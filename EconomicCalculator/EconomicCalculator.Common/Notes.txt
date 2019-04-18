@@ -1,0 +1,3 @@
+﻿Crop
+	1 man-day plows 1 acre of land
+	1 loaf of wheat bread is worth 8 servings (8 oz., 0.5 lb)
