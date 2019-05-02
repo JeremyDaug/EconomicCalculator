@@ -1,24 +1,25 @@
 ﻿using EconomicCalculator.Common;
-using System;
+using EconomicCalculator.Common.Processes;
+using EconomicCalculator.Common.Resource;
+using EconomicCalculator.Common.Sources;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EconomicCalculator
 {
     public class Manager
     {
         // Primary Resources
-        public List<Crop> Crops;
-        public List<Resource> Resources;
-        public List<Animal> Animals;
+        public List<Crop> Crops { get; set; }
+        public List<Mine> Resources { get; set; }
+        public List<Animal> Animals { get; set; }
 
         // Processing
-        public List<Process> Processes;
-        public List<Craft> Crafts;
+        public List<Process> Processes { get; set; }
+        public List<Craft> Crafts { get; set; }
+        public List<Butcher> Butchers { get; set; }
 
         // Final Product List
-        public List<IProduct> Products;
+        public List<Product> Products { get; set; }
+        public List<Market> Markets { get; set; }
     }
 }

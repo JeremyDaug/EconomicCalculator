@@ -1,4 +1,4 @@
-﻿namespace EconomicCalculator.Common
+﻿namespace EconomicCalculator.Common.Resource
 {
     public enum ProductType
     {

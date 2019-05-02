@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Currency"
+    targetNamespace="http://tempuri.org/Currency.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/Currency.xsd"
+    xmlns:mstns="http://tempuri.org/Currency.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="currencies">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="currency">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="variant" type="xs:string"/>
+            <xs:attribute name="price" type="xs:double" use="required"/>
+          </xs:complexType>
+        </xs:element>
+          
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

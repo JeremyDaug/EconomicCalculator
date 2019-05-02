@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Job"
+    targetNamespace="http://tempuri.org/Job.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/Job.xsd"
+    xmlns:mstns="http://tempuri.org/Job.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="jobs">
+    <xs:complexType>
+      <xs:sequence>
+        
+        <xs:element name="job">
+          <xs:complexType>
+            <xs:sequence>
+              
+              <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="variant" type="xs:string" minOccurs="0" maxOccurs="1"/>
+
+              <xs:element name="category" type="xs:string" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="dailyWage" type="xs:double" minOccurs="1" maxOccurs="1"/>
+              
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

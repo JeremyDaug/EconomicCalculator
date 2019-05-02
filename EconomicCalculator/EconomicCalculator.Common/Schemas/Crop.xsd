@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Crop"
+    targetNamespace="http://tempuri.org/XMLSchema1.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/XMLSchema1.xsd"
+    xmlns:mstns="http://tempuri.org/XMLSchema1.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="crops">
+    <xs:complexType>
+      <xs:sequence>
+        
+        <xs:element name="crop">
+          <xs:complexType>
+            <xs:sequence>
+              
+              <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+              
+              <xs:element name="variant" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                
+              <xs:element name="cropType" minOccurs="1" maxOccurs="1">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Orchard"/>
+                    <xs:enumeration value="Grain"/>
+                    <xs:enumeration value="Leaf"/>
+                    <xs:enumeration value="Root"/>
+                    <xs:enumeration value="Squash"/>
+                    <xs:enumeration value="Bush"/>
+                    <xs:enumeration value="Fiber"/>
+                    <xs:enumeration value="Other"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+
+              <xs:element name="reseedProduct" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="amount" type="xs:double" use="required"/>
+                </xs:complexType>
+              </xs:element>
+              
+              <xs:element name="produces" minOccurs="1">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="amount" type="xs:double" use="required"/>
+                  <xs:attribute name="price" type="xs:double" use="required"/>
+                </xs:complexType>
+              </xs:element>
+              
+              <xs:element name="sowingTime" type="xs:string" minOccurs="0"/>
+              
+              <xs:element name="growthTime" type="xs:int" minOccurs="0"/>
+              
+              <xs:element name="harvestTime" type="xs:string" minOccurs="0"/>
+              
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+</xs:schema>

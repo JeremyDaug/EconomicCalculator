@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Process"
+    targetNamespace="http://tempuri.org/Process.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/Process.xsd"
+    xmlns:mstns="http://tempuri.org/Process.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="processes">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="process">
+          <xs:complexType>
+            <xs:sequence>
+
+              <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="variant" type="xs:string" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="input" minOccurs="1">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="price" type="xs:double" use="required"/>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="output" minOccurs="1">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="price" type="xs:double" use="required"/>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="reduction" type="xs:double" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="ratePerDay" type="xs:double" default="-1" minOccurs="1" maxOccurs="1"/>
+              
+              <xs:element name="processorsCut" type="xs:double" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="priceMultiplier" type="xs:double" default="1" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="Job" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="wage" type="xs:double" use="required"/>
+                </xs:complexType>
+              </xs:element>
+              
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Animal"
+    targetNamespace="http://tempuri.org/AnimalSchema.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/AnimalSchema.xsd"
+    xmlns:mstns="http://tempuri.org/AnimalSchema.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="animals">
+    <xs:complexType>
+      <xs:sequence>
+        
+        <xs:element name="animal">
+          <xs:complexType>
+            <xs:sequence>
+              
+              <xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1"/>
+              
+              <xs:element name="game" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+              
+              <xs:element name="foodCrop" type="xs:string" minOccurs="1" maxOccurs="1"/>
+              
+              <xs:element name="liveWeight" type="xs:double" minOccurs="1" maxOccurs="1"/>
+              
+              <xs:element name="carcassWeight" type="xs:double" minOccurs="1" maxOccurs="1"/>
+              
+              <xs:element name="lifespan" type="xs:int" minOccurs="1" maxOccurs="1"/>
+              
+              <xs:element name="products">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="amount" type="xs:double" use="required"/>
+                  <xs:attribute name="price" type="xs:double" use="required"/>
+                </xs:complexType>
+              </xs:element>
+              
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+</xs:schema>

@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Craft"
+    targetNamespace="http://tempuri.org/Craft.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/Craft.xsd"
+    xmlns:mstns="http://tempuri.org/Craft.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="crafts">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="craft">
+          <xs:complexType>
+            <xs:sequence>
+
+              <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="variant" type="xs:string" minOccurs="1" maxOccurs="1"/>
+
+              <xs:element name="jobs">
+                <xs:complexType>
+                  <xs:sequence>
+                    
+                    <xs:element name="job" minOccurs="1" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="wage" type="xs:double" use="required"/>
+                        <xs:attribute name="amount" type="xs:double" use="required"/>
+                        <xs:attribute name="timeInDays" type="xs:double" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                
+                  </xs:sequence>  
+                </xs:complexType>
+              </xs:element>
+              
+              <xs:element name="inputs" minOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                  
+                    <xs:element name="input" minOccurs="1">
+                      <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="amount" type="xs:double" use="required"/>
+                        <xs:attribute name="pricePerUnit" type="xs:double" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                    
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="outputs" minOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+
+                    <xs:element name="output" minOccurs="1">
+                      <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="amount" type="xs:double" use="required"/>
+                        <xs:attribute name="pricePerUnit" type="xs:double" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                    
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="timeInDays" type="xs:double" maxOccurs="1"/>
+
+              <xs:element name="priceMultiplier" type="xs:double" minOccurs="1" maxOccurs="1"/>
+              
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

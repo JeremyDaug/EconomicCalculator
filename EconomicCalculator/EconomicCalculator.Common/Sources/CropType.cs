@@ -1,4 +1,4 @@
-﻿namespace EconomicCalculator.Common
+﻿namespace EconomicCalculator.Common.Sources
 {
     public enum CropType
     {

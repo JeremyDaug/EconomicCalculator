@@ -1,12 +1,13 @@
 ﻿using System;
 
-namespace EconomicCalculator.Common
+namespace EconomicCalculator.Common.Resource
 {
     public class Product
     {
         public string Name { get; set; }
-        public Guid Id { get; set; }
-        public float PricePerUnit { get; set; }
+        public double PricePerUnit { get; set; }
         public ProductType ProductType { get; set; }
+        public string Variant { get; set; }
     }
+
 }
