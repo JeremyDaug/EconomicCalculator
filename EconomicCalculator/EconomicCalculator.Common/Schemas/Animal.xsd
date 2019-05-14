@@ -17,9 +17,14 @@
               <xs:element name="name" type="xs:string" maxOccurs="1" minOccurs="1"/>
               
               <xs:element name="game" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
-              
-              <xs:element name="foodCrop" type="xs:string" minOccurs="1" maxOccurs="1"/>
-              
+
+              <xs:element name="foodCrop" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="amount" type="xs:double" use="required"/>
+                </xs:complexType>
+              </xs:element>
+                          
               <xs:element name="liveWeight" type="xs:double" minOccurs="1" maxOccurs="1"/>
               
               <xs:element name="carcassWeight" type="xs:double" minOccurs="1" maxOccurs="1"/>
@@ -28,11 +33,35 @@
               
               <xs:element name="products">
                 <xs:complexType>
-                  <xs:attribute name="name" type="xs:string" use="required"/>
-                  <xs:attribute name="amount" type="xs:double" use="required"/>
-                  <xs:attribute name="price" type="xs:double" use="required"/>
+                  <xs:sequence>
+
+                    <xs:element name="product">
+                      <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="amount" type="xs:double" use="required"/>
+                        <xs:attribute name="price" type="xs:double" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                    
+                  </xs:sequence>
                 </xs:complexType>
               </xs:element>
+
+              <xs:element name="offspringProduced">
+                <xs:complexType>
+                  <xs:sequence>
+
+                    <xs:element name="offspring">
+                      <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="number" type="xs:double" use="required"/>
+                        <xs:attribute name="lifetimeProduced" type="xs:double" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>              
               
             </xs:sequence>
           </xs:complexType>

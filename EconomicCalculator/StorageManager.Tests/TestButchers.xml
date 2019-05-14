@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<butchers xmlns="http://tempuri.org/Butcher.xsd">
+  <butcher>
+    <name>name1</name>
+    <variant>variant1</variant>
+    <animal>animal1</animal>
+    <products>
+      <product name="name1" amount="1" pricePerUnit="1" />
+    </products>
+    <priceMultiplier>1</priceMultiplier>
+  </butcher>
+</butchers>

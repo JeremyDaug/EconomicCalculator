@@ -135,7 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconomicCalculator.Common\EconomicCalculator.Common.csproj">
-      <Project>{C6323CE3-9C11-4EBC-A4F8-DF5BCD271C8D}</Project>
+      <Project>{723ba454-9855-4579-9354-8af4c05c0b47}</Project>
       <Name>EconomicCalculator.Common</Name>
     </ProjectReference>
   </ItemGroup>

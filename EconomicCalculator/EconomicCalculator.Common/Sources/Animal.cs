@@ -51,6 +51,11 @@ namespace EconomicCalculator.Common.Sources
         /// and it's unit price in UC.
         /// Tuple(name, amountPerDay, Price)
         /// </summary>
-        public IList<Tuple<string, double, double> > LIveProducts { get; set; }
+        public IList<Tuple<string, double, double> > LiveProducts { get; set; }
+
+        /// <summary>
+        /// What offspring this animal can produce, how many, and how often in a lifetime.
+        /// </summary>
+        public IList<Tuple<string, double, double>> Offspring { get; set; }
     }
 }

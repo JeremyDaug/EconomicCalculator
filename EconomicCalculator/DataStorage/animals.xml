@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animals xmlns="http://tempuri.org/AnimalSchema.xsd">
+  <animal>
+    <name>name1</name>
+    <game>true</game>
+    <foodCrop name="name1" amount="1" />
+    <liveWeight>1</liveWeight>
+    <carcassWeight>1</carcassWeight>
+    <lifespan>1</lifespan>
+    <products>
+      <product name="name1" amount="1" price="1" />
+    </products>
+    <offspringProduced>
+      <offspring name="name1" number="1" lifetimeProduced="1" />
+    </offspringProduced>
+  </animal>
+</animals>
