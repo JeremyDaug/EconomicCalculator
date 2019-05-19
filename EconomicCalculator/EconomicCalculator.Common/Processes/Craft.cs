@@ -22,17 +22,17 @@ namespace EconomicCalculator.Common.Processes
         /// <summary>
         /// What job does this craft, their wage, how many are needed, and how long they need to work
         /// </summary>
-        public Tuple<string, double, double, double> Job { get; set; }
+        public Tuple<WorkOrder> Job { get; set; }
 
         /// <summary>
-        /// The inputs, the amount of them, and their price.
+        /// The inputs, the amount of them, and their unit price.
         /// </summary>
-        public IList<Tuple<string, double, double>> Inputs { get; set; }
+        public IList<InputOutputs> Inputs { get; set; }
 
         /// <summary>
         /// the outputs, the amount of them, and their price.
         /// </summary>
-        public IList<Tuple<string, double, double>> Outputs { get; set; }
+        public IList<InputOutputs> Outputs { get; set; }
 
         /// <summary>
         /// How long it takes to craft in days.

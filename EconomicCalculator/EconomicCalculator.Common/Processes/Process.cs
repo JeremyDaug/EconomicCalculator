@@ -21,16 +21,16 @@ namespace EconomicCalculator.Common.Processes
         public string Variant { get; set; }
 
         /// <summary>
-        /// Input Products 
+        /// Input Products (Amount is ignored for Processing)
         /// Name, Price
         /// </summary>
-        public IList<Tuple<string, double>> InputsProducts { get; set; }
+        public IList<InputOutputs> InputsProducts { get; set; }
 
         /// <summary>
-        /// Output Products
+        /// Output Products (amount is ignored for Processing.
         /// name, price
         /// </summary>
-        public IList<Tuple<string, double>> OutputProducts { get; set; }
+        public IList<InputOutputs> OutputProducts { get; set; }
 
         /// <summary>
         /// How much 1 unit is reduced in weight.
@@ -55,6 +55,6 @@ namespace EconomicCalculator.Common.Processes
         /// <summary>
         /// What job does this.
         /// </summary>
-        public Tuple<string, double> Job { get; set; }
+        public Job Job { get; set; }
     }
 }

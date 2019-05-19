@@ -1,10 +1,5 @@
 ﻿using EconomicCalculator.Common.Resource;
-using EconomicCalculator.Common.Sources;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EconomicCalculator.Common.Shipping
 {
@@ -32,12 +27,14 @@ namespace EconomicCalculator.Common.Shipping
         /// What vehicle it is.
         /// name, lifespan, price
         /// </summary>
-        public Tuple<string, double, double> Vehicle { get; set; }
+        public Vehicle Vehicle { get; set; }
 
         /// <summary>
         /// What (if any) animal is driving the vehicle.
         /// name of crewmate (can be animal), number of them, their price per day
         /// </summary>
-        public IList<Tuple<string, double, double>> Crew { get; set; } 
+        public IList<Crewmates> Crew { get; set; } 
+
+        public IList<DrivingAnimal> DrivingAnimal { get; set; }
     }
 }

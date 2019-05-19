@@ -26,13 +26,13 @@ namespace EconomicCalculator.Common.Sources
         /// <summary>
         /// The name of the Reseed Product and how many units are used.
         /// </summary>
-        public Tuple<string, double> ReseedProduct { get; set; }
+        public ReseedProduct ReseedProduct { get; set; }
 
         /// <summary>
         /// What the crop produces, how much per acre, and it's unit price in UC.
         /// Tuple (name, amount, pricePerUnit)
         /// </summary>
-        public IList<Tuple<string, double, double>> Produces { get; set; }
+        public IList<InputOutputs> Produces { get; set; }
 
         /// <summary>
         /// When it is sowed.

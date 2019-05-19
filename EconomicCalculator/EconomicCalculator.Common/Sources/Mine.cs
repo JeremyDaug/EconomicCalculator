@@ -27,6 +27,6 @@ namespace EconomicCalculator.Common.Sources
         /// <summary>
         /// What the mine produces, how much per day, and how much it's unit price in UC.
         /// </summary>
-        public List<Tuple<string, double, double> > Products { get; set; }
+        public List<InputOutputs> Products { get; set; }
     }
 }

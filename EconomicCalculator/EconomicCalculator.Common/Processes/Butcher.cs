@@ -1,11 +1,14 @@
-﻿using System;
+﻿using System.Xml.Serialization;
 using System.Collections.Generic;
+using EconomicCalculator.Common.Resource;
+using System;
 
 namespace EconomicCalculator.Common.Processes
 {
     /// <summary>
     /// Butcher class manager
     /// </summary>
+    [Serializable]
     public class Butcher
     {
         /// <summary>
@@ -30,7 +33,8 @@ namespace EconomicCalculator.Common.Processes
         /// <summary>
         /// What Products are made, how much, and their price.
         /// </summary>
-        public List<Tuple<string, double, double>> Products { get; set; }
+        [XmlArrayItem]
+        public List<InputOutputs> Products { get; set; } = new List<InputOutputs>();
 
         /// <summary>
         /// The price multiplier of the products from the animal.
