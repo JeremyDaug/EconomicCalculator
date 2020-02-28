@@ -12,11 +12,6 @@ namespace StorageManager.ProcessManagers
     {
         public List<Butcher> Butchers { get; set; } = new List<Butcher>();
 
-        public IList<Butcher> LoadButchers(string filename)
-        {
-
-        }
-
         public void SaveButchers(string fileLocation, IList<Butcher> butchers)
         {
             if (string.IsNullOrWhiteSpace(fileLocation))
@@ -29,10 +24,10 @@ namespace StorageManager.ProcessManagers
 
             XmlSerializer serializer = new XmlSerializer(typeof(ButcherManager));
 
-            using (StreamWriter writer = new StreamWriter(filename))
-                serializer.Serialize(writer, Butchers);
+            // using (StreamWriter writer = new StreamWriter(filename))
+            //     serializer.Serialize(writer, Butchers);
 
-            return Butchers;
+            //return Butchers;
         }
     }
 }

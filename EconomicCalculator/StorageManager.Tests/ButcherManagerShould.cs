@@ -46,19 +46,5 @@ namespace StorageManager.Tests
                 Path.GetFullPath("D:\\Projects\\EconomicCalculator\\EconomicCalculator\\TestDataStorage\\" + testSavePath);
             Console.WriteLine(testLoadPath);
         }
-
-        [Test]
-        public void LoadButchersFromFlie()
-        {
-            var result = sut.LoadButchers(fullTestLoadPath);
-        }
-
-        [Test]
-        public void SaveButchersToTargetFile()
-        {
-            var result = sut.SaveButchers(fullTestLoadPath);
-
-            sut.SaveButchers(fullTestSavePath, result);
-        }
     }
 }
