@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomicCalculator", "EconomicCalculator\EconomicCalculator.csproj", "{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F5CB1CB6-5A16-462E-B546-FD26E30DA383}
+	EndGlobalSection
+EndGlobal

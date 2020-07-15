@@ -1,6 +1,0 @@
-﻿CREATE TABLE [dbo].[Table]
-(
-	[Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
-    [CropName] VARCHAR(50) NOT NULL, 
-    [CropTypes] NCHAR(10) NOT NULL, 
-)
