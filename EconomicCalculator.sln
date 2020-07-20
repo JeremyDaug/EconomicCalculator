@@ -5,6 +5,12 @@ VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomicCalculator", "EconomicCalculator\EconomicCalculator.csproj", "{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleInterface", "ConsoleInterface\ConsoleInterface.csproj", "{310587AD-0545-4CC3-A87D-949003FABCAF}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "EconomicDB", "EconomicDB\EconomicDB.sqlproj", "{254E54BE-472B-4F70-959C-65E54BCB3A38}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomicWindowApp", "EconomicWindowApp\EconomicWindowApp.csproj", "{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +21,20 @@ Global
 		{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{310587AD-0545-4CC3-A87D-949003FABCAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{310587AD-0545-4CC3-A87D-949003FABCAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{310587AD-0545-4CC3-A87D-949003FABCAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{310587AD-0545-4CC3-A87D-949003FABCAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{254E54BE-472B-4F70-959C-65E54BCB3A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{254E54BE-472B-4F70-959C-65E54BCB3A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{254E54BE-472B-4F70-959C-65E54BCB3A38}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{254E54BE-472B-4F70-959C-65E54BCB3A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{254E54BE-472B-4F70-959C-65E54BCB3A38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{254E54BE-472B-4F70-959C-65E54BCB3A38}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

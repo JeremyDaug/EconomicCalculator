@@ -34,6 +34,55 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="SampleDatabaseDataSet.xsc">
+      <DependentUpon>SampleDatabaseDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="SampleDatabaseDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>SampleDatabaseDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="SampleDatabaseDataSet.xss">
+      <DependentUpon>SampleDatabaseDataSet.xsd</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Enums\JobType.cs" />
+    <Compile Include="Enums\MineType.cs" />
+    <Compile Include="Enums\RockType.cs" />
+    <Compile Include="Generators\Crops.cs" />
+    <Compile Include="Enums\CropType.cs" />
+    <Compile Include="Generators\ICrops.cs" />
+    <Compile Include="Generators\IMine.cs" />
+    <Compile Include="Generators\IPopulation.cs" />
+    <Compile Include="Intermediaries\ICurrency.cs" />
+    <Compile Include="Intermediaries\IAccount.cs" />
+    <Compile Include="Intermediaries\IMarket.cs" />
+    <Compile Include="Intermediaries\IProcess.cs" />
+    <Compile Include="Intermediaries\IProduct.cs" />
+    <Compile Include="Intermediaries\Process.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Runner\TheWorld.cs" />
+    <Compile Include="SampleDatabaseDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SampleDatabaseDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Storage\ProductStorage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
