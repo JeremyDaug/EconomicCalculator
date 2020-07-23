@@ -28,9 +28,5 @@ namespace EconomicCalculator.Storage
         /// <param name="productName">The name of the product.</param>
         /// <returns>True if found, false otherwise.</returns>
         public bool Contains(string productName) => Products.Any(x => x.Name == productName);
-
-        public bool Contains(string productName, string variant) 
-            => Products.Any(x => x.Name == productName &&
-                                 x.VariantName == variant);
     }
 }

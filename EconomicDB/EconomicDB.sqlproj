@@ -57,10 +57,32 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="dbo\" />
+    <Folder Include="dbo\Tables\" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Products.sql" />
-    <Build Include="Units.sql" />
+    <Build Include="dbo\Tables\RockTypes.sql" />
+    <Build Include="dbo\Tables\ProcessOutputs.sql" />
+    <Build Include="dbo\Tables\ProcessInputs.sql" />
+    <Build Include="dbo\Tables\Processes.sql" />
+    <Build Include="dbo\Tables\Populations.sql" />
+    <Build Include="dbo\Tables\PopulationMoney.sql" />
+    <Build Include="dbo\Tables\PopulationLifeNeeds.sql" />
+    <Build Include="dbo\Tables\PopulationGoods.sql" />
+    <Build Include="dbo\Tables\MineTypes.sql" />
+    <Build Include="dbo\Tables\Mines.sql" />
+    <Build Include="dbo\Tables\MineProducts.sql" />
+    <Build Include="dbo\Tables\Markets.sql" />
+    <Build Include="dbo\Tables\MarketProcesses.sql" />
+    <Build Include="dbo\Tables\MarketPopulations.sql" />
+    <Build Include="dbo\Tables\MarketMines.sql" />
+    <Build Include="dbo\Tables\MarketCurrencies.sql" />
+    <Build Include="dbo\Tables\MarketCrops.sql" />
+    <Build Include="dbo\Tables\Currencies.sql" />
+    <Build Include="dbo\Tables\Crops.sql" />
+    <Build Include="dbo\Tables\CropOutputs.sql" />
+    <Build Include="dbo\Tables\Products.sql" />
+    <Build Include="dbo\Tables\Units.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="EconomicDB.refactorlog" />
