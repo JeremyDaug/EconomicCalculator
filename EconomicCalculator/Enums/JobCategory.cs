@@ -9,7 +9,7 @@ namespace EconomicCalculator.Enums
     /// <summary>
     /// The general types of job types.
     /// </summary>
-    public enum JobType
+    public enum JobCategory
     {
         LandLord, // Land Owners (Not Used)
         Capitalist, // Investors (not used)

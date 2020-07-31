@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace EconomicCalculator.Generators
 {
-    public interface IMine
+    public interface IMine : IJob
     {
         /// <summary>
         /// The name of the mine.
         /// </summary>
-        string Name { get; }
+        new string Name { get; }
 
         /// <summary>
         /// The variant name for unique instances of mines.
@@ -34,7 +34,7 @@ namespace EconomicCalculator.Generators
         /// <summary>
         /// How much labor of various skills is required in a day.
         /// </summary>
-        double LaborRequirements { get; }
+        new double LaborRequirements { get; }
 
         #region Capital
 
@@ -52,17 +52,17 @@ namespace EconomicCalculator.Generators
         #endregion Capital
 
         #region Requirements
-
-        // Running Costs TODO implement Running Costs
+        
+        // This is not implemented, though it does exist.
         /// <summary>
         /// The requirements to keep the mine running each day.
         /// </summary>
-        // IList<IProduct> Requirements { get; }
+        IList<IProduct> Requirements { get; }
 
         /// <summary>
         /// How much of each requirement is needed per day.
         /// </summary>
-        // IDictionary<string, double> RequirementAmounts { get; }
+        IDictionary<string, double> RequirementAmounts { get; }
 
         #endregion Requirements
 

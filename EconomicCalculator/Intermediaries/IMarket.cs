@@ -68,5 +68,11 @@ namespace EconomicCalculator.Intermediaries
         IDictionary<string, double> AvailableGoodAmounts { get; }
 
         #endregion Goods
+
+        #region Functions
+
+
+
+        #endregion Functions
     }
 }

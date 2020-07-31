@@ -24,9 +24,19 @@ namespace EconomicCalculator.Generators
         // string VariantName { get; }
 
         /// <summary>
-        /// The job name of the pop
+        /// The job Category of the pop
         /// </summary>
-        JobType Job { get; }
+        JobCategory JobCategory { get; }
+
+        /// <summary>
+        /// The title/name of their job.
+        /// </summary>
+        string JobName { get; }
+
+        /// <summary>
+        /// The Job the population does.
+        /// </summary>
+        IJob Job { get; }
 
         /// <summary>
         /// The Skill Level of the Population
@@ -47,7 +57,7 @@ namespace EconomicCalculator.Generators
         /// <summary>
         /// The amount of each currency available to the pops collectively (lots of averaging here).
         /// </summary>
-        IDictionary<string, double> CurrencyAmmounts { get; }
+        IDictionary<string, double> CurrencyAmounts { get; }
 
         // Saleable goods produced this cycle.
         /// <summary>
@@ -58,7 +68,7 @@ namespace EconomicCalculator.Generators
         /// <summary>
         /// The Amount of Goods available for sale by the population.
         /// </summary>
-        IDictionary<string, double> GoodAmmounts { get; }
+        IDictionary<string, double> GoodAmounts { get; }
 
         // Need Baskets
         /// <summary>

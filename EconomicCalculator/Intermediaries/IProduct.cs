@@ -44,7 +44,7 @@ namespace EconomicCalculator.Intermediaries
         /// <summary>
         /// The Average time for the item to break irrepairably.
         /// </summary>
-        double MTTF { get; }
+        int MTTF { get; }
 
         /// <summary>
         /// The chance that on any given day, the product will break. Calculated from <see cref="MTTF"/>.
@@ -56,6 +56,6 @@ namespace EconomicCalculator.Intermediaries
         /// </summary>
         /// <param name="days">How many days to calculate for.</param>
         /// <returns>The probability that the product breaks.</returns>
-        double FailureProbability(double days);
+        double FailureProbability(int days);
     }
 }

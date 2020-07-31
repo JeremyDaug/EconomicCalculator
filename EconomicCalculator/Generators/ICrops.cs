@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace EconomicCalculator.Generators
 {
-    public interface ICrops
+    public interface ICrops : IJob
     {
         /// <summary>
         /// The name of the crop
         /// </summary>
-        string Name { get; }
+        new string Name { get; }
 
         /// <summary>
         /// A variant name for a specific instance of a crop or field.
@@ -22,14 +22,14 @@ namespace EconomicCalculator.Generators
         CropType CropType { get;  }
 
         /// <summary>
-        /// How many units of seed is needed to plant. If -1, it's perenial, if 0 it's minimal.
+        /// The Products required to seed the crop every cycle.
         /// </summary>
-        double Planting { get; }
+        IList<IProduct> Seeding { get; }
 
         /// <summary>
-        /// The Seed product (if any), may be null if Planting is -1 or 0.
+        /// How many units of seed is needed to plant. If -1, it's perenial, if 0 it's minimal.
         /// </summary>
-        IProduct Seed { get; }
+        IDictionary<string, double> Planting { get; }
 
         /// <summary>
         /// What products are produced by the crop. Must have at least 1.
@@ -62,12 +62,25 @@ namespace EconomicCalculator.Generators
         /// How much, and what skill level, of labor
         /// required to work an acre of land measured in days per crop cycle.
         /// </summary>
-        double LaborRequirements { get; }
+        new double LaborRequirements { get; }
 
         /// <summary>
         /// How long a crop takes to grow from planting to
         /// harvest, measured in days.
         /// </summary>
         double CropLifecycle { get; }
+
+        /// <summary>
+        /// The Averaged output of the crop.
+        /// </summary>
+        /// <returns>The Output </returns>
+        IReadOnlyDictionary<string, double> AveragedDailyOutput();
+
+        /// <summary>
+        /// Retrieves the average of a product of the crop.
+        /// </summary>
+        /// <param name="Product">The name of the product to get.</param>
+        /// <returns>The average daily producton of the product.</returns>
+        double AveragedDailyOutputFor(string product);
     }
 }

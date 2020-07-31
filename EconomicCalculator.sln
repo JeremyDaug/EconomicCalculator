@@ -11,6 +11,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "EconomicDB", "EconomicDB\Ec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomicWindowApp", "EconomicWindowApp\EconomicWindowApp.csproj", "{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomicCalculator.Tests", "EconomicCalculator.Tests\EconomicCalculator.Tests.csproj", "{3AE47ADE-9D28-45B2-8766-3B5BEBBFC9D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CA92919-4707-4308-AA32-7EC3E7F4CC6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AE47ADE-9D28-45B2-8766-3B5BEBBFC9D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE47ADE-9D28-45B2-8766-3B5BEBBFC9D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE47ADE-9D28-45B2-8766-3B5BEBBFC9D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE47ADE-9D28-45B2-8766-3B5BEBBFC9D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

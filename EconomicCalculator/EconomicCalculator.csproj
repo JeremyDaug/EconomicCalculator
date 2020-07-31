@@ -66,6 +66,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\JobCategory.cs" />
+    <Compile Include="Generators\IJob.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EconomicDBDataSet.cs">
       <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
     </Compile>
@@ -74,7 +77,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
     </Compile>
-    <Compile Include="Enums\JobType.cs" />
     <Compile Include="Enums\MineType.cs" />
     <Compile Include="Enums\RockType.cs" />
     <Compile Include="Generators\Crops.cs" />
@@ -82,24 +84,30 @@
     <Compile Include="Generators\ICrops.cs" />
     <Compile Include="Generators\IMine.cs" />
     <Compile Include="Generators\IPopulation.cs" />
+    <Compile Include="Generators\Mine.cs" />
+    <Compile Include="Generators\Population.cs" />
+    <Compile Include="Intermediaries\Currency.cs" />
     <Compile Include="Intermediaries\ICurrency.cs" />
     <Compile Include="Intermediaries\IAccount.cs" />
     <Compile Include="Intermediaries\IMarket.cs" />
-    <Compile Include="Intermediaries\IProcess.cs" />
+    <Compile Include="Generators\IProcess.cs" />
     <Compile Include="Intermediaries\IProduct.cs" />
-    <Compile Include="Intermediaries\Process.cs" />
+    <Compile Include="Intermediaries\Market.cs" />
+    <Compile Include="Generators\Process.cs" />
+    <Compile Include="Intermediaries\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Runner\TheWorld.cs" />
-    <Compile Include="Storage\ProductStorage.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
