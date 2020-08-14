@@ -10,6 +10,6 @@
 		Case when ProcessJob Is Null Then 0 Else 1 End = 1
 	), 
     CONSTRAINT [FK_JobBoard_ToCrops] FOREIGN KEY ([CropJob]) REFERENCES [Crops]([Name]), 
-    CONSTRAINT [FK_JobBoard_ToMines] FOREIGN KEY ([MineJob]) REFERENCES [MInes]([Name]), 
+    CONSTRAINT [FK_JobBoard_ToMines] FOREIGN KEY ([MineJob]) REFERENCES [Mines]([Name]), 
     CONSTRAINT [FK_JobBoard_ToProcesses] FOREIGN KEY ([ProcessJob]) REFERENCES [Processes]([Name])
 )

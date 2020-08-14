@@ -21,7 +21,12 @@ namespace EconomicCalculator.Generators
         /// <summary>
         /// The Variant Name for the population group.
         /// </summary> TODO Implement later.
-        // string VariantName { get; }
+        string VariantName { get; }
+
+        /// <summary>
+        /// The Market which owns this population.
+        /// </summary>
+        IMarket Market { get; }
 
         /// <summary>
         /// The job Category of the pop
@@ -101,5 +106,10 @@ namespace EconomicCalculator.Generators
         /// The amount of Luxury Products.
         /// </summary> 
         // IDictionary<string, double> LuxuryAmounts { get; }
+
+        /// <summary>
+        /// Puts the poppulation to work.
+        /// </summary>
+        Task DoWork();
     }
 }

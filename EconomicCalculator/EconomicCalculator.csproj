@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums\JobCategory.cs" />
+    <Compile Include="Enums\JobTypes.cs" />
     <Compile Include="Generators\IJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EconomicDBDataSet.cs">

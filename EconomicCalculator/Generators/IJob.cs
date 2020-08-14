@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Intermediaries;
+﻿using EconomicCalculator.Enums;
+using EconomicCalculator.Intermediaries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,5 +42,18 @@ namespace EconomicCalculator.Generators
         /// How much work per unit of the job is needed.
         /// </summary>
         double LaborRequirements { get; }
+
+        /// <summary>
+        /// The type of job that this is (defines how it should calculate 
+        /// </summary>
+        JobTypes JobType { get; }
+
+        /// <summary>
+        /// Do work and make goods in the production.
+        /// </summary>
+        /// <param name="availableGoods">The goods available to the working population.</param>
+        /// <param name="Pops">The number of people in the population.</param>
+        /// <returns>The resulting change in goods for the population.</returns>
+        IDictionary<string, double> Work(IDictionary<string, double> availableGoods, int Pops);
     }
 }

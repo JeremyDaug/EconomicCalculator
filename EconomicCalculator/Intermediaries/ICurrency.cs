@@ -19,6 +19,11 @@ namespace EconomicCalculator.Intermediaries
         string VariantName { get; }
 
         /// <summary>
+        /// The monetary symbol, or shorthand for the currency. (IE $, GP, SP, JPY, USD etc.)
+        /// </summary>
+        string Symbol { get; }
+
+        /// <summary>
         /// The physical currency
         /// </summary>
         IProduct Cash { get; }

@@ -28,5 +28,18 @@ namespace EconomicCalculator.Intermediaries
             var chanceToNotHappen = 1 - DailyFailureChance;
             return 1 - Math.Pow(chanceToNotHappen, days);
         }
+
+        public override string ToString()
+        {
+            var result = string.Format("Name: {0}\n" +
+                "Product Units: {1}\n" +
+                "Current Price: {2}\n" +
+                "Mean Time To Failure: {3}\n",
+                Name, UnitName, CurrentPrice, MTTF);
+
+            result += "--------------------\n";
+
+            return result;
+        }
     }
 }

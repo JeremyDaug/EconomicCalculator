@@ -21,24 +21,112 @@ namespace EconomicCalculator.Runner
         /// </summary>
         public string Name { get; set; }
 
+        private const string missingMarketMsg = "Market: '{0}' Does not Exist.";
+
         /// <summary>
         /// The Unified market that is the world.
         /// </summary>
         public IMarket WorldMarket;
+
+        public IList<IMarket> markets;
 
         /// <summary>
         /// The connection to the database.
         /// </summary>
         private SqlConnection connection;
 
-        public void LoadMarkets()
-        {
-            // Units
-            var units = LoadUnits();
-            Console.WriteLine("--- Units Loaded");
+        #region PrintFunctions
 
+        public string PrintCurrencies(string market)
+        {
+            if (string.IsNullOrEmpty(market) || string.Equals(market, WorldMarket.Name))
+                return WorldMarket.PrintCurrencies();
+            var currMark = markets.SingleOrDefault(x => x.Name == market);
+            if (currMark == null)
+                return string.Format(missingMarketMsg, market);
+            return "--------------------\n" + currMark.PrintCurrencies();
+        }
+
+        public string PrintProducts(string market)
+        {
+            if (string.IsNullOrEmpty(market) || string.Equals(market, WorldMarket.Name))
+                return WorldMarket.PrintProducts();
+            var currMark = markets.SingleOrDefault(x => x.Name == market);
+            if (currMark == null)
+                return string.Format(missingMarketMsg, market);
+            return "--------------------\n" + currMark.PrintProducts();
+        }
+
+        public string PrintPops(string market)
+        {
+            if (string.IsNullOrEmpty(market) || string.Equals(market, WorldMarket.Name))
+                return WorldMarket.PrintPops();
+            var currMark = markets.SingleOrDefault(x => x.Name == market);
+            if (currMark == null)
+                return string.Format(missingMarketMsg, market);
+            return "--------------------\n" + currMark.PrintPops();
+        }
+
+        public string PrintProcesses(string market)
+        {
+            if (string.IsNullOrEmpty(market) || string.Equals(market, WorldMarket.Name))
+                return WorldMarket.PrintProcesses();
+            var currMark = markets.SingleOrDefault(x => x.Name == market);
+            if (currMark == null)
+                return string.Format(missingMarketMsg, market);
+            return "--------------------\n" + currMark.PrintProcesses();
+        }
+
+        public string PrintMines(string market)
+        {
+            if (string.IsNullOrEmpty(market) || string.Equals(market, WorldMarket.Name))
+                return WorldMarket.PrintMines();
+            var currMark = markets.SingleOrDefault(x => x.Name == market);
+            if (currMark == null)
+                return string.Format("Market: '{0}' Does not Exist.", market);
+            return "--------------------\n" + currMark.PrintMines();
+        }
+
+        public string PrintMarkets()
+        {
+            var result = WorldMarket.ToString();
+
+            foreach (var market in markets)
+                result += market.ToString();
+
+            return "--------------------\n" + result;
+        }
+
+        public string PrintMarketNames()
+        {
+            string result = WorldMarket.Name + "\n";
+            
+            foreach (var market in markets)
+            {
+                result += market.Name + "\n";
+            }
+
+            return result;
+        }
+
+        public string PrintCrops(string market)
+        {
+            if (string.IsNullOrEmpty(market) || string.Equals(market, WorldMarket.Name))
+                return WorldMarket.PrintCrops();
+            var currMark = markets.SingleOrDefault(x => x.Name == market);
+            if (currMark == null)
+                return string.Format("Market: '{0}' Does not Exist.", market);
+            return "--------------------\n" + currMark.PrintCrops();
+        }
+
+        #endregion PrintFunctions
+
+        #region LoadData
+
+        public void LoadData(string worldName)
+        {
             // Products
-            var products = LoadProducts(units);
+            var products = LoadProducts();
             Console.WriteLine("--- Products Loaded");
 
             // crops
@@ -58,28 +146,140 @@ namespace EconomicCalculator.Runner
             Console.WriteLine("--- Currencies Loaded");
 
             // Populations
-            var Populations = LoadPopulations(products, crops, mines, processes);
+            var Populations = LoadPopulations(products, crops, mines, processes, Currencies);
             Console.WriteLine("--- Populations Loaded");
 
             // Markets
+            markets = LoadMarkets(products, crops, mines, processes, Currencies, Populations);
+            Console.WriteLine("--- Markets Loaded");
 
             // Finalize Market
             WorldMarket = new Market
             {
+                Name = worldName,
                 AvailableGoods = products,
                 AvailableCrops = crops,
                 AvailableMines = mines,
                 AvailableProcesses = processes,
                 AvailableCurrencies = Currencies,
-                Pops = Populations
+                Pops = Populations,
+                TotalPopulation = Populations.Sum(x => x.Count)
             };
-            Console.WriteLine("--- Global Market Finalized Loaded");
+            Console.WriteLine("--- Global Market Finalized");
         }
 
-        private IList<IPopulation> LoadPopulations(IList<IProduct> products, IList<ICrops> crops, IList<IMine> mines, IList<IProcess> processes)
+        private IList<IMarket> LoadMarkets(IList<IProduct> products, IList<ICrops> crops,
+            IList<IMine> mines, IList<IProcess> processes, IList<ICurrency> currencies,
+            IList<IPopulation> populations)
         {
+            var markets = new List<Market>();
+            // base market
+            var sql = "Select * from Markets";
+            var sqlCommand = new SqlCommand(sql, connection);
+            using (var reader = sqlCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var marketName = reader.GetString(reader.GetOrdinal("Name"));
+                    var population = reader.GetDouble(reader.GetOrdinal("TotalPopulation"));
+
+                    var market = new Market
+                    {
+                        Name = marketName,
+                        TotalPopulation = population
+                    };
+                    markets.Add(market);
+                }
+            }
+
+            // Crops
+            sql = "Select * from MarketCrops";
+            sqlCommand = new SqlCommand(sql, connection);
+            using (var reader = sqlCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var name = reader.GetString(reader.GetOrdinal("MarketName"));
+                    var crop = reader.GetString(reader.GetOrdinal("CropName"));
+
+                    var market = markets.Single(x => x.Name == name);
+                    market.AvailableCrops.Add(crops.Single(x => x.Name == crop));
+                }
+            }
+
+            // mines
+            sql = "Select * from MarketMines";
+            sqlCommand = new SqlCommand(sql, connection);
+            using (var reader = sqlCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var name = reader.GetString(reader.GetOrdinal("MarketName"));
+                    var mine = reader.GetString(reader.GetOrdinal("MineName"));
+
+                    var market = markets.Single(x => x.Name == name);
+                    market.AvailableMines.Add(mines.Single(x => x.Name == mine));
+                }
+            }
+
+            // Processes
+            sql = "Select * from MarketProcesses";
+            sqlCommand = new SqlCommand(sql, connection);
+            using (var reader = sqlCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var name = reader.GetString(reader.GetOrdinal("MarketName"));
+                    var process = reader.GetString(reader.GetOrdinal("ProcessName"));
+
+                    var market = markets.Single(x => x.Name == name);
+                    market.AvailableProcesses.Add(processes.Single(x => x.Name == process));
+                }
+            }
+
+            // Currency
+            sql = "Select * from MarketCurrencies";
+            sqlCommand = new SqlCommand(sql, connection);
+            using (var reader = sqlCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var name = reader.GetString(reader.GetOrdinal("MarketName"));
+                    var currency = reader.GetString(reader.GetOrdinal("CurrencyName"));
+
+                    var market = markets.Single(x => x.Name == name);
+                    market.AvailableCurrencies.Add(currencies.Single(x => x.Name == currency));
+                }
+            }
+
+            // populations
+            sql = "Select Name, Variant, Market from Populations";
+            sqlCommand = new SqlCommand(sql, connection);
+            using (var reader = sqlCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var name = reader.GetString(reader.GetOrdinal("Name"));
+                    var variant = reader.GetString(reader.GetOrdinal("Variant"));
+                    var marketName = reader.GetString(reader.GetOrdinal("Market"));
+
+                    var pop = (Population)populations.Single(x => x.Name == name && x.VariantName == variant);
+                    var market = markets.Single(x => x.Name == marketName);
+
+                    market.Pops.Add(pop);
+                    pop.Market = market;
+                }
+            }
+
+            return new List<IMarket>(markets);
+        }
+
+        private IList<IPopulation> LoadPopulations(IList<IProduct> products, IList<ICrops> crops,
+            IList<IMine> mines, IList<IProcess> processes, IList<ICurrency> currencies)
+        {
+            // base population
             var Populations = new List<Population>();
-            var sql = "Select Name, Count, JobCategory, Populations.JobName, CropJob, MineJob, ProcessJob\n" +
+            var sql = "Select Name, Variant, Market, Count, JobCategory, Populations.JobName, CropJob, MineJob, ProcessJob\n" +
                       "From Populations\n" +
                       "Join JobBoard\n" +
                       "On Populations.JobName = JobBoard.JobName";
@@ -89,6 +289,8 @@ namespace EconomicCalculator.Runner
                 while (reader.Read())
                 {
                     var popName = reader.GetString(reader.GetOrdinal("Name"));
+                    var popVariant = reader.GetString(reader.GetOrdinal("Variant"));
+                    var market = reader.GetString(reader.GetOrdinal("Market"));
                     var popCount = reader.GetInt32(reader.GetOrdinal("Count"));
                     var jobCatStr = reader.GetString(reader.GetOrdinal("JobCategory"));
                     var jobCategory = (JobCategory)Enum.Parse(typeof(JobCategory), jobCatStr);
@@ -114,11 +316,72 @@ namespace EconomicCalculator.Runner
                     var Population = new Population
                     {
                         Name = popName,
+                        VariantName = popVariant,
                         JobCategory = jobCategory,
                         Count = popCount,
                         JobName = jobName,
                         Job = job
                     };
+
+                    Populations.Add(Population);
+                }
+            }
+
+            // goods
+            sql = "Select * From PopulationGoods";
+            var goodsSqlCommand = new SqlCommand(sql, connection);
+            using (var goodReader = goodsSqlCommand.ExecuteReader())
+            {
+                while (goodReader.Read())
+                {
+                    var popName = goodReader.GetString(goodReader.GetOrdinal("PopulationName"));
+                    var popVar = goodReader.GetString(goodReader.GetOrdinal("VariantName"));
+                    var pop = Populations.Single(x => x.Name == popName && x.VariantName == popVar);
+                    var productName = goodReader.GetString(goodReader.GetOrdinal("ProductName"));
+                    var good = products.Single(x => x.Name == productName);
+                    var amount = goodReader.GetDouble(goodReader.GetOrdinal("Amount"));
+
+                    pop.GoodsForSale.Add(good);
+                    pop.GoodAmounts[productName] = amount;
+                }
+            }
+
+            // Life Needs
+            sql = "Select * From PopulationLifeNeeds";
+            var needsSqlCommand = new SqlCommand(sql, connection);
+            using (var needReader = needsSqlCommand.ExecuteReader())
+            {
+                while (needReader.Read())
+                {
+                    var popName = needReader.GetString(needReader.GetOrdinal("PopulationName"));
+                    var popVar = needReader.GetString(needReader.GetOrdinal("VariantName"));
+                    var pop = Populations.Single(x => x.Name == popName && x.VariantName == popVar);
+                    var productName = needReader.GetString(needReader.GetOrdinal("ProductName"));
+                    var lifeNeed = products.Single(x => x.Name == productName);
+                    var amount = needReader.GetDouble(needReader.GetOrdinal("Amount"));
+
+                    pop.LifeNeeds.Add(lifeNeed);
+                    pop.LifeNeedAmounts[productName] = amount;
+                }
+            }
+
+            // Money
+            sql = "Select * From PopulationMoney";
+            var moneySqlCommand = new SqlCommand(sql, connection);
+            using (var moneyReader = moneySqlCommand.ExecuteReader())
+            {
+                while (moneyReader.Read())
+                {
+                    var popName = moneyReader.GetString(moneyReader.GetOrdinal("PopulationName"));
+                    var popVar = moneyReader.GetString(moneyReader.GetOrdinal("VariantName"));
+                    var pop = Populations.Single(x => x.Name == popName && x.VariantName == popVar);
+                    var currencyName = moneyReader.GetString(moneyReader.GetOrdinal("CurrencyName"));
+                    var currency = currencies.Single(x => x.Name == currencyName);
+                    var amountCol = moneyReader.GetOrdinal("Amount");
+                    var amount = moneyReader.GetDouble(moneyReader.GetOrdinal("Amount"));
+
+                    pop.Currencies.Add(currency);
+                    pop.CurrencyAmounts[currencyName] = amount;
                 }
             }
 
@@ -300,21 +563,26 @@ namespace EconomicCalculator.Runner
             }
         }
 
-        private IList<IProduct> LoadProducts(IDictionary<int, string> units)
+        private IList<IProduct> LoadProducts()
         {
             var productsSql = "Select * from Products";
             var productsSqlCommand = new SqlCommand(productsSql, connection);
-            using (var productsDataReader = productsSqlCommand.ExecuteReader())
+            using (var reader = productsSqlCommand.ExecuteReader())
             {
                 var products = new List<IProduct>();
-                while (productsDataReader.Read())
+                while (reader.Read())
                 {
+                    var name = reader.GetString(reader.GetOrdinal("Name"));
+                    var unit = reader.GetString(reader.GetOrdinal("Unit"));
+                    var currentPrice = reader.GetDouble(reader.GetOrdinal("CurrentPrice"));
+                    var MTTF = reader.GetInt32(reader.GetOrdinal("MeanTimeToFailure"));
+
                     var product = new Product
                     {
-                        Name = (string)productsDataReader.GetValue(0),
-                        UnitName = units[(int)productsDataReader.GetValue(1)],
-                        CurrentPrice = (double)productsDataReader.GetValue(2),
-                        MTTF = (int)productsDataReader.GetValue(3)
+                        Name = name,
+                        UnitName = unit,
+                        CurrentPrice = currentPrice,
+                        MTTF = MTTF
                     };
                     products.Add(product);
                 }
@@ -322,21 +590,7 @@ namespace EconomicCalculator.Runner
             }
         }
 
-        private IDictionary<int, string> LoadUnits()
-        {
-            // Units
-            var unitsSql = "Select * from Units";
-            var unitsSqlCommand = new SqlCommand(unitsSql, connection);
-            using (var unitsDataReader = unitsSqlCommand.ExecuteReader())
-            {
-                var units = new Dictionary<int, string>();
-                while (unitsDataReader.Read())
-                {
-                    units[(int)unitsDataReader.GetValue(0)] = (string)unitsDataReader.GetValue(1);
-                }
-                return units;
-            }
-        }
+        #endregion LoadData
 
         public void Open()
         {
@@ -347,6 +601,28 @@ namespace EconomicCalculator.Runner
         public void Close()
         {
             connection.Close();
+        }
+
+        public void RunFor(int dayCount)
+        {
+            int i = 0;
+            while (i < dayCount)
+            {
+                foreach (var market in markets)
+                {
+                    // Run each market's internal activity and production cycle. (World Market is excluded from all of this activity.
+                    market.ProductionCycle();
+
+                    // Do all consumption inside each market that is possible.
+                    // market.InternalConsumption();
+                }
+
+                // Merchants buy and/or sell
+                // market.MerchantTurn();
+
+                // Try secondary consumption run from merchants.
+                // market.ImportTurn();
+            }
         }
 
         static void Main(string[] args)

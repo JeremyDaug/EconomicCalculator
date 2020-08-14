@@ -40,7 +40,7 @@ namespace EconomicCalculator.Intermediaries
         /// </summary>
         IList<ICrops> AvailableCrops { get; }
 
-        /// <summary>
+        /// <summary>                       
         /// What mines are located trivially close to the market.
         /// </summary>
         IList<IMine> AvailableMines { get; }
@@ -54,6 +54,11 @@ namespace EconomicCalculator.Intermediaries
         /// The available processes in the market that people can work.
         /// </summary>
         IList<IProcess> AvailableProcesses { get; }
+
+        /// <summary>
+        /// The Production Cycle
+        /// </summary>
+        void ProductionCycle();
 
         #region Goods
 
@@ -69,10 +74,38 @@ namespace EconomicCalculator.Intermediaries
 
         #endregion Goods
 
-        #region Functions
+        #region PrintFunctions
 
+        /// <summary>
+        /// Prints the mines in the market.
+        /// </summary>
+        string PrintMines();
 
+        /// <summary>
+        /// Prints the crops
+        /// </summary>
+        string PrintCrops();
 
-        #endregion Functions
+        /// <summary>
+        /// Prints the Processes
+        /// </summary>
+        string PrintProcesses();
+
+        /// <summary>
+        /// Prints the Currencies
+        /// </summary>
+        string PrintCurrencies();
+
+        /// <summary>
+        /// Prints the Populations
+        /// </summary>
+        string PrintPops();
+
+        /// <summary>
+        /// Prints the Products
+        /// </summary>
+        string PrintProducts();
+
+        #endregion PrintFunctions
     }
 }
