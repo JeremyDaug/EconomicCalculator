@@ -14,8 +14,9 @@ namespace EconomicCalculator.Runner
     /// <summary>
     /// The world Acts as the head to the markets
     /// </summary>
-    public class TheWorld
+    public class World
     {
+        private bool Debug = true;
         /// <summary>
         /// The name of the world.
         /// </summary>
@@ -34,6 +35,17 @@ namespace EconomicCalculator.Runner
         /// The connection to the database.
         /// </summary>
         private SqlConnection connection;
+
+        #region AlterationFunctions
+
+        public void AddMarket(IMarket market)
+        {
+            // Check if market already exists in world.
+            if (markets.Contains(market))
+                return;
+        }
+
+        #endregion AlterationFunctions
 
         #region PrintFunctions
 
@@ -125,47 +137,100 @@ namespace EconomicCalculator.Runner
 
         public void LoadData(string worldName)
         {
-            // Products
-            var products = LoadProducts();
-            Console.WriteLine("--- Products Loaded");
-
-            // crops
-            var crops = LoadCrops(products);
-            Console.WriteLine("--- Crops Loaded");
-
-            // Mines
-            var mines = LoadMines(products);
-            Console.WriteLine("--- Mines Loaded");
-
-            // Processes
-            var processes = LoadProcesses(products);
-            Console.WriteLine("--- Processes Loaded");
-
-            // Currencies
-            var Currencies = LoadCurrencies(products);
-            Console.WriteLine("--- Currencies Loaded");
-
-            // Populations
-            var Populations = LoadPopulations(products, crops, mines, processes, Currencies);
-            Console.WriteLine("--- Populations Loaded");
-
-            // Markets
-            markets = LoadMarkets(products, crops, mines, processes, Currencies, Populations);
-            Console.WriteLine("--- Markets Loaded");
-
-            // Finalize Market
-            WorldMarket = new Market
+            // Product seeding
+            if (Debug)
             {
-                Name = worldName,
-                AvailableGoods = products,
-                AvailableCrops = crops,
-                AvailableMines = mines,
-                AvailableProcesses = processes,
-                AvailableCurrencies = Currencies,
-                Pops = Populations,
-                TotalPopulation = Populations.Sum(x => x.Count)
-            };
-            Console.WriteLine("--- Global Market Finalized");
+                // Bread Line
+                var wheat = new Product
+                {
+                    Name = "Wheat",
+                    UnitName = "lb",
+                    CurrentPrice = 0.05,
+                    MTTF = 12
+                };
+
+                var wheatFlour = new Product
+                {
+                    Name = "Wheat Flour",
+                    UnitName = "lb",
+                    CurrentPrice = 0.1,
+                    MTTF = 6
+                };
+
+                var wheatBread = new Product
+                {
+                    Name = "Wheat Bread",
+                    UnitName = "lb",
+                    CurrentPrice = 0.2,
+                    MTTF = 3
+                };
+
+                // Crops
+                var wheatField = new Crops
+                {
+                    Name = "Wheat",
+                    CropType = CropType.Grain,
+                    Seeding = new List<IProduct> { wheat },
+                    Planting = new Dictionary<string, double>
+                    {
+                        { wheat.Name, 120 }
+                    },
+                    HarvestProducts = new List<IProduct> { wheat },
+                    HarvestAmounts = new Dictionary<string, double>
+                    {
+                        { wheat.Name, 480 }
+                    },
+                    CropLifecycle = 180,
+                    LaborRequirements = 1/30,
+                };
+            }
+            else
+            {
+                // TODO working on an more progress, SQL DB being sidelined to functionality.
+                /*
+                // Products
+                var products = LoadProducts();
+                Console.WriteLine("--- Products Loaded");
+
+                // crops
+                var crops = LoadCrops(products);
+                Console.WriteLine("--- Crops Loaded");
+
+                // Mines
+                var mines = LoadMines(products);
+                Console.WriteLine("--- Mines Loaded");
+
+                // Processes
+                var processes = LoadProcesses(products);
+                Console.WriteLine("--- Processes Loaded");
+
+                // Currencies
+                var Currencies = LoadCurrencies(products);
+                Console.WriteLine("--- Currencies Loaded");
+
+                // Populations
+                var Populations = LoadPopulations(products, crops, mines, processes, Currencies);
+                Console.WriteLine("--- Populations Loaded");
+
+                // Markets
+                markets = LoadMarkets(products, crops, mines, processes, Currencies, Populations);
+                Console.WriteLine("--- Markets Loaded");
+
+                // Finalize Market
+                WorldMarket = new Market
+                {
+                    Name = worldName,
+                    AvailableGoods = products,
+                    AvailableCrops = crops,
+                    AvailableMines = mines,
+                    AvailableProcesses = processes,
+                    AvailableCurrencies = Currencies,
+                    Pops = Populations,
+                    TotalPopulation = Populations.Sum(x => x.Count)
+                };
+                Console.WriteLine("--- Global Market Finalized");
+                */
+            }
         }
 
         private IList<IMarket> LoadMarkets(IList<IProduct> products, IList<ICrops> crops,

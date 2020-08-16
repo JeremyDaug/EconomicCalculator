@@ -59,16 +59,15 @@ namespace EconomicCalculator.Generators
         #endregion Capital
 
         /// <summary>
-        /// How much, and what skill level, of labor
-        /// required to work an acre of land measured in days per crop cycle.
+        /// How much labor is required each day to maintain an acre of the crop.
         /// </summary>
-        new double LaborRequirements { get; }
+        new IList<double> LaborRequirements { get; }
 
         /// <summary>
         /// How long a crop takes to grow from planting to
         /// harvest, measured in days.
         /// </summary>
-        double CropLifecycle { get; }
+        int CropLifecycle { get; }
 
         /// <summary>
         /// The Averaged output of the crop.

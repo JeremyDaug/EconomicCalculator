@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace EconomicCalculator.Intermediaries
 {
@@ -8,6 +10,11 @@ namespace EconomicCalculator.Intermediaries
     public interface IProduct
     {
         /// <summary>
+        /// The Unique identifier of the product.
+        /// </summary>
+        Guid Id { get; }
+
+        /// <summary>
         /// The name of the product.
         /// </summary>
         string Name { get; }
@@ -16,13 +23,18 @@ namespace EconomicCalculator.Intermediaries
         /// A unique name to differentiate between the same product made through
         /// different means, in different locations, or by methods.
         /// </summary> 
-        // string VariantName { get; }
+        string VariantName { get; }
         
         /// <summary>
         /// What is the name or type of unit used to buy and
         /// sell this product.
         /// </summary>
         string UnitName { get; }
+
+        /// <summary>
+        /// The quality of the item
+        /// </summary>
+        int Quality { get; }
 
         /// <summary>
         /// The current market price of the product.

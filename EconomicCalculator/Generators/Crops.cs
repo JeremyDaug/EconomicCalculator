@@ -25,7 +25,7 @@ namespace EconomicCalculator.Generators
 
         public IDictionary<string, double> HarvestAmounts { get; set; }
 
-        #region Alts
+        #region JobAlts
 
         public IList<IProduct> Inputs => Seeding;
 
@@ -36,11 +36,13 @@ namespace EconomicCalculator.Generators
 
         public IDictionary<string, double> OutputResults => HarvestAmounts;
 
-        #endregion Alts
+        #endregion JobAlts
 
-        public double LaborRequirements { get; set; }
+        public IList<double> LaborRequirements { get; set; }
 
-        public double CropLifecycle { get; set; }
+        public double TotalLaborRequired() => LaborRequirements.Sum();
+
+        public int CropLifecycle { get; set; }
 
         public Crops()
         {

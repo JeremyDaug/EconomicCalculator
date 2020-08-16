@@ -10,11 +10,11 @@ namespace ConsoleInterface
 {
     public class ConsoleWorldManager
     {
-        private TheWorld theWorld;
+        private World theWorld;
 
         public ConsoleWorldManager()
         {
-            theWorld = new TheWorld();
+            theWorld = new World();
             theWorld.Name = "ConsoleWorld";
         }
 

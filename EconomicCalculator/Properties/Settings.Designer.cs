@@ -33,5 +33,17 @@ namespace EconomicCalculator.Properties {
                 return ((string)(this["EconomicDBConnectionString"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int MaxSkillLevel {
+            get {
+                return ((int)(this["MaxSkillLevel"]));
+            }
+            set {
+                this["MaxSkillLevel"] = value;
+            }
+        }
     }
 }

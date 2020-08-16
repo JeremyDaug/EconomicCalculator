@@ -10,9 +10,13 @@ namespace EconomicCalculator.Intermediaries
     {
         public string Name { get; set; }
 
+        public string VariantName { get; set; }
+
         public string UnitName { get; set; }
 
         public double CurrentPrice { get; set; }
+
+        public int Quality { get; set; }
 
         public int MTTF { get; set; }
 
@@ -27,6 +31,11 @@ namespace EconomicCalculator.Intermediaries
 
             var chanceToNotHappen = 1 - DailyFailureChance;
             return 1 - Math.Pow(chanceToNotHappen, days);
+        }
+
+        public int GetHashCode(object obj)
+        {
+            throw new NotImplementedException();
         }
 
         public override string ToString()

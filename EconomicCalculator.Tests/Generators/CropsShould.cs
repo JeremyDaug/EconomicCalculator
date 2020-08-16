@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Generators;
+﻿using EconomicCalculator.Enums;
+using EconomicCalculator.Generators;
 using EconomicCalculator.Intermediaries;
 using Moq;
 using NUnit.Framework;
@@ -13,13 +14,33 @@ namespace EconomicCalculator.Tests.Generators
     {
         private Crops sut;
 
+        private Mock<IProduct> SeedMock;
+
         private Mock<IProduct> ProductMock1;
         private Mock<IProduct> ProductMock2;
+
+        private string CropName = "TestCrop";
+        private int CropCycle = 100;
+        private double LaborRequirements = 1;
 
         [SetUp]
         public void Setup()
         {
-            sut = new Crops();
+            SeedMock = new Mock<IProduct>();
+
+            ProductMock1 = new Mock<IProduct>();
+            ProductMock2 = new Mock<IProduct>();
+
+            sut = new Crops
+            {
+                Name = CropName
+            };
+        }
+
+        [Test]
+        public void WorkProperly()
+        {
+
         }
     }
 }

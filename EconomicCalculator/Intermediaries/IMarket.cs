@@ -10,8 +10,13 @@ namespace EconomicCalculator.Intermediaries
     /// <summary>
     /// The Market Interface.
     /// </summary>
-    public interface IMarket
+    public interface IMarket : IEqualityComparer<IMarket>
     {
+        /// <summary>
+        /// The Unique Id of the market.
+        /// </summary>
+        Guid Id { get; }
+
         /// <summary>
         /// The name of the market.
         /// </summary>

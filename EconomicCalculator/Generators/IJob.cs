@@ -39,14 +39,19 @@ namespace EconomicCalculator.Generators
         IDictionary<string, double> OutputResults { get; }
 
         /// <summary>
-        /// How much work per unit of the job is needed.
+        /// How much work per unit of the job is needed, and what skill level it must be.
         /// </summary>
-        double LaborRequirements { get; }
+        IList<double> LaborRequirements { get; }
 
         /// <summary>
-        /// The type of job that this is (defines how it should calculate 
+        /// The type of job that this is (defines how labor and outputs are used)
         /// </summary>
         JobTypes JobType { get; }
+
+        /// <summary>
+        /// The Total required labor of the job ignoring skill level.
+        /// </summary>
+        double TotalLaborRequired();
 
         /// <summary>
         /// Do work and make goods in the production.
