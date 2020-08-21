@@ -1,47 +1,47 @@
-﻿using System;
+﻿using EconomicCalculator.Enums;
+using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EconomicCalculator.Enums;
-using EconomicCalculator.Intermediaries;
 
 namespace EconomicCalculator.Generators
 {
-    internal class Mine : IMine
+    public class Process : IProcess
     {
         public string Name { get; set; }
 
-        public MineType MineType { get; set; }
+        public IList<IProduct> Inputs { get; set; }
 
-        public RockType RockType { get; set; }
+        public IDictionary<string, double> InputRequirements { get; set; }
+
+        public IList<IProduct> Outputs { get; set; }
+
+        public IDictionary<string, double> OutputResults { get; set; }
 
         public double LaborRequirements { get; set; }
 
-        public IList<IProduct> Products { get; set; }
+        public JobTypes JobType => JobTypes.Craft;
 
-        public IDictionary<string, double> ProductAmounts { get; set; }
+        IList<double> IJob.LaborRequirements => throw new NotImplementedException();
 
-        public IList<IProduct> Outputs => Products;
+        public Guid Id => throw new NotImplementedException();
 
-        public IDictionary<string, double> OutputResults => ProductAmounts;
-
-        public IList<IProduct> Requirements { get; set; }
-
-        public IDictionary<string, double> RequirementAmounts { get; set; }
-
-        public IList<IProduct> Inputs => Requirements;
-
-        public IDictionary<string, double> InputRequirements => RequirementAmounts;
-
-        public JobTypes JobType => JobTypes.Mine;
-
-        public Mine()
+        public Process()
         {
-            Products = new List<IProduct>();
-            ProductAmounts = new Dictionary<string, double>();
-            Requirements = new List<IProduct>();
-            RequirementAmounts = new Dictionary<string, double>();
+            Inputs = new List<IProduct>();
+            InputRequirements = new Dictionary<string, double>();
+            Outputs = new List<IProduct>();
+            OutputResults = new Dictionary<string, double>();
+        }
+
+        public double ProductionCost()
+        {
+            return Inputs
+                .ToDictionary(x => x.Name, x => x.DefaultPrice * InputRequirements[x.Name])
+                .Sum(x => x.Value);
         }
 
         public IDictionary<string, double> GetExpectedInputs(int count)
@@ -81,30 +81,32 @@ namespace EconomicCalculator.Generators
         public override string ToString()
         {
             var result = string.Format("Name: {0}\n" +
-                "Mine Type: {1}\n" +
-                "Rock Type: {2}\n" +
-                "Labor Requirements: {3}\n",
-                Name, MineType, RockType, LaborRequirements);
+                "LaborRequirements: {1}\n", Name, LaborRequirements);
+
+            // Inputs
+            result += "Input(s):\n";
+            foreach(var input in Inputs)
+            {
+                result += string.Format("\t{0}: {1} {2}\n",
+                    input.Name, InputRequirements[input.Name], input.UnitName);
+            }
 
             // Outputs
-            result += "Outputs:\n";
-            foreach (var item in Products)
+            result += "Output(s):\n";
+            foreach (var output in Outputs)
             {
-                result += string.Format("\t{0} : {1} {2}\n", item.Name, ProductAmounts[item.Name], item.UnitName);
+                result += string.Format("\t{0}: {1} {2}\n",
+                    output.Name, OutputResults[output.Name], output.UnitName);
             }
 
-            // Inputs (requirements / capital)
-            result += "Inputs:\n";
-            foreach (var item in Inputs)
-            {
-                result += string.Format("\t{0} : {1} {2}\n", item.Name, ProductAmounts[item.Name], item.UnitName);
-            }
-            if (!Inputs.Any())
-                result += "\t None\n";
             result += "--------------------\n";
 
             return result;
         }
 
+        public double TotalLaborRequired()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

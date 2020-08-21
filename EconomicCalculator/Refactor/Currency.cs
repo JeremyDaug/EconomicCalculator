@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace EconomicCalculator.Intermediaries
 
         public double ConstructionCost()
         {
-            return Cash.CurrentPrice;
+            return Cash.DefaultPrice;
         }
 
         public override string ToString()

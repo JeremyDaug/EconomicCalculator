@@ -1,18 +1,24 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Generators
+namespace EconomicCalculator.Storage
 {
     /// <summary>
     /// An interface for anything that can be worked as a job.
     /// </summary>
     public interface IJob
     {
+        /// <summary>
+        /// The Id of the job.
+        /// </summary>
+        Guid Id { get; }
+
         /// <summary>
         /// The name of the job.
         /// </summary>
@@ -52,13 +58,5 @@ namespace EconomicCalculator.Generators
         /// The Total required labor of the job ignoring skill level.
         /// </summary>
         double TotalLaborRequired();
-
-        /// <summary>
-        /// Do work and make goods in the production.
-        /// </summary>
-        /// <param name="availableGoods">The goods available to the working population.</param>
-        /// <param name="Pops">The number of people in the population.</param>
-        /// <returns>The resulting change in goods for the population.</returns>
-        IDictionary<string, double> Work(IDictionary<string, double> availableGoods, int Pops);
     }
 }

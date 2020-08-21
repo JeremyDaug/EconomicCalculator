@@ -1,6 +1,7 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Generators;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Storage;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -140,49 +141,7 @@ namespace EconomicCalculator.Runner
             // Product seeding
             if (Debug)
             {
-                // Bread Line
-                var wheat = new Product
-                {
-                    Name = "Wheat",
-                    UnitName = "lb",
-                    CurrentPrice = 0.05,
-                    MTTF = 12
-                };
-
-                var wheatFlour = new Product
-                {
-                    Name = "Wheat Flour",
-                    UnitName = "lb",
-                    CurrentPrice = 0.1,
-                    MTTF = 6
-                };
-
-                var wheatBread = new Product
-                {
-                    Name = "Wheat Bread",
-                    UnitName = "lb",
-                    CurrentPrice = 0.2,
-                    MTTF = 3
-                };
-
-                // Crops
-                var wheatField = new Crops
-                {
-                    Name = "Wheat",
-                    CropType = CropType.Grain,
-                    Seeding = new List<IProduct> { wheat },
-                    Planting = new Dictionary<string, double>
-                    {
-                        { wheat.Name, 120 }
-                    },
-                    HarvestProducts = new List<IProduct> { wheat },
-                    HarvestAmounts = new Dictionary<string, double>
-                    {
-                        { wheat.Name, 480 }
-                    },
-                    CropLifecycle = 180,
-                    LaborRequirements = 1/30,
-                };
+                
             }
             else
             {
@@ -616,7 +575,7 @@ namespace EconomicCalculator.Runner
                             CropType = CropType,
                             Seeding = new List<IProduct> { SeedProduct },
                             Planting = new Dictionary<string, double> { { SeedName, Planting } },
-                            LaborRequirements = Labor,
+                            LaborRequirements = new List<double>(),
                             CropLifecycle = LifeCycle,
                             HarvestProducts = new List<IProduct> { OutputProduct },
                             HarvestAmounts = new Dictionary<string, double> { { OutputProduct.Name, OutputAmount } }
@@ -646,7 +605,7 @@ namespace EconomicCalculator.Runner
                     {
                         Name = name,
                         UnitName = unit,
-                        CurrentPrice = currentPrice,
+                        DefaultPrice = currentPrice,
                         MTTF = MTTF
                     };
                     products.Add(product);

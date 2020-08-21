@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Generators;
+using EconomicCalculator.Storage;
 
 namespace EconomicCalculator.Intermediaries
 {
     internal class Market : IMarket
     {
+        public Guid Id { get; }
+
         public string Name { get; set; }
 
         public double TotalPopulation { get; set; }
@@ -26,6 +29,8 @@ namespace EconomicCalculator.Intermediaries
         public IList<IProduct> AvailableGoods { get; set; }
 
         public IDictionary<string, double> AvailableGoodAmounts { get; set; }
+
+        public int Territory => throw new NotImplementedException();
 
         public Market()
         {
@@ -148,6 +153,11 @@ namespace EconomicCalculator.Intermediaries
             result += "--------------------\n";
 
             return result;
+        }
+
+        public bool Equals(IMarket other)
+        {
+            throw new NotImplementedException();
         }
     }
 }

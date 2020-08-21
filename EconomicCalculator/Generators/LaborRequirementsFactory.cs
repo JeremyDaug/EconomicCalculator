@@ -13,7 +13,7 @@ namespace EconomicCalculator.Generators
         /// </summary>
         public static int Length = Properties.Settings.Default.MaxSkillLevel;
 
-        public static IList<double> CreateLaborList()
+        public static List<double> CreateLaborList()
         {
             return new List<double>(Length);
         }

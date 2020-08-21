@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Enums;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Storage;
 
 namespace EconomicCalculator.Generators
 {
     internal class Crops : ICrops
     {
+        public Guid Id { get; }
+
         /// <summary>
         /// The name of the Crop.
         /// </summary>
@@ -69,9 +72,10 @@ namespace EconomicCalculator.Generators
 
         public IDictionary<string, double> Work(IDictionary<string, double> availableGoods, int Pops)
         {
+            throw new NotImplementedException();
             // TODO, change this to not have any daily requirements, instead inputs based on cycles.
             // Check Daily consumption is possible. If not and something is missing, return an empty Dict.
-            if (InputRequirements.Any(x => !availableGoods.ContainsKey(x.Key)))
+           /* if (InputRequirements.Any(x => !availableGoods.ContainsKey(x.Key)))
                 return new Dictionary<string, double>();
 
             // Calculate possible consumption, how many instances of the inputs we can meet for each.
@@ -79,14 +83,14 @@ namespace EconomicCalculator.Generators
                 .ToDictionary(x => x.Key, x => Math.Floor(availableGoods[x.Key] / x.Value));
 
             // How much labor can be satisfied.
-            var doableWork = Math.Floor(Pops / LaborRequirements);
+           // var doableWork = Math.Floor(Pops / LaborRequirements);
 
             // get the smallest value between input satisfaction and doable work.
-            var maxWork = Math.Min(doableWork, inputs.Min(x => x.Value));
+           // var maxWork = Math.Min(doableWork, inputs.Min(x => x.Value));
 
             // With the most work that we can do found, actually do it.
             // Subtract costs
-            var result = InputRequirements.ToDictionary(x => x.Key, x => -x.Value * maxWork);
+           // var result = InputRequirements.ToDictionary(x => x.Key, x => -x.Value * maxWork);
 
             // Add productions
             foreach (var product in OutputResults)
@@ -96,8 +100,8 @@ namespace EconomicCalculator.Generators
                 else
                     result[product.Key] = product.Value * maxWork / CropLifecycle;
             }
-
-            return result;
+            
+            return result; */
         }
 
 

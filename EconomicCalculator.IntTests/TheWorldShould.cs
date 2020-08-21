@@ -1,5 +1,6 @@
 using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Runner;
+using EconomicCalculator.Storage;
 using NUnit.Framework;
 
 namespace Tests

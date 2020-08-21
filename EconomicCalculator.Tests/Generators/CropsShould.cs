@@ -1,6 +1,7 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Generators;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Storage;
 using Moq;
 using NUnit.Framework;
 using System;

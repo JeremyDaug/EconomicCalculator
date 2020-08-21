@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,8 @@ using System.Threading.Tasks;
 namespace EconomicCalculator.Generators
 {
     /// <summary>
-    /// Product Substitute Groups define groups of products 
+    /// Product Substitute Groups define groups of products which can substitute
+    /// for each other for the purposes of consumption, 
     /// </summary>
     public interface IProductSubstituteGroup
     {
@@ -24,7 +26,7 @@ namespace EconomicCalculator.Generators
         /// <summary>
         /// The Product Groups that are part of the substitute group. These are organized by relative quality then by name.
         /// </summary>
-        IList<IProductGroup> Goods { get; }
+        IList<IProduct> Goods { get; }
 
         /// <summary>
         /// Retrieves the relative qualities of all product groups.

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections;
+﻿using EconomicCalculator.Enums;
+using System;
 using System.Collections.Generic;
 
-namespace EconomicCalculator.Intermediaries
+namespace EconomicCalculator.Storage
 {
     /// <summary>
     /// Products are goods which can be bought, sold, and consumed.
     /// </summary>
-    public interface IProduct
+    public interface IProduct : IEquatable<IProduct>, ISqlReader, IEqualityComparer<IProduct>
     {
         /// <summary>
         /// The Unique identifier of the product.
@@ -24,7 +24,7 @@ namespace EconomicCalculator.Intermediaries
         /// different means, in different locations, or by methods.
         /// </summary> 
         string VariantName { get; }
-        
+
         /// <summary>
         /// What is the name or type of unit used to buy and
         /// sell this product.
@@ -37,26 +37,24 @@ namespace EconomicCalculator.Intermediaries
         int Quality { get; }
 
         /// <summary>
-        /// The current market price of the product.
+        /// The default/starting price of the product.
         /// </summary>
-        double CurrentPrice { get; }
+        double DefaultPrice { get; }
 
-        // Components Implement Later
-        /// <summary>
-        /// The components that make up the Product and can be replaced individiually. May be empty or null.
-        /// </summary>
-        // IList<IProduct> Components { get; }
-
-        /// <summary>
-        /// The number of each component.
-        /// </summary>
-        // IDictionary<string, double> ComponentCounts { get; }
-
-        // Failure metrics
         /// <summary>
         /// The Average time for the item to break irrepairably.
         /// </summary>
         int MTTF { get; }
+
+        /// <summary>
+        /// The type of product this is.
+        /// </summary>
+        ProductTypes ProductType { get; }
+
+        /// <summary>
+        /// Can th good can be divided effectively indefinitely.
+        /// </summary>
+        bool Fractional { get; }
 
         /// <summary>
         /// The chance that on any given day, the product will break. Calculated from <see cref="MTTF"/>.

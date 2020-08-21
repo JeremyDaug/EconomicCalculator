@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Enums;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Storage;
 
 namespace EconomicCalculator.Generators
 {
@@ -59,7 +60,7 @@ namespace EconomicCalculator.Generators
             // TODO
 
             // Send Information to Job and let it handle it.
-            var results = Job.Work(GoodAmounts, Count);
+            //var results = Job.Work(GoodAmounts, Count);
 
             return Task.CompletedTask;
         }

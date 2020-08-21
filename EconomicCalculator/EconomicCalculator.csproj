@@ -68,15 +68,11 @@
   <ItemGroup>
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
-    <Compile Include="Generators\IComponents.cs" />
-    <Compile Include="Generators\IJob.cs" />
-    <Compile Include="Generators\IProcessGroup.cs" />
-    <Compile Include="Generators\IProductCount.cs" />
-    <Compile Include="Generators\IProductGroup.cs" />
-    <Compile Include="Generators\IProductSubstituteGroup.cs" />
+    <Compile Include="Enums\ProductTypes.cs" />
+    <Compile Include="Storage\IJob.cs" />
+    <Compile Include="Refactor\IProcessGroup.cs" />
+    <Compile Include="Refactor\IProductSubstituteGroup.cs" />
     <Compile Include="Generators\LaborRequirementsFactory.cs" />
-    <Compile Include="Generators\ProductCollection.cs" />
-    <Compile Include="Generators\ProductCount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EconomicDBDataSet.cs">
       <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
@@ -88,29 +84,33 @@
     </Compile>
     <Compile Include="Enums\MineType.cs" />
     <Compile Include="Enums\RockType.cs" />
-    <Compile Include="Generators\Crops.cs" />
+    <Compile Include="Refactor\Crops.cs" />
     <Compile Include="Enums\CropType.cs" />
-    <Compile Include="Generators\ICrops.cs" />
-    <Compile Include="Generators\IMine.cs" />
-    <Compile Include="Generators\IPopulation.cs" />
-    <Compile Include="Generators\Mine.cs" />
-    <Compile Include="Generators\Population.cs" />
-    <Compile Include="Intermediaries\Currency.cs" />
-    <Compile Include="Intermediaries\ICurrency.cs" />
-    <Compile Include="Intermediaries\IAccount.cs" />
-    <Compile Include="Intermediaries\IMarket.cs" />
-    <Compile Include="Generators\IProcess.cs" />
-    <Compile Include="Intermediaries\IProduct.cs" />
-    <Compile Include="Intermediaries\Market.cs" />
-    <Compile Include="Generators\Process.cs" />
-    <Compile Include="Intermediaries\Product.cs" />
+    <Compile Include="Refactor\ICrops.cs" />
+    <Compile Include="Refactor\IMine.cs" />
+    <Compile Include="Refactor\IPopulation.cs" />
+    <Compile Include="Refactor\Mine.cs" />
+    <Compile Include="Refactor\Population.cs" />
+    <Compile Include="Refactor\Currency.cs" />
+    <Compile Include="Refactor\ICurrency.cs" />
+    <Compile Include="Refactor\IAccount.cs" />
+    <Compile Include="Storage\ICrop.cs" />
+    <Compile Include="Storage\IMarket.cs" />
+    <Compile Include="Refactor\IProcess.cs" />
+    <Compile Include="Storage\IProduct.cs" />
+    <Compile Include="Refactor\Market.cs" />
+    <Compile Include="Refactor\Process.cs" />
+    <Compile Include="Storage\IProductCollection.cs" />
+    <Compile Include="Storage\ISqlReader.cs" />
+    <Compile Include="Storage\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Runner\World.cs" />
+    <Compile Include="Refactor\World.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Storage\ProductCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -120,10 +120,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Storage\EconomicDB.mdf">
+    <Content Include="Data\EconomicDB.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Storage\EconomicDB_log.ldf">
+    <Content Include="Data\EconomicDB_log.ldf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>EconomicDB.mdf</DependentUpon>
     </Content>
@@ -139,6 +139,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Runner\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
