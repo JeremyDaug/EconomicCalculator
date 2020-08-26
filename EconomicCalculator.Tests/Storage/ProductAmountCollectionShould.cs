@@ -9,9 +9,9 @@ using System.Text;
 namespace EconomicCalculator.Tests.Storage
 {
     [TestFixture]
-    public class ProductCollectionShould
+    public class ProductAmountCollectionShould
     {
-        private ProductCollection sut;
+        private ProductAmountCollection sut;
 
         private Mock<IProduct> ProductMock1;
         private Mock<IProduct> ProductMock2;
@@ -34,7 +34,7 @@ namespace EconomicCalculator.Tests.Storage
             ProductMock1.SetupGet(x => x.Id).Returns(TestId1);
             ProductMock2.SetupGet(x => x.Id).Returns(TestId2);
 
-            sut = new ProductCollection();
+            sut = new ProductAmountCollection();
         }
 
         #region AddProducts
@@ -132,5 +132,26 @@ namespace EconomicCalculator.Tests.Storage
         }
 
         #endregion DeleteProduct
+
+        #region Multiply
+
+        [Test]
+        public void MultiplyAndReturnNewProductCollection()
+        {
+            var scalar = 2;
+            // Add to sut
+            sut.AddProducts(ProductMock1.Object, TestValue1);
+            sut.AddProducts(ProductMock2.Object, TestValue2);
+
+            // Mulitply.
+            var result = sut.Multiply(scalar);
+
+            Assert.That(result.GetProductAmount(ProductMock1.Object),
+                Is.EqualTo(TestValue1 * scalar));
+            Assert.That(result.GetProductAmount(ProductMock2.Object),
+                Is.EqualTo(TestValue2 * scalar));
+        }
+
+        #endregion Multiply
     }
 }

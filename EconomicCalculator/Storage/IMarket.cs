@@ -38,7 +38,10 @@ namespace EconomicCalculator.Storage
 
         #region InfoDetails
 
-        // Population Breakdown and management.
+        /// <summary>
+        /// The population of the market and their breakdown.
+        /// </summary>
+        IPopulations Populations { get; }
 
         // Territory Breakdown and management.
 
@@ -46,17 +49,71 @@ namespace EconomicCalculator.Storage
 
         #region TheMarket
 
-        // Availability
         /// <summary>
         /// What products are available, and how many are available.
         /// Positive values represent available goods and surplus.
-        /// Negative Values represent Shortfalls.
+        /// Negative Values represent Shortages.
         /// </summary>
-        IProductAmountCollection ProductAvailability { get; }
+        IProductAmountCollection ProductSupply { get; }
 
-        // Production Phase
+        /// <summary>
+        /// The effective universal demands.
+        /// Calculated based off of population needs and job inputs.
+        /// </summary>
+        IProductAmountCollection ProductDemand { get; }
 
-        // Buying Phase
+        /// <summary>
+        /// The price of each product in absolute units.
+        /// </summary>
+        IProductAmountCollection ProductPrices { get; }
+
+        /// <summary>
+        /// The total production that can be done in a perfect day.
+        /// </summary>
+        IProductAmountCollection ProductionCapacity { get; }
+
+        /// <summary>
+        /// What currencies are accepted in the area. 
+        /// This isn't necissarily the tax currency.
+        /// Only Money Changers can work in all currencies regardless of the market.
+        /// The price of money can only change based on Money Changer Transactions.
+        /// </summary>
+        IList<IProduct> AcceptedCurrencies { get; }
+
+        /// <summary>
+        /// Run through all productions that can be done and add them to the market.
+        /// </summary>
+        void ProductionPhase();
+
+        /// <summary>
+        /// Run through all purchasing that takes place.
+        /// </summary>
+        void BuyPhase();
+
+        /// <summary>
+        /// Readjust and Recalulate Prices.
+        /// </summary>
+        void RecalculatePrices();
+
+        /// <summary>
+        /// Starts a transaction between a populationGroup and the market.
+        /// </summary>
+        /// <param name="populationGroup">The Buyer</param>
+        /// <param name="product">What they are buying.</param>
+        /// <param name="amount">How much they are seeking to buy.</param>
+        /// <returns>The change in items for the population group.</returns>
+        IProductAmountCollection StartTransaction(IPopulationGroup populationGroup, IProduct product, double amount);
+
+        /// <summary>
+        /// Gets a price for a good.
+        /// </summary>
+        /// <param name="product">The product we are pricing</param>
+        /// <param name="amount">How much are we getting.</param>
+        /// <returns>The price in abstract currency.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// If Product is null.
+        /// </exception>
+        double GetPrice(IProduct product, double amount);
 
         #endregion TheMarket
 
@@ -68,6 +125,30 @@ namespace EconomicCalculator.Storage
         // Accepted Currencies
 
         #endregion AvailableOptions
+
+        #region PracticalShortcuts
+
+        /// <summary>
+        /// Function to Exchange Cash for an alternative via money changers.
+        /// </summary>
+        /// <param name="cash">The product being exchanged.</param>
+        /// <param name="amount">How much is being exchanged.</param>
+        /// <param name="target">What is being sought.</param>
+        /// <returns>The number of target currency recieved.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// If the source or target moneys are invalid for exchange.
+        /// </exception>
+        /// <remarks>
+        /// May return 0 if no currency can be exchanged.
+        /// </remarks>
+        double ExchangeCash(IProduct source, double amount, IProduct target);
+
+        /// <summary>
+        /// Quick Access to a Money Changer.
+        /// </summary>
+        IPopulationGroup MoneyChangers { get; }
+
+        #endregion
 
         #region PrintFunctions
 

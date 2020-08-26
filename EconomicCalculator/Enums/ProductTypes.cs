@@ -14,5 +14,6 @@ namespace EconomicCalculator.Enums
         Consumable, // Storable, but consumed upon use.
         Good, // Storable, durable, but can break with use or time.
         Service, // Non-storable, and consumed immediately.
+        Land, // Indefinitely storable, and unconsumable.
     }
 }

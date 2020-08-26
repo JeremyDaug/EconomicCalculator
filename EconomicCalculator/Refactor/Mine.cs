@@ -9,7 +9,7 @@ using EconomicCalculator.Storage;
 
 namespace EconomicCalculator.Generators
 {
-    internal class Mine : IMine
+    internal class Mine
     {
         public string Name { get; set; }
 
@@ -36,8 +36,6 @@ namespace EconomicCalculator.Generators
         public IDictionary<string, double> InputRequirements => RequirementAmounts;
 
         public JobTypes JobType => JobTypes.Mine;
-
-        IList<double> IJob.LaborRequirements => throw new NotImplementedException();
 
         public Guid Id => throw new NotImplementedException();
 

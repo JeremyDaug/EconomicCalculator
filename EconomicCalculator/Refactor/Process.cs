@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EconomicCalculator.Generators
 {
-    public class Process : IProcess
+    public class Process
     {
         public string Name { get; set; }
 
@@ -24,8 +24,6 @@ namespace EconomicCalculator.Generators
         public double LaborRequirements { get; set; }
 
         public JobTypes JobType => JobTypes.Craft;
-
-        IList<double> IJob.LaborRequirements => throw new NotImplementedException();
 
         public Guid Id => throw new NotImplementedException();
 

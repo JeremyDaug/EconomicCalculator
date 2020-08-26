@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EconomicCalculator.Intermediaries;
 
 namespace EconomicCalculator.Storage
 {
     /// <summary>
     /// Storage for products and number counts for them.
     /// </summary>
-    public interface IProductAmountCollection
+    public interface IProductAmountCollection : IEnumerable<Tuple<IProduct, double>>
     {
         /// <summary>
         /// The products in the collection.
@@ -30,6 +31,16 @@ namespace EconomicCalculator.Storage
         /// If product does not exist, the item will be added.
         /// </remarks>
         void SetProductAmount(IProduct product, double value);
+
+        /// <summary>
+        /// Retrieve a subset of products from the list.
+        /// </summary>
+        /// <param name="products">The Sought Products.</param>
+        /// <returns>The Subset of items sought.</returns>
+        /// <remarks>
+        /// If an item is not in the collection it is added to the return collection with an amount of 9.
+        /// </remarks>
+        IProductAmountCollection GetProducts(IList<IProduct> products);
 
         /// <summary>
         /// Retrieve a count for an item in the collection
@@ -62,6 +73,12 @@ namespace EconomicCalculator.Storage
         void AddProducts(IProduct product, double value);
 
         /// <summary>
+        /// Add products from another collection to this one.
+        /// </summary>
+        /// <param name="products">The products to add.</param>
+        void AddProducts(IProductAmountCollection products);
+
+        /// <summary>
         /// Removes a number of products from the collection.
         /// </summary>
         /// <remarks>
@@ -88,5 +105,21 @@ namespace EconomicCalculator.Storage
         /// The product doesn't exist in the collection.
         /// </exception>
         void DeleteProduct(IProduct product);
+
+        /// <summary>
+        /// Multiplies the entire collection of items by a scalar.
+        /// </summary>
+        /// <param name="value">The scalar to multiply.</param>
+        /// <returns>A new collection of multiplied values.</returns>
+        IProductAmountCollection Multiply(double value);
+
+        /// <summary>
+        /// Checks that teh collection contains a product.
+        /// </summary>
+        /// <param name="product">The product being sought.</param>
+        /// <returns>
+        /// True if it contains it in the collection, regardless of the value.
+        /// </returns>
+        bool Contains(IProduct product);
     }
 }

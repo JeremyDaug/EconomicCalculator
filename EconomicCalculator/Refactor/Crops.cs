@@ -9,7 +9,7 @@ using EconomicCalculator.Storage;
 
 namespace EconomicCalculator.Generators
 {
-    internal class Crops : ICrops
+    internal class Crops
     {
         public Guid Id { get; }
 

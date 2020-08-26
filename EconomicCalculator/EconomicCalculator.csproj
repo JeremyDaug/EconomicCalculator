@@ -97,11 +97,14 @@
     <Compile Include="Storage\ICrop.cs" />
     <Compile Include="Storage\IMarket.cs" />
     <Compile Include="Refactor\IProcess.cs" />
+    <Compile Include="Storage\Population\IPopulationGroup.cs" />
+    <Compile Include="Storage\Population\IPopulations.cs" />
     <Compile Include="Storage\IProduct.cs" />
-    <Compile Include="Refactor\Market.cs" />
     <Compile Include="Refactor\Process.cs" />
-    <Compile Include="Storage\IProductCollection.cs" />
+    <Compile Include="Storage\IProductAmountCollection.cs" />
     <Compile Include="Storage\ISqlReader.cs" />
+    <Compile Include="Storage\Market.cs" />
+    <Compile Include="Storage\Population\PopulationGroup.cs" />
     <Compile Include="Storage\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -110,7 +113,7 @@
     </Compile>
     <Compile Include="Refactor\World.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="Storage\ProductCollection.cs" />
+    <Compile Include="Storage\ProductAmountCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

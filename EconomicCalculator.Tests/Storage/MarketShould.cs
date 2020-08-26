@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using EconomicCalculator.Intermediaries;
-using NUnit;
+﻿using EconomicCalculator.Storage;
 using NUnit.Framework;
 
 
-namespace EconomicCalculator.Tests.Intermediaries
+namespace EconomicCalculator.Tests.Storage
 {
     [TestFixture]
     public class MarketShould

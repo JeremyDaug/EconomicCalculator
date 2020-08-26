@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage
 {
-    internal class ProductCollection : IProductAmountCollection
+    internal class ProductAmountCollection : IProductAmountCollection
     {
         private List<IProduct> _products;
         private Dictionary<Guid, double> _productDict;
@@ -16,12 +17,15 @@ namespace EconomicCalculator.Storage
             get => _products;
         }
 
-        public IReadOnlyDictionary<Guid, double> ProductDict { get => _productDict; set => _productDict = value; }
+        public IReadOnlyDictionary<Guid, double> ProductDict
+        {
+            get => _productDict;
+        }
 
-        public ProductCollection()
+        public ProductAmountCollection()
         {
             _products = new List<IProduct>();
-            ProductDict = new Dictionary<Guid, double>();
+            _productDict = new Dictionary<Guid, double>();
         }
 
         public void SetProductAmount(IProduct product, double value)
@@ -99,6 +103,66 @@ namespace EconomicCalculator.Storage
                 throw new ArgumentOutOfRangeException(string.Format("{0} cannot be less than 0.", value));
 
             _productDict[product.Id] -= value;
+        }
+
+        public IProductAmountCollection Multiply(double value)
+        {
+            var result = new ProductAmountCollection();
+
+            // Copy products over.
+            result._products = _products;
+
+            // Copy values over and multiply.
+            result._productDict = _productDict.ToDictionary(x => x.Key, x => x.Value * value);
+
+            return result;
+        }
+
+        public IProductAmountCollection GetProducts(IList<IProduct> products)
+        {
+            var result = new ProductAmountCollection();
+
+            result._products = new List<IProduct>(products);
+
+            foreach (var product in products)
+            {
+                if (ProductDict.ContainsKey(product.Id))
+                {
+                    result._productDict[product.Id] = ProductDict[product.Id];
+                }
+                else
+                {
+                    result._productDict[product.Id] = 0;
+                }
+            }
+
+            return result;
+        }
+
+        public IEnumerator<Tuple<IProduct, double>> GetEnumerator()
+        {
+            foreach (var product in Products)
+            {
+                yield return new Tuple<IProduct, double>(product, ProductDict[product.Id]);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public bool Contains(IProduct product)
+        {
+            return Products.Any(x => x.Id == product.Id);
+        }
+
+        public void AddProducts(IProductAmountCollection products)
+        {
+            foreach(var pair in products)
+            {
+                AddProducts(pair.Item1, pair.Item2);
+            }
         }
     }
 }

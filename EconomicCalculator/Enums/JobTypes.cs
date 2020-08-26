@@ -13,6 +13,6 @@ namespace EconomicCalculator.Enums
         Craft, // Relies on Resource Inputs and Labor only makes in fixed increments.
         Processing, // Works raw resources and labor into something else in arbitrary increments.
         Shipping, // Relies on capiatal to start, buys goods and moves them elsewhere in days.
-        Service // Raw Labor input, get's paid a wage, any extra 'items' not sold are lost immediately.
+        Service // Primarily Labor Driven, with some inputs possibly needed. 
     }
 }

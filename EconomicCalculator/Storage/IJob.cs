@@ -12,7 +12,7 @@ namespace EconomicCalculator.Storage
     /// <summary>
     /// An interface for anything that can be worked as a job.
     /// </summary>
-    public interface IJob
+    public interface IJob : IEquatable<IJob>, ISqlReader, IEqualityComparer<IJob>
     {
         /// <summary>
         /// The Id of the job.
@@ -25,34 +25,38 @@ namespace EconomicCalculator.Storage
         string Name { get; }
 
         /// <summary>
-        /// The Products required for the job.
+        /// The type of job that this is, which defines how
+        /// inputs, outputs, capital, and labor are used.
         /// </summary>
-        IList<IProduct> Inputs { get; }
+        JobTypes JobType { get; }
 
         /// <summary>
-        /// The Amount of each input required for the job.
+        /// The Daily Input Requirements of the Job.
         /// </summary>
-        IDictionary<string, double> InputRequirements { get; }
+        IProductAmountCollection Inputs { get; }
 
         /// <summary>
-        /// The Outputs of the job.
+        /// The Outputs produced if All inputs met.
         /// </summary>
-        IList<IProduct> Outputs { get; }
+        IProductAmountCollection Outputs { get; }
 
         /// <summary>
-        /// The Amount of each Output product from the job.
+        /// Any Capital Needed to start the job. 
+        /// Products are not consumed every day, instead having a chance of breaking.
         /// </summary>
-        IDictionary<string, double> OutputResults { get; }
+        IProductAmountCollection Capital { get; }
+
+        /// <summary>
+        /// The storage of what capital goods have been satisfied.
+        /// </summary>
+        IProductAmountCollection CapitalStorage { get; }
 
         /// <summary>
         /// How much work per unit of the job is needed, and what skill level it must be.
         /// </summary>
         IList<double> LaborRequirements { get; }
 
-        /// <summary>
-        /// The type of job that this is (defines how labor and outputs are used)
-        /// </summary>
-        JobTypes JobType { get; }
+        // Placeholder for skill requirements.
 
         /// <summary>
         /// The Total required labor of the job ignoring skill level.

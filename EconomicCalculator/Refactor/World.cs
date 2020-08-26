@@ -227,7 +227,7 @@ namespace EconomicCalculator.Runner
                     var crop = reader.GetString(reader.GetOrdinal("CropName"));
 
                     var market = markets.Single(x => x.Name == name);
-                    market.AvailableCrops.Add(crops.Single(x => x.Name == crop));
+                    //market.AvailableCrops.Add(crops.Single(x => x.Name == crop));
                 }
             }
 
@@ -242,7 +242,7 @@ namespace EconomicCalculator.Runner
                     var mine = reader.GetString(reader.GetOrdinal("MineName"));
 
                     var market = markets.Single(x => x.Name == name);
-                    market.AvailableMines.Add(mines.Single(x => x.Name == mine));
+                    //market.AvailableMines.Add(mines.Single(x => x.Name == mine));
                 }
             }
 
@@ -257,7 +257,7 @@ namespace EconomicCalculator.Runner
                     var process = reader.GetString(reader.GetOrdinal("ProcessName"));
 
                     var market = markets.Single(x => x.Name == name);
-                    market.AvailableProcesses.Add(processes.Single(x => x.Name == process));
+                    //market.AvailableProcesses.Add(processes.Single(x => x.Name == process));
                 }
             }
 
@@ -272,7 +272,7 @@ namespace EconomicCalculator.Runner
                     var currency = reader.GetString(reader.GetOrdinal("CurrencyName"));
 
                     var market = markets.Single(x => x.Name == name);
-                    market.AvailableCurrencies.Add(currencies.Single(x => x.Name == currency));
+                    //market.AvailableCurrencies.Add(currencies.Single(x => x.Name == currency));
                 }
             }
 
@@ -290,7 +290,7 @@ namespace EconomicCalculator.Runner
                     var pop = (Population)populations.Single(x => x.Name == name && x.VariantName == variant);
                     var market = markets.Single(x => x.Name == marketName);
 
-                    market.Pops.Add(pop);
+                    //market.Pops.Add(pop);
                     pop.Market = market;
                 }
             }
@@ -463,7 +463,7 @@ namespace EconomicCalculator.Runner
                             Outputs = new List<IProduct> { Output },
                             OutputResults = new Dictionary<string, double> { { OutputName, OutputAmount } }
                         };
-                        processes.Add(process);
+                        //processes.Add(process);
                     }
                 }
 
@@ -505,7 +505,7 @@ namespace EconomicCalculator.Runner
                             Products = new List<IProduct> { OutputProduct },
                             ProductAmounts = new Dictionary<string, double> { { OutputName, OutputAmount } }
                         };
-                        mines.Add(mine);
+                        //mines.Add(mine);
                     }
                 }
                 return mines;
@@ -583,7 +583,7 @@ namespace EconomicCalculator.Runner
                         crops.Add(crop);
                     }
                 }
-                return new List<ICrops>(crops);
+                return new List<ICrops>(null);
             }
         }
 
@@ -635,7 +635,7 @@ namespace EconomicCalculator.Runner
                 foreach (var market in markets)
                 {
                     // Run each market's internal activity and production cycle. (World Market is excluded from all of this activity.
-                    market.ProductionCycle();
+                    //market.ProductionCycle();
 
                     // Do all consumption inside each market that is possible.
                     // market.InternalConsumption();
