@@ -37,6 +37,9 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <param name="products">The Sought Products.</param>
         /// <returns>The Subset of items sought.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="products"/> is null.
+        /// </exception>
         /// <remarks>
         /// If an item is not in the collection it is added to the return collection with an amount of 9.
         /// </remarks>
@@ -45,21 +48,33 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// Retrieve a count for an item in the collection
         /// </summary>
-        /// <param name="toFind">The Product to Find.</param>
+        /// <param name="product">The Product to Find.</param>
         /// <returns>The amount of the item attached.</returns>
         /// <exception cref="ArgumentNullException">
-        /// If product is null.
-        /// </exception> 
-        double GetProductAmount(IProduct toFind);
+        /// If <paramref name="product"/> is null.
+        /// </exception>
+        /// <exception cref="KeyNotFoundException">
+        /// If product is not found in the dictionary.
+        /// </exception>
+        double GetProductAmount(IProduct product);
 
         /// <summary>
         /// Adds a product to the collection with a connected value of zero.
         /// </summary>
         /// <param name="product">The product to include.</param>
         /// <exception cref="ArgumentNullException">
-        /// If product is null.
+        /// If <paramref name="product"/> is null.
         /// </exception>
         void IncludeProduct(IProduct product);
+
+        /// <summary>
+        /// Adds a product to the collection with a connected value of zero.
+        /// </summary>
+        /// <param name="products">The products to include.</param>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="products"/> is null.
+        /// </exception>
+        void IncludeProducts(IList<IProduct> products);
 
         /// <summary>
         /// Add a product or number of products to the collection.
@@ -68,7 +83,7 @@ namespace EconomicCalculator.Storage
         /// <param name="product">The product to add or add to.</param>
         /// <param name="value">The amount to add.</param>
         /// <exception cref="ArgumentNullException">
-        /// If product is null.
+        /// If <paramref name="product"/> is null.
         /// </exception>
         void AddProducts(IProduct product, double value);
 
@@ -76,6 +91,9 @@ namespace EconomicCalculator.Storage
         /// Add products from another collection to this one.
         /// </summary>
         /// <param name="products">The products to add.</param>
+        /// <exception cref="ArgumentNullException">
+        /// If <paramref name="products"/> or any product in the list is null.
+        /// </exception>
         void AddProducts(IProductAmountCollection products);
 
         /// <summary>
@@ -87,22 +105,19 @@ namespace EconomicCalculator.Storage
         /// <param name="product">The product to remove from.</param>
         /// <param name="value">The amount to remove.</param>
         /// <exception cref="ArgumentNullException">
-        /// If product is null.
+        /// If <paramref name="product"/> is null.
         /// </exception>
-        /// <exception cref="KeyNotFoundException">
-        /// The product does not exist in the collection.
-        /// </exception>
-        void RemoveProducts(IProduct product, double value);
+        void SubtractProducts(IProduct product, double value);
 
         /// <summary>
         /// Deletes a product entirely from the collectino.
         /// </summary>
         /// <param name="product">The product to delete.</param>
         /// <exception cref="ArgumentNullException">
-        /// Product is null.
+        /// <paramref name="product"/> is null.
         /// </exception>
         /// <exception cref="KeyNotFoundException">
-        /// The product doesn't exist in the collection.
+        /// The <paramref name="product"/> doesn't exist in the collection.
         /// </exception>
         void DeleteProduct(IProduct product);
 
@@ -120,6 +135,9 @@ namespace EconomicCalculator.Storage
         /// <returns>
         /// True if it contains it in the collection, regardless of the value.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// if <paramref name="product"/> is null.
+        /// </exception>
         bool Contains(IProduct product);
     }
 }

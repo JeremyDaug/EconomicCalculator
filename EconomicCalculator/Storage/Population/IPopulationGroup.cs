@@ -26,6 +26,21 @@ namespace EconomicCalculator.Storage
         double Count { get; }
 
         /// <summary>
+        /// The name of the Population's Skill.
+        /// </summary>
+        string SkillName { get; }
+
+        /// <summary>
+        /// The Skill Level of the population.
+        /// </summary>
+        int SkillLevel { get; }
+
+        /// <summary>
+        /// The Labor the population can produce (overflow from their job).
+        /// </summary>
+        IProduct JobLabor { get; }
+
+        /// <summary>
         /// The Primary Job of the Population that defines them.
         /// </summary>
         IJob PrimaryJob { get; }
@@ -96,12 +111,11 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The Consumption action of the population group.
         /// </summary>
-        /// <returns>A persentage of satisfaction for each good.</returns>
+        /// <returns>A percentage of satisfaction for each good.</returns>
         IProductAmountCollection Consume();
 
         /// <summary>
-        /// Calculates the Change in the population based off of
-        /// Needs Met, Items Sold, and availablility of better jobs.
+        /// A Placeholder for later Population Change Function.
         /// </summary>
         void PopulationChange();
 

@@ -48,8 +48,6 @@ namespace EconomicCalculator.Storage
         {
             if (product is null)
                 throw new ArgumentNullException(nameof(product));
-            if (value < 0)
-                throw new ArgumentOutOfRangeException(string.Format("{0} must not be less than 0.", value));
 
             if (ProductDict.ContainsKey(product.Id))
             {
@@ -59,6 +57,22 @@ namespace EconomicCalculator.Storage
             {
                 _products.Add(product);
                 _productDict.Add(product.Id, value);
+            }
+        }
+
+        public void SubtractProducts(IProduct product, double value)
+        {
+            AddProducts(product, -value);
+        }
+
+        public void AddProducts(IProductAmountCollection products)
+        {
+            if (products is null)
+                throw new ArgumentNullException(nameof(products));
+
+            foreach (var pair in products)
+            {
+                AddProducts(pair.Item1, pair.Item2);
             }
         }
 
@@ -74,12 +88,12 @@ namespace EconomicCalculator.Storage
             _productDict.Remove(product.Id);
         }
 
-        public double GetProductAmount(IProduct toFind)
+        public double GetProductAmount(IProduct product)
         {
-            if (toFind is null)
-                throw new ArgumentNullException(nameof(toFind));
+            if (product is null)
+                throw new ArgumentNullException(nameof(product));
 
-            return ProductDict[toFind.Id];
+            return ProductDict[product.Id];
         }
 
         public void IncludeProduct(IProduct product)
@@ -87,22 +101,22 @@ namespace EconomicCalculator.Storage
             if (product is null)
                 throw new ArgumentNullException(nameof(product));
 
-            if (_products.Contains(product))
+            if (_products.Any(x => x.Id == product.Id))
                 return;
 
+            _products.Add(product);
             _productDict[product.Id] = 0;
         }
 
-        public void RemoveProducts(IProduct product, double value)
+        public void IncludeProducts(IList<IProduct> products)
         {
-            if (product is null)
-                throw new ArgumentNullException(nameof(product));
-            if (!_products.Contains(product))
-                throw new KeyNotFoundException(string.Format("{0} does not exist in the connection.", nameof(product)));
-            if (value < 0)
-                throw new ArgumentOutOfRangeException(string.Format("{0} cannot be less than 0.", value));
+            if (products is null)
+                throw new ArgumentNullException(nameof(products));
 
-            _productDict[product.Id] -= value;
+            foreach (var product in products)
+            {
+                IncludeProduct(product);
+            }
         }
 
         public IProductAmountCollection Multiply(double value)
@@ -120,6 +134,12 @@ namespace EconomicCalculator.Storage
 
         public IProductAmountCollection GetProducts(IList<IProduct> products)
         {
+            if (products is null)
+                throw new ArgumentNullException(nameof(products));
+
+            if (products.Any(x => x is null))
+                throw new ArgumentNullException("Product in list is null.");
+
             var result = new ProductAmountCollection();
 
             result._products = new List<IProduct>(products);
@@ -154,15 +174,10 @@ namespace EconomicCalculator.Storage
 
         public bool Contains(IProduct product)
         {
-            return Products.Any(x => x.Id == product.Id);
-        }
+            if (product is null)
+                throw new ArgumentNullException(nameof(product));
 
-        public void AddProducts(IProductAmountCollection products)
-        {
-            foreach(var pair in products)
-            {
-                AddProducts(pair.Item1, pair.Item2);
-            }
+            return Products.Any(x => x.Id == product.Id);
         }
     }
 }

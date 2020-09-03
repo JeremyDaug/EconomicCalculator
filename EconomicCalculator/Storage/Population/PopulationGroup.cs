@@ -29,16 +29,69 @@ namespace EconomicCalculator.Storage
 
         public IProductAmountCollection Storage { get; set; }
 
+        public string SkillName { get; set; }
+
+        public int SkillLevel { get; set; }
+
+        public IProduct JobLabor { get; set; }
+
         public PopulationGroup()
         {
             Id = Guid.NewGuid();
+            SecondaryJobs = new List<IJob>();
         }
 
         #region Actions
 
         public IProductAmountCollection ProductionPhase()
         {
-            throw new NotImplementedException();
+            // Assuming perfection, get full needs expected.
+            // inputs times the population divided by the labor needed for the job.
+            var requirements = PrimaryJob.Inputs.Multiply(Count / PrimaryJob.LaborRequirements);
+            // Get Capital Requirements (only one needed per day of labor)
+            requirements.AddProducts(PrimaryJob.Capital.Multiply(Count));
+
+            // With expected inputs, see what we can actually satisfy.
+            double sat = 1;
+            foreach (var pair in requirements)
+            {
+                var product = pair.Item1;
+                var amount = pair.Item2;
+
+                // If storage doesn't have the product, don't bother, you can't meet any requirements.
+                if (!Storage.Contains(product))
+                    return new ProductAmountCollection();
+
+                sat = Math.Min(sat, Storage.GetProductAmount(product) / amount);
+            }
+
+            // If something cannot be satisfied, we GTFO.
+            if (sat == 0)
+                return new ProductAmountCollection();
+
+            // With Satisfaction, get and consume the inputs.
+            var inputs = PrimaryJob.Inputs.Multiply(Count / PrimaryJob.LaborRequirements * sat);
+            ConsumeGoods(inputs);
+            var result = new ProductAmountCollection();
+            result.AddProducts(inputs.Multiply(-1));
+
+            // Get the resulting outputs
+            var outputs = PrimaryJob.Outputs.Multiply(Count / PrimaryJob.LaborRequirements * sat);
+            Storage.AddProducts(outputs);
+            result.AddProducts(outputs);
+
+            // Calculate remaining labor and add that to results
+            if (sat < 1)
+            {
+                var remainder = sat * Count;
+
+                result.AddProducts(JobLabor, remainder);
+            }
+
+            // Don't run breakdown of capital here, run it alongside all other breakdown chances.
+
+            // return results
+            return result;
         }
 
         public IProductAmountCollection BuyPhase(IMarket market)
@@ -69,9 +122,62 @@ namespace EconomicCalculator.Storage
             return cart;
         }
 
+        /// <summary>
+        /// The Consumption action of the population group.
+        /// </summary>
+        /// <returns>A percentage of satisfaction for each good.</returns>
         public IProductAmountCollection Consume()
         {
-            throw new NotImplementedException();
+            // life needs first
+            var result = ConsumeGoods(LifeNeeds.Multiply(Count));
+
+            // then daily needs
+            result.AddProducts(ConsumeGoods(DailyNeeds.Multiply(Count)));
+
+            // then luxuries
+            result.AddProducts(ConsumeGoods(LuxuryNeeds.Multiply(Count)));
+
+            // then return satisfaction.
+            return result;
+        }
+
+        /// <summary>
+        /// Consumes the given set of goods.
+        /// </summary>
+        /// <param name="goods">The goods to attempt to consume.</param>
+        /// <returns>The satisfaction of each product.</returns>
+        private IProductAmountCollection ConsumeGoods(IProductAmountCollection goods)
+        {
+            var result = new ProductAmountCollection();
+            // for every good to consume.
+            foreach (var pair in goods)
+            {
+                // Get the item and amount of the person.
+                var product = pair.Item1;
+                var amount = pair.Item2;
+
+                // Assume All items being consumed are in storage already,
+                // if they aren't we have a consistency problem.
+                // get the satisfaction, capping it at 1.
+                var sat = Math.Min(1, Storage.GetProductAmount(product) / amount);
+
+                // If satisfaction can't be met, subtract what you can.
+                if (sat < 1)
+                {
+                    Storage.SubtractProducts(product, 
+                        Storage.GetProductAmount(product));
+                }
+                else // If greater than 1, then substract everything needed.
+                {
+                    Storage.SubtractProducts(product, amount);
+                }
+
+                // add the satisfaction to the collection.
+                result.AddProducts(product, sat);
+            }
+
+            // Return satisfaction results.
+            return result;
         }
 
         public void PopulationChange()

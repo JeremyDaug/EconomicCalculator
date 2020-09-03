@@ -52,9 +52,19 @@ namespace EconomicCalculator.Storage
         IProductAmountCollection CapitalStorage { get; }
 
         /// <summary>
-        /// How much work per unit of the job is needed, and what skill level it must be.
+        /// The name of the skill for the job.
         /// </summary>
-        IList<double> LaborRequirements { get; }
+        string SkillName { get; }
+
+        /// <summary>
+        /// The Skill required to work the job.
+        /// </summary>
+        int SkillLevel { get; }
+
+        /// <summary>
+        /// How much work per unit of the job is needed.
+        /// </summary>
+        double LaborRequirements { get; }
 
         // Placeholder for skill requirements.
 
