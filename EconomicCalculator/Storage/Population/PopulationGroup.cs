@@ -51,6 +51,9 @@ namespace EconomicCalculator.Storage
             // Get Capital Requirements (only one needed per day of labor)
             requirements.AddProducts(PrimaryJob.Capital.Multiply(Count));
 
+            if (requirements.ProductDict == PrimaryJob.Inputs.ProductDict)
+                return null;
+
             // With expected inputs, see what we can actually satisfy.
             double sat = 1;
             foreach (var pair in requirements)
@@ -72,6 +75,7 @@ namespace EconomicCalculator.Storage
             // With Satisfaction, get and consume the inputs.
             var inputs = PrimaryJob.Inputs.Multiply(Count / PrimaryJob.LaborRequirements * sat);
             ConsumeGoods(inputs);
+            // Add what was consumed to the result.
             var result = new ProductAmountCollection();
             result.AddProducts(inputs.Multiply(-1));
 
@@ -86,6 +90,7 @@ namespace EconomicCalculator.Storage
                 var remainder = sat * Count;
 
                 result.AddProducts(JobLabor, remainder);
+                Storage.AddProducts(JobLabor, remainder);
             }
 
             // Don't run breakdown of capital here, run it alongside all other breakdown chances.
@@ -145,7 +150,7 @@ namespace EconomicCalculator.Storage
         /// Consumes the given set of goods.
         /// </summary>
         /// <param name="goods">The goods to attempt to consume.</param>
-        /// <returns>The satisfaction of each product.</returns>
+        /// <returns>The satisfaction of each product for happiness measurements</returns>
         private IProductAmountCollection ConsumeGoods(IProductAmountCollection goods)
         {
             var result = new ProductAmountCollection();

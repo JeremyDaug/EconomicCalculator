@@ -429,6 +429,10 @@ namespace EconomicCalculator.Tests.Storage
             // ensure the original is unharmed.
             Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1));
             Assert.That(sut.GetProductAmount(ProductMock2.Object), Is.EqualTo(TestValue2));
+
+            // ensure they are deep copies, no shallow copies.
+            Assert.That(result.Products, Is.Not.SameAs(sut.Products));
+            Assert.That(result.ProductDict, Is.Not.SameAs(sut.ProductDict));
         }
 
         #endregion Multiply

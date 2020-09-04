@@ -124,7 +124,7 @@ namespace EconomicCalculator.Storage
             var result = new ProductAmountCollection();
 
             // Copy products over.
-            result._products = _products;
+            result._products = _products.ToList();
 
             // Copy values over and multiply.
             result._productDict = _productDict.ToDictionary(x => x.Key, x => x.Value * value);

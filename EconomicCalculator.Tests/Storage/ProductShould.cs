@@ -41,12 +41,13 @@ namespace EconomicCalculator.Tests.Intermediaries
         }
 
         [Test]
-        [TestCase(100, 1 / 100)]
-        [TestCase(20 , 1 / 20)]
-        public void ReturnInverseOfMTTFForDailyFailureChance(int MTTF, double failChance)
+        [TestCase(100)]
+        [TestCase(200)]
+        public void ReturnInverseOfMTTFForDailyFailureChance(int MTTF)
         {
             sut.MTTF = MTTF;
-            Assert.AreEqual(sut.DailyFailureChance, failChance);
+            double failureChance = 1.0 / MTTF;
+            Assert.AreEqual(sut.DailyFailureChance, failureChance);
         }
 
         [Test]

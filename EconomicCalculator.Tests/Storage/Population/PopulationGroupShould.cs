@@ -14,8 +14,9 @@ namespace EconomicCalculator.Tests.Storage
 
         private readonly Guid TestId = Guid.NewGuid();
         private const string TestName = "TestName";
-        private const double PopCount = 1000;
+        private const double PopCount = 1;
         private Mock<IProduct> LaborMock;
+        private readonly Guid LaborId = Guid.NewGuid();
         private const int Priority1 = 1;
         private const int Priority2 = 2;
         private const string SkillName = "TestName";
@@ -99,8 +100,11 @@ namespace EconomicCalculator.Tests.Storage
                 .Returns(JobOutputs);
             JobMock.Setup(x => x.Capital)
                 .Returns(JobCapitals);
+            JobMock.Setup(x => x.LaborRequirements)
+                .Returns(1);
 
-            LaborMock = new Mock<IProduct>();     
+            LaborMock = new Mock<IProduct>();
+            LaborMock.Setup(x => x.Id).Returns(LaborId);
 
             StorageMock = new ProductAmountCollection();
 
@@ -122,6 +126,12 @@ namespace EconomicCalculator.Tests.Storage
             };
         }
 
+        // A helper function for avsserting products in the collection are correct.
+        private void AssertProductAmountIsEqual(IProductAmountCollection collection, Mock<IProduct> product, double value)
+        {
+            Assert.That(collection.GetProductAmount(product.Object), Is.EqualTo(value));
+        }
+
         #region ProductionPhase
 
         [Test]
@@ -140,6 +150,58 @@ namespace EconomicCalculator.Tests.Storage
             var result = sut.ProductionPhase();
 
             Assert.That(result.Products.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ReturnsFullySatisfiedCollection()
+        {
+            // Add all inputs and Capital to Storage
+            sut.Storage.AddProducts(JobInput.Object, 2);
+            sut.Storage.AddProducts(JobCapital.Object, 2);
+
+            // Run production phase
+            var result = sut.ProductionPhase();
+
+            // Check that the result is correct
+            Assert.That(result.Products.Count, Is.EqualTo(2));
+            Assert.That(result.ProductDict.Count, Is.EqualTo(2));
+            AssertProductAmountIsEqual(result, JobInput, -1);
+            AssertProductAmountIsEqual(result, JobOutput, 1);
+
+            // ensure that capital was not eaten.
+            AssertProductAmountIsEqual(sut.Storage, JobCapital, 2);
+
+            // check that storage has changed appropriately.
+            AssertProductAmountIsEqual(sut.Storage, JobInput, 1);
+            AssertProductAmountIsEqual(sut.Storage, JobOutput, 1);
+        }
+
+        [Test]
+        public void ReturnPartiallySatisfiedCollection()
+        {
+            sut.Count = 100;
+
+            // Add all inputs and Capital to Storage
+            sut.Storage.AddProducts(JobInput.Object, 50);
+            sut.Storage.AddProducts(JobCapital.Object, 50);
+
+            // Run production phase
+            var result = sut.ProductionPhase();
+
+            // Check that the result is correct
+            Assert.That(result.Products.Count, Is.EqualTo(3));
+            Assert.That(result.ProductDict.Count, Is.EqualTo(3));
+            AssertProductAmountIsEqual(result, JobInput, -50);
+            AssertProductAmountIsEqual(result, JobOutput, 50);
+            AssertProductAmountIsEqual(result, LaborMock, 50);
+
+            // ensure that capital was not eaten.
+            AssertProductAmountIsEqual(sut.Storage, JobCapital, 50);
+
+            // check that storage has changed appropriately.
+            AssertProductAmountIsEqual(sut.Storage, JobInput, 0);
+            AssertProductAmountIsEqual(sut.Storage, JobOutput, 50);
+            AssertProductAmountIsEqual(sut.Storage, LaborMock, 50);
         }
 
         #endregion ProductionPhase
