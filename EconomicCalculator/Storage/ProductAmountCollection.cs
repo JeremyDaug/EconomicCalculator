@@ -179,5 +179,19 @@ namespace EconomicCalculator.Storage
 
             return Products.Any(x => x.Id == product.Id);
         }
+
+        public IProductAmountCollection Copy()
+        {
+            return new ProductAmountCollection
+            {
+                _products = this._products.ToList(),
+                _productDict = this._productDict.ToDictionary(x => x.Key, x => x.Value)
+            };
+        }
+
+        public IProductAmountCollection MultiplyBy(IProductAmountCollection lifeSatisfaction)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

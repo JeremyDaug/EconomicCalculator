@@ -536,5 +536,35 @@ namespace EconomicCalculator.Tests.Storage
         }
 
         #endregion Contains
+
+        #region Copy
+
+        [Test]
+        public void ReturnDeepCopyFromCopy()
+        {
+            // add stuff to copy
+            sut.AddProducts(ProductMock1.Object, TestValue1);
+            sut.AddProducts(ProductMock2.Object, TestValue2);
+
+            // Do copy
+            var copy = sut.Copy();
+
+            // check they aren't the same instance at any point.
+            Assert.That(sut, Is.Not.SameAs(copy));
+            Assert.That(sut.Products, Is.Not.SameAs(copy.Products));
+            Assert.That(sut.ProductDict, Is.Not.SameAs(copy.ProductDict));
+
+            // check all of the data is the same
+            Assert.That(sut.Products.Count, Is.EqualTo(copy.Products.Count));
+            Assert.That(sut.ProductDict.Count, Is.EqualTo(copy.ProductDict.Count));
+            Assert.That(copy.Products.Any(x => x.Id == ProductMock1.Object.Id), Is.True);
+            Assert.That(copy.Products.Any(x => x.Id == ProductMock2.Object.Id), Is.True);
+            Assert.That(copy.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
+            Assert.That(copy.ProductDict.ContainsKey(ProductMock2.Object.Id), Is.True);
+            Assert.That(copy.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1));
+            Assert.That(copy.GetProductAmount(ProductMock2.Object), Is.EqualTo(TestValue2));
+        }
+
+        #endregion  Copy
     }
 }

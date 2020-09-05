@@ -74,6 +74,66 @@ namespace EconomicCalculator.Storage
 
         #endregion Needs
 
+        #region PastSatisfaction
+        // These values represent the satisfaction of the pop ffrom the last run ConsumptionPhase.
+        // It also includes helper functions to find how much shortfall there was.
+
+        /// <summary>
+        /// The satisfaction of the population's life needs.
+        /// </summary>
+        IProductAmountCollection LifeSatisfaction { get; }
+
+        /// <summary>
+        /// The satisfaction of the population's daily needs.
+        /// </summary>
+        IProductAmountCollection DailySatisfaction { get; }
+
+        /// <summary>
+        /// The satisfaction of the population's luxury needs.
+        /// </summary>
+        IProductAmountCollection LuxurySatisfaction { get; }
+
+        /// <summary>
+        /// The life need shortfall (if any).
+        /// </summary>
+        IProductAmountCollection LifeShortfall { get; }
+
+        /// <summary>
+        /// The Daily need shortfall (if any).
+        /// </summary>
+        IProductAmountCollection DailyShortfall { get; }
+
+        /// <summary>
+        /// The Daily need shortfall (if any).
+        /// </summary>
+        IProductAmountCollection LuxuryShortfall { get; }
+
+        #region JobSatisfaction
+
+        /// <summary>
+        /// The satisfaction of all the job inputs.
+        /// </summary>
+        IProductAmountCollection JobInputSatisfaction { get; }
+
+        /// <summary>
+        /// The satisfaction of all the job capital requirements.
+        /// </summary>
+        IProductAmountCollection JobCapitalSatisfaction { get; }
+
+        /// <summary>
+        /// The Job Input shortfall (if any).
+        /// </summary>
+        IProductAmountCollection JobInputShortfall { get; }
+
+        /// <summary>
+        /// The Job Input shortfall (if any).
+        /// </summary>
+        IProductAmountCollection JobCapitalShortfall { get; }
+
+        #endregion JobSatisfaction
+
+        #endregion PastSatisfaction
+
         #region MarketExpansions
 
         /// <summary>
@@ -84,14 +144,23 @@ namespace EconomicCalculator.Storage
 
         /// <summary>
         /// Products currently stored by the Population.
+        /// Should never have a negative storage value.
         /// </summary>
         IProductAmountCollection Storage { get; }
 
         #endregion MarketExpansions
 
-        // Placeholder for storage space.
-
         // Placeholder for additional Information, demographic breakdowns, and the like.
+
+        #region Helpers
+
+        /// <summary>
+        /// Initializes the storage to ensure it includes all products from 
+        /// Needs, and job. Run after any change to needs or jobs.
+        /// </summary>
+        void InitializeStorage();
+
+        #endregion Helpers
 
         #region Actions
 
@@ -102,17 +171,19 @@ namespace EconomicCalculator.Storage
         IProductAmountCollection ProductionPhase();
 
         /// <summary>
-        /// Population Buys from the market to meet it's own demands.
-        /// </summary>
-        /// <param name="market">The market the pop is buying from.</param>
-        /// <returns>The change in goods bought/traded.</returns>
-        IProductAmountCollection BuyPhase(IMarket market);
-
-        /// <summary>
         /// The Consumption action of the population group.
         /// </summary>
         /// <returns>A percentage of satisfaction for each good.</returns>
-        IProductAmountCollection Consume();
+        IProductAmountCollection ConsumptionPhase();
+
+        /// <summary>
+        /// The Loss phase of the population, calculates and removes items due to
+        /// failure and breakdown.
+        /// </summary>
+        /// <returns>The goods lost in the phase.</returns>
+        IProductAmountCollection LossPhase();
+
+        // TODO Taxes Phase.
 
         /// <summary>
         /// A Placeholder for later Population Change Function.

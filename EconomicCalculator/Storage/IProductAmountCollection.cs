@@ -75,6 +75,7 @@ namespace EconomicCalculator.Storage
         /// If <paramref name="products"/> is null.
         /// </exception>
         void IncludeProducts(IList<IProduct> products);
+        IProductAmountCollection MultiplyBy(IProductAmountCollection lifeSatisfaction);
 
         /// <summary>
         /// Add a product or number of products to the collection.
@@ -95,6 +96,12 @@ namespace EconomicCalculator.Storage
         /// If <paramref name="products"/> or any product in the list is null.
         /// </exception>
         void AddProducts(IProductAmountCollection products);
+
+        /// <summary>
+        /// Creates a copy of the product amount collection.
+        /// </summary>
+        /// <returns>A copy of the Collection.</returns>
+        IProductAmountCollection Copy();
 
         /// <summary>
         /// Removes a number of products from the collection.

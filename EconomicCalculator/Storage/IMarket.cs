@@ -115,6 +115,16 @@ namespace EconomicCalculator.Storage
         /// </exception>
         double GetPrice(IProduct product, double amount);
 
+        /// <summary>
+        /// Buys good from the market.
+        /// </summary>
+        /// <param name="product">The product to buy.</param>
+        /// <param name="amount">How many units to buy.</param>
+        /// <param name="sellable">The available products to trade for the product.</param>
+        /// <returns>The change in <paramref name="sellable"/> items, plus the amount of good bought.</returns>
+        /// <remarks>Buying goods prioritizes using currency to buy over barter of goods.</remarks>
+        IProductAmountCollection BuyGood(IProduct product, double amount, IProductAmountCollection sellable);
+
         #endregion TheMarket
 
         #region AvailableOptions

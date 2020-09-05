@@ -206,13 +206,7 @@ namespace EconomicCalculator.Tests.Storage
 
         #endregion ProductionPhase
 
-        #region BuyPhase
-        #endregion BuyPhase
-
-        #region Consume
-        #endregion Consume
-
-        #region BuyGoods
-        #endregion BuyGoods
+        #region ConsumptionPhase
+        #endregion ConsumptionPhase
     }
 }

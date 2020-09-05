@@ -47,11 +47,6 @@ namespace EconomicCalculator.Storage
         IProductAmountCollection Capital { get; }
 
         /// <summary>
-        /// The storage of what capital goods have been satisfied.
-        /// </summary>
-        IProductAmountCollection CapitalStorage { get; }
-
-        /// <summary>
         /// The name of the skill for the job.
         /// </summary>
         string SkillName { get; }
@@ -66,11 +61,24 @@ namespace EconomicCalculator.Storage
         /// </summary>
         double LaborRequirements { get; }
 
-        // Placeholder for skill requirements.
+        /// <summary>
+        /// The Daily input needs of the job. <see cref="Inputs"/> / <see cref="LaborRequirements"/>.
+        /// </summary>
+        /// <returns>The DailyInput Needs of the job.</returns>
+        IProductAmountCollection DailyInputNeeds();
 
         /// <summary>
-        /// The Total required labor of the job ignoring skill level.
+        /// The Daily Input needs of the job for a number of peopel.
         /// </summary>
-        double TotalLaborRequired();
+        /// <param name="amount">The number of pops.</param>
+        /// <returns>THe Daily Input needs for a population.</returns>
+        IProductAmountCollection DailyInputNeedsForPops(double amount);
+
+        /// <summary>
+        /// The amount of capital needed for a population.
+        /// </summary>
+        /// <param name="amount">The size of a population.</param>
+        /// <returns>The total capital needs of said pop.</returns>
+        IProductAmountCollection CapitalNeedsForPops(double amount);
     }
 }

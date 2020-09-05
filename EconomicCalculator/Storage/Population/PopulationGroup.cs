@@ -27,6 +27,10 @@ namespace EconomicCalculator.Storage
 
         public IList<IJob> SecondaryJobs { get; set; }
 
+        /// <summary>
+        /// Products currently stored by the Population.
+        /// Should never have a negative storage value.
+        /// </summary>
         public IProductAmountCollection Storage { get; set; }
 
         public string SkillName { get; set; }
@@ -41,30 +45,118 @@ namespace EconomicCalculator.Storage
             SecondaryJobs = new List<IJob>();
         }
 
+        #region Helper
+
+        /// <summary>
+        /// Initializes the storage to ensure it includes all products from 
+        /// Needs, and job. Run after any change to needs or jobs.
+        /// </summary>
+        /// <remarks>
+        /// If this is used, then we can assume that all actions related to
+        /// needs or job products are included in storage if nothing else.
+        /// </remarks>
+        public void InitializeStorage()
+        {
+            Storage.IncludeProducts(LifeNeeds.Products.ToList());
+            Storage.IncludeProducts(DailyNeeds.Products.ToList());
+            Storage.IncludeProducts(LuxuryNeeds.Products.ToList());
+            Storage.IncludeProducts(PrimaryJob.Inputs.Products.ToList());
+            Storage.IncludeProducts(PrimaryJob.Capital.Products.ToList());
+            Storage.IncludeProducts(PrimaryJob.Outputs.Products.ToList());
+            Storage.IncludeProduct(JobLabor);
+            // Placeholder for secondary jobs.
+        }
+
+        #endregion Helper
+
+        #region PastSatisfaction
+        // These values represent the satisfaction of the pop ffrom the last run ConsumptionPhase.
+        // It also includes helper functions to find how much shortfall there was.
+
+        /// <summary>
+        /// The satisfaction of the population's life needs.
+        /// </summary>
+        public IProductAmountCollection LifeSatisfaction { get; }
+
+        /// <summary>
+        /// The satisfaction of the population's daily needs.
+        /// </summary>
+        public IProductAmountCollection DailySatisfaction { get; }
+
+        /// <summary>
+        /// The satisfaction of the population's luxury needs.
+        /// </summary>
+        public IProductAmountCollection LuxurySatisfaction { get; }
+
+        /// <summary>
+        /// The life need shortfall (if any).
+        /// </summary>
+        public IProductAmountCollection LifeShortfall { get
+            {
+                return LifeNeeds.MultiplyBy(LifeSatisfaction);
+            }
+        }
+
+        /// <summary>
+        /// The Daily need shortfall (if any).
+        /// </summary>
+        public IProductAmountCollection DailyShortfall { get; }
+
+        /// <summary>
+        /// The Daily need shortfall (if any).
+        /// </summary>
+        public IProductAmountCollection LuxuryShortfall { get; }
+
+        #region JobSatisfaction
+
+        /// <summary>
+        /// The satisfaction of all the job inputs.
+        /// </summary>
+        public IProductAmountCollection JobInputSatisfaction { get; }
+
+        /// <summary>
+        /// The satisfaction of all the job capital requirements.
+        /// </summary>
+        public IProductAmountCollection JobCapitalSatisfaction { get; }
+
+        /// <summary>
+        /// The Job Input shortfall (if any).
+        /// </summary>
+        public IProductAmountCollection JobInputShortfall { get; }
+
+        /// <summary>
+        /// The Job Input shortfall (if any).
+        /// </summary>
+        public IProductAmountCollection JobCapitalShortfall { get; }
+
+        #endregion JobSatisfaction
+
+        #endregion PastSatisfaction
+
         #region Actions
 
+        /// <summary>
+        /// The Production Phase of the population.
+        /// </summary>
+        /// <returns>The change in products because of the phase.</returns>
         public IProductAmountCollection ProductionPhase()
         {
             // Assuming perfection, get full needs expected.
             // inputs times the population divided by the labor needed for the job.
-            var requirements = PrimaryJob.Inputs.Multiply(Count / PrimaryJob.LaborRequirements);
+            var requirements = PrimaryJob.DailyInputNeedsForPops(Count);
             // Get Capital Requirements (only one needed per day of labor)
-            requirements.AddProducts(PrimaryJob.Capital.Multiply(Count));
-
-            if (requirements.ProductDict == PrimaryJob.Inputs.ProductDict)
-                return null;
+            requirements.AddProducts(PrimaryJob.CapitalNeedsForPops(Count));
 
             // With expected inputs, see what we can actually satisfy.
             double sat = 1;
             foreach (var pair in requirements)
             {
+                // get product and amount
                 var product = pair.Item1;
                 var amount = pair.Item2;
 
-                // If storage doesn't have the product, don't bother, you can't meet any requirements.
-                if (!Storage.Contains(product))
-                    return new ProductAmountCollection();
-
+                // check if current satisfaction is less than the stored amount of the product
+                // the product should be there BC of InitializeStorage
                 sat = Math.Min(sat, Storage.GetProductAmount(product) / amount);
             }
 
@@ -99,39 +191,11 @@ namespace EconomicCalculator.Storage
             return result;
         }
 
-        public IProductAmountCollection BuyPhase(IMarket market)
-        {
-            if (market is null)
-                throw new ArgumentNullException(nameof(market));
-
-            var cart = new ProductAmountCollection();
-
-            // Buy Life Needs
-            BuyGoods(cart, market, LifeNeeds.Multiply(Count));
-
-            // Buy Job Requirements
-            // Check Capital Inputs are still avaliable.
-            var CapitalRequirements = PrimaryJob.Capital.Multiply(Count);
-            var JobInputs = PrimaryJob.Inputs.Multiply(Count);
-            if (Storage.Any(x => x.Item2 < CapitalRequirements.GetProductAmount(x.Item1)))
-                BuyGoods(cart, market, CapitalRequirements);
-            // Get Daily inputs
-            BuyGoods(cart, market, JobInputs);
-
-            // Buy Daily Needs
-            BuyGoods(cart, market, DailyNeeds.Multiply(Count));
-
-            // Buy Luxuries
-            BuyGoods(cart, market, LuxuryNeeds.Multiply(Count));
-
-            return cart;
-        }
-
         /// <summary>
         /// The Consumption action of the population group.
         /// </summary>
         /// <returns>A percentage of satisfaction for each good.</returns>
-        public IProductAmountCollection Consume()
+        public IProductAmountCollection ConsumptionPhase()
         {
             // life needs first
             var result = ConsumeGoods(LifeNeeds.Multiply(Count));
@@ -169,7 +233,7 @@ namespace EconomicCalculator.Storage
                 // If satisfaction can't be met, subtract what you can.
                 if (sat < 1)
                 {
-                    Storage.SubtractProducts(product, 
+                    Storage.SubtractProducts(product,
                         Storage.GetProductAmount(product));
                 }
                 else // If greater than 1, then substract everything needed.
@@ -185,45 +249,17 @@ namespace EconomicCalculator.Storage
             return result;
         }
 
-        public void PopulationChange()
+        public IProductAmountCollection LossPhase()
         {
             throw new NotImplementedException();
         }
 
-        #endregion Actions
-
-        public void BuyGoods(IProductAmountCollection cart, IMarket market, 
-            IProductAmountCollection shoppingList)
+        public void PopulationChange()
         {
-            // check for nulls
-            if (cart is null)
-                throw new ArgumentNullException(nameof(cart));
-            if (market is null)
-                throw new ArgumentNullException(nameof(market));
-            if (shoppingList is null)
-                throw new ArgumentNullException(nameof(shoppingList));
-
-            // go through the shopping list and try to buy everything.
-            foreach (var item in shoppingList)
-            {
-                var product = item.Item1;
-                var amount = item.Item2;
-
-                // remove already owned goods from shopping list and add extra demand.
-                if (Storage.Contains(product))
-                    amount = amount - Storage.GetProductAmount(product);
-
-                // If the amount is already in storage, skip it and continue to the next item.
-                if (amount <= 0)
-                    continue;
-
-                // Initiate Transaction between buyer and seller.
-                var transaction = market.StartTransaction(this, product, amount);
-
-                // Finalize buy from the market and add it to the cart.
-                Storage.AddProducts(transaction);
-            }
+            throw new NotImplementedException();
         }
+        
+        #endregion Actions
 
         public bool Equals(IPopulationGroup other)
         {
