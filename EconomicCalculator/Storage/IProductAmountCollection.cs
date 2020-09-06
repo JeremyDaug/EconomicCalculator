@@ -75,7 +75,6 @@ namespace EconomicCalculator.Storage
         /// If <paramref name="products"/> is null.
         /// </exception>
         void IncludeProducts(IList<IProduct> products);
-        IProductAmountCollection MultiplyBy(IProductAmountCollection lifeSatisfaction);
 
         /// <summary>
         /// Add a product or number of products to the collection.
@@ -134,6 +133,13 @@ namespace EconomicCalculator.Storage
         /// <param name="value">The scalar to multiply.</param>
         /// <returns>A new collection of multiplied values.</returns>
         IProductAmountCollection Multiply(double value);
+
+        /// <summary>
+        /// Multiplies the current collection by another on a product by product basis.
+        /// </summary>
+        /// <param name="a">The collection to add.</param>
+        /// <returns>The resulting multiplication.</returns>
+        IProductAmountCollection MultiplyBy(IProductAmountCollection other);
 
         /// <summary>
         /// Checks that teh collection contains a product.

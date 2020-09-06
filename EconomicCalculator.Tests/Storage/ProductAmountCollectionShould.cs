@@ -566,5 +566,58 @@ namespace EconomicCalculator.Tests.Storage
         }
 
         #endregion  Copy
+
+        #region MultiplyBy
+
+        [Test]
+        public void ThrowArguementNullFromMultipyByWhenOtherIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => sut.MultiplyBy(null));
+        }
+
+        [Test]
+        public void MultiplyTwoCollectionsTogetherCorrectly()
+        {
+            // Add products to sut.
+            sut.AddProducts(ProductMock1.Object, TestValue1);
+            sut.AddProducts(ProductMock2.Object, TestValue2);
+
+            // add products to other.
+            var other = new ProductAmountCollection();
+            other.AddProducts(ProductMock1.Object, TestValue1);
+            other.AddProducts(ProductMock2.Object, TestValue2);
+
+            // multiply
+            var result = sut.MultiplyBy(other);
+
+            // verify correct calculation
+            Assert.That(result.Products.Count, Is.EqualTo(2));
+            Assert.That(result.ProductDict.Count, Is.EqualTo(2));
+            Assert.That(result.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1 * TestValue1));
+            Assert.That(result.GetProductAmount(ProductMock2.Object), Is.EqualTo(TestValue2 * TestValue2));
+        }
+
+        [Test]
+        public void MultiplyTwoCollectionsTogetherCorrectlyWhenOriginExcludesAProduct()
+        {
+            // Add products to sut.
+            sut.AddProducts(ProductMock1.Object, TestValue1);
+
+            // add products to other.
+            var other = new ProductAmountCollection();
+            other.AddProducts(ProductMock1.Object, TestValue1);
+            other.AddProducts(ProductMock2.Object, TestValue2);
+
+            // multiply
+            var result = sut.MultiplyBy(other);
+
+            // verify correct calculation
+            Assert.That(result.Products.Count, Is.EqualTo(2));
+            Assert.That(result.ProductDict.Count, Is.EqualTo(2));
+            Assert.That(result.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1 * TestValue1));
+            Assert.That(result.GetProductAmount(ProductMock2.Object), Is.EqualTo(0));
+        }
+
+        #endregion MultiplyBy
     }
 }

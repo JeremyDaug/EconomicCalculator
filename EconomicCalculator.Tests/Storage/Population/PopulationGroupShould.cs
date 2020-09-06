@@ -207,6 +207,13 @@ namespace EconomicCalculator.Tests.Storage
         #endregion ProductionPhase
 
         #region ConsumptionPhase
+
+        [Test]
+        public void ConsumeGoodsFromStorage()
+        {
+
+        }
+
         #endregion ConsumptionPhase
     }
 }

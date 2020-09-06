@@ -109,5 +109,10 @@ namespace EconomicCalculator.Storage
         {
             throw new NotImplementedException();
         }
+
+        public IProductAmountCollection BuyGood(IProduct product, double amount, IProductAmountCollection sellable)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

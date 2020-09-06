@@ -22,6 +22,10 @@ namespace EconomicCalculator.Storage
             get => _productDict;
         }
 
+        public int Count => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
         public ProductAmountCollection()
         {
             _products = new List<IProduct>();
@@ -177,7 +181,7 @@ namespace EconomicCalculator.Storage
             if (product is null)
                 throw new ArgumentNullException(nameof(product));
 
-            return Products.Any(x => x.Id == product.Id);
+            return ProductDict.ContainsKey(product.Id);
         }
 
         public IProductAmountCollection Copy()
@@ -189,9 +193,42 @@ namespace EconomicCalculator.Storage
             };
         }
 
-        public IProductAmountCollection MultiplyBy(IProductAmountCollection lifeSatisfaction)
+        public IProductAmountCollection MultiplyBy(IProductAmountCollection other)
         {
-            throw new NotImplementedException();
+            if (other is null)
+                throw new ArgumentNullException(nameof(other));
+
+            // create the result preemptively.
+            var result = new ProductAmountCollection();
+
+            // combine through the current and multiply by other if it's there.
+            foreach (var product in Products)
+            {
+                // get first value
+                var value = ProductDict[product.Id];
+
+                // check if second is there.
+                if (other.Contains(product))
+                {
+                    // if it is, multiply
+                    value *= other.ProductDict[product.Id];
+                }
+                else // if it isn't there then treat it as 0.
+                    value = 0;
+                // finalize and add value to collection.
+                result.AddProducts(product, value);
+            }
+
+            // Go through the other list and ensure we got everything.
+            foreach (var product in other.Products)
+            {
+                // if it's not in there already, then just include it with a value of 0.
+                if (!result.Contains(product))
+                    result.IncludeProduct(product);
+            }
+
+            // return the final result.
+            return result;
         }
     }
 }

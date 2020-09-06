@@ -76,36 +76,50 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The satisfaction of the population's life needs.
         /// </summary>
-        public IProductAmountCollection LifeSatisfaction { get; }
+        public IProductAmountCollection LifeSatisfaction { get; set; }
 
         /// <summary>
         /// The satisfaction of the population's daily needs.
         /// </summary>
-        public IProductAmountCollection DailySatisfaction { get; }
+        public IProductAmountCollection DailySatisfaction { get; set; }
 
         /// <summary>
         /// The satisfaction of the population's luxury needs.
         /// </summary>
-        public IProductAmountCollection LuxurySatisfaction { get; }
+        public IProductAmountCollection LuxurySatisfaction { get; set; }
 
         /// <summary>
         /// The life need shortfall (if any).
         /// </summary>
-        public IProductAmountCollection LifeShortfall { get
+        public IProductAmountCollection LifeShortfall
+        {
+            get
             {
-                return LifeNeeds.MultiplyBy(LifeSatisfaction);
+                return LifeNeeds.MultiplyBy(LifeSatisfaction).Multiply(Count);
             }
         }
 
         /// <summary>
         /// The Daily need shortfall (if any).
         /// </summary>
-        public IProductAmountCollection DailyShortfall { get; }
+        public IProductAmountCollection DailyShortfall
+        {
+            get
+            {
+                return DailyNeeds.MultiplyBy(DailySatisfaction).Multiply(Count);
+            }
+        }
 
         /// <summary>
         /// The Daily need shortfall (if any).
         /// </summary>
-        public IProductAmountCollection LuxuryShortfall { get; }
+        public IProductAmountCollection LuxuryShortfall
+        {
+            get
+            {
+                return LuxuryNeeds.MultiplyBy(LuxurySatisfaction).Multiply(Count);
+            }
+        }
 
         #region JobSatisfaction
 
@@ -122,12 +136,24 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The Job Input shortfall (if any).
         /// </summary>
-        public IProductAmountCollection JobInputShortfall { get; }
+        public IProductAmountCollection JobInputShortfall
+        {
+            get
+            {
+                return PrimaryJob.Inputs.MultiplyBy(JobInputSatisfaction).Multiply(Count);
+            }
+        }
 
         /// <summary>
         /// The Job Input shortfall (if any).
         /// </summary>
-        public IProductAmountCollection JobCapitalShortfall { get; }
+        public IProductAmountCollection JobCapitalShortfall
+        {
+            get
+            {
+                return PrimaryJob.Capital.MultiplyBy(JobCapitalSatisfaction).Multiply(Count);
+            }
+        }
 
         #endregion JobSatisfaction
 
@@ -194,17 +220,17 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The Consumption action of the population group.
         /// </summary>
-        /// <returns>A percentage of satisfaction for each good.</returns>
+        /// <returns>The resulting change in goods.</returns>
         public IProductAmountCollection ConsumptionPhase()
         {
             // life needs first
-            var result = ConsumeGoods(LifeNeeds.Multiply(Count));
+            var result = ConsumeGoods(LifeNeeds.Multiply(Count), LifeSatisfaction);
 
             // then daily needs
-            result.AddProducts(ConsumeGoods(DailyNeeds.Multiply(Count)));
+            result.AddProducts(ConsumeGoods(DailyNeeds.Multiply(Count), DailySatisfaction));
 
             // then luxuries
-            result.AddProducts(ConsumeGoods(LuxuryNeeds.Multiply(Count)));
+            result.AddProducts(ConsumeGoods(LuxuryNeeds.Multiply(Count), LuxurySatisfaction));
 
             // then return satisfaction.
             return result;
@@ -214,11 +240,14 @@ namespace EconomicCalculator.Storage
         /// Consumes the given set of goods.
         /// </summary>
         /// <param name="goods">The goods to attempt to consume.</param>
-        /// <returns>The satisfaction of each product for happiness measurements</returns>
-        private IProductAmountCollection ConsumeGoods(IProductAmountCollection goods)
+        /// <param name="satisfaction">The satisfaction we'll be filling out as we go.</param>
+        /// <returns>The change in products stored.</returns>
+        private IProductAmountCollection ConsumeGoods(IProductAmountCollection goods,
+            IProductAmountCollection satisfaction)
         {
             var result = new ProductAmountCollection();
-            // for every good to consume.
+
+            // for each good to consume.
             foreach (var pair in goods)
             {
                 // Get the item and amount of the person.
@@ -233,19 +262,24 @@ namespace EconomicCalculator.Storage
                 // If satisfaction can't be met, subtract what you can.
                 if (sat < 1)
                 {
+                    result.SubtractProducts(product,
+                        Storage.GetProductAmount(product));
+
                     Storage.SubtractProducts(product,
                         Storage.GetProductAmount(product));
                 }
                 else // If greater than 1, then substract everything needed.
                 {
+                    result.SubtractProducts(product, amount);
+
                     Storage.SubtractProducts(product, amount);
                 }
 
-                // add the satisfaction to the collection.
-                result.AddProducts(product, sat);
+                // Finally, set it's satisfaction satisfaction.
+                satisfaction.SetProductAmount(product, sat);
             }
 
-            // Return satisfaction results.
+            // Return change in products stored.
             return result;
         }
 
