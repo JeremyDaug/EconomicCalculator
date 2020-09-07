@@ -25,6 +25,9 @@ namespace EconomicCalculator.Tests.Storage
         private IProductAmountCollection DailyNeedsMock;
         private IProductAmountCollection LuxuryNeedsMock;
         private IProductAmountCollection StorageMock;
+        private IProductAmountCollection LifeSat;
+        private IProductAmountCollection DailySat;
+        private IProductAmountCollection LuxurySat;
 
         private Mock<IMarket> MarketMock;
 
@@ -102,11 +105,13 @@ namespace EconomicCalculator.Tests.Storage
                 .Returns(JobCapitals);
             JobMock.Setup(x => x.LaborRequirements)
                 .Returns(1);
+            JobMock.Setup(x => x.DailyInputNeedsForPops(It.IsAny<double>()))
+                .Returns((double value) => JobInputs.Multiply(value));
+            JobMock.Setup(x => x.CapitalNeedsForPops(It.IsAny<double>()))
+                .Returns((double value) => JobCapitals.Multiply(value));
 
             LaborMock = new Mock<IProduct>();
             LaborMock.Setup(x => x.Id).Returns(LaborId);
-
-            StorageMock = new ProductAmountCollection();
 
             sut = new PopulationGroup
             {
@@ -122,8 +127,10 @@ namespace EconomicCalculator.Tests.Storage
                 SecondaryJobs = new List<IJob>(),
                 SkillLevel = SkillLevel,
                 SkillName = SkillName,
-                Storage = StorageMock
             };
+
+            sut.InitializeStorage();
+
         }
 
         // A helper function for avsserting products in the collection are correct.
@@ -131,6 +138,12 @@ namespace EconomicCalculator.Tests.Storage
         {
             Assert.That(collection.GetProductAmount(product.Object), Is.EqualTo(value));
         }
+
+        #region InitializeStorage
+
+        // I'm lazy, this is a placeholder for InitilazeStorage().
+
+        #endregion InitializeStorage
 
         #region ProductionPhase
 
@@ -211,7 +224,91 @@ namespace EconomicCalculator.Tests.Storage
         [Test]
         public void ConsumeGoodsFromStorage()
         {
+            // Add needs to storage
+            sut.Storage.AddProducts(LifeNeed.Object, 1);
+            sut.Storage.AddProducts(DailyNeed.Object, 1);
+            sut.Storage.AddProducts(LuxNeed.Object, 1);
 
+            // run consumption phase
+            var result = sut.ConsumptionPhase();
+
+            // assuming nothing broke
+            // Ensure consumption occured correctly
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 0);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 0);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 0);
+
+            // Ensure the return is correct
+            AssertProductAmountIsEqual(result, LifeNeed, -1);
+            AssertProductAmountIsEqual(result, DailyNeed, -1);
+            AssertProductAmountIsEqual(result, LuxNeed, -1);
+
+            // Ensure Satisfaction is recorded properly.
+            AssertProductAmountIsEqual(sut.LifeSatisfaction, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.DailySatisfaction, DailyNeed, 1);
+            AssertProductAmountIsEqual(sut.LuxurySatisfaction, LuxNeed, 1);
+        }
+
+        [Test]
+        public void ConsumeGoodsFromStorageWhenNotFullyStocked()
+        {
+            // set to 100 pops.
+            sut.Count = 100;
+
+            // Add needs to storage
+            sut.Storage.AddProducts(LifeNeed.Object, 50);
+            sut.Storage.AddProducts(DailyNeed.Object, 50);
+            sut.Storage.AddProducts(LuxNeed.Object, 50);
+
+            // run consumption phase
+            var result = sut.ConsumptionPhase();
+
+            // assuming nothing broke
+            // Ensure consumption occured correctly
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 0);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 0);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 0);
+
+            // Ensure the return is correct
+            AssertProductAmountIsEqual(result, LifeNeed, -50);
+            AssertProductAmountIsEqual(result, DailyNeed, -50);
+            AssertProductAmountIsEqual(result, LuxNeed, -50);
+
+            // Ensure Satisfaction is recorded properly.
+            AssertProductAmountIsEqual(sut.LifeSatisfaction, LifeNeed, 0.5);
+            AssertProductAmountIsEqual(sut.DailySatisfaction, DailyNeed, 0.5);
+            AssertProductAmountIsEqual(sut.LuxurySatisfaction, LuxNeed, 0.5);
+        }
+
+        [Test]
+        public void ConsumeGoodsFromStorageWhenOverStocked()
+        {
+            // set to 100 pops.
+            sut.Count = 100;
+
+            // Add needs to storage
+            sut.Storage.AddProducts(LifeNeed.Object, 150);
+            sut.Storage.AddProducts(DailyNeed.Object, 150);
+            sut.Storage.AddProducts(LuxNeed.Object, 150);
+
+            // run consumption phase
+            var result = sut.ConsumptionPhase();
+
+            // assuming nothing broke
+            // Ensure consumption occured correctly
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 50);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 50);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 50);
+
+            // Ensure the return is correct
+            AssertProductAmountIsEqual(result, LifeNeed, -100);
+            AssertProductAmountIsEqual(result, DailyNeed, -100);
+            AssertProductAmountIsEqual(result, LuxNeed, -100);
+
+            // Ensure Satisfaction is recorded properly.
+            AssertProductAmountIsEqual(sut.LifeSatisfaction, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.DailySatisfaction, DailyNeed, 1);
+            AssertProductAmountIsEqual(sut.LuxurySatisfaction, LuxNeed, 1);
         }
 
         #endregion ConsumptionPhase

@@ -43,6 +43,12 @@ namespace EconomicCalculator.Storage
         {
             Id = Guid.NewGuid();
             SecondaryJobs = new List<IJob>();
+            Storage = new ProductAmountCollection();
+            LifeSatisfaction = new ProductAmountCollection();
+            DailySatisfaction = new ProductAmountCollection();
+            LuxurySatisfaction = new ProductAmountCollection();
+            JobInputSatisfaction = new ProductAmountCollection();
+            JobCapitalSatisfaction = new ProductAmountCollection();
         }
 
         #region Helper
@@ -192,7 +198,7 @@ namespace EconomicCalculator.Storage
 
             // With Satisfaction, get and consume the inputs.
             var inputs = PrimaryJob.Inputs.Multiply(Count / PrimaryJob.LaborRequirements * sat);
-            ConsumeGoods(inputs);
+            ConsumeGoods(inputs, JobInputSatisfaction);
             // Add what was consumed to the result.
             var result = new ProductAmountCollection();
             result.AddProducts(inputs.Multiply(-1));
