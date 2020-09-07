@@ -312,5 +312,30 @@ namespace EconomicCalculator.Tests.Storage
         }
 
         #endregion ConsumptionPhase
+
+        #region TotalNeeds
+
+        [Test]
+        public void GetAllNeedsFromTotalNeeds()
+        {
+            // Get the total needs
+            var result = sut.TotalNeeds;
+
+            // Ensure they are all there.
+            AssertProductAmountIsEqual(result, LifeNeed, 1);
+            AssertProductAmountIsEqual(result, DailyNeed, 1);
+            AssertProductAmountIsEqual(result, LuxNeed, 1);
+            AssertProductAmountIsEqual(result, JobInput, 1);
+            AssertProductAmountIsEqual(result, JobCapital, 1);
+
+            // ENsure they are in priority order
+            Assert.That(result.Products[0].Id, Is.EqualTo(LifeNeed.Object.Id));
+            Assert.That(result.Products[1].Id, Is.EqualTo(JobCapital.Object.Id));
+            Assert.That(result.Products[2].Id, Is.EqualTo(JobInput.Object.Id));
+            Assert.That(result.Products[3].Id, Is.EqualTo(DailyNeed.Object.Id));
+            Assert.That(result.Products[4].Id, Is.EqualTo(LuxNeed.Object.Id));
+        }
+
+        #endregion TotalNeeds
     }
 }

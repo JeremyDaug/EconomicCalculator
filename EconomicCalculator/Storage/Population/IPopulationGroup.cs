@@ -148,6 +148,11 @@ namespace EconomicCalculator.Storage
         /// </summary>
         IProductAmountCollection Storage { get; }
 
+        /// <summary>
+        /// The total summed needs of the population for the day.
+        /// </summary>
+        IProductAmountCollection TotalNeeds { get; }
+
         #endregion MarketExpansions
 
         // Placeholder for additional Information, demographic breakdowns, and the like.

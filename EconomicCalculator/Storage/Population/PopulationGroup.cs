@@ -53,6 +53,19 @@ namespace EconomicCalculator.Storage
 
         #region Helper
 
+        public IProductAmountCollection TotalNeeds
+        {
+            get
+            {
+                var result = LifeNeeds.Copy();
+                result.AddProducts(PrimaryJob.Capital);
+                result.AddProducts(PrimaryJob.Inputs);
+                result.AddProducts(DailyNeeds);
+                result.AddProducts(LuxuryNeeds);
+                return result;
+            }
+        }
+
         /// <summary>
         /// Initializes the storage to ensure it includes all products from 
         /// Needs, and job. Run after any change to needs or jobs.

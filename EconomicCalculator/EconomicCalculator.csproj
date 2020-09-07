@@ -105,6 +105,7 @@
     <Compile Include="Storage\ISqlReader.cs" />
     <Compile Include="Storage\Market.cs" />
     <Compile Include="Storage\Population\PopulationGroup.cs" />
+    <Compile Include="Storage\Population\Populations.cs" />
     <Compile Include="Storage\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

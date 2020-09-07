@@ -81,6 +81,11 @@ namespace EconomicCalculator.Storage
         IList<IProduct> AcceptedCurrencies { get; }
 
         /// <summary>
+        /// Runs a market day through it's cycle.
+        /// </summary>
+        void RunMarketDay();
+
+        /// <summary>
         /// Run through all productions that can be done and add them to the market.
         /// </summary>
         void ProductionPhase();
@@ -94,15 +99,6 @@ namespace EconomicCalculator.Storage
         /// Readjust and Recalulate Prices.
         /// </summary>
         void RecalculatePrices();
-
-        /// <summary>
-        /// Starts a transaction between a populationGroup and the market.
-        /// </summary>
-        /// <param name="populationGroup">The Buyer</param>
-        /// <param name="product">What they are buying.</param>
-        /// <param name="amount">How much they are seeking to buy.</param>
-        /// <returns>The change in items for the population group.</returns>
-        IProductAmountCollection StartTransaction(IPopulationGroup populationGroup, IProduct product, double amount);
 
         /// <summary>
         /// Gets a price for a good.
@@ -157,6 +153,12 @@ namespace EconomicCalculator.Storage
         /// Quick Access to a Money Changer.
         /// </summary>
         IPopulationGroup MoneyChangers { get; }
+
+        /// <summary>
+        /// Quick access to Merchants in the market (those who don't produce, only
+        /// buy and sell goods.
+        /// </summary>
+        IPopulationGroup Merchants { get; }
 
         #endregion
 

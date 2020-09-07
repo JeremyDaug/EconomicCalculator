@@ -46,17 +46,10 @@ namespace EconomicCalculator.Storage
         IProductAmountCollection ProductionPhase();
 
         /// <summary>
-        /// The Populations buy goods from the markets for their needs and jobs.
-        /// </summary>
-        /// <param name="market">The market they are buying from.</param>
-        /// <returns>The change in products in the market.</returns>
-        IProductAmountCollection BuyPhase(IMarket market);
-
-        /// <summary>
         /// Makes the Populations consume their non-job related needs and returns
-        /// their satisfaction.
+        /// the change in products..
         /// </summary>
-        /// <returns>The satisfaction of the populations overall.</returns>
+        /// <returns>The change in products of the market.</returns>
         IProductAmountCollection Consume();
 
         /// <summary>
