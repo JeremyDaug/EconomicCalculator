@@ -86,6 +86,11 @@ namespace EconomicCalculator.Storage
         void RunMarketDay();
 
         /// <summary>
+        /// The phase where products owned by pops are bought and sold.
+        /// </summary>
+        void PurchasingPhase();
+
+        /// <summary>
         /// Run through all productions that can be done and add them to the market.
         /// </summary>
         void ProductionPhase();

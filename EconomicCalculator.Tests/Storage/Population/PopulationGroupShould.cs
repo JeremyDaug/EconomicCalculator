@@ -136,7 +136,7 @@ namespace EconomicCalculator.Tests.Storage
         // A helper function for avsserting products in the collection are correct.
         private void AssertProductAmountIsEqual(IProductAmountCollection collection, Mock<IProduct> product, double value)
         {
-            Assert.That(collection.GetProductAmount(product.Object), Is.EqualTo(value));
+            Assert.That(collection.GetProductValue(product.Object), Is.EqualTo(value));
         }
 
         #region InitializeStorage

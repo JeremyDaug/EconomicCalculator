@@ -92,7 +92,7 @@ namespace EconomicCalculator.Storage
             _productDict.Remove(product.Id);
         }
 
-        public double GetProductAmount(IProduct product)
+        public double GetProductValue(IProduct product)
         {
             if (product is null)
                 throw new ArgumentNullException(nameof(product));

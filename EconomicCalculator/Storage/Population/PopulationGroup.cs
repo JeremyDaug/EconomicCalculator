@@ -33,6 +33,8 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public IProductAmountCollection Storage { get; set; }
 
+        public IProductAmountCollection ForSale { get; set; }
+
         public string SkillName { get; set; }
 
         public int SkillLevel { get; set; }
@@ -202,7 +204,7 @@ namespace EconomicCalculator.Storage
 
                 // check if current satisfaction is less than the stored amount of the product
                 // the product should be there BC of InitializeStorage
-                sat = Math.Min(sat, Storage.GetProductAmount(product) / amount);
+                sat = Math.Min(sat, Storage.GetProductValue(product) / amount);
             }
 
             // If something cannot be satisfied, we GTFO.
@@ -276,16 +278,16 @@ namespace EconomicCalculator.Storage
                 // Assume All items being consumed are in storage already,
                 // if they aren't we have a consistency problem.
                 // get the satisfaction, capping it at 1.
-                var sat = Math.Min(1, Storage.GetProductAmount(product) / amount);
+                var sat = Math.Min(1, Storage.GetProductValue(product) / amount);
 
                 // If satisfaction can't be met, subtract what you can.
                 if (sat < 1)
                 {
                     result.SubtractProducts(product,
-                        Storage.GetProductAmount(product));
+                        Storage.GetProductValue(product));
 
                     Storage.SubtractProducts(product,
-                        Storage.GetProductAmount(product));
+                        Storage.GetProductValue(product));
                 }
                 else // If greater than 1, then substract everything needed.
                 {
@@ -304,7 +306,25 @@ namespace EconomicCalculator.Storage
 
         public IProductAmountCollection LossPhase()
         {
-            throw new NotImplementedException();
+            var result = new ProductAmountCollection();
+
+            // for each item in storage
+            foreach (var pair in Storage)
+            {
+                var product = pair.Item1;
+                var amount = pair.Item2;
+
+                // get a random amount of failure
+                var failedAmount = product.FailedProducts(amount);
+
+                // remove the failed items from storage
+                Storage.SubtractProducts(product, failedAmount);
+
+                // Subtract the removed itmes from result.
+                result.AddProducts(product, -failedAmount);
+            }
+
+            return result;
         }
 
         public void PopulationChange()

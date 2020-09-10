@@ -52,7 +52,7 @@ namespace EconomicCalculator.Tests.Storage
             sut.SetProductAmount(ProductMock1.Object, 10);
 
             // Check it
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(10));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(10));
         }
 
         [Test]
@@ -64,7 +64,7 @@ namespace EconomicCalculator.Tests.Storage
             // CHeck it's in there.
             Assert.That(sut.Products.Any(x => x.Id == ProductMock1.Object.Id), Is.True);
             Assert.That(sut.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(0));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(0));
 
             // Set it
             sut.SetProductAmount(ProductMock1.Object, 100);
@@ -72,7 +72,7 @@ namespace EconomicCalculator.Tests.Storage
             // Check it updated.
             Assert.That(sut.Products.Any(x => x.Id == ProductMock1.Object.Id), Is.True);
             Assert.That(sut.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(100));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(100));
         }
 
         #endregion SetProductAmount
@@ -153,15 +153,15 @@ namespace EconomicCalculator.Tests.Storage
             // CHeck that it was added properly
             Assert.That(sut.Products.Any(x => x.Id == ProductMock1.Object.Id), Is.True);
             Assert.That(sut.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(diff));
-            Assert.That(sut.GetProductAmount(ProductMock2.Object), Is.EqualTo(diff));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(diff));
+            Assert.That(sut.GetProductValue(ProductMock2.Object), Is.EqualTo(diff));
 
             // add it again
             sut.AddProducts(src);
 
             // check it again to see it was added twice.
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(diff*2));
-            Assert.That(sut.GetProductAmount(ProductMock2.Object), Is.EqualTo(diff*2));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(diff*2));
+            Assert.That(sut.GetProductValue(ProductMock2.Object), Is.EqualTo(diff*2));
         }
 
         #endregion AddProducts
@@ -260,13 +260,13 @@ namespace EconomicCalculator.Tests.Storage
         [Test]
         public void ThrowArgumentNullFromGetProductAmountWhenProductIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => sut.GetProductAmount(null));
+            Assert.Throws<ArgumentNullException>(() => sut.GetProductValue(null));
         }
 
         [Test]
         public void ThrowsKeyNotFoundFromGetProductAmountWhenProductIsNotInTheCollection()
         {
-            Assert.Throws<KeyNotFoundException>(() => sut.GetProductAmount(ProductMock1.Object));
+            Assert.Throws<KeyNotFoundException>(() => sut.GetProductValue(ProductMock1.Object));
         }
 
         [Test]
@@ -277,7 +277,7 @@ namespace EconomicCalculator.Tests.Storage
         {
             sut.AddProducts(ProductMock1.Object, value);
 
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(value));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(value));
         }
 
         #endregion GetProductionAmount
@@ -304,7 +304,7 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(sut.Products.Any(x => x.Id == ProductMock1.Object.Id), Is.True);
             Assert.That(sut.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
             // And it has a value of 0
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(0));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(0));
         }
 
         [Test]
@@ -316,7 +316,7 @@ namespace EconomicCalculator.Tests.Storage
             // Ensure it's in there correctly.
             Assert.That(sut.Products.Any(x => x.Id == ProductMock1.Object.Id), Is.True);
             Assert.That(sut.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(100));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(100));
 
             // Include the product
             sut.IncludeProduct(ProductMock1.Object);
@@ -324,7 +324,7 @@ namespace EconomicCalculator.Tests.Storage
             // Ensure it hasn't changed.
             Assert.That(sut.Products.Any(x => x.Id == ProductMock1.Object.Id), Is.True);
             Assert.That(sut.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(100));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(100));
 
             // Ensure it isn't double booked.
             Assert.That(sut.Products.Count, Is.EqualTo(1));
@@ -367,8 +367,8 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(sut.ProductDict.ContainsKey(ProductMock2.Object.Id), Is.True);
 
             // with value 0
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(0));
-            Assert.That(sut.GetProductAmount(ProductMock2.Object), Is.EqualTo(0));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(0));
+            Assert.That(sut.GetProductValue(ProductMock2.Object), Is.EqualTo(0));
         }
 
         [Test]
@@ -380,7 +380,7 @@ namespace EconomicCalculator.Tests.Storage
             // ensure the list is empty.
             Assert.That(sut.Products.Count, Is.EqualTo(1));
             Assert.That(sut.ProductDict.Count, Is.EqualTo(1));
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(value));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(value));
 
             // make list
             var products = new List<IProduct>
@@ -401,8 +401,8 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(sut.ProductDict.ContainsKey(ProductMock2.Object.Id), Is.True);
 
             // with value 0
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(value));
-            Assert.That(sut.GetProductAmount(ProductMock2.Object), Is.EqualTo(0));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(value));
+            Assert.That(sut.GetProductValue(ProductMock2.Object), Is.EqualTo(0));
         }
 
         #endregion IncludeProducts
@@ -421,14 +421,14 @@ namespace EconomicCalculator.Tests.Storage
             var result = sut.Multiply(scalar);
 
             // Check that it was multiplied
-            Assert.That(result.GetProductAmount(ProductMock1.Object),
+            Assert.That(result.GetProductValue(ProductMock1.Object),
                 Is.EqualTo(TestValue1 * scalar));
-            Assert.That(result.GetProductAmount(ProductMock2.Object),
+            Assert.That(result.GetProductValue(ProductMock2.Object),
                 Is.EqualTo(TestValue2 * scalar));
 
             // ensure the original is unharmed.
-            Assert.That(sut.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1));
-            Assert.That(sut.GetProductAmount(ProductMock2.Object), Is.EqualTo(TestValue2));
+            Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(TestValue1));
+            Assert.That(sut.GetProductValue(ProductMock2.Object), Is.EqualTo(TestValue2));
 
             // ensure they are deep copies, no shallow copies.
             Assert.That(result.Products, Is.Not.SameAs(sut.Products));
@@ -475,8 +475,8 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(result.ProductDict.ContainsKey(ProductMock2.Object.Id), Is.True);
 
             // ensure all are equal to 0
-            Assert.That(result.GetProductAmount(ProductMock1.Object), Is.EqualTo(0));
-            Assert.That(result.GetProductAmount(ProductMock2.Object), Is.EqualTo(0));
+            Assert.That(result.GetProductValue(ProductMock1.Object), Is.EqualTo(0));
+            Assert.That(result.GetProductValue(ProductMock2.Object), Is.EqualTo(0));
         }
 
         [Test]
@@ -501,8 +501,8 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(result.ProductDict.ContainsKey(ProductMock2.Object.Id), Is.True);
 
             // ensure all are equal to 0
-            Assert.That(result.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1));
-            Assert.That(result.GetProductAmount(ProductMock2.Object), Is.EqualTo(TestValue2));
+            Assert.That(result.GetProductValue(ProductMock1.Object), Is.EqualTo(TestValue1));
+            Assert.That(result.GetProductValue(ProductMock2.Object), Is.EqualTo(TestValue2));
         }
 
         #endregion GetProducts
@@ -561,8 +561,8 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(copy.Products.Any(x => x.Id == ProductMock2.Object.Id), Is.True);
             Assert.That(copy.ProductDict.ContainsKey(ProductMock1.Object.Id), Is.True);
             Assert.That(copy.ProductDict.ContainsKey(ProductMock2.Object.Id), Is.True);
-            Assert.That(copy.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1));
-            Assert.That(copy.GetProductAmount(ProductMock2.Object), Is.EqualTo(TestValue2));
+            Assert.That(copy.GetProductValue(ProductMock1.Object), Is.EqualTo(TestValue1));
+            Assert.That(copy.GetProductValue(ProductMock2.Object), Is.EqualTo(TestValue2));
         }
 
         #endregion  Copy
@@ -593,8 +593,8 @@ namespace EconomicCalculator.Tests.Storage
             // verify correct calculation
             Assert.That(result.Products.Count, Is.EqualTo(2));
             Assert.That(result.ProductDict.Count, Is.EqualTo(2));
-            Assert.That(result.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1 * TestValue1));
-            Assert.That(result.GetProductAmount(ProductMock2.Object), Is.EqualTo(TestValue2 * TestValue2));
+            Assert.That(result.GetProductValue(ProductMock1.Object), Is.EqualTo(TestValue1 * TestValue1));
+            Assert.That(result.GetProductValue(ProductMock2.Object), Is.EqualTo(TestValue2 * TestValue2));
         }
 
         [Test]
@@ -614,8 +614,8 @@ namespace EconomicCalculator.Tests.Storage
             // verify correct calculation
             Assert.That(result.Products.Count, Is.EqualTo(2));
             Assert.That(result.ProductDict.Count, Is.EqualTo(2));
-            Assert.That(result.GetProductAmount(ProductMock1.Object), Is.EqualTo(TestValue1 * TestValue1));
-            Assert.That(result.GetProductAmount(ProductMock2.Object), Is.EqualTo(0));
+            Assert.That(result.GetProductValue(ProductMock1.Object), Is.EqualTo(TestValue1 * TestValue1));
+            Assert.That(result.GetProductValue(ProductMock2.Object), Is.EqualTo(0));
         }
 
         #endregion MultiplyBy

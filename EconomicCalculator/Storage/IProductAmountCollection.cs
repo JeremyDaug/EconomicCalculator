@@ -56,7 +56,7 @@ namespace EconomicCalculator.Storage
         /// <exception cref="KeyNotFoundException">
         /// If product is not found in the dictionary.
         /// </exception>
-        double GetProductAmount(IProduct product);
+        double GetProductValue(IProduct product);
 
         /// <summary>
         /// Adds a product to the collection with a connected value of zero.

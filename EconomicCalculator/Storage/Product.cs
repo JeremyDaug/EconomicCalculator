@@ -65,6 +65,12 @@ namespace EconomicCalculator.Storage
             return 1 - Math.Pow(chanceToNotHappen, days);
         }
 
+        public double FailedProducts(double count)
+        {
+            var rand = new Random();
+            return count * DailyFailureChance * 2 * rand.NextDouble();
+        }
+
         public override string ToString()
         {
             var result = string.Format("Name: {0}\n" +

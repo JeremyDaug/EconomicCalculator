@@ -61,7 +61,7 @@ namespace EconomicCalculator.Storage
         public IProductAmountCollection ProductDemand { get; }
 
         /// <summary>
-        /// The price of each product in absolute units.
+        /// The price of each product in Abstract units.
         /// </summary>
         public IProductAmountCollection ProductPrices { get; }
 
@@ -91,17 +91,50 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public void RunMarketDay()
         {
-            // Buy everything we need for the day.
-            BuyPhase();
-
             // Work, consume goods to make goods.
-            ProductionPhase();
+            // Put first to allow for an easy kickstart, 
+            // and ensure money to buy needs.
+            ProductionPhase(); // Done, don't touch
 
             // consume what we need/want for the day
-            ConsumptionPhase();
+            ConsumptionPhase(); // Done, Don't touch
 
-            // sell everything you can to the market.
+            // Loss Phase, where goods decay and breakdown randomly
+            LossPhase();
+
+            // Asset Tax Phase, for taxing assets.
+            // Asset taxes are taken out in money first, then goods.
+            // It sucks, but it needs to be done somewhere, here is best.
+
+            // Offer what remains up to the market for the day.
+            // Sell it all, don't think about tomorrow.
             SellPhase();
+
+            // Let Local Merchants buy what they can for the local market.
+            // LocalMerchantsBuy(); Todo
+
+            // Let the market buy up what it can now.
+            BuyPhase();
+
+            // let the travelling merchants pick through what's left.
+            // TravellingMerchantPhase(); todo
+        }
+
+        public void SellPhase()
+        {
+            // For all pops, put everything they have stored on the market.
+            foreach (var pop in Populations.Pops)
+            {
+                pop.UpForSale();
+            }
+        }
+
+        /// <summary>
+        /// Run through all purchasing that takes place.
+        /// </summary>
+        public void BuyPhase()
+        {
+            
         }
 
         /// <summary>
@@ -118,22 +151,9 @@ namespace EconomicCalculator.Storage
             Populations.Consume();
         }
 
-        /// <summary>
-        /// Run through all purchasing that takes place.
-        /// </summary>
-        public void BuyPhase()
+        public void LossPhase()
         {
-            // for each population
-            foreach (var pop in Populations.PopsByPriority)
-            {
-                // Get what the pop ones (organized in order of priority).
-                var needs = pop.TotalNeeds;
-            }
-        }
-
-        public void  SellPhase()
-        {
-
+            var losses = Populations.LossPhase();
         }
 
         /// <summary>

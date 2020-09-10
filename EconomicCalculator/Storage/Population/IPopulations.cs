@@ -36,7 +36,19 @@ namespace EconomicCalculator.Storage
         /// </summary>
         IList<IPopulationGroup> PopsByPriority { get; }
 
+        /// <summary>
+        /// The Population by the job they have.
+        /// </summary>
+        IDictionary<Guid, IPopulationGroup> PopsByJobs { get; }
+
         #region Actions
+
+        /// <summary>
+        /// Gets the pops selling a specific product.
+        /// </summary>
+        /// <param name="product">The product we want to find.</param>
+        /// <returns>The populations selling that product, in priority order.</returns>
+        IList<IPopulationGroup> GetPopsSellingProduct(IProduct product);
 
         /// <summary>
         /// The Production Phase of the populations.
@@ -56,6 +68,12 @@ namespace EconomicCalculator.Storage
         /// Changes in the population due to the market. Placeholder.
         /// </summary>
         void PopulationChanges();
+
+        /// <summary>
+        /// Makes each population go through it's product loss phase.
+        /// </summary>
+        /// <returns>The products lost to decay.</returns>
+        IProductAmountCollection LossPhase();
 
         #endregion Actions
     }

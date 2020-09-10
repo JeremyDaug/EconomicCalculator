@@ -69,5 +69,12 @@ namespace EconomicCalculator.Storage
         /// <param name="days">How many days to calculate for.</param>
         /// <returns>The probability that the product breaks.</returns>
         double FailureProbability(int days);
+
+        /// <summary>
+        /// Products destroyed by decay.
+        /// </summary>
+        /// <param name="amount">The amount being checked against.</param>
+        /// <returns>The number of failed products.</returns>
+        double FailedProducts(double amount);
     }
 }

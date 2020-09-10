@@ -18,7 +18,19 @@ namespace EconomicCalculator.Storage.Population
 
         public IList<IPopulationGroup> PopsByPriority { get; set; }
 
+        public IDictionary<Guid, IPopulationGroup> PopsByJobs { get; set; }
+
         #region Actions
+
+        /// <summary>
+        /// Gets the pops selling a specific product.
+        /// </summary>
+        /// <param name="product">The product we want to find.</param>
+        /// <returns>The populations selling that product, in priority order.</returns>
+        public IList<IPopulationGroup> GetPopsSellingProduct(IProduct product)
+        {
+            return PopsByPriority.Where(x => x.ForSale.Contains(product)).ToList();
+        }
 
         public IProductAmountCollection Consume()
         {
@@ -27,6 +39,17 @@ namespace EconomicCalculator.Storage.Population
             foreach (var pop in Pops)
             {
                 result.AddProducts(pop.ConsumptionPhase());
+            }
+
+            return result;
+        }
+
+        public IProductAmountCollection LossPhase()
+        {
+            var result = new ProductAmountCollection();
+            foreach (var pop in Pops)
+            {
+                result.AddProducts(pop.LossPhase());
             }
 
             return result;

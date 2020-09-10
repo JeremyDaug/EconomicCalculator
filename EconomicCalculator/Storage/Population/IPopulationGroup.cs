@@ -149,6 +149,13 @@ namespace EconomicCalculator.Storage
         IProductAmountCollection Storage { get; }
 
         /// <summary>
+        /// The products owned by the population up for sale.
+        /// Goods bought are removed from this list as we go. 
+        /// What was traded for goes to storage.
+        /// </summary>
+        IProductAmountCollection ForSale { get; }
+
+        /// <summary>
         /// The total summed needs of the population for the day.
         /// </summary>
         IProductAmountCollection TotalNeeds { get; }
@@ -180,6 +187,12 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <returns>A percentage of satisfaction for each good.</returns>
         IProductAmountCollection ConsumptionPhase();
+
+        /// <summary>
+        /// Puts the goods stored by the pop up for sale on the market.
+        /// </summary>
+        /// <returns>The goods being put up on sale.</returns>
+        IProductAmountCollection UpForSale();
 
         /// <summary>
         /// The Loss phase of the population, calculates and removes items due to
