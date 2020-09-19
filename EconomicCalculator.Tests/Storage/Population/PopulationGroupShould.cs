@@ -313,6 +313,80 @@ namespace EconomicCalculator.Tests.Storage
 
         #endregion ConsumptionPhase
 
+        #region LossPhase
+
+        [Test]
+        public void RemoveAppropriateGoodsFromStorage()
+        {
+            // Add Failed Products to Need Mocks
+            LifeNeed.Setup(x => x.FailedProducts(100)).Returns(50);
+            DailyNeed.Setup(x => x.FailedProducts(100)).Returns(25);
+            LuxNeed.Setup(x => x.FailedProducts(100)).Returns(10);
+            JobCapital.Setup(x => x.FailedProducts(100)).Returns(0);
+
+            // Add goods to storage.
+            sut.Storage.AddProducts(LifeNeed.Object, 100);
+            sut.Storage.AddProducts(DailyNeed.Object, 100);
+            sut.Storage.AddProducts(LuxNeed.Object, 100);
+            sut.Storage.AddProducts(JobCapital.Object, 100);
+
+            // Run loss phase
+            var result = sut.LossPhase();
+
+            // Check that the correct good amounts were lost.
+            AssertProductAmountIsEqual(result, LifeNeed, -50);
+            AssertProductAmountIsEqual(result, DailyNeed, -25);
+            AssertProductAmountIsEqual(result, LuxNeed, -10);
+            // Ensure that good which didn't decay, doesn't get added.
+            Assert.That(result.Contains(JobCapital.Object), Is.False);
+
+            // check that the expected goods were lost in storage.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 50);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 75);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 90);
+            AssertProductAmountIsEqual(sut.Storage, JobCapital, 100);
+        }
+
+        #endregion LossPhase
+
+        #region UpForSale
+
+        [Test]
+        public void ReturnListOfGoodsAvailableForSale()
+        {
+            // Adjust pops for easier testing.
+            sut.Count = 50;
+
+            // Add goods to storage
+            sut.Storage.AddProducts(LifeNeed.Object, 100);
+            sut.Storage.AddProducts(DailyNeed.Object, 100);
+            sut.Storage.AddProducts(LuxNeed.Object, 100);
+            sut.Storage.AddProducts(JobCapital.Object, 100);
+            sut.Storage.AddProducts(JobInput.Object, 100);
+            sut.Storage.AddProducts(JobOutput.Object, 100);
+
+            // Get back what can be sold.
+            var result = sut.UpForSale();
+
+            // check it's all there for sale.
+            AssertProductAmountIsEqual(result, LifeNeed, 50);
+            AssertProductAmountIsEqual(result, DailyNeed, 50);
+            AssertProductAmountIsEqual(result, LuxNeed, 50);
+            AssertProductAmountIsEqual(result, JobCapital, 50);
+            AssertProductAmountIsEqual(result, JobInput, 50);
+            AssertProductAmountIsEqual(result, JobOutput, 100);
+
+            // check the goods haven't been removed. We only remove from storage upon loss or purchase.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 100);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 100);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 100);
+            AssertProductAmountIsEqual(sut.Storage, JobCapital, 100);
+            AssertProductAmountIsEqual(sut.Storage, JobInput, 100);
+            AssertProductAmountIsEqual(sut.Storage, JobOutput, 100);
+        }
+
+        #endregion UpForSale
+
         #region TotalNeeds
 
         [Test]

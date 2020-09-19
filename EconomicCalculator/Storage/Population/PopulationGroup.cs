@@ -59,11 +59,11 @@ namespace EconomicCalculator.Storage
         {
             get
             {
-                var result = LifeNeeds.Copy();
-                result.AddProducts(PrimaryJob.Capital);
-                result.AddProducts(PrimaryJob.Inputs);
-                result.AddProducts(DailyNeeds);
-                result.AddProducts(LuxuryNeeds);
+                var result = LifeNeeds.Multiply(Count);
+                result.AddProducts(PrimaryJob.Capital.Multiply(Count));
+                result.AddProducts(PrimaryJob.Inputs.Multiply(Count));
+                result.AddProducts(DailyNeeds.Multiply(Count));
+                result.AddProducts(LuxuryNeeds.Multiply(Count));
                 return result;
             }
         }
@@ -317,6 +317,9 @@ namespace EconomicCalculator.Storage
                 // get a random amount of failure
                 var failedAmount = product.FailedProducts(amount);
 
+                if (failedAmount == 0)
+                    continue;
+
                 // remove the failed items from storage
                 Storage.SubtractProducts(product, failedAmount);
 
@@ -325,6 +328,59 @@ namespace EconomicCalculator.Storage
             }
 
             return result;
+        }
+
+        public IProductAmountCollection UpForSale()
+        {
+            // Clear old sale space just in case.
+            ForSale = new ProductAmountCollection();
+
+            // for each good
+            foreach (var pair in Storage)
+            {
+                // get each item
+                var product = pair.Item1;
+                var amount = pair.Item2;
+
+                // if it is desired by the population.
+                if (TotalNeeds.Contains(product))
+                {
+                    // Subtract what is needed.
+                    amount = amount - TotalNeeds.GetProductValue(product);
+                }
+
+                // If the amount left after removing needs is greater than 0
+                // then add to our list for sale.
+                if (amount > 0)
+                {
+                    ForSale.AddProducts(product, amount);
+                }
+            }
+
+            return ForSale;
+        }
+
+        /// <summary>
+        /// Retrieve the Currency the population holds.
+        /// </summary>
+        /// <param name="Currencies">What counts as currency.</param>
+        /// <returns></returns>
+        public IProductAmountCollection GetCash(IList<IProduct> Currencies)
+        {
+            return ForSale.GetProducts(Currencies);
+        }
+
+        /// <summary>
+        /// Get's the purchasing power of the population, returned in order of
+        /// prefered buying order (most durable to least)
+        /// </summary>
+        /// <returns>The Items for sale in Descending chance of breaking.</returns>
+        public IProductAmountCollection PurchasingPower()
+        {
+            // Get the products for sale and order them by the chance of failure
+            // (how long they last) 
+            // Maybe give a special sorting to put Currency Up Front?
+            return ForSale.OrderProductsBy(x => x.DailyFailureChance);
         }
 
         public void PopulationChange()

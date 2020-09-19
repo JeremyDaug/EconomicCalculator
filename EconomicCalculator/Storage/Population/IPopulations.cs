@@ -32,7 +32,7 @@ namespace EconomicCalculator.Storage
         IList<IPopulationGroup> Pops { get; }
 
         /// <summary>
-        /// The list of pops, organized by Priority.
+        /// The list of pops, organized by Priority. Merchants are not included.
         /// </summary>
         IList<IPopulationGroup> PopsByPriority { get; }
 
@@ -40,6 +40,16 @@ namespace EconomicCalculator.Storage
         /// The Population by the job they have.
         /// </summary>
         IDictionary<Guid, IPopulationGroup> PopsByJobs { get; }
+
+        /// <summary>
+        /// The merchants in the population group, easily accessible.
+        /// </summary>
+        IPopulationGroup Merchants { get; }
+
+        /// <summary>
+        /// The Money changers which are part of the group, easily accessible.
+        /// </summary>
+        IPopulationGroup MoneyChangers { get; }
 
         #region Actions
 
@@ -74,6 +84,12 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <returns>The products lost to decay.</returns>
         IProductAmountCollection LossPhase();
+
+        /// <summary>
+        /// The Sell phase for the populations.
+        /// </summary>
+        /// <returns>The goods up for sale.</returns>
+        IProductAmountCollection SellPhase();
 
         #endregion Actions
     }

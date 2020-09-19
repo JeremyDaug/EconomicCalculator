@@ -33,16 +33,14 @@ namespace EconomicCalculator.Storage
         void SetProductAmount(IProduct product, double value);
 
         /// <summary>
-        /// Retrieve a subset of products from the list.
+        /// Retrieve a products from the list.
+        /// If the collection doesn't contain the item, it includes it with a value of 0.
         /// </summary>
         /// <param name="products">The Sought Products.</param>
         /// <returns>The Subset of items sought.</returns>
         /// <exception cref="ArgumentNullException">
         /// If <paramref name="products"/> is null.
         /// </exception>
-        /// <remarks>
-        /// If an item is not in the collection it is added to the return collection with an amount of 9.
-        /// </remarks>
         IProductAmountCollection GetProducts(IList<IProduct> products);
 
         /// <summary>
@@ -152,5 +150,13 @@ namespace EconomicCalculator.Storage
         /// if <paramref name="product"/> is null.
         /// </exception>
         bool Contains(IProduct product);
+
+        /// <summary>
+        /// Returns a duplicate of the Collection, ordered buy the requested action 
+        /// in ascending order.
+        /// </summary>
+        /// <param name="action">How to organize the products.</param>
+        /// <returns>The collection, organized in ascending order.</returns>
+        IProductAmountCollection OrderProductsBy(Func<IProduct, object> func);
     }
 }

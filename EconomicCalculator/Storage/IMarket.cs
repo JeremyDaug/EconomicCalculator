@@ -86,11 +86,6 @@ namespace EconomicCalculator.Storage
         void RunMarketDay();
 
         /// <summary>
-        /// The phase where products owned by pops are bought and sold.
-        /// </summary>
-        void PurchasingPhase();
-
-        /// <summary>
         /// Run through all productions that can be done and add them to the market.
         /// </summary>
         void ProductionPhase();
@@ -158,12 +153,6 @@ namespace EconomicCalculator.Storage
         /// Quick Access to a Money Changer.
         /// </summary>
         IPopulationGroup MoneyChangers { get; }
-
-        /// <summary>
-        /// Quick access to Merchants in the market (those who don't produce, only
-        /// buy and sell goods.
-        /// </summary>
-        IPopulationGroup Merchants { get; }
 
         #endregion
 

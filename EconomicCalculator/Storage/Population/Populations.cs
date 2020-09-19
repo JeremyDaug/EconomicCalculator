@@ -16,7 +16,25 @@ namespace EconomicCalculator.Storage.Population
 
         public IList<IPopulationGroup> Pops { get; set; }
 
-        public IList<IPopulationGroup> PopsByPriority { get; set; }
+        public IList<IPopulationGroup> PopsByPriority
+        {
+            get
+            {
+                return Pops.OrderBy(x => x.Priority).ToList();
+            }
+        }
+
+        #region SpecialPops
+
+        // These pops are special in that they are placed uniquely in the market.
+        // Merchants always buy first and get to sell first.
+        // Money changers don't produce goods, but instead trade currency as needed.
+
+        public IPopulationGroup MoneyChangers { get; }
+
+        public IPopulationGroup Merchants { get; }
+
+        #endregion SpecialPops
 
         public IDictionary<Guid, IPopulationGroup> PopsByJobs { get; set; }
 
@@ -71,6 +89,19 @@ namespace EconomicCalculator.Storage.Population
             foreach (var pop in Pops)
             {
                 result.AddProducts(pop.ProductionPhase());
+            }
+
+            return result;
+        }
+
+        public IProductAmountCollection SellPhase()
+        {
+            var result = new ProductAmountCollection();
+
+            // For all pops, put everything they have stored on the market.
+            foreach (var pop in Pops)
+            {
+                result.AddProducts(pop.UpForSale());
             }
 
             return result;

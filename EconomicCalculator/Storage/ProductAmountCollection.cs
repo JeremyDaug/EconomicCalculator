@@ -230,5 +230,19 @@ namespace EconomicCalculator.Storage
             // return the final result.
             return result;
         }
+
+        public IProductAmountCollection OrderProductsBy(Func<IProduct, object> func)
+        {
+            var result = new ProductAmountCollection();
+
+            // Copy the list in the order we want.
+            result._products = _products.OrderBy(func).ToList();
+
+            // copy the dict over properly.
+            result._productDict = _productDict.ToDictionary(x => x.Key, x => x.Value);
+
+            // return result.
+            return result;
+        }
     }
 }

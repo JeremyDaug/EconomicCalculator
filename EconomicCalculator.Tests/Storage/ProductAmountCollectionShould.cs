@@ -619,5 +619,36 @@ namespace EconomicCalculator.Tests.Storage
         }
 
         #endregion MultiplyBy
+
+        #region OrderProductsBy
+
+        [Test]
+        public void ReturnACopyProperlyArrainged()
+        {
+            // Give our mocks differing values to sort them buy.
+            ProductMock1.Setup(x => x.DefaultPrice).Returns(10);
+            ProductMock2.Setup(x => x.DefaultPrice).Returns(5);
+
+            // add products to selection
+            sut.AddProducts(ProductMock1.Object, TestValue1);
+            sut.AddProducts(ProductMock2.Object, TestValue2);
+
+            // Ensure they are in the sut and in placement order.
+            Assert.That(sut.Products[0].Id, Is.EqualTo(ProductMock1.Object.Id));
+            Assert.That(sut.Products[1].Id, Is.EqualTo(ProductMock2.Object.Id));
+
+            // Since they are there in placed order, get the new sorted one.
+            var result = sut.OrderProductsBy(x => x.DefaultPrice);
+
+            // Check that the result is in correct order.
+            Assert.That(result.Products[0].Id, Is.EqualTo(ProductMock2.Object.Id));
+            Assert.That(result.Products[1].Id, Is.EqualTo(ProductMock1.Object.Id));
+
+            // check that the values of each is correct.
+            Assert.That(result.GetProductValue(ProductMock1.Object), Is.EqualTo(TestValue1));
+            Assert.That(result.GetProductValue(ProductMock2.Object), Is.EqualTo(TestValue2));
+        }
+
+        #endregion OrderProductsBy
     }
 }

@@ -72,6 +72,10 @@ namespace EconomicCalculator.Storage
         /// </summary>
         IProductAmountCollection LuxuryNeeds { get; }
 
+        // Placeholder for possible 'capital' desires. Goods which don't get consumed,
+        // but instead breakdown and must be replaced. The Daily needs and/or Luxury Needs
+        // as they are longer lasting and easier to fulfill long term.
+
         #endregion Needs
 
         #region PastSatisfaction
@@ -171,6 +175,20 @@ namespace EconomicCalculator.Storage
         /// Needs, and job. Run after any change to needs or jobs.
         /// </summary>
         void InitializeStorage();
+
+        /// <summary>
+        /// Retrieve the Currency the population holds.
+        /// </summary>
+        /// <param name="Currencies">What counts as currency.</param>
+        /// <returns></returns>
+        IProductAmountCollection GetCash(IList<IProduct> Currencies);
+
+        /// <summary>
+        /// Get's the purchasing power of the population, returned in order of
+        /// prefered buying order (most durable to least)
+        /// </summary>
+        /// <returns>The Items for sale in Descending chance of breaking.</returns>
+        IProductAmountCollection PurchasingPower();
 
         #endregion Helpers
 
