@@ -32,7 +32,7 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The Territorial extent of the Market in acres. -1 means infinite.
         /// </summary>
-        int Territory { get; }
+        double Territory { get; }
 
         #endregion GeneralInfo
 

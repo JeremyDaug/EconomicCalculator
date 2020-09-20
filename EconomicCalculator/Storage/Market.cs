@@ -30,7 +30,7 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The Territorial extent of the Market in acres. -1 means infinite.
         /// </summary>
-        public int Territory { get; set; }
+        public double Territory { get; set; } // not actually used yet.
 
         #endregion GeneralInfo
 
@@ -44,6 +44,11 @@ namespace EconomicCalculator.Storage
         // Territory Breakdown and management.
 
         #endregion InfoDetails
+
+        public Market()
+        {
+            ProductPrices = new ProductAmountCollection();
+        }
 
         #region TheMarket
 
@@ -61,6 +66,7 @@ namespace EconomicCalculator.Storage
                 return _productSupply;
             }
         }
+
         /// <summary>
         /// The effective universal demands.
         /// Calculated based off of population needs and job inputs.
@@ -83,7 +89,7 @@ namespace EconomicCalculator.Storage
         /// Only Money Changers can work in all currencies regardless of the market.
         /// The price of money can only change based on Money Changer Transactions.
         /// </summary>
-        public IList<IProduct> AcceptedCurrencies { get; }
+        public IList<IProduct> AcceptedCurrencies { get; set; }
 
         /// <summary>
         /// Kickstarts the economy from absolutely nothing.
@@ -93,8 +99,7 @@ namespace EconomicCalculator.Storage
 
         }
 
-        /*
-         * How the Market Works: 
+        /* How the Market Works: 
          * - The market works by simple procedures. Pops take what they have to 
          * produce what they can.
          * - Once goods are produced, they try to meet their needs for the day.
@@ -167,8 +172,15 @@ namespace EconomicCalculator.Storage
             TravellingMerchantPhase();
 
             // Population shifting phase
+            PopChanges();
 
             // Price Correction Phase, where prices of goods are updated
+            RecalculatePrices();
+        }
+
+        public void PopChanges()
+        {
+            // todo
         }
 
         public void SellPhase()
@@ -181,7 +193,7 @@ namespace EconomicCalculator.Storage
 
         public void LocalMerchantsBuy()
         {
-            // todo, 
+            // todo,
         }
 
         /// <summary>
@@ -270,16 +282,12 @@ namespace EconomicCalculator.Storage
         /// <param name="price">The price to meet (roughly)</param>
         /// <returns>The appropriate cash for the price.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="AvailableCash"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">If <paramref name="AvailableCash"/> contains a null product.</exception>
-        /// 
+        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="price"/> is less than or equal to 0.</exception>
         public IProductAmountCollection ChangeForPrice(IProductAmountCollection AvailableCash, double price)
         {
             // ensure cash is not null.
             if (AvailableCash is null)
                 throw new ArgumentNullException(nameof(AvailableCash));
-            // ensure nothing in cash is null
-            if (AvailableCash.Any(x => x.Item1 is null))
-                throw new ArgumentNullException("Prodcut in AvailableCash is null.");
             // ensure that the price is greater than 0
             if (price <= 0)
                 throw new ArgumentOutOfRangeException("Price must be greater than 0.");
@@ -298,7 +306,7 @@ namespace EconomicCalculator.Storage
             foreach (var coin in AvailableCash.OrderByDescending(x => ProductPrices.GetProductValue(x.Item1)))
             {
                 // if none of that coin exist
-                if (coin.Item2 == 0)
+                if (coin.Item2 == 0 )
                 {
                     // add it as zero
                     result.AddProducts(coin.Item1, 0);
@@ -310,6 +318,15 @@ namespace EconomicCalculator.Storage
                 var curr = coin.Item1;
                 // coin value
                 var val = ProductPrices.GetProductValue(curr);
+                // if value is higher then remaining price.
+                if (val > price)
+                {
+                    // add it as zero
+                    result.AddProducts(curr, 0);
+                    // and skip
+                    continue;
+                }
+
                 // coin amount
                 var amt = coin.Item2;
 
@@ -382,7 +399,7 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public void RecalculatePrices()
         {
-            throw new NotImplementedException();
+            // todo
         }
 
         /// <summary>
@@ -396,7 +413,26 @@ namespace EconomicCalculator.Storage
         /// </exception>
         public double GetPrice(IProduct product, double amount)
         {
-            throw new NotImplementedException();
+            if (product is null)
+                throw new ArgumentNullException(nameof(product));
+
+            return ProductPrices.GetProductValue(product) * amount;
+        }
+
+        /// <summary>
+        /// Gets a price for a good.
+        /// </summary>
+        /// <param name="product">The product we are pricing</param>
+        /// <returns>The price in abstract currency.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// If Product is null.
+        /// </exception>
+        public double GetPrice(IProduct product)
+        {
+            if (product is null)
+                throw new ArgumentNullException(nameof(product));
+
+            return ProductPrices.GetProductValue(product);
         }
 
         /// <summary>
@@ -413,15 +449,6 @@ namespace EconomicCalculator.Storage
         }
 
         #endregion TheMarket
-
-        #region AvailableOptions
-
-        // Crops
-        // Mines
-        // Processes
-        // Accepted Currencies
-
-        #endregion AvailableOptions
 
         #region PracticalShortcuts
 
@@ -446,12 +473,12 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// Quick Access to a Money Changer.
         /// </summary>
-        public IPopulationGroup MoneyChangers { get; }
+        public IPopulationGroup MoneyChangers { get; set; }
 
         /// <summary>
         /// Travelling merchants are a unique group, and are split apart.
         /// </summary>
-        public IList<IPopulationGroup> TravellingMerchants { get; }
+        public IList<IPopulationGroup> TravellingMerchants { get; set; }
 
         #endregion
 
