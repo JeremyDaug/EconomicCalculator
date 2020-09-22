@@ -226,6 +226,42 @@ namespace EconomicCalculator.Storage
         /// </summary>
         void PopulationChange();
 
+        /// <summary>
+        /// Get the price of a good by the pop
+        /// </summary>
+        /// <param name="good">The good to price.</param>
+        /// <param name="v">The current market price of the good.</param>
+        /// <returns>The population's price of the good.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="good"/> is null.</exception>
+        double GetPrice(IProduct good, double v);
+
+        /// <summary>
+        /// Buys products based on the cash given to buy the good.
+        /// </summary>
+        /// <param name="cash">The cash to buy the goods.</param>
+        /// <param name="good">The good being bought.</param>
+        /// <param name="amount">The amount being bought.</param>
+        /// <param name="market">The market we are buying in.</param>
+        /// <returns>The resulting change in goods for the buyer.</returns>
+        IProductAmountCollection BuyGood(IProductAmountCollection cash, IProduct good,
+            double amount, IMarket market);
+
+        /// <summary>
+        /// Buys good via barter.
+        /// </summary>
+        /// <param name="buyerStock">The buyer's goods up for trade.</param>
+        /// <param name="good">The good being traded for.</param>
+        /// <param name="amount">The amount of the good being bought.</param>
+        /// <param name="market">The market that the barter is taking place in.</param>
+        /// <returns>The resulting change in goods for the buyer.</returns>
+        IProductAmountCollection BarterGood(IProductAmountCollection buyerStock, IProduct good, double amount, IMarket market);
+
+        /// <summary>
+        /// Complete a transaction, adding what was bought, and removing what was paid.
+        /// </summary>
+        /// <param name="transaction">What to add and remove.</param>
+        void CompleteTransaction(IProductAmountCollection transaction);
+
         #endregion Actions
     }
 }

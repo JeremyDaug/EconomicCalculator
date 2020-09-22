@@ -409,5 +409,206 @@ namespace EconomicCalculator.Storage
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Get the price of a good by the pop
+        /// </summary>
+        /// <param name="good">The good to price.</param>
+        /// <param name="v">The current market price of the good.</param>
+        /// <returns>The population's price of the good.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="good"/> is null.</exception>
+        public double GetPrice(IProduct good, double v)
+        { // TODO This is currently not tested.
+            if (good is null)
+                throw new ArgumentNullException(nameof(good));
+
+            // For a generic pop, this is just the market price, no special logic yet.
+            return v;
+        }
+
+        public IProductAmountCollection BuyGood(IProductAmountCollection cash, IProduct good, double amount, IMarket market)
+        {
+            // Sanity check for nulls.
+            if (cash is null) throw new ArgumentNullException(nameof(cash));
+            if (good is null) throw new ArgumentNullException(nameof(good));
+            if (market is null) throw new ArgumentNullException(nameof(market));
+            if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
+
+            // The collection we're returning.
+            var result = new ProductAmountCollection();
+
+            // get how much to buy, what's available, or what's desired.
+            var available = Math.Min(amount, ForSale.GetProductValue(good));
+
+            // get the price of that good
+            var totalPrice = GetPrice(good, market.GetPrice(good)) * amount;
+
+            // get the cash needed for the goods
+            var money = market.ChangeForPrice(cash, totalPrice);
+
+            // get our available money total
+            var totalMoney = money.Sum(x => market.GetPrice(x.Item1, x.Item2));
+
+            // if the money is enough, just buy outright
+            if (totalMoney >= totalPrice)
+            {
+                // Add what they're buying.
+                result.AddProducts(good, available);
+                // remove what they spent
+                result.AddProducts(money.Multiply(-1));
+            }
+            else // if it's not enough
+            {
+                // get the buyable units of the good
+                double buyableUnits = 0;
+
+                // if we can buy fractionally
+                if (good.Fractional)
+                {
+                    // just do the math straight.
+                    buyableUnits = totalMoney / market.GetPrice(good);
+                }
+                else // if we can't 
+                {
+                    // take what we can and round down, seller should always make more than the buyer here.
+                    buyableUnits = Math.Floor(totalMoney / market.GetPrice(good));
+                }
+
+                // if we can buy any units
+                if (buyableUnits > 0)
+                {
+                    // buy them add the units to the results
+                    result.AddProducts(good, buyableUnits);
+                    // subtract the cash.
+                    result.AddProducts(money.Multiply(-1));
+                }
+            }
+
+            // Return change if possible
+            var change = totalMoney - market.GetPrice(good) * result.GetProductValue(good);
+
+            // Subtract the smallest coin value to guarantee we don't overpay the change.
+            change -= market.CurrencyValues().Min(x => x.Item2);
+
+            // make change using the seller's coins.
+            var buyersChange = market.ChangeForPrice(GetCash(market.AcceptedCurrencies), change);
+
+            // add back the buyer's change
+            result.AddProducts(buyersChange);
+
+            // complete the transaction for the seller, and subtract the result.
+            CompleteTransaction(result.Multiply(-1));
+
+            // we're done, return the change in the buyer's goods.
+            return result;
+        }
+
+        /// <summary>
+        /// Buys good via barter.
+        /// </summary>
+        /// <param name="buyerStock">The buyer's goods up for trade.</param>
+        /// <param name="good">The good being traded for.</param>
+        /// <param name="amount">The amount of the good being bought.</param>
+        /// <param name="market">The market that the barter is taking place in.</param>
+        /// <returns>The resulting change in goods for the buyer.</returns>
+        public IProductAmountCollection BarterGood(IProductAmountCollection buyerStock,
+            IProduct good, double amount, IMarket market)
+        {
+            if (buyerStock == null)
+                throw new ArgumentNullException(nameof(buyerStock));
+            if (good == null)
+                throw new ArgumentNullException(nameof(good));
+            if (market == null)
+                throw new ArgumentNullException(nameof(market));
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(amount));
+
+            // the return result of the barter
+            var result = new ProductAmountCollection();
+
+            // TODO a barter modifier, to discourage or encourage bartering.
+            // This should become more flexible later.
+            var BarterMod = 1;
+
+            // get the price of the good.
+            var totalPrice = GetPrice(good, market.GetPrice(good)) * BarterMod;
+
+            // get the total price of what's offered.
+            double barterVal = 0;
+            foreach (var product in buyerStock)
+            {
+                barterVal += market.GetPrice(product.Item1) * product.Item2;
+            }
+
+            // the barter we're trading for the goods.
+            IProductAmountCollection barter;
+            // if the available barter is greater than the price, begin bartering
+            if (barterVal >= totalPrice)
+            {
+                // Use get change for the easiest option.
+                barter = market.ChangeForPrice(buyerStock, totalPrice);
+
+                // don't go more accurate, barter isn't supposed to be more accurate to coins,
+                // no one would accept change in bits of wheat.
+
+                // Add the goods being bought
+                result.AddProducts(good, amount);
+
+                // Remove the goods being traded.
+                result.AddProducts(barter.Multiply(-1));
+            }
+            else
+            {
+                // if it's not enough, throw it all in, and buy what you can.
+                double buyableUnits = 0;
+
+                // if the good is fractional
+                if (good.Fractional)
+                {
+                    // just divide
+                    buyableUnits = barterVal / (market.GetPrice(good) * BarterMod);
+                }
+                else
+                {
+                    // round down
+                    buyableUnits = Math.Floor(barterVal / (market.GetPrice(good) * BarterMod));
+                }
+
+                // If we can buy anything, do so.
+                if (buyableUnits > 0)
+                {
+                    // add the goods
+                    result.AddProducts(good, buyableUnits);
+                    // subtract the goods
+                    result.AddProducts(buyerStock.Multiply(-1));
+                }
+            }
+
+            // No change, this is bartering.
+
+            // We've done what we can, move on.
+            return result;
+        }
+
+        public void CompleteTransaction(IProductAmountCollection transaction)
+        {
+            if (transaction is null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            // add and remove the trasaction to storage
+            Storage.AddProducts(transaction);
+            // Add to for sale, rather than recalculating it entirely
+            ForSale.AddProducts(transaction);
+
+            // quickly remove any products from for sale that are 0 or less.
+            if (ForSale.Any(x => x.Item2 <= 0))
+            {
+                foreach (var product in ForSale)
+                {
+                    if (product.Item2 <= 0)
+                        ForSale.DeleteProduct(product.Item1);
+                }
+            }
+        }
     }
 }

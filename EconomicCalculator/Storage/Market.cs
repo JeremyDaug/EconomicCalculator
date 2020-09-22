@@ -83,6 +83,8 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public IProductAmountCollection ProductionCapacity { get; }
 
+        public IList<IProduct> OfficialCurrencies { get; set; }
+
         /// <summary>
         /// What currencies are accepted in the area. 
         /// This isn't necissarily the tax currency.
@@ -90,6 +92,25 @@ namespace EconomicCalculator.Storage
         /// The price of money can only change based on Money Changer Transactions.
         /// </summary>
         public IList<IProduct> AcceptedCurrencies { get; set; }
+
+        /// <summary>
+        /// Get's the Value of the currencies in the market.
+        /// </summary>
+        /// <returns>all currencies and their market value.</returns>
+        public IProductAmountCollection CurrencyValues()
+        {
+            var result = new ProductAmountCollection();
+
+            // for each coin
+            foreach (var coin in AcceptedCurrencies)
+            {
+                // get add that coin and it's current market price to the result.
+                result.AddProducts(coin, GetPrice(coin));
+            }
+
+            // and return it.
+            return result;
+        }
 
         /// <summary>
         /// Kickstarts the economy from absolutely nothing.
@@ -207,43 +228,46 @@ namespace EconomicCalculator.Storage
                 // go through their list of needs
                 foreach (var needPair in buyer.TotalNeeds)
                 {
-                    // Check we can keep going and there is stuff that the pop
+                    // Check that there is stuff that the pop
                     // can trade for goods
                     if (buyer.ForSale.All(x => x.Item2 <= 0))
-                        break;
+                        break; // if they don't they stop
 
                     // get the product and amount
                     var need = needPair.Item1;
-                    var desired = needPair.Item2;
+                    var desired = needPair.Item2; // the units desired
 
-                    // If it's not in the Product Supply, add it at 0. It should be anyway.
-                    if (!ProductSupply.Contains(need))
+                    // Check if the product is available to buy,
+                    // else just subtract to denote a deficit and move on.
+                    try
                     {
+                        if (ProductSupply.GetProductValue(need) <= 0)
+                        {
+                            ProductSupply.SubtractProducts(need, desired);
+                            continue; // the next need please
+                        }
+                    }
+                    catch (KeyNotFoundException) // If it doesn't exist in the supply at all.
+                    {
+                        // Add it in at 0
                         ProductSupply.IncludeProduct(need);
-                    }
-
-                    // Check if the product is available to buy, else just subtract and move on.
-                    if (ProductSupply.GetProductValue(need) <= 0)
-                    {
+                        // Subtract our desire for record keeping
                         ProductSupply.SubtractProducts(need, desired);
-                        continue;
+                        continue; // and skip it here.
                     }
 
-                    // since it's available to buy go to the merchants Local first
-                    // if they have any to sell
+                    // since it's available to buy go to the
+                    // merchants Local first if they have any to sell
                     if (Populations.Merchants.ForSale.Contains(need))
                     {
-                        // get the price from the merchants 
-                        // Merchants.GetGoodPrice()
-                        // Price defaults to twice for now.
-                        var price = ProductPrices.GetProductValue(need) * 2 * desired;
-                        // TODO we'll come back to this. Merchants are not done yet..
+                        // Todo, get Generic Buying done first.
                     }
 
-                    // there is more to buy, go to the rest.
+                    // if there is more to buy, go to the other locals.
                     if (desired > 0)
                     {
-                        // get market price
+                        var result = BuyGoodsFromMarket(buyer, need, desired);
+                        // get market price of all the goods.
                         var absPrice = ProductPrices.GetProductValue(need) * desired;
 
                         // try to buy what is needed going through each pop who's selling
@@ -253,7 +277,8 @@ namespace EconomicCalculator.Storage
                             // whe know the seller is selling,
                             // so we get what we want or what they have
                             // whichever's higher
-                            var available = Math.Min(desired, seller.ForSale.GetProductValue(need));
+                            var available 
+                                = Math.Min(desired, seller.ForSale.GetProductValue(need));
 
                             // with the amount we can buy, get the price
                             var price = GetPrice(need, available);
@@ -270,8 +295,89 @@ namespace EconomicCalculator.Storage
                             // else, just go to bartering.
                         }
                     }
+
+                    // And if there is still stuff left at this point
+                    // go to travelling merchants.
                 }
             }
+        }
+
+        /// <summary>
+        /// Buys good from the market.
+        /// </summary>
+        /// <param name="buyer">The one buying the good.</param>
+        /// <param name="good">The good they are trying to buy.</param>
+        /// <param name="amount">How much they are trying to buy.</param>
+        /// <returns></returns>
+        public IProductAmountCollection BuyGoodsFromMarket(IPopulationGroup buyer, 
+            IProduct good, double amount)
+        {
+            // First buy from local merchants.
+
+
+            IProductAmountCollection result = new ProductAmountCollection();
+            // Then buy from everyone else.
+            foreach (var seller in Populations.GetPopsSellingProduct(good))
+            {
+                // If someone is selling the good, try to buy from them.
+                result = BuyGoods(buyer, good, amount, seller);
+            }
+
+            // Finish buy going to the travelling merchants, if all else fails.
+
+
+            return result;
+        }
+
+        public IProductAmountCollection BuyGoods(IPopulationGroup buyer, IProduct good, double amount,
+            IPopulationGroup seller)
+        {
+            if (buyer is null)
+                throw new ArgumentNullException(nameof(buyer));
+            if (good is null)
+                throw new ArgumentNullException(nameof(good));
+            if (seller is null)
+                throw new ArgumentNullException(nameof(seller));
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(amount));
+
+            // get the cash we have available.
+            var cash = buyer.GetCash(AcceptedCurrencies);
+
+            var result = new ProductAmountCollection();
+
+            // if we have any cash, try to buy with that first.
+            if (cash.Any(x => x.Item2 > 0))
+            { 
+                // Buy what we can with our cash.
+                var transaction = seller.BuyGood(cash, good, amount, this);
+
+                // With our transaction initiated, complete it on the buyer's end.
+                buyer.CompleteTransaction(transaction);
+
+                // Add the transaction to our return value
+                result.AddProducts(transaction);
+
+                // Update our desired amount
+                amount -= transaction.GetProductValue(good);
+            }
+
+            // if we still have more to buy, it means we are out of cash. Begin bartering.
+            // check we have things to barter.
+            if (amount > 0 && buyer.ForSale.Any(x => x.Item2 > 0) && BarterLegal)
+            {
+                // Begin Bartering
+                var barter = seller.BarterGood(buyer.ForSale, good, amount, this);
+
+                // with the barter complete, finish for buyer.
+                buyer.CompleteTransaction(barter);
+
+                // add the transaction to the result
+                result.AddProducts(barter);
+            }
+
+            // we've bought what we could from the pop, so return.
+            return result;
         }
 
         /// <summary>
@@ -479,6 +585,7 @@ namespace EconomicCalculator.Storage
         /// Travelling merchants are a unique group, and are split apart.
         /// </summary>
         public IList<IPopulationGroup> TravellingMerchants { get; set; }
+        public bool BarterLegal { get; private set; }
 
         #endregion
 

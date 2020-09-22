@@ -36,6 +36,15 @@ namespace EconomicCalculator.Storage
 
         #endregion GeneralInfo
 
+        #region LegalInfo
+
+        /// <summary>
+        /// Whether Bartering is legal or not.
+        /// </summary>
+        bool BarterLegal { get; }
+
+        #endregion LegalInfo
+
         #region InfoDetails
 
         /// <summary>
@@ -81,6 +90,12 @@ namespace EconomicCalculator.Storage
         IList<IProduct> AcceptedCurrencies { get; }
 
         /// <summary>
+        /// Get's the Value of the currencies in the market.
+        /// </summary>
+        /// <returns>all currencies and their market value.</returns>
+        IProductAmountCollection CurrencyValues();
+
+        /// <summary>
         /// Runs a market day through it's cycle.
         /// </summary>
         void RunMarketDay();
@@ -112,6 +127,17 @@ namespace EconomicCalculator.Storage
         double GetPrice(IProduct product, double amount);
 
         /// <summary>
+        /// Gets a price for a good.
+        /// </summary>
+        /// <param name="product">The product we are pricing</param>
+        /// <param name="amount">How much are we getting.</param>
+        /// <returns>The price in abstract currency.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// If Product is null.
+        /// </exception>
+        double GetPrice(IProduct good);
+
+        /// <summary>
         /// Buys good from the market.
         /// </summary>
         /// <param name="product">The product to buy.</param>
@@ -133,6 +159,17 @@ namespace EconomicCalculator.Storage
         #endregion AvailableOptions
 
         #region PracticalShortcuts
+
+        /// <summary>
+        /// Given a set of cash and a desired price, get the amount of the cash
+        /// to meet the price (rounded up for safety)
+        /// </summary>
+        /// <param name="AvailableCash">The amount of cash avaliable.</param>
+        /// <param name="price">The price to meet (roughly)</param>
+        /// <returns>The appropriate cash for the price.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="AvailableCash"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="price"/> is less than or equal to 0.</exception>
+        IProductAmountCollection ChangeForPrice(IProductAmountCollection AvailableCash, double price);
 
         /// <summary>
         /// Function to Exchange Cash for an alternative via money changers.
