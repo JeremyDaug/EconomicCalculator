@@ -48,16 +48,17 @@ namespace EconomicCalculator.Storage
         public Market()
         {
             ProductPrices = new ProductAmountCollection();
+
         }
 
         #region TheMarket
 
         private IProductAmountCollection _productSupply;
+        private IProductAmountCollection _purchasedGoods;
+        private IProductAmountCollection _surplus;
 
         /// <summary>
-        /// What products are available, and how many are available.
-        /// Positive values represent available goods and surplus.
-        /// Negative Values represent Shortages.
+        /// What goods were up for sale today.
         /// </summary>
         public IProductAmountCollection ProductSupply
         {
@@ -68,8 +69,34 @@ namespace EconomicCalculator.Storage
         }
 
         /// <summary>
-        /// The effective universal demands.
-        /// Calculated based off of population needs and job inputs.
+        /// How many goods were bought throughout the day.
+        /// </summary>
+        public IProductAmountCollection PurchasedGoods
+        {
+            get
+            {
+                return _purchasedGoods;
+            }
+        }
+
+        /// <summary>
+        /// The desired goods that couldn't be gotten, regardless of the reason.
+        /// </summary>
+        public IProductAmountCollection Shortfall { get; set; }
+
+        /// <summary>
+        /// Of what was put up for sale today, how much remains.
+        /// </summary>
+        public IProductAmountCollection Surplus
+        {
+            get
+            {
+                return _surplus;
+            }
+        }
+
+        /// <summary>
+        /// The total demands of all pops.
         /// </summary>
         public IProductAmountCollection ProductDemand { get; }
 
@@ -83,6 +110,9 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public IProductAmountCollection ProductionCapacity { get; }
 
+        /// <summary>
+        /// The official currencies of the location, may be empty.
+        /// </summary>
         public IList<IProduct> OfficialCurrencies { get; set; }
 
         /// <summary>
@@ -90,6 +120,8 @@ namespace EconomicCalculator.Storage
         /// This isn't necissarily the tax currency.
         /// Only Money Changers can work in all currencies regardless of the market.
         /// The price of money can only change based on Money Changer Transactions.
+        /// The point at which currency becomes acceptes is when there is more of
+        /// that currency than others.
         /// </summary>
         public IList<IProduct> AcceptedCurrencies { get; set; }
 
@@ -256,48 +288,13 @@ namespace EconomicCalculator.Storage
                         continue; // and skip it here.
                     }
 
-                    // since it's available to buy go to the
-                    // merchants Local first if they have any to sell
-                    if (Populations.Merchants.ForSale.Contains(need))
-                    {
-                        // Todo, get Generic Buying done first.
-                    }
+                    // Go to the market and buy
+                    var reciept = BuyGoodsFromMarket(buyer, need, desired);
 
-                    // if there is more to buy, go to the other locals.
-                    if (desired > 0)
-                    {
-                        var result = BuyGoodsFromMarket(buyer, need, desired);
-                        // get market price of all the goods.
-                        var absPrice = ProductPrices.GetProductValue(need) * desired;
+                    // process our reciept, getting how satisfied our need was.
+                    var satisfaction = reciept.GetProductValue(need);
 
-                        // try to buy what is needed going through each pop who's selling
-                        // until you get what you need, or nothing is left.
-                        foreach (var seller in Populations.GetPopsSellingProduct(need))
-                        {
-                            // whe know the seller is selling,
-                            // so we get what we want or what they have
-                            // whichever's higher
-                            var available 
-                                = Math.Min(desired, seller.ForSale.GetProductValue(need));
-
-                            // with the amount we can buy, get the price
-                            var price = GetPrice(need, available);
-
-                            // With the price get the currency of the pop first, if available.
-                            var cash = buyer.GetCash(AcceptedCurrencies);
-
-                            // If there is any cash available, buy with cash
-                            if (cash.Any(x => x.Item2 > 0))
-                            {
-                                var toBuy = ChangeForPrice(cash, price);
-                            }
-
-                            // else, just go to bartering.
-                        }
-                    }
-
-                    // And if there is still stuff left at this point
-                    // go to travelling merchants.
+                    // subtract what we were able to get from our need follower.
                 }
             }
         }
@@ -308,25 +305,37 @@ namespace EconomicCalculator.Storage
         /// <param name="buyer">The one buying the good.</param>
         /// <param name="good">The good they are trying to buy.</param>
         /// <param name="amount">How much they are trying to buy.</param>
-        /// <returns></returns>
-        public IProductAmountCollection BuyGoodsFromMarket(IPopulationGroup buyer, 
+        /// <returns>The Receipt of purchases</returns>
+        public IProductAmountCollection BuyGoodsFromMarket(IPopulationGroup buyer,
             IProduct good, double amount)
         {
-            // First buy from local merchants.
-
-
+            // The result of the purchases.
             IProductAmountCollection result = new ProductAmountCollection();
-            // Then buy from everyone else.
+
+            // First buy from local merchants, they only accept cash.
+            result = Populations.Merchants
+                .BuyGood(buyer.GetCash(AcceptedCurrencies), good, amount, this);
+
+            // Then buy from everyone else via both cash and barter.
             foreach (var seller in Populations.GetPopsSellingProduct(good))
             {
                 // If someone is selling the good, try to buy from them.
-                result = BuyGoods(buyer, good, amount, seller);
+                result.AddProducts(BuyGoods(buyer, good, amount, seller));
             }
 
             // Finish buy going to the travelling merchants, if all else fails.
+            foreach (var travSeller in TravellingMerchantsSelling(good))
+            {
+                result.AddProducts(BuyGoods(buyer, good, amount, travSeller));
+            }
 
-
+            // return the ultimate receipt.
             return result;
+        }
+
+        public IEnumerable<IPopulationGroup> TravellingMerchantsSelling(IProduct good)
+        {
+            return TravellingMerchants.Where(x => x.ForSale.Contains(good));
         }
 
         public IProductAmountCollection BuyGoods(IPopulationGroup buyer, IProduct good, double amount,
@@ -348,7 +357,7 @@ namespace EconomicCalculator.Storage
 
             // if we have any cash, try to buy with that first.
             if (cash.Any(x => x.Item2 > 0))
-            { 
+            {
                 // Buy what we can with our cash.
                 var transaction = seller.BuyGood(cash, good, amount, this);
 
@@ -395,7 +404,7 @@ namespace EconomicCalculator.Storage
             if (AvailableCash is null)
                 throw new ArgumentNullException(nameof(AvailableCash));
             // ensure that the price is greater than 0
-            if (price <= 0)
+            if (price <= 0) // TODO, allow this to savely give change for 0. It's not that hard.
                 throw new ArgumentOutOfRangeException("Price must be greater than 0.");
 
             // first, check that all available cash can meet the price.
@@ -412,7 +421,7 @@ namespace EconomicCalculator.Storage
             foreach (var coin in AvailableCash.OrderByDescending(x => ProductPrices.GetProductValue(x.Item1)))
             {
                 // if none of that coin exist
-                if (coin.Item2 == 0 )
+                if (coin.Item2 == 0)
                 {
                     // add it as zero
                     result.AddProducts(coin.Item1, 0);

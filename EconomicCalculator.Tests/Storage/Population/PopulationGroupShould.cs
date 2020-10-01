@@ -45,6 +45,12 @@ namespace EconomicCalculator.Tests.Storage
         private Mock<IProduct> ProducedGood;
         private readonly Guid ProducedGoodId = Guid.NewGuid();
 
+        private IProductAmountCollection currencyValues;
+        private Mock<IProduct> CurrencyMock1;
+        private readonly Guid Currency1Id = Guid.NewGuid();
+        private Mock<IProduct> CurrencyMock2;
+        private readonly Guid Currency2Id = Guid.NewGuid();
+
         #region Needs
         private Mock<IProduct> LifeNeed;
         private readonly Guid LifeNeedId = Guid.NewGuid();
@@ -61,10 +67,13 @@ namespace EconomicCalculator.Tests.Storage
 
             LifeNeed = new Mock<IProduct>();
             LifeNeed.Setup(x => x.Id).Returns(LifeNeedId);
+            LifeNeed.Setup(x => x.Name).Returns("LifeNeed");
             DailyNeed = new Mock<IProduct>();
             DailyNeed.Setup(x => x.Id).Returns(DailyNeedId);
+            DailyNeed.Setup(x => x.Name).Returns("DailyNeed");
             LuxNeed = new Mock<IProduct>();
             LuxNeed.Setup(x => x.Id).Returns(LuxNeedId);
+            LuxNeed.Setup(x => x.Name).Returns("LuxNeed");
 
             LifeNeedsMock = new ProductAmountCollection();
             LifeNeedsMock.AddProducts(LifeNeed.Object, 1);
@@ -74,6 +83,8 @@ namespace EconomicCalculator.Tests.Storage
             LuxuryNeedsMock.AddProducts(LuxNeed.Object, 1);
 
             #endregion Needs
+
+            #region JobGoods
 
             JobInput = new Mock<IProduct>();
             JobInput.Setup(x => x.Id).Returns(JobInputId);
@@ -96,6 +107,9 @@ namespace EconomicCalculator.Tests.Storage
             ProducedGoods = new ProductAmountCollection();
             ProducedGoods.AddProducts(ProducedGood.Object, 1);
 
+            #endregion JobGoods
+
+            #region JobSetup
             JobMock = new Mock<IJob>();
             JobMock.Setup(x => x.Inputs)
                 .Returns(JobInputs);
@@ -109,9 +123,42 @@ namespace EconomicCalculator.Tests.Storage
                 .Returns((double value) => JobInputs.Multiply(value));
             JobMock.Setup(x => x.CapitalNeedsForPops(It.IsAny<double>()))
                 .Returns((double value) => JobCapitals.Multiply(value));
+            #endregion JobSetup
 
             LaborMock = new Mock<IProduct>();
             LaborMock.Setup(x => x.Id).Returns(LaborId);
+
+            currencyValues = new ProductAmountCollection();
+
+            CurrencyMock1 = new Mock<IProduct>();
+            CurrencyMock1.Setup(x => x.Id).Returns(Currency1Id);
+            CurrencyMock1.Setup(x => x.Name).Returns("Currency1");
+            CurrencyMock2 = new Mock<IProduct>();
+            CurrencyMock2.Setup(x => x.Id).Returns(Currency2Id);
+            CurrencyMock2.Setup(x => x.Name).Returns("Currency2");
+
+            MarketMock = new Mock<IMarket>();
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(DailyNeed.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(LuxNeed.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(JobInput.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(JobOutput.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(JobCapital.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(ProducedGood.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock1.Object))
+                .Returns(100);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock2.Object))
+                .Returns(100);
+
+            MarketMock.Setup(x => x.AcceptedCurrencies)
+                .Returns(new List<IProduct> { CurrencyMock1.Object, CurrencyMock2.Object });
 
             sut = new PopulationGroup
             {
@@ -124,6 +171,8 @@ namespace EconomicCalculator.Tests.Storage
                 LuxuryNeeds = LuxuryNeedsMock,
                 PrimaryJob = JobMock.Object,
                 Priority = Priority1,
+                Storage = new ProductAmountCollection(),
+                ForSale = new ProductAmountCollection(),
                 SecondaryJobs = new List<IJob>(),
                 SkillLevel = SkillLevel,
                 SkillName = SkillName,
@@ -411,5 +460,704 @@ namespace EconomicCalculator.Tests.Storage
         }
 
         #endregion TotalNeeds
+
+        #region GetCash
+
+        [Test]
+        public void ReturnCashFromGetCash()
+        {
+            // setup ForSale
+            sut.ForSale.AddProducts(LuxNeed.Object, 1);
+            sut.ForSale.AddProducts(DailyNeed.Object, 1);
+            sut.ForSale.AddProducts(CurrencyMock1.Object, 1);
+            sut.ForSale.AddProducts(CurrencyMock2.Object, 1);
+
+            // get list of currencies we want back.
+            var currenices = new List<IProduct>
+            {
+                CurrencyMock1.Object,
+                CurrencyMock2.Object
+            };
+
+            // Get our Cash
+            var cash = sut.GetCash(currenices)
+;
+
+            // check our desired cash is in there.
+            AssertProductAmountIsEqual(cash, CurrencyMock1, 1);
+            AssertProductAmountIsEqual(cash, CurrencyMock2, 1);
+
+            // Ensure the others aren't there.
+            Assert.That(cash.Contains(LuxNeed.Object), Is.False);
+            Assert.That(cash.Contains(DailyNeed.Object), Is.False);
+        }
+
+        #endregion GetCash
+
+        #region GetPrice
+
+        [Test]
+        public void ReturnPriceFromGetPrice()
+        {
+            var price = 100;
+            // TODO test this more later, it doesn't do anything right now anyway.
+            var result = sut.GetPrice(LifeNeed.Object, price);
+
+            Assert.That(result, Is.EqualTo(price));
+        }
+
+        #endregion GetPrice
+
+        #region BuyGood
+
+        [Test]
+        public void ThrowArgumentNullFromBuyGoodWhenCashIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => sut.BuyGood(null, LifeNeed.Object, 100, MarketMock.Object));
+        }
+
+        [Test]
+        public void ThrowArgumentNullFromBuyGoodWhenGoodIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => sut.BuyGood(JobInputs, null, 100, MarketMock.Object));
+        }
+
+        [Test]
+        public void ThrowArgumentNullFromBuyGoodWhenMarketIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => sut.BuyGood(JobInputs, LifeNeed.Object, 100, null));
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void ThrowArgumentNullFromBuyGoodWhenAmountIsLessThanOrEqualTo0(double val)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => sut.BuyGood(JobInputs, LifeNeed.Object, val, MarketMock.Object));
+        }
+
+        [Test]
+        public void ReturnSuccessfulPurchaseFromBuyGood()
+        {
+            // set up currency.
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock1.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 1);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock2.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 100);
+
+            // setup immediate cash.
+            var cash = new ProductAmountCollection();
+            cash.AddProducts(CurrencyMock1.Object, 10000);
+            cash.AddProducts(CurrencyMock2.Object, 10000);
+
+            // Setup Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 100);
+            sut.Storage.AddProducts(CurrencyMock1.Object, 10000);
+            sut.Storage.AddProducts(CurrencyMock2.Object, 10000);
+            sut.ForSale.AddProducts(LifeNeed.Object, 100);
+            sut.ForSale.AddProducts(CurrencyMock1.Object, 10000);
+            sut.ForSale.AddProducts(CurrencyMock2.Object, 10000);
+
+            // setup Product
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object))
+                .Returns(123);
+
+            // setup change return
+            var change = new ProductAmountCollection();
+            change.AddProducts(CurrencyMock2.Object, 1);
+            change.AddProducts(CurrencyMock1.Object, 23);
+            MarketMock.Setup(x => x.ChangeForPrice(cash, 123))
+                .Returns(change);
+
+            // test it out
+            var result = sut.BuyGood(cash, LifeNeed.Object, 1, MarketMock.Object);
+
+            // Ensure that the seller has appropriately changed his goods.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 99);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 10001);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 10023);
+
+            // ensure result is correct transaction reciept
+            AssertProductAmountIsEqual(result, LifeNeed, 1);
+            AssertProductAmountIsEqual(result, CurrencyMock2, -1);
+            AssertProductAmountIsEqual(result, CurrencyMock1, -23);
+        }
+
+        [Test]
+        public void ReturnSuccessfulPurchaseFromBuyGoodWithChange()
+        {
+            // set up currency.
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock1.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 1);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock2.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 100);
+
+            // setup immediate cash.
+            var cash = new ProductAmountCollection();
+            cash.AddProducts(CurrencyMock1.Object, 0);
+            cash.AddProducts(CurrencyMock2.Object, 10000);
+
+            // Setup Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 100);
+            sut.Storage.AddProducts(CurrencyMock1.Object, 10000);
+            sut.Storage.AddProducts(CurrencyMock2.Object, 10000);
+            sut.ForSale.AddProducts(LifeNeed.Object, 100);
+            sut.ForSale.AddProducts(CurrencyMock1.Object, 10000);
+            sut.ForSale.AddProducts(CurrencyMock2.Object, 10000);
+
+            // setup Product
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object))
+                .Returns(123);
+
+            // setup change return
+            var change = new ProductAmountCollection();
+            change.AddProducts(CurrencyMock1.Object, 0);
+            change.AddProducts(CurrencyMock2.Object, 2);
+
+            // Setup seller's change
+            var sellerChange = new ProductAmountCollection();
+            sellerChange.AddProducts(CurrencyMock1.Object, 77);
+            sellerChange.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup changes, general to specific
+            MarketMock
+                .Setup(x => x.ChangeForPrice(It.IsAny<IProductAmountCollection>(), 77))
+                .Returns(sellerChange);
+            MarketMock.Setup(x => x.ChangeForPrice(cash, 123)).Returns(change);
+
+            // test it out
+            var result = sut.BuyGood(cash, LifeNeed.Object, 1, MarketMock.Object);
+
+            // Ensure that the seller has appropriately changed his goods.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 99);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 10002);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1,  9923);
+
+            // ensure result is correct transaction reciept
+            AssertProductAmountIsEqual(result, LifeNeed, 1);
+            AssertProductAmountIsEqual(result, CurrencyMock2, -2);
+            AssertProductAmountIsEqual(result, CurrencyMock1, 77);
+        }
+
+        [Test]
+        public void ReturnUnsuccessfulPurchaseWhenBuyerCannotAffordAnything()
+        {
+            // set up currency.
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock1.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 1);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock2.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 100);
+
+            // setup immediate cash.
+            var cash = new ProductAmountCollection();
+            cash.AddProducts(CurrencyMock1.Object, 0);
+            cash.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 100);
+            sut.Storage.AddProducts(CurrencyMock1.Object, 10000);
+            sut.Storage.AddProducts(CurrencyMock2.Object, 10000);
+            sut.ForSale.AddProducts(LifeNeed.Object, 100);
+            sut.ForSale.AddProducts(CurrencyMock1.Object, 10000);
+            sut.ForSale.AddProducts(CurrencyMock2.Object, 10000);
+
+            // setup Product
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object))
+                .Returns(123);
+
+            // setup change return
+            var change = new ProductAmountCollection();
+            change.AddProducts(CurrencyMock1.Object, 0);
+            change.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup seller's change
+            var sellerChange = new ProductAmountCollection();
+            sellerChange.AddProducts(CurrencyMock1.Object, 0);
+            sellerChange.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup changes, general to specific
+            MarketMock
+                .Setup(x => x.ChangeForPrice(It.IsAny<IProductAmountCollection>(), 77))
+                .Returns(sellerChange);
+            MarketMock.Setup(x => x.ChangeForPrice(cash, 123)).Returns(change);
+
+            // test it out
+            var result = sut.BuyGood(cash, LifeNeed.Object, 1, MarketMock.Object);
+
+            // Ensure that the seller has appropriately changed his goods.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 100);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 10000);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 10000);
+
+            // ensure result is correct transaction reciept
+            Assert.That(result.Contains(LifeNeed.Object), Is.False);
+            Assert.That(result.Contains(CurrencyMock1.Object), Is.False);
+            Assert.That(result.Contains(CurrencyMock2.Object), Is.False);
+        }
+
+        [Test]
+        public void ReturnPartialSuccessWhenGoodIsFractionalAndSomeCanBeBought()
+        {
+            // test varablies
+            var goodPrice = 100;
+            var BuyAmount = 1;
+
+            // make good fractional
+            LifeNeed.Setup(x => x.Fractional).Returns(true);
+
+            // set up currency.
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock1.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 1);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock2.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 100);
+
+            // setup immediate cash.
+            var cash = new ProductAmountCollection();
+            cash.AddProducts(CurrencyMock1.Object, 50);
+            cash.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 100);
+            sut.Storage.AddProducts(CurrencyMock1.Object, 10000);
+            sut.Storage.AddProducts(CurrencyMock2.Object, 10000);
+            sut.ForSale.AddProducts(LifeNeed.Object, 100);
+            sut.ForSale.AddProducts(CurrencyMock1.Object, 10000);
+            sut.ForSale.AddProducts(CurrencyMock2.Object, 10000);
+
+            // setup Product
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object))
+                .Returns(goodPrice);
+
+            // setup change return
+            var change = new ProductAmountCollection();
+            change.AddProducts(CurrencyMock1.Object, 50);
+            change.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup seller's change
+            var sellerChange = new ProductAmountCollection();
+            sellerChange.AddProducts(CurrencyMock1.Object, 0);
+            sellerChange.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup changes, general to specific
+            MarketMock
+                .Setup(x => x.ChangeForPrice(It.IsAny<IProductAmountCollection>(), 77))
+                .Returns(sellerChange);
+            MarketMock.Setup(x => x.ChangeForPrice(cash, goodPrice)).Returns(change);
+
+            // test it out
+            var result = sut.BuyGood(cash, LifeNeed.Object, BuyAmount, MarketMock.Object);
+
+            // Ensure that the seller has appropriately changed his goods.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 99.5);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 10000);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 10050);
+
+            // ensure result is correct transaction reciept
+            AssertProductAmountIsEqual(result, LifeNeed, 0.5);
+            AssertProductAmountIsEqual(result, CurrencyMock2, 0);
+            AssertProductAmountIsEqual(result, CurrencyMock1, -50);
+        }
+
+        [Test]
+        public void ReturnSuccessWhenSellerIsShortOnGoods()
+        {
+            // test varablies
+            var goodPrice = 100;
+            var BuyAmount = 2;
+
+            // set up currency.
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock1.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 1);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock2.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 100);
+
+            // setup immediate cash.
+            var cash = new ProductAmountCollection();
+            cash.AddProducts(CurrencyMock1.Object, 10000);
+            cash.AddProducts(CurrencyMock2.Object, 10000);
+
+            // Setup Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 1);
+            sut.Storage.AddProducts(CurrencyMock1.Object, 10000);
+            sut.Storage.AddProducts(CurrencyMock2.Object, 10000);
+            sut.ForSale.AddProducts(LifeNeed.Object, 1);
+            sut.ForSale.AddProducts(CurrencyMock1.Object, 10000);
+            sut.ForSale.AddProducts(CurrencyMock2.Object, 10000);
+
+            // setup Product
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object))
+                .Returns(goodPrice);
+
+            // setup change return
+            var change = new ProductAmountCollection();
+            change.AddProducts(CurrencyMock1.Object, 0);
+            change.AddProducts(CurrencyMock2.Object, 1);
+
+            // Setup seller's change
+            var sellerChange = new ProductAmountCollection();
+            sellerChange.AddProducts(CurrencyMock1.Object, 0);
+            sellerChange.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup changes, general to specific
+            MarketMock
+                .Setup(x => x.ChangeForPrice(It.IsAny<IProductAmountCollection>(), 0))
+                .Returns(sellerChange);
+            MarketMock.Setup(x => x.ChangeForPrice(cash, goodPrice)).Returns(change);
+
+            // test it out
+            var result = sut.BuyGood(cash, LifeNeed.Object, BuyAmount, MarketMock.Object);
+
+            // Ensure that the seller has appropriately changed his goods.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 0);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 10001);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 10000);
+
+            // ensure result is correct transaction reciept
+            AssertProductAmountIsEqual(result, LifeNeed, 1);
+            AssertProductAmountIsEqual(result, CurrencyMock2, -1);
+            AssertProductAmountIsEqual(result, CurrencyMock1, 0);
+        }
+
+        [Test]
+        public void ReturnSuccessWhenSellerIsShortOnChange()
+        {
+            // test varablies
+            var goodPrice = 123;
+            var BuyAmount = 1;
+            var sellAmount = 100;
+            var expectedBuy = 1;
+
+            // Change good to produce change.
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object)).Returns(goodPrice);
+
+            // set up currency.
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock1.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 1);
+            MarketMock.Setup(x => x.GetPrice(CurrencyMock2.Object, It.IsAny<double>()))
+                .Returns((IProduct prod, double x) => x * 100);
+
+            // setup immediate cash.
+            var cash = new ProductAmountCollection();
+            cash.AddProducts(CurrencyMock1.Object, 0);
+            cash.AddProducts(CurrencyMock2.Object, 10000);
+
+            // Setup Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, sellAmount);
+            sut.Storage.AddProducts(CurrencyMock1.Object, 50);
+            sut.Storage.AddProducts(CurrencyMock2.Object, 0);
+            sut.ForSale.AddProducts(LifeNeed.Object, sellAmount);
+            sut.ForSale.AddProducts(CurrencyMock1.Object, 50);
+            sut.ForSale.AddProducts(CurrencyMock2.Object, 0);
+
+            // setup Product
+            MarketMock.Setup(x => x.GetPrice(LifeNeed.Object))
+                .Returns(goodPrice);
+
+            // setup change return
+            var change = new ProductAmountCollection();
+            change.AddProducts(CurrencyMock1.Object, 0);
+            change.AddProducts(CurrencyMock2.Object, 2);
+
+            // Setup seller's change
+            var sellerChange = new ProductAmountCollection();
+            sellerChange.AddProducts(CurrencyMock1.Object, 50);
+            sellerChange.AddProducts(CurrencyMock2.Object, 0);
+
+            // Setup changes, general to specific
+            MarketMock
+                .Setup(x => x.ChangeForPrice(It.IsAny<IProductAmountCollection>(), 77))
+                .Returns(sellerChange);
+            MarketMock.Setup(x => x.ChangeForPrice(cash, goodPrice)).Returns(change);
+
+            // test it out
+            var result = sut.BuyGood(cash, LifeNeed.Object, BuyAmount, MarketMock.Object);
+
+            // Ensure that the seller has appropriately changed his goods.
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, sellAmount-expectedBuy);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 2);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 0);
+
+            // ensure result is correct transaction reciept
+            AssertProductAmountIsEqual(result, LifeNeed, expectedBuy);
+            AssertProductAmountIsEqual(result, CurrencyMock2, -2);
+            AssertProductAmountIsEqual(result, CurrencyMock1, 50);
+        }
+
+        #endregion BuyGood
+
+        #region BarterGood
+
+        [Test]
+        public void ThrowArgumentNullFromBarterGoodWhenBuyerStockIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => sut.BarterGood(null, LifeNeed.Object, 100, MarketMock.Object));
+        }
+
+        [Test]
+        public void ThrowArgumentNullFromBarterGoodWhenGoodIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => sut.BarterGood(JobInputs, null, 100, MarketMock.Object));
+        }
+
+        [Test]
+        public void ThrowArgumentNullFromBarterGoodWhenMarketIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => sut.BarterGood(JobInputs, LifeNeed.Object, 100, null));
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void ThrowArgumentNullFromBarterGoodWhenAmountIs0OrLess(double val)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => sut.BarterGood(JobInputs, LifeNeed.Object, val, MarketMock.Object));
+        }
+
+        [Test]
+        public void SuccessfullyBarterGoodWithSufficentBarter()
+        {
+            // Setup Market Change for price.
+            MarketMock.Setup(x => x.ChangeForPrice(JobInputs, 100))
+                .Returns(JobInputs.Copy());
+
+            // Add Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 1);
+            sut.ForSale.AddProducts(LifeNeed.Object, 1);
+
+            // Barter 1 LifeNeed for 1 JobInput.
+            var result = sut.BarterGood(JobInputs, LifeNeed.Object, 1, MarketMock.Object);
+
+            // check transaction
+            AssertProductAmountIsEqual(result, LifeNeed, 1);
+            AssertProductAmountIsEqual(result, JobInput, -1);
+
+            // Ensure no change in storage or for sale
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.ForSale, LifeNeed, 1);
+
+            // Ensure that receipt doesn't go above storage or ForSale
+            Assert.That(sut.Storage.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+            Assert.That(sut.ForSale.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+        }
+
+        [Test]
+        public void SuccessfullyBarterGoodWithSufficentBarterButInsufficientStorage()
+        {
+            // Setup Market Change for price.
+            MarketMock.Setup(x => x.ChangeForPrice(JobInputs, 100))
+                .Returns(JobInputs.Copy());
+
+            // Add Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 1);
+            sut.ForSale.AddProducts(LifeNeed.Object, 1);
+
+            // Barter 1 LifeNeed for 1 JobInput.
+            var result = sut.BarterGood(JobInputs, LifeNeed.Object, 2, MarketMock.Object);
+
+            // check transaction
+            AssertProductAmountIsEqual(result, LifeNeed, 1);
+            AssertProductAmountIsEqual(result, JobInput, -1);
+
+            // Ensure no change in storage or for sale
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.ForSale, LifeNeed, 1);
+
+            // Ensure that receipt doesn't go above storage or ForSale
+            Assert.That(sut.Storage.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+            Assert.That(sut.ForSale.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+        }
+
+        [Test]
+        public void SuccessfullyBarterWithInsufficientBarter()
+        {
+            // Update Good Price
+            MarketMock.Setup(x => x.GetPrice(JobInput.Object))
+                .Returns(20);
+
+            // Add Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 1);
+            sut.ForSale.AddProducts(LifeNeed.Object, 1);
+
+            // Setup Market Change for price.
+            MarketMock.Setup(x => x.ChangeForPrice(JobInputs, 100))
+                .Returns(JobInputs.Copy());
+
+            // Barter 1 LifeNeed for 1 JobInput.
+            var result = sut.BarterGood(JobInputs, LifeNeed.Object, 1, MarketMock.Object);
+
+            // check transaction
+            Assert.That(result.Contains(JobInput.Object), Is.False);
+            Assert.That(result.Contains(LifeNeed.Object), Is.False);
+
+            // Ensure no change in storage or for sale
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.ForSale, LifeNeed, 1);
+        }
+
+        [Test]
+        public void SucessfullyBarterWithInsufficientBarterButEnoughToGetSomething()
+        {
+            MarketMock.Setup(x => x.GetPrice(JobInput.Object))
+                .Returns(20);
+
+            JobInputs.SetProductAmount(JobInput.Object, 6);
+
+            var changeRet = new ProductAmountCollection();
+            changeRet.SetProductAmount(JobInput.Object, 5);
+
+            // Setup Market Change for price.
+            MarketMock.Setup(x => x.ChangeForPrice(JobInputs, 100))
+                .Returns(changeRet);
+
+            // Add Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 1);
+            sut.ForSale.AddProducts(LifeNeed.Object, 1);
+
+            // Barter 1 LifeNeed for 1 JobInput.
+            var result = sut.BarterGood(JobInputs, LifeNeed.Object, 2, MarketMock.Object);
+
+            // check transaction
+            AssertProductAmountIsEqual(result, LifeNeed, 1);
+            AssertProductAmountIsEqual(result, JobInput, -5);
+
+            // Ensure no change in storage or for sale
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.ForSale, LifeNeed, 1);
+
+            // Ensure that receipt doesn't go above storage or ForSale
+            Assert.That(sut.Storage.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+            Assert.That(sut.ForSale.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+        }
+
+        [Test]
+        public void SucessfullyBarterForFractionalGood()
+        {
+            MarketMock.Setup(x => x.GetPrice(JobInput.Object))
+                .Returns(20);
+
+            LifeNeed.Setup(x => x.Fractional)
+                .Returns(true);
+
+            JobInputs.SetProductAmount(JobInput.Object, 6);
+
+            var changeRet = new ProductAmountCollection();
+            changeRet.SetProductAmount(JobInput.Object, 5);
+
+            // Add Storage and ForSale
+            sut.Storage.AddProducts(LifeNeed.Object, 2);
+            sut.ForSale.AddProducts(LifeNeed.Object, 2);
+
+            // Setup Market Change for price.
+            MarketMock.Setup(x => x.ChangeForPrice(JobInputs, 100))
+                .Returns(changeRet);
+
+            // Barter 1 LifeNeed for 1 JobInput.
+            var result = sut.BarterGood(JobInputs, LifeNeed.Object, 2, MarketMock.Object);
+
+            // check transaction
+            AssertProductAmountIsEqual(result, LifeNeed, 1.2);
+            AssertProductAmountIsEqual(result, JobInput, -6);
+
+            // Ensure no change in storage or for sale
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 2);
+            AssertProductAmountIsEqual(sut.ForSale, LifeNeed, 2);
+
+            // Ensure that receipt doesn't go above storage or ForSale
+            Assert.That(sut.Storage.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+            Assert.That(sut.ForSale.GetProductValue(LifeNeed.Object),
+                Is.GreaterThanOrEqualTo(result.GetProductValue(LifeNeed.Object)));
+        }
+
+        #endregion BarterGood
+
+        #region CompleteTransaction
+
+        [Test]
+        public void ThrowArgumentNullFromCompleteTransaction()
+        {
+            Assert.Throws<ArgumentNullException>(() => sut.CompleteTransaction(null));
+        }
+
+        [Test]
+        public void CompleteATransactionsCorrectly()
+        {
+            // create transaction
+            var transaction = new ProductAmountCollection();
+            transaction.AddProducts(LifeNeed.Object, 1);
+            transaction.AddProducts(DailyNeed.Object, 2);
+            transaction.AddProducts(LuxNeed.Object, 3);
+            transaction.AddProducts(CurrencyMock1.Object, 4);
+            transaction.AddProducts(CurrencyMock2.Object, 5);
+
+            // complete transaction
+            sut.CompleteTransaction(transaction);
+
+            // check it's all there in Storage
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 2);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 3);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 4);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 5);
+
+            // Check it's in For Sale
+            AssertProductAmountIsEqual(sut.ForSale, LifeNeed, 1);
+            AssertProductAmountIsEqual(sut.ForSale, DailyNeed, 2);
+            AssertProductAmountIsEqual(sut.ForSale, LuxNeed, 3);
+            AssertProductAmountIsEqual(sut.ForSale, CurrencyMock1, 4);
+            AssertProductAmountIsEqual(sut.ForSale, CurrencyMock2, 5);
+
+            // Add it again to double check
+            sut.CompleteTransaction(transaction);
+
+            // check it's all there in Storage
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 2);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 4);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 6);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 8);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 10);
+
+            // Check it's in For Sale
+            AssertProductAmountIsEqual(sut.ForSale, LifeNeed, 2);
+            AssertProductAmountIsEqual(sut.ForSale, DailyNeed, 4);
+            AssertProductAmountIsEqual(sut.ForSale, LuxNeed, 6);
+            AssertProductAmountIsEqual(sut.ForSale, CurrencyMock1, 8);
+            AssertProductAmountIsEqual(sut.ForSale, CurrencyMock2, 10);
+
+            // check again, but subtract this time.
+            transaction.SetProductAmount(LifeNeed.Object, -2);
+
+            sut.CompleteTransaction(transaction);
+
+            // check it's all there in Storage
+            AssertProductAmountIsEqual(sut.Storage, LifeNeed, 0);
+            AssertProductAmountIsEqual(sut.Storage, DailyNeed, 6);
+            AssertProductAmountIsEqual(sut.Storage, LuxNeed, 9);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock1, 12);
+            AssertProductAmountIsEqual(sut.Storage, CurrencyMock2, 15);
+
+            // Check it's in For Sale
+            AssertProductAmountIsEqual(sut.ForSale, DailyNeed, 6);
+            AssertProductAmountIsEqual(sut.ForSale, LuxNeed, 9);
+            AssertProductAmountIsEqual(sut.ForSale, CurrencyMock1, 12);
+            AssertProductAmountIsEqual(sut.ForSale, CurrencyMock2, 15);
+
+            // ensure that Subtracted product is deleted
+            Assert.That(sut.ForSale.Contains(LifeNeed.Object), Is.False);
+        }
+
+        #endregion CompleteTransaction
     }
 }

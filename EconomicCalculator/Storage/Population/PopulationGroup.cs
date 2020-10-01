@@ -367,6 +367,8 @@ namespace EconomicCalculator.Storage
         /// <returns></returns>
         public IProductAmountCollection GetCash(IList<IProduct> Currencies)
         {
+            // TODO this will most likely be changed when products
+            // have more implementations.
             return ForSale.GetProducts(Currencies);
         }
 
@@ -376,7 +378,7 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <returns>The Items for sale in Descending chance of breaking.</returns>
         public IProductAmountCollection PurchasingPower()
-        {
+        { // TODO delete this, it's not used.
             // Get the products for sale and order them by the chance of failure
             // (how long they last) 
             // Maybe give a special sorting to put Currency Up Front?
@@ -426,7 +428,8 @@ namespace EconomicCalculator.Storage
             return v;
         }
 
-        public IProductAmountCollection BuyGood(IProductAmountCollection cash, IProduct good, double amount, IMarket market)
+        public IProductAmountCollection BuyGood(IProductAmountCollection cash,
+            IProduct good, double amount, IMarket market)
         {
             // Sanity check for nulls.
             if (cash is null) throw new ArgumentNullException(nameof(cash));
@@ -441,7 +444,7 @@ namespace EconomicCalculator.Storage
             var available = Math.Min(amount, ForSale.GetProductValue(good));
 
             // get the price of that good
-            var totalPrice = GetPrice(good, market.GetPrice(good)) * amount;
+            var totalPrice = GetPrice(good, market.GetPrice(good)) * available;
 
             // get the cash needed for the goods
             var money = market.ChangeForPrice(cash, totalPrice);
@@ -456,6 +459,11 @@ namespace EconomicCalculator.Storage
                 result.AddProducts(good, available);
                 // remove what they spent
                 result.AddProducts(money.Multiply(-1));
+            }
+            else if (!good.Fractional && totalMoney < market.GetPrice(good))
+            {// If the total money is not enough for a single unit, and the good can't be divided
+                // we can't actually buy anything, so just return an empty transaction
+                return new ProductAmountCollection();
             }
             else // if it's not enough
             {
@@ -484,17 +492,20 @@ namespace EconomicCalculator.Storage
                 }
             }
 
-            // Return change if possible
+            // Get change, if any.
             var change = totalMoney - market.GetPrice(good) * result.GetProductValue(good);
 
-            // Subtract the smallest coin value to guarantee we don't overpay the change.
-            change -= market.CurrencyValues().Min(x => x.Item2);
+            // get the change, if any
+            IProductAmountCollection buyersChange = new ProductAmountCollection();
 
-            // make change using the seller's coins.
-            var buyersChange = market.ChangeForPrice(GetCash(market.AcceptedCurrencies), change);
+            // if change is greater than 0.
+            if (change > 0) // Make said change.
+                buyersChange = market.ChangeForPrice(GetCash(market.AcceptedCurrencies), change);
 
             // add back the buyer's change
             result.AddProducts(buyersChange);
+
+            // TODO, maybe add check to see if the seller shortchanged the buyer.
 
             // complete the transaction for the seller, and subtract the result.
             CompleteTransaction(result.Multiply(-1));
@@ -514,6 +525,8 @@ namespace EconomicCalculator.Storage
         public IProductAmountCollection BarterGood(IProductAmountCollection buyerStock,
             IProduct good, double amount, IMarket market)
         {
+            // TODO, update to use the coincidence of wants,
+            // it will discourage barter more than anything.
             if (buyerStock == null)
                 throw new ArgumentNullException(nameof(buyerStock));
             if (good == null)
@@ -530,8 +543,11 @@ namespace EconomicCalculator.Storage
             // This should become more flexible later.
             var BarterMod = 1;
 
+            // Get how much we can or want to get
+            amount = Math.Min(amount, ForSale.GetProductValue(good));
+
             // get the price of the good.
-            var totalPrice = GetPrice(good, market.GetPrice(good)) * BarterMod;
+            var totalPrice = GetPrice(good, market.GetPrice(good)) * amount * BarterMod;
 
             // get the total price of what's offered.
             double barterVal = 0;
@@ -603,10 +619,10 @@ namespace EconomicCalculator.Storage
             // quickly remove any products from for sale that are 0 or less.
             if (ForSale.Any(x => x.Item2 <= 0))
             {
-                foreach (var product in ForSale)
+                var gone = ForSale.Where(x => x.Item2 == 0).ToList();
+                foreach (var product in gone)
                 {
-                    if (product.Item2 <= 0)
-                        ForSale.DeleteProduct(product.Item1);
+                    ForSale.DeleteProduct(product.Item1);
                 }
             }
         }

@@ -158,5 +158,8 @@ namespace EconomicCalculator.Storage
         /// <param name="action">How to organize the products.</param>
         /// <returns>The collection, organized in ascending order.</returns>
         IProductAmountCollection OrderProductsBy(Func<IProduct, object> func);
+
+        // TODO add IsEmpty() function if need be. It should be easy to do.
+        // bool IsEmpty();
     }
 }
