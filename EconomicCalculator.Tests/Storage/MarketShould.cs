@@ -19,6 +19,10 @@ namespace EconomicCalculator.Tests.Storage
 
         private Mock<IPopulations> testPops;
 
+        private Mock<IPopulationGroup> popMock1;
+        private Mock<IPopulationGroup> popMock2;
+        private Mock<IPopulationGroup> MerchantsMock;
+
         private Mock<IProduct> currencyMock1;
         private Mock<IProduct> currencyMock2;
         private Mock<IProduct> currencyMock3;
@@ -43,7 +47,15 @@ namespace EconomicCalculator.Tests.Storage
         [SetUp]
         public void Setup()
         {
+            MerchantsMock = new Mock<IPopulationGroup>();
+
             testPops = new Mock<IPopulations>();
+
+            testPops.Setup(x => x.Merchants)
+                .Returns(MerchantsMock.Object);
+
+            popMock1 = new Mock<IPopulationGroup>();
+            popMock2 = new Mock<IPopulationGroup>();
 
             #region CurrencySetup
 
@@ -113,6 +125,7 @@ namespace EconomicCalculator.Tests.Storage
                 TotalPopulation = testPopTotal,
                 AcceptedCurrencies = currencies,
                 TravellingMerchants = travMerchants,
+                BarterLegal = false
             };
 
             // Add products to prices
@@ -131,11 +144,587 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(collection.GetProductValue(product.Object), Is.EqualTo(value));
         }
 
-        #region BuyPhase
+        #region BuyGoodsFromMarket
 
+        [Test]
+        public void ThrowArgumentNullFromBuyGoodsFromMarketWhenBuyerIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => sutMarket.BuyGoodsFromMarket(null, productMock1.Object, 100));
+        }
 
+        [Test]
+        public void ThrowArgumentNullFromBuyGoodsFromMarketWhenGoodIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => sutMarket.BuyGoodsFromMarket(popMock1.Object, null, 100));
+        }
 
-        #endregion BuyPhase
+        [Test]
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void ThrowArgumentOutOfRangeFromBuyGoodsFromMarketWhenAmountIsNotPositive(double val)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => sutMarket.BuyGoodsFromMarket(popMock1.Object, productMock1.Object, val));
+        }
+
+        [Test]
+        public void ReturnTotalTransactionAfterBuyingFromMarketFully()
+        {
+            // preexisting conditions.
+            double BuyAmount = 3;
+            double MerchantSells = 1;
+            double ProducersSell = 1;
+            double TravellersSell = 1;
+
+            // Setup Selling Pops
+            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+                .Returns(new List<IPopulationGroup> { popMock2.Object });
+
+            // Setup Buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 1);
+            buyerCash.AddProducts(currencyMock2.Object, 1);
+            buyerCash.AddProducts(currencyMock3.Object, 1);
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+            var ForSale = new ProductAmountCollection();
+            popMock1.Setup(x => x.ForSale)
+                .Returns(ForSale);
+
+            // Setup Merchants
+            var merchantResult = new ProductAmountCollection();
+            merchantResult.AddProducts(productMock1.Object, 1);
+
+            MerchantsMock.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket))
+                .Returns(merchantResult);
+
+            // Setup Sellers
+            var sellerResults = new ProductAmountCollection();
+            sellerResults.AddProducts(productMock1.Object, 1);
+            popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket))
+                .Returns(sellerResults);
+
+            // Setup Travelling Merchants
+            var travellerGoods = new ProductAmountCollection();
+            travellerGoods.AddProducts(productMock1.Object, 1);
+            TravellerMock1.Setup(x => x.ForSale)
+                .Returns(travellerGoods);
+
+            var travellerResults = new ProductAmountCollection();
+            travellerResults.AddProducts(productMock1.Object, 1);
+
+            TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket))
+                .Returns(travellerResults);
+
+            sutMarket.TravellingMerchants = new List<IPopulationGroup> { TravellerMock1.Object };
+
+            // Buy from the market.
+            var result = sutMarket.BuyGoodsFromMarket(popMock1.Object, productMock1.Object, BuyAmount);
+
+            // Ensure that the result has the expected good
+            AssertProductAmountIsEqual(result, productMock1, BuyAmount);
+
+            // ensure merchants bought from
+            MerchantsMock.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Sellers Bought From
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket),
+                Times.Once);
+
+            // Ensure Travelling Merchants bought from
+            TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Once);
+        }
+
+        [Test]
+        public void ReturnTotalTransactionAfterBuyingFromOnlyMerchants()
+        {
+            // preexisting conditions.
+            double BuyAmount = 3;
+            double MerchantSells = 1;
+            double ProducersSell = 1;
+            double TravellersSell = 1;
+
+            // Setup Selling Pops
+            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+                .Returns(new List<IPopulationGroup>());
+
+            // Setup Buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 1);
+            buyerCash.AddProducts(currencyMock2.Object, 1);
+            buyerCash.AddProducts(currencyMock3.Object, 1);
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+            var ForSale = new ProductAmountCollection();
+            popMock1.Setup(x => x.ForSale)
+                .Returns(ForSale);
+
+            // Setup Merchants
+            var merchantResult = new ProductAmountCollection();
+            merchantResult.AddProducts(productMock1.Object, 1);
+
+            MerchantsMock.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket))
+                .Returns(merchantResult);
+
+            // Setup Sellers
+            var sellerResults = new ProductAmountCollection();
+            // sellerResults.AddProducts(productMock1.Object, 1);
+            popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket))
+                .Returns(sellerResults);
+
+            // Setup Travelling Merchants
+            var travellerGoods = new ProductAmountCollection();
+            // travellerGoods.AddProducts(productMock1.Object, 1);
+            TravellerMock1.Setup(x => x.ForSale)
+                .Returns(travellerGoods);
+
+            var travellerResults = new ProductAmountCollection();
+            travellerResults.AddProducts(productMock1.Object, 1);
+
+            TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket))
+                .Returns(travellerResults);
+
+            sutMarket.TravellingMerchants = new List<IPopulationGroup> { TravellerMock1.Object };
+
+            // Buy from the market.
+            var result = sutMarket.BuyGoodsFromMarket(popMock1.Object, productMock1.Object, BuyAmount);
+
+            // Ensure that the result has the expected good
+            AssertProductAmountIsEqual(result, productMock1, MerchantSells);
+
+            // ensure merchants bought from
+            MerchantsMock.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Sellers Bought From
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket),
+                Times.Never);
+
+            // Ensure Travelling Merchants bought from
+            TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Never);
+        }
+
+        [Test]
+        public void ReturnTotalTransactionAfterProducersSatisfyEverything()
+        {
+            // preexisting conditions.
+            double BuyAmount = 3;
+            double MerchantSells = 1;
+            double ProducersSell = 2;
+            double TravellersSell = 1;
+
+            // Setup Selling Pops
+            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+                .Returns(new List<IPopulationGroup> { popMock2.Object });
+
+            // Setup Buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 1);
+            buyerCash.AddProducts(currencyMock2.Object, 1);
+            buyerCash.AddProducts(currencyMock3.Object, 1);
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+            var ForSale = new ProductAmountCollection();
+            popMock1.Setup(x => x.ForSale)
+                .Returns(ForSale);
+
+            // Setup Merchants
+            var merchantResult = new ProductAmountCollection();
+            merchantResult.AddProducts(productMock1.Object, MerchantSells);
+
+            MerchantsMock.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket))
+                .Returns(merchantResult);
+
+            // Setup Sellers
+            var sellerResults = new ProductAmountCollection();
+            sellerResults.AddProducts(productMock1.Object, ProducersSell);
+            popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object, 
+                                          BuyAmount - MerchantSells, sutMarket))
+                .Returns(sellerResults);
+
+            // Setup Travelling Merchants
+            var travellerGoods = new ProductAmountCollection();
+            travellerGoods.AddProducts(productMock1.Object, TravellersSell);
+            TravellerMock1.Setup(x => x.ForSale)
+                .Returns(travellerGoods);
+
+            var travellerResults = new ProductAmountCollection();
+            travellerResults.AddProducts(productMock1.Object, TravellersSell);
+
+            TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket))
+                .Returns(travellerResults);
+
+            sutMarket.TravellingMerchants = new List<IPopulationGroup> { TravellerMock1.Object };
+
+            // Buy from the market.
+            var result = sutMarket.BuyGoodsFromMarket(popMock1.Object, productMock1.Object, BuyAmount);
+
+            // Ensure that the result has the expected good
+            AssertProductAmountIsEqual(result, productMock1, BuyAmount);
+
+            // ensure merchants bought from
+            MerchantsMock.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Sellers Bought From
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket),
+                Times.Once);
+
+            // Ensure Travelling Merchants bought from
+            TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Never);
+        }
+
+        [Test]
+        public void ReturnTotalTransactionAfterSkippingProducersAndBuyingFromMerchants()
+        {
+            // preexisting conditions.
+            double BuyAmount = 3;
+            double MerchantSells = 1;
+            double ProducersSell = 0;
+            double TravellersSell = 2;
+
+            // Setup Selling Pops
+            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+                .Returns(new List<IPopulationGroup>());
+
+            // Setup Buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 1);
+            buyerCash.AddProducts(currencyMock2.Object, 1);
+            buyerCash.AddProducts(currencyMock3.Object, 1);
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+            var ForSale = new ProductAmountCollection();
+            popMock1.Setup(x => x.ForSale)
+                .Returns(ForSale);
+
+            // Setup Merchants
+            var merchantResult = new ProductAmountCollection();
+            merchantResult.AddProducts(productMock1.Object, MerchantSells);
+
+            MerchantsMock.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket))
+                .Returns(merchantResult);
+
+            // Setup Sellers
+            var sellerResults = new ProductAmountCollection();
+            sellerResults.AddProducts(productMock1.Object, ProducersSell);
+            popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object,
+                                          BuyAmount - MerchantSells, sutMarket))
+                .Returns(sellerResults);
+
+            // Setup Travelling Merchants
+            var travellerGoods = new ProductAmountCollection();
+            travellerGoods.AddProducts(productMock1.Object, TravellersSell);
+            TravellerMock1.Setup(x => x.ForSale)
+                .Returns(travellerGoods);
+
+            var travellerResults = new ProductAmountCollection();
+            travellerResults.AddProducts(productMock1.Object, TravellersSell);
+
+            TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket))
+                .Returns(travellerResults);
+
+            sutMarket.TravellingMerchants = new List<IPopulationGroup> { TravellerMock1.Object };
+
+            // Buy from the market.
+            var result = sutMarket.BuyGoodsFromMarket(popMock1.Object, productMock1.Object, BuyAmount);
+
+            // Ensure that the result has the expected good
+            AssertProductAmountIsEqual(result, productMock1, BuyAmount);
+
+            // ensure merchants bought from
+            MerchantsMock.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Sellers Bought From
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket),
+                Times.Never);
+
+            // Ensure Travelling Merchants bought from
+            TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Once);
+        }
+
+        #endregion BuyGoodsFromMarket
+
+        #region TravellingMerchantsSelling
+
+        [Test]
+        public void ThrowArgumentNullFromTravellingMerchantsSellingWhenGoodIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => sutMarket.TravellingMerchantsSelling(null));
+        }
+
+        #endregion TravellingMerchantsSelling
+
+        #region BuyGoods
+
+        [Test]
+        public void ThrowsArgumentNullFromBuyGoodsWhenBuyerIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => sutMarket.BuyGoods(null, productMock1.Object, 100, popMock2.Object));
+        }
+
+        [Test]
+        public void ThrowsArgumentNullFromBuyGoodsWhenGoodIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => sutMarket.BuyGoods(popMock1.Object, null, 100, popMock2.Object));
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void ThrowsArgumentOutOfRangeFromBuyGoodsWhenValueIsZeroOrLess(double val)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => sutMarket.BuyGoods(popMock1.Object, productMock1.Object, val, popMock2.Object));
+        }
+
+        [Test]
+        public void ThrowsArgumentNullFromBuyGoodsWhenSellerIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => sutMarket.BuyGoods(popMock1.Object, productMock1.Object, 100, null));
+        }
+
+        [Test]
+        public void CreateAndReturnTransactionFromBuyGoodsOnlyBuyNoBarter()
+        {
+            // setup good to buy
+            var buyAmount = 1;
+            var recievedAmount = 1;
+            var goodPrice = 100;
+
+            // setup buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 10000);
+            buyerCash.AddProducts(currencyMock2.Object, 10000);
+            buyerCash.AddProducts(currencyMock3.Object, 10000);
+
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+
+            // setup seller
+            var reciept = new ProductAmountCollection();
+            reciept.AddProducts(productMock1.Object, recievedAmount);
+            reciept.AddProducts(currencyMock1.Object, -1);
+
+            popMock2
+                .Setup(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket))
+                .Returns(reciept);
+
+            var result = sutMarket.BuyGoods(popMock1.Object, productMock1.Object,
+                buyAmount, popMock2.Object);
+
+            // ensure transaction is correct
+            AssertProductAmountIsEqual(result, productMock1, recievedAmount);
+            AssertProductAmountIsEqual(result, currencyMock1, -1);
+
+            // Ensure buying ran
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Barter Did not run
+            popMock2.Verify(x => x.BarterGood(popMock1.Object.ForSale, productMock1.Object, buyAmount, sutMarket),
+                Times.Never);
+
+            // Ensure Transaction Completed on the buyer's side the correct number of times.
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<ProductAmountCollection>()),
+                Times.Once);
+        }
+
+        [Test]
+        public void CreateAndReturnTransactionFromBuyGoodsNoBuyOnlyBarter()
+        {
+            // Set Barter to legal
+            sutMarket.BarterLegal = true;
+
+            // setup good to buy
+            var buyAmount = 1;
+            var boughtAmount = 1;
+            var barteredAmount = 1;
+            var goodPrice = 100;
+
+            // setup buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 0);
+            buyerCash.AddProducts(currencyMock2.Object, 0);
+            buyerCash.AddProducts(currencyMock3.Object, 0);
+
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+
+            var buyerGoods = new ProductAmountCollection();
+            buyerGoods.AddProducts(productMock2.Object, 1000);
+
+            popMock1.Setup(x => x.ForSale)
+                .Returns(buyerGoods);
+
+            // setup seller
+            var reciept = new ProductAmountCollection();
+            reciept.AddProducts(productMock1.Object, boughtAmount);
+            reciept.AddProducts(currencyMock1.Object, -1);
+
+            popMock2
+                .Setup(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket))
+                .Returns(reciept);
+
+            var barterTransaction = new ProductAmountCollection();
+            barterTransaction.AddProducts(productMock1.Object, barteredAmount);
+
+            popMock2
+                .Setup(x => x.BarterGood(popMock1.Object.ForSale, productMock1.Object, buyAmount, sutMarket))
+                .Returns(barterTransaction);
+
+            var result = sutMarket.BuyGoods(popMock1.Object, productMock1.Object,
+                buyAmount, popMock2.Object);
+
+            // ensure transaction is correct
+            AssertProductAmountIsEqual(result, productMock1, boughtAmount);
+
+            // Ensure buying ran
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket),
+                Times.Never);
+
+            // Ensure Barter Did not run
+            popMock2.Verify(x => x.BarterGood(popMock1.Object.ForSale, productMock1.Object, buyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Transaction Completed on the buyer's side the correct number of times.
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<ProductAmountCollection>()),
+                Times.Once);
+        }
+
+        [Test]
+        public void CreateAndReturnTransactionFromBuyGoodsBothBuyAndBarter()
+        {
+            // Set Barter to legal
+            sutMarket.BarterLegal = true;
+
+            // setup good to buy
+            var buyAmount = 2;
+            var boughtAmount = 1;
+            var barteredAmount = 1;
+            var goodPrice = 100;
+
+            // setup buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 1000);
+            buyerCash.AddProducts(currencyMock2.Object, 1000);
+            buyerCash.AddProducts(currencyMock3.Object, 1000);
+
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+
+            var buyerGoods = new ProductAmountCollection();
+            buyerGoods.AddProducts(productMock2.Object, 1000);
+
+            popMock1.Setup(x => x.ForSale)
+                .Returns(buyerGoods);
+
+            // setup seller
+            var reciept = new ProductAmountCollection();
+            reciept.AddProducts(productMock1.Object, boughtAmount);
+            reciept.AddProducts(currencyMock1.Object, -1);
+
+            popMock2
+                .Setup(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket))
+                .Returns(reciept);
+
+            var barterTransaction = new ProductAmountCollection();
+            barterTransaction.AddProducts(productMock1.Object, barteredAmount);
+
+            popMock2
+                .Setup(x => x.BarterGood(popMock1.Object.ForSale, productMock1.Object, barteredAmount, sutMarket))
+                .Returns(barterTransaction);
+
+            var result = sutMarket.BuyGoods(popMock1.Object, productMock1.Object,
+                buyAmount, popMock2.Object);
+
+            // ensure transaction is correct
+            AssertProductAmountIsEqual(result, productMock1, boughtAmount+barteredAmount);
+
+            // Ensure buying ran
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Barter Did not run
+            popMock2.Verify(x => x.BarterGood(popMock1.Object.ForSale, productMock1.Object, barteredAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Transaction Completed on the buyer's side the correct number of times.
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<ProductAmountCollection>()),
+                Times.Exactly(2));
+        }
+
+        [Test]
+        public void CreateAndReturnTransactionFromBuyGoodsSkipBarterWhenIllegal()
+        {
+            // Set Barter to legal
+            sutMarket.BarterLegal = false;
+
+            // setup good to buy
+            var buyAmount = 2;
+            var boughtAmount = 1;
+            var barteredAmount = 1;
+            var goodPrice = 100;
+
+            // setup buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 1000);
+            buyerCash.AddProducts(currencyMock2.Object, 1000);
+            buyerCash.AddProducts(currencyMock3.Object, 1000);
+
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+
+            var buyerGoods = new ProductAmountCollection();
+            buyerGoods.AddProducts(productMock2.Object, 1000);
+
+            popMock1.Setup(x => x.ForSale)
+                .Returns(buyerGoods);
+
+            // setup seller
+            var reciept = new ProductAmountCollection();
+            reciept.AddProducts(productMock1.Object, boughtAmount);
+            reciept.AddProducts(currencyMock1.Object, -1);
+
+            popMock2
+                .Setup(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket))
+                .Returns(reciept);
+
+            var barterTransaction = new ProductAmountCollection();
+            barterTransaction.AddProducts(productMock1.Object, barteredAmount);
+
+            popMock2
+                .Setup(x => x.BarterGood(popMock1.Object.ForSale, productMock1.Object, barteredAmount, sutMarket))
+                .Returns(barterTransaction);
+
+            var result = sutMarket.BuyGoods(popMock1.Object, productMock1.Object,
+                buyAmount, popMock2.Object);
+
+            // ensure transaction is correct
+            AssertProductAmountIsEqual(result, productMock1, boughtAmount);
+
+            // Ensure buying ran
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, buyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Barter Did not run 
+            popMock2.Verify(x => x.BarterGood(popMock1.Object.ForSale, productMock1.Object, barteredAmount, sutMarket),
+                Times.Never);
+
+            // Ensure Transaction Completed on the buyer's side the correct number of times.
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<ProductAmountCollection>()),
+                Times.Once);
+        }
+
+        #endregion BuyGoods
 
         #region SellPhase
 

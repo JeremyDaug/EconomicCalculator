@@ -309,6 +309,13 @@ namespace EconomicCalculator.Storage
         public IProductAmountCollection BuyGoodsFromMarket(IPopulationGroup buyer,
             IProduct good, double amount)
         {
+            if (buyer is null)
+                throw new ArgumentNullException(nameof(buyer));
+            if (good is null)
+                throw new ArgumentNullException(nameof(good));
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(amount));
+
             // The result of the purchases.
             IProductAmountCollection result = new ProductAmountCollection();
 
@@ -316,17 +323,56 @@ namespace EconomicCalculator.Storage
             result = Populations.Merchants
                 .BuyGood(buyer.GetCash(AcceptedCurrencies), good, amount, this);
 
+            // see how much was bought.
+            double remainder = 0;
+
+            // if any was bought, update what we are seeking.
+            if (result.Contains(good))
+                remainder = amount - result.GetProductValue(good);
+
+            // if no remainder, return
+            if (remainder <= 0)
+                return result;
+
             // Then buy from everyone else via both cash and barter.
             foreach (var seller in Populations.GetPopsSellingProduct(good))
             {
                 // If someone is selling the good, try to buy from them.
-                result.AddProducts(BuyGoods(buyer, good, amount, seller));
+                var reciept = BuyGoods(buyer, good, remainder, seller);
+
+                // if something was bought
+                if (reciept.Count() > 0)
+                {
+                    // remove it from the remainder
+                    remainder -= reciept.GetProductValue(good);
+
+                    // add it to our result
+                    result.AddProducts(reciept);
+                }
+
+                // if nothing remains, we're done.
+                if (remainder <= 0)
+                    return result;
             }
 
             // Finish buy going to the travelling merchants, if all else fails.
             foreach (var travSeller in TravellingMerchantsSelling(good))
             {
-                result.AddProducts(BuyGoods(buyer, good, amount, travSeller));
+                var reciept = BuyGoods(buyer, good, remainder, travSeller);
+
+                // if something was bought
+                if (reciept.Count() > 0)
+                {
+                    // remove it from remainder
+                    remainder -= reciept.GetProductValue(good);
+
+                    // add it to the result
+                    result.AddProducts(reciept);
+                }
+
+                // if nothing remains, return
+                if (remainder <= 0)
+                    return result;
             }
 
             // return the ultimate receipt.
@@ -335,6 +381,10 @@ namespace EconomicCalculator.Storage
 
         public IEnumerable<IPopulationGroup> TravellingMerchantsSelling(IProduct good)
         {
+            if (good is null)
+                throw new ArgumentNullException(nameof(good));
+
+            // TODO, this isn't tested fully, but this is just a shortcut.
             return TravellingMerchants.Where(x => x.ForSale.Contains(good));
         }
 
@@ -594,7 +644,11 @@ namespace EconomicCalculator.Storage
         /// Travelling merchants are a unique group, and are split apart.
         /// </summary>
         public IList<IPopulationGroup> TravellingMerchants { get; set; }
-        public bool BarterLegal { get; private set; }
+
+        /// <summary>
+        /// Whether Barter is legal or not in the market.
+        /// </summary>
+        public bool BarterLegal { get; set; }
 
         #endregion
 
