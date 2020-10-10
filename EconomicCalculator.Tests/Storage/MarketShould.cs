@@ -145,6 +145,36 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(collection.GetProductValue(product.Object), Is.EqualTo(value));
         }
 
+        #region SellPhase
+
+        [Test]
+        public void ResetSupplyShortfallAndSurplusCorrectly()
+        {
+            // setup Pop SellPhase
+            var sellPhase = new ProductAmountCollection();
+            sellPhase.AddProducts(productMock1.Object, 1);
+
+            testPops.Setup(x => x.SellPhase())
+                .Returns(sellPhase);
+
+            // Run Sell phase
+            sutMarket.SellPhase();
+
+            // check supply
+            Assert.That(sutMarket.ProductSupply, Is.EqualTo(sellPhase));
+
+            // check shortfall
+            Assert.That(sutMarket.Shortfall.Count(), Is.EqualTo(0));
+
+            // check surplus
+            AssertProductAmountIsEqual(sutMarket.Surplus, productMock1, 1);
+
+            // Ensure Surplus and Supply aren't the same thing.
+            Assert.That(sutMarket.ProductSupply, Is.Not.SameAs(sutMarket.Surplus));
+        }
+
+        #endregion SellPhase
+
         #region BuyPhase
 
         [Test]
