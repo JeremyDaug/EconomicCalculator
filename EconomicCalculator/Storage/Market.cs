@@ -48,7 +48,10 @@ namespace EconomicCalculator.Storage
         public Market()
         {
             ProductPrices = new ProductAmountCollection();
-
+            Shortfall = new ProductAmountCollection();
+            _surplus = new ProductAmountCollection();
+            _productSupply = new ProductAmountCollection();
+            _purchasedGoods = new ProductAmountCollection();
         }
 
         #region TheMarket
@@ -241,7 +244,11 @@ namespace EconomicCalculator.Storage
             // Get all goods up for sale.
             _productSupply = Populations.SellPhase();
 
-            // Fill out all
+            // Reset Shortfall to zero.
+            Shortfall = new ProductAmountCollection();
+
+            // Fill Surplus preemtively, we'll remove bought products later.
+            _surplus = ProductSupply.Copy();
         }
 
         public void LocalMerchantsBuy()
@@ -269,34 +276,47 @@ namespace EconomicCalculator.Storage
                     var need = needPair.Item1;
                     var desired = needPair.Item2; // the units desired
 
-                    // Check if the product is available to buy,
-                    // else just subtract to denote a deficit and move on.
                     try
                     {
+                        // Check if the product is available to buy
                         if (ProductSupply.GetProductValue(need) <= 0)
                         {
-                            ProductSupply.SubtractProducts(need, desired);
-                            continue; // the next need please
+                            // if nothing is available, add it to the shortfall.
+                            Shortfall.AddProducts(need, desired);
+                            continue; // and go to the next need
                         }
                     }
                     catch (KeyNotFoundException) // If it doesn't exist in the supply at all.
                     {
                         // Add it in at 0
                         ProductSupply.IncludeProduct(need);
-                        // Subtract our desire for record keeping
-                        ProductSupply.SubtractProducts(need, desired);
+                        // Subtract the missing product from shortfall.
+                        Shortfall.AddProducts(need, desired);
                         continue; // and skip it here.
                     }
 
-                    // Go to the market and buy
+                    // Go to the market and buy what we can.
                     var reciept = BuyGoodsFromMarket(buyer, need, desired);
 
                     // process our reciept, getting how satisfied our need was.
                     var satisfaction = reciept.GetProductValue(need);
 
-                    // subtract what we were able to get from our need follower.
+                    // Add satisfaction to our purchased good recorder
+                    _purchasedGoods.AddProducts(need, satisfaction);
+
+                    // Remove bought good from supply
+                    ProductSupply.SubtractProducts(need, satisfaction);
+
+                    // get the number of goods that couldn't be bought.
+                    var shortfall = desired - satisfaction;
+
+                    // add that to shortfall
+                    Shortfall.AddProducts(need, shortfall);
                 }
             }
+
+            // with all buying done, get surplus supply available by removing bought goods.
+            _surplus.AddProducts(PurchasedGoods.Multiply(-1));
         }
 
         /// <summary>
@@ -328,7 +348,11 @@ namespace EconomicCalculator.Storage
 
             // if any was bought, update what we are seeking.
             if (result.Contains(good))
+            {
                 remainder = amount - result.GetProductValue(good);
+                // and complete the transaction
+                buyer.CompleteTransaction(result);
+            }
 
             // if no remainder, return
             if (remainder <= 0)
@@ -337,7 +361,7 @@ namespace EconomicCalculator.Storage
             // Then buy from everyone else via both cash and barter.
             foreach (var seller in Populations.GetPopsSellingProduct(good))
             {
-                // If someone is selling the good, try to buy from them.
+                // If someone is selling the good, buy or barter with them.
                 var reciept = BuyGoods(buyer, good, remainder, seller);
 
                 // if something was bought
@@ -358,13 +382,16 @@ namespace EconomicCalculator.Storage
             // Finish buy going to the travelling merchants, if all else fails.
             foreach (var travSeller in TravellingMerchantsSelling(good))
             {
-                var reciept = BuyGoods(buyer, good, remainder, travSeller);
+                var reciept = travSeller.BuyGood(buyer.GetCash(AcceptedCurrencies), good, remainder, this);
 
                 // if something was bought
                 if (reciept.Count() > 0)
                 {
                     // remove it from remainder
                     remainder -= reciept.GetProductValue(good);
+
+                    // Complete the transaction for the buyer
+                    buyer.CompleteTransaction(reciept);
 
                     // add it to the result
                     result.AddProducts(reciept);
@@ -545,6 +572,7 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public void ProductionPhase()
         {
+            // Run through production
             Populations.ProductionPhase();
         }
 
@@ -556,6 +584,7 @@ namespace EconomicCalculator.Storage
 
         public void LossPhase()
         {
+            // Carry out losses.
             var losses = Populations.LossPhase();
         }
 

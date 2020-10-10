@@ -125,6 +125,7 @@ namespace EconomicCalculator.Tests.Storage
                 TotalPopulation = testPopTotal,
                 AcceptedCurrencies = currencies,
                 TravellingMerchants = travMerchants,
+                Shortfall = new ProductAmountCollection(),
                 BarterLegal = false
             };
 
@@ -143,6 +144,346 @@ namespace EconomicCalculator.Tests.Storage
         {
             Assert.That(collection.GetProductValue(product.Object), Is.EqualTo(value));
         }
+
+        #region BuyPhase
+
+        [Test]
+        public void GoThroughBuyPhaseSuccessfully()
+        {
+            // Setup ProductSupply
+            sutMarket.ProductSupply.AddProducts(productMock1.Object, 2);
+            sutMarket.ProductSupply.AddProducts(productMock2.Object, 2);
+            sutMarket.ProductSupply.AddProducts(productMock3.Object, 2);
+
+            // Setup pop priority
+            popMock1.Setup(x => x.Priority)
+                .Returns(100);
+            popMock2.Setup(x => x.Priority)
+                .Returns(50);
+
+            // Setup Buyer Goods for sale
+            var pop1Sale = new ProductAmountCollection();
+            pop1Sale.AddProducts(currencyMock1.Object, 100);
+            pop1Sale.AddProducts(currencyMock2.Object, 100);
+            pop1Sale.AddProducts(currencyMock3.Object, 100);
+
+            var pop2Sale = new ProductAmountCollection();
+            pop2Sale.AddProducts(currencyMock1.Object, 100);
+            pop2Sale.AddProducts(currencyMock2.Object, 100);
+            pop2Sale.AddProducts(currencyMock3.Object, 100);
+
+            popMock1.Setup(x => x.ForSale)
+                .Returns(pop1Sale);
+            popMock2.Setup(x => x.ForSale)
+                .Returns(pop2Sale);
+
+            // Setup Buyer Cash
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(pop1Sale);
+            popMock2.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(pop2Sale);
+
+            // setup pop needs
+            var popNeeds1 = new ProductAmountCollection();
+            popNeeds1.AddProducts(productMock1.Object, 1);
+            popNeeds1.AddProducts(productMock2.Object, 1);
+            popNeeds1.AddProducts(productMock3.Object, 1);
+            popMock1.Setup(x => x.TotalNeeds)
+                .Returns(popNeeds1);
+            var popNeeds2 = new ProductAmountCollection();
+            popNeeds2.AddProducts(productMock1.Object, 1);
+            popNeeds2.AddProducts(productMock2.Object, 1);
+            popNeeds2.AddProducts(productMock3.Object, 1);
+            popMock2.Setup(x => x.TotalNeeds)
+                .Returns(popNeeds2);
+
+            // Setup PopsByPriority
+            testPops.Setup(x => x.PopsByPriority)
+                .Returns(
+                    new List<IPopulationGroup> { popMock1.Object, popMock2.Object }
+                );
+
+            // Setup Surplus
+            sutMarket.Surplus.AddProducts(productMock1.Object, 2);
+            sutMarket.Surplus.AddProducts(productMock2.Object, 2);
+            sutMarket.Surplus.AddProducts(productMock3.Object, 2);
+
+            // Setup Merchant Buys
+            var buyCollection1 = new ProductAmountCollection();
+            buyCollection1.AddProducts(productMock1.Object, 1);
+            buyCollection1.AddProducts(currencyMock1.Object, -1);
+
+            var buyCollection2 = new ProductAmountCollection();
+            buyCollection2.AddProducts(productMock2.Object, 1);
+            buyCollection2.AddProducts(currencyMock1.Object, -1);
+
+            var buyCollection3 = new ProductAmountCollection();
+            buyCollection3.AddProducts(productMock3.Object, 1);
+            buyCollection3.AddProducts(currencyMock1.Object, -1);
+
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock1.Object, 1, sutMarket))
+                .Returns(buyCollection1);
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock2.Object, 1, sutMarket))
+                .Returns(buyCollection2);
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock3.Object, 1, sutMarket))
+                .Returns(buyCollection3);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock1.Object, 1, sutMarket))
+                .Returns(buyCollection1);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock2.Object, 1, sutMarket))
+                .Returns(buyCollection2);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock3.Object, 1, sutMarket))
+                .Returns(buyCollection3);
+
+            // Run BuyPhase
+            sutMarket.BuyPhase();
+
+            // Ensure purchased Goods are filled.
+            AssertProductAmountIsEqual(sutMarket.PurchasedGoods, productMock1, 2);
+            AssertProductAmountIsEqual(sutMarket.PurchasedGoods, productMock2, 2);
+            AssertProductAmountIsEqual(sutMarket.PurchasedGoods, productMock3, 2);
+
+            // Ensure there is no shortfall.
+            Assert.That(sutMarket.Shortfall.GetProductValue(productMock1.Object), Is.EqualTo(0));
+            Assert.That(sutMarket.Shortfall.GetProductValue(productMock2.Object), Is.EqualTo(0));
+            Assert.That(sutMarket.Shortfall.GetProductValue(productMock3.Object), Is.EqualTo(0));
+
+            // Ensure No Surplus
+            Assert.That(sutMarket.Surplus.GetProductValue(productMock1.Object), Is.EqualTo(0));
+            Assert.That(sutMarket.Surplus.GetProductValue(productMock2.Object), Is.EqualTo(0));
+            Assert.That(sutMarket.Surplus.GetProductValue(productMock3.Object), Is.EqualTo(0));
+
+            // Ensure Pop1 got to complete a transaction
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Exactly(3));
+
+            // as did pop2
+            popMock2.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Exactly(3));
+        }
+
+        [Test]
+        public void AddMissingProductsToProductSupplyIfNotAlreadyInSupply()
+        {
+            // Setup ProductSupply
+
+            // Setup pop priority
+            popMock1.Setup(x => x.Priority)
+                .Returns(100);
+            popMock2.Setup(x => x.Priority)
+                .Returns(50);
+
+            // Setup Buyer Goods for sale
+            var pop1Sale = new ProductAmountCollection();
+            pop1Sale.AddProducts(currencyMock1.Object, 100);
+            pop1Sale.AddProducts(currencyMock2.Object, 100);
+            pop1Sale.AddProducts(currencyMock3.Object, 100);
+
+            var pop2Sale = new ProductAmountCollection();
+            pop2Sale.AddProducts(currencyMock1.Object, 100);
+            pop2Sale.AddProducts(currencyMock2.Object, 100);
+            pop2Sale.AddProducts(currencyMock3.Object, 100);
+
+            popMock1.Setup(x => x.ForSale)
+                .Returns(pop1Sale);
+            popMock2.Setup(x => x.ForSale)
+                .Returns(pop2Sale);
+
+            // Setup Buyer Cash
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(pop1Sale);
+            popMock2.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(pop2Sale);
+
+            // setup pop needs
+            var popNeeds1 = new ProductAmountCollection();
+            popNeeds1.AddProducts(productMock1.Object, 1);
+            popNeeds1.AddProducts(productMock2.Object, 1);
+            popNeeds1.AddProducts(productMock3.Object, 1);
+            popMock1.Setup(x => x.TotalNeeds)
+                .Returns(popNeeds1);
+            var popNeeds2 = new ProductAmountCollection();
+            popNeeds2.AddProducts(productMock1.Object, 1);
+            popNeeds2.AddProducts(productMock2.Object, 1);
+            popNeeds2.AddProducts(productMock3.Object, 1);
+            popMock2.Setup(x => x.TotalNeeds)
+                .Returns(popNeeds2);
+
+            // Setup PopsByPriority
+            testPops.Setup(x => x.PopsByPriority)
+                .Returns(
+                    new List<IPopulationGroup> { popMock1.Object, popMock2.Object }
+                );
+
+            // Setup Surplus
+
+            // Setup Merchant Buys
+            var buyCollection1 = new ProductAmountCollection();
+            buyCollection1.AddProducts(productMock1.Object, 1);
+            buyCollection1.AddProducts(currencyMock1.Object, -1);
+
+            var buyCollection2 = new ProductAmountCollection();
+            buyCollection2.AddProducts(productMock2.Object, 1);
+            buyCollection2.AddProducts(currencyMock1.Object, -1);
+
+            var buyCollection3 = new ProductAmountCollection();
+            buyCollection3.AddProducts(productMock3.Object, 1);
+            buyCollection3.AddProducts(currencyMock1.Object, -1);
+
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock1.Object, 1, sutMarket))
+                .Returns(buyCollection1);
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock2.Object, 1, sutMarket))
+                .Returns(buyCollection2);
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock3.Object, 1, sutMarket))
+                .Returns(buyCollection3);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock1.Object, 1, sutMarket))
+                .Returns(buyCollection1);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock2.Object, 1, sutMarket))
+                .Returns(buyCollection2);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock3.Object, 1, sutMarket))
+                .Returns(buyCollection3);
+
+            // Run BuyPhase
+            sutMarket.BuyPhase();
+
+            // Ensure purchased Goods are filled.
+            Assert.That(sutMarket.PurchasedGoods.Contains(productMock1.Object), Is.False);
+            Assert.That(sutMarket.PurchasedGoods.Contains(productMock2.Object), Is.False);
+            Assert.That(sutMarket.PurchasedGoods.Contains(productMock3.Object), Is.False);
+
+            // Ensure there is no shortfall.
+            Assert.That(sutMarket.Shortfall.GetProductValue(productMock1.Object), Is.EqualTo(2));
+            Assert.That(sutMarket.Shortfall.GetProductValue(productMock2.Object), Is.EqualTo(2));
+            Assert.That(sutMarket.Shortfall.GetProductValue(productMock3.Object), Is.EqualTo(2));
+
+            // Ensure No Surplus
+            Assert.That(sutMarket.Surplus.Contains(productMock1.Object), Is.False);
+            Assert.That(sutMarket.Surplus.Contains(productMock2.Object), Is.False);
+            Assert.That(sutMarket.Surplus.Contains(productMock3.Object), Is.False);
+
+            // Ensure Pop1 didn't buy anything
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Never);
+
+            // And neither did pop2
+            popMock2.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Never);
+        }
+
+        [Test]
+        public void LetHigherPriorityPopsBuyGoodsFirst()
+        {
+            // Setup ProductSupply
+            sutMarket.ProductSupply.AddProducts(productMock1.Object, 1);
+            sutMarket.ProductSupply.AddProducts(productMock2.Object, 1);
+            sutMarket.ProductSupply.AddProducts(productMock3.Object, 1);
+
+            // Setup pop priority
+            popMock1.Setup(x => x.Priority)
+                .Returns(100);
+            popMock2.Setup(x => x.Priority)
+                .Returns(50);
+
+            // Setup Buyer Goods for sale
+            var pop1Sale = new ProductAmountCollection();
+            pop1Sale.AddProducts(currencyMock1.Object, 100);
+            pop1Sale.AddProducts(currencyMock2.Object, 100);
+            pop1Sale.AddProducts(currencyMock3.Object, 100);
+
+            var pop2Sale = new ProductAmountCollection();
+            pop2Sale.AddProducts(currencyMock1.Object, 100);
+            pop2Sale.AddProducts(currencyMock2.Object, 100);
+            pop2Sale.AddProducts(currencyMock3.Object, 100);
+
+            popMock1.Setup(x => x.ForSale)
+                .Returns(pop1Sale);
+            popMock2.Setup(x => x.ForSale)
+                .Returns(pop2Sale);
+
+            // Setup Buyer Cash
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(pop1Sale);
+            popMock2.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(pop2Sale);
+
+            // setup pop needs
+            var popNeeds1 = new ProductAmountCollection();
+            popNeeds1.AddProducts(productMock1.Object, 1);
+            popNeeds1.AddProducts(productMock2.Object, 1);
+            popNeeds1.AddProducts(productMock3.Object, 1);
+            popMock1.Setup(x => x.TotalNeeds)
+                .Returns(popNeeds1);
+            var popNeeds2 = new ProductAmountCollection();
+            popNeeds2.AddProducts(productMock1.Object, 1);
+            popNeeds2.AddProducts(productMock2.Object, 1);
+            popNeeds2.AddProducts(productMock3.Object, 1);
+            popMock2.Setup(x => x.TotalNeeds)
+                .Returns(popNeeds2);
+
+            // Setup PopsByPriority
+            testPops.Setup(x => x.PopsByPriority)
+                .Returns(
+                    new List<IPopulationGroup> { popMock1.Object, popMock2.Object }
+                );
+
+            // Setup Surplus
+            sutMarket.Surplus.AddProducts(productMock1.Object, 1);
+            sutMarket.Surplus.AddProducts(productMock2.Object, 1);
+            sutMarket.Surplus.AddProducts(productMock3.Object, 1);
+
+            // Setup Merchant Buys
+            var buyCollection1 = new ProductAmountCollection();
+            buyCollection1.AddProducts(productMock1.Object, 1);
+            buyCollection1.AddProducts(currencyMock1.Object, -1);
+
+            var buyCollection2 = new ProductAmountCollection();
+            buyCollection2.AddProducts(productMock2.Object, 1);
+            buyCollection2.AddProducts(currencyMock1.Object, -1);
+
+            var buyCollection3 = new ProductAmountCollection();
+            buyCollection3.AddProducts(productMock3.Object, 1);
+            buyCollection3.AddProducts(currencyMock1.Object, -1);
+
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock1.Object, 1, sutMarket))
+                .Returns(buyCollection1);
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock2.Object, 1, sutMarket))
+                .Returns(buyCollection2);
+            MerchantsMock.Setup(x => x.BuyGood(pop1Sale, productMock3.Object, 1, sutMarket))
+                .Returns(buyCollection3);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock1.Object, 1, sutMarket))
+                .Returns(buyCollection1);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock2.Object, 1, sutMarket))
+                .Returns(buyCollection2);
+            MerchantsMock.Setup(x => x.BuyGood(pop2Sale, productMock3.Object, 1, sutMarket))
+                .Returns(buyCollection3);
+
+            // Run BuyPhase
+            sutMarket.BuyPhase();
+
+            // Ensure purchased Goods are filled.
+            AssertProductAmountIsEqual(sutMarket.PurchasedGoods, productMock1, 1);
+            AssertProductAmountIsEqual(sutMarket.PurchasedGoods, productMock2, 1);
+            AssertProductAmountIsEqual(sutMarket.PurchasedGoods, productMock3, 1);
+
+            // Ensure there is no shortfall.
+            AssertProductAmountIsEqual(sutMarket.Shortfall, productMock1, 1);
+            AssertProductAmountIsEqual(sutMarket.Shortfall, productMock2, 1);
+            AssertProductAmountIsEqual(sutMarket.Shortfall, productMock3, 1);
+
+            // Ensure No Surplus
+            AssertProductAmountIsEqual(sutMarket.Surplus, productMock1, 0);
+            AssertProductAmountIsEqual(sutMarket.Surplus, productMock2, 0);
+            AssertProductAmountIsEqual(sutMarket.Surplus, productMock3, 0);
+
+            // Ensure Pop1 got to complete a transaction
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Exactly(3));
+
+            // but that pop2 didn't 
+            popMock2.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Never);
+        }
+
+        #endregion BuyPhase
 
         #region BuyGoodsFromMarket
 
@@ -174,6 +515,7 @@ namespace EconomicCalculator.Tests.Storage
             double MerchantSells = 1;
             double ProducersSell = 1;
             double TravellersSell = 1;
+            sutMarket.BarterLegal = false;
 
             // Setup Selling Pops
             testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
@@ -181,9 +523,9 @@ namespace EconomicCalculator.Tests.Storage
 
             // Setup Buyer
             var buyerCash = new ProductAmountCollection();
-            buyerCash.AddProducts(currencyMock1.Object, 1);
-            buyerCash.AddProducts(currencyMock2.Object, 1);
-            buyerCash.AddProducts(currencyMock3.Object, 1);
+            buyerCash.AddProducts(currencyMock1.Object, 100);
+            buyerCash.AddProducts(currencyMock2.Object, 100);
+            buyerCash.AddProducts(currencyMock3.Object, 100);
             popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
                 .Returns(buyerCash);
             var ForSale = new ProductAmountCollection();
@@ -193,6 +535,7 @@ namespace EconomicCalculator.Tests.Storage
             // Setup Merchants
             var merchantResult = new ProductAmountCollection();
             merchantResult.AddProducts(productMock1.Object, 1);
+            merchantResult.AddProducts(currencyMock1.Object, -1);
 
             MerchantsMock.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket))
                 .Returns(merchantResult);
@@ -200,6 +543,8 @@ namespace EconomicCalculator.Tests.Storage
             // Setup Sellers
             var sellerResults = new ProductAmountCollection();
             sellerResults.AddProducts(productMock1.Object, 1);
+            sellerResults.AddProducts(currencyMock2.Object, -1);
+
             popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket))
                 .Returns(sellerResults);
 
@@ -211,6 +556,7 @@ namespace EconomicCalculator.Tests.Storage
 
             var travellerResults = new ProductAmountCollection();
             travellerResults.AddProducts(productMock1.Object, 1);
+            travellerResults.AddProducts(currencyMock3.Object, -1);
 
             TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket))
                 .Returns(travellerResults);
@@ -233,6 +579,16 @@ namespace EconomicCalculator.Tests.Storage
 
             // Ensure Travelling Merchants bought from
             TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Once);
+
+            // Ensure Buyer Completed Transactions
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Exactly(3));
+            popMock1.Verify(x => x.CompleteTransaction(merchantResult),
+                Times.Once);
+            popMock1.Verify(x => x.CompleteTransaction(sellerResults),
+                Times.Once);
+            popMock1.Verify(x => x.CompleteTransaction(travellerResults),
                 Times.Once);
         }
 
@@ -270,6 +626,7 @@ namespace EconomicCalculator.Tests.Storage
             // Setup Sellers
             var sellerResults = new ProductAmountCollection();
             // sellerResults.AddProducts(productMock1.Object, 1);
+            sellerResults.AddProducts(currencyMock2.Object, -1);
             popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket))
                 .Returns(sellerResults);
 
@@ -281,6 +638,7 @@ namespace EconomicCalculator.Tests.Storage
 
             var travellerResults = new ProductAmountCollection();
             travellerResults.AddProducts(productMock1.Object, 1);
+            travellerResults.AddProducts(currencyMock3.Object, -1);
 
             TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket))
                 .Returns(travellerResults);
@@ -303,6 +661,16 @@ namespace EconomicCalculator.Tests.Storage
 
             // Ensure Travelling Merchants bought from
             TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Never);
+
+            // Ensure Buyer Completed Transactions
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Exactly(1));
+            popMock1.Verify(x => x.CompleteTransaction(merchantResult),
+                Times.Once);
+            popMock1.Verify(x => x.CompleteTransaction(sellerResults),
+                Times.Never);
+            popMock1.Verify(x => x.CompleteTransaction(travellerResults),
                 Times.Never);
         }
 
@@ -340,6 +708,7 @@ namespace EconomicCalculator.Tests.Storage
             // Setup Sellers
             var sellerResults = new ProductAmountCollection();
             sellerResults.AddProducts(productMock1.Object, ProducersSell);
+            sellerResults.AddProducts(currencyMock2.Object, -1);
             popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object, 
                                           BuyAmount - MerchantSells, sutMarket))
                 .Returns(sellerResults);
@@ -352,7 +721,7 @@ namespace EconomicCalculator.Tests.Storage
 
             var travellerResults = new ProductAmountCollection();
             travellerResults.AddProducts(productMock1.Object, TravellersSell);
-
+            travellerResults.AddProducts(currencyMock3.Object, -1);
             TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket))
                 .Returns(travellerResults);
 
@@ -374,6 +743,16 @@ namespace EconomicCalculator.Tests.Storage
 
             // Ensure Travelling Merchants bought from
             TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Never);
+
+            // Ensure Buyer Completed Transactions
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Exactly(2));
+            popMock1.Verify(x => x.CompleteTransaction(merchantResult),
+                Times.Once);
+            popMock1.Verify(x => x.CompleteTransaction(sellerResults),
+                Times.Once);
+            popMock1.Verify(x => x.CompleteTransaction(travellerResults),
                 Times.Never);
         }
 
@@ -411,6 +790,7 @@ namespace EconomicCalculator.Tests.Storage
             // Setup Sellers
             var sellerResults = new ProductAmountCollection();
             sellerResults.AddProducts(productMock1.Object, ProducersSell);
+            sellerResults.AddProducts(currencyMock2.Object, -1);
             popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object,
                                           BuyAmount - MerchantSells, sutMarket))
                 .Returns(sellerResults);
@@ -423,7 +803,7 @@ namespace EconomicCalculator.Tests.Storage
 
             var travellerResults = new ProductAmountCollection();
             travellerResults.AddProducts(productMock1.Object, TravellersSell);
-
+            travellerResults.AddProducts(currencyMock3.Object, -1);
             TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket))
                 .Returns(travellerResults);
 
@@ -446,6 +826,115 @@ namespace EconomicCalculator.Tests.Storage
             // Ensure Travelling Merchants bought from
             TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
                 Times.Once);
+
+            // Ensure Buyer Completed Transactions
+            popMock1.Verify(x => x.CompleteTransaction(It.IsAny<IProductAmountCollection>()),
+                Times.Exactly(2));
+            popMock1.Verify(x => x.CompleteTransaction(merchantResult),
+                Times.Once);
+            popMock1.Verify(x => x.CompleteTransaction(sellerResults),
+                Times.Never);
+            popMock1.Verify(x => x.CompleteTransaction(travellerResults),
+                Times.Once);
+        }
+
+        [Test]
+        public void BuyFromMerchantsThenSellersThenTravellers()
+        {
+            // preexisting conditions.
+            double BuyAmount = 3;
+            double MerchantSells = 1;
+            double ProducersSell = 1;
+            double TravellersSell = 1;
+            sutMarket.BarterLegal = false;
+            bool merchantRun = false;
+            bool sellerRun = false;
+            bool travellerRun = false;
+
+            // Setup Selling Pops
+            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+                .Returns(new List<IPopulationGroup> { popMock2.Object });
+
+            // Setup Buyer
+            var buyerCash = new ProductAmountCollection();
+            buyerCash.AddProducts(currencyMock1.Object, 100);
+            buyerCash.AddProducts(currencyMock2.Object, 100);
+            buyerCash.AddProducts(currencyMock3.Object, 100);
+            popMock1.Setup(x => x.GetCash(sutMarket.AcceptedCurrencies))
+                .Returns(buyerCash);
+            var ForSale = new ProductAmountCollection();
+            popMock1.Setup(x => x.ForSale)
+                .Returns(ForSale);
+
+            // Setup Merchants
+            var merchantResult = new ProductAmountCollection();
+            merchantResult.AddProducts(productMock1.Object, 1);
+            merchantResult.AddProducts(currencyMock1.Object, -1);
+
+            MerchantsMock.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket))
+                .Callback(() =>
+                {
+                    Assert.That(sellerRun, Is.False);
+                    Assert.That(travellerRun, Is.False);
+                    merchantRun = true;
+                })
+                .Returns(merchantResult);
+
+            // Setup Sellers
+            var sellerResults = new ProductAmountCollection();
+            sellerResults.AddProducts(productMock1.Object, 1);
+            sellerResults.AddProducts(currencyMock2.Object, -1);
+
+            popMock2.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket))
+                .Callback(() =>
+                {
+                    Assert.That(merchantRun, Is.True);
+                    Assert.That(travellerRun, Is.False);
+                    sellerRun = true;
+                })
+                .Returns(sellerResults);
+
+            // Setup Travelling Merchants
+            var travellerGoods = new ProductAmountCollection();
+            travellerGoods.AddProducts(productMock1.Object, 1);
+            TravellerMock1.Setup(x => x.ForSale)
+                .Returns(travellerGoods);
+
+            var travellerResults = new ProductAmountCollection();
+            travellerResults.AddProducts(productMock1.Object, 1);
+            travellerResults.AddProducts(currencyMock3.Object, -1);
+
+            TravellerMock1.Setup(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket))
+                .Callback(() =>
+                {
+                    Assert.That(merchantRun, Is.True);
+                    Assert.That(sellerRun, Is.True);
+                    travellerRun = true;
+                })
+                .Returns(travellerResults);
+
+            sutMarket.TravellingMerchants = new List<IPopulationGroup> { TravellerMock1.Object };
+
+            // Buy from the market.
+            var result = sutMarket.BuyGoodsFromMarket(popMock1.Object, productMock1.Object, BuyAmount);
+
+            // Ensure that the result has the expected good
+            AssertProductAmountIsEqual(result, productMock1, BuyAmount);
+
+            // ensure merchants bought from
+            MerchantsMock.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount, sutMarket),
+                Times.Once);
+
+            // Ensure Sellers Bought From
+            popMock2.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells, sutMarket),
+                Times.Once);
+
+            // Ensure Travelling Merchants bought from
+            TravellerMock1.Verify(x => x.BuyGood(buyerCash, productMock1.Object, BuyAmount - MerchantSells - ProducersSell, sutMarket),
+                Times.Once);
+
+            // Ensure All Ran
+            Assert.That(merchantRun && sellerRun && travellerRun, Is.True);
         }
 
         #endregion BuyGoodsFromMarket
@@ -756,6 +1245,31 @@ namespace EconomicCalculator.Tests.Storage
 
             // check that the product supply has been copied over.
             Assert.That(sutMarket.ProductSupply, Is.EqualTo(products));
+        }
+
+        [Test]
+        public void UpdateShortfallAndSurplusInSellPhase()
+        {
+            // setup the sell phase
+            var products = new ProductAmountCollection();
+            products.AddProducts(productMock1.Object, 100);
+            testPops.Setup(x => x.SellPhase()).Returns(products);
+
+            // Set Shortfall to anything
+            sutMarket.Shortfall.AddProducts(productMock1.Object, 100);
+
+            // Ensure it's there.
+            AssertProductAmountIsEqual(sutMarket.Shortfall, productMock1, 100);
+
+            // run sell phase
+            sutMarket.SellPhase();
+
+            // Check it was updated
+            Assert.That(sutMarket.Shortfall.Count(), Is.EqualTo(0));
+
+            // Ensure that Surplus is Equal With Supply
+            Assert.That(products.GetProductValue(productMock1.Object),
+                Is.EqualTo(sutMarket.Surplus.GetProductValue(productMock1.Object)));
         }
 
         #endregion SellPhase
