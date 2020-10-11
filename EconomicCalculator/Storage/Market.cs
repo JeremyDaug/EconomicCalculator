@@ -52,6 +52,7 @@ namespace EconomicCalculator.Storage
             _surplus = new ProductAmountCollection();
             _productSupply = new ProductAmountCollection();
             _purchasedGoods = new ProductAmountCollection();
+            _productDemand = new ProductAmountCollection();
         }
 
         #region TheMarket
@@ -59,6 +60,8 @@ namespace EconomicCalculator.Storage
         private IProductAmountCollection _productSupply;
         private IProductAmountCollection _purchasedGoods;
         private IProductAmountCollection _surplus;
+        private IProductAmountCollection _productDemand;
+        private IProductAmountCollection _productionCapacity;
 
         /// <summary>
         /// What goods were up for sale today.
@@ -83,7 +86,7 @@ namespace EconomicCalculator.Storage
         }
 
         /// <summary>
-        /// The desired goods that couldn't be gotten, regardless of the reason.
+        /// The desired goods that couldn't be gotten due to lack of supply.
         /// </summary>
         public IProductAmountCollection Shortfall { get; set; }
 
@@ -101,7 +104,13 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The total demands of all pops.
         /// </summary>
-        public IProductAmountCollection ProductDemand { get; }
+        public IProductAmountCollection ProductDemand
+        {
+            get
+            {
+                return _productDemand;
+            }
+        }
 
         /// <summary>
         /// The price of each product in Abstract units.
@@ -111,7 +120,7 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The total production that can be done in a perfect day.
         /// </summary>
-        public IProductAmountCollection ProductionCapacity { get; }
+        public IProductAmountCollection ProductionCapacity => _productionCapacity;
 
         /// <summary>
         /// The official currencies of the location, may be empty.
@@ -127,6 +136,8 @@ namespace EconomicCalculator.Storage
         /// that currency than others.
         /// </summary>
         public IList<IProduct> AcceptedCurrencies { get; set; }
+
+        public IDictionary<IProduct, bool>;
 
         /// <summary>
         /// Get's the Value of the currencies in the market.
@@ -236,7 +247,15 @@ namespace EconomicCalculator.Storage
 
         public void PopChanges()
         {
-            // todo
+            // Cover the four corners of the possible market.
+
+            // over supplied
+
+            // under supplied
+
+            // high demand
+
+            // low demand
         }
 
         public void SellPhase()
@@ -249,11 +268,17 @@ namespace EconomicCalculator.Storage
 
             // Fill Surplus preemtively, we'll remove bought products later.
             _surplus = ProductSupply.Copy();
+
+            // While we're at it, also get total demand of all products
+            _productDemand = Populations.TotalDemand();
+
+            // And the hypothetical total production available.
+            _productionCapacity = Populations.TotalProduction();
         }
 
         public void LocalMerchantsBuy()
         {
-            // todo,
+            // Hold off on this section. Let's focus on just sellers first.
         }
 
         /// <summary>
@@ -593,7 +618,46 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public void RecalculatePrices()
         {
-            // todo
+            // for each product in the market.
+            foreach (var pair in ProductSupply)
+            {
+                var product = pair.Item1;
+
+                // get surplus product not spent
+                var surplus = Surplus.GetProductValue(product);
+
+                // get product that was desired to buy.
+                var shortfall = Shortfall.GetProductValue(product);
+
+                // the amount of change to make to the good's price.
+                double priceChange = 0;
+
+                // If any surplus and shortfall exists, price was too high
+                if (surplus > 0 && shortfall > 0)
+                {
+                    priceChange += -0.01;
+                }
+                else if (surplus > 0)
+                { 
+                    // If no shortfall but still surplus, try lowering price to sell it, oversupply is not good.
+                    priceChange += -0.01;
+                }
+                else if (shortfall > 0)
+                { // if shortfall but no surplus, price is too low.
+                    priceChange += 0.01;
+                }
+                // In no surplus nor shortfall, then we have hit equilibrium.
+                // No change in price.
+
+                // add the change in price to the new price
+                // TODO make this more flexible and reactive.
+                // going in 0.01 ABS price unit sized steps is too small
+                // and may make prices too stagnant
+                var newPrice = ProductPrices.GetProductValue(product) + priceChange;
+
+                // update to said price.
+                ProductPrices.SetProductAmount(product, newPrice);
+            }
         }
 
         /// <summary>
@@ -645,6 +709,17 @@ namespace EconomicCalculator.Storage
         #endregion TheMarket
 
         #region PracticalShortcuts
+
+        /// <summary>
+        /// Get's the minimal cost for the item in the current market,
+        /// assuming the inputs (but not capital) was bought.
+        /// </summary>
+        /// <param name="product">The product we want the pure cost of.</param>
+        /// <returns>The current minimal market cost.</returns>
+        public double ProductMinimalCost(IProduct product)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Function to Exchange Cash for an alternative via money changers.

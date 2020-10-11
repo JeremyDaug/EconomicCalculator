@@ -107,6 +107,45 @@ namespace EconomicCalculator.Storage.Population
             return result;
         }
 
+        public IProductAmountCollection TotalDemand()
+        {
+            // get result to eventually return
+            var result = new ProductAmountCollection();
+
+            // add Normal Pop Demands
+            foreach (var pop in Pops)
+            {
+                result.AddProducts(pop.TotalNeeds);
+            }
+
+            // add merchants
+            result.AddProducts(Merchants.TotalNeeds);
+
+            // Add Money Changers
+            result.AddProducts(MoneyChangers.TotalNeeds);
+
+            // return results.
+            return result;
+        }
+
+        public IProductAmountCollection TotalProduction()
+        {
+            // the result to eventually return
+            var result = new ProductAmountCollection();
+
+            // for every pop.
+            foreach (var pop in Pops)
+            {
+                // get the hypothetical max production for the pop
+                var maxOutput = pop.PrimaryJob.Outputs.Multiply(pop.Count);
+
+                // and add it to the result
+                result.AddProducts(maxOutput);
+            }
+
+            return result;
+        }
+
         #endregion Actions
     }
 }

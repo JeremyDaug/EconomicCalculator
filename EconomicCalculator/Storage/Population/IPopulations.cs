@@ -90,6 +90,8 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <returns>The goods up for sale.</returns>
         IProductAmountCollection SellPhase();
+        IProductAmountCollection TotalDemand();
+        IProductAmountCollection TotalProduction();
 
         #endregion Actions
     }
