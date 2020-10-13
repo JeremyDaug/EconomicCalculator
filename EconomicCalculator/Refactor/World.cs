@@ -2,6 +2,7 @@
 using EconomicCalculator.Generators;
 using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Storage;
+using EconomicCalculator.Storage.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;

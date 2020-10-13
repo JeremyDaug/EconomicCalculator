@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage
+namespace EconomicCalculator.Storage.Jobs
 {
     /// <summary>
     /// An interface for anything that can be worked as a job.

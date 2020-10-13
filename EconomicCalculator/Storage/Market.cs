@@ -137,8 +137,6 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public IList<IProduct> AcceptedCurrencies { get; set; }
 
-        public IDictionary<IProduct, bool>;
-
         /// <summary>
         /// Get's the Value of the currencies in the market.
         /// </summary>
@@ -618,17 +616,31 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public void RecalculatePrices()
         {
+            // TODO Allow for this to be modified by variations
+            // TODO Create a way to allow for faster Price changes, when supply/demand differences are large.
             // for each product in the market.
-            foreach (var pair in ProductSupply)
+            foreach (var pair in ProductPrices)
             {
+                // Get the product
                 var product = pair.Item1;
 
-                // get surplus product not spent
-                var surplus = Surplus.GetProductValue(product);
+                double surplus;
+                double shortfall;
 
-                // get product that was desired to buy.
-                var shortfall = Shortfall.GetProductValue(product);
+                try
+                {
+                    // get surplus product not spent
+                    surplus = Surplus.GetProductValue(product);
 
+                    // get product that was desired to buy.
+                    shortfall = Shortfall.GetProductValue(product);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // if the item does not exist in surplus or shortfal, then it probably was not
+                    // sold or desired in the market. skip it.
+                    continue;
+                }
                 // the amount of change to make to the good's price.
                 double priceChange = 0;
 
@@ -694,16 +706,20 @@ namespace EconomicCalculator.Storage
         }
 
         /// <summary>
-        /// Buys good from the market.
+        /// The external option to buy from the market.
         /// </summary>
         /// <param name="product">The product to buy.</param>
         /// <param name="amount">How many units to buy.</param>
         /// <param name="sellable">The available products to trade for the product.</param>
         /// <returns>The change in <paramref name="sellable"/> items, plus the amount of good bought.</returns>
         /// <remarks>Buying goods prioritizes using currency to buy over barter of goods.</remarks>
-        public IProductAmountCollection BuyGood(IProduct product, double amount, IProductAmountCollection sellable)
+        public IProductAmountCollection BuyGood(IProduct product, double amount, IProductAmountCollection cash)
         {
-            throw new NotImplementedException();
+            var result = new ProductAmountCollection();
+
+            // TODO, come back to this later if need be. Currently, no external buyers exist.
+
+            return result;
         }
 
         #endregion TheMarket

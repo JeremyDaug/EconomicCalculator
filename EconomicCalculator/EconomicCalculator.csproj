@@ -69,7 +69,8 @@
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
     <Compile Include="Enums\ProductTypes.cs" />
-    <Compile Include="Storage\IJob.cs" />
+    <Compile Include="Storage\Jobs\IFarmer.cs" />
+    <Compile Include="Storage\Jobs\IJob.cs" />
     <Compile Include="Refactor\IProcessGroup.cs" />
     <Compile Include="Refactor\IProductSubstituteGroup.cs" />
     <Compile Include="Generators\LaborRequirementsFactory.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Storage\ICrop.cs" />
     <Compile Include="Storage\IMarket.cs" />
     <Compile Include="Refactor\IProcess.cs" />
+    <Compile Include="Storage\Jobs\ILaborer.cs" />
     <Compile Include="Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Storage\Population\IPopulations.cs" />
     <Compile Include="Storage\IProduct.cs" />

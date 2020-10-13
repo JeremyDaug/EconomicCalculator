@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator.Storage;
+using EconomicCalculator.Storage.Jobs;
 using Moq;
 using NUnit.Framework;
 using System;

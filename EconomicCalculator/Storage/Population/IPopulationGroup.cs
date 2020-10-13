@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Storage.Jobs;
+using System;
 using System.Collections.Generic;
 
 namespace EconomicCalculator.Storage

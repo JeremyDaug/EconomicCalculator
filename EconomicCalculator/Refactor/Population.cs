@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EconomicCalculator.Enums;
 using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Storage;
+using EconomicCalculator.Storage.Jobs;
 
 namespace EconomicCalculator.Generators
 {
