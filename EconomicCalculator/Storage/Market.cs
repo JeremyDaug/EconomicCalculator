@@ -638,7 +638,8 @@ namespace EconomicCalculator.Storage
                 catch (KeyNotFoundException)
                 {
                     // if the item does not exist in surplus or shortfal, then it probably was not
-                    // sold or desired in the market. skip it.
+                    // sold or desired in the market. Give it a boost to denote it's rarity, and try and encourage it.
+                    ProductPrices.AddProducts(product, 0.01);
                     continue;
                 }
                 // the amount of change to make to the good's price.
@@ -715,11 +716,7 @@ namespace EconomicCalculator.Storage
         /// <remarks>Buying goods prioritizes using currency to buy over barter of goods.</remarks>
         public IProductAmountCollection BuyGood(IProduct product, double amount, IProductAmountCollection cash)
         {
-            var result = new ProductAmountCollection();
-
-            // TODO, come back to this later if need be. Currently, no external buyers exist.
-
-            return result;
+            throw new NotImplementedException();
         }
 
         #endregion TheMarket

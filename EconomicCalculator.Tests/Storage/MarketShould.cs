@@ -148,13 +148,26 @@ namespace EconomicCalculator.Tests.Storage
         #region RecalculatePrices
 
         [Test]
-        public void DecreaseProductPriceWhenSurplusAndShortfall()
+        public void IncreaseProductPriceWhenProductIsNotBeingSoldOrDesired()
         {
             // Original price
             double orgPrice = 1;
 
-            // setup the product supply.
-            sutMarket.ProductSupply.AddProducts(productMock1.Object, 1);
+            // setup orignial price
+            sutMarket.ProductPrices.SetProductAmount(productMock1.Object, orgPrice);
+
+            // recalculate prices
+            sutMarket.RecalculatePrices();
+
+            // Ensure Product price is updated 
+            Assert.That(sutMarket.GetPrice(productMock1.Object), Is.GreaterThan(orgPrice));
+        }
+
+        [Test]
+        public void DecreaseProductPriceWhenSurplusAndShortfall()
+        {
+            // Original price
+            double orgPrice = 1;
 
             // Setup Surplus
             sutMarket.Surplus.AddProducts(productMock1.Object, 1);
@@ -178,9 +191,6 @@ namespace EconomicCalculator.Tests.Storage
             // Original price
             double orgPrice = 1;
 
-            // setup the product supply.
-            sutMarket.ProductSupply.AddProducts(productMock1.Object, 1);
-
             // Setup Surplus
             sutMarket.Surplus.AddProducts(productMock1.Object, 1);
 
@@ -203,9 +213,6 @@ namespace EconomicCalculator.Tests.Storage
             // Original price
             double orgPrice = 1;
 
-            // setup the product supply.
-            sutMarket.ProductSupply.AddProducts(productMock1.Object, 1);
-
             // Setup Surplus
             sutMarket.Surplus.AddProducts(productMock1.Object, 0);
 
@@ -227,9 +234,6 @@ namespace EconomicCalculator.Tests.Storage
         {
             // Original price
             double orgPrice = 1;
-
-            // setup the product supply.
-            sutMarket.ProductSupply.AddProducts(productMock1.Object, 1);
 
             // Setup Surplus
             sutMarket.Surplus.AddProducts(productMock1.Object, 0);
