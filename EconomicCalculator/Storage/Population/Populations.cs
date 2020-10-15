@@ -38,6 +38,15 @@ namespace EconomicCalculator.Storage.Population
 
         public IDictionary<Guid, IPopulationGroup> PopsByJobs { get; set; }
 
+        // Not Tested as it's just a pass through for a linq function.
+        public double PopGrowthRate
+        {
+            get
+            {
+                return Pops.Average(x => x.PopGrowthRate);
+            }
+        }
+
         #region Actions
 
         /// <summary>

@@ -245,15 +245,36 @@ namespace EconomicCalculator.Storage
 
         public void PopChanges()
         {
-            // Cover the four corners of the possible market.
+            // get the growth rate from Populations
+            var popGrowth = Populations.PopGrowthRate;
 
-            // over supplied
+            // get the number of new pops, min 1 expected.
+            var newPops = Math.Min(TotalPopulation * popGrowth, 1);
 
-            // under supplied
+            // Create a storage for pop success
+            var popSuccess = new Dictionary<Guid, double>();
 
-            // high demand
+            // for each pop, check how successful/profitable they are.
+            foreach (var pop in Populations.Pops)
+            {
+                // get the pop's id for use.
+                var id = pop.Id;
 
-            // low demand
+                // how satisfied is the pop's needs
+                double lifeSat = pop.AverageLifeSatisfaction();
+                double jobSat = pop.AverageJobSatisfaction();
+                double dailySat = pop.AverageDailySatisfaction();
+                double LuxSat = pop.AverageLuxurySatisfaction();
+
+                // Sum all satisfaction to find how much people want to be there.
+                // Subtract 1 to really hammer home the jobs that aren't even meeting their basic needs.
+                var totalSuccess = lifeSat + jobSat + dailySat + LuxSat - 1;
+
+                // add that to our resulting selection.
+                popSuccess[id] = totalSuccess;
+
+                // TODO !! pick up here !!
+            }
         }
 
         public void SellPhase()
@@ -277,6 +298,7 @@ namespace EconomicCalculator.Storage
         public void LocalMerchantsBuy()
         {
             // Hold off on this section. Let's focus on just sellers first.
+            throw new NotImplementedException();
         }
 
         /// <summary>

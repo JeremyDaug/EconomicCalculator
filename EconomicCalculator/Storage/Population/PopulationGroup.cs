@@ -16,6 +16,8 @@ namespace EconomicCalculator.Storage
 
         public double Count { get; set; }
 
+        public double PopGrowthRate { get; set; }
+
         public IJob PrimaryJob { get; set; }
 
         public int Priority { get; set; }
@@ -94,6 +96,44 @@ namespace EconomicCalculator.Storage
         #region PastSatisfaction
         // These values represent the satisfaction of the pop ffrom the last run ConsumptionPhase.
         // It also includes helper functions to find how much shortfall there was.
+
+        /// <summary>
+        /// The average life need satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        public double AverageLifeSatisfaction()
+        {
+            return LifeSatisfaction.Average(x => x.Item2);
+        }
+
+        /// <summary>
+        /// The average Daily need satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        public double AverageDailySatisfaction()
+        {
+            return DailySatisfaction.Average(x => x.Item2);
+        }
+
+        /// <summary>
+        /// The average Luxury need satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        public double AverageLuxurySatisfaction()
+        {
+            return LuxurySatisfaction.Average(x => x.Item2);
+        }
+
+        /// <summary>
+        /// The average Job satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        public double AverageJobSatisfaction()
+        { // May split this into input and capital satisfaction.
+            var combo = JobInputSatisfaction.Copy();
+            combo.AddProducts(JobCapitalSatisfaction);
+            return combo.Average(x => x.Item2);
+        }
 
         /// <summary>
         /// The satisfaction of the population's life needs.
@@ -297,7 +337,7 @@ namespace EconomicCalculator.Storage
                     Storage.SubtractProducts(product, amount);
                 }
 
-                // Finally, set it's satisfaction satisfaction.
+                // Finally, set it's satisfaction.
                 satisfaction.SetProductAmount(product, sat);
             }
 

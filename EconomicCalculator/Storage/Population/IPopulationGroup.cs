@@ -27,6 +27,11 @@ namespace EconomicCalculator.Storage
         double Count { get; }
 
         /// <summary>
+        /// The daily growth rate of the population.
+        /// </summary>
+        double PopGrowthRate { get; }
+
+        /// <summary>
         /// The name of the Population's Skill.
         /// </summary>
         string SkillName { get; }
@@ -74,7 +79,8 @@ namespace EconomicCalculator.Storage
         IProductAmountCollection LuxuryNeeds { get; }
 
         // Placeholder for possible 'capital' desires. Goods which don't get consumed,
-        // but instead breakdown and must be replaced. The Daily needs and/or Luxury Needs
+        // but instead breakdown and must be replaced, or have maintenance costs.
+        // The Daily needs and/or Luxury Needs
         // as they are longer lasting and easier to fulfill long term.
 
         #endregion Needs
@@ -82,6 +88,30 @@ namespace EconomicCalculator.Storage
         #region PastSatisfaction
         // These values represent the satisfaction of the pop ffrom the last run ConsumptionPhase.
         // It also includes helper functions to find how much shortfall there was.
+
+        /// <summary>
+        /// The average life need satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        double AverageLifeSatisfaction();
+
+        /// <summary>
+        /// The average Daily need satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        double AverageDailySatisfaction();
+
+        /// <summary>
+        /// The average Luxury need satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        double AverageLuxurySatisfaction();
+
+        /// <summary>
+        /// The average Job satisfaction of the pop.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        double AverageJobSatisfaction();
 
         /// <summary>
         /// The satisfaction of the population's life needs.
@@ -98,21 +128,6 @@ namespace EconomicCalculator.Storage
         /// </summary>
         IProductAmountCollection LuxurySatisfaction { get; }
 
-        /// <summary>
-        /// The life need shortfall (if any).
-        /// </summary>
-        IProductAmountCollection LifeShortfall { get; }
-
-        /// <summary>
-        /// The Daily need shortfall (if any).
-        /// </summary>
-        IProductAmountCollection DailyShortfall { get; }
-
-        /// <summary>
-        /// The Daily need shortfall (if any).
-        /// </summary>
-        IProductAmountCollection LuxuryShortfall { get; }
-
         #region JobSatisfaction
 
         /// <summary>
@@ -124,16 +139,6 @@ namespace EconomicCalculator.Storage
         /// The satisfaction of all the job capital requirements.
         /// </summary>
         IProductAmountCollection JobCapitalSatisfaction { get; }
-
-        /// <summary>
-        /// The Job Input shortfall (if any).
-        /// </summary>
-        IProductAmountCollection JobInputShortfall { get; }
-
-        /// <summary>
-        /// The Job Input shortfall (if any).
-        /// </summary>
-        IProductAmountCollection JobCapitalShortfall { get; }
 
         #endregion JobSatisfaction
 

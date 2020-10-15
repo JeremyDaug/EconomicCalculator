@@ -27,6 +27,11 @@ namespace EconomicCalculator.Storage
         double TotalPopulation { get; }
 
         /// <summary>
+        /// The average growth rate across all the pop groups.
+        /// </summary>
+        double PopGrowthRate { get; }
+
+        /// <summary>
         /// The Population Groups
         /// </summary>
         IList<IPopulationGroup> Pops { get; }
@@ -50,7 +55,7 @@ namespace EconomicCalculator.Storage
         /// The Money changers which are part of the group, easily accessible.
         /// </summary>
         IPopulationGroup MoneyChangers { get; }
-
+        
         #region Actions
 
         /// <summary>
