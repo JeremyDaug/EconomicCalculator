@@ -41,6 +41,27 @@ namespace EconomicCalculator.Tests.Intermediaries
         }
 
         [Test]
+        [TestCase(ProductTypes.Consumable, 1)]
+        [TestCase(ProductTypes.Currency, 0)]
+        [TestCase(ProductTypes.Good, 0)]
+        [TestCase(ProductTypes.Land, 0)]
+        [TestCase(ProductTypes.Service, 1)]
+        public void ReturnCorrectConsumptionForProductType(ProductTypes prodType, double expectedResult)
+        {
+            // starting amount
+            var start = 1;
+
+            // set the good type.
+            sut.ProductType = prodType;
+
+            // consume the good.
+            var result = sut.ConsumeProducts(start);
+
+            // Check that the result is correct.
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+
+        [Test]
         [TestCase(100)]
         [TestCase(200)]
         public void ReturnInverseOfMTTFForDailyFailureChance(int MTTF)
