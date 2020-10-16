@@ -71,22 +71,6 @@ namespace EconomicCalculator.Storage
             return count * DailyFailureChance * 2 * rand.NextDouble();
         }
 
-        public double ConsumeProducts(double amount)
-        {
-            switch (ProductType)
-            { // test this out.
-                case ProductTypes.Consumable:
-                case ProductTypes.Service:
-                    return amount;
-                case ProductTypes.Good:
-                case ProductTypes.Land:
-                case ProductTypes.Currency:
-                    return 0;
-                default:
-                    throw new Exception("Product Type not Defined");
-            }
-        }
-
         public override string ToString()
         {
             var result = string.Format("Name: {0}\n" +

@@ -15,6 +15,5 @@ namespace EconomicCalculator.Enums
         Good, // Storable, durable, but can break with use or time.
         Service, // Non-storable, and consumed immediately.
         Land, // Indefinitely storable, and unconsumable.
-        Currency, // A good by which other goods are traded.
     }
 }

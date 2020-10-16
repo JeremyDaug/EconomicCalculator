@@ -76,12 +76,5 @@ namespace EconomicCalculator.Storage
         /// <param name="amount">The amount being checked against.</param>
         /// <returns>The number of failed products.</returns>
         double FailedProducts(double amount);
-
-        /// <summary>
-        /// Consume this product.
-        /// </summary>
-        /// <param name="amount">The ammount of product to consume.</param>
-        /// <returns>How much is consumed in it's use.</returns>
-        double ConsumeProducts(double amount);
     }
 }
