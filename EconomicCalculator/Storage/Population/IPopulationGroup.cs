@@ -111,7 +111,13 @@ namespace EconomicCalculator.Storage
         /// The average Job satisfaction of the pop.
         /// </summary>
         /// <returns>The Average of satisfaction of the needs.</returns>
-        double AverageJobSatisfaction();
+        double AverageJobInputSatisfaction();
+
+        /// <summary>
+        /// The average Capital need satisfaction for jobs.
+        /// </summary>
+        /// <returns>The Average of satisfaction of the needs.</returns>
+        double AverageJobCapitalSatisfaction();
 
         /// <summary>
         /// The satisfaction of the population's life needs.
@@ -195,6 +201,20 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <returns>The Items for sale in Descending chance of breaking.</returns>
         IProductAmountCollection PurchasingPower();
+
+        /// <summary>
+        /// The current profitability of the pop group.
+        /// </summary>
+        /// <param name="market">The current market, which holds prices.</param>
+        /// <returns></returns>
+        double Profitability(IMarket market);
+
+        /// <summary>
+        /// The entry cost to begin working the job.
+        /// </summary>
+        /// <param name="market"></param>
+        /// <returns></returns>
+        double EntryCost(IMarket market);
 
         #endregion Helpers
 

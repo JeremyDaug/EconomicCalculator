@@ -236,6 +236,9 @@ namespace EconomicCalculator.Storage
             // let the travelling merchants pick through what's left.
             TravellingMerchantPhase();
 
+            // Population Growth Phase
+            PopGrowth();
+
             // Population shifting phase
             PopChanges();
 
@@ -243,38 +246,11 @@ namespace EconomicCalculator.Storage
             RecalculatePrices();
         }
 
+
+
         public void PopChanges()
         {
-            // get the growth rate from Populations
-            var popGrowth = Populations.PopGrowthRate;
-
-            // get the number of new pops, min 1 expected.
-            var newPops = Math.Min(TotalPopulation * popGrowth, 1);
-
-            // Create a storage for pop success
-            var popSuccess = new Dictionary<Guid, double>();
-
-            // for each pop, check how successful/profitable they are.
-            foreach (var pop in Populations.Pops)
-            {
-                // get the pop's id for use.
-                var id = pop.Id;
-
-                // how satisfied is the pop's needs
-                double lifeSat = pop.AverageLifeSatisfaction();
-                double jobSat = pop.AverageJobSatisfaction();
-                double dailySat = pop.AverageDailySatisfaction();
-                double LuxSat = pop.AverageLuxurySatisfaction();
-
-                // Sum all satisfaction to find how much people want to be there.
-                // Subtract 1 to really hammer home the jobs that aren't even meeting their basic needs.
-                var totalSuccess = lifeSat + jobSat + dailySat + LuxSat - 1;
-
-                // add that to our resulting selection.
-                popSuccess[id] = totalSuccess;
-
-                // TODO !! pick up here !!
-            }
+            // TODO
         }
 
         public void SellPhase()

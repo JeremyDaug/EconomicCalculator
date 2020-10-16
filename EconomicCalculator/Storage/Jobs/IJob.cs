@@ -31,7 +31,8 @@ namespace EconomicCalculator.Storage.Jobs
         JobTypes JobType { get; }
 
         /// <summary>
-        /// The Daily Input Requirements of the Job.
+        /// The Daily Input Requirements of the Job. 
+        /// Normally capital goods may be consumed as part of the process.
         /// </summary>
         IProductAmountCollection Inputs { get; }
 
