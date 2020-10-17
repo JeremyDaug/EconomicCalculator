@@ -14,6 +14,8 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public Guid Id { get; set; }
 
+        public Random rand;
+
         #region GeneralInfo
 
         /// <summary>
@@ -28,6 +30,12 @@ namespace EconomicCalculator.Storage
         public double TotalPopulation { get; set; }
 
         /// <summary>
+        /// The extra growth from yesterday being carried over.
+        /// Should be between -1 and 1.
+        /// </summary>
+        private double carryoverGrowth { get; set; }
+
+        /// <summary>
         /// The Territorial extent of the Market in acres. -1 means infinite.
         /// </summary>
         public double Territory { get; set; } // not actually used yet.
@@ -39,7 +47,7 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The population of the market and their breakdown.
         /// </summary>
-        public IPopulations Populations { get; set; }
+        public IPopulations Populous { get; set; }
 
         // Territory Breakdown and management.
 
@@ -53,6 +61,8 @@ namespace EconomicCalculator.Storage
             _productSupply = new ProductAmountCollection();
             _purchasedGoods = new ProductAmountCollection();
             _productDemand = new ProductAmountCollection();
+
+            rand = new Random();
         }
 
         #region TheMarket
@@ -217,7 +227,9 @@ namespace EconomicCalculator.Storage
             ConsumptionPhase(); // Done, Don't touch
 
             // Loss Phase, where goods decay and breakdown randomly
-            LossPhase();
+            // Put away to ensure labor isn't destroyed immediately.
+            // will reactivate later.
+            // LossPhase();
 
             // Asset Tax Phase, for taxing assets.
             // Asset taxes are taken out in money first, then goods.
@@ -246,7 +258,99 @@ namespace EconomicCalculator.Storage
             RecalculatePrices();
         }
 
+        /// <summary>
+        /// Grows the population, prioritizing those which are happiest/most successful over others.
+        /// </summary>
+        public void PopGrowth()
+        {
+            // The average growth we achieve each day.
+            var popGrowth = 0.01; // to be divided later represents one year growth average.
 
+            // Get the success of the total populous.
+            var lifeSat = Populous.LifeNeedsSatisfaction();
+            var dailySat = Populous.DailyNeedsSatisfaction();
+
+            // modify growth by satisfaction.
+            if (lifeSat >= 0.99)
+            { // Effectively totally satisfied.
+                // The higher the Daily need Satisfaction, the greater the pop growth.
+                popGrowth += 0.1 * dailySat;
+            }
+            else
+            { // Life sat not satisfied, remove 3 times the missing life need satisfaction.
+                popGrowth -= 0.3 * lifeSat; // This bottoms out at -0.02.
+            }
+
+            // get daily growth rate for the day
+            var growthToday = popGrowth / 365;
+
+            // Randomize growth today.
+            var variance = rand.NextDouble() * 0.02 - 0.01; // -0.01 to 0.01
+            growthToday += variance;
+
+            // Get the new pops to add (divide by our year length)
+            var newPops = TotalPopulation * growthToday / 360;
+
+            // add fractional pops to the carryover growth
+            carryoverGrowth += newPops % 1;
+
+            // if carry over growth greater than 1 (positive or negative)
+            if (Math.Abs(carryoverGrowth) > 1)
+            {
+                // add (or remove) the whole number value of carry over.
+                newPops += carryoverGrowth - (carryoverGrowth % 1);
+
+                // update carryoverGrowth
+                carryoverGrowth = carryoverGrowth % 1;
+            }
+
+            // Get pops ordered by success (descending order)
+            var popsBySuccess = Populous.Pops.OrderByDescending(x => x.Success());
+
+            // get total weight of the populous (all positive values, no negatives)
+            double totalWeight = 0;
+            foreach (var pop in popsBySuccess)
+            {
+                // get the success
+                var success = pop.Success();
+
+                // add to totalWeight if it's positive
+                totalWeight += success > 0 ? success : 0;
+            }
+
+            // Now, we figure out where to put the pops.
+            foreach (var pop in popsBySuccess)
+            {
+                // get pop's success again
+                var success = pop.Success();
+
+                // if pop is not successful, regardless of reason, GTFO, failing pops don't grow
+                // and if the pop is not successful, no following pops will be either.
+                if (success < 0)
+                    break;
+
+                // get pop growth, divided by weight, and multiplied by success
+                var born = newPops / totalWeight * pop.Success();
+
+                // modify up or down by 50%
+                born *= 0.5 * rand.NextDouble();
+
+                // remove hanging decimals
+                born -= born % 1;
+
+                // add new pops to group
+                pop.AddPop(born);
+
+                // remove born from new pops
+                newPops -= born;
+
+                // remove the success from the total weight
+                totalWeight -= pop.Success();
+            }
+
+            // any remainder pop, just add to the most successful pop.
+            popsBySuccess.First().AddPop(newPops - (newPops % 1)); // any extra just drop.
+        }
 
         public void PopChanges()
         {
@@ -256,7 +360,7 @@ namespace EconomicCalculator.Storage
         public void SellPhase()
         {
             // Get all goods up for sale.
-            _productSupply = Populations.SellPhase();
+            _productSupply = Populous.SellPhase();
 
             // Reset Shortfall to zero.
             Shortfall = new ProductAmountCollection();
@@ -265,10 +369,10 @@ namespace EconomicCalculator.Storage
             _surplus = ProductSupply.Copy();
 
             // While we're at it, also get total demand of all products
-            _productDemand = Populations.TotalDemand();
+            _productDemand = Populous.TotalDemand();
 
             // And the hypothetical total production available.
-            _productionCapacity = Populations.TotalProduction();
+            _productionCapacity = Populous.TotalProduction();
         }
 
         public void LocalMerchantsBuy()
@@ -283,7 +387,7 @@ namespace EconomicCalculator.Storage
         public void BuyPhase()
         {
             // go through each pop in order of priority
-            foreach (var buyer in Populations.PopsByPriority)
+            foreach (var buyer in Populous.PopsByPriority)
             {
                 // go through their list of needs
                 foreach (var needPair in buyer.TotalNeeds)
@@ -361,7 +465,7 @@ namespace EconomicCalculator.Storage
             IProductAmountCollection result = new ProductAmountCollection();
 
             // First buy from local merchants, they only accept cash.
-            result = Populations.Merchants
+            result = Populous.Merchants
                 .BuyGood(buyer.GetCash(AcceptedCurrencies), good, amount, this);
 
             // see how much was bought.
@@ -380,7 +484,7 @@ namespace EconomicCalculator.Storage
                 return result;
 
             // Then buy from everyone else via both cash and barter.
-            foreach (var seller in Populations.GetPopsSellingProduct(good))
+            foreach (var seller in Populous.GetPopsSellingProduct(good))
             {
                 // If someone is selling the good, buy or barter with them.
                 var reciept = BuyGoods(buyer, good, remainder, seller);
@@ -594,19 +698,19 @@ namespace EconomicCalculator.Storage
         public void ProductionPhase()
         {
             // Run through production
-            Populations.ProductionPhase();
+            Populous.ProductionPhase();
         }
 
         public void ConsumptionPhase()
         {
             // Kick down to populations.
-            Populations.Consume();
+            Populous.Consume();
         }
 
         public void LossPhase()
         {
             // Carry out losses.
-            var losses = Populations.LossPhase();
+            var losses = Populous.LossPhase();
         }
 
         /// <summary>

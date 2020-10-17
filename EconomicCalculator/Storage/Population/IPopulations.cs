@@ -95,8 +95,48 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <returns>The goods up for sale.</returns>
         IProductAmountCollection SellPhase();
+
+        /// <summary>
+        /// The Total demands of the population.
+        /// </summary>
+        /// <returns></returns>
         IProductAmountCollection TotalDemand();
+
+        /// <summary>
+        /// The total production capability of the populations.
+        /// </summary>
+        /// <returns></returns>
         IProductAmountCollection TotalProduction();
+
+        /// <summary>
+        /// The satisfaction of the total population's life needs.
+        /// </summary>
+        /// <returns>The percent of satisfaction.</returns>
+        double LifeNeedsSatisfaction();
+
+        /// <summary>
+        /// The satisfaction of the total population's daily needs.
+        /// </summary>
+        /// <returns>The percent of satisfaction.</returns>
+        double DailyNeedsSatisfaction();
+
+        /// <summary>
+        /// The satisfaction of the total population's luxury needs.
+        /// </summary>
+        /// <returns>The percent of satisfaction.</returns>
+        double LuxuryNeedsSatisfaction();
+
+        /// <summary>
+        /// The satisfaction of the total population's job inputs.
+        /// </summary>
+        /// <returns>The percent of satisfaction.</returns>
+        double JobInputSatisfaction();
+
+        /// <summary>
+        /// The satisfaction of the total population's job capital.
+        /// </summary>
+        /// <returns>The percent of satisfaction.</returns>
+        double JobCapitalSatisfaction();
 
         #endregion Actions
     }

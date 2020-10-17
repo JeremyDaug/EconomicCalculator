@@ -120,7 +120,7 @@ namespace EconomicCalculator.Tests.Storage
             {
                 Id = testGuid,
                 Name = testName,
-                Populations = testPops.Object,
+                Populous = testPops.Object,
                 Territory = testTerritory,
                 TotalPopulation = testPopTotal,
                 AcceptedCurrencies = currencies,

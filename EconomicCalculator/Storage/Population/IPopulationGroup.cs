@@ -216,6 +216,13 @@ namespace EconomicCalculator.Storage
         /// <returns></returns>
         double EntryCost(IMarket market);
 
+        /// <summary>
+        /// The success of the pop group, measured in how many of it's needs
+        /// are being met.
+        /// </summary>
+        /// <returns>How successful the pop is.</returns>
+        double Success();
+
         #endregion Helpers
 
         #region Actions
@@ -287,6 +294,12 @@ namespace EconomicCalculator.Storage
         /// </summary>
         /// <param name="transaction">What to add and remove.</param>
         void CompleteTransaction(IProductAmountCollection transaction);
+
+        /// <summary>
+        /// Adds pops to popGroup
+        /// </summary>
+        /// <param name="born">The number of pops to add.</param>
+        void AddPop(double born);
 
         #endregion Actions
     }

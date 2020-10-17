@@ -50,7 +50,7 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The population of the market and their breakdown.
         /// </summary>
-        IPopulations Populations { get; }
+        IPopulations Populous { get; }
 
         // Territory Breakdown and management.
 

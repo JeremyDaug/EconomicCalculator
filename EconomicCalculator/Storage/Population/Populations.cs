@@ -155,6 +155,31 @@ namespace EconomicCalculator.Storage.Population
             return result;
         }
 
+        public double LifeNeedsSatisfaction()
+        {
+            return Pops.Average(x => x.AverageLifeSatisfaction());
+        }
+
+        public double DailyNeedsSatisfaction()
+        {
+            return Pops.Average(x => x.AverageDailySatisfaction());
+        }
+
+        public double LuxuryNeedsSatisfaction()
+        {
+            return Pops.Average(x => x.AverageLuxurySatisfaction());
+        }
+
+        public double JobInputSatisfaction()
+        {
+            return Pops.Average(x => x.AverageJobInputSatisfaction());
+        }
+
+        public double JobCapitalSatisfaction()
+        {
+            return Pops.Average(x => x.AverageJobCapitalSatisfaction());
+        }
+
         #endregion Actions
     }
 }

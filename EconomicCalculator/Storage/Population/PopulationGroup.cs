@@ -667,5 +667,47 @@ namespace EconomicCalculator.Storage
                 }
             }
         }
+
+        public double Success()
+        {
+            // get average need satisfaction
+            var success = AverageLifeSatisfaction();
+            success += AverageDailySatisfaction();
+            success += AverageLuxurySatisfaction();
+            // subtract 1 to ensure life need failure leaves you in the negative
+            success -= 1;
+            // return success.
+            return success;
+        }
+
+        // Here down is not tested as functionality is simple.
+
+        public double AverageJobInputSatisfaction()
+        {
+            return JobInputSatisfaction.Average(x => x.Item2);
+        }
+
+        public double AverageJobCapitalSatisfaction()
+        {
+            return JobCapitalSatisfaction.Average(x => x.Item2);
+        }
+
+        public double Profitability(IMarket market)
+        {
+            // Requires knowing how merchants work.
+            throw new NotImplementedException();
+        }
+
+        public double EntryCost(IMarket market)
+        {
+            // Requires knowing how merchants work.
+            throw new NotImplementedException();
+        }
+
+        public void AddPop(double born)
+        {
+            // Add new pops to population.
+            Count += born;
+        }
     }
 }

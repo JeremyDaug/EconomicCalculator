@@ -189,6 +189,23 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(collection.GetProductValue(product.Object), Is.EqualTo(value));
         }
 
+        #region Success
+
+        [Test]
+        [TestCase(1, 1, 1)]
+        public void ReturnSumOfSatisfactionMinus1(double lifeSat, double dailySat, double luxSat)
+        {
+            sut.LifeSatisfaction.AddProducts(LifeNeed.Object, lifeSat);
+            sut.DailySatisfaction.AddProducts(DailyNeed.Object, dailySat);
+            sut.LuxurySatisfaction.AddProducts(LuxNeed.Object, luxSat);
+
+            var result = sut.Success();
+
+            Assert.That(result, Is.EqualTo(lifeSat + dailySat + luxSat - 1));
+        }
+
+        #endregion Success
+
         #region InitializeStorage
 
         // I'm lazy, this is a placeholder for InitilazeStorage().
