@@ -208,12 +208,7 @@ namespace EconomicCalculator.Runner
                     var marketName = reader.GetString(reader.GetOrdinal("Name"));
                     var population = reader.GetDouble(reader.GetOrdinal("TotalPopulation"));
 
-                    var market = new Market
-                    {
-                        Name = marketName,
-                        TotalPopulation = population
-                    };
-                    markets.Add(market);
+                    
                 }
             }
 
@@ -602,14 +597,7 @@ namespace EconomicCalculator.Runner
                     var currentPrice = reader.GetDouble(reader.GetOrdinal("CurrentPrice"));
                     var MTTF = reader.GetInt32(reader.GetOrdinal("MeanTimeToFailure"));
 
-                    var product = new Product
-                    {
-                        Name = name,
-                        UnitName = unit,
-                        DefaultPrice = currentPrice,
-                        MTTF = MTTF
-                    };
-                    products.Add(product);
+                    
                 }
                 return products;
             }

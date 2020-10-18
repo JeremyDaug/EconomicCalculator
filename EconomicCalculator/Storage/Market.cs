@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Randomizer;
 
 namespace EconomicCalculator.Storage
 {
@@ -14,7 +15,7 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public Guid Id { get; set; }
 
-        public Random rand;
+        public IRandomizer rand;
 
         #region GeneralInfo
 
@@ -53,16 +54,16 @@ namespace EconomicCalculator.Storage
 
         #endregion InfoDetails
 
-        public Market()
+        public Market(IRandomizer randomizer)
         {
+            rand = randomizer;
+
             ProductPrices = new ProductAmountCollection();
             Shortfall = new ProductAmountCollection();
             _surplus = new ProductAmountCollection();
             _productSupply = new ProductAmountCollection();
             _purchasedGoods = new ProductAmountCollection();
             _productDemand = new ProductAmountCollection();
-
-            rand = new Random();
         }
 
         #region TheMarket
@@ -285,7 +286,7 @@ namespace EconomicCalculator.Storage
             var growthToday = popGrowth / 365;
 
             // Randomize growth today.
-            var variance = rand.NextDouble() * 0.02 - 0.01; // -0.01 to 0.01
+            var variance = rand.NextDouble(-0.01, 0.01) * 0.02 - 0.01; // -0.01 to 0.01
             growthToday += variance;
 
             // Get the new pops to add (divide by our year length)

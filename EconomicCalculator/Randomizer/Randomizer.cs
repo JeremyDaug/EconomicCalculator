@@ -44,14 +44,19 @@ namespace EconomicCalculator.Randomizer
             return rand.NextDouble();
         }
 
+        public double NextDouble(double max)
+        {
+            return NextDouble() * max;
+        }
+
+        public double NextDouble(double min, double max)
+        {
+            return NextDouble() * (max - min) + min;
+        }
+
         public void NextByte(byte[] buffer)
         {
             rand.NextBytes(buffer);
-        }
-
-        public double DoubleBetweenValues(double min, double max)
-        {
-            return NextDouble() * (max - min) + min;
         }
 
         public double Normal(double mean, double stdDev)

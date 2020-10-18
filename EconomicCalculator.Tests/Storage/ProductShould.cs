@@ -1,6 +1,8 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Randomizer;
 using EconomicCalculator.Storage;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -23,21 +25,25 @@ namespace EconomicCalculator.Tests.Intermediaries
         private const ProductTypes TestType = ProductTypes.Good;
         private const bool TestFractional = true;
 
+        private Mock<IRandomizer> randMock;
+
         [SetUp]
         public void Setup()
         {
-            sut = new Product
-            {
-                Id = TestId,
-                Name = TestName,
-                VariantName = TestVarName,
-                UnitName = TestUnit,
-                DefaultPrice = TestPrice,
-                Quality = TestQuality,
-                MTTF = 100,
-                ProductType = TestType,
-                Fractional = TestFractional
-            };
+            randMock = new Mock<IRandomizer>();
+            randMock.Setup(x => x.NextDouble())
+                .Returns(0.5);
+
+            sut = new Product(randMock.Object);
+            sut.Id = TestId;
+            sut.Name = TestName;
+            sut.VariantName = TestVarName;
+            sut.UnitName = TestUnit;
+            sut.DefaultPrice = TestPrice;
+            sut.Quality = TestQuality;
+            sut.MTTF = 100;
+            sut.ProductType = TestType;
+            sut.Fractional = TestFractional;
         }
 
         [Test]
@@ -66,12 +72,20 @@ namespace EconomicCalculator.Tests.Intermediaries
         [Test]
         public void FindEqualityOnId()
         {
-            var comp = new Product
-            {
-                Id = TestId
-            };
+            var comp = new Product(randMock.Object);
+            comp.Id = TestId;
 
             Assert.That(sut.Equals(comp), Is.True);
+        }
+
+        [Test]
+        public void ReturnFailedProductsSelectedRandomly()
+        {
+            var result = sut.FailedProducts(100);
+
+            Assert.That(result, Is.EqualTo(1));
+
+            randMock.Verify(x => x.NextDouble(), Times.Once);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Generators;
+using EconomicCalculator.Randomizer;
 using EconomicCalculator.Storage;
 using System;
 using System.Data.SqlClient;
@@ -8,6 +9,7 @@ namespace EconomicCalculator.Storage
 {
     internal class Product : IProduct
     {
+        private readonly IRandomizer randomizer;
         #region Data
 
         public Guid Id { get; set; }
@@ -35,13 +37,15 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// Default Constructor.
         /// </summary>
-        public Product()
+        public Product(IRandomizer randomizer)
         {
             Id = Guid.NewGuid();
             DefaultPrice = 1;
             UnitName = "Unit";
             MTTF = 0;
             ProductType = ProductTypes.Good;
+
+            this.randomizer = randomizer;
         }
 
         public bool Equals(IProduct other)
@@ -67,8 +71,8 @@ namespace EconomicCalculator.Storage
 
         public double FailedProducts(double count)
         {
-            var rand = new Random();
-            return count * DailyFailureChance * 2 * rand.NextDouble();
+
+            return count * DailyFailureChance * 2 * randomizer.NextDouble();
         }
 
         public override string ToString()

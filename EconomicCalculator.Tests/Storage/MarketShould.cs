@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Storage;
+﻿using EconomicCalculator.Randomizer;
+using EconomicCalculator.Storage;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -18,6 +19,8 @@ namespace EconomicCalculator.Tests.Storage
         private const double testTerritory = 100;
 
         private Mock<IPopulations> testPops;
+
+        private Mock<IRandomizer> randMock;
 
         private Mock<IPopulationGroup> popMock1;
         private Mock<IPopulationGroup> popMock2;
@@ -116,18 +119,20 @@ namespace EconomicCalculator.Tests.Storage
                 TravellerMock2.Object
             };
 
-            sutMarket = new Market
-            {
-                Id = testGuid,
-                Name = testName,
-                Populous = testPops.Object,
-                Territory = testTerritory,
-                TotalPopulation = testPopTotal,
-                AcceptedCurrencies = currencies,
-                TravellingMerchants = travMerchants,
-                Shortfall = new ProductAmountCollection(),
-                BarterLegal = false
-            };
+            randMock = new Mock<IRandomizer>();
+            randMock.Setup(x => x.NextDouble(It.IsAny<double>(), It.IsAny<double>()))
+                .Returns((double x, double y) => (x + y) / 2);
+
+            sutMarket = new Market(randMock.Object);
+            sutMarket.Id = testGuid;
+            sutMarket.Name = testName;
+            sutMarket.Populous = testPops.Object;
+            sutMarket.Territory = testTerritory;
+            sutMarket.TotalPopulation = testPopTotal;
+            sutMarket.AcceptedCurrencies = currencies;
+            sutMarket.TravellingMerchants = travMerchants;
+            sutMarket.Shortfall = new ProductAmountCollection();
+            sutMarket.BarterLegal = false;
 
             // Add products to prices
             sutMarket.ProductPrices.AddProducts(currencyMock1.Object, currencyVal1);
