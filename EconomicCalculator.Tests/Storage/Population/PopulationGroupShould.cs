@@ -201,7 +201,7 @@ namespace EconomicCalculator.Tests.Storage
 
             var result = sut.Success();
 
-            Assert.That(result, Is.EqualTo(lifeSat + dailySat + luxSat - 1));
+            Assert.That(result, Is.EqualTo(lifeSat + dailySat + luxSat));
         }
 
         #endregion Success

@@ -218,7 +218,7 @@ namespace EconomicCalculator.Storage
 
         /// <summary>
         /// The success of the pop group, measured in how many of it's needs
-        /// are being met.
+        /// are being met. Between 0 and 3.
         /// </summary>
         /// <returns>How successful the pop is.</returns>
         double Success();

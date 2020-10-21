@@ -674,9 +674,6 @@ namespace EconomicCalculator.Storage
             var success = AverageLifeSatisfaction();
             success += AverageDailySatisfaction();
             success += AverageLuxurySatisfaction();
-            // subtract 1 to ensure life need failure leaves you in the negative
-            success -= 1;
-            // return success.
             return success;
         }
 

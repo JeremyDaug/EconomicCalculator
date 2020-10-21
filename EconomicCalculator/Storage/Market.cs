@@ -275,25 +275,25 @@ namespace EconomicCalculator.Storage
             if (lifeSat >= 0.99)
             { // Effectively totally satisfied.
                 // The higher the Daily need Satisfaction, the greater the pop growth.
-                popGrowth += 0.1 * dailySat;
+                popGrowth += 0.01 * dailySat;
             }
             else
             { // Life sat not satisfied, remove 3 times the missing life need satisfaction.
-                popGrowth -= 0.3 * lifeSat; // This bottoms out at -0.02.
+                popGrowth -= 0.03 * (1 - lifeSat); // This bottoms out at -0.02.
             }
 
-            // get daily growth rate for the day
-            var growthToday = popGrowth / 365;
-
             // Randomize growth today.
-            var variance = rand.NextDouble(-0.01, 0.01) * 0.02 - 0.01; // -0.01 to 0.01
-            growthToday += variance;
+            var variance = rand.NextDouble(-0.01, 0.01); // -0.01 to 0.01
+            popGrowth += variance;
 
             // Get the new pops to add (divide by our year length)
-            var newPops = TotalPopulation * growthToday / 360;
+            var newPops = TotalPopulation * popGrowth / 360;
 
             // add fractional pops to the carryover growth
             carryoverGrowth += newPops % 1;
+
+            // remove fraction from newPops
+            newPops -= newPops % 1;
 
             // if carry over growth greater than 1 (positive or negative)
             if (Math.Abs(carryoverGrowth) > 1)
@@ -313,10 +313,7 @@ namespace EconomicCalculator.Storage
             foreach (var pop in popsBySuccess)
             {
                 // get the success
-                var success = pop.Success();
-
-                // add to totalWeight if it's positive
-                totalWeight += success > 0 ? success : 0;
+                totalWeight += pop.Success();
             }
 
             // Now, we figure out where to put the pops.
@@ -327,14 +324,14 @@ namespace EconomicCalculator.Storage
 
                 // if pop is not successful, regardless of reason, GTFO, failing pops don't grow
                 // and if the pop is not successful, no following pops will be either.
-                if (success < 0)
+                if (success <= 0.5)
                     break;
 
                 // get pop growth, divided by weight, and multiplied by success
-                var born = newPops / totalWeight * pop.Success();
+                var born = newPops / totalWeight * success;
 
                 // modify up or down by 50%
-                born *= 0.5 * rand.NextDouble();
+                born *= (0.5 + rand.NextDouble());
 
                 // remove hanging decimals
                 born -= born % 1;
@@ -346,7 +343,7 @@ namespace EconomicCalculator.Storage
                 newPops -= born;
 
                 // remove the success from the total weight
-                totalWeight -= pop.Success();
+                totalWeight -= success;
             }
 
             // any remainder pop, just add to the most successful pop.

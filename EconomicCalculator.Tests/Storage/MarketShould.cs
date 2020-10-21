@@ -18,7 +18,7 @@ namespace EconomicCalculator.Tests.Storage
         private const double testPopTotal = 100;
         private const double testTerritory = 100;
 
-        private Mock<IPopulations> testPops;
+        private Mock<IPopulations> populousMock;
 
         private Mock<IRandomizer> randMock;
 
@@ -52,13 +52,16 @@ namespace EconomicCalculator.Tests.Storage
         {
             MerchantsMock = new Mock<IPopulationGroup>();
 
-            testPops = new Mock<IPopulations>();
+            populousMock = new Mock<IPopulations>();
 
-            testPops.Setup(x => x.Merchants)
+            populousMock.Setup(x => x.Merchants)
                 .Returns(MerchantsMock.Object);
 
             popMock1 = new Mock<IPopulationGroup>();
             popMock2 = new Mock<IPopulationGroup>();
+
+            populousMock.Setup(x => x.Pops)
+                .Returns(new List<IPopulationGroup> { popMock1.Object, popMock2.Object });
 
             #region CurrencySetup
 
@@ -123,10 +126,13 @@ namespace EconomicCalculator.Tests.Storage
             randMock.Setup(x => x.NextDouble(It.IsAny<double>(), It.IsAny<double>()))
                 .Returns((double x, double y) => (x + y) / 2);
 
+            randMock.Setup(x => x.NextDouble())
+                .Returns(0.5);
+
             sutMarket = new Market(randMock.Object);
             sutMarket.Id = testGuid;
             sutMarket.Name = testName;
-            sutMarket.Populous = testPops.Object;
+            sutMarket.Populous = populousMock.Object;
             sutMarket.Territory = testTerritory;
             sutMarket.TotalPopulation = testPopTotal;
             sutMarket.AcceptedCurrencies = currencies;
@@ -149,6 +155,146 @@ namespace EconomicCalculator.Tests.Storage
         {
             Assert.That(collection.GetProductValue(product.Object), Is.EqualTo(value));
         }
+
+        #region PopGrowth
+
+        [Test]
+        public void GrowPopCorrectly()
+        {
+            // setup Populations
+            populousMock.Setup(x => x.LifeNeedsSatisfaction())
+                .Returns(1);
+            populousMock.Setup(x => x.DailyNeedsSatisfaction())
+                .Returns(1);
+
+            // setup popGroups
+            popMock1.Setup(x => x.Success())
+                .Returns(1);
+            popMock2.Setup(x => x.Success())
+                .Returns(1);
+
+            // increase pop size for good measure
+            sutMarket.TotalPopulation = 1000000;
+
+            sutMarket.PopGrowth();
+        }
+
+        [Test]
+        public void GrowPopCorrectlyWithPreferenceToFirst()
+        {
+            // setup Populations
+            populousMock.Setup(x => x.LifeNeedsSatisfaction())
+                .Returns(1);
+            populousMock.Setup(x => x.DailyNeedsSatisfaction())
+                .Returns(1);
+
+            // setup popGroups
+            popMock1.Setup(x => x.Success())
+                .Returns(2);
+            popMock2.Setup(x => x.Success())
+                .Returns(1);
+
+            double mock1PopsBorn = 0;
+            double mock2PopsBorn = 0;
+            popMock1.Setup(x => x.AddPop(It.IsAny<double>()))
+                .Callback<double>(x =>
+                {
+                    if (mock1PopsBorn == 0)
+                        mock1PopsBorn = x;
+                });
+            popMock2.Setup(x => x.AddPop(It.IsAny<double>()))
+                .Callback<double>(x => 
+                {
+                    if (mock2PopsBorn == 0)
+                        mock2PopsBorn = x;
+                });
+
+            // increase pop size for good measure
+            sutMarket.TotalPopulation = 1000000;
+
+            sutMarket.PopGrowth();
+
+            Assert.That(mock1PopsBorn, Is.GreaterThan(mock2PopsBorn));
+        }
+
+        [Test]
+        public void GrowPopCorrectlyWithPreferenceToSecond()
+        {
+            // setup Populations
+            populousMock.Setup(x => x.LifeNeedsSatisfaction())
+                .Returns(1);
+            populousMock.Setup(x => x.DailyNeedsSatisfaction())
+                .Returns(1);
+
+            // setup popGroups
+            popMock1.Setup(x => x.Success())
+                .Returns(1);
+            popMock2.Setup(x => x.Success())
+                .Returns(2);
+
+            double mock1PopsBorn = 0;
+            double mock2PopsBorn = 0;
+            popMock1.Setup(x => x.AddPop(It.IsAny<double>()))
+                .Callback<double>(x =>
+                {
+                    if (mock1PopsBorn == 0)
+                        mock1PopsBorn = x;
+                });
+            popMock2.Setup(x => x.AddPop(It.IsAny<double>()))
+                .Callback<double>(x =>
+                {
+                    if (mock2PopsBorn == 0)
+                        mock2PopsBorn = x;
+                });
+
+            // increase pop size for good measure
+            sutMarket.TotalPopulation = 1000000;
+
+            sutMarket.PopGrowth();
+
+            Assert.That(mock1PopsBorn, Is.LessThan(mock2PopsBorn));
+        }
+
+        [Test]
+        public void GrowPopCorrectlySkippingOnesWithLowSuccess()
+        {
+            // setup Populations
+            populousMock.Setup(x => x.LifeNeedsSatisfaction())
+                .Returns(1);
+            populousMock.Setup(x => x.DailyNeedsSatisfaction())
+                .Returns(1);
+
+            // setup popGroups
+            popMock1.Setup(x => x.Success())
+                .Returns(0.5);
+            popMock2.Setup(x => x.Success())
+                .Returns(0.4);
+
+            double mock1PopsBorn = 0;
+            double mock2PopsBorn = 0;
+            popMock1.Setup(x => x.AddPop(It.IsAny<double>()))
+                .Callback<double>(x =>
+                {
+                    if (mock1PopsBorn == 0)
+                        mock1PopsBorn = x;
+                });
+            popMock2.Setup(x => x.AddPop(It.IsAny<double>()))
+                .Callback<double>(x =>
+                {
+                    if (mock2PopsBorn == 0)
+                        mock2PopsBorn = x;
+                });
+
+            // increase pop size for good measure
+            sutMarket.TotalPopulation = 1000000;
+
+            sutMarket.PopGrowth();
+
+            popMock1.Verify(x => x.AddPop(It.IsAny<double>()), Times.Once);
+            popMock2.Verify(x => x.AddPop(It.IsAny<double>()), Times.Never);
+        }
+
+        #endregion PopGrowth
 
         #region RecalculatePrices
 
@@ -267,7 +413,7 @@ namespace EconomicCalculator.Tests.Storage
             var sellPhase = new ProductAmountCollection();
             sellPhase.AddProducts(productMock1.Object, 1);
 
-            testPops.Setup(x => x.SellPhase())
+            populousMock.Setup(x => x.SellPhase())
                 .Returns(sellPhase);
 
             // Run Sell phase
@@ -341,7 +487,7 @@ namespace EconomicCalculator.Tests.Storage
                 .Returns(popNeeds2);
 
             // Setup PopsByPriority
-            testPops.Setup(x => x.PopsByPriority)
+            populousMock.Setup(x => x.PopsByPriority)
                 .Returns(
                     new List<IPopulationGroup> { popMock1.Object, popMock2.Object }
                 );
@@ -452,7 +598,7 @@ namespace EconomicCalculator.Tests.Storage
                 .Returns(popNeeds2);
 
             // Setup PopsByPriority
-            testPops.Setup(x => x.PopsByPriority)
+            populousMock.Setup(x => x.PopsByPriority)
                 .Returns(
                     new List<IPopulationGroup> { popMock1.Object, popMock2.Object }
                 );
@@ -563,7 +709,7 @@ namespace EconomicCalculator.Tests.Storage
                 .Returns(popNeeds2);
 
             // Setup PopsByPriority
-            testPops.Setup(x => x.PopsByPriority)
+            populousMock.Setup(x => x.PopsByPriority)
                 .Returns(
                     new List<IPopulationGroup> { popMock1.Object, popMock2.Object }
                 );
@@ -661,7 +807,7 @@ namespace EconomicCalculator.Tests.Storage
             sutMarket.BarterLegal = false;
 
             // Setup Selling Pops
-            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+            populousMock.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
                 .Returns(new List<IPopulationGroup> { popMock2.Object });
 
             // Setup Buyer
@@ -745,7 +891,7 @@ namespace EconomicCalculator.Tests.Storage
             double TravellersSell = 1;
 
             // Setup Selling Pops
-            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+            populousMock.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
                 .Returns(new List<IPopulationGroup>());
 
             // Setup Buyer
@@ -827,7 +973,7 @@ namespace EconomicCalculator.Tests.Storage
             double TravellersSell = 1;
 
             // Setup Selling Pops
-            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+            populousMock.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
                 .Returns(new List<IPopulationGroup> { popMock2.Object });
 
             // Setup Buyer
@@ -909,7 +1055,7 @@ namespace EconomicCalculator.Tests.Storage
             double TravellersSell = 2;
 
             // Setup Selling Pops
-            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+            populousMock.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
                 .Returns(new List<IPopulationGroup>());
 
             // Setup Buyer
@@ -995,7 +1141,7 @@ namespace EconomicCalculator.Tests.Storage
             bool travellerRun = false;
 
             // Setup Selling Pops
-            testPops.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
+            populousMock.Setup(x => x.GetPopsSellingProduct(productMock1.Object))
                 .Returns(new List<IPopulationGroup> { popMock2.Object });
 
             // Setup Buyer
@@ -1364,16 +1510,16 @@ namespace EconomicCalculator.Tests.Storage
         public void CallsPopulationsSellPhaseInSellPhase()
         {
             // setup the sell phase with an arbitrary return
-            testPops.Setup(x => x.SellPhase()).Returns(new ProductAmountCollection());
+            populousMock.Setup(x => x.SellPhase()).Returns(new ProductAmountCollection());
 
             // Test it's not been run.
-            testPops.Verify(x => x.SellPhase(), Times.Never);
+            populousMock.Verify(x => x.SellPhase(), Times.Never);
 
             // run sell phase.
             sutMarket.SellPhase();
 
             // Check the function was run.
-            testPops.Verify(x => x.SellPhase(), Times.Once);
+            populousMock.Verify(x => x.SellPhase(), Times.Once);
         }
 
         [Test]
@@ -1381,7 +1527,7 @@ namespace EconomicCalculator.Tests.Storage
         {
             // setup the sell phase
             var products = new ProductAmountCollection();
-            testPops.Setup(x => x.SellPhase()).Returns(products);
+            populousMock.Setup(x => x.SellPhase()).Returns(products);
 
             // run the sell phase
             sutMarket.SellPhase();
@@ -1396,7 +1542,7 @@ namespace EconomicCalculator.Tests.Storage
             // setup the sell phase
             var products = new ProductAmountCollection();
             products.AddProducts(productMock1.Object, 100);
-            testPops.Setup(x => x.SellPhase()).Returns(products);
+            populousMock.Setup(x => x.SellPhase()).Returns(products);
 
             // Set Shortfall to anything
             sutMarket.Shortfall.AddProducts(productMock1.Object, 100);
@@ -1423,16 +1569,16 @@ namespace EconomicCalculator.Tests.Storage
         public void CallPopulationProductionPhase()
         {
             // set up test
-            testPops.Setup(x => x.ProductionPhase());
+            populousMock.Setup(x => x.ProductionPhase());
 
             // check it hasn't run yet.
-            testPops.Verify(x => x.ProductionPhase(), Times.Never);
+            populousMock.Verify(x => x.ProductionPhase(), Times.Never);
 
             // run production phase
             sutMarket.ProductionPhase();
 
             // check that it ran the function call.
-            testPops.Verify(x => x.ProductionPhase(), Times.Once);
+            populousMock.Verify(x => x.ProductionPhase(), Times.Once);
         }
 
         #endregion ProductPhase
@@ -1443,16 +1589,16 @@ namespace EconomicCalculator.Tests.Storage
         public void CallPopulationsConsumptionPhaseFromConsumptionPhase()
         {
             // set up test
-            testPops.Setup(x => x.Consume());
+            populousMock.Setup(x => x.Consume());
 
             // check it hasn't run yet.
-            testPops.Verify(x => x.Consume(), Times.Never);
+            populousMock.Verify(x => x.Consume(), Times.Never);
 
             // run production phase
             sutMarket.ConsumptionPhase();
 
             // check that it ran the function call.
-            testPops.Verify(x => x.Consume(), Times.Once);
+            populousMock.Verify(x => x.Consume(), Times.Once);
         }
 
         #endregion
@@ -1463,16 +1609,16 @@ namespace EconomicCalculator.Tests.Storage
         public void CallsPopulationLossPhaseInLossPhase()
         {
             // set up test
-            testPops.Setup(x => x.LossPhase());
+            populousMock.Setup(x => x.LossPhase());
 
             // check it hasn't run yet.
-            testPops.Verify(x => x.LossPhase(), Times.Never);
+            populousMock.Verify(x => x.LossPhase(), Times.Never);
 
             // run production phase
             sutMarket.LossPhase();
 
             // check that it ran the function call.
-            testPops.Verify(x => x.LossPhase(), Times.Once);
+            populousMock.Verify(x => x.LossPhase(), Times.Once);
         }
 
         #endregion LossPhase

@@ -157,27 +157,67 @@ namespace EconomicCalculator.Storage.Population
 
         public double LifeNeedsSatisfaction()
         {
-            return Pops.Average(x => x.AverageLifeSatisfaction());
+            // average weighted by population.
+            double totalPopulation = 0;
+            double totalWeight = 0;
+            foreach (var pop in Pops)
+            {
+                totalPopulation += pop.Count;
+                totalWeight += pop.AverageLifeSatisfaction() * pop.Count;
+            }
+            return totalWeight / totalPopulation;
         }
 
         public double DailyNeedsSatisfaction()
         {
-            return Pops.Average(x => x.AverageDailySatisfaction());
+            // average weighted by population.
+            double totalPopulation = 0;
+            double totalWeight = 0;
+            foreach (var pop in Pops)
+            {
+                totalPopulation += pop.Count;
+                totalWeight += pop.AverageDailySatisfaction() * pop.Count;
+            }
+            return totalWeight / totalPopulation;
         }
 
         public double LuxuryNeedsSatisfaction()
         {
-            return Pops.Average(x => x.AverageLuxurySatisfaction());
+            // average weighted by population.
+            double totalPopulation = 0;
+            double totalWeight = 0;
+            foreach (var pop in Pops)
+            {
+                totalPopulation += pop.Count;
+                totalWeight += pop.AverageLuxurySatisfaction() * pop.Count;
+            }
+            return totalWeight / totalPopulation;
         }
 
         public double JobInputSatisfaction()
         {
-            return Pops.Average(x => x.AverageJobInputSatisfaction());
+            // average weighted by population.
+            double totalPopulation = 0;
+            double totalWeight = 0;
+            foreach (var pop in Pops)
+            {
+                totalPopulation += pop.Count;
+                totalWeight += pop.AverageJobInputSatisfaction() * pop.Count;
+            }
+            return totalWeight / totalPopulation;
         }
 
         public double JobCapitalSatisfaction()
         {
-            return Pops.Average(x => x.AverageJobCapitalSatisfaction());
+            // average weighted by population.
+            double totalPopulation = 0;
+            double totalWeight = 0;
+            foreach (var pop in Pops)
+            {
+                totalPopulation += pop.Count;
+                totalWeight += pop.AverageJobCapitalSatisfaction() * pop.Count;
+            }
+            return totalWeight / totalPopulation;
         }
 
         #endregion Actions
