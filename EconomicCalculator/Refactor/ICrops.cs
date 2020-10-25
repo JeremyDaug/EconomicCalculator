@@ -2,6 +2,7 @@
 using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Storage;
 using EconomicCalculator.Storage.Jobs;
+using EconomicCalculator.Storage.Products;
 using System.Collections.Generic;
 
 namespace EconomicCalculator.Generators

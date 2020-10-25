@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Storage.Products;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,10 @@ namespace EconomicCalculator.Storage
     /// </summary>
     public interface IPopulations
     {
+        // Should not need stored by DB as this is just a holder for pop Groups.
+
+        #region GeneralData
+
         /// <summary>
         /// The name of the population group.
         /// </summary>
@@ -36,9 +41,14 @@ namespace EconomicCalculator.Storage
         /// </summary>
         IList<IPopulationGroup> Pops { get; }
 
+        #endregion GeneralData
+
         /// <summary>
         /// The list of pops, organized by Priority. Merchants are not included.
         /// </summary>
+        /// <remarks>
+        /// <see cref="Pops"/>, sorted by priority.
+        /// </remarks>
         IList<IPopulationGroup> PopsByPriority { get; }
 
         /// <summary>

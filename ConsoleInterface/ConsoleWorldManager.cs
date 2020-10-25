@@ -18,8 +18,6 @@ namespace ConsoleInterface
             theWorld.Name = "ConsoleWorld";
         }
 
-        public void LoadDB() => theWorld.LoadData("Console World");
-
         public void Open() => theWorld.Open();
 
         public void Close() => theWorld.Close();

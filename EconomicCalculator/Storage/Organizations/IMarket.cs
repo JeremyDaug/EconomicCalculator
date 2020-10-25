@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator.Generators;
 using EconomicCalculator.Intermediaries;
+using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;
 

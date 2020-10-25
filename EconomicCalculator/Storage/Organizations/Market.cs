@@ -5,11 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Randomizer;
+using EconomicCalculator.Storage.Products;
 
 namespace EconomicCalculator.Storage
 {
+    /// <summary>
+    /// The Market, which contains prices, markets, and the like.
+    /// </summary>
     internal class Market : IMarket
-    {
+    {// TODO consider splitting off market activities from the market.
         /// <summary>
         /// The Unique Id of the market.
         /// </summary>

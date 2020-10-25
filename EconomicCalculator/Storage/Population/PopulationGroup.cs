@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator.Storage.Jobs;
+using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;

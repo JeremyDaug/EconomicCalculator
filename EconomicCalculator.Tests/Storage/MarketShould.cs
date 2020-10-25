@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator.Randomizer;
 using EconomicCalculator.Storage;
+using EconomicCalculator.Storage.Products;
 using Moq;
 using NUnit.Framework;
 using System;

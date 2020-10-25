@@ -1,6 +1,7 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Storage;
+using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace EconomicCalculator.Storage.Jobs
     /// </summary>
     public interface IJob : IEquatable<IJob>, ISqlReader, IEqualityComparer<IJob>
     {
+        #region GeneralData
+
         /// <summary>
         /// The Id of the job.
         /// </summary>
@@ -31,21 +34,30 @@ namespace EconomicCalculator.Storage.Jobs
         JobTypes JobType { get; }
 
         /// <summary>
-        /// The Daily Input Requirements of the Job. 
-        /// Normally capital goods may be consumed as part of the process.
+        /// The inputs required for the job's process.
         /// </summary>
         IProductAmountCollection Inputs { get; }
 
         /// <summary>
-        /// The Outputs produced if All inputs met.
+        /// The capital required for the job's process.
+        /// </summary>
+        IProductAmountCollection Capital { get; }
+
+        /// <summary>
+        /// The goods output by the job's process.
         /// </summary>
         IProductAmountCollection Outputs { get; }
 
         /// <summary>
-        /// Any Capital Needed to start the job. 
-        /// Products are not consumed every day, instead having a chance of breaking.
+        /// The labor the job can render. The process get's first dibs on this labor.
+        /// This labor should require no inputs to be valid.
         /// </summary>
-        IProductAmountCollection Capital { get; }
+        IProduct Labor { get; }
+
+        /// <summary>
+        /// Processes the job does.
+        /// </summary>
+        IProcess Process { get; }
 
         /// <summary>
         /// The name of the skill for the job.
@@ -61,6 +73,10 @@ namespace EconomicCalculator.Storage.Jobs
         /// How much work per unit of the job is needed.
         /// </summary>
         double LaborRequirements { get; }
+
+        #endregion GeneralData
+
+        #region Aggregation
 
         /// <summary>
         /// The Daily input needs of the job. <see cref="Inputs"/> / <see cref="LaborRequirements"/>.
@@ -81,5 +97,7 @@ namespace EconomicCalculator.Storage.Jobs
         /// <param name="amount">The size of a population.</param>
         /// <returns>The total capital needs of said pop.</returns>
         IProductAmountCollection CapitalNeedsForPops(double amount);
+
+        #endregion Aggregation
     }
 }

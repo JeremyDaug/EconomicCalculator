@@ -18,7 +18,6 @@ namespace ConsoleInterface
             worldManager.Open();
             try
             {
-                worldManager.LoadDB();
                 // Finished Loading
                 Console.WriteLine("Loaded ----");
 

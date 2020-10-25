@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Storage.Products;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,7 +46,7 @@ namespace EconomicCalculator.Storage
 
         /// <summary>
         /// The percentage of water that covers the land.
-        /// Mostly meant for Coastal Territory, or very large lakes.
+        /// Mostly meant for Coastal Territory, lakes, or seas.
         /// </summary>
         double WaterLevel { get; }
 

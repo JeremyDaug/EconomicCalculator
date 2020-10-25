@@ -73,8 +73,9 @@
     <Compile Include="Randomizer\Randomizer.cs" />
     <Compile Include="Refactor\ICrops.cs" />
     <Compile Include="Refactor\ICurrency.cs" />
-    <Compile Include="Storage\IGovernor.cs" />
-    <Compile Include="Storage\ITerritory.cs" />
+    <Compile Include="Storage\Organizations\Company.cs" />
+    <Compile Include="Storage\Organizations\IGovernor.cs" />
+    <Compile Include="Storage\Organizations\ITerritory.cs" />
     <Compile Include="Storage\Jobs\IFarmer.cs" />
     <Compile Include="Storage\Jobs\IJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -91,17 +92,21 @@
     <Compile Include="Enums\CropType.cs" />
     <Compile Include="Refactor\IMine.cs" />
     <Compile Include="Storage\ICrop.cs" />
-    <Compile Include="Storage\IMarket.cs" />
+    <Compile Include="Storage\Organizations\IMarket.cs" />
     <Compile Include="Storage\Jobs\ILaborer.cs" />
     <Compile Include="Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Storage\Population\IPopulations.cs" />
-    <Compile Include="Storage\IProduct.cs" />
+    <Compile Include="Enums\BuildingType.cs" />
+    <Compile Include="Storage\Products\IBuilding.cs" />
+    <Compile Include="Storage\Products\IPlot.cs" />
+    <Compile Include="Storage\Products\IProcess.cs" />
+    <Compile Include="Storage\Products\IProduct.cs" />
     <Compile Include="Storage\IProductAmountCollection.cs" />
     <Compile Include="Storage\ISqlReader.cs" />
-    <Compile Include="Storage\Market.cs" />
+    <Compile Include="Storage\Organizations\Market.cs" />
     <Compile Include="Storage\Population\PopulationGroup.cs" />
     <Compile Include="Storage\Population\Populations.cs" />
-    <Compile Include="Storage\Product.cs" />
+    <Compile Include="Storage\Products\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -110,7 +115,6 @@
     <Compile Include="Refactor\World.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Storage\ProductAmountCollection.cs" />
-    <Compile Include="Storage\Territory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
