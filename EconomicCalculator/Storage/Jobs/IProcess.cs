@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage.Products
+namespace EconomicCalculator.Storage.Jobs
 {
     /// <summary>
     /// A recipe or process to turn some set of goods into another good or set of goods.

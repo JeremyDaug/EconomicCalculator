@@ -1,0 +1,27 @@
+﻿Product Overview Sheet
+
+- Products are pretty much everything to the simulation. These are products that can be bought, sold,
+traded, and used. Overall, abstractly there are only 2 kinds of products, components, and goods.
+Goods are products which are used or consumed, and components are products which go into other
+products. This division isn't too useful, so instead we combine them and abstract the details away.
+
+Subtypes
+- Product
+	This is a generic product, it may do something, it may do nothing, but it covers everything a 
+	product NEEDS to do.
+- Plot
+	A plot of land in product form. It is used in almost every process, as work needs space to do it,
+	and it's also very difficult or expensive to make. It has storage space, instead of taking up
+	storage space.
+- Building
+	A combination of capital and a plot of land, it is where most jobs occur, and can store goods.
+	It can add more space to a plot than the plot would actually allow through vertical construction.
+- Currency
+	Currency is a unique type of product in that it is rarely if ever consumed by the population. It's
+	value is in trading for other things. It has two subtypes, Money and Currency.
+	- Money - is the direct commodity so Gold Coins or the like. It requires having the physical
+	product on hand to trade.
+	- Currency - is a rough equivalent to a bank note, or similar idea.
+- Service
+	Service is a good which cannot be stored cheaply but is often used in other	goods. For example, 
+	labor is a service, as is electricity. 

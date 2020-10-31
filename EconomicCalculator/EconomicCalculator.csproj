@@ -66,6 +66,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\CashType.cs" />
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
     <Compile Include="Enums\ProductTypes.cs" />
@@ -99,8 +100,9 @@
     <Compile Include="Storage\Population\IPopulations.cs" />
     <Compile Include="Enums\BuildingType.cs" />
     <Compile Include="Storage\Products\IBuilding.cs" />
+    <Compile Include="Storage\Products\ICurrency.cs" />
     <Compile Include="Storage\Products\IPlot.cs" />
-    <Compile Include="Storage\Products\IProcess.cs" />
+    <Compile Include="Storage\Jobs\IProcess.cs" />
     <Compile Include="Storage\Products\IProduct.cs" />
     <Compile Include="Storage\IProductAmountCollection.cs" />
     <Compile Include="Storage\ISqlReader.cs" />
@@ -132,6 +134,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>EconomicDB.mdf</DependentUpon>
     </Content>
+    <Content Include="Storage\Organizations\OrganizationOverview.txt" />
+    <Content Include="Storage\Products\ProductOverview.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">

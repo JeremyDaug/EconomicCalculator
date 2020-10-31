@@ -1,0 +1,62 @@
+﻿Organizations
+
+Organizations are how we organize the physical universe and it's managers.
+
+
+- Territory
+	Territory is the smallest unit of land, it contains a starting amount of land, a roughness,
+	size, and resources such as biodiversity or mineral wealth. It can be upgraded by 
+	infrastructure to allow easier connections to other territories.
+- Population Group
+	A population group is a collection of people who we average out our actions on. They have
+	storage, jobs, skills, and so on.
+- Market
+	Markets are the economic activity of a market, it has pops, which have needs, that they get
+	through production and trade. It 
+- Govenor
+	Governor is the government of territories. They have control over the territory and
+	have the right to tax. Their military does not disrupt or take their territory.
+	- Sliders
+		- Command Economy vs Market Economy
+		- Centralized Government vs Decentralized Government
+		- Militarization
+		- Taxes
+	- Authority - Where or what is considered to be the source of legitimate authority. 
+	Not all or nothing, but proportional.
+		- Democracy - Power from the People (probably more like republicanism, but whatevs.)
+		- Stratocracy - Power from the Military (Military First, Service Guarantees Citizenship)
+		- Thalassocracy - Power from the Navy (Navy First, not necissarily military)
+		- Plutocracy - Power from wealth (Rich rule, poor drool)
+		- Aristocracy - Power from Bloodline (Feudalism and Nobility)
+		- Timocracy - Power from Honor (Omae wo mo shinderu)
+		- Theocracy - Power from Religion (Can I get an AMEN?)
+		- Meritocracy - Power from Merit (Be good or get out.)
+		- Ergotocracy - Power from Workers (Socialism HO!)
+		- Landocracy - Power from Land Ownership (Really, isn't this just normal government?)
+	- Policy options 
+		- Anti-monopoly (hard/soft) - If any company (if hard) and/or corporation (if hard or soft)
+		reaches a majority share of a market they will be broken up. Majority market share is
+		defined by the governor as between 50% and 100%.
+		- Citizenship requirements
+			- Service Guarantees Citizenship
+			- By birth
+			- Naturalization
+			- Purchase
+		- Tax implementations
+			- Income Tax
+			- Property Tax
+			- Consumption Tax
+			- Tarrif
+		- Subsidies
+			- Product Subsidies
+			- Rebates
+			- Negative Tax
+- Company
+	A collection of jobs and processes which, when managed, are more economically efficient by
+	combining buying and selling, they are limited within a singular market area, but can take
+	almost any form. For companies to combine, they must either share a job, product output,
+	the job must output into their inputs, or the job takes an input from their output.
+- Corporation
+	A collection of companies across multiple markets, it also increases efficiency, with some
+	additional overhead. It can enforce product price equivalence across multiple markets, but
+	has a tendency to push prices upwards if allowed.
