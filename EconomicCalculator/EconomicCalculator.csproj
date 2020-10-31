@@ -73,6 +73,7 @@
     <Compile Include="Randomizer\Randomizer.cs" />
     <Compile Include="Refactor\ICrops.cs" />
     <Compile Include="Refactor\ICurrency.cs" />
+    <Compile Include="Storage\IReadOnlyProductAmountCollection.cs" />
     <Compile Include="Storage\Organizations\Company.cs" />
     <Compile Include="Storage\Organizations\IGovernor.cs" />
     <Compile Include="Storage\Organizations\ITerritory.cs" />

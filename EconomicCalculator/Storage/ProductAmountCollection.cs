@@ -23,9 +23,7 @@ namespace EconomicCalculator.Storage
             get => _productDict;
         }
 
-        public int Count => throw new NotImplementedException();
-
-        public bool IsReadOnly => throw new NotImplementedException();
+        public int Count() => Products.Count();
 
         public ProductAmountCollection()
         {

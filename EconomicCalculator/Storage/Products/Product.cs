@@ -16,6 +16,32 @@ namespace EconomicCalculator.Storage.Products
     {
         private readonly IRandomizer randomizer;
 
+        /// <summary>
+        /// Default Constructor.
+        /// </summary>
+        public Product(IRandomizer randomizer)
+        {
+            if (randomizer is null)
+                throw new ArgumentNullException();
+
+            Id = Guid.NewGuid();
+            Name = "DefaultName";
+            VariantName = "VariantName";
+            UnitName = "Unit";
+            Quality = 0;
+            DefaultPrice = 1;
+            Mass = 1;
+            Bulk = 1;
+            ProductType = ProductTypes.Good;
+            Maintainable = false;
+            Fractional = false;
+            MTTF = 0;
+            FailsInto = new ProductAmountCollection();
+            Maintenance = new ProductAmountCollection();
+
+            this.randomizer = randomizer;
+        }
+
         #region GeneralData
 
         /// <summary>
@@ -49,6 +75,18 @@ namespace EconomicCalculator.Storage.Products
         /// The default/starting price of the product.
         /// </summary>
         public double DefaultPrice { get; set; }
+
+        /// <summary>
+        /// How much the product weighs, used primarily for transportation, in Kg.
+        /// </summary>
+        public double Mass { get; }
+
+        // TODO, consider adding a Mass Breakdown to the product.
+
+        /// <summary>
+        /// How much space it takes up, used in both storage and transportation.
+        /// </summary>
+        public double Bulk { get; }
 
         /// <summary>
         /// The type of product this is.
@@ -123,6 +161,8 @@ namespace EconomicCalculator.Storage.Products
         {
             if (days < 1)
                 throw new ArgumentOutOfRangeException("Parameter 'days' cannot be less than 1.");
+            if (MaintenanceMet < 0 || MaintenanceMet > 1)
+                throw new ArgumentOutOfRangeException("MaintenanceMet must be between 0 and 1.");
             if (MTTF <= 1)
                 return 0;
 
@@ -150,6 +190,11 @@ namespace EconomicCalculator.Storage.Products
         /// <returns>The number of failed products.</returns>
         public double FailedProducts(double amount, double MaintenanceMet)
         {
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException("Amount bust be greater than 0.");
+            if (MaintenanceMet < 0 || MaintenanceMet > 1)
+                throw new ArgumentOutOfRangeException("Maintenance Met must be between 0 and 1.");
+
             // get the current failure chance, modified by maintenance met.
             var currentFailChance = DailyFailureChance * (2 - MaintenanceMet);
 
@@ -190,7 +235,7 @@ namespace EconomicCalculator.Storage.Products
         /// <param name="MaintenanceProducts">The products being used to maintain the products.</param>
         /// <param name="Satisfaction">How much was satisfied.</param>
         /// <returns>The items consumed.</returns>
-        public IProductAmountCollection RunMaintenance(double products, IProductAmountCollection MaintenanceProducts, out double Satisfaction)
+        public IProductAmountCollection RunMaintenance(double products, IReadOnlyProductAmountCollection MaintenanceProducts, out double Satisfaction)
         {
             // null check
             if (MaintenanceProducts is null)
@@ -245,20 +290,6 @@ namespace EconomicCalculator.Storage.Products
         }
 
         #endregion MaintenanceFunctions
-
-        /// <summary>
-        /// Default Constructor.
-        /// </summary>
-        public Product(IRandomizer randomizer)
-        {
-            Id = Guid.NewGuid();
-            DefaultPrice = 1;
-            UnitName = "Unit";
-            MTTF = 0;
-            ProductType = ProductTypes.Good;
-
-            this.randomizer = randomizer;
-        }
 
         public bool Equals(IProduct other)
         {

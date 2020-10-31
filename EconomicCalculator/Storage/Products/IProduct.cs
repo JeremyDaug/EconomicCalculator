@@ -44,6 +44,18 @@ namespace EconomicCalculator.Storage.Products
         double DefaultPrice { get; }
 
         /// <summary>
+        /// How much the product weighs, used primarily for transportation, in Kg.
+        /// </summary>
+        double Mass { get; }
+
+        // TODO, consider adding a Mass Breakdown to the product.
+
+        /// <summary>
+        /// How much space it takes up, used in both storage and transportation.
+        /// </summary>
+        double Bulk { get; }
+
+        /// <summary>
         /// The type of product this is.
         /// </summary>
         ProductTypes ProductType { get; }
@@ -149,7 +161,7 @@ namespace EconomicCalculator.Storage.Products
         /// <param name="MaintenanceProducts">The products being used to maintain the products.</param>
         /// <param name="Satisfaction">How much was satisfied.</param>
         /// <returns>The items consumed.</returns>
-        IProductAmountCollection RunMaintenance(double products, IProductAmountCollection MaintenanceProducts, out double Satisfaction);
+        IProductAmountCollection RunMaintenance(double products, IReadOnlyProductAmountCollection MaintenanceProducts, out double Satisfaction);
 
         #endregion MaintenanceFunctions
     }
