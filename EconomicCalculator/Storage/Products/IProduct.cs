@@ -58,6 +58,9 @@ namespace EconomicCalculator.Storage.Products
         /// <summary>
         /// The type of product this is.
         /// </summary>
+        /// <remarks>
+        /// Any storage requirements are based on this.
+        /// </remarks>
         ProductTypes ProductType { get; }
 
         /// <summary>
@@ -69,6 +72,12 @@ namespace EconomicCalculator.Storage.Products
         /// Can the good can be divided effectively indefinitely.
         /// </summary>
         bool Fractional { get; }
+
+        /// <summary>
+        /// The technology required for the product.
+        /// This is a partial placeholder.
+        /// </summary>
+        string Technology { get; }
 
         #endregion GeneralData
 

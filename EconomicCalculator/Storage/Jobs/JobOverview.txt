@@ -1,0 +1,30 @@
+﻿Job Overview
+
+Jobs are what populations do to create wealth. They do this through multiple means, but ultimately they are divided into a number of
+more detailed jobs.
+
+Jobs
+
+	Ground Floor Producers - They require few inputs, and are the foundation of the economy.
+		Farmer - They own land and possibly some buildings. Their focus is on growing crops of various things.
+		Miner - They own mines and mine it for valuable resources.
+		Laborer - A catch all term, they are the people who may not have the resources to do other jobs, but instead work for others.
+	Self Employed - They buy the goods themself and produce a product with those goods for their own benefit.
+		Craftsman - They take goods and produce new goods. Often, with very little in the way of capital or land requirements.
+		Practitioners - These are people who provide a service, such as doctors, maintenance workers, and the like.
+	Intermediaries - They buy goods to store and sell them elsewhere.
+		Merchants - Those who buy up goods and resell them at a profit, the focus on storage of goods, were others focus on production.
+		Travelling Merchants - Those who buy up goods and transport them between markets to sell at a profit.
+	Military - Those who fight for the nation, 
+		Soldier - Military personel, including support personel, they produce military might at the cost of military equipment. May also be Private Security.
+		Officers - Military Leaders, they increase the efficiency of soldiers in the field, and create the upper crust of the military.
+	Business Jobs - Those who make and improve companies and corporations
+		Managers - Middle Management, they are used in companies and corporations to increase efficiency and organize production.
+		Owners - Company and Corporation Owners, they are the ones who found and create companies and corporations and technically
+			own the factories.
+		Land Lords - Land Lords (also possibly called Aristocrats) are those who own land and primarily make their wealth through renting
+			out land or buildings. They can also own farms and mines.
+	Government Jobs - Jobs that generally don't produce anything, but help the government run and work.
+		Bureaucrats - Those who make the government run from day to day. Includes tax collectors, judges, police, and so on.
+	Miscellaneous
+		Researchers - These are people who apply their skills and knowledge towards discovering new technology.

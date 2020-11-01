@@ -479,15 +479,5 @@ namespace EconomicCalculator.Tests.Intermediaries
 
             Assert.That(sut.Equals(comp), Is.True);
         }
-
-        [Test]
-        public void ReturnFailedProductsSelectedRandomly()
-        {
-            var result = sut.FailedProducts(100);
-
-            Assert.That(result, Is.EqualTo(1));
-
-            randMock.Verify(x => x.NextDouble(), Times.Once);
-        }
     }
 }

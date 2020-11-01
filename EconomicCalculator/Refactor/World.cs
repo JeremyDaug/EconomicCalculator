@@ -1,6 +1,4 @@
 ﻿using EconomicCalculator.Enums;
-using EconomicCalculator.Generators;
-using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Storage;
 using EconomicCalculator.Storage.Jobs;
 using EconomicCalculator.Storage.Products;

@@ -1,5 +1,4 @@
 ﻿using EconomicCalculator.Enums;
-using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Storage;
 using EconomicCalculator.Storage.Products;
 using System;
@@ -49,12 +48,6 @@ namespace EconomicCalculator.Storage.Jobs
         IProductAmountCollection Outputs { get; }
 
         /// <summary>
-        /// The labor the job can render. The process get's first dibs on this labor.
-        /// This labor should require no inputs to be valid.
-        /// </summary>
-        IProduct Labor { get; }
-
-        /// <summary>
         /// Processes the job does.
         /// </summary>
         IProcess Process { get; }
@@ -73,6 +66,11 @@ namespace EconomicCalculator.Storage.Jobs
         /// How much work per unit of the job is needed.
         /// </summary>
         double LaborRequirements { get; }
+
+        /// <summary>
+        /// The jobs related to this job. People working this job can switch to one of these jobs trivially.
+        /// </summary>
+        IReadOnlyList<IJob> RelatedJobs { get; } // TODO May remove this in favor of just searching jobs with the same skill name.
 
         #endregion GeneralData
 

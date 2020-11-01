@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Storage.Jobs;
+﻿using EconomicCalculator.Enums;
+using EconomicCalculator.Storage.Jobs;
 using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;
@@ -158,6 +159,20 @@ namespace EconomicCalculator.Storage
         /// downtime.
         /// </summary>
         IList<IJob> SecondaryJobs { get; }
+
+        /// <summary>
+        /// The total available storage bulk available.
+        /// </summary>
+        double TotalAvailableStorage { get; }
+
+        /// <summary>
+        /// The breakdown of storage by specialization.
+        /// Only 3 kinds exist. Unspecialized, Cold, and Capital.
+        /// Unspecialized can be used for anything, but doesn't alter decay.
+        /// Cold Slows decay for those that need it. 
+        /// Capital is active storage where the capital good can be used.
+        /// </summary>
+        IDictionary<string, double> AvailableStorageDetails { get; }
 
         /// <summary>
         /// Products currently stored by the Population.

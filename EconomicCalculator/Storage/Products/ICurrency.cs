@@ -40,7 +40,6 @@ namespace EconomicCalculator.Storage.Products
         /// <summary>
         /// The value of the currency when broken down.
         /// </summary>
-        /// <returns></returns>
         double RawValue();
     }
 }

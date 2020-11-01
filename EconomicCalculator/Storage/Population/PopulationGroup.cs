@@ -32,6 +32,29 @@ namespace EconomicCalculator.Storage
         public IList<IJob> SecondaryJobs { get; set; }
 
         /// <summary>
+        /// The total available storage bulk available.
+        /// Calculated from land and buildings owned.
+        /// </summary>
+        public double TotalAvailableStorage
+        {
+            get
+            {
+                return AvailableStorageDetails.Sum(x => x.Value);
+            }
+        }
+
+        /// <summary>
+        /// The breakdown of storage by specialization.
+        /// Only 3 kinds exist. Unspecialized, Cold, and Capital.
+        /// Unspecialized can be used for anything, but doesn't alter decay.
+        /// Cold Slows decay for those that need it. 
+        /// Capital is active storage where the capital good can be used.
+        /// Calculated from owned land and buildings.
+        /// Update on buy and sell.
+        /// </summary>
+        public IDictionary<string, double> AvailableStorageDetails { get; }
+
+        /// <summary>
         /// Products currently stored by the Population.
         /// Should never have a negative storage value.
         /// </summary>
@@ -49,6 +72,7 @@ namespace EconomicCalculator.Storage
         {
             Id = Guid.NewGuid();
             SecondaryJobs = new List<IJob>();
+            AvailableStorageDetails = new Dictionary<string, double>();
             Storage = new ProductAmountCollection();
             LifeSatisfaction = new ProductAmountCollection();
             DailySatisfaction = new ProductAmountCollection();

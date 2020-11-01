@@ -103,6 +103,12 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         public bool Fractional { get; set; }
 
+        /// <summary>
+        /// The technology required for the product.
+        /// This is a partial placeholder.
+        /// </summary>
+        string Technology { get; set; }
+
         #endregion GeneralData
 
         #region FailureData

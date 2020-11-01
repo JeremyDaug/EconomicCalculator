@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Randomizer;
 using EconomicCalculator.Storage.Products;
 
@@ -223,23 +222,6 @@ namespace EconomicCalculator.Storage
         /// </summary>
         public void RunMarketDay()
         {
-            // Work, consume goods to make goods.
-            // Put first to allow for an easy kickstart, 
-            // and ensure money to buy needs.
-            ProductionPhase(); // Done, don't touch
-
-            // consume what we need/want for the day
-            ConsumptionPhase(); // Done, Don't touch
-
-            // Loss Phase, where goods decay and breakdown randomly
-            // Put away to ensure labor isn't destroyed immediately.
-            // will reactivate later.
-            // LossPhase();
-
-            // Asset Tax Phase, for taxing assets.
-            // Asset taxes are taken out in money first, then goods.
-            // It sucks, but it needs to be done somewhere, here is best.
-
             // Offer what remains up to the market for the day.
             // Sell what you don't need to make what you can.
             SellPhase();
@@ -252,6 +234,21 @@ namespace EconomicCalculator.Storage
 
             // let the travelling merchants pick through what's left.
             TravellingMerchantPhase();
+
+            // Work, consume goods to make goods.
+            // Put first to allow for an easy kickstart, 
+            // and ensure money to buy needs.
+            ProductionPhase(); // Done, don't touch
+
+            // consume what we need/want for the day
+            ConsumptionPhase(); // Done, Don't touch
+
+            // Loss Phase, where goods decay and breakdown randomly
+            LossPhase();
+
+            // Asset Tax Phase, for taxing assets.
+            // Asset taxes are taken out in money first, then goods.
+            // It sucks, but it needs to be done somewhere, here is best.
 
             // Population Growth Phase
             PopGrowth();
