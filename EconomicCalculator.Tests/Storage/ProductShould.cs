@@ -1,5 +1,4 @@
 ﻿using EconomicCalculator.Enums;
-using EconomicCalculator.Intermediaries;
 using EconomicCalculator.Randomizer;
 using EconomicCalculator.Storage;
 using EconomicCalculator.Storage.Products;

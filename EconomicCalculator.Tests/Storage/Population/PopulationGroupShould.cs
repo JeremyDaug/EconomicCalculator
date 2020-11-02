@@ -121,10 +121,10 @@ namespace EconomicCalculator.Tests.Storage
                 .Returns(JobCapitals);
             JobMock.Setup(x => x.LaborRequirements)
                 .Returns(1);
-            JobMock.Setup(x => x.DailyInputNeedsForPops(It.IsAny<double>()))
-                .Returns((double value) => JobInputs.Multiply(value));
-            JobMock.Setup(x => x.CapitalNeedsForPops(It.IsAny<double>()))
-                .Returns((double value) => JobCapitals.Multiply(value));
+            JobMock.Setup(x => x.Inputs)
+                .Returns(JobInputs);
+            JobMock.Setup(x => x.Capital)
+                .Returns(JobCapitals);
             #endregion JobSetup
 
             LaborMock = new Mock<IProduct>();

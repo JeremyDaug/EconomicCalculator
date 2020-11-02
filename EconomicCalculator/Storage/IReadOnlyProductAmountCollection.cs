@@ -49,6 +49,14 @@ namespace EconomicCalculator.Storage
         double GetProductValue(IProduct product);
 
         /// <summary>
+        /// Try to retrieve a count for an item in the collection.
+        /// </summary>
+        /// <param name="product">The product to find.</param>
+        /// <param name="count">The Count of the Product.</param>
+        /// <returns>True if successful, false otherwise.</returns>
+        bool TryGetProductValue(IProduct product, out double count);
+
+        /// <summary>
         /// Creates a copy of the product amount collection.
         /// </summary>
         /// <returns>A copy of the Collection.</returns>

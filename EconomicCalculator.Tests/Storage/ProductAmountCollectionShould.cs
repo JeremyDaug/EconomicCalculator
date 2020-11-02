@@ -281,6 +281,40 @@ namespace EconomicCalculator.Tests.Storage
             Assert.That(sut.GetProductValue(ProductMock1.Object), Is.EqualTo(value));
         }
 
+        [Test]
+        public void ThrowArgumentNullFromTryGetProductAmountWhenProductIsNull()
+        {
+            double ret;
+            Assert.Throws<ArgumentNullException>(() => sut.TryGetProductValue(null, out ret));
+        }
+
+        [Test]
+        public void NotThrowKeyNotFoundFromTryGetProductAmountProductNotInCollection()
+        {
+            // Get out ready
+            double ret;
+
+            // get result ready
+            bool result;
+
+            // Try to get the item
+            try
+            {
+                result = sut.TryGetProductValue(ProductMock1.Object, out ret);
+            }
+            catch (KeyNotFoundException)
+            {
+                // If we got here, the test failed.
+                Assert.Fail();
+                return;
+            }
+            // Assert that the result of the failure returns false.
+            Assert.That(result, Is.False);
+
+            // Ensure the out is 0;
+            Assert.That(ret, Is.EqualTo(0));
+        }
+
         #endregion GetProductionAmount
 
         #region IncludeProduct

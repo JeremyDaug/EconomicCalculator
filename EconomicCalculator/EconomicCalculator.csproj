@@ -73,6 +73,7 @@
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\Randomizer.cs" />
     <Compile Include="Storage\IReadOnlyProductAmountCollection.cs" />
+    <Compile Include="Storage\Jobs\Job.cs" />
     <Compile Include="Storage\Organizations\Company.cs" />
     <Compile Include="Storage\Organizations\IGovernor.cs" />
     <Compile Include="Storage\Organizations\ITerritory.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="Storage\Organizations\Market.cs" />
     <Compile Include="Storage\Population\PopulationGroup.cs" />
     <Compile Include="Storage\Population\Populations.cs" />
+    <Compile Include="Storage\Products\Process.cs" />
     <Compile Include="Storage\Products\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

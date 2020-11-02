@@ -9,6 +9,7 @@ Jobs
 		Farmer - They own land and possibly some buildings. Their focus is on growing crops of various things.
 		Miner - They own mines and mine it for valuable resources.
 		Laborer - A catch all term, they are the people who may not have the resources to do other jobs, but instead work for others.
+		Slaves - A special class of worker who produces labor for jobs, but does not get paid, instead merely getting their LifeNeeds met by their owners.
 	Self Employed - They buy the goods themself and produce a product with those goods for their own benefit.
 		Craftsman - They take goods and produce new goods. Often, with very little in the way of capital or land requirements.
 		Practitioners - These are people who provide a service, such as doctors, maintenance workers, and the like.
@@ -24,7 +25,10 @@ Jobs
 			own the factories.
 		Land Lords - Land Lords (also possibly called Aristocrats) are those who own land and primarily make their wealth through renting
 			out land or buildings. They can also own farms and mines.
+		Investors - Like Owners, but rather than having direct ownership of businesses, they gain money by investing and taking interest.
 	Government Jobs - Jobs that generally don't produce anything, but help the government run and work.
 		Bureaucrats - Those who make the government run from day to day. Includes tax collectors, judges, police, and so on.
+		Clergy - May be considered government or not, but they help enrich the people culturally.
 	Miscellaneous
 		Researchers - These are people who apply their skills and knowledge towards discovering new technology.
+		Engineer - These people take the Science discovered by Researchers and apply it into new products and improve existing goods or processes.

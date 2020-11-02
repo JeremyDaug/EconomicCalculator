@@ -99,6 +99,20 @@ namespace EconomicCalculator.Storage
             return ProductDict[product.Id];
         }
 
+        public bool TryGetProductValue(IProduct product, out double sat)
+        {
+            try
+            {
+                sat = GetProductValue(product);
+            }
+            catch (KeyNotFoundException)
+            {
+                sat = 0;
+                return false;
+            }
+            return true;
+        }
+
         public void IncludeProduct(IProduct product)
         {
             if (product is null)

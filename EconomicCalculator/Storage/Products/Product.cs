@@ -1,5 +1,4 @@
 ﻿using EconomicCalculator.Enums;
-using EconomicCalculator.Generators;
 using EconomicCalculator.Randomizer;
 using EconomicCalculator.Storage;
 using System;
@@ -107,7 +106,7 @@ namespace EconomicCalculator.Storage.Products
         /// The technology required for the product.
         /// This is a partial placeholder.
         /// </summary>
-        string Technology { get; set; }
+        public string Technology { get; set; }
 
         #endregion GeneralData
 

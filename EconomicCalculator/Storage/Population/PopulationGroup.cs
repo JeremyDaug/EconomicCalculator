@@ -256,9 +256,9 @@ namespace EconomicCalculator.Storage
         {
             // Assuming perfection, get full needs expected.
             // inputs times the population divided by the labor needed for the job.
-            var requirements = PrimaryJob.DailyInputNeedsForPops(Count);
+            var requirements = PrimaryJob.Inputs.Multiply(Count);
             // Get Capital Requirements (only one needed per day of labor)
-            requirements.AddProducts(PrimaryJob.CapitalNeedsForPops(Count));
+            requirements.AddProducts(PrimaryJob.Capital.Multiply(Count));
 
             // With expected inputs, see what we can actually satisfy.
             double sat = 1;
