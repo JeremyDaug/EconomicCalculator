@@ -72,6 +72,11 @@ namespace EconomicCalculator.Storage
         /// </summary>
         IDictionary<Guid, double> GovernmentResources { get; }
 
+        /// <summary>
+        /// Placeholder for technologies the government has available to it.
+        /// </summary>
+        IList<string> Technologies { get; }
+
         #endregion BalanceSheet
     }
 }

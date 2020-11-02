@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Storage;
+using EconomicCalculator.Storage.Processes;
 using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;
@@ -78,5 +79,7 @@ namespace EconomicCalculator.Storage.Jobs
         IReadOnlyList<IJob> RelatedJobs { get; } // TODO May remove this in favor of just searching jobs with the same skill name.
 
         #endregion GeneralData
+
+        // TODO probably add DoJob Logic back in. This makes the most sense.
     }
 }

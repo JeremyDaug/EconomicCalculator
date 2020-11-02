@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Enums;
+using EconomicCalculator.Storage.Processes;
 using EconomicCalculator.Storage.Products;
 
 namespace EconomicCalculator.Storage.Jobs

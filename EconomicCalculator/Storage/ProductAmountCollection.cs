@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage
 {
-    internal class ProductAmountCollection : IProductAmountCollection
+    internal class ProductAmountCollection : IProductAmountCollection, IReadOnlyProductAmountCollection
     {
         private List<IProduct> _products;
         private Dictionary<Guid, double> _productDict;
