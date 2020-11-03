@@ -15,7 +15,7 @@ namespace Tests
         {
             sut = new World();
 
-            //TestMarket1 = new Market()
+            TestMarket1 = new Market();
 
             //sut.AddMarket(TestMarket1);
         }

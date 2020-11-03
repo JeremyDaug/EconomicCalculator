@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage
+namespace EconomicCalculator.Storage.Population
 {
     /// <summary>
     /// The manager and storgae for population groups in a market.

@@ -60,6 +60,7 @@
     <None Include="EconomicDBDataSet.xss">
       <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -70,6 +71,7 @@
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
     <Compile Include="Enums\ProductTypes.cs" />
+    <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\Randomizer.cs" />
     <Compile Include="Storage\IReadOnlyProductAmountCollection.cs" />
@@ -122,6 +124,9 @@
     <Compile Include="Storage\ProductAmountCollection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -153,7 +158,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Generators\" />
     <Folder Include="Runner\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
