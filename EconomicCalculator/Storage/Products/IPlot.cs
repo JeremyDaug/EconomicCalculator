@@ -26,7 +26,7 @@ namespace EconomicCalculator.Storage.Products
         ITerritory Territory { get; }
 
         /// <summary>
-        /// The size of a plot in Acres, This is universal across all plots.
+        /// The smallest size of a plot in Acres, This is universal across all plots.
         /// </summary>
         double Size { get; }
     }

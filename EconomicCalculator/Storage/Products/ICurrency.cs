@@ -31,8 +31,8 @@ namespace EconomicCalculator.Storage.Products
         /// <summary>
         /// What is backing the currency, the price of this currency is fixed
         /// to the price of that good.
-        /// If Backing is itself, then it's a commodity currency (coinage).
-        /// If backed by something else, then it's a token or banknote.
+        /// If Backing is itself, then it's a commodity currency.
+        /// If backed by something else, then it's a token or minted.
         /// If backed by nothing then it's a fiat currency.
         /// </summary>
         IProduct Backing { get; }
@@ -40,6 +40,8 @@ namespace EconomicCalculator.Storage.Products
         /// <summary>
         /// The value of the currency when broken down.
         /// </summary>
-        double RawValue();
+        /// <param name="market">The Market the raw value is coming from.</param>
+        /// <returns>The raw value of the currency when it's de-currencied.</returns>
+        double RawValue(IMarket market);
     }
 }

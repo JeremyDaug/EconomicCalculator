@@ -42,7 +42,11 @@ namespace EconomicCalculator.Enums
         /// <summary>
         /// Has Storage, Not Consumed, Not Storable, Not Transferrable, Requires maintenance.
         /// </summary>
-        Building, // Subtype of Land, Not storable, but can store other things. A type of capital good.
+        Building, 
+        /// <summary>
+        /// Can be Stored, Not Consumed in most uses, No Maintenance Required.
+        /// </summary>
+        Currency
 
         /*              | Consumed   | Not Consumed
          * -------------+------------+--------------

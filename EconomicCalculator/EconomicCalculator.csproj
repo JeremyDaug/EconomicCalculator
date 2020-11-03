@@ -97,6 +97,8 @@
     <Compile Include="Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Storage\Population\IPopulations.cs" />
     <Compile Include="Enums\BuildingType.cs" />
+    <Compile Include="Storage\Products\Building.cs" />
+    <Compile Include="Storage\Products\Currency.cs" />
     <Compile Include="Storage\Products\IBuilding.cs" />
     <Compile Include="Storage\Products\ICurrency.cs" />
     <Compile Include="Storage\Products\IPlot.cs" />
@@ -108,6 +110,7 @@
     <Compile Include="Storage\Population\PopulationGroup.cs" />
     <Compile Include="Storage\Population\Populations.cs" />
     <Compile Include="Storage\Process\Process.cs" />
+    <Compile Include="Storage\Products\Plot.cs" />
     <Compile Include="Storage\Products\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

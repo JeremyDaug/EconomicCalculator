@@ -101,7 +101,7 @@ namespace EconomicCalculator.Storage.Products
         /// and how much of each.
         /// </summary>
         /// <remarks>Services don't turn into</remarks>
-        IProductAmountCollection FailsInto { get; }
+        IReadOnlyProductAmountCollection FailsInto { get; }
 
         #endregion FailureData
 
@@ -112,7 +112,7 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         /// <param name="failedProducts">How many failed products there are.</param>
         /// <returns>The products that have been failed into.</returns>
-        IProductAmountCollection FailureResults(double failedProducts);
+        IReadOnlyProductAmountCollection FailureResults(double failedProducts);
 
         /// <summary>
         /// The probability that after a number of days, failure will occur.
@@ -154,7 +154,7 @@ namespace EconomicCalculator.Storage.Products
         /// This is added to the needs of anyone who holds the product.
         /// Not meeting maintenance increases failure chance.
         /// </summary>
-        IProductAmountCollection Maintenance { get; }
+        IReadOnlyProductAmountCollection Maintenance { get; }
 
         // TODO, consider adding unmaintained failure chance.
         // The current system just doubles the failure chance if unmaintained.

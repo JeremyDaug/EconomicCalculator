@@ -78,14 +78,14 @@ namespace EconomicCalculator.Storage.Products
         /// <summary>
         /// How much the product weighs, used primarily for transportation, in Kg.
         /// </summary>
-        public double Mass { get; }
+        public double Mass { get; set; }
 
         // TODO, consider adding a Mass Breakdown to the product.
 
         /// <summary>
         /// How much space it takes up, used in both storage and transportation.
         /// </summary>
-        public double Bulk { get; }
+        public double Bulk { get; set; }
 
         /// <summary>
         /// The type of product this is.
@@ -130,7 +130,7 @@ namespace EconomicCalculator.Storage.Products
         /// and how much of each.
         /// </summary>
         /// <remarks>Services don't turn into</remarks>
-        public IProductAmountCollection FailsInto { get; set; }
+        public IReadOnlyProductAmountCollection FailsInto { get; set; }
 
         #endregion FailureData
 
@@ -141,7 +141,7 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         /// <param name="failedProducts">How many failed products there are.</param>
         /// <returns>The products that have been failed into.</returns>
-        public IProductAmountCollection FailureResults(double failedProducts)
+        public IReadOnlyProductAmountCollection FailureResults(double failedProducts)
         {
             return FailsInto.Multiply(failedProducts);
         }
@@ -227,7 +227,7 @@ namespace EconomicCalculator.Storage.Products
         /// This is added to the needs of anyone who holds the product.
         /// Not meeting maintenance increases failure chance.
         /// </summary>
-        public IProductAmountCollection Maintenance { get; set; }
+        public IReadOnlyProductAmountCollection Maintenance { get; set; }
 
         #endregion MaintenanceData
 
@@ -322,7 +322,7 @@ namespace EconomicCalculator.Storage.Products
             return result;
         }
 
-        public void LoadFromSql(SqlConnection connection)
+        public virtual void LoadFromSql(SqlConnection connection)
         {
             throw new NotImplementedException();
         }
