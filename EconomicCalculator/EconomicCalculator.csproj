@@ -74,6 +74,7 @@
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\Randomizer.cs" />
+    <Compile Include="Storage\HexCoord.cs" />
     <Compile Include="Storage\IReadOnlyProductAmountCollection.cs" />
     <Compile Include="Storage\Jobs\Job.cs" />
     <Compile Include="Storage\Organizations\Company.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Storage\ICrop.cs" />
     <Compile Include="Storage\Organizations\IMarket.cs" />
     <Compile Include="Storage\Jobs\ILaborer.cs" />
+    <Compile Include="Storage\Organizations\Territory.cs" />
     <Compile Include="Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Storage\Population\IPopulations.cs" />
     <Compile Include="Enums\BuildingType.cs" />

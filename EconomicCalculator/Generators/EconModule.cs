@@ -1,6 +1,7 @@
 ﻿using EconomicCalculator.Randomizer;
 using EconomicCalculator.Storage;
 using EconomicCalculator.Storage.Jobs;
+using EconomicCalculator.Storage.Organizations;
 using EconomicCalculator.Storage.Population;
 using EconomicCalculator.Storage.Processes;
 using EconomicCalculator.Storage.Products;
@@ -41,6 +42,7 @@ namespace EconomicCalculator.Generators
 
             // Organizations
             Bind<IMarket>().To<Market>();
+            Bind<ITerritory>().To<Territory>();
         }
     }
 }

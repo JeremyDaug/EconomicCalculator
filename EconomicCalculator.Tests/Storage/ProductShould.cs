@@ -79,7 +79,7 @@ namespace EconomicCalculator.Tests.Intermediaries
             sut.Maintainable = true;
         }
 
-        private void AssertCollectionContains(IProductAmountCollection col, Mock<IProduct> product, double amount)
+        private void AssertCollectionContains(IReadOnlyProductAmountCollection col, Mock<IProduct> product, double amount)
         {
             Assert.That(col.GetProductValue(product.Object), Is.EqualTo(amount));
         }

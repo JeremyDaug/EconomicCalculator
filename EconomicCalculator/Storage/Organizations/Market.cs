@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Randomizer;
+using EconomicCalculator.Storage.Population;
 using EconomicCalculator.Storage.Products;
 
 namespace EconomicCalculator.Storage
