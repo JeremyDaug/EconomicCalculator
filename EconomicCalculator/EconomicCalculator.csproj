@@ -143,6 +143,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>EconomicDB.mdf</DependentUpon>
     </Content>
+    <Content Include="Storage\Jobs\IntermarketTradeOverviewAndBrainstorms.txt" />
     <Content Include="Storage\Jobs\JobOverview.txt" />
     <Content Include="Storage\Organizations\OrganizationOverview.txt" />
     <Content Include="Storage\Products\ProductOverview.txt" />

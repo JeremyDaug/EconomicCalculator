@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebInterface", "WebInterfac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebInterface.Tests", "WebInterface.Tests\WebInterface.Tests.csproj", "{5F7C1FFB-2925-4A22-91C2-D3293894BFA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconModels", "EconModels\EconModels.csproj", "{8E205D41-9825-45F0-8F73-3002277FAF32}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{5F7C1FFB-2925-4A22-91C2-D3293894BFA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F7C1FFB-2925-4A22-91C2-D3293894BFA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F7C1FFB-2925-4A22-91C2-D3293894BFA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E205D41-9825-45F0-8F73-3002277FAF32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E205D41-9825-45F0-8F73-3002277FAF32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E205D41-9825-45F0-8F73-3002277FAF32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E205D41-9825-45F0-8F73-3002277FAF32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

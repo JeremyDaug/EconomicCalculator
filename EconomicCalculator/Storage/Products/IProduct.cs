@@ -34,7 +34,7 @@ namespace EconomicCalculator.Storage.Products
         string UnitName { get; }
 
         /// <summary>
-        /// The quality of the item
+        /// The quality of the item, higher is better.
         /// </summary>
         int Quality { get; }
 
@@ -145,6 +145,12 @@ namespace EconomicCalculator.Storage.Products
         double FailedProducts(double amount, double MaintenanceMet);
 
         #endregion FailureFunctions
+
+        #region ConsumptionAction
+
+        // Placeholder for consumption results. I need to work on the Entity Framework stuff first.
+
+        #endregion ConsumptionAction
 
         #region MaintenanceData
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using EconModels;
+using EconModels.ProductModel;
+using EconomicCalculator.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,23 +17,37 @@ namespace ConsoleInterface
             inputManager = new CMDInputManager();
             // Initial Loading
             Console.WriteLine("Loading Values ----");
-            var worldManager = new ConsoleWorldManager();
-            worldManager.Open();
-            try
+            using (var context = new EconSimContext())
             {
-                // Finished Loading
-                Console.WriteLine("Loaded ----");
+                Console.WriteLine("Product Count: " + context.Products.Count());
+                Console.Write("Product Name >>");
+                string name = Console.ReadLine();
+                context.Products.Add(new Product
+                {
+                    Name = name,
+                    VariantName = "",
+                    UnitName = "unit",
+                    Quality = 1,
+                    DefaultPrice = 1.10M,
+                    Bulk = 1,
+                    ProductTypes = ProductTypes.Good,
+                    Maintainable = false,
+                    Fractional = false,
+                    MeanTimeToFailure = 100,
+                });
 
-                // Activate Promt manager.
-                inputManager.PromptReader(worldManager);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            finally
-            {
-                worldManager.Close();
+                var products = context.Products.ToList();
+                var failProducts = from m in context.Products
+                                   where m.FailsInto != null
+                                   select m;
+
+                Console.WriteLine(products.ToString());
+
+                context.SaveChanges();
+
+                Console.WriteLine("NewProductCount = " + context.Products.Count());
+
+                Console.ReadLine();
             }
         }
     }

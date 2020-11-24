@@ -5,19 +5,33 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{310587AD-0545-4CC3-A87D-949003FABCAF}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>ConsoleInterface</RootNamespace>
-    <AssemblyName>ConsoleInterface</AssemblyName>
+    <ProjectGuid>{8E205D41-9825-45F0-8F73-3002277FAF32}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EconModels</RootNamespace>
+    <AssemblyName>EconModels</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -27,7 +41,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -53,24 +66,65 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CMDInputManager.cs" />
-    <Compile Include="ConsoleWorldManager.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="EconSimContext.cs" />
+    <Compile Include="Migrations\202011221854580_InitialCreate.cs" />
+    <Compile Include="Migrations\202011221854580_InitialCreate.designer.cs">
+      <DependentUpon>202011221854580_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011222002206_Update1.cs" />
+    <Compile Include="Migrations\202011222002206_Update1.designer.cs">
+      <DependentUpon>202011222002206_Update1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011241749508_Prod1.cs" />
+    <Compile Include="Migrations\202011241749508_Prod1.designer.cs">
+      <DependentUpon>202011241749508_Prod1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="ProductModel\Product.cs" />
+    <Compile Include="ProductModel\ProductToProductPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
+      <Project>{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}</Project>
+      <Name>EconomicCalculator</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EconModels\EconModels.csproj">
-      <Project>{8E205D41-9825-45F0-8F73-3002277FAF32}</Project>
-      <Name>EconModels</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
-      <Project>{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}</Project>
-      <Name>EconomicCalculator</Name>
-    </ProjectReference>
+    <EmbeddedResource Include="Migrations\202011221854580_InitialCreate.resx">
+      <DependentUpon>202011221854580_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011222002206_Update1.resx">
+      <DependentUpon>202011222002206_Update1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011241749508_Prod1.resx">
+      <DependentUpon>202011241749508_Prod1.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="EconModelDB.mdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="EconModelDB_log.ldf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>EconModelDB.mdf</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6.1 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
