@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EconSimContext.cs" />
+    <Compile Include="JobModels\Job.cs" />
     <Compile Include="Migrations\202011221854580_InitialCreate.cs" />
     <Compile Include="Migrations\202011221854580_InitialCreate.designer.cs">
       <DependentUpon>202011221854580_InitialCreate.cs</DependentUpon>
@@ -79,7 +80,17 @@
     <Compile Include="Migrations\202011241749508_Prod1.designer.cs">
       <DependentUpon>202011241749508_Prod1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202012040801239_ProductFailureAndMaintenance.cs" />
+    <Compile Include="Migrations\202012040801239_ProductFailureAndMaintenance.designer.cs">
+      <DependentUpon>202012040801239_ProductFailureAndMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202012041955564_ProcessBase.cs" />
+    <Compile Include="Migrations\202012041955564_ProcessBase.designer.cs">
+      <DependentUpon>202012041955564_ProcessBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="ProcessModel\Process.cs" />
+    <Compile Include="ProcessModel\ProcessToProduct.cs" />
     <Compile Include="ProductModel\Product.cs" />
     <Compile Include="ProductModel\ProductToProductPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -103,6 +114,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202011241749508_Prod1.resx">
       <DependentUpon>202011241749508_Prod1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012040801239_ProductFailureAndMaintenance.resx">
+      <DependentUpon>202012040801239_ProductFailureAndMaintenance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012041955564_ProcessBase.resx">
+      <DependentUpon>202012041955564_ProcessBase.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

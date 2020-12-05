@@ -11,6 +11,14 @@ namespace EconModels.ProductModel
 {
     public class Product
     {
+        public Product()
+        {
+            FailsInto = new List<FailsIntoPair>();
+            MadeFromFailure = new List<FailsIntoPair>();
+            Maintenance = new List<MaintenancePair>();
+            Maintains = new List<MaintenancePair>();
+        }
+
         public int Id { get; set; }
 
         [Required, StringLength(30, MinimumLength = 3)]
@@ -22,7 +30,7 @@ namespace EconModels.ProductModel
         [Required, StringLength(15)]
         public string UnitName { get; set; }
 
-        [Required]
+        [Required, Range(0, int.MaxValue)]
         public int Quality { get; set; }
 
         [Required]
@@ -47,8 +55,12 @@ namespace EconModels.ProductModel
         public int MeanTimeToFailure { get; set; }
 
         // Navigation Properties
-        public virtual List<FailsIntoPair> FailsInto { get; set; }
+        public virtual ICollection<FailsIntoPair> FailsInto { get; set; }
 
-        public virtual List<MaintenancePair> Maintenance { get; set; }
+        public virtual ICollection<FailsIntoPair> MadeFromFailure { get; set; }
+
+        public virtual ICollection<MaintenancePair> Maintenance { get; set; }
+
+        public virtual ICollection<MaintenancePair> Maintains { get; set; }
     }
 }

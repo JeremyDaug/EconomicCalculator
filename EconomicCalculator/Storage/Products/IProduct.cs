@@ -35,6 +35,11 @@ namespace EconomicCalculator.Storage.Products
 
         /// <summary>
         /// The quality of the item, higher is better.
+        /// 0 is garbage or roughly equivalent, 
+        /// 1 is poverty level,
+        /// 2 is basic
+        /// 3 is desireable
+        /// 4 is the highest quality
         /// </summary>
         int Quality { get; }
 
