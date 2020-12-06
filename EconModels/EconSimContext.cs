@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EconModels.JobModels;
 using EconModels.ProcessModel;
 using EconModels.ProductModel;
 
@@ -32,6 +33,9 @@ namespace EconModels
         public DbSet<ProcessInput> ProcessInputs { get; set; }
         public DbSet<ProcessOutput> ProcessOutputs { get; set; }
         public DbSet<ProcessCapital> ProcessCapitals { get; set; }
+
+        // Jobs
+        public DbSet<Job> Jobs { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

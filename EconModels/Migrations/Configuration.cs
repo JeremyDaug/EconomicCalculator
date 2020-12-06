@@ -1,5 +1,6 @@
 ﻿namespace EconModels.Migrations
 {
+    using EconModels.JobModels;
     using EconModels.ProcessModel;
     using EconModels.ProductModel;
     using EconomicCalculator.Enums;
@@ -23,6 +24,7 @@
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method
             //  to avoid creating duplicate seed data.
 
+            #region Product
             var bioWaste = new Product
             {
                 Name = "Bio Waste",
@@ -116,6 +118,9 @@
                 FlourFailsInto,
                 BreadFailsInto);
 
+            #endregion Product
+
+            #region Processes
             // Processes
             // Farming
             var Farming = new Process
@@ -183,6 +188,50 @@
                 FarmingOutput,
                 millingOutput,
                 BakingOutput);
+
+            #endregion Processes
+
+            #region Job
+
+            var wheatFarmer = new Job
+            {
+                Name = "Wheat Farmer",
+                JobType = JobTypes.Crop,
+                JobCategory = JobCategory.Farmer,
+                Process = Farming,
+                SkillName = "Farmer",
+                SkillLevel = 1,
+                LaborRequirements = 0.001,
+            };
+
+            var grainMiller = new Job
+            {
+                Name = "Wheat Miller",
+                JobType = JobTypes.Processing,
+                JobCategory = JobCategory.Craftsman,
+                LaborRequirements = 0.005,
+                Process = Milling,
+                SkillName = "Milling",
+                SkillLevel = 1,
+            };
+
+            var baker = new Job
+            {
+                Name = "Bread Baking",
+                JobType = JobTypes.Craft,
+                JobCategory = JobCategory.Craftsman,
+                LaborRequirements = 0.005,
+                Process = BakeBread,
+                SkillName = "Cooking",
+                SkillLevel = 1,
+            };
+
+            context.Jobs.AddOrUpdate(
+                wheatFarmer,
+                grainMiller,
+                baker);
+
+            #endregion Job
         }
     }
 }

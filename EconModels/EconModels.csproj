@@ -88,6 +88,10 @@
     <Compile Include="Migrations\202012041955564_ProcessBase.designer.cs">
       <DependentUpon>202012041955564_ProcessBase.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202012052357244_Jobs.cs" />
+    <Compile Include="Migrations\202012052357244_Jobs.designer.cs">
+      <DependentUpon>202012052357244_Jobs.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ProcessModel\Process.cs" />
     <Compile Include="ProcessModel\ProcessToProduct.cs" />
@@ -120,6 +124,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202012041955564_ProcessBase.resx">
       <DependentUpon>202012041955564_ProcessBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012052357244_Jobs.resx">
+      <DependentUpon>202012052357244_Jobs.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
