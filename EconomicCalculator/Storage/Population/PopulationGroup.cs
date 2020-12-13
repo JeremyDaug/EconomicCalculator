@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator.Storage.Jobs;
+using EconomicCalculator.Storage.Population;
 using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,9 @@ namespace EconomicCalculator.Storage
 {
     internal class PopulationGroup : IPopulationGroup
     {
+        private readonly List<ICulture> _cultures;
+        private readonly Dictionary<Guid, double> _cultureBreakdown;
+
         public Guid Id { get; set; }
 
         public string Name { get; set; }
@@ -22,6 +26,22 @@ namespace EconomicCalculator.Storage
         public IJob PrimaryJob { get; set; }
 
         public int Priority { get; set; }
+
+        #region CultureBreakdown
+        // Consider Separating this into it's own class.
+
+        /// <summary>
+        /// The Cultures within this population group.
+        /// </summary>
+        public IReadOnlyList<ICulture> Cultures => _cultures;
+        /// <summary>
+        /// The percent of the population who is part of a culture
+        /// Key is the Id of the Culture.
+        /// Value should be greater than 0 and sum to the total population.
+        /// </summary>
+        public IReadOnlyDictionary<Guid, double> CultureBreakdown => _cultureBreakdown;
+
+        #endregion CultureBreakdown
 
         public IProductAmountCollection LifeNeeds { get; set; }
 
@@ -455,7 +475,7 @@ namespace EconomicCalculator.Storage
         {
             throw new NotImplementedException();
         }
-        
+
         #endregion Actions
 
         public bool Equals(IPopulationGroup other)

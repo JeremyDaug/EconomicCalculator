@@ -70,6 +70,7 @@
     <Compile Include="Enums\CashType.cs" />
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
+    <Compile Include="Enums\NeedType.cs" />
     <Compile Include="Enums\ProductTypes.cs" />
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
@@ -98,6 +99,8 @@
     <Compile Include="Storage\Organizations\IMarket.cs" />
     <Compile Include="Storage\Jobs\ILaborer.cs" />
     <Compile Include="Storage\Organizations\Territory.cs" />
+    <Compile Include="Storage\Population\Culture.cs" />
+    <Compile Include="Storage\Population\ICulture.cs" />
     <Compile Include="Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Storage\Population\IPopulations.cs" />
     <Compile Include="Enums\BuildingType.cs" />

@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Storage.Jobs;
+using EconomicCalculator.Storage.Population;
 using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;
@@ -59,6 +60,23 @@ namespace EconomicCalculator.Storage
         int Priority { get; }
 
         #endregion GeneralData
+
+        #region CultureBreakdown
+        // Consider Separating this into it's own class.
+        
+        /// <summary>
+        /// The Cultures within this population group.
+        /// </summary>
+        IReadOnlyList<ICulture> Cultures { get; }
+
+        /// <summary>
+        /// The percent of the population who is part of a culture
+        /// Key is the Id of the Culture.
+        /// Value should be less than 1 and sum to 1.
+        /// </summary>
+        IReadOnlyDictionary<Guid, double> CultureBreakdown { get; }
+
+        #endregion CultureBreakdown
 
         #region Needs
 

@@ -1,6 +1,7 @@
 ﻿namespace EconModels.Migrations
 {
     using EconModels.JobModels;
+    using EconModels.PopulationModels;
     using EconModels.ProcessModel;
     using EconModels.ProductModel;
     using EconomicCalculator.Enums;
@@ -232,6 +233,121 @@
                 baker);
 
             #endregion Job
+
+            #region Culture
+
+            var HumanCulture = new Culture
+            {
+                Name = "Human",
+                CultureGrowthRate = 0.02,
+            };
+
+            var GrainNeed = new CultureNeeds
+            {
+                Culture = HumanCulture,
+                Need = WheatGrain,
+                NeedType = NeedType.Life,
+                Amount = 1
+            };
+
+            var flourNeed = new CultureNeeds
+            {
+                Culture = HumanCulture,
+                Need = Flour,
+                NeedType = NeedType.Daily,
+                Amount = 1
+            };
+
+            var breadNeed = new CultureNeeds
+            {
+                Culture = HumanCulture,
+                Need = Bread,
+                NeedType = NeedType.Luxury,
+                Amount = 1
+            };
+
+            HumanCulture.CultureNeeds.Add(GrainNeed);
+            HumanCulture.CultureNeeds.Add(flourNeed);
+            HumanCulture.CultureNeeds.Add(breadNeed);
+
+            context.CultureNeeds.AddOrUpdate(
+                GrainNeed,
+                flourNeed,
+                breadNeed);
+
+            context.Cultures.AddOrUpdate(
+                HumanCulture);
+
+            #endregion Culture
+
+            #region Populations
+
+            var farmers = new PopulationGroup
+            {
+                Name = "Farmers",
+                Count = 100,
+                PrimaryJob = wheatFarmer,
+                SkillName = "Farmer",
+                SkillLevel = 1,
+                Priority = 1
+            };
+
+            var millers = new PopulationGroup
+            {
+                Name = "Millers",
+                Count = 100,
+                PrimaryJob = grainMiller,
+                SkillName = "Milling",
+                SkillLevel = 1,
+                Priority = 1
+            };
+
+            var bakers = new PopulationGroup
+            {
+                Name = "Bakers",
+                Count = 100,
+                PrimaryJob = baker,
+                SkillName = "Cooking",
+                SkillLevel = 1,
+                Priority = 1
+            };
+
+            var farmerCultureBreakdown = new PopulationCultureBreakdown
+            {
+                Parent = farmers,
+                Culture = HumanCulture,
+                Amount = 100
+            };
+
+            var MillerCultureBreakdown = new PopulationCultureBreakdown
+            {
+                Parent = millers,
+                Culture = HumanCulture,
+                Amount = 100
+            };
+
+            var bakerCultureBreakdown = new PopulationCultureBreakdown
+            {
+                Parent = bakers,
+                Culture = HumanCulture,
+                Amount = 100
+            };
+
+            farmers.CultureBreakdown.Add(farmerCultureBreakdown);
+            millers.CultureBreakdown.Add(MillerCultureBreakdown);
+            bakers.CultureBreakdown.Add(bakerCultureBreakdown);
+
+            context.PopCultureBreakdowns.AddOrUpdate(
+                farmerCultureBreakdown,
+                MillerCultureBreakdown,
+                bakerCultureBreakdown);
+
+            context.PopulationGroups.AddOrUpdate(
+                farmers,
+                millers,
+                bakers);
+
+            #endregion Populations
         }
     }
 }

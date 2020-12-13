@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconModels.JobModels;
+using EconModels.PopulationModels;
 using EconModels.ProcessModel;
 using EconModels.ProductModel;
 
@@ -36,6 +37,14 @@ namespace EconModels
 
         // Jobs
         public DbSet<Job> Jobs { get; set; }
+
+        // Cultures
+        public DbSet<CultureNeeds> CultureNeeds { get; set; }
+        public DbSet<Culture> Cultures { get; set; }
+
+        // Population Groups
+        public DbSet<PopulationCultureBreakdown> PopCultureBreakdowns { get; set; }
+        public DbSet<PopulationGroup> PopulationGroups { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

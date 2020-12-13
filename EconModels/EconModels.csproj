@@ -92,7 +92,15 @@
     <Compile Include="Migrations\202012052357244_Jobs.designer.cs">
       <DependentUpon>202012052357244_Jobs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202012122304510_PopGroups.cs" />
+    <Compile Include="Migrations\202012122304510_PopGroups.designer.cs">
+      <DependentUpon>202012122304510_PopGroups.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="PopulationModels\Culture.cs" />
+    <Compile Include="PopulationModels\CultureNeeds.cs" />
+    <Compile Include="PopulationModels\PopulationCultureBreakdown.cs" />
+    <Compile Include="PopulationModels\PopulationGroup.cs" />
     <Compile Include="ProcessModel\Process.cs" />
     <Compile Include="ProcessModel\ProcessToProduct.cs" />
     <Compile Include="ProductModel\Product.cs" />
@@ -128,6 +136,9 @@
     <EmbeddedResource Include="Migrations\202012052357244_Jobs.resx">
       <DependentUpon>202012052357244_Jobs.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012122304510_PopGroups.resx">
+      <DependentUpon>202012122304510_PopGroups.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Content Include="EconModelDB.mdf">
@@ -150,6 +161,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
