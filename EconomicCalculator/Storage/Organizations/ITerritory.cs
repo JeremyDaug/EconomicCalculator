@@ -156,12 +156,12 @@ namespace EconomicCalculator.Storage.Organizations
         /// <exception cref="KeyNotFoundException">If Seller Does not own any land.</exception>
         void UpdateOwnership(IPopulationGroup buyer, double acres, IPopulationGroup seller);
 
-        #endregion HelperFuncs
-
         // housing
 
         // factories
 
         // Warehouses/Merchants
+
+        #endregion HelperFuncs
     }
 }

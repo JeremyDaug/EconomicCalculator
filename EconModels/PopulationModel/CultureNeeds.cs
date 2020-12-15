@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconModels.PopulationModels
+namespace EconModels.PopulationModel
 {
     public class CultureNeeds
     {

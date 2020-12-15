@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconModels.PopulationModels
+namespace EconModels.PopulationModel
 {
     public class PopulationGroup
     {
@@ -43,5 +43,8 @@ namespace EconModels.PopulationModels
 
         [Required]
         public virtual ICollection<PopulationCultureBreakdown> CultureBreakdown { get; set; }
+
+        // Population Group Property, may go over storage limits later,
+        public virtual ICollection<OwnedProperty>  OwnedProperties { get; set; }
     }
 }

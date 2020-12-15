@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="EconSimContext.cs" />
     <Compile Include="JobModels\Job.cs" />
+    <Compile Include="MarketModel\Market.cs" />
     <Compile Include="Migrations\202011221854580_InitialCreate.cs" />
     <Compile Include="Migrations\202011221854580_InitialCreate.designer.cs">
       <DependentUpon>202011221854580_InitialCreate.cs</DependentUpon>
@@ -96,16 +97,24 @@
     <Compile Include="Migrations\202012122304510_PopGroups.designer.cs">
       <DependentUpon>202012122304510_PopGroups.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202012151718268_Territory.cs" />
+    <Compile Include="Migrations\202012151718268_Territory.designer.cs">
+      <DependentUpon>202012151718268_Territory.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="PopulationModels\Culture.cs" />
-    <Compile Include="PopulationModels\CultureNeeds.cs" />
-    <Compile Include="PopulationModels\PopulationCultureBreakdown.cs" />
-    <Compile Include="PopulationModels\PopulationGroup.cs" />
+    <Compile Include="PopulationModel\Culture.cs" />
+    <Compile Include="PopulationModel\CultureNeeds.cs" />
+    <Compile Include="PopulationModel\OwnedProperty.cs" />
+    <Compile Include="PopulationModel\PopulationCultureBreakdown.cs" />
+    <Compile Include="PopulationModel\PopulationGroup.cs" />
     <Compile Include="ProcessModel\Process.cs" />
     <Compile Include="ProcessModel\ProcessToProduct.cs" />
     <Compile Include="ProductModel\Product.cs" />
     <Compile Include="ProductModel\ProductToProductPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TerritoryModel\LandOwner.cs" />
+    <Compile Include="TerritoryModel\Territory.cs" />
+    <Compile Include="TerritoryModel\TerritoryConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
@@ -138,6 +147,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202012122304510_PopGroups.resx">
       <DependentUpon>202012122304510_PopGroups.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012151718268_Territory.resx">
+      <DependentUpon>202012151718268_Territory.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,10 @@
 ﻿namespace EconModels.Migrations
 {
     using EconModels.JobModels;
-    using EconModels.PopulationModels;
+    using EconModels.PopulationModel;
     using EconModels.ProcessModel;
     using EconModels.ProductModel;
+    using EconModels.TerritoryModel;
     using EconomicCalculator.Enums;
     using System;
     using System.Collections.Generic;
@@ -347,7 +348,86 @@
                 millers,
                 bakers);
 
+            // TODO consider adding storage to PopulationGroups, may not bother.
+
             #endregion Populations
+
+            #region Territory
+
+            var Marketrea = new TerritoryModel.Territory
+            {
+                Name = "Marketrea",
+                X = 0,
+                Y = 0,
+                Z = 0,
+                Extent = 665_000, // Hexagon 20 mi to a side
+                Elevation = 0,
+                WaterLevel = 0.1M,
+                HasRiver = false,
+                Humidity = 25,
+                Tempurature = 22,
+                Roughness = 1,
+                InfrastructureLevel = 0,
+                AvailableLand = 665_000 // No land currently owned.
+            };
+
+            // An undeveloped, unlived in tract of land
+            var Sucktopia = new TerritoryModel.Territory
+            {
+                Name = "Sucktopia",
+                X = 0,
+                Y = 0,
+                Z = 0,
+                Extent = 665_000, // Hexagon 20 mi to a side
+                Elevation = 0,
+                WaterLevel = 0.1M,
+                HasRiver = false,
+                Humidity = 25,
+                Tempurature = 22,
+                Roughness = 1,
+                InfrastructureLevel = 0,
+                AvailableLand = 665_000 // No land currently owned.
+            };
+
+            var MarkToSuck = new TerritoryConnection
+            {
+                Start = Marketrea,
+                End = Sucktopia
+            };
+
+            var SuckToMark = new TerritoryConnection
+            {
+                Start = Sucktopia,
+                End = Marketrea
+            };
+
+            Marketrea.OutgoingConnections.Add(MarkToSuck);
+            Sucktopia.OutgoingConnections.Add(SuckToMark);
+
+            Marketrea.IncomingConnections.Add(SuckToMark);
+            Sucktopia.IncomingConnections.Add(MarkToSuck);
+
+            var FarmLand = new LandOwner
+            {
+                Owner = farmers,
+                Territory = Marketrea,
+                Amount = 100
+            };
+
+            Marketrea.LandOwners.Add(FarmLand);
+
+            context.Territories.AddOrUpdate(
+                Marketrea,
+                Sucktopia);
+
+            context.TerritoryConnections.AddOrUpdate(
+                MarkToSuck,
+                SuckToMark);
+
+            context.LandOwners.AddOrUpdate(
+                FarmLand);
+
+            #endregion
         }
     }
 }

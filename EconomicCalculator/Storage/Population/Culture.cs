@@ -49,6 +49,8 @@ namespace EconomicCalculator.Storage.Population
         // TODO, consider section for needs that are limited to
         // subtypes of the population.
 
+        // TODO, Add functionality which grabs needs by type
+
         #endregion Needs
     }
 }

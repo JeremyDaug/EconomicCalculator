@@ -5,9 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconModels.JobModels;
-using EconModels.PopulationModels;
+using EconModels.PopulationModel;
 using EconModels.ProcessModel;
 using EconModels.ProductModel;
+using EconModels.TerritoryModel;
 
 namespace EconModels
 {
@@ -45,6 +46,12 @@ namespace EconModels
         // Population Groups
         public DbSet<PopulationCultureBreakdown> PopCultureBreakdowns { get; set; }
         public DbSet<PopulationGroup> PopulationGroups { get; set; }
+        public DbSet<OwnedProperty> OwnedProperties { get; set; }
+
+        // Territory
+        public DbSet<Territory> Territories { get; set; }
+        public DbSet<TerritoryConnection> TerritoryConnections { get; set; }
+        public DbSet<LandOwner> LandOwners { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -77,6 +84,20 @@ namespace EconModels
                 .HasRequired(x => x.Result)
                 .WithMany(x => x.Maintains)
                 .HasForeignKey(x => x.ResultId)
+                .WillCascadeOnDelete(false);
+
+            // Territory outgoing
+            modelBuilder.Entity<TerritoryConnection>()
+                .HasRequired(x => x.Start)
+                .WithMany(x => x.OutgoingConnections)
+                .HasForeignKey(x => x.StartId)
+                .WillCascadeOnDelete(false);
+
+            // Territory Incoming
+            modelBuilder.Entity<TerritoryConnection>()
+                .HasRequired(x => x.End)
+                .WithMany(x => x.IncomingConnections)
+                .HasForeignKey(x => x.EndId)
                 .WillCascadeOnDelete(false);
         }
     }
