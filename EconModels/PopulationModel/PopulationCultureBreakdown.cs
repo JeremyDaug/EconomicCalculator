@@ -18,7 +18,7 @@ namespace EconModels.PopulationModel
         public virtual Culture Culture { get; set; }
 
         /// <summary>
-        /// The total population of the 
+        /// The member count of the parent population of this culture.
         /// </summary>
         [Required]
         public double Amount { get; set; }

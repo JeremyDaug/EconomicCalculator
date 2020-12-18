@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconModels.JobModels;
+using EconModels.MarketModel;
 using EconModels.PopulationModel;
 using EconModels.ProcessModel;
 using EconModels.ProductModel;
@@ -52,6 +53,10 @@ namespace EconModels
         public DbSet<Territory> Territories { get; set; }
         public DbSet<TerritoryConnection> TerritoryConnections { get; set; }
         public DbSet<LandOwner> LandOwners { get; set; }
+
+        // Market
+        public DbSet<Market> Markets { get; set; }
+        public DbSet<ProductPrices> MarketPrices { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

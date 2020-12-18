@@ -69,6 +69,7 @@
     <Compile Include="EconSimContext.cs" />
     <Compile Include="JobModels\Job.cs" />
     <Compile Include="MarketModel\Market.cs" />
+    <Compile Include="MarketModel\ProductPrices.cs" />
     <Compile Include="Migrations\202011221854580_InitialCreate.cs" />
     <Compile Include="Migrations\202011221854580_InitialCreate.designer.cs">
       <DependentUpon>202011221854580_InitialCreate.cs</DependentUpon>
@@ -100,6 +101,10 @@
     <Compile Include="Migrations\202012151718268_Territory.cs" />
     <Compile Include="Migrations\202012151718268_Territory.designer.cs">
       <DependentUpon>202012151718268_Territory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202012182011183_Market1.cs" />
+    <Compile Include="Migrations\202012182011183_Market1.designer.cs">
+      <DependentUpon>202012182011183_Market1.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="PopulationModel\Culture.cs" />
@@ -150,6 +155,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202012151718268_Territory.resx">
       <DependentUpon>202012151718268_Territory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012182011183_Market1.resx">
+      <DependentUpon>202012182011183_Market1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

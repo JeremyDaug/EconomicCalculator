@@ -1,6 +1,7 @@
 ﻿namespace EconModels.Migrations
 {
     using EconModels.JobModels;
+    using EconModels.MarketModel;
     using EconModels.PopulationModel;
     using EconModels.ProcessModel;
     using EconModels.ProductModel;
@@ -78,6 +79,19 @@
                 Maintainable = false,
                 Fractional = false,
                 MeanTimeToFailure = 5,
+            };
+            var GoldOre = new Product // Simple currency
+            {
+                Name = "Gold Ore",
+                UnitName = "nugget",
+                Quality = 1,
+                DefaultPrice = 1.0M,
+                Bulk = 1,
+                Mass = 1,
+                ProductTypes = ProductTypes.Currency,
+                Maintainable = false,
+                Fractional = true,
+                MeanTimeToFailure = -1,
             };
 
             var WheatGrainFailsInto = new FailsIntoPair
@@ -177,10 +191,25 @@
             BakeBread.Inputs.Add(BakingInput);
             BakeBread.Outputs.Add(BakingOutput);
 
+            // Gold Mining
+            var MineGold = new Process
+            {
+                Name = "Gold Mining",
+            };
+            var GoldMiningOutput = new ProcessOutput
+            {
+                Parent = MineGold,
+                Product = GoldOre,
+                Amount = 1
+            };
+            MineGold.Outputs.Add(GoldMiningOutput);
+
+
             context.Processes.AddOrUpdate(
                 Farming,
                 Milling,
-                BakeBread);
+                BakeBread,
+                MineGold);
 
             context.ProcessInputs.AddOrUpdate(
                 millingInput,
@@ -189,7 +218,8 @@
             context.ProcessOutputs.AddOrUpdate(
                 FarmingOutput,
                 millingOutput,
-                BakingOutput);
+                BakingOutput,
+                GoldMiningOutput);
 
             #endregion Processes
 
@@ -228,10 +258,22 @@
                 SkillLevel = 1,
             };
 
+            var goldMiner = new Job
+            {
+                Name = "Gold Miner",
+                JobType = JobTypes.Mine,
+                JobCategory = JobCategory.Miner,
+                LaborRequirements = 1,
+                Process = MineGold,
+                SkillName = "Miner",
+                SkillLevel = 1
+            };
+
             context.Jobs.AddOrUpdate(
                 wheatFarmer,
                 grainMiller,
-                baker);
+                baker,
+                goldMiner);
 
             #endregion Job
 
@@ -313,6 +355,16 @@
                 Priority = 1
             };
 
+            var miners = new PopulationGroup
+            {
+                Name = "Bakers",
+                Count = 100,
+                PrimaryJob = baker,
+                SkillName = "Cooking",
+                SkillLevel = 1,
+                Priority = 1
+            };
+
             var farmerCultureBreakdown = new PopulationCultureBreakdown
             {
                 Parent = farmers,
@@ -334,19 +386,29 @@
                 Amount = 100
             };
 
+            var minerCultureBreakdown = new PopulationCultureBreakdown
+            {
+                Parent = miners,
+                Culture = HumanCulture,
+                Amount = 100
+            };
+
             farmers.CultureBreakdown.Add(farmerCultureBreakdown);
             millers.CultureBreakdown.Add(MillerCultureBreakdown);
             bakers.CultureBreakdown.Add(bakerCultureBreakdown);
+            miners.CultureBreakdown.Add(minerCultureBreakdown);
 
             context.PopCultureBreakdowns.AddOrUpdate(
                 farmerCultureBreakdown,
                 MillerCultureBreakdown,
-                bakerCultureBreakdown);
+                bakerCultureBreakdown,
+                minerCultureBreakdown);
 
             context.PopulationGroups.AddOrUpdate(
                 farmers,
                 millers,
-                bakers);
+                bakers,
+                miners);
 
             // TODO consider adding storage to PopulationGroups, may not bother.
 
@@ -368,7 +430,7 @@
                 Tempurature = 22,
                 Roughness = 1,
                 InfrastructureLevel = 0,
-                AvailableLand = 665_000 // No land currently owned.
+                AvailableLand = 664_900 // No land currently owned.
             };
 
             // An undeveloped, unlived in tract of land
@@ -414,7 +476,15 @@
                 Amount = 100
             };
 
+            var MineLand = new LandOwner
+            {
+                Owner = miners,
+                Territory = Marketrea,
+                Amount = 100
+            };
+
             Marketrea.LandOwners.Add(FarmLand);
+            Marketrea.LandOwners.Add(MineLand);
 
             context.Territories.AddOrUpdate(
                 Marketrea,
@@ -425,9 +495,68 @@
                 SuckToMark);
 
             context.LandOwners.AddOrUpdate(
-                FarmLand);
+                FarmLand,
+                MineLand);
 
             #endregion
+
+            #region Market
+
+            var FirstMarket = new Market
+            {
+                Name = "Market of Marketrea",
+                Territory = Marketrea
+            };
+
+            // pops in market
+            FirstMarket.PopulationGroups.Add(farmers);
+            FirstMarket.PopulationGroups.Add(millers);
+            FirstMarket.PopulationGroups.Add(bakers);
+            FirstMarket.PopulationGroups.Add(miners);
+
+            // product prices
+            var bioWastePrice = new ProductPrices
+            {
+                Market = FirstMarket,
+                Product = bioWaste,
+                MarketPrice = 0.5M
+            };
+
+            var WheatPrice = new ProductPrices
+            {
+                Market = FirstMarket,
+                Product = WheatGrain,
+                MarketPrice = 1
+            };
+
+            var FlourPrice = new ProductPrices
+            {
+                Market = FirstMarket,
+                Product = Flour,
+                MarketPrice = 2
+            };
+
+            var BreadPrice = new ProductPrices
+            {
+                Market = FirstMarket,
+                Product = Bread,
+                MarketPrice = 4
+            };
+
+            var GoldPrice = new ProductPrices
+            {
+                Market = FirstMarket,
+                Product = GoldOre,
+                MarketPrice = 1
+            };
+
+            // prices to market
+            FirstMarket.ProductPrices.Add(bioWastePrice);
+            FirstMarket.ProductPrices.Add(WheatPrice);
+            FirstMarket.ProductPrices.Add(FlourPrice);
+            FirstMarket.ProductPrices.Add(BreadPrice);
+
+            #endregion Market
         }
     }
 }

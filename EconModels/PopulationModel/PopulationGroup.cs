@@ -21,6 +21,9 @@ namespace EconModels.PopulationModel
         [StringLength(30, MinimumLength = 3)]
         public string Name { get; set; }
 
+        // Include market connection? Not sure.
+
+        // The Total Population Count, should be equal to the sum of the culture breakdown.
         [Required]
         public decimal Count { get; set; }
 
