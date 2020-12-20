@@ -47,7 +47,7 @@ namespace EconModels.TerritoryModel
         [Required]
         public int Roughness { get; set; }
 
-        [Required]
+        [Required] // TODO expand this for multiple types and kinds of Infrastructure.
         public int InfrastructureLevel { get; set; }
 
         // Adjacent Territories

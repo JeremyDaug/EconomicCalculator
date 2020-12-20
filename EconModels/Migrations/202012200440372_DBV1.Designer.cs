@@ -7,13 +7,13 @@ namespace EconModels.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class Update1 : IMigrationMetadata
+    public sealed partial class DBV1 : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Update1));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(DBV1));
         
         string IMigrationMetadata.Id
         {
-            get { return "202011222002206_Update1"; }
+            get { return "202012200440372_DBV1"; }
         }
         
         string IMigrationMetadata.Source

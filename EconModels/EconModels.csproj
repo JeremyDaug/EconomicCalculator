@@ -70,41 +70,9 @@
     <Compile Include="JobModels\Job.cs" />
     <Compile Include="MarketModel\Market.cs" />
     <Compile Include="MarketModel\ProductPrices.cs" />
-    <Compile Include="Migrations\202011221854580_InitialCreate.cs" />
-    <Compile Include="Migrations\202011221854580_InitialCreate.designer.cs">
-      <DependentUpon>202011221854580_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011222002206_Update1.cs" />
-    <Compile Include="Migrations\202011222002206_Update1.designer.cs">
-      <DependentUpon>202011222002206_Update1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011241749508_Prod1.cs" />
-    <Compile Include="Migrations\202011241749508_Prod1.designer.cs">
-      <DependentUpon>202011241749508_Prod1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202012040801239_ProductFailureAndMaintenance.cs" />
-    <Compile Include="Migrations\202012040801239_ProductFailureAndMaintenance.designer.cs">
-      <DependentUpon>202012040801239_ProductFailureAndMaintenance.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202012041955564_ProcessBase.cs" />
-    <Compile Include="Migrations\202012041955564_ProcessBase.designer.cs">
-      <DependentUpon>202012041955564_ProcessBase.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202012052357244_Jobs.cs" />
-    <Compile Include="Migrations\202012052357244_Jobs.designer.cs">
-      <DependentUpon>202012052357244_Jobs.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202012122304510_PopGroups.cs" />
-    <Compile Include="Migrations\202012122304510_PopGroups.designer.cs">
-      <DependentUpon>202012122304510_PopGroups.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202012151718268_Territory.cs" />
-    <Compile Include="Migrations\202012151718268_Territory.designer.cs">
-      <DependentUpon>202012151718268_Territory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202012182011183_Market1.cs" />
-    <Compile Include="Migrations\202012182011183_Market1.designer.cs">
-      <DependentUpon>202012182011183_Market1.cs</DependentUpon>
+    <Compile Include="Migrations\202012200440372_DBV1.cs" />
+    <Compile Include="Migrations\202012200440372_DBV1.designer.cs">
+      <DependentUpon>202012200440372_DBV1.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="PopulationModel\Culture.cs" />
@@ -132,44 +100,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202011221854580_InitialCreate.resx">
-      <DependentUpon>202011221854580_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011222002206_Update1.resx">
-      <DependentUpon>202011222002206_Update1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011241749508_Prod1.resx">
-      <DependentUpon>202011241749508_Prod1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202012040801239_ProductFailureAndMaintenance.resx">
-      <DependentUpon>202012040801239_ProductFailureAndMaintenance.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202012041955564_ProcessBase.resx">
-      <DependentUpon>202012041955564_ProcessBase.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202012052357244_Jobs.resx">
-      <DependentUpon>202012052357244_Jobs.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202012122304510_PopGroups.resx">
-      <DependentUpon>202012122304510_PopGroups.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202012151718268_Territory.resx">
-      <DependentUpon>202012151718268_Territory.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202012182011183_Market1.resx">
-      <DependentUpon>202012182011183_Market1.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="EconModelDB.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="EconModelDB_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>EconModelDB.mdf</DependentUpon>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.6.1 %28x86 and x64%29</ProductName>
@@ -181,7 +111,11 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202012200440372_DBV1.resx">
+      <DependentUpon>202012200440372_DBV1.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
