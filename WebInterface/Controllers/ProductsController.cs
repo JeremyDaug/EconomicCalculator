@@ -6,133 +6,113 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using WebInterface.Models;
+using EconModels;
+using EconModels.ProductModel;
+using EconomicCalculator.Enums;
 
 namespace WebInterface.Controllers
 {
-    public class MarketsController : Controller
+    public class ProductsController : Controller
     {
-        private MarketDBContext db = new MarketDBContext();
+        private EconSimContext db = new EconSimContext();
 
-        // GET: Markets
-        public ActionResult Index(string marketGenre, string searchString)
+        // GET: Products
+        public ActionResult Index()
         {
-            var GenreList = new List<string>();
+            return View(db.Products.ToList());
+        }
 
-            var GenreQry = from m in db.Markets
-                           orderby m.Genre
-                           select m.Genre;
-
-            GenreList.AddRange(GenreQry.Distinct());
-            ViewBag.MarketGenre = new SelectList(GenreList);
-
-            var markets = from m in db.Markets
-                          select m;
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                markets = markets.Where(s => s.Title.Contains(searchString));
-            }
-
-            if (!String.IsNullOrEmpty(marketGenre))
-            {
-                markets = markets.Where(x => x.Genre == marketGenre);
-            }
-
-            return View(markets);
-        } 
-
-        // GET: Markets/Details/5
+        // GET: Products/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Market market = db.Markets.Find(id);
-            if (market == null)
+            Product product = db.Products.Find(id);
+            if (product == null)
             {
                 return HttpNotFound();
             }
-            return View(market);
+            return View(product);
         }
 
-        // GET: Markets/Create
+        // GET: Products/Create
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: Markets/Create
+        // POST: Products/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Title,ReleaseDate,Genre,Price,Rating")] Market market)
+        public ActionResult Create([Bind(Include = "Id,Name,VariantName,UnitName,Quality,DefaultPrice,Mass,Bulk,ProductTypes,Maintainable,Fractional,MeanTimeToFailure")] Product product)
         {
             if (ModelState.IsValid)
             {
-                db.Markets.Add(market);
+                db.Products.Add(product);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            return View(market);
+            return View(product);
         }
 
-        // GET: Markets/Edit/5
+        // GET: Products/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Market market = db.Markets.Find(id);
-            if (market == null)
+            Product product = db.Products.Find(id);
+            if (product == null)
             {
                 return HttpNotFound();
             }
-            return View(market);
+            return View(product);
         }
 
-        // POST: Markets/Edit/5
+        // POST: Products/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Title,ReleaseDate,Genre,Price,Rating")] Market market)
+        public ActionResult Edit([Bind(Include = "Id,Name,VariantName,UnitName,Quality,DefaultPrice,Mass,Bulk,ProductTypes,Maintainable,Fractional,MeanTimeToFailure")] Product product)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(market).State = EntityState.Modified;
+                db.Entry(product).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(market);
+            return View(product);
         }
 
-        // GET: Markets/Delete/5
+        // GET: Products/Delete/5
         public ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Market market = db.Markets.Find(id);
-            if (market == null)
+            Product product = db.Products.Find(id);
+            if (product == null)
             {
                 return HttpNotFound();
             }
-            return View(market);
+            return View(product);
         }
 
-        // POST: Markets/Delete/5
+        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Market market = db.Markets.Find(id);
-            db.Markets.Remove(market);
+            Product product = db.Products.Find(id);
+            db.Products.Remove(product);
             db.SaveChanges();
             return RedirectToAction("Index");
         }

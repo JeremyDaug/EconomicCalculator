@@ -1,12 +1,12 @@
 ﻿namespace EconModels.Migrations
 {
+    using EconModels.Enums;
     using EconModels.JobModels;
     using EconModels.MarketModel;
     using EconModels.PopulationModel;
     using EconModels.ProcessModel;
     using EconModels.ProductModel;
     using EconModels.TerritoryModel;
-    using EconomicCalculator.Enums;
     using System;
     using System.Collections.Generic;
     using System.Data.Entity;

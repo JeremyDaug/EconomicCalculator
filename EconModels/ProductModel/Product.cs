@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.Enums;
+﻿using EconModels.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

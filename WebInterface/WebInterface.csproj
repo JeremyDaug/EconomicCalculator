@@ -128,11 +128,10 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\MarketsController.cs" />
+    <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Market.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -171,16 +170,20 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Markets\Create.cshtml" />
-    <Content Include="Views\Markets\Delete.cshtml" />
-    <Content Include="Views\Markets\Details.cshtml" />
-    <Content Include="Views\Markets\Edit.cshtml" />
-    <Content Include="Views\Markets\Index.cshtml" />
+    <Content Include="Views\Products\Create.cshtml" />
+    <Content Include="Views\Products\Delete.cshtml" />
+    <Content Include="Views\Products\Details.cshtml" />
+    <Content Include="Views\Products\Edit.cshtml" />
+    <Content Include="Views\Products\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">
       <Project>{8e205d41-9825-45f0-8f73-3002277faf32}</Project>
       <Name>EconModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
+      <Project>{b912ac5b-4dfe-4d8c-83ab-de9a0f2a4b0e}</Project>
+      <Name>EconomicCalculator</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +201,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Models\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

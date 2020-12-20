@@ -75,6 +75,15 @@
       <DependentUpon>202012200440372_DBV1.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="ModelEnums\BuildingType.cs" />
+    <Compile Include="ModelEnums\CashType.cs" />
+    <Compile Include="ModelEnums\CropType.cs" />
+    <Compile Include="ModelEnums\JobCategory.cs" />
+    <Compile Include="ModelEnums\JobTypes.cs" />
+    <Compile Include="ModelEnums\MineType.cs" />
+    <Compile Include="ModelEnums\NeedType.cs" />
+    <Compile Include="ModelEnums\ProductTypes.cs" />
+    <Compile Include="ModelEnums\RockType.cs" />
     <Compile Include="PopulationModel\Culture.cs" />
     <Compile Include="PopulationModel\CultureNeeds.cs" />
     <Compile Include="PopulationModel\OwnedProperty.cs" />

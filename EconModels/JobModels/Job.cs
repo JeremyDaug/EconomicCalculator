@@ -1,5 +1,5 @@
-﻿using EconModels.ProcessModel;
-using EconomicCalculator.Enums;
+﻿using EconModels.Enums;
+using EconModels.ProcessModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
