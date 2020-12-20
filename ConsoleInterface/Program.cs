@@ -1,6 +1,6 @@
 ﻿using EconModels;
+using EconModels.Enums;
 using EconModels.ProductModel;
-using EconomicCalculator.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

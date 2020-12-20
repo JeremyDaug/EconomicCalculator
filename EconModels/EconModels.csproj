@@ -70,9 +70,13 @@
     <Compile Include="JobModels\Job.cs" />
     <Compile Include="MarketModel\Market.cs" />
     <Compile Include="MarketModel\ProductPrices.cs" />
-    <Compile Include="Migrations\202012200440372_DBV1.cs" />
-    <Compile Include="Migrations\202012200440372_DBV1.designer.cs">
-      <DependentUpon>202012200440372_DBV1.cs</DependentUpon>
+    <Compile Include="Migrations\202012201909249_Initial.cs" />
+    <Compile Include="Migrations\202012201909249_Initial.designer.cs">
+      <DependentUpon>202012201909249_Initial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202012201952227_TestMigration.cs" />
+    <Compile Include="Migrations\202012201952227_TestMigration.designer.cs">
+      <DependentUpon>202012201952227_TestMigration.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
@@ -90,9 +94,13 @@
     <Compile Include="PopulationModel\PopulationCultureBreakdown.cs" />
     <Compile Include="PopulationModel\PopulationGroup.cs" />
     <Compile Include="ProcessModel\Process.cs" />
+    <Compile Include="ProcessModel\ProcessCapital.cs" />
+    <Compile Include="ProcessModel\ProcessInput.cs" />
+    <Compile Include="ProcessModel\ProcessOutput.cs" />
     <Compile Include="ProcessModel\ProcessToProduct.cs" />
+    <Compile Include="ProductModel\FailsIntoPair.cs" />
+    <Compile Include="ProductModel\MaintenancePair.cs" />
     <Compile Include="ProductModel\Product.cs" />
-    <Compile Include="ProductModel\ProductToProductPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TerritoryModel\LandOwner.cs" />
     <Compile Include="TerritoryModel\Territory.cs" />
@@ -121,8 +129,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202012200440372_DBV1.resx">
-      <DependentUpon>202012200440372_DBV1.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202012201909249_Initial.resx">
+      <DependentUpon>202012201909249_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012201952227_TestMigration.resx">
+      <DependentUpon>202012201952227_TestMigration.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

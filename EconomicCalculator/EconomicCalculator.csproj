@@ -49,17 +49,6 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="EconomicDBDataSet.xsc">
-      <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="EconomicDBDataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>EconomicDBDataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="EconomicDBDataSet.xss">
-      <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -84,14 +73,6 @@
     <Compile Include="Storage\Jobs\IFarmer.cs" />
     <Compile Include="Storage\Jobs\IJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EconomicDBDataSet.cs">
-      <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
-    </Compile>
-    <Compile Include="EconomicDBDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EconomicDBDataSet.xsd</DependentUpon>
-    </Compile>
     <Compile Include="Enums\MineType.cs" />
     <Compile Include="Enums\RockType.cs" />
     <Compile Include="Enums\CropType.cs" />

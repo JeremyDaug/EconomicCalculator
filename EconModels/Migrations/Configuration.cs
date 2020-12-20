@@ -8,16 +8,16 @@
     using EconModels.ProductModel;
     using EconModels.TerritoryModel;
     using System;
-    using System.Collections.Generic;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<EconSimContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<EconModels.EconSimContext>
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationDataLossAllowed = true;
         }
 
         protected override void Seed(EconSimContext context)
@@ -26,6 +26,8 @@
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method
             //  to avoid creating duplicate seed data.
+            // To Clean out the database 
+            //  run Update-Database -TargetMigration:0 | Update-Database -Force
 
             #region Product
             var bioWaste = new Product
@@ -185,7 +187,7 @@
             var BakingOutput = new ProcessOutput
             {
                 Parent = BakeBread,
-                Product = Bread, 
+                Product = Bread,
                 Amount = 1
             };
             BakeBread.Inputs.Add(BakingInput);
@@ -498,7 +500,7 @@
                 FarmLand,
                 MineLand);
 
-            #endregion
+            #endregion Territory
 
             #region Market
 
@@ -556,7 +558,18 @@
             FirstMarket.ProductPrices.Add(FlourPrice);
             FirstMarket.ProductPrices.Add(BreadPrice);
 
+            context.Markets.AddOrUpdate(
+                FirstMarket);
+            context.MarketPrices.AddOrUpdate(
+                bioWastePrice,
+                WheatPrice,
+                FlourPrice,
+                BreadPrice,
+                GoldPrice);
+
             #endregion Market
+
+            base.Seed(context);
         }
     }
 }

@@ -60,15 +60,56 @@ namespace EconModels
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+
+            Database.SetInitializer<EconSimContext>(null);
             // Base Call, no big deal, just required.
             base.OnModelCreating(modelBuilder);
 
-            // Failure Source
+            // Failure
+            modelBuilder.Entity<Product>()
+                .HasMany(x => x.FailsInto)
+                .WithRequired(x => x.Source)
+                .HasForeignKey(x => x.SourceId)
+                .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<Product>()
+                .HasMany(x => x.MadeFromFailure)
+                .WithRequired(x => x.Result)
+                .HasForeignKey(x => x.ResultId)
+                .WillCascadeOnDelete(false);
+
+            // Maintenance
+            modelBuilder.Entity<Product>()
+                .HasMany(x => x.Maintains)
+                .WithRequired(x => x.Source)
+                .HasForeignKey(x => x.SourceId)
+                .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<Product>()
+                .HasMany(x => x.Maintenance)
+                .WithRequired(x => x.Result)
+                .HasForeignKey(x => x.ResultId)
+                .WillCascadeOnDelete(false);
+
+            // Territory Connections
+            modelBuilder.Entity<Territory>()
+                .HasMany(x => x.OutgoingConnections)
+                .WithRequired(x => x.Start)
+                .HasForeignKey(x => x.StartId)
+                .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<Territory>()
+                .HasMany(x => x.IncomingConnections)
+                .WithRequired(x => x.End)
+                .HasForeignKey(x => x.EndId)
+                .WillCascadeOnDelete(false);
+
+            /*// Failure Source
             modelBuilder.Entity<FailsIntoPair>()
                 .HasRequired(x => x.Source)
                 .WithMany(x => x.FailsInto)
                 .HasForeignKey(x => x.SourceId)
-                .WillCascadeOnDelete(false);
+                .WillCascadeOnDelete(false);/*
 
             // Failure Result
             modelBuilder.Entity<FailsIntoPair>()
@@ -103,7 +144,7 @@ namespace EconModels
                 .HasRequired(x => x.End)
                 .WithMany(x => x.IncomingConnections)
                 .HasForeignKey(x => x.EndId)
-                .WillCascadeOnDelete(false);
+                .WillCascadeOnDelete(false);*/
         }
     }
 }

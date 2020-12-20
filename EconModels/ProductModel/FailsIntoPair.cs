@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EconModels.ProductModel
 {
-    public abstract class ProductToProductPair
+    public class FailsIntoPair
     {
         public int Id { get; set; }
 
@@ -27,8 +22,4 @@ namespace EconModels.ProductModel
         [Required]
         public double Amount { get; set; }
     }
-
-    public class FailsIntoPair : ProductToProductPair { }
-
-    public class MaintenancePair : ProductToProductPair { }
 }

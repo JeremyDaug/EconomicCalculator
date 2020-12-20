@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EconModels.ProcessModel
 {
-    public class ProcessToProduct
+    public abstract class ProcessToProduct
     {
         public int Id { get; set; }
 
@@ -26,10 +26,4 @@ namespace EconModels.ProcessModel
         [Required]
         public double Amount { get; set; }
     }
-
-    public class ProcessInput : ProcessToProduct { }
-
-    public class ProcessOutput : ProcessToProduct { }
-
-    public class ProcessCapital : ProcessToProduct { }
 }
