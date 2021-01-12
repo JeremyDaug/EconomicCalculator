@@ -59,28 +59,26 @@
                 "dbo.FailsIntoPairs",
                 c => new
                     {
-                        Id = c.Int(nullable: false, identity: true),
                         SourceId = c.Int(nullable: false),
                         ResultId = c.Int(nullable: false),
                         Amount = c.Double(nullable: false),
                     })
-                .PrimaryKey(t => t.Id)
+                .PrimaryKey(t => new { t.SourceId, t.ResultId })
+                .ForeignKey("dbo.Products", t => t.SourceId, cascadeDelete: true)
                 .ForeignKey("dbo.Products", t => t.ResultId)
-                .ForeignKey("dbo.Products", t => t.SourceId)
                 .Index(t => new { t.SourceId, t.ResultId }, unique: true, name: "UniqueCoupling");
             
             CreateTable(
                 "dbo.MaintenancePairs",
                 c => new
                     {
-                        Id = c.Int(nullable: false, identity: true),
                         SourceId = c.Int(nullable: false),
                         ResultId = c.Int(nullable: false),
                         Amount = c.Double(nullable: false),
                     })
-                .PrimaryKey(t => t.Id)
+                .PrimaryKey(t => new { t.SourceId, t.ResultId })
+                .ForeignKey("dbo.Products", t => t.SourceId, cascadeDelete: true)
                 .ForeignKey("dbo.Products", t => t.ResultId)
-                .ForeignKey("dbo.Products", t => t.SourceId)
                 .Index(t => new { t.SourceId, t.ResultId }, unique: true, name: "UniqueCoupling");
             
             CreateTable(
@@ -250,7 +248,7 @@
                     })
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.Territories", t => t.EndId)
-                .ForeignKey("dbo.Territories", t => t.StartId)
+                .ForeignKey("dbo.Territories", t => t.StartId, cascadeDelete: true)
                 .Index(t => new { t.StartId, t.EndId }, unique: true, name: "UniqueCoupling");
             
             CreateTable(
@@ -306,10 +304,10 @@
             DropForeignKey("dbo.ProcessCapitals", "ProductId", "dbo.Products");
             DropForeignKey("dbo.ProcessCapitals", "ParentId", "dbo.Processes");
             DropForeignKey("dbo.CultureNeeds", "Need_Id", "dbo.Products");
-            DropForeignKey("dbo.MaintenancePairs", "SourceId", "dbo.Products");
             DropForeignKey("dbo.MaintenancePairs", "ResultId", "dbo.Products");
-            DropForeignKey("dbo.FailsIntoPairs", "SourceId", "dbo.Products");
+            DropForeignKey("dbo.MaintenancePairs", "SourceId", "dbo.Products");
             DropForeignKey("dbo.FailsIntoPairs", "ResultId", "dbo.Products");
+            DropForeignKey("dbo.FailsIntoPairs", "SourceId", "dbo.Products");
             DropForeignKey("dbo.CultureNeeds", "Culture_Id", "dbo.Cultures");
             DropIndex("dbo.Markets", new[] { "Territory_Id" });
             DropIndex("dbo.ProductPrices", "UniqueCoupling");

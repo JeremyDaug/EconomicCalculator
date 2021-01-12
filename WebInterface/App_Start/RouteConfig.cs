@@ -14,6 +14,11 @@ namespace WebInterface
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "ProductFailsInto",
+                url: "products/fails_into/{sourceId}",
+                defaults: new { controller = "ProductFailsInto", action = "SourceFailsInto" });
+
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
@@ -23,6 +28,7 @@ namespace WebInterface
                 name: "market",
                 url: "{controller}/{action}/{name}/{id}"
             );
+
         }
     }
 }

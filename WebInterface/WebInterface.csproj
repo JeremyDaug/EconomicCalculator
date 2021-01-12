@@ -127,8 +127,8 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\FailsIntoPairsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ProductFailsIntoController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -176,11 +176,14 @@
     <Content Include="Views\Products\Details.cshtml" />
     <Content Include="Views\Products\Edit.cshtml" />
     <Content Include="Views\Products\Index.cshtml" />
-    <Content Include="Views\FailsIntoPairs\Create.cshtml" />
-    <Content Include="Views\FailsIntoPairs\Delete.cshtml" />
-    <Content Include="Views\FailsIntoPairs\Details.cshtml" />
-    <Content Include="Views\FailsIntoPairs\Edit.cshtml" />
-    <Content Include="Views\FailsIntoPairs\Index.cshtml" />
+    <Content Include="Views\ProductFailsInto\Create.cshtml" />
+    <Content Include="Views\ProductFailsInto\Delete.cshtml" />
+    <Content Include="Views\ProductFailsInto\Details.cshtml" />
+    <Content Include="Views\ProductFailsInto\Edit.cshtml" />
+    <Content Include="Views\ProductFailsInto\Index.cshtml" />
+    <Content Include="Views\ProductFailsInto\AllFailureResults.cshtml" />
+    <Content Include="Views\ProductFailsInto\SourceFailsInto.cshtml" />
+    <Content Include="Views\ProductFailsInto\FailsIntoResult.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">

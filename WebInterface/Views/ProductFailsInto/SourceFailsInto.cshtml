@@ -1,0 +1,55 @@
+﻿@model IEnumerable<EconModels.ProductModel.FailsIntoPair>
+
+@{
+    ViewBag.Title = "SourceFailsInto";
+}
+
+@{ 
+    var source = Model.First().Source;
+}
+
+<h2>One @source.UnitName (@source.Mass Kg) of @Model.First().Source.Name Fails or produces when consumed </h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Result.UnitName)
+        </th>
+        <th>
+            Kg
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Result.Name)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Amount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result.UnitName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result.Mass)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result.Name)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { sourceId = item.SourceId, resultId = item.ResultId }) |
+            @Html.ActionLink("Details", "Details", new { sourceId = item.SourceId, resultId = item.ResultId }) |
+            @Html.ActionLink("Delete", "Delete", new { sourceId = item.SourceId, resultId = item.ResultId })
+        </td>
+    </tr>
+}
+
+</table>

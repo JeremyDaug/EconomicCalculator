@@ -1,8 +1,10 @@
 ﻿using EconModels.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +17,7 @@ namespace EconModels.ProductModel
         {
             FailsInto = new List<FailsIntoPair>();
             MadeFromFailure = new List<FailsIntoPair>();
-            Maintenance = new List<MaintenancePair>();
+            MaintainedBy = new List<MaintenancePair>();
             Maintains = new List<MaintenancePair>();
         }
 
@@ -24,9 +26,11 @@ namespace EconModels.ProductModel
         [Required, StringLength(30, MinimumLength = 3)]
         public string Name { get; set; }
 
+        [DisplayName("Variant Name")]
         [StringLength(30)]
         public string VariantName { get; set; }
 
+        [DisplayName("Unit Name")]
         [Required, StringLength(15)]
         public string UnitName { get; set; }
 
@@ -34,6 +38,7 @@ namespace EconModels.ProductModel
         public int Quality { get; set; }
 
         [Required]
+        [DisplayName("Default Price")]
         public decimal DefaultPrice { get; set; }
 
         [Required, Range(0, double.MaxValue)]
@@ -43,6 +48,7 @@ namespace EconModels.ProductModel
         public double Bulk { get; set; }
 
         [Required]
+        [DisplayName("Product Type")]
         public ProductTypes ProductTypes { get; set; }
 
         [Required]
@@ -52,6 +58,7 @@ namespace EconModels.ProductModel
         public bool Fractional { get; set; }
 
         [Required]
+        [DisplayName("Mean Time To Failure")]
         public int MeanTimeToFailure { get; set; }
 
         // Navigation Properties
@@ -59,7 +66,7 @@ namespace EconModels.ProductModel
 
         public virtual ICollection<FailsIntoPair> MadeFromFailure { get; set; }
 
-        public virtual ICollection<MaintenancePair> Maintenance { get; set; }
+        public virtual ICollection<MaintenancePair> MaintainedBy { get; set; }
 
         public virtual ICollection<MaintenancePair> Maintains { get; set; }
     }

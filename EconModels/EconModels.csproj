@@ -70,13 +70,9 @@
     <Compile Include="JobModels\Job.cs" />
     <Compile Include="MarketModel\Market.cs" />
     <Compile Include="MarketModel\ProductPrices.cs" />
-    <Compile Include="Migrations\202012201909249_Initial.cs" />
-    <Compile Include="Migrations\202012201909249_Initial.designer.cs">
-      <DependentUpon>202012201909249_Initial.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202012201952227_TestMigration.cs" />
-    <Compile Include="Migrations\202012201952227_TestMigration.designer.cs">
-      <DependentUpon>202012201952227_TestMigration.cs</DependentUpon>
+    <Compile Include="Migrations\202101052003006_Initial.cs" />
+    <Compile Include="Migrations\202101052003006_Initial.designer.cs">
+      <DependentUpon>202101052003006_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
@@ -129,11 +125,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202012201909249_Initial.resx">
-      <DependentUpon>202012201909249_Initial.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202012201952227_TestMigration.resx">
-      <DependentUpon>202012201952227_TestMigration.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202101052003006_Initial.resx">
+      <DependentUpon>202101052003006_Initial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

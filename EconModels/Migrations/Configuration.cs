@@ -8,6 +8,7 @@
     using EconModels.ProductModel;
     using EconModels.TerritoryModel;
     using System;
+    using System.Collections.Generic;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
@@ -16,11 +17,11 @@
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationsEnabled = false;
             AutomaticMigrationDataLossAllowed = true;
         }
 
-        protected override void Seed(EconSimContext context)
+        protected override void Seed(EconModels.EconSimContext context)
         {
             //  This method will be called after migrating to the latest version.
 
@@ -29,9 +30,16 @@
             // To Clean out the database 
             //  run Update-Database -TargetMigration:0 | Update-Database -Force
 
+            /* Sanity Notes:
+             * When adding something that has a foreign key add the Id not the 
+             * connection itself. IE, FailsIntoPairs.SourceId should be set, not
+             * FailsIntoPairs.Source, that will create duplicate data.
+            */
             #region Product
-            var bioWaste = new Product
+            // Biowaste
+            var BioWaste = new Product
             {
+                Id = 1,
                 Name = "Bio Waste",
                 UnitName = "kg",
                 Quality = 0,
@@ -43,8 +51,10 @@
                 Fractional = true,
                 MeanTimeToFailure = -1,
             };
+            
             var WheatGrain = new Product
             {
+                Id = 2,
                 Name = "Wheat Grain",
                 UnitName = "kg",
                 Quality = 1,
@@ -58,6 +68,7 @@
             };
             var Flour = new Product
             {
+                Id = 3,
                 Name = "Wheat Flour",
                 UnitName = "kg",
                 Quality = 1,
@@ -71,6 +82,7 @@
             };
             var Bread = new Product
             {
+                Id = 4,
                 Name = "Simple Bread",
                 UnitName = "Loaf",
                 Quality = 1,
@@ -84,6 +96,7 @@
             };
             var GoldOre = new Product // Simple currency
             {
+                Id = 5,
                 Name = "Gold Ore",
                 UnitName = "nugget",
                 Quality = 1,
@@ -96,48 +109,50 @@
                 MeanTimeToFailure = -1,
             };
 
+            var products = new List<Product>
+            {
+                WheatGrain,
+                BioWaste,
+                Flour,
+                Bread,
+                GoldOre
+            };
+
+            products
+                .ForEach(
+                    product => context.Products.AddOrUpdate(
+                        x => new { x.Name, x.VariantName }, product));
+
+            context.SaveChanges();
             var WheatGrainFailsInto = new FailsIntoPair
             {
-                Source = WheatGrain,
-                Result = bioWaste,
+                SourceId = WheatGrain.Id,
+                ResultId = BioWaste.Id,
                 Amount = 1
             };
 
             var FlourFailsInto = new FailsIntoPair
             {
-                Source = Flour,
-                Result = bioWaste,
+                SourceId = Flour.Id,
+                ResultId = BioWaste.Id,
                 Amount = 1
             };
 
             var BreadFailsInto = new FailsIntoPair
             {
-                Source = Bread,
-                Result = bioWaste,
+                SourceId = Bread.Id,
+                ResultId = BioWaste.Id,
                 Amount = 0.5
             };
-
-            WheatGrain.FailsInto.Add(WheatGrainFailsInto);
-            bioWaste.MadeFromFailure.Add(WheatGrainFailsInto);
-            Flour.FailsInto.Add(FlourFailsInto);
-            bioWaste.MadeFromFailure.Add(FlourFailsInto);
-            Bread.FailsInto.Add(BreadFailsInto);
-            bioWaste.MadeFromFailure.Add(BreadFailsInto);
-
-            context.Products.AddOrUpdate(
-                bioWaste,
-                WheatGrain,
-                Flour,
-                Bread
-            );
 
             context.FailurePairs.AddOrUpdate(
                 WheatGrainFailsInto,
                 FlourFailsInto,
                 BreadFailsInto);
-
             #endregion Product
 
+            // Commented out below here to focus on products.
+            /*
             #region Processes
             // Processes
             // Farming
@@ -568,6 +583,9 @@
                 GoldPrice);
 
             #endregion Market
+            */
+
+            context.SaveChanges();
 
             base.Seed(context);
         }

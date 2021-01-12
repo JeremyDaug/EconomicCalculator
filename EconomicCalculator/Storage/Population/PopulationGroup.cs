@@ -27,6 +27,10 @@ namespace EconomicCalculator.Storage
 
         public int Priority { get; set; }
 
+        public string SkillName { get; set; }
+
+        public int SkillLevel { get; set; }
+
         #region CultureBreakdown
         // Consider Separating this into it's own class.
 
@@ -81,10 +85,6 @@ namespace EconomicCalculator.Storage
         public IProductAmountCollection Storage { get; set; }
 
         public IProductAmountCollection ForSale { get; set; }
-
-        public string SkillName { get; set; }
-
-        public int SkillLevel { get; set; }
 
         public IProduct JobLabor { get; set; }
 

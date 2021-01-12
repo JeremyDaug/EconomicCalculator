@@ -1,40 +1,78 @@
-﻿using System;
+﻿using EconModels;
+using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
 using System.Linq;
-using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using EconModels;
 using EconModels.ProductModel;
+using System.Data.Entity;
+using System.Net;
 
 namespace WebInterface.Controllers
 {
-    public class FailsIntoPairsController : Controller
+    public class ProductFailsIntoController : Controller
     {
         private EconSimContext db = new EconSimContext();
 
-        // GET: FailsIntoPairs
+        // GET: ProductFailsInto/Index
         public ActionResult Index()
         {
-            var failurePairs = db.FailurePairs.Include(f => f.Result).Include(f => f.Source);
+            var failurePairs = db.FailurePairs.Include(f => f.Result)
+                .Include(x => x.Source);
             return View(failurePairs.ToList());
         }
 
-        // GET: FailsIntoPairs/Details/5
-        public ActionResult Details(int? id)
+        // GET: SourceFailsInto
+        public ActionResult SourceFailsInto(int? sourceId)
         {
-            if (id == null)
+            if (sourceId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            FailsIntoPair failsIntoPair = db.FailurePairs.Find(id);
-            if (failsIntoPair == null)
+
+            var failurePairs = db.FailurePairs.Where(x => x.SourceId == sourceId);
+
+            return View(failurePairs.ToList());
+        }
+
+        public ActionResult FailsIntoResult(int? resultId)
+        {
+            if (resultId == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var failIntoResult = db.FailurePairs.Where(x => x.ResultId == resultId);
+
+            return View(failIntoResult.ToList());
+        }
+
+        // GET: FailsIntoPairs/Details/5
+        public ActionResult Details(int? sourceId, int? resultId)
+        {
+            if (sourceId == null || resultId == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            FailsIntoPair failsIntoPair;
+            try
+            {
+                failsIntoPair = db.FailurePairs
+                    .Single(x => x.SourceId == sourceId && x.ResultId == resultId);
+            }
+            catch (InvalidOperationException)
             {
                 return HttpNotFound();
             }
             return View(failsIntoPair);
+        }
+
+        // GET: AllFailureResults
+        public ActionResult AllFailureResults()
+        {
+            var AllPairs = db.FailurePairs.Include(x => x.Result)
+                .Include(x => x.Source);
+            return View(AllPairs.ToList());
         }
 
         // GET: FailsIntoPairs/Create
@@ -50,7 +88,7 @@ namespace WebInterface.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,SourceId,ResultId,Amount")] FailsIntoPair failsIntoPair)
+        public ActionResult Create([Bind(Include = "SourceId,ResultId,Amount")] FailsIntoPair failsIntoPair)
         {
             if (ModelState.IsValid)
             {
@@ -65,13 +103,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: FailsIntoPairs/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? sourceId, int? resultId)
         {
-            if (id == null)
+            if (sourceId == null || resultId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            FailsIntoPair failsIntoPair = db.FailurePairs.Find(id);
+            FailsIntoPair failsIntoPair = db.FailurePairs.Single(x => x.SourceId == sourceId && x.ResultId == resultId);
+
             if (failsIntoPair == null)
             {
                 return HttpNotFound();
@@ -86,7 +125,7 @@ namespace WebInterface.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,SourceId,ResultId,Amount")] FailsIntoPair failsIntoPair)
+        public ActionResult Edit([Bind(Include = "SourceId,ResultId,Amount")] FailsIntoPair failsIntoPair)
         {
             if (ModelState.IsValid)
             {
@@ -100,13 +139,15 @@ namespace WebInterface.Controllers
         }
 
         // GET: FailsIntoPairs/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? sourceId, int? resultId)
         {
-            if (id == null)
+            if (sourceId == null || resultId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            FailsIntoPair failsIntoPair = db.FailurePairs.Find(id);
+            FailsIntoPair failsIntoPair = db.FailurePairs
+                .Single(x => x.SourceId == sourceId && x.ResultId == resultId);
+
             if (failsIntoPair == null)
             {
                 return HttpNotFound();

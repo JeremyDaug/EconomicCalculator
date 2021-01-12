@@ -40,6 +40,8 @@ namespace WebInterface.Controllers
         // GET: Products/Create
         public ActionResult Create()
         {
+            ViewBag.productOptions = new MultiSelectList(db.Products);
+
             return View();
         }
 
@@ -54,7 +56,7 @@ namespace WebInterface.Controllers
             {
                 db.Products.Add(product);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("AddFailureProducts", "ProductFailsInto", product.Id);
             }
 
             return View(product);
@@ -63,15 +65,21 @@ namespace WebInterface.Controllers
         // GET: Products/Edit/5
         public ActionResult Edit(int? id)
         {
+            // check id is not null.
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
+            // ensure product with that id exists.
             Product product = db.Products.Find(id);
             if (product == null)
             {
                 return HttpNotFound();
             }
+
+            // Get products to allow for minimal failure and maintenance connections.
+            ViewBag.ProductConnectionOptions =
+                new MultiSelectList(db.Products);
             return View(product);
         }
 

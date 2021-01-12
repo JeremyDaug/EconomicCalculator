@@ -97,9 +97,60 @@
         <dd>
             @Html.DisplayFor(model => model.MeanTimeToFailure)
         </dd>
-
     </dl>
 </div>
+
+@if (Model.FailsInto.Any())
+{
+<p>One @Model.UnitName (@Model.Mass Kg) of the Product fails into</p>
+<table class="table-condensed">
+    <tr>
+        <th>Amount</th>
+        <th>Unit</th>
+        <th>Product</th>
+    </tr>
+@foreach (var item in Model.FailsInto)
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Amount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result.UnitName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result.Name)
+        </td>
+    </tr>
+}
+</table>
+}
+
+@if (Model.MaintainedBy.Any())
+{
+<p>One @Model.UnitName (@Model.Mass Kg) of the product is maintained by</p>
+<table class="table-responsive">
+    <tr>
+        <th>Amount</th>
+        <th>Unit</th>
+        <th>Product</th>
+    </tr>
+@foreach (var item in Model.MaintainedBy)
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Amount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result.UnitName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result)
+        </td>
+    </tr>
+}
+</table>
+}
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     @Html.ActionLink("Back to List", "Index")

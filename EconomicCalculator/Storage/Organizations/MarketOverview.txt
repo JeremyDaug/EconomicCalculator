@@ -1,0 +1,47 @@
+﻿Market Overview
+
+Markets are the workhorse of the system, and do most of the heavy lifting. They
+Markets connect together
+	- The population of the market who buy, sell, and process products.
+	- The Territory of the market which applies physical limitations and 
+		connects it to other territories and markets.
+	- The prices of Products, which are defined and stored on the basis of a market.
+	- The Organizations which control various aspects of the market
+		-> Governors primarily control territory and taxation.
+		-> Companies primarily control Jobs.
+
+The Market Day
+	Each 'day', which could be a literal day or another arbitrarily defined unit of time,
+	the market goes through this cycle of actions to push the market forward.
+	In order
+	1. Labor Sell Phase
+		- Labor has no requirements, and so can sell preemptively, helping move
+		  production forward.
+	3. Sell Phase
+		- All other products are put up for sale, so long as they are not needed by 
+		  a later phase of the day (Consumption/Production).
+	4. Local Merchants Buy
+		- Local Merchants get first dibs on everything because it is their job and they
+		  have more storage generally, they also increase the price appropriately.
+	5. General Buy Phase
+		- After Merchants buy, then everyone else in the market can buy.
+	6. Travelling Merchant Buy Phase
+		- Once the Market has gotten what it can/need from itself travelling merchants get
+		  to buy the rest.
+	7. Production Phase
+		- Any jobs that can be done are gone through, consuming their inputs, and producing
+		  their outputs into local storage.
+	8. Consumption Phase
+		- All pops consume what they are able to, destroying the products and producing 
+		  waste if that is being taken into account.
+	9. Loss Phase
+		- With all transactions complete, run a loss phase and see what breaks down.
+	10. Pop Growth Phase
+		- With our work for the day done, begin growing the populations, scaling to how
+		  well they met their needs.
+	11. Pop Shift Phase
+		- After adding population begin shifting some population around from low margin
+		  work to high margin work. People want to get rich.
+	12. Price Recalculation Phase
+		- With everything said and done, update prices based on the size of shortage or
+		  surplus in the market with the goods.

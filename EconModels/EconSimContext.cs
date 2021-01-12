@@ -66,6 +66,9 @@ namespace EconModels
             base.OnModelCreating(modelBuilder);
 
             // Failure
+            modelBuilder.Entity<FailsIntoPair>()
+                .HasKey(x => new { x.SourceId, x.ResultId });
+
             modelBuilder.Entity<Product>()
                 .HasMany(x => x.FailsInto)
                 .WithRequired(x => x.Source)
@@ -79,6 +82,9 @@ namespace EconModels
                 .WillCascadeOnDelete(false);
 
             // Maintenance
+            modelBuilder.Entity<MaintenancePair>()
+                .HasKey(x => new { x.SourceId, x.ResultId });
+
             modelBuilder.Entity<Product>()
                 .HasMany(x => x.Maintains)
                 .WithRequired(x => x.Source)
@@ -86,7 +92,7 @@ namespace EconModels
                 .WillCascadeOnDelete(true);
 
             modelBuilder.Entity<Product>()
-                .HasMany(x => x.Maintenance)
+                .HasMany(x => x.MaintainedBy)
                 .WithRequired(x => x.Result)
                 .HasForeignKey(x => x.ResultId)
                 .WillCascadeOnDelete(false);

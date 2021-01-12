@@ -1,0 +1,48 @@
+﻿@model IEnumerable<EconModels.ProductModel.FailsIntoPair>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Product Failure Index</h2>
+
+<p>
+    Failure results for all products.
+</p>
+<p>
+    @Html.ActionLink("Create New Failure", "Create")
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Source)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Result)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>
+            @Html.ActionLink(item.Source.Name, "Details", new { sourceId = item.SourceId, resultId = item.ResultId })
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Amount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Result.Name)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { sourceId = item.SourceId, resultId = item.ResultId }) |
+            @Html.ActionLink("Delete", "Delete", new { sourceId = item.SourceId, resultId = item.ResultId })
+        </td>
+    </tr>
+}
+</table>

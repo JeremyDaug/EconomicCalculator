@@ -1,0 +1,36 @@
+﻿@model IEnumerable<EconModels.ProductModel.FailsIntoPair>
+
+@{
+    ViewBag.Title = "AllFailureResults";
+}
+
+<h2>All Failure Results</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Source)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Result)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Amount)
+        </th>
+    </tr>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>
+            @Html.ActionLink(item.Source.Name, "Details", "Products", new { id=item.SourceId }, null)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItm => item.Result.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItm => item.Amount)
+        </td>
+    </tr>
+}
+</table>
