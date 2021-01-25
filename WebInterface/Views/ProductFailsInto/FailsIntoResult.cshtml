@@ -4,7 +4,17 @@
     ViewBag.Title = "FailsIntoResult";
 }
 
-<h2>FailsIntoResult</h2>
+@{ 
+    EconModels.ProductModel.Product result = null;
+    if (Model.Any())
+    {
+        result = Model.First().Result;
+    }
+}
+
+@if (result != null)
+{
+<h2>@result.Name is created from the consumption or failure of: </h2>
 
 <p>
     @Html.ActionLink("Create New", "Create")
@@ -12,34 +22,39 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Result.Name)
+            Source Product
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Source.Name)
+            One Unit Fails into
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Amount)
+            Result Product
         </th>
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
+@foreach (var item in Model)
+{
     <tr>
         <td>
-            @Html.DisplayFor(modelItem => item.Result.Name)
+            @Html.ActionLink(item.Source.Name, "Details", "Products", new { id = item.SourceId }, htmlAttributes: null)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.Source.Name)
+            @Html.DisplayFor(modelItem => item.Amount) @Html.DisplayFor(modelItem => item.Result.UnitName)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.Amount)
+            @Html.ActionLink(item.Result.Name, "Details", "Products", new { id = item.ResultId }, htmlAttributes: null)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            @Html.ActionLink("Edit", "Edit", new { sourceId = item.SourceId, resultId = item.ResultId }) |
+            @Html.ActionLink("Details", "Details", new { sourceId = item.SourceId, resultId = item.ResultId }) |
+            @Html.ActionLink("Delete", "Delete", new { sourceId = item.SourceId, resultId = item.ResultId })
         </td>
     </tr>
 }
 
 </table>
+}
+else {
+    <p>Product does not result from failure or consumption.</p>
+}

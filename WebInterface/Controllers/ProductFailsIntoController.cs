@@ -35,6 +35,7 @@ namespace WebInterface.Controllers
             return View(failurePairs.ToList());
         }
 
+        // GET: FailsIntoResult
         public ActionResult FailsIntoResult(int? resultId)
         {
             if (resultId == null)
@@ -42,9 +43,9 @@ namespace WebInterface.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var failIntoResult = db.FailurePairs.Where(x => x.ResultId == resultId);
+            var failIntoResult = db.FailurePairs.Where(x => x.ResultId == resultId).ToList();
 
-            return View(failIntoResult.ToList());
+            return View(failIntoResult);
         }
 
         // GET: FailsIntoPairs/Details/5
@@ -75,6 +76,42 @@ namespace WebInterface.Controllers
             return View(AllPairs.ToList());
         }
 
+        // GET: Add Failure Pair For Source
+        public ActionResult CreateFailureWithSource(int? sourceId)
+        {
+            if (sourceId == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            var currentPairs = db.FailurePairs.Where(x => x.SourceId == sourceId);
+
+            ViewBag.CurrentPairs = currentPairs.ToList();
+            ViewBag.DefaultSource = db.Products.Single(x => x.Id == sourceId);
+            ViewBag.SourceId = new SelectList(db.Products, "Id", "Name");
+            ViewBag.ResultId = new SelectList(db.Products, "Id", "Name");
+
+            return View();
+        }
+
+        // POST: FailsIntoPairs/Create
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateFailureWithSource([Bind(Include = "SourceId,ResultId,Amount")] FailsIntoPair failsIntoPair)
+        {
+            if (ModelState.IsValid)
+            {
+                db.FailurePairs.Add(failsIntoPair);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.ResultId = new SelectList(db.Products, "Id", "Name", failsIntoPair.ResultId);
+            ViewBag.SourceId = new SelectList(db.Products, "Id", "Name", failsIntoPair.SourceId);
+            return View(failsIntoPair);
+        }
+
         // GET: FailsIntoPairs/Create
         public ActionResult Create()
         {
@@ -93,6 +130,16 @@ namespace WebInterface.Controllers
             if (ModelState.IsValid)
             {
                 db.FailurePairs.Add(failsIntoPair);
+
+                // if it already exists
+                if (db.FailurePairs.Any(x => x.SourceId == failsIntoPair.SourceId 
+                    && x.ResultId == failsIntoPair.ResultId))
+                {
+                    // return a conflict from the DB
+                    // TODO: Improve this so when it happens people know why.
+                    return new HttpStatusCodeResult(HttpStatusCode.Conflict);
+                }
+
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -158,9 +205,15 @@ namespace WebInterface.Controllers
         // POST: FailsIntoPairs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int? sourceId, int? resultId)
         {
-            FailsIntoPair failsIntoPair = db.FailurePairs.Find(id);
+            if (sourceId == null || resultId == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            FailsIntoPair failsIntoPair = db.FailurePairs
+                .Single(x => x.SourceId == sourceId && x.ResultId == resultId);
             db.FailurePairs.Remove(failsIntoPair);
             db.SaveChanges();
             return RedirectToAction("Index");

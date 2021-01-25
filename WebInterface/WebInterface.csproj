@@ -184,6 +184,7 @@
     <Content Include="Views\ProductFailsInto\AllFailureResults.cshtml" />
     <Content Include="Views\ProductFailsInto\SourceFailsInto.cshtml" />
     <Content Include="Views\ProductFailsInto\FailsIntoResult.cshtml" />
+    <Content Include="Views\ProductFailsInto\CreateFailureWithSource.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">
