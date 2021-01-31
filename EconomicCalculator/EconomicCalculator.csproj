@@ -131,6 +131,7 @@
     <Content Include="Storage\Jobs\JobOverview.txt" />
     <Content Include="Storage\Organizations\MarketOverview.txt" />
     <Content Include="Storage\Organizations\OrganizationOverview.txt" />
+    <Content Include="Storage\Process\ProcessOverviewAndBrainstorm.txt" />
     <Content Include="Storage\Products\ProductOverview.txt" />
   </ItemGroup>
   <ItemGroup>

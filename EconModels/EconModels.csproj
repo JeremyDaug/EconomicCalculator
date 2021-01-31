@@ -74,6 +74,14 @@
     <Compile Include="Migrations\202101052003006_Initial.designer.cs">
       <DependentUpon>202101052003006_Initial.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202101271843533_ProcessV1.cs" />
+    <Compile Include="Migrations\202101271843533_ProcessV1.designer.cs">
+      <DependentUpon>202101271843533_ProcessV1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202101302321028_ProcessVariantName.cs" />
+    <Compile Include="Migrations\202101302321028_ProcessVariantName.designer.cs">
+      <DependentUpon>202101302321028_ProcessVariantName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
     <Compile Include="ModelEnums\CashType.cs" />
@@ -93,7 +101,6 @@
     <Compile Include="ProcessModel\ProcessCapital.cs" />
     <Compile Include="ProcessModel\ProcessInput.cs" />
     <Compile Include="ProcessModel\ProcessOutput.cs" />
-    <Compile Include="ProcessModel\ProcessToProduct.cs" />
     <Compile Include="ProductModel\FailsIntoPair.cs" />
     <Compile Include="ProductModel\MaintenancePair.cs" />
     <Compile Include="ProductModel\Product.cs" />
@@ -127,6 +134,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202101052003006_Initial.resx">
       <DependentUpon>202101052003006_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202101271843533_ProcessV1.resx">
+      <DependentUpon>202101271843533_ProcessV1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202101302321028_ProcessVariantName.resx">
+      <DependentUpon>202101302321028_ProcessVariantName.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

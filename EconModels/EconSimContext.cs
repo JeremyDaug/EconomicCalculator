@@ -97,6 +97,15 @@ namespace EconModels
                 .HasForeignKey(x => x.ResultId)
                 .WillCascadeOnDelete(false);
 
+            // Process Connections
+            modelBuilder.Entity<ProcessInput>()
+                .HasKey(x => new { x.ProcessId, x.InputId });
+            modelBuilder.Entity<ProcessOutput>()
+                .HasKey(x => new { x.ProcessId, x.OutputId });
+            modelBuilder.Entity<ProcessCapital>()
+                .HasKey(x => new { x.ProcessId, x.CapitalId });
+            // May not need, TODO test whether it's needed or not.
+
             // Territory Connections
             modelBuilder.Entity<Territory>()
                 .HasMany(x => x.OutgoingConnections)
@@ -109,48 +118,6 @@ namespace EconModels
                 .WithRequired(x => x.End)
                 .HasForeignKey(x => x.EndId)
                 .WillCascadeOnDelete(false);
-
-            /*// Failure Source
-            modelBuilder.Entity<FailsIntoPair>()
-                .HasRequired(x => x.Source)
-                .WithMany(x => x.FailsInto)
-                .HasForeignKey(x => x.SourceId)
-                .WillCascadeOnDelete(false);/*
-
-            // Failure Result
-            modelBuilder.Entity<FailsIntoPair>()
-                .HasRequired(x => x.Result)
-                .WithMany(x => x.MadeFromFailure)
-                .HasForeignKey(x => x.ResultId)
-                .WillCascadeOnDelete(false);
-
-            // Maintenance Source
-            modelBuilder.Entity<MaintenancePair>()
-                .HasRequired(x => x.Source)
-                .WithMany(x => x.Maintenance)
-                .HasForeignKey(x => x.SourceId)
-                .WillCascadeOnDelete(false);
-
-            // maintenance Result
-            modelBuilder.Entity<MaintenancePair>()
-                .HasRequired(x => x.Result)
-                .WithMany(x => x.Maintains)
-                .HasForeignKey(x => x.ResultId)
-                .WillCascadeOnDelete(false);
-
-            // Territory outgoing
-            modelBuilder.Entity<TerritoryConnection>()
-                .HasRequired(x => x.Start)
-                .WithMany(x => x.OutgoingConnections)
-                .HasForeignKey(x => x.StartId)
-                .WillCascadeOnDelete(false);
-
-            // Territory Incoming
-            modelBuilder.Entity<TerritoryConnection>()
-                .HasRequired(x => x.End)
-                .WithMany(x => x.IncomingConnections)
-                .HasForeignKey(x => x.EndId)
-                .WillCascadeOnDelete(false);*/
         }
     }
 }

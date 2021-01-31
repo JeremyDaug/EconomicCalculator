@@ -39,7 +39,6 @@
             // Biowaste
             var BioWaste = new Product
             {
-                Id = 1,
                 Name = "Bio Waste",
                 UnitName = "kg",
                 Quality = 0,
@@ -54,7 +53,6 @@
             
             var WheatGrain = new Product
             {
-                Id = 2,
                 Name = "Wheat Grain",
                 UnitName = "kg",
                 Quality = 1,
@@ -68,7 +66,6 @@
             };
             var Flour = new Product
             {
-                Id = 3,
                 Name = "Wheat Flour",
                 UnitName = "kg",
                 Quality = 1,
@@ -82,21 +79,20 @@
             };
             var Bread = new Product
             {
-                Id = 4,
                 Name = "Simple Bread",
                 UnitName = "Loaf",
                 Quality = 1,
                 DefaultPrice = 4.0M,
                 Bulk = 1,
-                Mass = 0.5,
+                Mass = 1,
                 ProductTypes = ProductTypes.ColdConsumable,
                 Maintainable = false,
                 Fractional = false,
                 MeanTimeToFailure = 5,
             };
-            var GoldOre = new Product // Simple currency
+            // Simple currency
+            var GoldOre = new Product
             {
-                Id = 5,
                 Name = "Gold Ore",
                 UnitName = "nugget",
                 Quality = 1,
@@ -108,6 +104,95 @@
                 Fractional = true,
                 MeanTimeToFailure = -1,
             };
+            
+            var IronOre = new Product
+            {
+                Name = "Iron Ore",
+                UnitName = "Kg",
+                Quality = 0,
+                DefaultPrice = 3.0M,
+                Bulk = 1,
+                Mass = 1,
+                ProductTypes = ProductTypes.Consumable,
+                Maintainable = false,
+                Fractional = true,
+                MeanTimeToFailure = -1
+            };
+
+            var IronIngot = new Product
+            {
+                Name = "Iron Ingot",
+                UnitName = "Kg",
+                Quality = 0,
+                DefaultPrice = 6.0M,
+                Bulk = 1,
+                Mass = 1,
+                ProductTypes = ProductTypes.Consumable,
+                Maintainable = false,
+                Fractional = true,
+                MeanTimeToFailure = 10000
+            };
+
+            // Captial For Processes
+
+            // Currently 100% Iron
+            var FarmTools = new Product
+            {
+                Name = "Farming Tools",
+                UnitName = "Set",
+                Quality = 1,
+                DefaultPrice = 50.0M,
+                Bulk = 2,
+                Mass = 20,
+                ProductTypes = ProductTypes.CapitalGood,
+                Maintainable = true,
+                Fractional = false,
+                MeanTimeToFailure = 500,
+            };
+
+            // Currently 100% Iron
+            var MineTools = new Product
+            {
+                Name = "Mining Tools",
+                UnitName = "Set",
+                Quality = 1,
+                DefaultPrice = 50.0M,
+                Bulk = 2,
+                Mass = 20,
+                ProductTypes = ProductTypes.CapitalGood,
+                Maintainable = true,
+                Fractional = false,
+                MeanTimeToFailure = 500,
+            };
+
+            // Made by magic and random stones.
+            var MillStone = new Product
+            {
+                Name = "Mill Stone",
+                UnitName = "Set",
+                Quality = 1,
+                DefaultPrice = 100.0M,
+                Bulk = 4,
+                Mass = 30,
+                ProductTypes = ProductTypes.CapitalGood,
+                Maintainable = false,
+                Fractional = false,
+                MeanTimeToFailure = 400
+            };
+
+            var Oven = new Product
+            {
+                Name = "Oven",
+                UnitName = "Oven",
+                Quality = 1,
+                DefaultPrice = 200.0M,
+                Bulk = 4,
+                Mass = 20,
+                ProductTypes = ProductTypes.CapitalGood,
+                Maintainable = false,
+                Fractional = false,
+                MeanTimeToFailure = 1800,
+            };
 
             var products = new List<Product>
             {
@@ -115,7 +200,13 @@
                 BioWaste,
                 Flour,
                 Bread,
-                GoldOre
+                GoldOre,
+                IronOre,
+                IronIngot,
+                FarmTools,
+                MineTools,
+                MillStone,
+                Oven
             };
 
             products
@@ -145,101 +236,407 @@
                 Amount = 0.5
             };
 
+            var IronScrap = new FailsIntoPair
+            {
+                SourceId = IronIngot.Id,
+                ResultId = IronOre.Id,
+                Amount = 2
+            };
+
+            var FarmingScrap = new FailsIntoPair
+            {
+                SourceId = FarmTools.Id,
+                ResultId = IronOre.Id,
+                Amount = 40
+            };
+
+            var MiningToolScrap = new FailsIntoPair
+            {
+                SourceId = MineTools.Id,
+                ResultId = IronOre.Id,
+                Amount = 40
+            };
+
+            // Milling Stones break into nothing just as they come from nothing.
+
+            var BrokenOven = new FailsIntoPair
+            {
+                SourceId = Oven.Id,
+                ResultId = IronOre.Id,
+                Amount = 40
+            };
+
             context.FailurePairs.AddOrUpdate(
                 WheatGrainFailsInto,
                 FlourFailsInto,
-                BreadFailsInto);
+                BreadFailsInto,
+                IronScrap,
+                FarmingScrap,
+                MiningToolScrap,
+                BrokenOven);
+
+            // Sanity check this update
+
             #endregion Product
 
             // Commented out below here to focus on products.
-            /*
+
             #region Processes
             // Processes
-            // Farming
+            // Farming TODO recalculate for acreage yield standards
+            // currently no input required for farming.
+            // TODO Will require land input and allow land to modify result.
+            // TODO think of how to add option for adding fertilizer
+            // TODO figure out how to apply labor to this process.
+            // TODO how to handle capital as throughput requirement.
+            // Suggestion: Only allow capital to be used 1/ day, but
+            //     allow fractions even if capital good is not fractional.
+            // TODO figure out how to handle Processes below 1 input/output/capital needed.
+            // Suggestion: Maybe allow for a process to happen in fractions so long as
+            //     inputs and outputs fractionality is maintained.
+
+            /* Farming
+             * Input: (Seed) Grain (1 bushel, 27 Kg/Acre) (Labor not counted)
+             * Capital: Farming Tools (1 set / 50 Acres) (land not included)
+             * Output: Wheat Grain (8 bushels, 216 Kg/Acre)
+             */
+            #region FarmingProc
             var Farming = new Process
             {
                 Name = "Wheat Farming",
             };
+            // Seed Grain (labor not included)
+            var FarmingInput = new ProcessInput
+            {
+                ProcessId = Farming.Id,
+                InputId = WheatGrain.Id,
+                Amount = 27 // equal to 1 bushel.
+            };
+            // Farming Implements (land not included yet)
+            var FarmingCapital = new ProcessCapital
+            {
+                ProcessId = Farming.Id,
+                CapitalId = FarmTools.Id,
+                Amount = 0.02 // 1 set can cover 50 acres max
+            };
+            // Wheat Grain
             var FarmingOutput = new ProcessOutput
             {
-                Parent = Farming,
-                Product = Flour,
-                Amount = 0.25
+                ProcessId = Farming.Id,
+                OutputId = WheatGrain.Id,
+                Amount = 27 * 8 // 8 fold growth as base.
             };
+            Farming.Inputs.Add(FarmingInput);
+            Farming.Capital.Add(FarmingCapital);
             Farming.Outputs.Add(FarmingOutput);
-
-            // Milling
+            #endregion FarmingProc
+            /* Milling
+             * Input: Grain (1 bushel)
+             * Capital: Mill Stone (1 per 100 bushels per day)
+             * Output: Flour 18.9 kg (30% weight reduction)
+             *      BioWaste 8.1 kg
+             */
+            #region MillingProc
             var Milling = new Process
             {
                 Name = "Wheat Milling",
             };
+            // Grain Input
             var millingInput = new ProcessInput
             {
-                Parent = Milling,
-                Product = WheatGrain,
-                Amount = 1
+                ProcessId = Milling.Id,
+                InputId = WheatGrain.Id,
+                Amount = 27 // input of 1 bushel
             };
-            var millingOutput = new ProcessOutput
+            // Capital: Mill Stones
+            var millingCapitalStone = new ProcessCapital
             {
-                Parent = Milling,
-                Product = Flour,
-                Amount = 0.25
+                ProcessId = Milling.Id,
+                CapitalId = MillStone.Id,
+                Amount = 0.01 // a mill stone can handle 100 bushels a day
+            };
+            // Outputs: Flour and BioWaste
+            var millingFlourOutput = new ProcessOutput
+            {
+                ProcessId = Milling.Id,
+                OutputId = Flour.Id,
+                Amount = 18.9 // a reduction of 30 %.
+            };
+            var millingBioWasteOutput = new ProcessOutput
+            {
+                ProcessId = Milling.Id,
+                OutputId = BioWaste.Id,
+                Amount = 8.1 // reducted material becomes waste.
             };
             Milling.Inputs.Add(millingInput);
-            Milling.Outputs.Add(millingOutput);
-
+            Milling.Outputs.Add(millingFlourOutput);
+            Milling.Outputs.Add(millingBioWasteOutput);
+            Milling.Capital.Add(millingCapitalStone);
+            #endregion MillingProc
             // Baking Bread
+            /* Input: Flour 0.5 kg (water, eggs, etc not included)
+             *      Labor not included
+             * Capital: Oven (20 Loaves / Oven / Day)
+             * Output: Bread (1kg)
+             */
+            #region BakingProc
             var BakeBread = new Process
             {
                 Name = "Bake Bread"
             };
-            var BakingInput = new ProcessInput
+            // Flour
+            var BakingFlourInput = new ProcessInput
             {
-                Parent = BakeBread,
-                Product = Flour,
+                ProcessId = BakeBread.Id,
+                InputId = Flour.Id,
                 Amount = 0.5
             };
-            var BakingOutput = new ProcessOutput
+            // Oven
+            var BakingOvenCapital = new ProcessCapital
             {
-                Parent = BakeBread,
-                Product = Bread,
-                Amount = 1
+                ProcessId = BakeBread.Id,
+                CapitalId = Oven.Id,
+                Amount = 0.05 // 1 oven can make 20 loaves at a time.
             };
-            BakeBread.Inputs.Add(BakingInput);
-            BakeBread.Outputs.Add(BakingOutput);
-
-            // Gold Mining
+            // Bread
+            var BakingBreadOutput = new ProcessOutput
+            {
+                ProcessId = BakeBread.Id,
+                OutputId = Bread.Id,
+                Amount = 1 // 1/2 KG of flour + magic creates 1 kg of bread
+            };
+            BakeBread.Inputs.Add(BakingFlourInput);
+            BakeBread.Outputs.Add(BakingBreadOutput);
+            BakeBread.Capital.Add(BakingOvenCapital);
+            #endregion BakingProc
+            /* Gold Mining
+             * Inputs: Labor not included
+             * Capital: Mining Tools (1 kg / set / day)
+             *      Land not included
+             * Output: 1 Kg gold ore nugget (per worker Day)
+             */
+            #region GoldMining
             var MineGold = new Process
             {
                 Name = "Gold Mining",
             };
-            var GoldMiningOutput = new ProcessOutput
+            // Labor not included
+            // Mining Tools (land not included)
+            var GoldMiningCapital = new ProcessCapital
             {
-                Parent = MineGold,
-                Product = GoldOre,
+                ProcessId = MineGold.Id,
+                CapitalId = MineTools.Id,
                 Amount = 1
             };
+            // Gold Ore
+            var GoldMiningOutput = new ProcessOutput
+            {
+                ProcessId = MineGold.Id,
+                OutputId = GoldOre.Id,
+                Amount = 1
+            };
+            MineGold.Capital.Add(GoldMiningCapital);
             MineGold.Outputs.Add(GoldMiningOutput);
+            #endregion GoldMining
+            /* Iron Mining
+             * Inputs: Labor not Included
+             * Capital: Mining Tools (100 kg / set / day)
+             * Output: Iron Ore 100 / day and set
+             */
+            #region IronMining
+            var IronMining = new Process
+            {
+                Name = "Iron Mining"
+            };
+            // Labor not included
+            // Mining Tools
+            var MiningCapitalTools = new ProcessCapital
+            {
+                ProcessId = IronMining.Id,
+                CapitalId = MineTools.Id,
+                Amount = 0.01 // 1 per 100 kg mined
+            };
+            // Iron Ore
+            var MiningOutputOre = new ProcessOutput
+            {
+                ProcessId = IronMining.Id,
+                OutputId = IronOre.Id,
+                Amount = 1 // 100 kg of ore per set of tools and labor day.
+            };
+            IronMining.Capital.Add(MiningCapitalTools);
+            IronMining.Outputs.Add(MiningOutputOre);
+            #endregion IronMining
+            /* Iron Refining
+             * Input: Iron Ore 1
+             *      Labon not included
+             * Capital: nothing (upgrade to smelter) 1 oven to 5 kg of input / day
+             * Output: Iron Ingot 0.5
+             *      Slag (not included)
+             */
+            #region IronRefining
+            var IronRefining = new Process
+            {
+                Name = "Iron Refining",
+            };
+            // Iron Ore
+            var IronRefiningInputOre = new ProcessInput
+            {
+                ProcessId = IronRefining.Id,
+                InputId = IronOre.Id,
+                Amount = 1
+            };
+            // labor not included
+            // smelter not included
+            // Iron Ingots
+            var IronRefiningOutputIngot = new ProcessOutput
+            {
+                ProcessId = IronRefining.Id,
+                OutputId = IronIngot.Id,
+                Amount = 0.5
+            };
+            // Slag (not included)
+            IronRefining.Inputs.Add(IronRefiningInputOre);
+            IronRefining.Outputs.Add(IronRefiningOutputIngot);
+            #endregion IronRefining
+            /* Iron Crafting (farm tools)
+             * Input: Iron Ingots 25 Kg
+             *      Labor not included
+             * Capital: Nothing (we use bare hands to beat iron into shape.)
+             * Outputs: 1 set of farming tools
+             *      5 kg of scrap iron (iron ingot)
+             */
+            #region FarmToolCrafting
+            var FarmToolCrafting = new Process
+            {
+                Name = "Farm Tool Crafting"
+            };
+            // Iron Ingots
+            var FarmToolCraftInputIron = new ProcessInput
+            {
+                ProcessId = FarmToolCrafting.Id,
+                InputId = IronIngot.Id,
+                Amount = 25
+            };
+            //  labor not included
+            // Forge Tools not included
+            // farming tool set
+            var FarmToolCraftOutputTool = new ProcessOutput
+            {
+                ProcessId = FarmToolCrafting.Id,
+                OutputId = FarmTools.Id,
+                Amount = 1
+            };
+            // scrap iron
+            var FarmToolCraftOutputExcess = new ProcessOutput
+            {
+                ProcessId = FarmToolCrafting.Id,
+                OutputId = IronIngot.Id,
+                Amount = 5
+            };
+            FarmToolCrafting.Inputs.Add(FarmToolCraftInputIron);
+            FarmToolCrafting.Outputs.Add(FarmToolCraftOutputTool);
+            FarmToolCrafting.Outputs.Add(FarmToolCraftOutputExcess);
+            #endregion FarmToolCrafting
+            /* Iron Crafting (mine tools)
+             * Input: Iron Ingots 25 Kg
+             *      Labor not included
+             * Capital: Nothing (we use bare hands to beat iron into shape.)
+             * Outputs: 1 set of Mining tools
+             *      5 kg of scrap iron (iron ingot)
+             */
+            #region MineToolCrafting
+            var MineToolCrafting = new Process
+            {
+                Name = "Mine Tool Crafting"
+            };
+            // Iron Ingots
+            var MineToolCraftInputIron = new ProcessInput
+            {
+                ProcessId = MineToolCrafting.Id,
+                InputId = IronIngot.Id,
+                Amount = 25
+            };
+            //  labor not included
+            // Forge Tools not included
+            // farming tool set
+            var MineToolCraftOutputTool = new ProcessOutput
+            {
+                ProcessId = MineToolCrafting.Id,
+                OutputId = MineTools.Id,
+                Amount = 1
+            };
+            // scrap iron
+            var MineToolCraftOutputExcess = new ProcessOutput
+            {
+                ProcessId = MineToolCrafting.Id,
+                OutputId = IronIngot.Id,
+                Amount = 5
+            };
+            MineToolCrafting.Inputs.Add(MineToolCraftInputIron);
+            MineToolCrafting.Outputs.Add(MineToolCraftOutputTool);
+            MineToolCrafting.Outputs.Add(MineToolCraftOutputExcess);
+            #endregion MineToolcrafting
+            /* Iron Crafting (Ovens)
+             * Input: Iron Ingots 30kg
+             *      Labor not included
+             * Capital: Nothing (tools not included)
+             * Output: 1 Oven
+             *      10 kg of scrap iron (iron ingot)
+            */
+            #region OvenCrafting
+            var OvenCrafting = new Process
+            {
+                Name = "Oven Crafting"
+            };
+            // iron Ingots
+            var OvenCraftInputIron = new ProcessInput
+            {
+                ProcessId = OvenCrafting.Id,
+                InputId = IronIngot.Id,
+                Amount = 30
+            };
+            // Labor Not included
+            // Forge Tools not included.
+            // Oven 
+            var OvenCraftOutputOven = new ProcessOutput
+            {
+                ProcessId = OvenCrafting.Id,
+                OutputId = Oven.Id,
+                Amount = 1
+            };
+            // Scrap Iron
+            var OvenCraftOutputIron = new ProcessOutput
+            {
+                ProcessId = OvenCrafting.Id,
+                OutputId = IronIngot.Id,
+                Amount = 10
+            };
+            OvenCrafting.Inputs.Add(OvenCraftInputIron);
+            OvenCrafting.Outputs.Add(OvenCraftOutputOven);
+            OvenCrafting.Outputs.Add(OvenCraftOutputIron);
+            #endregion OvenCrafting
 
-
-            context.Processes.AddOrUpdate(
+            var processes = new List<Process>
+            {
                 Farming,
                 Milling,
                 BakeBread,
-                MineGold);
+                MineGold,
+                IronMining,
+                IronRefining,
+                FarmToolCrafting,
+                MineToolCrafting,
+                OvenCrafting
+            };
 
-            context.ProcessInputs.AddOrUpdate(
-                millingInput,
-                BakingInput);
-
-            context.ProcessOutputs.AddOrUpdate(
-                FarmingOutput,
-                millingOutput,
-                BakingOutput,
-                GoldMiningOutput);
-
+            processes
+                .ForEach(
+                    process => context.Processes.AddOrUpdate(
+                        x => new { x.Name }, process));
+            
             #endregion Processes
 
+            /*
             #region Job
 
             var wheatFarmer = new Job
