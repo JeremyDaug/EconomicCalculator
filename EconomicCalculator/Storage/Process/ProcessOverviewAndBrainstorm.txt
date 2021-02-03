@@ -55,12 +55,13 @@ Problems -
   as there. The biggest limiters are Labor Inputs and Capital 
   requirements. Capital limitations are easy enough as they are
   maintained (assuming low failure) each day, they would have
-  lower priority compared to inputs as inputs make outputs but
-  capital doesn't on it's own. Labor is limited in that it's
-  total capacity is harshly limited by the population the labor
-  comes from. Generally, a process's owner should either 
-  try to buy each input in proportion to the others, or it
-  should prioritize storable goods in then buy labor as it can.
+  lower priority compared to inputs as inputs make outputs and
+  thus profit, but capital doesn't on it's own. Labor is limited
+  in that it's total capacity is harshly limited by the
+  population the labor comes from. Generally, a process's owner
+  should either  try to buy each input in proportion to the
+  others, or it should prioritize storable goods in then buy
+  labor as it can.
   2.The next biggest problem is lack of information density. If
   you want to have the same effective process with different
   capital or input requirements, you have to duplicate the
@@ -74,6 +75,15 @@ Hypothetical Changes -
 	1)This problem may be one which can't be solved here. Some
 	  way to assist may be added via priorities or helper 
 	  functions, but otherwise may be not doable from here.
+	  Currently the system takes in the Required Inputs and
+	  Capital. The one with the lowest input ratio to it's
+	  expected maximum acts as the limit for all and only that
+	  ratio of the goods will used or consumed. Likewise only
+	  that ratio of outputs will be produced. Non-fractional
+	  goods, particularly outputs, can reduce this further.
+	  This however, would be handled more properly by jobs,
+	  not processes. Processes should be for information storage
+	  not actvity or actual consumption.
 	2)Information density can most likely be solved by adding
 	  info to inputs and capital. Most would apply to capital,
 	  but allowing substitute goods for inputs, or supplementary
@@ -89,25 +99,46 @@ Hypothetical Changes -
 		    process, would give a bonus to it's inclusion or
 			a penalty for it's exclusion. Without (3) this bonus
 			would have to be a flat bonus across the board.
+			This could further be split between 2 variants
+			-Variant 1, Optional Input, this would be a fusion
+			 of Optional and Consumed for an input, causing the
+			 good to be consumed into it's failure products, but
+			 not alter the outputs directly. Throughput would
+			 still be the main bonus.
+			-Variant 2, Optional Capital, this would be a real
+			 optional good. Again, it would increase throughput
+			 of required input goods to standard output goods.
 		  c)Substitute, marks a good as a substitute for another,
 		    somehow. This would probably not be possible, and
 			would require (4) to be functional at all.
 		  d)Consumed, marks a good as being used, and so does not
 		    become one of the output goods but rather changes to
 			it's standard failure products. This would also be
-			great for secondary or catalyst goods.
-		  e)Refined/Slag, this could be used to make a pair of
+			great for secondary or catalyst goods. It would only
+			be valid for Input Goods.
+		  e)Refine/unrefined, this could be used to make a pair of
 		    outputs as one being a refining product and the
 			other being the slag produced. Increasing efficiency
 			would cause the ratio of refined to slag to change.
+			For example, a refining process for iron takes in
+			1 kg iron ore and processes it into 0.4 kg of iron
+			ingots 0.4 iron ore and 0.2 iron slag. The output
+			of iron ore would be marked as unrefined and the
+			iron ingots would be marked as refined. Thus
+			effeciency would improve the ratio of refined to
+			unrefined. This is probably a bad idea, but worth
+			writing down here. At least when it comes to
+			satisfying my mania of requiring mass consistency.
 		2.Base Effect, this is how much the input or good effects
 		  the process on flatly, so iron would be a base of 1
-		  while wood would be 0 in refining.
+		  while wood would be 0 in refining. This is too rough
+		  to seriously consider including, but is worth
+		  remembering if this can be worked.
 		3.Multiplicative Bonus, this is how much the process
 		  improves the efficiency of the process, allowing for
 		  more throughput or higher of specific outputs. For
 		  example, using coal instead of wood would improve the
-		  efficiency of refining iron.
+		  efficiency of refining iron. 
 		4.Substitute Goods, this would be entirely separate from
 		  processes and would instead be more closely related to
 		  products. This would be a method by which goods could

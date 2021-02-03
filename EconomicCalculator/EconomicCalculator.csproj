@@ -61,6 +61,7 @@
     <Compile Include="Enums\JobTypes.cs" />
     <Compile Include="Enums\NeedType.cs" />
     <Compile Include="Enums\ProductTypes.cs" />
+    <Compile Include="Enums\ProcessGoodTag.cs" />
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\Randomizer.cs" />

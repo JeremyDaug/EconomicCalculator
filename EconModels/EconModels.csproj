@@ -82,6 +82,10 @@
     <Compile Include="Migrations\202101302321028_ProcessVariantName.designer.cs">
       <DependentUpon>202101302321028_ProcessVariantName.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202102031918447_ProcessGoodTags.cs" />
+    <Compile Include="Migrations\202102031918447_ProcessGoodTags.designer.cs">
+      <DependentUpon>202102031918447_ProcessGoodTags.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
     <Compile Include="ModelEnums\CashType.cs" />
@@ -91,6 +95,7 @@
     <Compile Include="ModelEnums\MineType.cs" />
     <Compile Include="ModelEnums\NeedType.cs" />
     <Compile Include="ModelEnums\ProductTypes.cs" />
+    <Compile Include="ModelEnums\ProcessGoodTag.cs" />
     <Compile Include="ModelEnums\RockType.cs" />
     <Compile Include="PopulationModel\Culture.cs" />
     <Compile Include="PopulationModel\CultureNeeds.cs" />
@@ -140,6 +145,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202101302321028_ProcessVariantName.resx">
       <DependentUpon>202101302321028_ProcessVariantName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202102031918447_ProcessGoodTags.resx">
+      <DependentUpon>202102031918447_ProcessGoodTags.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

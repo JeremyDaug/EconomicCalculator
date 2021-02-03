@@ -3,6 +3,7 @@
     using EconModels.Enums;
     using EconModels.JobModels;
     using EconModels.MarketModel;
+    using EconModels.ModelEnums;
     using EconModels.PopulationModel;
     using EconModels.ProcessModel;
     using EconModels.ProductModel;

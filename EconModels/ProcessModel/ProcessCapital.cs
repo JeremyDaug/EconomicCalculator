@@ -1,4 +1,5 @@
-﻿using EconModels.ProductModel;
+﻿using EconModels.ModelEnums;
+using EconModels.ProductModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,5 +25,9 @@ namespace EconModels.ProcessModel
         [Required]
         [DisplayName("Amount")]
         public double Amount { get; set; }
+
+        [DefaultValue(0)]
+        [DisplayName("Capital Tag")]
+        public ProcessGoodTag Tag { get; set; } = 0;
     }
 }
