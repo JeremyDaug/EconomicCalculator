@@ -56,12 +56,21 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -127,7 +136,12 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ProcessCapitalsController.cs" />
+    <Compile Include="Controllers\ProcessesController.cs" />
+    <Compile Include="Controllers\ProcessInputsController.cs" />
+    <Compile Include="Controllers\ProcessOutputsController.cs" />
     <Compile Include="Controllers\ProductFailsIntoController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Global.asax.cs">
@@ -157,7 +171,9 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -185,6 +201,26 @@
     <Content Include="Views\ProductFailsInto\SourceFailsInto.cshtml" />
     <Content Include="Views\ProductFailsInto\FailsIntoResult.cshtml" />
     <Content Include="Views\ProductFailsInto\CreateFailureWithSource.cshtml" />
+    <Content Include="Views\Processes\Create.cshtml" />
+    <Content Include="Views\Processes\Delete.cshtml" />
+    <Content Include="Views\Processes\Details.cshtml" />
+    <Content Include="Views\Processes\Edit.cshtml" />
+    <Content Include="Views\Processes\Index.cshtml" />
+    <Content Include="Views\ProcessInputs\Create.cshtml" />
+    <Content Include="Views\ProcessInputs\Delete.cshtml" />
+    <Content Include="Views\ProcessInputs\Details.cshtml" />
+    <Content Include="Views\ProcessInputs\Edit.cshtml" />
+    <Content Include="Views\ProcessInputs\Index.cshtml" />
+    <Content Include="Views\ProcessCapitals\Create.cshtml" />
+    <Content Include="Views\ProcessCapitals\Delete.cshtml" />
+    <Content Include="Views\ProcessCapitals\Details.cshtml" />
+    <Content Include="Views\ProcessCapitals\Edit.cshtml" />
+    <Content Include="Views\ProcessCapitals\Index.cshtml" />
+    <Content Include="Views\ProcessOutputs\Create.cshtml" />
+    <Content Include="Views\ProcessOutputs\Delete.cshtml" />
+    <Content Include="Views\ProcessOutputs\Details.cshtml" />
+    <Content Include="Views\ProcessOutputs\Edit.cshtml" />
+    <Content Include="Views\ProcessOutputs\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">
