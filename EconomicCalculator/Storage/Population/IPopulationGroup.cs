@@ -72,7 +72,7 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// The percent of the population who is part of a culture
         /// Key is the Id of the Culture.
-        /// Value should be less than 1 and sum to 1.
+        /// Value should be less than 1 and sum to 1 (or within a rounding error of 1).
         /// </summary>
         IReadOnlyDictionary<Guid, double> CultureBreakdown { get; }
 

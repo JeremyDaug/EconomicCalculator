@@ -65,7 +65,7 @@ namespace EconomicCalculator.Storage.Jobs
         /// </summary>
         public int SkillLevel { get; }
 
-        /// <summary>
+        /// <summary> TODO, remove this, it's folded into Process.
         /// How much work per unit of the job is needed.
         /// </summary>
         public double LaborRequirements { get; }

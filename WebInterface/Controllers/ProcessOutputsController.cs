@@ -23,13 +23,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessOutputs/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? processId, int? outputId)
         {
-            if (id == null)
+            if (processId == null || outputId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessOutput processOutput = db.ProcessOutputs.Find(id);
+            ProcessOutput processOutput = db.ProcessOutputs
+                .SingleOrDefault(x => x.ProcessId == processId && x.OutputId == outputId);
             if (processOutput == null)
             {
                 return HttpNotFound();
@@ -65,13 +66,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessOutputs/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? processId, int? outputId)
         {
-            if (id == null)
+            if (processId == null || outputId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessOutput processOutput = db.ProcessOutputs.Find(id);
+            ProcessOutput processOutput = db.ProcessOutputs
+                .SingleOrDefault(x => x.ProcessId == processId && x.OutputId == outputId);
             if (processOutput == null)
             {
                 return HttpNotFound();
@@ -100,13 +102,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessOutputs/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? processId, int? outputId)
         {
-            if (id == null)
+            if (processId == null || outputId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessOutput processOutput = db.ProcessOutputs.Find(id);
+            ProcessOutput processOutput = db.ProcessOutputs
+                .SingleOrDefault(x => x.ProcessId == processId && x.OutputId == outputId);
             if (processOutput == null)
             {
                 return HttpNotFound();

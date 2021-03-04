@@ -1,0 +1,48 @@
+﻿Political Groups
+
+Political groups are a method by which a population group defines
+it's politics. It's key features are:
+
+Allies connects the political group to others who it considered
+	friendly. They generally agree on matters, vote together,
+	and when members change party, they tend to move along these
+	lines.
+
+Enemies connects the political group to others it considers to be
+	political rivals. This is not just a disagreement, but an 
+	opposition. The movement of one side tends to create an
+	opposing motion in the other. And should one rebel the other
+	will begin radicalizing.
+
+Radicalism is how radical or extreme the party is. The more
+	radical the more extreme it's political oppinions and the 
+	greater it's militarism will be.
+
+Tags are modifiers which change how the members of the political
+	group act. Examples:
+		- Militant, the group is particularly aggressive and
+		  militant resulting in any gains in radicalism to be 
+		  amplified.
+		- Pacifist, the group is particularly peaceful and all
+		  militancy is greatly reduced.
+		- Fracturous, the group lacks a strong unifying identity
+		  weakening it's voting power.
+		- Unified, the group has a strong unifying identity which
+		  strengthen's it's voting power and brings more converts.
+		- Idealogues, the political group has very high retension
+		  but lower growth rate as well.
+		- Religious, the political group has a connection to a
+		  particular religion which gains increased attraction 
+		  from them and decreases attraction from others.
+		- Supremacist, this group has culture which it considers
+		  to be the most important and greatest. This greatly
+		  decreases the draw from other cultures, and increases
+		  it from the one it's attached to.
+		- Subjugationist
+
+Derived Statistics
+	Militancy, this is how agressive the group is and how much 
+	it desires to revolt and overthrow a ruling party which it
+	disagrees with as well as how strongly they will fight to
+	keep themselves in power. Calculated based on the radicalism
+	and modifying tags.

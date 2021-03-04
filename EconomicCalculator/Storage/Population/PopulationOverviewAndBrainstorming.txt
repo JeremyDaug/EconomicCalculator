@@ -1,0 +1,10 @@
+﻿Population Overview
+
+Population (See PopulationGroup) is the abstracted smallest unit of population the
+system works with, any economic activity done by an individual is treated as part of
+the population group and it's effects are averaged out across the group. 
+
+A populationGroup also has a Culture Breakdown, which defines what cultures exist in
+the population group and in what proportion.
+
+The last largest thing a PopulationGroup has is a Job which they do.

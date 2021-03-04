@@ -4,7 +4,7 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Processes</h2>
 
 <p>
     @Html.ActionLink("Create New", "Create")
@@ -18,13 +18,13 @@
             @Html.DisplayNameFor(model => model.VariantName)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Inputs)
+            @Html.ActionLink("Inputs", "Index", "ProcessInputs", null, null)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Capital)
+            @Html.ActionLink("Capitals", "Index", "ProcessCapitals", null, null)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Outputs)
+            @Html.ActionLink("Outputs", "Index", "ProcessOutputs", null, null)
         </th>
         <th></th>
     </tr>

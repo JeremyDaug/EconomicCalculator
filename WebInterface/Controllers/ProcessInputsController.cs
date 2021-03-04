@@ -23,13 +23,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessInputs/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? processId, int? inputId)
         {
-            if (id == null)
+            if (processId == null || inputId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessInput processInput = db.ProcessInputs.Find(id);
+            ProcessInput processInput = db.ProcessInputs
+                .SingleOrDefault(x => x.ProcessId == processId && x.InputId == inputId);
             if (processInput == null)
             {
                 return HttpNotFound();
@@ -65,13 +66,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessInputs/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? processId, int? inputId)
         {
-            if (id == null)
+            if (processId == null || inputId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessInput processInput = db.ProcessInputs.Find(id);
+            ProcessInput processInput = db.ProcessInputs.SingleOrDefault(x => x.ProcessId == processId &&
+                                                                              x.InputId == inputId);
             if (processInput == null)
             {
                 return HttpNotFound();
@@ -100,13 +102,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessInputs/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? processId, int? inputId)
         {
-            if (id == null)
+            if (processId == null || inputId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessInput processInput = db.ProcessInputs.Find(id);
+            ProcessInput processInput = db.ProcessInputs
+                .SingleOrDefault(x => x.ProcessId == processId && x.InputId == inputId);
             if (processInput == null)
             {
                 return HttpNotFound();
@@ -117,9 +120,10 @@ namespace WebInterface.Controllers
         // POST: ProcessInputs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int processId, int inputId)
         {
-            ProcessInput processInput = db.ProcessInputs.Find(id);
+            ProcessInput processInput = db.ProcessInputs
+                .SingleOrDefault(x => x.ProcessId == processId && x.InputId == inputId);
             db.ProcessInputs.Remove(processInput);
             db.SaveChanges();
             return RedirectToAction("Index");

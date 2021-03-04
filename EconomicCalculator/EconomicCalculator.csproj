@@ -83,6 +83,7 @@
     <Compile Include="Storage\Organizations\Territory.cs" />
     <Compile Include="Storage\Population\Culture.cs" />
     <Compile Include="Storage\Population\ICulture.cs" />
+    <Compile Include="Storage\Population\IPoliticalGroup.cs" />
     <Compile Include="Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Storage\Population\IPopulations.cs" />
     <Compile Include="Enums\BuildingType.cs" />
@@ -117,6 +118,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -132,6 +134,8 @@
     <Content Include="Storage\Jobs\JobOverview.txt" />
     <Content Include="Storage\Organizations\MarketOverview.txt" />
     <Content Include="Storage\Organizations\OrganizationOverview.txt" />
+    <Content Include="Storage\Population\PoliticalGroupOverview.txt" />
+    <Content Include="Storage\Population\PopulationOverviewAndBrainstorming.txt" />
     <Content Include="Storage\Process\ProcessOverviewAndBrainstorm.txt" />
     <Content Include="Storage\Products\ProductOverview.txt" />
   </ItemGroup>

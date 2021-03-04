@@ -4,7 +4,7 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Process Capitals</h2>
 
 <p>
     @Html.ActionLink("Create New", "Create")
@@ -15,7 +15,7 @@
             @Html.DisplayNameFor(model => model.Capital.Name)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Process.Name)
+            @Html.ActionLink("Process", "Index", "Processes", null, null)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Amount)
@@ -41,9 +41,9 @@
             @Html.DisplayFor(modelItem => item.Tag)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            @Html.ActionLink("Edit", "Edit", new { processId=item.ProcessId, capitalId=item.CapitalId }) |
+            @Html.ActionLink("Details", "Details", new { processId = item.ProcessId, capitalId = item.CapitalId }) |
+            @Html.ActionLink("Delete", "Delete", new { processId = item.ProcessId, capitalId = item.CapitalId })
         </td>
     </tr>
 }

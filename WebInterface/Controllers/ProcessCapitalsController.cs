@@ -23,13 +23,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessCapitals/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? processId, int? capitalId)
         {
-            if (id == null)
+            if (processId == null || capitalId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessCapital processCapital = db.ProcessCapitals.Find(id);
+            ProcessCapital processCapital = db.ProcessCapitals.SingleOrDefault(x => x.ProcessId == processId
+                                                                      && x.CapitalId == capitalId);
             if (processCapital == null)
             {
                 return HttpNotFound();
@@ -65,13 +66,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessCapitals/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? processId, int? capitalId)
         {
-            if (id == null)
+            if (processId == null || capitalId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessCapital processCapital = db.ProcessCapitals.Find(id);
+            ProcessCapital processCapital = db.ProcessCapitals.SingleOrDefault(x => x.ProcessId == processId
+                                                                      && x.CapitalId == capitalId);
             if (processCapital == null)
             {
                 return HttpNotFound();
@@ -100,13 +102,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: ProcessCapitals/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? processId, int? capitalId)
         {
-            if (id == null)
+            if (processId == null || capitalId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProcessCapital processCapital = db.ProcessCapitals.Find(id);
+            ProcessCapital processCapital = db.ProcessCapitals.SingleOrDefault(x => x.ProcessId == processId
+                                                                      && x.CapitalId == capitalId);
             if (processCapital == null)
             {
                 return HttpNotFound();
@@ -117,9 +120,10 @@ namespace WebInterface.Controllers
         // POST: ProcessCapitals/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int processId, int capitalId)
         {
-            ProcessCapital processCapital = db.ProcessCapitals.Find(id);
+            ProcessCapital processCapital = db.ProcessCapitals.SingleOrDefault(x => x.ProcessId == processId
+                                                                      && x.CapitalId == capitalId);
             db.ProcessCapitals.Remove(processCapital);
             db.SaveChanges();
             return RedirectToAction("Index");

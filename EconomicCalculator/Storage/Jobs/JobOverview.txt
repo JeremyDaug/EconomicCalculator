@@ -3,6 +3,9 @@
 Jobs are what populations do to create wealth. They do this through multiple means, but ultimately they are divided into a number of
 more detailed jobs.
 
+Job and Population Logic
+	The logic of Jobs and population is a shared goal, however, we will limit the talk to just how the population handles it's job.
+
 Jobs
 
 	Ground Floor Producers - They require few inputs, and are the foundation of the economy.
