@@ -1,4 +1,6 @@
 ﻿using EconModels.Enums;
+using EconModels.JobModels;
+using EconModels.SkillsModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,10 +21,11 @@ namespace EconModels.ProductModel
             MadeFromFailure = new List<FailsIntoPair>();
             MaintainedBy = new List<MaintenancePair>();
             Maintains = new List<MaintenancePair>();
+            Jobs = new List<Job>();
         }
 
         public int Id { get; set; }
-
+        // Index with VariantName
         [Required, StringLength(30, MinimumLength = 3)]
         public string Name { get; set; }
 
@@ -49,7 +52,7 @@ namespace EconModels.ProductModel
 
         [Required]
         [DisplayName("Product Type")]
-        public ProductTypes ProductTypes { get; set; }
+        public ProductTypes ProductType { get; set; }
 
         [Required]
         public bool Maintainable { get; set; }
@@ -69,5 +72,12 @@ namespace EconModels.ProductModel
         public virtual ICollection<MaintenancePair> MaintainedBy { get; set; }
 
         public virtual ICollection<MaintenancePair> Maintains { get; set; }
+
+        // For jobs, because one way connections are just not in the cards.
+        // Job.Labor
+        public virtual ICollection<Job> Jobs { get; set; }
+
+        // To Skill.ValidLabors
+        public virtual ICollection<Skill> Skills { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace ConsoleInterface
                     Quality = 1,
                     DefaultPrice = 1.10M,
                     Bulk = 1,
-                    ProductTypes = ProductTypes.Good,
+                    ProductType = ProductTypes.Good,
                     Maintainable = false,
                     Fractional = false,
                     MeanTimeToFailure = 100,

@@ -7,13 +7,13 @@ namespace EconModels.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class ProcessV1 : IMigrationMetadata
+    public sealed partial class InitThroughJobs : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(ProcessV1));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitThroughJobs));
         
         string IMigrationMetadata.Id
         {
-            get { return "202101271843533_ProcessV1"; }
+            get { return "202103181214067_InitThroughJobs"; }
         }
         
         string IMigrationMetadata.Source

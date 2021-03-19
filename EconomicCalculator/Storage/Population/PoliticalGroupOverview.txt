@@ -38,7 +38,13 @@ Tags are modifiers which change how the members of the political
 		  to be the most important and greatest. This greatly
 		  decreases the draw from other cultures, and increases
 		  it from the one it's attached to.
-		- Subjugationist
+		- Subjugationist, this group views a culture as lesser
+		  and seeks to enslave, expel, or otheriwse remove them
+		  from power.
+		- Affluent, this group finds a hold in the wealthier
+		  members of society easier.
+		- Empoverished, this group finds a hold in the poorer
+		  members of society easier.
 
 Derived Statistics
 	Militancy, this is how agressive the group is and how much 

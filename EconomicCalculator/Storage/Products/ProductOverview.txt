@@ -9,13 +9,18 @@ Subtypes
 - Product
 	This is a generic product, it may do something, it may do nothing, but it covers everything a 
 	product NEEDS to do.
+- Capital
+	This is a product which is used to make other products but is not consumed by the process.
 - Plot
 	A plot of land in product form. It is used in almost every process, as work needs space to do it,
 	and it's also very difficult or expensive to make. It has storage space, instead of taking up
-	storage space.
+	storage space. There are variants of this for each territory, but all of these are treated as equal
+	for the sake of consumption. (How this will work needs to be figured out.)
 - Building
 	A combination of capital and a plot of land, it is where most jobs occur, and can store goods.
 	It can add more space to a plot than the plot would actually allow through vertical construction.
+	Like plots, these are 'unique' to territroy they are from, but otherwise treated as equivalent
+	regardless of space. (Again, how this will work needs to be figured out.)
 - Currency
 	Currency is a unique type of product in that it is rarely if ever consumed by the population. It's
 	value is in trading for other things. It has two subtypes, Money and Currency.

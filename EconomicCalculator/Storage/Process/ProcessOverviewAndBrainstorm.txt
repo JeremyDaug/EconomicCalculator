@@ -13,6 +13,10 @@ Current iteration -
   The current iteration contains minimal data and has no
     optional parts.
 
+	TODO -> To Inputs and capital add an optional slot for 
+		a multiplier to define how much an optional good
+		increases throughput.
+
   - Id and Name are for identification.
   - VariantName is to allow processes of the same big name
     that have differences. IE, milling with stone mill vs
@@ -21,11 +25,35 @@ Current iteration -
   - Outputs are products which are produced by the process.
   - Capital are goods required to complete the process, but are 
 	not consumed in during the process.
+	- Inputs, Outputs, and Capital have additional tags which
+	  add details to how they are treated in the buying priority
+	  and how they act within the process. These may be comibined
+	  more or less arbitrarily.
+	  - Required, used for both inputs and Capital, this markes
+	    the good as required by the process.
+	  - Optional, this marks a good and is not required by 
+	    the process. It's absence will not reduce throughput.
+		If the product is an input it is consumed as though
+		it failed. If it's a capital, it is treated like a 
+		capital. These products increase 
+	  - Consumed, this marks a good as being consumed by the 
+	    process, but is transformed into it's failure products
+		instead of the process outputs. This is meant for 
+		inputs, not capital.
+	  - Fixed, this marks an input or capital good as fixed in
+	    quantity regardless of increased throughput. If, 
+		due to external modifiers or optional goods, the
+		throughput of the process is increased, this good
+		will not increase.
+	  - Investment, this marks an input or capital good as 
+	    only being required once in the standard cycle of 
+		the process. This is primarily used for long term
+		processes like Farming or monetary loans.
 	
   Currently, it is assumed a population will do as many
     processes as possible, with the primary limitations being
 	capital and inputs, with labor inputs being granted special
-	attention from inputs. Capital can be used defined
+	attention from inputs. Capital can be used
 	fractionally, having a process use only a portion of a
 	capital good. Inputs are only limited by the total available
 	products which go into it. If there is enough inputs for 1
@@ -34,7 +62,7 @@ Current iteration -
 	labor inputs. When calculating throughput it assumes use of
 	all in proportion and an output that is of equivalent
 	proportion.
-	Eg. 
+	For Example
 	Milling takes as inputs
 	  - 1000 Kg of Grain
 	  - 1 day of labor
@@ -49,6 +77,9 @@ Current iteration -
 	is doing this by his own he gains all the profit. So lost
 	labor costs him nothing. If the process is owned by someone
 	else, the laborer is only payed for that half day.
+  With the Optional Tag we have slightly different rules. If the
+    good is optional we add 25% to the valid throughput per 
+	optional good in the process. 
 
 Problems - 
   1.Currently, the calculation and effect of limitations is hard
@@ -69,7 +100,9 @@ Problems -
   name. This is inefficient in terms of storage since processes
   which are simple variations could condense changes down into
   variants and modifiers based on inputs, capital, labor, tech,
-  or what have you.
+  or what have you. And, it makes changing between them more
+  difficult as it requires more complex thought to select which
+  to make.
 
 Hypothetical Changes -
 	1)This problem may be one which can't be solved here. Some

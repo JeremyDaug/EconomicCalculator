@@ -114,7 +114,7 @@ namespace EconomicCalculator.Storage.Products
 
         /// <summary>
         /// The Average time for the item to break irrepairably.
-        /// 0 cannot be stored beyond at all.
+        /// 0 cannot be stored at all.
         /// -1 never breaks down.
         /// </summary>
         public int MTTF { get; set; }

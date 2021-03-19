@@ -36,6 +36,13 @@ namespace EconomicCalculator.Enums
         /// than the process outputs.
         /// This is meant for inputs and not capital.
         /// </summary>
-        Consumed
+        Consumed,
+        /// <summary>
+        /// The product does not increase if throughput 
+        /// increases, it will always require the same
+        /// amount. This often applies to Labor, but can
+        /// apply to other things.
+        /// </summary>
+        Fixed
     }
 }

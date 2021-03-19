@@ -1,37 +1,121 @@
 ﻿Job Overview
 
-Jobs are what populations do to create wealth. They do this through multiple means, but ultimately they are divided into a number of
-more detailed jobs.
+Jobs are what populations do to create wealth. They do this through multiple means,
+but ultimately they are divided into a number of more detailed jobs.
 
 Job and Population Logic
-	The logic of Jobs and population is a shared goal, however, we will limit the talk to just how the population handles it's job.
+	The logic of Jobs and population is a shared goal, however, we will limit the talk
+	to just how the population handles it's job.
 
-Jobs
+	A job's requriments are managed by the process(es) it has. If a job has more than one
+	process, then the people attached to the job can swap between them instantly and 
+	split their labor between the two. The job records this split and uses it to calculate
+	needs for the day, and depending on the profits and success of each portion the 
+	population will reallocate labor between it's subdivisions in small increments.
+	
+	Alongside Processes, the job has at least one kind of Labor which the job produces
+	innately. This labor requires no inputs and so gets made 'for free' before the job
+	buys what it needs. This is also used to calculate the throughput cap, this free
+	labor is needed and should not be sought unless the job is part of a larger
+	organization (such as a business or corporation who buys labor from the market).
+	The labor which is selected is based on the split to each process. A pop can also
+	decide to produce just it's labor if companies want it enough to pay more than
+	they can make through self employment. 
+	
+	Note, services could be thought of as advanced labor as it requires inputs and
+	capital to do, so services come out of products. If a process requests a service,
+	which is not suggested, the job should be able to 'devolve' the service into it's
+	constituent components as well and draw that in as well, turning the components of
+	the service directly into the process.
 
+	^^ This section will need more thought and clarification for the details.^^
+
+Buying Goods for a job.
+	While a job does not do the buying, it does create a priority list for 
+	buying goods for the job. A job organizes first by process (if it has more than one)
+	putting all of the goods of the most profitable process first. Then in each processes
+	group of inputs it will organize first by non-optional inputs, then non-optional 
+	capitals, then optional capitals, finally optional inputs. These values always aim
+	to maximize all needed goods, no scaling down if unable to meet all needs. As
+	standard, goods from population's existing inventory is selected first before buying.
+
+Job Process Profitability
+	Profitability can be measured by 2 metrics, past profits or expected profits. One of
+	these must be chosen.
+	- Past profits is the most reasonable method, this method records profits gained from
+	  the previous day's work, calculating the money earned in selling vs the cost of the
+	  input goods as though they were bought off the market (this ignores whether they
+	  actually were bought or not).
+	- Expected Profit calculated the expected profits of the day, taking the current sell
+	  price of the items and subtracting the current costs of the item. This predicts what
+	  the expected to come out of it. 
+	These are of effectively similar cost, though past profits requires memory for
+	storing the previous day's profits. Predictive requires no storage between days, but
+	is optimistic as it assumes all goods are sold. Past profits are more realistic, but
+	exact logic as to capture this are unclear right now. Regardless, both of these will
+	most likely require access to the market.
+
+Job Labor(s)
+	A job has at least one kind of labor attached to it. These labors are the initial cap
+	on throughput and are decided by the population split meantioned in Job Population
+	and logic. When doing processes, any labor that cannot be used in a process is
+	automatically added as saleable goods as the labor will disappear after the day is done
+	anyway.
+
+Jobs in Organizations
+	Jobs in organizations work slightly differently, instead of being limited by how much
+	available labor there is, it's instead limited by how many organizers (bosses,
+	managers, etc) there are in the organization. People can work either for the company
+	or be hired by the company indirectly. Working for them directly ensures their labor
+	is going to the company first and that they get paid, regardless of whether the labor
+	gets used or not. Those not hired only get paid for their exact productivity and no
+	more.
+
+Jobs types
 	Ground Floor Producers - They require few inputs, and are the foundation of the economy.
-		Farmer - They own land and possibly some buildings. Their focus is on growing crops of various things.
+		Farmer - They own land and possibly some buildings. Their focus is on growing crops
+			of various things.
 		Miner - They own mines and mine it for valuable resources.
-		Laborer - A catch all term, they are the people who may not have the resources to do other jobs, but instead work for others.
-		Slaves - A special class of worker who produces labor for jobs, but does not get paid, instead merely getting their LifeNeeds met by their owners.
-	Self Employed - They buy the goods themself and produce a product with those goods for their own benefit.
-		Craftsman - They take goods and produce new goods. Often, with very little in the way of capital or land requirements.
-		Practitioners - These are people who provide a service, such as doctors, maintenance workers, and the like.
+		Laborer - A catch all term, they are the people who may not have the resources to
+			do other jobs, but instead work for others.
+		Slaves - A special class of worker who produces labor for jobs, but does not get
+			paid, instead merely getting their LifeNeeds met by their owners.
+	Self Employed - They buy the goods themself and produce a product with those goods for
+		their own benefit.
+		Craftsman - They take goods and produce new goods. Often, with very little in the
+			way of capital or land requirements.
+		Practitioners - These are people who provide a service, such as doctors,
+			maintenance workers, and the like.
 	Intermediaries - They buy goods to store and sell them elsewhere.
-		Merchants - Those who buy up goods and resell them at a profit, the focus on storage of goods, were others focus on production.
-		Travelling Merchants - Those who buy up goods and transport them between markets to sell at a profit.
+		Merchants - Those who buy up goods and resell them at a profit, the focus on
+			storage of goods, were others focus on production.
+		Travelling Merchants - Those who buy up goods and transport them between markets
+			to sell at a profit.
 	Military - Those who fight for the nation, 
-		Soldier - Military personel, including support personel, they produce military might at the cost of military equipment. May also be Private Security.
-		Officers - Military Leaders, they increase the efficiency of soldiers in the field, and create the upper crust of the military.
+		Soldier - Military personel, including support personel, they produce military
+			might at the cost of military equipment. May also be Private Security.
+		Officers - Military Leaders, they increase the efficiency of soldiers in the field,
+			and create the upper crust of the military.
 	Business Jobs - Those who make and improve companies and corporations
-		Managers - Middle Management, they are used in companies and corporations to increase efficiency and organize production.
-		Owners - Company and Corporation Owners, they are the ones who found and create companies and corporations and technically
-			own the factories.
-		Land Lords - Land Lords (also possibly called Aristocrats) are those who own land and primarily make their wealth through renting
-			out land or buildings. They can also own farms and mines.
-		Investors - Like Owners, but rather than having direct ownership of businesses, they gain money by investing and taking interest.
-	Government Jobs - Jobs that generally don't produce anything, but help the government run and work.
-		Bureaucrats - Those who make the government run from day to day. Includes tax collectors, judges, police, and so on.
-		Clergy - May be considered government or not, but they help enrich the people culturally.
+		Managers - Middle Management, they are used in companies and corporations to
+			increase efficiency and organize production.
+		Owners - Company and Corporation Owners, they are the ones who found and create
+			companies and corporations and technically own the factories.
+		Land Lords - Land Lords (also possibly called Aristocrats) are those who own
+			land and primarily make their wealth through renting out land or buildings.
+			They can also own farms and mines.
+		Investors - Like Owners, but rather than having direct ownership of businesses,
+			they gain money by investing and taking interest.
+	Government Jobs - Jobs that generally don't produce anything, but help the government
+		run and work.
+		Bureaucrats - Those who make the government run from day to day. Includes tax
+			collectors, judges, police, and so on.
+		Clergy - May be considered government or not, but they help enrich the people
+			culturally.
+		Educators - Educators are public teachers who spread teaching to the populace at
+			the expense of the government.
 	Miscellaneous
-		Researchers - These are people who apply their skills and knowledge towards discovering new technology.
-		Engineer - These people take the Science discovered by Researchers and apply it into new products and improve existing goods or processes.
+		Researchers - These are people who apply their skills and knowledge towards
+			discovering new technology.
+		Engineer - These people take the Science discovered by Researchers and apply it
+			into new products and improve existing goods or processes.

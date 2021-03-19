@@ -1,10 +1,71 @@
 ﻿Population Overview
 
-Population (See PopulationGroup) is the abstracted smallest unit of population the
-system works with, any economic activity done by an individual is treated as part of
-the population group and it's effects are averaged out across the group. 
+Population (See PopulationGroup) is the abstracted smallest unit of population
+the system works with, any economic activity done by an individual is treated
+as part of the population group and it's effects are averaged out across the
+group. 
 
-A populationGroup also has a Culture Breakdown, which defines what cultures exist in
-the population group and in what proportion.
+A populationGroup also has a Culture Breakdown, which defines what cultures
+exist in the population group and in what proportion.
 
 The last largest thing a PopulationGroup has is a Job which they do.
+
+The Individual in the Population.
+	Currently there are 2 thoughts, one default way, and one hypothetical alternative.
+	Household Unit - Each 1 in a pop group is actually a household, automatically including 
+		a husband, wife, seniors, and children. This is the simplest method and can allow
+		effects such as education, pensions, and so on to be simplified. While alterations
+		to the proportion between children, working adults, non-working adults, and seniors
+		can simulate some demographic changes, it may be overly simple and unrealistic.
+	Demographic Breakdown - Each pop is actually a list of populations. The population is
+		broken into 4 groups, Babies, Children, Adults, and Elders. Each time somenoe is
+		born to a job they start as a baby who does nothing but consume resources and labor.
+		Children are able to grant labor to the job and/or be educated allowing the pop to
+		become more skilled in time or make promotion to other jobs easier. Adults are the 
+		primary laborers and do most of the work, though they may have their labor split
+		between their primary job or child care. Elders are the final pop group and while 
+		they provide little to no labor, they increase skill level retention.
+		The rough ranges for these pop groups is Baby 0-5, Child 6-20, Adult 21-60, Elder
+		61+.  
+		How these age groups upgrade or downgrade is a bit messy, but the current methods
+		are.
+			1. Hard Breaks by Year, instead of caring about individual pops you split it
+			   into groups, either 1 year or 5 year groups. Every pop born gets put into
+			   the baby category and then after the year interval the entire group goes up
+			   one step at once. If 5 year intervals, this would be the easiest, but could
+			   be done with 1 year increments. This method is adds costs in memory and
+			   calculation, but allows for demographics over time to be much more
+			   meaningful.
+			2. Age Queue, this has each population group count up the births each day then
+			   moving them up day by day. This method is bad. It's even more memory
+			   intensive than (1) and even more calculation heavy, but is the most accurate
+			   the system could possibly be.
+			3. Shift rate, this method uses a consistent measure of rates to move pops from
+			   one demographic group to another. The first group gains from the birth rate
+			   of the population group. The second and each thereafter gain a small
+			   percent of the previous group, such that if a single person exists in the 
+			   demographic range it will take about as long as it takes for the pop to age
+			   out to move up. IE, from baby (0-5) to child (6-20) has a 1/(365*5) % chance
+			   of shifting one pop from baby to child. Follow this logic for each demographic
+			   group. This method is not quite as light weight as the Hard Breaks, but creates
+			   a smoother transition rather than hard jumps periodically. This may be the
+			   best and simplest option.
+
+
+Population Purchasing.
+	Pops try to buy goods in a specific order of operations, with the intent being to
+	get all of their needs met in a specific order. The pop will buy as much as it can of 
+	each product in each category, then move onto the next product or category until it has
+	run out of money.
+
+	1. Life Needs - No pop wants to go without food and water, so they always buy these
+		first. This order is rather arbitrary, but ultimately defined by the database. There
+		may be optional life needs, such as life support or warm clothing, which are added
+		to a pop if they are in a particularly hostile environment.
+	2. Job inputs - Job inputs are sought next as these will bring the pop enough money to
+		continue buying what they desire and working. The exact order is defined by the 
+		job, but the order will usually focus on the most profitable processes of a job
+		first, followed by less profitable jobs. And within the buying of an individual job
+		capital comes before inputs, required inputs before optional inputs.
+	3. Daily Needs
+	4. Luxury Needs
