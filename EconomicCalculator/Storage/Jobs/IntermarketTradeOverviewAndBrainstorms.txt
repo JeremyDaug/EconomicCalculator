@@ -28,6 +28,11 @@ Methods of Trade and Calculation -
 		   find anything, then they add some of their neighbor's excess demand to themselves. This is more
 		   complicated as it requires finding a good way to transfer demand, but should be less calculation
 		   intense, and could be throttled to seek out only locations which need demand.
+
+		Heatmap logic: When a good is produced somewhere, that product's info will spread out 1 day trip at
+		  a time. These places who know of it will attempt to make or buy it themselves. If they cannot
+		  meet the total of their demand their demand will splash into adjacent territories. 
+
 	2. Trade Route System - This system is a shortcut calculation, where a source is tied directly to a 
 	   sink destination. This would only be used for particularly long travels, or specific goals. It would
 	   give them an additional weight, making it the preferred path for goods to travel. It also makes local

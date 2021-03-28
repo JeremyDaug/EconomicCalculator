@@ -1074,8 +1074,7 @@
             BlacksmithSkill.ValidLabors.Add(MenialLabor);
 
             // Related Skills
-            BlacksmithSkill.RelationChild.Add(SmeltingSkill);
-            SmeltingSkill.RelationParent.Add(BlacksmithSkill);
+            BlacksmithSkill.AddSkillRelation(SmeltingSkill);
 
             var AllSkills = new List<Skill>
             {

@@ -1,0 +1,101 @@
+﻿@model EconModels.SkillsModel.Skill
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Skill</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Desc)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Desc)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Min)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Min)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Max)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Max)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ValidLabors)
+        </dt>
+
+        <dd>
+            <table class="table-bordered">
+                @foreach (var labor in Model.ValidLabors)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => labor.Name)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.RelationChild)
+        </dt>
+
+        <dd>
+            <table class="table-bordered">
+                @foreach (var skill in Model.RelationChild.Concat(Model.RelationParent))
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => skill.Name)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SkillsJobs)
+        </dt>
+
+        <dd>
+            <table class="table-bordered">
+                @foreach (var job in Model.SkillsJobs)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => job.Name)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

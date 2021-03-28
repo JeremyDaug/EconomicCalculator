@@ -52,6 +52,52 @@ The Individual in the Population.
 			   best and simplest option.
 
 
+Population Education and Skills
+	Pops have a skill level attached to them, representing the average skill level of the
+	populace at a job. Whenever a new member is added they often have 0 in the skill, but
+	they should quickly elevate to level 1. At level 1 they should never be a total drag
+	on production, but they may not be at full efficiency if the job requires a higher
+	skill level. 
+	Education occurs in many ways, but it attached to demographic breakdowns, and has 
+	small forces acting on it.
+		- Brain Drain, this is the process in which pops leave the group, by
+		  emigration (to other jobs or other locations). Regardless of who leaves this
+		  will always produce a small loss. The higher the skill level the more this
+		  hurts.
+		- Death, when a pop dies, they remove a small amount of skill from the pop,
+		  the elderly remove the most, adults 2nd, children 3rd, and babies none. 
+		  the higher the skill level the more this hurts.
+		- Literacy Rate, Literacy rate is a penalty or bonus to both gaining and keeping
+		  skill levels. Low Literacy is a penalty, high literacy gives bonuses.
+		- Elderly Tradition, The more elderly there are (proportionally) the less skill
+		  will be lost in general, particularly to Illiteracy.
+		- Job Experience, working adults naturally adapt to their job's requirements,
+		  though this process is slow.
+		- Youthful Learning, the proportion of children in the population increases the
+		  general rate of skill acquisition as they are more ready and able to learn.
+		- Family Education, this is an educational option available to a pop and generally
+		  considered the default option. The elderly will teach the children how to do
+		  the job, increasing skill growth relative to both old and young.
+		- Communal Education, this education option has the children being taught by 
+		  the community, using the proportion of elderly in the integrated territory 
+		  as a whole rather than the specific group. This requires fewer elderly
+		  proportionally, gives less skill growth, but increases mobility and lowers
+		  the skill loss from Brain Drain. Great for groups living in small,
+		  isolated communities. This reduces the elderly's productivity at their jobs,
+		  and only slightly reduces the productivity of the children. This is
+		  instituted by governments, though requires either low population or high
+		  communal tendencies.
+		- Private Education, this is an service that a pop can buy. It costs some
+		  existing productivity capacity and money, but gives increased skill gains.
+		  This is the most effective, and the pop will always seek to buy the best
+		  education they can. It also increases the productivity of the elderly.
+		- Public Education, this is a government service which provides free schooling
+		  for all child populations. What kind of schooling, and how much is decided
+		  by the government. It requires no elderly, increasing their productivity, but
+		  greately diminishes the productivity of the children. It also boosts their 
+		  mobility between jobs, and makes low skill jobs easy, and can boost literacy.
+		  Exact details depend on the curriculum taught.
+
 Population Purchasing.
 	Pops try to buy goods in a specific order of operations, with the intent being to
 	get all of their needs met in a specific order. The pop will buy as much as it can of 
@@ -69,3 +115,23 @@ Population Purchasing.
 		capital comes before inputs, required inputs before optional inputs.
 	3. Daily Needs
 	4. Luxury Needs
+
+Possible Improvement - Wants
+	Wants is an alternative formulation for needs. Instead of dictating what kind of needs
+	the population needs by listing out the products they want, we instead attach 'wants'
+	to the products and have the populous buy based on the wants the product fulfills. 
+	Doing this would allow for the implementation of Substitute goods without more complex
+	methods of connection.
+
+	For example:
+		Let's say a pop has daily needs of 1 food, 1 water, 1 clothing, and 1 shelter. 
+		They have a daily need of 3 food, 2 water, 2 clothing, 4 shelter, 3 entertainment.
+		And so on. 
+		Instead of buying 1 bread, water, shirt, etc. They buy products which satisfy
+		those desires. This means that goods which satisfy the same needs are substitutes
+		for each other. Buying priority would be dependent on the level of the need (life,
+		basic, etc), the quality of the goods, the price of the good, etc. This is a 
+		complex problem and may quickly bloat if not careful.
+
+	This is a good idea, but Let's hold off on this until after getting past at least
+	the existing ideas. This should be relatively easy to implement.
