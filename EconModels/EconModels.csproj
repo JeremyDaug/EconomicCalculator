@@ -74,6 +74,10 @@
     <Compile Include="Migrations\202103181214067_InitThroughJobs.designer.cs">
       <DependentUpon>202103181214067_InitThroughJobs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202104010210388_JobSkillUpdate.cs" />
+    <Compile Include="Migrations\202104010210388_JobSkillUpdate.designer.cs">
+      <DependentUpon>202104010210388_JobSkillUpdate.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
     <Compile Include="ModelEnums\CashType.cs" />
@@ -128,6 +132,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202103181214067_InitThroughJobs.resx">
       <DependentUpon>202103181214067_InitThroughJobs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104010210388_JobSkillUpdate.resx">
+      <DependentUpon>202104010210388_JobSkillUpdate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

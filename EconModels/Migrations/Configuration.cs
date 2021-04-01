@@ -1189,8 +1189,7 @@
             BlackSmithing.Processes.Add(context.Processes.Single(x => x.Name == MineToolCrafting.Name));
             BlackSmithing.Processes.Add(context.Processes.Single(x => x.Name == OvenCrafting.Name));
 
-            goldMiner.RelatedChild.Add(ironMiner);
-            ironMiner.RelatedParent.Add(goldMiner);
+            goldMiner.AddRelatedJob(ironMiner);
 
             context.Jobs.AddOrUpdate(x => x.Name,
                 wheatFarmer,

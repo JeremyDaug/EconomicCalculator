@@ -53,7 +53,7 @@ namespace EconModels.JobModels
         /// <summary>
         /// What processes does the job do.
         /// </summary>
-        [DisplayName("Process")]
+        [DisplayName("Processes")]
         public virtual ICollection<Process> Processes { get; set; }
 
         /// <summary>
@@ -66,6 +66,7 @@ namespace EconModels.JobModels
         /// The Primary Skill the job has.
         /// </summary>
         [ForeignKey("SkillId")]
+        [DisplayName("Skill")]
         public virtual Skill Skill { get; set; }
 
         /// <summary>
@@ -74,7 +75,8 @@ namespace EconModels.JobModels
         /// may lower the minimum and maximum range.
         /// </summary>
         [Required, Range(0, float.MaxValue)]
-        public float SkillLevel { get; set; }
+        [DisplayName("Skill Level")]
+        public int SkillLevel { get; set; }
 
         /// <summary>
         /// What labor or service the job provides to the market.
@@ -84,11 +86,79 @@ namespace EconModels.JobModels
         public virtual ICollection<Product> Labor { get; set; }
         
         // Many to many self refernce for related jobs.
+        [DisplayName("Related Jobs")]
         public virtual ICollection<Job> RelatedChild { get; set; }
         public virtual ICollection<Job> RelatedParent { get; set; }
 
         // This class is an abstract job and so specific breakdowns
         // are not needed here, but rather in the population group
         // the job is connected to. 
+
+        public void AddRelatedJob(Job otherJob)
+        {
+            if (RelatedChild.Contains(otherJob))
+                return;
+
+            RelatedChild.Add(otherJob);
+            RelatedParent.Add(otherJob);
+
+            otherJob.AddRelatedJob(this);
+        }
+
+        public void RemoveJobRelation(Job job)
+        {
+            RelatedChild.Remove(job);
+            RelatedParent.Remove(job);
+        }
+
+        public void ClearJobRelations()
+        {
+            foreach (var job in RelatedChild)
+            {
+                if (job.Id != Id)
+                {
+                    job.RemoveJobRelation(this);
+                }
+            }
+
+            RelatedChild.Clear();
+            RelatedParent.Clear();
+        }
+
+        public void ClearProcessRelations()
+        {
+            // go through each process and remove this job.
+            foreach (var proc in Processes)
+            {
+                proc.Jobs.Remove(this);
+            }
+
+            // then clear jobs.
+            Processes.Clear();
+        }
+
+        public void ClearLaborRelations()
+        {
+            // remove this job from all related labors
+            foreach (var labor in Labor)
+            {
+                labor.Jobs.Remove(this);
+            }
+
+            // then clear labors
+            Labor.Clear();
+        }
+
+        public void AddProcess(Process process)
+        {
+            Processes.Add(process);
+            process.Jobs.Add(this);
+        }
+
+        public void AddLabor(Product labor)
+        {
+            Labor.Add(labor);
+            labor.Jobs.Add(this);
+        }
     }
 }
