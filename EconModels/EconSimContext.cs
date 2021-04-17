@@ -29,6 +29,7 @@ namespace EconModels
 
         // Products
         public DbSet<Product> Products { get; set; }
+        public DbSet<ProductWantTag> ProductWantTags { get; set; }
         public DbSet<FailsIntoPair> FailurePairs { get; set; }
         public DbSet<MaintenancePair> MaintenancePairs { get; set; }
 
@@ -47,11 +48,27 @@ namespace EconModels
         // skill and job many-many tables hold this incase needed later.
 
         // Cultures
-        public DbSet<CultureNeeds> CultureNeeds { get; set; }
+        public DbSet<CultureNeed> CultureNeeds { get; set; }
+        public DbSet<CultureWant> CultureWants { get; set; }
         public DbSet<Culture> Cultures { get; set; }
 
+        // Species
+        public DbSet<SpeciesAnathema> SpeciesAnathemas { get; set; }
+        public DbSet<SpeciesAversion> SpeciesAversions { get; set; }
+        public DbSet<SpeciesWant> SpeciesWants { get; set; }
+        public DbSet<SpeciesNeed> SpeciesNeeds { get; set; }
+        public DbSet<Species> Species { get; set; }
+
+        // Political Groups
+        public DbSet<PoliticalTag> PoliticalTags { get; set; }
+        public DbSet<PoliticalGroup> PoliticalGroups { get; set; }
+
+        public DbSet<Religion> Religion { get; set; }
+
         // Population Groups
-        public DbSet<PopulationCultureBreakdown> PopCultureBreakdowns { get; set; }
+        public DbSet<CultureBreakdown> PopCultureBreakdowns { get; set; }
+        public DbSet<SpeciesBreakdown> PopSpeciesBreakdowns { get; set; }
+        public DbSet<PoliticalBreakdown> PopPoliticalBreakdowns { get; set; }
         public DbSet<PopulationGroup> PopulationGroups { get; set; }
         public DbSet<OwnedProperty> OwnedProperties { get; set; }
 
@@ -91,6 +108,10 @@ namespace EconModels
                 .WithRequired(x => x.Result)
                 .HasForeignKey(x => x.ResultId)
                 .WillCascadeOnDelete(false);
+
+            // Want Tags
+            modelBuilder.Entity<ProductWantTag>()
+                .HasKey(x => new { x.ProductId, x.Tag });
 
             // Maintenance
             modelBuilder.Entity<MaintenancePair>()
@@ -187,7 +208,103 @@ namespace EconModels
                     x.ToTable("RelatedSkills");
                 });
 
+            // Culture
+            // Shouldn't need to explain many to one connections from culture out.
+            modelBuilder.Entity<CultureNeed>()
+                .HasKey(p => new { p.CultureId, p.NeedId, p.NeedType });
+            modelBuilder.Entity<CultureWant>()
+                .HasKey(p => new { p.CultureId, p.Want, p.NeedType });
+            modelBuilder.Entity<CultureTag>()
+                .HasKey(p => new { p.CultureId, p.Tag });
+            modelBuilder.Entity<Culture>()
+                .HasIndex(p => new { p.Name, p.VariantName })
+                .IsUnique();
+
+            // Culture <-> Culture
+            modelBuilder.Entity<Culture>()
+                .HasMany(x => x.RelationChild)
+                .WithMany(x => x.RelationParent)
+                .Map(x =>
+                {
+                    x.MapLeftKey("ParentId");
+                    x.MapRightKey("ChildId");
+                    x.ToTable("RelatedCultures");
+                });
+
+            // Political Tag
+            modelBuilder.Entity<PoliticalTag>()
+                .HasKey(x => new { x.GroupId, x.Tag });
+            // Political Groups
+            modelBuilder.Entity<PoliticalGroup>()
+                .HasIndex(x => new { x.Name, x.VariantName })
+                .IsUnique();
+            // Political Allies
+            modelBuilder.Entity<PoliticalGroup>()
+                .HasMany(x => x.Allies)
+                .WithMany(x => x.AlliesRev)
+                .Map(x =>
+                {
+                    x.MapLeftKey("AllyId");
+                    x.MapRightKey("RevId");
+                    x.ToTable("PoliticalAllies");
+                });
+            // Political Entities
+            modelBuilder.Entity<PoliticalGroup>()
+                .HasMany(x => x.Enemies)
+                .WithMany(x => x.EnemiesRev)
+                .Map(x =>
+                {
+                    x.MapLeftKey("EnemyId");
+                    x.MapRightKey("RevId");
+                    x.ToTable("PoliticalEnemies");
+                });
+
+            // Species
+            modelBuilder.Entity<SpeciesWant>()
+                .HasKey(x => new { x.SpeciesId, x.Want });
+            modelBuilder.Entity<SpeciesNeed>()
+                .HasKey(x => new { x.SpeciesId, x.NeedId });
+            modelBuilder.Entity<SpeciesTag>()
+                .HasKey(x => new { x.SpeciesId, x.Tag });
+            modelBuilder.Entity<SpeciesAversion>()
+                .HasKey(x => new { x.SpeciesId, x.Aversion });
+            modelBuilder.Entity<SpeciesAnathema>()
+                .HasKey(x => new { x.SpeciesId, x.AnathemaId });
+            modelBuilder.Entity<Species>()
+                .HasIndex(x => new { x.Name, x.VariantName })
+                .IsUnique();
+
+            // Species to species not included as name matching
+            // is all that is needed and must remain the main
+            // method.
+
+            // property 
+            modelBuilder.Entity<OwnedProperty>()
+                .HasKey(x => new { x.OwnerId, x.ProductId });
+
+            // Breakdowns
+            modelBuilder.Entity<SpeciesBreakdown>()
+                .HasKey(x => new { x.ParentId, x.SpeciesId });
+            modelBuilder.Entity<CultureBreakdown>()
+                .HasKey(x => new { x.ParentId, x.CultureId });
+            modelBuilder.Entity<PoliticalBreakdown>()
+                .HasKey(x => new { x.ParentId, x.PoliticalGroupId });
+
+            // Pop Group Indeces
+            // There should only be one pop group per job in each territory.
+            modelBuilder.Entity<PopulationGroup>()
+                .HasIndex(x => new { x.TerritoryId, x.PrimaryJobId })
+                .IsUnique();
+
             // Territory Connections
+            modelBuilder.Entity<Territory>()
+                .HasIndex(x => x.Name);
+
+            modelBuilder.Entity<Territory>()
+                .HasMany(x => x.Pops)
+                .WithRequired(x => x.Territory) // make required later.
+                .WillCascadeOnDelete(false);
+
             modelBuilder.Entity<Territory>()
                 .HasMany(x => x.OutgoingConnections)
                 .WithRequired(x => x.Start)

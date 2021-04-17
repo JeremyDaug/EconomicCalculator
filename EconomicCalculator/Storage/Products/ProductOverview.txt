@@ -5,6 +5,33 @@ traded, and used. Overall, abstractly there are only 2 kinds of products, compon
 Goods are products which are used or consumed, and components are products which go into other
 products. This division isn't too useful, so instead we combine them and abstract the details away.
 
+- Product Substitution, Product Substitution is the method by which one good can be used as
+  an alternative for another. Substitution has a few dimensions in which it can be 
+  substituted.
+  - First is by varants of similar quality, goods of equivalent quality levels are a direct 
+    one to one, and the one which is most cheaply produced is the one prefered to be bought.
+	These match based on the primary name of the product.
+  - Second is by variants of different qualities. Variants with higher qualities satisfy 
+    a desire for it more easily. One unit of higher quality satisfies more desire than one
+	unit of lower quality. Like the first, it matches on the primary name of the product.
+	Pops will always buy the most cost efficient product first
+	- Current math, satisfaction = 1 * (Quality * 0.25).
+	- *Possible option, higher quality goods are more effective when used in a process.*
+	  Hold off on this for now, making conservation of mass/energy is still something
+	  I'd like to make easy to have, even if it's isn't required. Maybe allow
+	  substitutes for Capital and Optional goods which produce failure outputs rather than
+	  process outputs. This would be easiest to implement and maintain my own sanity.
+  - Third is by want, when a population doesn't want a specific good, but instead is seeking
+    to meet some less specific need, such as food, shelter, protection, etc. These look for
+	matching Want tags, and allow for a much wider variety of goods to qualify. Rules 1 and
+	2 still apply.
+	- Maybe allow this rule to follow with the second on Optional and Captial process 
+	  inputs, this would be more difficult, but not impossible. Not worth the cost most
+	  likely.
+	- Contemplate Allowing this for maintenance of products, similar problem as the previous
+	  however.
+
+
 Subtypes
 - Product
 	This is a generic product, it may do something, it may do nothing, but it covers everything a 

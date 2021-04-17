@@ -22,6 +22,7 @@ namespace EconModels.ProductModel
             MaintainedBy = new List<MaintenancePair>();
             Maintains = new List<MaintenancePair>();
             Jobs = new List<Job>();
+            WantTags = new List<ProductWantTag>();
         }
 
         public int Id { get; set; }
@@ -73,11 +74,29 @@ namespace EconModels.ProductModel
 
         public virtual ICollection<MaintenancePair> Maintains { get; set; }
 
+        /// <summary>
+        /// What wants the product can satisfy when owned or consumed.
+        /// </summary>
+        [DisplayName("Want Tags")]
+        public virtual ICollection<ProductWantTag> WantTags { get; set; }
+
         // For jobs, because one way connections are just not in the cards.
         // Job.Labor
         public virtual ICollection<Job> Jobs { get; set; }
 
         // To Skill.ValidLabors
         public virtual ICollection<Skill> Skills { get; set; }
+
+        public ProductWantTag AddWantTag(string tag)
+        {
+            var want = new ProductWantTag
+            {
+                Product = this,
+                ProductId = Id,
+                Tag = tag
+            };
+            WantTags.Add(want);
+            return want;
+        }
     }
 }

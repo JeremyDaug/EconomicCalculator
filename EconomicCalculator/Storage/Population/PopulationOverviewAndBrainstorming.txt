@@ -17,6 +17,7 @@ The Individual in the Population.
 		effects such as education, pensions, and so on to be simplified. While alterations
 		to the proportion between children, working adults, non-working adults, and seniors
 		can simulate some demographic changes, it may be overly simple and unrealistic.
+		This is the baby simple option.
 	Demographic Breakdown - Each pop is actually a list of populations. The population is
 		broken into 4 groups, Babies, Children, Adults, and Elders. Each time somenoe is
 		born to a job they start as a baby who does nothing but consume resources and labor.
@@ -129,7 +130,7 @@ Possible Improvement - Wants
 		And so on. 
 		Instead of buying 1 bread, water, shirt, etc. They buy products which satisfy
 		those desires. This means that goods which satisfy the same needs are substitutes
-		for each other. Buying priority would be dependent on the level of the need (life,
+		for each other. Buying priority would be dependent on the level of the want (life,
 		basic, etc), the quality of the goods, the price of the good, etc. This is a 
 		complex problem and may quickly bloat if not careful.
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconModels.PopulationModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace EconModels.TerritoryModel
         {
             OutgoingConnections = new List<TerritoryConnection>();
             IncomingConnections = new List<TerritoryConnection>();
+            Pops = new List<PopulationGroup>();
             LandOwners = new List<LandOwner>();
         }
 
@@ -59,7 +61,7 @@ namespace EconModels.TerritoryModel
 
         // Market Connection Placeholder.
 
-        // Populations connections redundant here, Market holds them instead.
+        public virtual ICollection<PopulationGroup> Pops { get; set; }
 
         // Governor Placeholder
 

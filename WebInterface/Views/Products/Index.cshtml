@@ -33,7 +33,7 @@
             @Html.DisplayNameFor(model => model.Bulk)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.ProductTypes)
+            @Html.DisplayNameFor(model => model.ProductType)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Maintainable)
@@ -43,6 +43,9 @@
         </th>
         <th>
             @Html.DisplayNameFor(model => model.MeanTimeToFailure)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.WantTags)
         </th>
         <th></th>
     </tr>
@@ -71,7 +74,7 @@
             @Html.DisplayFor(modelItem => item.Bulk)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.ProductTypes)
+            @Html.DisplayFor(modelItem => item.ProductType)
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.Maintainable)
@@ -81,6 +84,17 @@
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.MeanTimeToFailure)
+        </td>
+        <td>
+            <table class="table">
+                
+                @foreach (var want in item.WantTags)
+                {
+                    <tr>
+                        @Html.DisplayFor(modelItem => want.Tag)
+                    </tr>
+                }
+            </table>
         </td>
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |

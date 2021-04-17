@@ -21,6 +21,7 @@ namespace EconomicCalculator.Storage
 
         public double Count { get; set; }
 
+        // TODO, update to be based on species, and culture.
         public double PopGrowthRate { get; set; }
 
         public IJob PrimaryJob { get; set; }
@@ -44,6 +45,9 @@ namespace EconomicCalculator.Storage
         /// Value should be greater than 0 and sum to the total population.
         /// </summary>
         public IReadOnlyDictionary<Guid, double> CultureBreakdown => _cultureBreakdown;
+
+        // Species Breakdown
+        // Politics Breakdown
 
         #endregion CultureBreakdown
 

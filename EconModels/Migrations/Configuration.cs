@@ -2,7 +2,6 @@
 {
     using EconModels.Enums;
     using EconModels.JobModels;
-    using EconModels.MarketModel;
     using EconModels.ModelEnums;
     using EconModels.PopulationModel;
     using EconModels.ProcessModel;
@@ -11,7 +10,6 @@
     using EconModels.TerritoryModel;
     using System;
     using System.Collections.Generic;
-    using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Data.Entity.Validation;
     using System.Linq;
@@ -20,8 +18,13 @@
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
             AutomaticMigrationDataLossAllowed = true;
+        }
+
+        private Product GetProduct(EconSimContext context, string name)
+        {
+            return context.Products.Single(x => x.Name == name);
         }
 
         protected override void Seed(EconModels.EconSimContext context)
@@ -50,6 +53,15 @@
              *     .HasIndex(x => new { x.Name, x.VariantName })
              *     .IsUnique();
              */
+            #region Constants
+
+            string shelter = "shelter";
+            string food = "food";
+            string finery = "finery";
+            string sustenance = "sustenance";
+            string security = "security";
+
+            #endregion Constants
             #region Product
             // Types of labor
             var MenialLabor = new Product
@@ -148,7 +160,7 @@
             var Land = new Product
             {
                 Name = "Plot", // plots are equal to 1/8 an acre.
-                Bulk = double.PositiveInfinity, // land cannot be moved.
+                Bulk = double.MaxValue, // land cannot be moved.
                 Mass = 0, // it is without mass as artificial land has it's weight tied to the craft.
                 DefaultPrice = 10.00M,
                 Fractional = false, // Plots are the smallest unit.
@@ -156,7 +168,9 @@
                 ProductType = ProductTypes.Land,
                 Quality = 0, // land quality is tied to territory.
                 MeanTimeToFailure = -1, // land doesn't stop existing.
+                UnitName = "plot"
             };
+            Land.AddWantTag(shelter); // Asume a simple hut is always available
             // Biowaste
             var BioWaste = new Product
             {
@@ -184,6 +198,7 @@
                 Fractional = true,
                 MeanTimeToFailure = 50,
             };
+            WheatGrain.AddWantTag(food);
             var Flour = new Product
             {
                 Name = "Wheat Flour",
@@ -197,6 +212,7 @@
                 Fractional = true,
                 MeanTimeToFailure = 10,
             };
+            Flour.AddWantTag(food);
             var Bread = new Product
             {
                 Name = "Simple Bread",
@@ -210,6 +226,7 @@
                 Fractional = false,
                 MeanTimeToFailure = 5,
             };
+            Bread.AddWantTag(food);
             // Simple currency
             var GoldOre = new Product
             {
@@ -224,6 +241,7 @@
                 Fractional = true,
                 MeanTimeToFailure = -1,
             };
+            GoldOre.AddWantTag(finery);
             // Simple Iron
             var IronOre = new Product
             {
@@ -251,6 +269,7 @@
                 Fractional = true,
                 MeanTimeToFailure = 10000
             };
+            IronIngot.AddWantTag(finery);
             // Captial For Processes
             // Currently 100% Iron
             var FarmTools = new Product
@@ -317,6 +336,7 @@
                 MineEngineer,
                 SmeltingWork,
                 BlackSmither,
+                Land,
                 WheatGrain,
                 BioWaste,
                 Flour,
@@ -336,6 +356,30 @@
                     .AddOrUpdate(x => new { x.Name, x.VariantName }, product));
 
             context.SaveChanges();
+
+            // Want Tags
+            var LandTag = GetProduct(context, Land.Name).AddWantTag(shelter);
+            var GrainTag = GetProduct(context, WheatGrain.Name).AddWantTag(food);
+            var FlourTag = GetProduct(context, Flour.Name).AddWantTag(food);
+            var BreadTag = GetProduct(context, Bread.Name).AddWantTag(food);
+            
+            var newTags = new List<ProductWantTag>
+            {
+                LandTag,
+                GrainTag,
+                FlourTag,
+                BreadTag
+            };
+
+            // clear old tags for security reasons.
+            foreach (var tag in context.ProductWantTags)
+            {
+                context.ProductWantTags.Remove(tag);
+            }
+            foreach (var tag in newTags)
+            {
+                context.ProductWantTags.Add(tag);
+            }
 
             // Failure and Maintenance pairs.
             var WheatGrainFailsInto = new FailsIntoPair
@@ -1096,6 +1140,18 @@
 
             #region Job
 
+            // Menial Laborer
+            var menialLaborer = new Job
+            {
+                Name = "Menial Laborer",
+                JobType = JobTypes.Service,
+                JobCategory = JobCategory.Laborer,
+                SkillId = FarmSkill.Id,
+                SkillLevel = 0
+            };
+            menialLaborer.Labor.Add(GetProduct(context, MenialLabor.Name));
+            // Menial Laborers do not have any processes.
+
             // Wheat Farmer
             var wheatFarmer = new Job
             {
@@ -1191,7 +1247,20 @@
 
             goldMiner.AddRelatedJob(ironMiner);
 
+            var jobList = new List<Job>
+            {
+                menialLaborer,
+                wheatFarmer,
+                grainMiller,
+                baker,
+                goldMiner,
+                ironMiner,
+                ironSmelter,
+                BlackSmithing
+            };
+
             context.Jobs.AddOrUpdate(x => x.Name,
+                menialLaborer,
                 wheatFarmer,
                 grainMiller,
                 baker,
@@ -1204,143 +1273,478 @@
 
             #endregion Job
 
-            /*
-            #region Culture
+            #region Species
 
-            var HumanCulture = new Culture
+            // human
+            var human = new Species
             {
                 Name = "Human",
-                CultureGrowthRate = 0.02,
+                InfantPhaseLength = 5 * 360,
+                ChildPhaseLength = 15 * 360,
+                AdultPhaseLength = 25 * 360,
+                AverageLifeSpan = 70 * 360,
+                GravityPreference = 1,
+                TempuraturePreference = 20,
+                SpeciesGrowthRate = 0.04M / 360
+                // needs and aversions
             };
 
-            var GrainNeed = new CultureNeeds
+            context.Species.AddOrUpdate(x => x.Name,
+                human);
+
+            context.SaveChanges();
+
+            // wants, needs, and tags.
+            human = context.Species.Single(x => x.Name == "Human");
+
+            // human need food
+            var humWant1 = new SpeciesWant
             {
-                Culture = HumanCulture,
-                Need = WheatGrain,
-                NeedType = NeedType.Life,
-                Amount = 1
+                SpeciesId = human.Id,
+                Species = human,
+                Want = food,
+                Amount = 2,
+                Tag = sustenance
             };
 
-            var flourNeed = new CultureNeeds
+            // human need water
+            // add with Territories.
+            // human need air
+            // add with territories.
+            // human need for shelter
+            var humWant2 = new SpeciesWant
             {
-                Culture = HumanCulture,
-                Need = Flour,
-                NeedType = NeedType.Daily,
-                Amount = 1
+                SpeciesId = human.Id,
+                Species = human,
+                Want = shelter,
+                Amount = 2,
+                Tag = security
             };
 
-            var breadNeed = new CultureNeeds
+            var speciesWants = new List<SpeciesWant>
             {
-                Culture = HumanCulture,
-                Need = Bread,
-                NeedType = NeedType.Luxury,
-                Amount = 1
+                humWant1,
+                humWant2
             };
 
-            HumanCulture.CultureNeeds.Add(GrainNeed);
-            HumanCulture.CultureNeeds.Add(flourNeed);
-            HumanCulture.CultureNeeds.Add(breadNeed);
-
-            context.CultureNeeds.AddOrUpdate(
-                GrainNeed,
-                flourNeed,
-                breadNeed);
-
-            context.Cultures.AddOrUpdate(
-                HumanCulture);
-
-            #endregion Culture
-
-            #region Populations
-
-            var farmers = new PopulationGroup
+            // check if want is in db already, if not add.
+            foreach (var want in speciesWants)
             {
-                Name = "Farmers",
-                Count = 100,
-                PrimaryJob = wheatFarmer,
-                SkillName = "Farmer",
-                SkillLevel = 1,
-                Priority = 1
-            };
+                if (!context.SpeciesWants.Any(x => x.SpeciesId == want.SpeciesId
+                                                  && x.Tag == want.Tag))
+                    context.SpeciesWants.Add(want);
+            }
+            
+            context.SaveChanges();
 
-            var millers = new PopulationGroup
+            #endregion Species
+
+            #region Cultures
+
+            // Culture
+            var Agrarian = new Culture // farmers, for testing
             {
-                Name = "Millers",
-                Count = 100,
-                PrimaryJob = grainMiller,
-                SkillName = "Milling",
-                SkillLevel = 1,
-                Priority = 1
+                Name = "Agrarian",
+                CultureGrowthRate = 0.0 // no additional growth rate.
             };
-
-            var bakers = new PopulationGroup
+            var Miner = new Culture
             {
-                Name = "Bakers",
-                Count = 100,
-                PrimaryJob = baker,
-                SkillName = "Cooking",
-                SkillLevel = 1,
-                Priority = 1
+                Name = "Miner",
+                CultureGrowthRate = 0.0
             };
-
-            var miners = new PopulationGroup
+            var Urbanite = new Culture
             {
-                Name = "Bakers",
-                Count = 100,
-                PrimaryJob = baker,
-                SkillName = "Cooking",
-                SkillLevel = 1,
-                Priority = 1
+                Name = "Urbanite",
+                CultureGrowthRate = 0.0
             };
 
-            var farmerCultureBreakdown = new PopulationCultureBreakdown
+            Agrarian.AddRelatedCulture(Miner);
+            Agrarian.AddRelatedCulture(Urbanite);
+            Miner.AddRelatedCulture(Urbanite);
+
+            context.Cultures.AddOrUpdate(x => x.Name,
+                Agrarian,
+                Miner,
+                Urbanite);
+
+            context.SaveChanges();
+
+            Agrarian = context.Cultures.Single(x => x.Name == Agrarian.Name);
+            Miner = context.Cultures.Single(x => x.Name == Miner.Name);
+            Urbanite = context.Cultures.Single(x => x.Name == Urbanite.Name);
+
+            // Agrarian Needs/Wants
+            var AgDaily = new CultureNeed
             {
-                Parent = farmers,
-                Culture = HumanCulture,
-                Amount = 100
+                Culture = Agrarian,
+                CultureId = Agrarian.Id,
+                Need = GetProduct(context, Flour.Name),
+                NeedId = GetProduct(context, Flour.Name).Id,
+                Amount = 1,
+                NeedType = NeedType.Daily
             };
-
-            var MillerCultureBreakdown = new PopulationCultureBreakdown
+            var AgLuxury = new CultureNeed
             {
-                Parent = millers,
-                Culture = HumanCulture,
-                Amount = 100
+                Culture = Agrarian,
+                CultureId = Agrarian.Id,
+                Need = GetProduct(context, Bread.Name),
+                NeedId = GetProduct(context, Bread.Name).Id,
+                Amount = 1,
+                NeedType = NeedType.Luxury
             };
-
-            var bakerCultureBreakdown = new PopulationCultureBreakdown
+            var AgWant = new CultureWant
             {
-                Parent = bakers,
-                Culture = HumanCulture,
-                Amount = 100
+                Culture = Agrarian,
+                CultureId = Agrarian.Id,
+                Want = finery,
+                Amount = 1,
+                NeedType = NeedType.Luxury
             };
-
-            var minerCultureBreakdown = new PopulationCultureBreakdown
+            // Miner Needs/Wants
+            var MinerDaily = new CultureNeed
             {
-                Parent = miners,
-                Culture = HumanCulture,
-                Amount = 100
+                Culture = Miner,
+                CultureId = Miner.Id,
+                Need = GetProduct(context, Flour.Name),
+                NeedId = GetProduct(context, Flour.Name).Id,
+                Amount = 1,
+                NeedType = NeedType.Daily
+            };
+            var MinerLuxury = new CultureNeed
+            {
+                Culture = Miner,
+                CultureId = Miner.Id,
+                Need = GetProduct(context, Bread.Name),
+                NeedId = GetProduct(context, Bread.Name).Id,
+                Amount = 1,
+                NeedType = NeedType.Luxury
+            };
+            var MinerWant = new CultureWant
+            {
+                Culture = Miner,
+                CultureId = Miner.Id,
+                Want = finery,
+                Amount = 2,
+                NeedType = NeedType.Luxury
+            };
+            // Urbanite Needs/Wants
+            var UrbaniteDaily = new CultureNeed
+            {
+                Culture = Urbanite,
+                CultureId = Urbanite.Id,
+                Need = GetProduct(context, Flour.Name),
+                NeedId = GetProduct(context, Flour.Name).Id,
+                Amount = 1,
+                NeedType = NeedType.Daily
+            };
+            var UrbaniteLuxury = new CultureNeed
+            {
+                Culture = Urbanite,
+                CultureId = Urbanite.Id,
+                Need = GetProduct(context, Bread.Name),
+                NeedId = GetProduct(context, Bread.Name).Id,
+                Amount = 1,
+                NeedType = NeedType.Luxury
+            };
+            var UrbaniteWant = new CultureWant
+            {
+                Culture = Urbanite,
+                CultureId = Urbanite.Id,
+                Want = finery,
+                Amount = 4,
+                NeedType = NeedType.Luxury
             };
 
-            farmers.CultureBreakdown.Add(farmerCultureBreakdown);
-            millers.CultureBreakdown.Add(MillerCultureBreakdown);
-            bakers.CultureBreakdown.Add(bakerCultureBreakdown);
-            miners.CultureBreakdown.Add(minerCultureBreakdown);
+            // check to add needs
+            var cultureNeeds = new List<CultureNeed>
+            {
+                AgDaily,
+                AgLuxury,
+                MinerDaily,
+                MinerLuxury,
+                UrbaniteDaily,
+                UrbaniteLuxury
+            };
+            foreach (var need in cultureNeeds)
+            {
+                if (!context.CultureNeeds.Any(x => x.CultureId == need.CultureId && x.NeedId == need.NeedId))
+                    context.CultureNeeds.Add(need);
+            }
+            context.SaveChanges();
+            // check to add wants.
+            var cultureWants = new List<CultureWant>
+            {
+                AgWant,
+                MinerWant,
+                UrbaniteWant
+            };
+            foreach (var want in cultureWants)
+            {
+                if (!context.CultureWants.Any(x => x.CultureId == want.CultureId && x.Want == want.Want))
+                    context.CultureWants.Add(want);
+            };
 
-            context.PopCultureBreakdowns.AddOrUpdate(
-                farmerCultureBreakdown,
-                MillerCultureBreakdown,
-                bakerCultureBreakdown,
-                minerCultureBreakdown);
+            context.SaveChanges();
 
-            context.PopulationGroups.AddOrUpdate(
-                farmers,
-                millers,
-                bakers,
-                miners);
+            #endregion Cultures
 
-            // TODO consider adding storage to PopulationGroups, may not bother.
+            #region PoliticalGroup
 
-            #endregion Populations
+            var Agricult = new PoliticalGroup
+            {
+                Name = "Agricult",
+                Radicalism = 5,
+                Nationalism = 0.3,
+                Centralization = -0.4,
+                Planning = -0.2,
+                Militarism = 0.6,
+            };
+            var Ruralists = new PoliticalGroup
+            {
+                Name = "Ruralists",
+                Radicalism = 1,
+                Nationalism = -0.3,
+                Centralization = 0.3,
+                Planning = -0.5,
+                Militarism = -0.3
+            };
+            var Socialites = new PoliticalGroup
+            {
+                Name = "Socialites",
+                Radicalism = 3,
+                Nationalism = -0.6,
+                Centralization = 0.8,
+                Planning = 0.8,
+                Militarism = -0.7
+            };
+
+            Agricult.AddAlly(Ruralists);
+            Agricult.AddEnemy(Socialites);
+
+            var AgriRelTag = Agricult.AddTag("Religious(Agricult)");
+            var AgrMilTag = Agricult.AddTag("Militant");
+            var RurUniTag = Ruralists.AddTag("Unified");
+            var SocAffTag = Socialites.AddTag("Affluent");
+
+            context.PoliticalGroups.AddOrUpdate(x => x.Name,
+                Agricult,
+                Ruralists,
+                Socialites);
+
+            context.SaveChanges();
+
+            context.SaveChanges();
+
+            #endregion PoliticalGroup
+
+            // Territories, to maintain sanity going forward for
+            // generation.
+
+            #region PopulationGroups
+
+            // dummy territory
+            var dumland = new Territory
+            {
+                Name = "Dumland",
+                X = 0,
+                Y = 0,
+                Z = 0,
+                Extent = 10 * 10 / (2 * 1.73205080757M), // area of a hexagon. 10 km in radius
+                Elevation = 0,
+                WaterLevel = 0,
+                HasRiver = false,
+                Humidity = 50,
+                Tempurature = 20,
+                Roughness = 0,
+                InfrastructureLevel = 0,
+                AvailableLand = 10 * 10 / (2 * 1.73205080757M)
+            };
+
+            if (!context.Territories.Any(x => x.Name == dumland.Name))
+            {
+                context.Territories.Add(dumland);
+            }
+            context.SaveChanges();
+            dumland = context.Territories.Single(x => x.Name == dumland.Name);
+
+            // TODO make it do this for each territory.
+            var Menials = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == menialLaborer.Name).Id,
+                Priority = 1,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+            var Farmers = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == wheatFarmer.Name).Id,
+                Priority = 2,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+            var Millers = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == grainMiller.Name).Id,
+                Priority = 3,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+            var Bakers = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == baker.Name).Id,
+                Priority = 4,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+            var IronMiners = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == ironMiner.Name).Id,
+                Priority = 5,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+            var IronSmelters = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == ironSmelter.Name).Id,
+                Priority = 6,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+            var GoldMiners = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == goldMiner.Name).Id,
+                Priority = 7,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+            var BlackSmiths = new PopulationGroup
+            {
+                Count = 1000,
+                PrimaryJobId = context.Jobs.Single(x => x.Name == BlackSmithing.Name).Id,
+                Priority = 8,
+                SkillLevel = 2,
+                TerritoryId = dumland.Id
+            };
+
+            var popGroups = new List<PopulationGroup>
+            {
+                Menials,
+                Farmers,
+                Millers,
+                Bakers,
+                IronMiners,
+                IronSmelters,
+                GoldMiners,
+                BlackSmiths
+            };
+
+            context.PopulationGroups.AddOrUpdate(x => new { x.TerritoryId, x.PrimaryJobId },
+                Menials,
+                Farmers,
+                Millers,
+                Bakers,
+                IronMiners,
+                IronSmelters,
+                GoldMiners,
+                BlackSmiths);
+
+            context.SaveChanges();
+
+            // complete breakdowns (let's be lazy)
+            foreach (var pop in popGroups)
+            {
+                // Species
+                var speBreak = new SpeciesBreakdown
+                {
+                    ParentId = pop.Id,
+                    Parent = pop,
+                    SpeciesId = context.Species.Single(x => x.Name == human.Name).Id,
+                    Percent = 1
+                };
+
+                // pop.SpeciesBreakdown.Add(speBreak);
+                context.PopSpeciesBreakdowns.AddOrUpdate(x => new { x.ParentId, x.SpeciesId },
+                    speBreak);
+
+                context.SaveChanges();
+
+                // Culture
+                var agriBreak = new CultureBreakdown
+                {
+                    ParentId = pop.Id,
+                    Parent = pop,
+                    CultureId = context.Cultures.Single(x => x.Name == Agrarian.Name).Id,
+                    Percent = 0.5
+                };
+                var minbreak = new CultureBreakdown
+                {
+                    ParentId = pop.Id,
+                    Parent = pop,
+                    CultureId = context.Cultures.Single(x => x.Name == Miner.Name).Id,
+                    Percent = 0.25
+                };
+                var urbBreak = new CultureBreakdown
+                {
+                    ParentId = pop.Id,
+                    Parent = pop,
+                    CultureId = context.Cultures.Single(x => x.Name == Urbanite.Name).Id,
+                    Percent = 0.25
+                };
+                //pop.CultureBreakdown.Add(agriBreak);
+                //pop.CultureBreakdown.Add(minbreak);
+                //pop.CultureBreakdown.Add(urbBreak);
+
+                context.PopCultureBreakdowns.AddOrUpdate(x => new { x.ParentId, x.CultureId },
+                    agriBreak,
+                    minbreak,
+                    urbBreak);
+
+                context.SaveChanges();
+
+                // political Group
+                var agcultBreak = new PoliticalBreakdown
+                {
+                    ParentId = pop.Id,
+                    Parent = pop,
+                    PoliticalGroupId = context.PoliticalGroups.Single(x => x.Name == Agricult.Name).Id,
+                    Percent = 0.25
+                };
+                var rurBreak = new PoliticalBreakdown
+                {
+                    ParentId = pop.Id,
+                    Parent = pop,
+                    PoliticalGroupId = context.PoliticalGroups.Single(x => x.Name == Ruralists.Name).Id,
+                    Percent = 0.25
+                };
+                var socBreak = new PoliticalBreakdown
+                {
+                    ParentId = pop.Id,
+                    Parent = pop,
+                    PoliticalGroupId = context.PoliticalGroups.Single(x => x.Name == Socialites.Name).Id,
+                    Percent = 0.25
+                };
+                //pop.PoliticalBreakdown.Add(agcultBreak);
+                //pop.PoliticalBreakdown.Add(rurBreak);
+                //pop.PoliticalBreakdown.Add(socBreak);
+
+                context.PopPoliticalBreakdowns.AddOrUpdate(x => new { x.ParentId, x.PoliticalGroupId },
+                    agcultBreak,
+                    rurBreak,
+                    socBreak);
+
+                context.SaveChanges();
+            }
+
+            #endregion PopulationGroups
+
+            /*
 
             #region Territory
 

@@ -78,6 +78,26 @@
     <Compile Include="Migrations\202104010210388_JobSkillUpdate.designer.cs">
       <DependentUpon>202104010210388_JobSkillUpdate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202104021207026_ProductWantTagsUpdate.cs" />
+    <Compile Include="Migrations\202104021207026_ProductWantTagsUpdate.designer.cs">
+      <DependentUpon>202104021207026_ProductWantTagsUpdate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202104111801367_PopulationGroupUpdate.cs" />
+    <Compile Include="Migrations\202104111801367_PopulationGroupUpdate.designer.cs">
+      <DependentUpon>202104111801367_PopulationGroupUpdate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202104152243157_RemoveRequiredVariants.cs" />
+    <Compile Include="Migrations\202104152243157_RemoveRequiredVariants.designer.cs">
+      <DependentUpon>202104152243157_RemoveRequiredVariants.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202104160257127_CorrectRadicalism.cs" />
+    <Compile Include="Migrations\202104160257127_CorrectRadicalism.designer.cs">
+      <DependentUpon>202104160257127_CorrectRadicalism.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202104170259595_TerritoryAndCorrectionChange.cs" />
+    <Compile Include="Migrations\202104170259595_TerritoryAndCorrectionChange.designer.cs">
+      <DependentUpon>202104170259595_TerritoryAndCorrectionChange.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
     <Compile Include="ModelEnums\CashType.cs" />
@@ -89,11 +109,24 @@
     <Compile Include="ModelEnums\ProductTypes.cs" />
     <Compile Include="ModelEnums\ProcessGoodTag.cs" />
     <Compile Include="ModelEnums\RockType.cs" />
-    <Compile Include="PopulationModel\Culture.cs" />
-    <Compile Include="PopulationModel\CultureNeeds.cs" />
+    <Compile Include="PopulationModel\Culture\Culture.cs" />
+    <Compile Include="PopulationModel\Culture\CultureNeed.cs" />
+    <Compile Include="PopulationModel\Culture\CultureTag.cs" />
+    <Compile Include="PopulationModel\Culture\CultureWant.cs" />
     <Compile Include="PopulationModel\OwnedProperty.cs" />
+    <Compile Include="PopulationModel\PoliticalBreakdown.cs" />
+    <Compile Include="PopulationModel\PoliticalGroup\PoliticalGroup.cs" />
+    <Compile Include="PopulationModel\PoliticalGroup\PoliticalTag.cs" />
     <Compile Include="PopulationModel\PopulationCultureBreakdown.cs" />
     <Compile Include="PopulationModel\PopulationGroup.cs" />
+    <Compile Include="PopulationModel\Religion\Religion.cs" />
+    <Compile Include="PopulationModel\SpeciesBreakdown.cs" />
+    <Compile Include="PopulationModel\Species\Species.cs" />
+    <Compile Include="PopulationModel\Species\SpeciesAnathema.cs" />
+    <Compile Include="PopulationModel\Species\SpeciesAversion.cs" />
+    <Compile Include="PopulationModel\Species\SpeciesNeed.cs" />
+    <Compile Include="PopulationModel\Species\SpeciesTag.cs" />
+    <Compile Include="PopulationModel\Species\SpeciesWant.cs" />
     <Compile Include="ProcessModel\Process.cs" />
     <Compile Include="ProcessModel\ProcessCapital.cs" />
     <Compile Include="ProcessModel\ProcessInput.cs" />
@@ -101,6 +134,7 @@
     <Compile Include="ProductModel\FailsIntoPair.cs" />
     <Compile Include="ProductModel\MaintenancePair.cs" />
     <Compile Include="ProductModel\Product.cs" />
+    <Compile Include="ProductModel\ProductWantTag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SkillsModel\Skill.cs" />
     <Compile Include="TerritoryModel\LandOwner.cs" />
@@ -135,6 +169,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202104010210388_JobSkillUpdate.resx">
       <DependentUpon>202104010210388_JobSkillUpdate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104021207026_ProductWantTagsUpdate.resx">
+      <DependentUpon>202104021207026_ProductWantTagsUpdate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104111801367_PopulationGroupUpdate.resx">
+      <DependentUpon>202104111801367_PopulationGroupUpdate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104152243157_RemoveRequiredVariants.resx">
+      <DependentUpon>202104152243157_RemoveRequiredVariants.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104160257127_CorrectRadicalism.resx">
+      <DependentUpon>202104160257127_CorrectRadicalism.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104170259595_TerritoryAndCorrectionChange.resx">
+      <DependentUpon>202104170259595_TerritoryAndCorrectionChange.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

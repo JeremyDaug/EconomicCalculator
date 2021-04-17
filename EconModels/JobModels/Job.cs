@@ -107,22 +107,21 @@ namespace EconModels.JobModels
 
         public void RemoveJobRelation(Job job)
         {
+            if (!RelatedChild.Contains(job))
+                return;
+
             RelatedChild.Remove(job);
             RelatedParent.Remove(job);
+
+            job.RemoveJobRelation(this);
         }
 
         public void ClearJobRelations()
         {
             foreach (var job in RelatedChild)
             {
-                if (job.Id != Id)
-                {
-                    job.RemoveJobRelation(this);
-                }
+                RemoveJobRelation(job);
             }
-
-            RelatedChild.Clear();
-            RelatedParent.Clear();
         }
 
         public void ClearProcessRelations()

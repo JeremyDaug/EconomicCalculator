@@ -92,8 +92,13 @@ namespace EconModels.SkillsModel
 
         public void RemoveSkillRelation(Skill skill)
         {
+            if (!RelationChild.Contains(skill))
+                return;
+
             RelationChild.Remove(skill);
             RelationParent.Remove(skill);
+
+            skill.RemoveSkillRelation(skill);
         }
 
         public void ClearSkillRelations()
@@ -101,15 +106,8 @@ namespace EconModels.SkillsModel
             // remove myself from related skills
             foreach (var skill in RelationChild)
             {
-                if (skill.Id != Id)
-                {
-                    skill.RemoveSkillRelation(this);
-                }
+                RemoveSkillRelation(skill);
             }
-
-            // clear my relations
-            RelationChild.Clear();
-            RelationParent.Clear();
         }
     }
 }
