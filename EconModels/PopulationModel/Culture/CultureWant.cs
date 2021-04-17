@@ -15,7 +15,7 @@ namespace EconModels.PopulationModel
         /// <summary>
         /// The Culture Attached to.
         /// </summary>
-        [Required, ForeignKey("CultureId")]
+        [ForeignKey("CultureId")]
         public virtual Culture Culture { get; set; }
 
         /// <summary>

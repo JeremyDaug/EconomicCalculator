@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EconModels.PopulationModel
@@ -14,13 +15,14 @@ namespace EconModels.PopulationModel
         /// <summary>
         /// The Culture Attached to.
         /// </summary>
-        [Required, ForeignKey("CultureId")]
+        [ForeignKey("CultureId")]
         public virtual Culture Culture { get; set; }
 
         /// <summary>
         /// The tag of the culture with data inside.
         /// </summary>
         [Required, StringLength(30)]
+        [DisplayName("Tag")]
         public string Tag { get; set; }
     }
 }

@@ -50,6 +50,7 @@ namespace EconModels
         // Cultures
         public DbSet<CultureNeed> CultureNeeds { get; set; }
         public DbSet<CultureWant> CultureWants { get; set; }
+        public DbSet<CultureTag> CultureTags { get; set; }
         public DbSet<Culture> Cultures { get; set; }
 
         // Species

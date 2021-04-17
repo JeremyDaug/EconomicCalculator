@@ -15,7 +15,7 @@ namespace EconModels.PopulationModel
         [Required]
         public int NeedId { get; set; }
 
-        [Required, ForeignKey("NeedId")]
+        [ForeignKey("NeedId")]
         public Product Need { get; set; }
 
         [Required, Range(0, double.MaxValue)]

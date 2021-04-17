@@ -14,7 +14,7 @@ namespace EconModels.PopulationModel
         /// <summary>
         /// The Species Attached to.
         /// </summary>
-        [Required, ForeignKey("SpeciesId")]
+        [ForeignKey("SpeciesId")]
         public virtual Species Species { get; set; }
 
         /// <summary>

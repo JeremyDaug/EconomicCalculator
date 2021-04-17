@@ -25,7 +25,7 @@ namespace EconModels.PopulationModel
         /// <summary>
         /// The Culture this need connects back to.
         /// </summary>
-        [Required, ForeignKey("CultureId")]
+        [ForeignKey("CultureId")]
         public virtual Culture Culture { get; set; }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace EconModels.PopulationModel
         /// <summary>
         /// The product they need.
         /// </summary>
-        [Required, ForeignKey("NeedId")]
+        [ForeignKey("NeedId")]
         public virtual Product Need { get; set; }
 
         /// <summary>

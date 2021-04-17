@@ -10,13 +10,13 @@ namespace EconModels.PopulationModel
         [Required]
         public int SpeciesId { get; set; }
 
-        [Required, ForeignKey("SpeciesId")]
+        [ForeignKey("SpeciesId")]
         public virtual Species Species { get; set; }
 
         [Required]
         public int AnathemaId { get; set; }
 
-        [Required, ForeignKey("AnathemaId")]
+        [ForeignKey("AnathemaId")]
         public Product Anathema { get; set; }
 
         [Required, Range(0, double.MaxValue)]

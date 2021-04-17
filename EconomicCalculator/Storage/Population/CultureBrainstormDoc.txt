@@ -28,10 +28,20 @@ All cultures have:
 	  - Species Incompatibility, this culture is incompatable with some species. The
 	    species will never convert to this culture and even if they did, they would
 		immediately find another.
-	  - Political Connection
-	  - Political Antipathy
-	  - Supremacist
-	  - Subjucationist
+	  - Political Connection, this culture has a preference to a specific political group.
+	    This increases attraction from this culture to that political group (and vice versa)
+		[2] times. This stacks with a bonus from a tag the other way.
+	  - Political Antipathy, this culture has a preference away from a specific political
+	    group.
+	  - Job Preference, this culture tends to gravitate to a specific job. Those with 
+	    this job are more likely to be in this job than not. A culture can have multiple
+		jobs this way.
+	  - Disfavored Job, this culture is adverse to a specific job. Those with this 
+	    culture have an aversion to taking this job, and those in this job are less likely
+		to be of this culture. 
+	  - Supremacist, they view thesmelves as superior to other cultures.
+	  - Subjucationist, they view cultures further away from them as worthy of 
+	    enslavement and subjugation.
 
 Species Ideas and Overview
 

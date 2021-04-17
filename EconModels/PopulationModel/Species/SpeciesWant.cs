@@ -8,7 +8,7 @@ namespace EconModels.PopulationModel
         [Required]
         public int SpeciesId { get; set; }
 
-        [Required, ForeignKey("SpeciesId")]
+        [ForeignKey("SpeciesId")]
         public virtual Species Species { get; set; }
 
         [Required, StringLength(20)]

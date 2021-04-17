@@ -19,7 +19,7 @@ namespace EconModels.PopulationModel
         /// <summary>
         /// The Political Group attached to.
         /// </summary>
-        [Required, ForeignKey("GroupId")]
+        [ForeignKey("GroupId")]
         public virtual PoliticalGroup Group { get; set; }
 
         /// <summary>

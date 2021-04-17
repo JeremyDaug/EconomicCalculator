@@ -1050,7 +1050,6 @@
 
             #endregion Processes
 
-            /* Skills */
             #region Skills
 
             // General Farming
@@ -1483,6 +1482,44 @@
                 if (!context.CultureWants.Any(x => x.CultureId == want.CultureId && x.Want == want.Want))
                     context.CultureWants.Add(want);
             };
+
+            context.SaveChanges();
+
+            // culture tags
+            var AgTag = new CultureTag
+            {
+                CultureId = Agrarian.Id,
+                Tag = "JobPreference(" + wheatFarmer.Name + ")"
+            };
+            var minTag1 = new CultureTag
+            {
+                CultureId = Miner.Id,
+                Tag = "JobPreference(" + ironMiner.Name + ")"
+            };
+            var minTag2 = new CultureTag
+            {
+                CultureId = Miner.Id,
+                Tag = "JobPreference(" + goldMiner.Name + ")"
+            };
+            var urbTag = new CultureTag
+            {
+                CultureId = Urbanite.Id,
+                Tag = "DisfavoredJob(" + wheatFarmer.Name + ")"
+            };
+
+            var cultureTags = new List<CultureTag>
+            {
+                AgTag,
+                minTag1,
+                minTag2,
+                urbTag
+            };
+            
+            foreach (var tag in cultureTags)
+            {
+                if (!context.CultureTags.Any(x => x.CultureId == tag.CultureId && x.Tag == tag.Tag))
+                    context.CultureTags.Add(tag);
+            }
 
             context.SaveChanges();
 

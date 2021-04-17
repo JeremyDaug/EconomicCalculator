@@ -11,7 +11,7 @@ namespace EconModels.PopulationModel
         [Required, ForeignKey("SpeciesId")]
         public virtual Species Species { get; set; }
 
-        [Required, StringLength(20)]
+        [StringLength(20)]
         public string Aversion { get; set; }
 
         [Required, Range(0, double.MaxValue)]
