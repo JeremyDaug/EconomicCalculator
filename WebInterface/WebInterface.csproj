@@ -350,12 +350,10 @@
     <Content Include="Views\CultureTags\Create.cshtml" />
     <Content Include="Views\CultureTags\Delete.cshtml" />
     <Content Include="Views\CultureTags\Details.cshtml" />
-    <Content Include="Views\CultureTags\Edit.cshtml" />
     <Content Include="Views\CultureTags\Index.cshtml" />
     <Content Include="Views\CultureWants\Create.cshtml" />
     <Content Include="Views\CultureWants\Delete.cshtml" />
     <Content Include="Views\CultureWants\Details.cshtml" />
-    <Content Include="Views\CultureWants\Edit.cshtml" />
     <Content Include="Views\CultureWants\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>

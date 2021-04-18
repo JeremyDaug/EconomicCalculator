@@ -23,14 +23,14 @@ namespace WebInterface.Views
         }
 
         // GET: CultureWants/Details/5
-        public ActionResult Details(int? id, int? wantId)
+        public ActionResult Details(int? id, string want)
         {
-            if (id == null || wantId == null)
+            if (id == null || want == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             CultureWant cultureWant = db.CultureWants
-                .SingleOrDefault(x => x.CultureId == id && x.WantId == wantId);
+                .SingleOrDefault(x => x.CultureId == id && x.Want == want);
             if (cultureWant == null)
             {
                 return HttpNotFound();
@@ -64,14 +64,14 @@ namespace WebInterface.Views
         }
 
         // GET: CultureWants/Delete/5
-        public ActionResult Delete(int? id, int? wantId)
+        public ActionResult Delete(int? id, string want)
         {
-            if (id == null || wantId == null)
+            if (id == null || want == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             CultureWant cultureWant = db.CultureWants
-                .SingleOrDefault(x => x.CultureId == id && x.WantId == wantId);
+                .SingleOrDefault(x => x.CultureId == id && x.Want == want);
             if (cultureWant == null)
             {
                 return HttpNotFound();
@@ -82,10 +82,10 @@ namespace WebInterface.Views
         // POST: CultureWants/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id, int wantId)
+        public ActionResult DeleteConfirmed(int id, string want)
         {
             CultureWant cultureWant = db.CultureWants
-                .SingleOrDefault(x => x.CultureId == id && x.WantId == wantId);
+                .SingleOrDefault(x => x.CultureId == id && x.Want == want);
             db.CultureWants.Remove(cultureWant);
             db.SaveChanges();
             return RedirectToAction("Index");

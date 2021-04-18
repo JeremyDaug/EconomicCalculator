@@ -15,7 +15,13 @@
             @Html.DisplayNameFor(model => model.Culture.Name)
         </th>
         <th>
+            @Html.DisplayNameFor(model => model.Want)
+        </th>
+        <th>
             @Html.DisplayNameFor(model => model.Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.NeedType)
         </th>
         <th></th>
     </tr>
@@ -26,14 +32,23 @@
             @Html.DisplayFor(modelItem => item.Culture.Name)
         </td>
         <td>
+            @Html.DisplayFor(modelItem => item.Want)
+        </td>
+        <td>
             @Html.DisplayFor(modelItem => item.Amount)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            @Html.DisplayFor(modelItem => item.NeedType)
+        </td>
+        <td>
+            @Html.ActionLink("Details", "Details", new { id = item.CultureId, want = item.Want }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.CultureId, want = item.Want })
         </td>
     </tr>
 }
 
 </table>
+
+<p>
+    Editing Is unavailable. Delete the old and make a new instead.
+</p>
