@@ -345,7 +345,6 @@
     <Content Include="Views\CultureNeeds\Create.cshtml" />
     <Content Include="Views\CultureNeeds\Delete.cshtml" />
     <Content Include="Views\CultureNeeds\Details.cshtml" />
-    <Content Include="Views\CultureNeeds\Edit.cshtml" />
     <Content Include="Views\CultureNeeds\Index.cshtml" />
     <Content Include="Views\CultureTags\Create.cshtml" />
     <Content Include="Views\CultureTags\Delete.cshtml" />

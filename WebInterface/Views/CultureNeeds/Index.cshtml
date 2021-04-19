@@ -12,13 +12,16 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Culture.Name)
+            @Html.DisplayNameFor(model => model.CultureId)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Need.Name)
+            @Html.DisplayNameFor(model => model.Need)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.NeedType)
         </th>
         <th></th>
     </tr>
@@ -35,9 +38,11 @@
             @Html.DisplayFor(modelItem => item.Amount)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            @Html.DisplayFor(modelItem => item.NeedType)
+        </td>
+        <td>
+            @Html.ActionLink("Details", "Details", new { id = item.CultureId, needId = item.NeedId }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.CultureId, needId = item.NeedId })
         </td>
     </tr>
 }
