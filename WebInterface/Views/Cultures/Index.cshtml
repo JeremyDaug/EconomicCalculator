@@ -4,10 +4,13 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Cultures</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Create New", "Create") |
+    @Html.ActionLink("To Culture Tags", "Index", "CultureTags", null, null) |
+    @Html.ActionLink("To Culture Wants", "Index", "CultureWants", null, null) |
+    @Html.ActionLink("To Culture Needs", "Index", "CultureNeeds", null, null)
 </p>
 <table class="table">
     <tr>
@@ -19,6 +22,15 @@
         </th>
         <th>
             @Html.DisplayNameFor(model => model.CultureGrowthRate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CultureNeeds)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CultureWants)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Tags)
         </th>
         <th></th>
     </tr>
@@ -35,9 +47,84 @@
             @Html.DisplayFor(modelItem => item.CultureGrowthRate)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Need
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <th>
+                        Type
+                    </th>
+                </tr>
+                @foreach (var need in item.CultureNeeds)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(it => need.Need.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(it => need.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(it => need.NeedType)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </td>
+        <td>
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Want
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <th>
+                        Type
+                    </th>
+                </tr>
+                @foreach (var want in item.CultureWants)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(it => want.Want)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(it => want.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(it => want.NeedType)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </td>
+        <td>
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Tag
+                    </th>
+                </tr>
+                @foreach (var tag in item.Tags)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(x => tag.Tag)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+            @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
         </td>
     </tr>
 }
