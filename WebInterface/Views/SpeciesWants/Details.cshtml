@@ -1,0 +1,45 @@
+﻿@model EconModels.PopulationModel.SpeciesWant
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>SpeciesWant</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Species.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Species.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Want)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Want)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Amount)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Amount)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Tag)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Tag)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

@@ -1,0 +1,96 @@
+﻿@model EconModels.PopulationModel.Species
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Species</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VariantName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VariantName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SpeciesGrowthRate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SpeciesGrowthRate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TempuraturePreference)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TempuraturePreference)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.GravityPreference)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GravityPreference)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.InfantPhaseLength)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.InfantPhaseLength)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ChildPhaseLength)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ChildPhaseLength)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AdultPhaseLength)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AdultPhaseLength)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AverageLifeSpan)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AverageLifeSpan)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

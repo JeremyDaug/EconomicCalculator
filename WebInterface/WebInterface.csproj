@@ -130,10 +130,10 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\CultureNeedsController.cs" />
-    <Compile Include="Controllers\CulturesController.cs" />
-    <Compile Include="Controllers\CultureTagsController.cs" />
-    <Compile Include="Controllers\CultureWantsController.cs" />
+    <Compile Include="Controllers\Cultures\CultureNeedsController.cs" />
+    <Compile Include="Controllers\Cultures\CulturesController.cs" />
+    <Compile Include="Controllers\Cultures\CultureTagsController.cs" />
+    <Compile Include="Controllers\Cultures\CultureWantsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobsController.cs" />
     <Compile Include="Controllers\ProcessCapitalsController.cs" />
@@ -143,6 +143,12 @@
     <Compile Include="Controllers\ProductFailsIntoController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\SkillsController.cs" />
+    <Compile Include="Controllers\Species\SpeciesAnathemasController.cs" />
+    <Compile Include="Controllers\Species\SpeciesAversionsController.cs" />
+    <Compile Include="Controllers\Species\SpeciesController.cs" />
+    <Compile Include="Controllers\Species\SpeciesNeedsController.cs" />
+    <Compile Include="Controllers\Species\SpeciesTagsController.cs" />
+    <Compile Include="Controllers\Species\SpeciesWantsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -354,6 +360,34 @@
     <Content Include="Views\CultureWants\Delete.cshtml" />
     <Content Include="Views\CultureWants\Details.cshtml" />
     <Content Include="Views\CultureWants\Index.cshtml" />
+    <Content Include="Views\Species\Create.cshtml" />
+    <Content Include="Views\Species\Delete.cshtml" />
+    <Content Include="Views\Species\Details.cshtml" />
+    <Content Include="Views\Species\Edit.cshtml" />
+    <Content Include="Views\Species\Index.cshtml" />
+    <Content Include="Views\SpeciesAnathemas\Create.cshtml" />
+    <Content Include="Views\SpeciesAnathemas\Delete.cshtml" />
+    <Content Include="Views\SpeciesAnathemas\Details.cshtml" />
+    <Content Include="Views\SpeciesAnathemas\Edit.cshtml" />
+    <Content Include="Views\SpeciesAnathemas\Index.cshtml" />
+    <Content Include="Views\SpeciesAversions\Create.cshtml" />
+    <Content Include="Views\SpeciesAversions\Delete.cshtml" />
+    <Content Include="Views\SpeciesAversions\Details.cshtml" />
+    <Content Include="Views\SpeciesAversions\Edit.cshtml" />
+    <Content Include="Views\SpeciesAversions\Index.cshtml" />
+    <Content Include="Views\SpeciesNeeds\Create.cshtml" />
+    <Content Include="Views\SpeciesNeeds\Delete.cshtml" />
+    <Content Include="Views\SpeciesNeeds\Details.cshtml" />
+    <Content Include="Views\SpeciesNeeds\Edit.cshtml" />
+    <Content Include="Views\SpeciesNeeds\Index.cshtml" />
+    <Content Include="Views\SpeciesTags\Create.cshtml" />
+    <Content Include="Views\SpeciesTags\Delete.cshtml" />
+    <Content Include="Views\SpeciesTags\Details.cshtml" />
+    <Content Include="Views\SpeciesTags\Index.cshtml" />
+    <Content Include="Views\SpeciesWants\Create.cshtml" />
+    <Content Include="Views\SpeciesWants\Delete.cshtml" />
+    <Content Include="Views\SpeciesWants\Details.cshtml" />
+    <Content Include="Views\SpeciesWants\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">

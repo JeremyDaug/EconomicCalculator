@@ -318,5 +318,7 @@ namespace EconModels
                 .HasForeignKey(x => x.EndId)
                 .WillCascadeOnDelete(false);
         }
+
+        public System.Data.Entity.DbSet<EconModels.PopulationModel.SpeciesTag> SpeciesTags { get; set; }
     }
 }

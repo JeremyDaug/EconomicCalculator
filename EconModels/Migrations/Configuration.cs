@@ -1336,6 +1336,30 @@
             
             context.SaveChanges();
 
+            var humanNeed = new SpeciesNeed
+            {
+                SpeciesId = human.Id,
+                NeedId = Bread.Id,
+                Amount = 2,
+                Tag = "Calories"
+            };
+
+            context.SpeciesNeeds.AddOrUpdate(x => new { x.SpeciesId, x.NeedId },
+                humanNeed);
+
+            context.SaveChanges();
+
+            var humanTag = new SpeciesTag
+            {
+                SpeciesId = human.Id,
+                Tag = "Humanoid"
+            };
+
+            context.SpeciesTags.AddOrUpdate(x => new { x.SpeciesId, x.Tag },
+                humanTag);
+
+            context.SaveChanges();
+
             #endregion Species
 
             #region Cultures
