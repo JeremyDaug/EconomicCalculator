@@ -23,13 +23,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: SpeciesAversions/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? id, string aversion)
         {
-            if (id == null)
+            if (id == null || aversion == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            SpeciesAversion speciesAversion = db.SpeciesAversions.Find(id);
+            SpeciesAversion speciesAversion = db.SpeciesAversions
+                .SingleOrDefault(x => x.SpeciesId == id && x.Aversion == aversion);
             if (speciesAversion == null)
             {
                 return HttpNotFound();
@@ -63,13 +64,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: SpeciesAversions/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? id, string aversion)
         {
-            if (id == null)
+            if (id == null || aversion == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            SpeciesAversion speciesAversion = db.SpeciesAversions.Find(id);
+            SpeciesAversion speciesAversion = db.SpeciesAversions
+                .SingleOrDefault(x => x.SpeciesId == id && x.Aversion == aversion);
             if (speciesAversion == null)
             {
                 return HttpNotFound();
@@ -96,13 +98,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: SpeciesAversions/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, string aversion)
         {
-            if (id == null)
+            if (id == null || aversion == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            SpeciesAversion speciesAversion = db.SpeciesAversions.Find(id);
+            SpeciesAversion speciesAversion = db.SpeciesAversions
+                .SingleOrDefault(x => x.SpeciesId == id && x.Aversion == aversion);
             if (speciesAversion == null)
             {
                 return HttpNotFound();
@@ -113,9 +116,10 @@ namespace WebInterface.Controllers
         // POST: SpeciesAversions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int id, string aversion)
         {
-            SpeciesAversion speciesAversion = db.SpeciesAversions.Find(id);
+            SpeciesAversion speciesAversion = db.SpeciesAversions
+                .SingleOrDefault(x => x.SpeciesId == id && x.Aversion == aversion);
             db.SpeciesAversions.Remove(speciesAversion);
             db.SaveChanges();
             return RedirectToAction("Index");

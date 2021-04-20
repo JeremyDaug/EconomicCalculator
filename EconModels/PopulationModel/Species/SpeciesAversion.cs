@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EconModels.PopulationModel
@@ -6,15 +7,19 @@ namespace EconModels.PopulationModel
     public class SpeciesAversion
     {
         [Required]
+        [DisplayName("Species Id")]
         public int SpeciesId { get; set; }
 
-        [Required, ForeignKey("SpeciesId")]
+        [ForeignKey("SpeciesId")]
+        [DisplayName("Species")]
         public virtual Species Species { get; set; }
 
-        [StringLength(20)]
+        [Required, StringLength(20)]
+        [DisplayName("Aversion")]
         public string Aversion { get; set; }
 
         [Required, Range(0, double.MaxValue)]
+        [DisplayName("Amount")]
         public decimal Amount { get; set; }
 
         /// <summary>
@@ -22,6 +27,7 @@ namespace EconModels.PopulationModel
         /// advanced effects.
         /// </summary>
         [Required, StringLength(30)]
+        [DisplayName("Tag")]
         public string Tag { get; set; }
     }
 }
