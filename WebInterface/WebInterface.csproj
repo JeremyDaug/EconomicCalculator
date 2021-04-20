@@ -378,7 +378,6 @@
     <Content Include="Views\SpeciesNeeds\Create.cshtml" />
     <Content Include="Views\SpeciesNeeds\Delete.cshtml" />
     <Content Include="Views\SpeciesNeeds\Details.cshtml" />
-    <Content Include="Views\SpeciesNeeds\Edit.cshtml" />
     <Content Include="Views\SpeciesNeeds\Index.cshtml" />
     <Content Include="Views\SpeciesTags\Create.cshtml" />
     <Content Include="Views\SpeciesTags\Delete.cshtml" />

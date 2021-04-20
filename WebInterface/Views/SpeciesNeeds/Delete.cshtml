@@ -12,25 +12,22 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Need.Name)
+            @Html.DisplayNameFor(model => model.Species)
         </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Need.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Species.Name)
-        </dt>
-
         <dd>
             @Html.DisplayFor(model => model.Species.Name)
         </dd>
 
         <dt>
+            @Html.DisplayNameFor(model => model.Need)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Need.Name)
+        </dd>
+
+        <dt>
             @Html.DisplayNameFor(model => model.Amount)
         </dt>
-
         <dd>
             @Html.DisplayFor(model => model.Amount)
         </dd>
@@ -38,7 +35,6 @@
         <dt>
             @Html.DisplayNameFor(model => model.Tag)
         </dt>
-
         <dd>
             @Html.DisplayFor(model => model.Tag)
         </dd>

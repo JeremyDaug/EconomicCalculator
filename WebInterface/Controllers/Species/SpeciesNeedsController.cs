@@ -23,13 +23,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: SpeciesNeeds/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? id, int? need)
         {
-            if (id == null)
+            if (id == null || need == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            SpeciesNeed speciesNeed = db.SpeciesNeeds.Find(id);
+            SpeciesNeed speciesNeed = db.SpeciesNeeds
+                .SingleOrDefault(x => x.SpeciesId == id && x.NeedId == need);
             if (speciesNeed == null)
             {
                 return HttpNotFound();
@@ -63,50 +64,16 @@ namespace WebInterface.Controllers
             ViewBag.SpeciesId = new SelectList(db.Species, "Id", "Name", speciesNeed.SpeciesId);
             return View(speciesNeed);
         }
-
-        // GET: SpeciesNeeds/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            SpeciesNeed speciesNeed = db.SpeciesNeeds.Find(id);
-            if (speciesNeed == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.NeedId = new SelectList(db.Products, "Id", "Name", speciesNeed.NeedId);
-            ViewBag.SpeciesId = new SelectList(db.Species, "Id", "Name", speciesNeed.SpeciesId);
-            return View(speciesNeed);
-        }
-
-        // POST: SpeciesNeeds/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "SpeciesId,NeedId,Amount,Tag")] SpeciesNeed speciesNeed)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(speciesNeed).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            ViewBag.NeedId = new SelectList(db.Products, "Id", "Name", speciesNeed.NeedId);
-            ViewBag.SpeciesId = new SelectList(db.Species, "Id", "Name", speciesNeed.SpeciesId);
-            return View(speciesNeed);
-        }
-
+        
         // GET: SpeciesNeeds/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, int? need)
         {
-            if (id == null)
+            if (id == null || need == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            SpeciesNeed speciesNeed = db.SpeciesNeeds.Find(id);
+            SpeciesNeed speciesNeed = db.SpeciesNeeds
+                .SingleOrDefault(x => x.SpeciesId == id && x.NeedId == need);
             if (speciesNeed == null)
             {
                 return HttpNotFound();
@@ -117,9 +84,10 @@ namespace WebInterface.Controllers
         // POST: SpeciesNeeds/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int id, int need)
         {
-            SpeciesNeed speciesNeed = db.SpeciesNeeds.Find(id);
+            SpeciesNeed speciesNeed = db.SpeciesNeeds
+                .SingleOrDefault(x => x.SpeciesId == id && x.NeedId == need);
             db.SpeciesNeeds.Remove(speciesNeed);
             db.SaveChanges();
             return RedirectToAction("Index");
