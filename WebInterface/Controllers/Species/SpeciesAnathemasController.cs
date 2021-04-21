@@ -23,13 +23,14 @@ namespace WebInterface.Controllers
         }
 
         // GET: SpeciesAnathemas/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? id, int? anathema)
         {
-            if (id == null)
+            if (id == null || anathema == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            SpeciesAnathema speciesAnathema = db.SpeciesAnathemas.Find(id);
+            SpeciesAnathema speciesAnathema = db.SpeciesAnathemas
+                .SingleOrDefault(x => x.SpeciesId == id && x.AnathemaId == anathema);
             if (speciesAnathema == null)
             {
                 return HttpNotFound();
@@ -64,49 +65,15 @@ namespace WebInterface.Controllers
             return View(speciesAnathema);
         }
 
-        // GET: SpeciesAnathemas/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            SpeciesAnathema speciesAnathema = db.SpeciesAnathemas.Find(id);
-            if (speciesAnathema == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.AnathemaId = new SelectList(db.Products, "Id", "Name", speciesAnathema.AnathemaId);
-            ViewBag.SpeciesId = new SelectList(db.Species, "Id", "Name", speciesAnathema.SpeciesId);
-            return View(speciesAnathema);
-        }
-
-        // POST: SpeciesAnathemas/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "SpeciesId,AnathemaId,Amount,Tag")] SpeciesAnathema speciesAnathema)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(speciesAnathema).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            ViewBag.AnathemaId = new SelectList(db.Products, "Id", "Name", speciesAnathema.AnathemaId);
-            ViewBag.SpeciesId = new SelectList(db.Species, "Id", "Name", speciesAnathema.SpeciesId);
-            return View(speciesAnathema);
-        }
-
         // GET: SpeciesAnathemas/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, int? anathema)
         {
-            if (id == null)
+            if (id == null || anathema == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            SpeciesAnathema speciesAnathema = db.SpeciesAnathemas.Find(id);
+            SpeciesAnathema speciesAnathema = db.SpeciesAnathemas
+                .SingleOrDefault(x => x.SpeciesId == id && x.AnathemaId == anathema);
             if (speciesAnathema == null)
             {
                 return HttpNotFound();
@@ -117,9 +84,10 @@ namespace WebInterface.Controllers
         // POST: SpeciesAnathemas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int id, int anathema)
         {
-            SpeciesAnathema speciesAnathema = db.SpeciesAnathemas.Find(id);
+            SpeciesAnathema speciesAnathema = db.SpeciesAnathemas
+                .SingleOrDefault(x => x.SpeciesId == id && x.AnathemaId == anathema);
             db.SpeciesAnathemas.Remove(speciesAnathema);
             db.SaveChanges();
             return RedirectToAction("Index");

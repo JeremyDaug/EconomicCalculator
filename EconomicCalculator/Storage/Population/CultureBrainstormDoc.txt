@@ -151,6 +151,10 @@ Species and Culture Wants, Needs, and Aversions and Anathemas
 	  die very quickly if not retrieved within the next few days.
 	- Air, this thing sustains them immediately, and if they don't have enough
 	  they begin dying immediately.
+	- Sporatic(MTTH), this thing is needed randomly, it is added randomly to
+	  the pop and continues until it is satisfied.
+	- Periodic(Period), this thing is needed periodically, it's added as a need
+	  and the pop will continue having it until they're need is satisfied.
 	Aversions/Anathemas
 	- Pollution, this thing causes the population to become unhappy in low
 	  levels and increases both health needs and/or death rate at higher

@@ -368,7 +368,6 @@
     <Content Include="Views\SpeciesAnathemas\Create.cshtml" />
     <Content Include="Views\SpeciesAnathemas\Delete.cshtml" />
     <Content Include="Views\SpeciesAnathemas\Details.cshtml" />
-    <Content Include="Views\SpeciesAnathemas\Edit.cshtml" />
     <Content Include="Views\SpeciesAnathemas\Index.cshtml" />
     <Content Include="Views\SpeciesAversions\Create.cshtml" />
     <Content Include="Views\SpeciesAversions\Delete.cshtml" />
