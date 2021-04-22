@@ -9,80 +9,239 @@
 <div>
     <h4>Species</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
+	<dl class="dl-horizontal">
+		<dt>
+			@Html.DisplayNameFor(model => model.Name)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.Name)
+		</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
+		<dt>
+			@Html.DisplayNameFor(model => model.VariantName)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.VariantName)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.VariantName)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.SpeciesGrowthRate)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.SpeciesGrowthRate)
+		</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.VariantName)
-        </dd>
+		<dt>
+			@Html.DisplayNameFor(model => model.TempuraturePreference)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.TempuraturePreference)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.SpeciesGrowthRate)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.GravityPreference)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.GravityPreference)
+		</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.SpeciesGrowthRate)
-        </dd>
+		<dt>
+			@Html.DisplayNameFor(model => model.InfantPhaseLength)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.InfantPhaseLength)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.TempuraturePreference)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.ChildPhaseLength)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.ChildPhaseLength)
+		</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.TempuraturePreference)
-        </dd>
+		<dt>
+			@Html.DisplayNameFor(model => model.AdultPhaseLength)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.AdultPhaseLength)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.GravityPreference)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.AverageLifeSpan)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.AverageLifeSpan)
+		</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.GravityPreference)
-        </dd>
+		@if (Model.Aversions.Any())
+		{
+			<dt>
+				@Html.DisplayNameFor(model => model.Aversions)
+			</dt>
+			<dd>
+				<table class="table-bordered">
+					<tr>
+						<th>
+							Name
+						</th>
+						<th>
+							Amount
+						</th>
+						<td>
+							Tag
+						</td>
+					</tr>
+					@foreach (var sub in Model.Aversions)
+					{
+						<tr>
+							<td>
+								@Html.DisplayFor(x => sub.Aversion)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Amount)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Tag)
+							</td>
+						</tr>
+					}
+				</table>
+			</dd>
+		}
 
-        <dt>
-            @Html.DisplayNameFor(model => model.InfantPhaseLength)
-        </dt>
+		@if (Model.Anathemas.Any())
+		{
+			<dt>
+				@Html.DisplayNameFor(model => model.Anathemas)
+			</dt>
+			<dd>
+				<table class="table-bordered">
+					<tr>
+						<th>
+							Name
+						</th>
+						<th>
+							Amount
+						</th>
+						<td>
+							Tag
+						</td>
+					</tr>
+					@foreach (var sub in Model.Anathemas)
+					{
+						<tr>
+							<td>
+								@Html.DisplayFor(x => sub.Anathema.Name)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Amount)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Tag)
+							</td>
+						</tr>
+					}
+				</table>
+			</dd>
+		}
 
-        <dd>
-            @Html.DisplayFor(model => model.InfantPhaseLength)
-        </dd>
+		@if (Model.LifeNeeds.Any())
+		{
+			<dt>
+				@Html.DisplayNameFor(model => model.LifeNeeds)
+			</dt>
+			<dd>
+				<table class="table-bordered">
+					<tr>
+						<th>
+							Name
+						</th>
+						<th>
+							Amount
+						</th>
+						<td>
+							Tag
+						</td>
+					</tr>
+					@foreach (var sub in Model.LifeNeeds)
+					{
+						<tr>
+							<td>
+								@Html.DisplayFor(x => sub.Need.Name)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Amount)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Tag)
+							</td>
+						</tr>
+					}
+				</table>
+			</dd>
+		}
 
-        <dt>
-            @Html.DisplayNameFor(model => model.ChildPhaseLength)
-        </dt>
+		@if (Model.LifeWants.Any())
+		{
+			<dt>
+				@Html.DisplayNameFor(model => model.LifeWants)
+			</dt>
+			<dd>
+				<table class="table-bordered">
+					<tr>
+						<th>
+							Name
+						</th>
+						<th>
+							Amount
+						</th>
+						<td>
+							Tag
+						</td>
+					</tr>
+					@foreach (var sub in Model.LifeWants)
+					{
+						<tr>
+							<td>
+								@Html.DisplayFor(x => sub.Want)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Amount)
+							</td>
+							<td>
+								@Html.DisplayFor(x => sub.Tag)
+							</td>
+						</tr>
+					}
+				</table>
+			</dd>
+		}
 
-        <dd>
-            @Html.DisplayFor(model => model.ChildPhaseLength)
-        </dd>
+		@if (Model.Tags.Any())
+		{
+			<dt>
+				@Html.DisplayNameFor(model => model.Tags)
+			</dt>
+			<dd>
+				<table class="table-bordered">
+					<tr>
+						<th>
+							Tag
+						</th>
+					</tr>
+					@foreach (var sub in Model.Tags)
+					{
+						<tr>
+							<td>
+								@Html.DisplayFor(x => sub.Tag)
+							</td>
+						</tr>
+					}
+				</table>
+			</dd>
+		}
 
-        <dt>
-            @Html.DisplayNameFor(model => model.AdultPhaseLength)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AdultPhaseLength)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.AverageLifeSpan)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AverageLifeSpan)
-        </dd>
-
-    </dl>
+	</dl>
 </div>
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |

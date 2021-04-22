@@ -1360,6 +1360,36 @@
 
             context.SaveChanges();
 
+            // Aversion to pollutants.
+
+            var humanAversion = new SpeciesAversion
+            {
+                SpeciesId = human.Id,
+                Aversion = "pollution",
+                Amount = 10,
+                Tag = "toxin"
+            };
+
+            context.SpeciesAversions.AddOrUpdate(x => new { x.SpeciesId, x.Aversion },
+                humanAversion);
+
+            context.SaveChanges();
+
+            // Anathema to Biowaste
+
+            var humanAnathema = new SpeciesAnathema
+            {
+                SpeciesId = human.Id,
+                AnathemaId = BioWaste.Id,
+                Amount = 10,
+                Tag = "toxin"
+            };
+
+            context.SpeciesAnathemas.AddOrUpdate(x => new { x.SpeciesId, x.AnathemaId },
+                humanAnathema);
+
+            context.SaveChanges();
+
             #endregion Species
 
             #region Cultures

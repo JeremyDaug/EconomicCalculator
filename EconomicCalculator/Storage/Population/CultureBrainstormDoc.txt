@@ -155,6 +155,10 @@ Species and Culture Wants, Needs, and Aversions and Anathemas
 	  the pop and continues until it is satisfied.
 	- Periodic(Period), this thing is needed periodically, it's added as a need
 	  and the pop will continue having it until they're need is satisfied.
+	- Baby Need, this thing is needed by babies to be healthy and happy.
+	- Child Need, this thing is needed by children to be healthy and happy.
+	- Adult Need, this thing is needed by adults to be healthy and happy.
+	- Senior Need, this thing is needed by seniors to be healthy and happy.
 	Aversions/Anathemas
 	- Pollution, this thing causes the population to become unhappy in low
 	  levels and increases both health needs and/or death rate at higher

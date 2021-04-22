@@ -9,6 +9,13 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+<p>
+	@Html.ActionLink("To Needs", "Index", "SpeciesNeeds") |
+	@Html.ActionLink("To Wants", "Index", "SpeciesWants") |
+	@Html.ActionLink("To Aversions", "Index", "SpeciesAversions") |
+	@Html.ActionLink("To Anathemas", "Index", "SpeciesAnathemas") |
+	@Html.ActionLink("To Tags", "Index", "SpeciesTags")
+</p>
 <table class="table">
     <tr>
         <th>
@@ -37,6 +44,21 @@
         </th>
         <th>
             @Html.DisplayNameFor(model => model.AverageLifeSpan)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Aversions)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Anathemas)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.LifeNeeds)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.LifeWants)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Tags)
         </th>
         <th></th>
     </tr>
@@ -70,10 +92,143 @@
         <td>
             @Html.DisplayFor(modelItem => item.AverageLifeSpan)
         </td>
+        <th>
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <td>
+                        Tag
+                    </td>
+                </tr>
+                @foreach(var sub in item.Aversions)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(x => sub.Aversion)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Tag)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </th>
+        <th>
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <td>
+                        Tag
+                    </td>
+                </tr>
+                @foreach (var sub in item.Anathemas)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(x => sub.Anathema.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Tag)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </th>
+        <th>
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <td>
+                        Tag
+                    </td>
+                </tr>
+                @foreach (var sub in item.LifeNeeds)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(x => sub.Need.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Tag)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </th>
+        <th>
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <td>
+                        Tag
+                    </td>
+                </tr>
+                @foreach (var sub in item.LifeWants)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(x => sub.Want)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(x => sub.Tag)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </th>
+        <th>
+            <table class="table-bordered">
+                <tr>
+                    <th>
+                        Tag
+                    </th>
+                </tr>
+                @foreach (var sub in item.Tags)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(x => sub.Tag)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </th>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+            @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
         </td>
     </tr>
 }

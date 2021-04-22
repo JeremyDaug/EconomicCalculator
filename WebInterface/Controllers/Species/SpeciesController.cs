@@ -18,7 +18,15 @@ namespace WebInterface.Controllers
         // GET: Species
         public ActionResult Index()
         {
-            return View(db.Species.ToList());
+            var species = db.Species
+                .Include(j => j.Aversions)
+                .Include(j => j.Anathemas)
+                .Include("Anathemas.Anathema")
+                .Include(j => j.LifeNeeds)
+                .Include("LifeNeeds.Need")
+                .Include(j => j.LifeWants)
+                .Include(j => j.Tags);
+            return View(species.ToList());
         }
 
         // GET: Species/Details/5
@@ -28,11 +36,17 @@ namespace WebInterface.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Species species = db.Species.Find(id);
+            Species species = db.Species
+                .Include(x => x.LifeNeeds)
+                .Include("LifeNeeds.Need")
+                .Include(x => x.Anathemas)
+                .Include("Anathemas.Anathema")
+                .SingleOrDefault(x => x.Id == id);
             if (species == null)
             {
                 return HttpNotFound();
             }
+            
             return View(species);
         }
 
