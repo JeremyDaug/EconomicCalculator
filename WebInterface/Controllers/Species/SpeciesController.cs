@@ -127,6 +127,10 @@ namespace WebInterface.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Species species = db.Species
+                .Include(x => x.LifeNeeds)
+                .Include("LifeNeeds.Need")
+                .Include(x => x.Anathemas)
+                .Include("Anathemas.Anathema")
                 .SingleOrDefault(x => x.Id == id);
             db.Species.Remove(species);
             db.SaveChanges();
