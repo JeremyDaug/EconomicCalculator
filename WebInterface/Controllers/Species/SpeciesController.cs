@@ -80,7 +80,8 @@ namespace WebInterface.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Species species = db.Species.Find(id);
+            Species species = db.Species
+                .SingleOrDefault(x => x.Id == id);
             if (species == null)
             {
                 return HttpNotFound();
@@ -111,7 +112,8 @@ namespace WebInterface.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Species species = db.Species.Find(id);
+            Species species = db.Species
+                .SingleOrDefault(x => x.Id == id);
             if (species == null)
             {
                 return HttpNotFound();
@@ -124,7 +126,8 @@ namespace WebInterface.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Species species = db.Species.Find(id);
+            Species species = db.Species
+                .SingleOrDefault(x => x.Id == id);
             db.Species.Remove(species);
             db.SaveChanges();
             return RedirectToAction("Index");

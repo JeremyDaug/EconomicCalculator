@@ -136,10 +136,10 @@
     <Compile Include="Controllers\Cultures\CultureWantsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobsController.cs" />
-    <Compile Include="Controllers\ProcessCapitalsController.cs" />
-    <Compile Include="Controllers\ProcessesController.cs" />
-    <Compile Include="Controllers\ProcessInputsController.cs" />
-    <Compile Include="Controllers\ProcessOutputsController.cs" />
+    <Compile Include="Controllers\Processes\ProcessCapitalsController.cs" />
+    <Compile Include="Controllers\Processes\ProcessesController.cs" />
+    <Compile Include="Controllers\Processes\ProcessInputsController.cs" />
+    <Compile Include="Controllers\Processes\ProcessOutputsController.cs" />
     <Compile Include="Controllers\ProductFailsIntoController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\SkillsController.cs" />

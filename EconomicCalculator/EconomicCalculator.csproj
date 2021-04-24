@@ -123,13 +123,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\EconomicDB.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\EconomicDB_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>EconomicDB.mdf</DependentUpon>
-    </Content>
     <Content Include="Storage\Jobs\IntermarketTradeOverviewAndBrainstorms.txt" />
     <Content Include="Storage\Jobs\JobOverview.txt" />
     <Content Include="Storage\Organizations\MarketOverview.txt" />
@@ -153,6 +146,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\" />
     <Folder Include="Runner\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
