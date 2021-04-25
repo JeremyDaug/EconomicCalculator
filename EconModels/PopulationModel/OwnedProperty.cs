@@ -14,16 +14,16 @@ namespace EconModels.PopulationModel
         [Required]
         public int OwnerId { get; set; }
 
-        [Required, ForeignKey("OwnerId")]
+        [ForeignKey("OwnerId")]
         public virtual PopulationGroup Owner { get; set; }
 
         [Required]
         public int ProductId { get; set; }
 
-        [Required, ForeignKey("ProductId")]
+        [ForeignKey("ProductId")]
         public virtual Product Product { get; set; }
 
-        [Required, Range(0, int.MaxValue)]
+        [Required, Range(int.MinValue, int.MaxValue)]
         public decimal Amount { get; set; }
     }
 }

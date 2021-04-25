@@ -34,7 +34,7 @@ namespace WebInterface.Models
         public Skill Skill { get; set; }
 
         [Required, Range(0, float.MaxValue)]
-        [DisplayName("Skill Level")
+        [DisplayName("Skill Level")]
         public int SkillLevel { get; set; }
 
         // Labor Products
