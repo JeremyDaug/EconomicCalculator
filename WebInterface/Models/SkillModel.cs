@@ -3,6 +3,7 @@ using EconModels.ProductModel;
 using EconModels.SkillsModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -22,21 +23,25 @@ namespace WebInterface.Models
         /// <summary>
         /// The name of the Skill
         /// </summary>
+        [Required, StringLength(maximumLength: 30, MinimumLength = 3)]
         public string Name { get; set; }
 
         /// <summary>
         /// A description of the skill.
         /// </summary>
+        [Required, StringLength(maximumLength: 100)]
         public string Desc { get; set; }
 
         /// <summary>
         /// The minimum level of the skill.
         /// </summary>
+        [Required, Range(0, int.MaxValue)]
         public int Min { get; set; }
 
         /// <summary>
         /// The Maximum level of the skill.
         /// </summary>
+        [Required, Range(0, int.MaxValue)]
         public int Max { get; set; }
 
         /// <summary>

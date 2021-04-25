@@ -136,6 +136,8 @@
     <Compile Include="Controllers\Cultures\CultureWantsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobsController.cs" />
+    <Compile Include="Controllers\PoliticalGroupsController.cs" />
+    <Compile Include="Controllers\PoliticalTagsController.cs" />
     <Compile Include="Controllers\Processes\ProcessCapitalsController.cs" />
     <Compile Include="Controllers\Processes\ProcessesController.cs" />
     <Compile Include="Controllers\Processes\ProcessInputsController.cs" />
@@ -153,6 +155,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\JobModel.cs" />
+    <Compile Include="Models\PoliticalGroupModel.cs" />
     <Compile Include="Models\SkillModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -385,6 +388,15 @@
     <Content Include="Views\SpeciesWants\Delete.cshtml" />
     <Content Include="Views\SpeciesWants\Details.cshtml" />
     <Content Include="Views\SpeciesWants\Index.cshtml" />
+    <Content Include="Views\PoliticalGroups\Create.cshtml" />
+    <Content Include="Views\PoliticalGroups\Delete.cshtml" />
+    <Content Include="Views\PoliticalGroups\Details.cshtml" />
+    <Content Include="Views\PoliticalGroups\Edit.cshtml" />
+    <Content Include="Views\PoliticalGroups\Index.cshtml" />
+    <Content Include="Views\PoliticalTags\Create.cshtml" />
+    <Content Include="Views\PoliticalTags\Delete.cshtml" />
+    <Content Include="Views\PoliticalTags\Details.cshtml" />
+    <Content Include="Views\PoliticalTags\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">

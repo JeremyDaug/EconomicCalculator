@@ -98,7 +98,7 @@ namespace EconModels.SkillsModel
             RelationChild.Remove(skill);
             RelationParent.Remove(skill);
 
-            skill.RemoveSkillRelation(skill);
+            skill.RemoveSkillRelation(this);
         }
 
         public void ClearSkillRelations()

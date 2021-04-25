@@ -1586,6 +1586,7 @@
                 Name = "Agricult",
                 Radicalism = 5,
                 Nationalism = 0.3,
+                Authority = 0.9,
                 Centralization = -0.4,
                 Planning = -0.2,
                 Militarism = 0.6,
@@ -1595,6 +1596,7 @@
                 Name = "Ruralists",
                 Radicalism = 1,
                 Nationalism = -0.3,
+                Authority = -0.4,
                 Centralization = 0.3,
                 Planning = -0.5,
                 Militarism = -0.3
@@ -1604,6 +1606,7 @@
                 Name = "Socialites",
                 Radicalism = 3,
                 Nationalism = -0.6,
+                Authority = 0.3,
                 Centralization = 0.8,
                 Planning = 0.8,
                 Militarism = -0.7
@@ -1621,8 +1624,6 @@
                 Agricult,
                 Ruralists,
                 Socialites);
-
-            context.SaveChanges();
 
             context.SaveChanges();
 

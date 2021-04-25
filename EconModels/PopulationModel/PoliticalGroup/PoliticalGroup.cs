@@ -41,7 +41,7 @@ namespace EconModels.PopulationModel
         public string VariantName { get; set; }
 
         /// <summary>
-        /// The level of radicalism inate to the political group.
+        /// The level of radicalism innate to the political group.
         /// The higher the radicalisation the more likely they are
         /// to create rebellions, sepratist groups, terrorist cells
         /// and become activily millitant.
@@ -146,7 +146,9 @@ namespace EconModels.PopulationModel
 
         public void ClearAllies()
         {
-            foreach(var ally in Allies)
+            var temp = Allies.ToList();
+
+            foreach(var ally in temp)
             {
                 RemoveAlly(ally);
             }
@@ -160,7 +162,7 @@ namespace EconModels.PopulationModel
             Enemies.Add(other);
             EnemiesRev.Add(other);
 
-            other.AddEnemy(other);
+            other.AddEnemy(this);
         }
 
         public void RemoveEnemy(PoliticalGroup other)
@@ -176,7 +178,9 @@ namespace EconModels.PopulationModel
 
         public void ClearEnemies()
         {
-            foreach (var enemy in Enemies)
+            var temp = Enemies.ToList();
+
+            foreach (var enemy in temp)
             {
                 RemoveEnemy(enemy);
             }
