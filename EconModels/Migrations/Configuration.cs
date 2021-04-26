@@ -1662,68 +1662,68 @@
             // TODO make it do this for each territory.
             var Menials = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == menialLaborer.Name).Id,
                 Priority = 1,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            Menials.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var Farmers = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == wheatFarmer.Name).Id,
                 Priority = 2,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            Farmers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var Millers = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == grainMiller.Name).Id,
                 Priority = 3,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            Millers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var Bakers = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == baker.Name).Id,
                 Priority = 4,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            Bakers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var IronMiners = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == ironMiner.Name).Id,
                 Priority = 5,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            IronMiners.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var IronSmelters = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == ironSmelter.Name).Id,
                 Priority = 6,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            IronSmelters.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var GoldMiners = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == goldMiner.Name).Id,
                 Priority = 7,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            GoldMiners.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var BlackSmiths = new PopulationGroup
             {
-                Count = 1000,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == BlackSmithing.Name).Id,
                 Priority = 8,
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
+            BlackSmiths.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
 
             var popGroups = new List<PopulationGroup>
             {
@@ -1813,7 +1813,7 @@
                     ParentId = pop.Id,
                     Parent = pop,
                     PoliticalGroupId = context.PoliticalGroups.Single(x => x.Name == Ruralists.Name).Id,
-                    Percent = 0.25
+                    Percent = 0.50
                 };
                 var socBreak = new PoliticalBreakdown
                 {

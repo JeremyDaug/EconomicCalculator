@@ -98,6 +98,10 @@
     <Compile Include="Migrations\202104170259595_TerritoryAndCorrectionChange.designer.cs">
       <DependentUpon>202104170259595_TerritoryAndCorrectionChange.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202104260220229_PopGroupUpdate.cs" />
+    <Compile Include="Migrations\202104260220229_PopGroupUpdate.designer.cs">
+      <DependentUpon>202104260220229_PopGroupUpdate.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
     <Compile Include="ModelEnums\CashType.cs" />
@@ -184,6 +188,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202104170259595_TerritoryAndCorrectionChange.resx">
       <DependentUpon>202104170259595_TerritoryAndCorrectionChange.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104260220229_PopGroupUpdate.resx">
+      <DependentUpon>202104260220229_PopGroupUpdate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
