@@ -2,6 +2,7 @@
 using EconModels.TerritoryModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -22,13 +23,16 @@ namespace EconModels.PopulationModel
 
         // May remove this
         [StringLength(30)]
+        [DisplayName("Name")]
         public string Name { get; set; }
 
         // Todo, Make Required
+        [Required]
         public int TerritoryId { get; set; }
 
         // Todo, Make Required
         [ForeignKey("TerritoryId")]
+        [DisplayName("Territory")]
         public virtual Territory Territory { get; set; }
 
         // The Total Population Count, should be equal to the sum of the culture breakdown.
@@ -56,6 +60,7 @@ namespace EconModels.PopulationModel
         public int PrimaryJobId { get; set; }
 
         [Required, ForeignKey("PrimaryJobId")]
+        [DisplayName("Primary Job")]
         public virtual Job PrimaryJob { get; set; }
 
         [Required, Range(0, int.MaxValue)]
@@ -96,21 +101,58 @@ namespace EconModels.PopulationModel
             return SpeciesBreakdown.Sum(x => x.Percent);
         }
 
-        public void ShiftPartyPercent(PoliticalGroup pol, double percent)
+        /// <summary>
+        /// Sets the percent of a party in the population group equal to the desired value.
+        /// It will take shares from all others proportionally.
+        /// </summary>
+        /// <param name="pol">The political group we are setting.</param>
+        /// <param name="percent">The percent we are setting it to.</param>
+        public void SetPartyPercent(PoliticalGroup pol, double percent)
         {
-            if (PoliticalBreakdown.Any(x => x.PoliticalGroup == pol))
+            if (percent <= 0 || percent > 1)
+                throw new ArgumentOutOfRangeException("Percent must be greater than 0 or less than or equal to 1.");
+
+            if (!PoliticalBreakdown.Any(x => x.PoliticalGroup.Id == pol.Id))
             {
                 PoliticalBreakdown.Add(new PoliticalBreakdown
                 {
                     ParentId = Id,
-                    Parent = this,
                     Percent = 0,
-                    PoliticalGroup = pol,
                     PoliticalGroupId = pol.Id
                 });
             }
 
-            PoliticalBreakdown.Single(x => x.PoliticalGroup == pol)
+            double oldPercent = PoliticalBreakdown
+                .Single(x => x.PoliticalGroupId == pol.Id)
+                .Percent;
+
+            double add = (oldPercent - percent) / (percent - 1);
+
+             PoliticalBreakdown
+                .Single(x => x.PoliticalGroupId == pol.Id)
+                .Percent += add;
+
+            var newSum = PolPercent();
+
+            foreach (var group in PoliticalBreakdown)
+            {
+                group.Percent = group.Percent / newSum;
+            }
+        }
+
+        public void ShiftPartyPercent(PoliticalGroup pol, double percent)
+        {
+            if (!PoliticalBreakdown.Any(x => x.PoliticalGroup == pol))
+            {
+                PoliticalBreakdown.Add(new PoliticalBreakdown
+                {
+                    ParentId = Id,
+                    Percent = 0,
+                    PoliticalGroupId = pol.Id
+                });
+            }
+
+            PoliticalBreakdown.Single(x => x.PoliticalGroupId == pol.Id)
                 .Percent += percent;
 
             var newSum = PolPercent();
@@ -118,6 +160,160 @@ namespace EconModels.PopulationModel
             foreach (var group in PoliticalBreakdown)
             {
                 group.Percent = group.Percent / newSum;
+            }
+        }
+
+        public void NormalizeCultures()
+        {
+            var newSum = CulPercent();
+
+            foreach (var part in CultureBreakdown)
+            {
+                part.Percent = part.Percent / newSum;
+            }
+        }
+
+        public void NormalizePolitics()
+        {
+            var newSum = PolPercent();
+
+            foreach (var part in PoliticalBreakdown)
+            {
+                part.Percent = part.Percent / newSum;
+            }
+        }
+
+        public void NormalizeSpecies()
+        {
+            var newSum = SpePercent();
+
+            foreach (var part in SpeciesBreakdown)
+            {
+                part.Percent = part.Percent / newSum;
+            }
+        }
+
+        /// <summary>
+        /// Sets the percent of a species in the population group equal to the desired value.
+        /// It will take shares from all others proportionally.
+        /// </summary>
+        /// <param name="spe">The political group we are setting.</param>
+        /// <param name="percent">The percent we are setting it to.</param>
+        public void SetSpeciesPercent(Species spe, double percent)
+        {
+            if (percent <= 0 || percent > 1)
+                throw new ArgumentOutOfRangeException("Percent must be greater than 0 or less than or equal to 1.");
+
+            if (!SpeciesBreakdown.Any(x => x.SpeciesId == spe.Id))
+            {
+                SpeciesBreakdown.Add(new SpeciesBreakdown
+                {
+                    ParentId = Id,
+                    Percent = 0,
+                    SpeciesId = spe.Id
+                });
+            }
+
+            double oldPercent = SpeciesBreakdown
+                .Single(x => x.SpeciesId == spe.Id)
+                .Percent;
+
+            double add = (oldPercent - percent) / (percent - 1);
+
+            SpeciesBreakdown
+               .Single(x => x.SpeciesId == spe.Id)
+               .Percent += add;
+
+            var newSum = SpePercent();
+
+            foreach (var group in SpeciesBreakdown)
+            {
+                group.Percent = group.Percent / newSum;
+            }
+        }
+
+        public void ShiftSpeciesPercent(Species spe, double percent)
+        {
+            if (!SpeciesBreakdown.Any(x => x.SpeciesId == spe.Id))
+            {
+                SpeciesBreakdown.Add(new SpeciesBreakdown
+                {
+                    ParentId = Id,
+                    Percent = 0,
+                    SpeciesId = spe.Id
+                });
+            }
+
+            SpeciesBreakdown.Single(x => x.SpeciesId == spe.Id)
+                .Percent += percent;
+
+            var newSum = SpePercent();
+
+            foreach (var part in SpeciesBreakdown)
+            {
+                part.Percent = part.Percent / newSum;
+            }
+        }
+
+        /// <summary>
+        /// Sets the percent of a culture in the population group equal to the desired value.
+        /// It will take shares from all others proportionally.
+        /// </summary>
+        /// <param name="cult">The political group we are setting.</param>
+        /// <param name="percent">The percent we are setting it to.</param>
+        public void SetCulturePercent(Culture cult, double percent)
+        {
+            if (percent <= 0 || percent > 1)
+                throw new ArgumentOutOfRangeException("Percent must be greater than 0 or less than or equal to 1.");
+
+            if (!CultureBreakdown.Any(x => x.CultureId == cult.Id))
+            {
+                CultureBreakdown.Add(new CultureBreakdown
+                {
+                    ParentId = Id,
+                    Percent = 0,
+                    CultureId = cult.Id
+                });
+            }
+
+            double oldPercent = CultureBreakdown
+                .Single(x => x.CultureId == cult.Id)
+                .Percent;
+
+            double add = (oldPercent - percent) / (percent - 1);
+
+            CultureBreakdown
+               .Single(x => x.CultureId == cult.Id)
+               .Percent += add;
+
+            var newSum = CulPercent();
+
+            foreach (var group in CultureBreakdown)
+            {
+                group.Percent = group.Percent / newSum;
+            }
+        }
+
+        public void ShiftCulturePercent(Culture cult, double percent)
+        {
+            if (!CultureBreakdown.Any(x => x.CultureId == cult.Id))
+            {
+                CultureBreakdown.Add(new CultureBreakdown
+                {
+                    ParentId = Id,
+                    Percent = 0,
+                    CultureId = cult.Id
+                });
+            }
+
+            CultureBreakdown.Single(x => x.CultureId == cult.Id)
+                .Percent += percent;
+
+            var newSum = CulPercent();
+
+            foreach (var cul in CultureBreakdown)
+            {
+                cul.Percent = cul.Percent / newSum;
             }
         }
     }

@@ -127,6 +127,7 @@
     <Content Include="Storage\Jobs\JobOverview.txt" />
     <Content Include="Storage\Organizations\MarketOverview.txt" />
     <Content Include="Storage\Organizations\OrganizationOverview.txt" />
+    <Content Include="Storage\Organizations\TerritoryOverview.txt" />
     <Content Include="Storage\Population\CultureBrainstormDoc.txt" />
     <Content Include="Storage\Population\PoliticalGroupOverview.txt" />
     <Content Include="Storage\Population\PopulationOverviewAndBrainstorming.txt" />

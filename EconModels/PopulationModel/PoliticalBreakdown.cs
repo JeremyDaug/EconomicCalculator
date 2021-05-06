@@ -8,13 +8,13 @@ namespace EconModels.PopulationModel
         [Required]
         public int ParentId { get; set; }
 
-        [Required, ForeignKey("ParentId")]
+        [ForeignKey("ParentId")]
         public virtual PopulationGroup Parent { get; set; }
 
         [Required]
         public int PoliticalGroupId { get; set; }
 
-        [Required, ForeignKey("PoliticalGroupId")]
+        [ForeignKey("PoliticalGroupId")]
         public virtual PoliticalGroup PoliticalGroup { get; set; }
 
         [Required, Range(0, 1)]

@@ -34,6 +34,12 @@
 
             //  This method will be called after migrating to the latest version.
 
+            // To others, once you confirm you can build the solution, you may 
+            // create the DB by following the commands
+            // Enable-Migrations
+            // Update-Database
+            // this should create the DB for your build.
+
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method
             //  to avoid creating duplicate seed data.
             // To Clean out the database 
@@ -170,7 +176,7 @@
                 MeanTimeToFailure = -1, // land doesn't stop existing.
                 UnitName = "plot"
             };
-            Land.AddWantTag(shelter); // Asume a simple hut is always available
+            Land.AddWantTag(shelter); // Assume a simple hut is always available for now.
             // Biowaste
             var BioWaste = new Product
             {
@@ -1390,6 +1396,25 @@
 
             context.SaveChanges();
 
+            // Debug blank species
+
+            var Catgirl = new Species
+            {
+                Name = "Catgirl",
+                InfantPhaseLength = 5 * 360,
+                ChildPhaseLength = 15 * 360,
+                AdultPhaseLength = 25 * 360,
+                AverageLifeSpan = 80 * 360,
+                GravityPreference = 1,
+                TempuraturePreference = 20,
+                SpeciesGrowthRate = 0.05M / 360
+            };
+
+            context.Species.AddOrUpdate(x => x.Name,
+                Catgirl);
+
+            context.SaveChanges();
+
             #endregion Species
 
             #region Cultures
@@ -1662,6 +1687,7 @@
             // TODO make it do this for each territory.
             var Menials = new PopulationGroup
             {
+                Name = dumland.Name + " " + menialLaborer.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == menialLaborer.Name).Id,
                 Priority = 1,
                 SkillLevel = 2,
@@ -1670,6 +1696,7 @@
             Menials.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var Farmers = new PopulationGroup
             {
+                Name = dumland.Name + " " + wheatFarmer.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == wheatFarmer.Name).Id,
                 Priority = 2,
                 SkillLevel = 2,
@@ -1678,6 +1705,7 @@
             Farmers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var Millers = new PopulationGroup
             {
+                Name = dumland.Name + " " + grainMiller.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == grainMiller.Name).Id,
                 Priority = 3,
                 SkillLevel = 2,
@@ -1686,6 +1714,7 @@
             Millers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var Bakers = new PopulationGroup
             {
+                Name = dumland.Name + " " + baker.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == baker.Name).Id,
                 Priority = 4,
                 SkillLevel = 2,
@@ -1694,6 +1723,7 @@
             Bakers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var IronMiners = new PopulationGroup
             {
+                Name = dumland.Name + " " + ironMiner.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == ironMiner.Name).Id,
                 Priority = 5,
                 SkillLevel = 2,
@@ -1702,6 +1732,7 @@
             IronMiners.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var IronSmelters = new PopulationGroup
             {
+                Name = dumland.Name + " " + ironSmelter.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == ironSmelter.Name).Id,
                 Priority = 6,
                 SkillLevel = 2,
@@ -1710,6 +1741,7 @@
             IronSmelters.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var GoldMiners = new PopulationGroup
             {
+                Name = dumland.Name + " " + goldMiner.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == goldMiner.Name).Id,
                 Priority = 7,
                 SkillLevel = 2,
@@ -1718,6 +1750,7 @@
             GoldMiners.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
             var BlackSmiths = new PopulationGroup
             {
+                Name = dumland.Name + " " + BlackSmithing.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == BlackSmithing.Name).Id,
                 Priority = 8,
                 SkillLevel = 2,
@@ -1752,84 +1785,37 @@
             // complete breakdowns (let's be lazy)
             foreach (var pop in popGroups)
             {
-                // Species
-                var speBreak = new SpeciesBreakdown
-                {
-                    ParentId = pop.Id,
-                    Parent = pop,
-                    SpeciesId = context.Species.Single(x => x.Name == human.Name).Id,
-                    Percent = 1
-                };
+                pop.ShiftSpeciesPercent(context.Species.Single(x => x.Name == human.Name), 1);
 
                 // pop.SpeciesBreakdown.Add(speBreak);
                 context.PopSpeciesBreakdowns.AddOrUpdate(x => new { x.ParentId, x.SpeciesId },
-                    speBreak);
+                    pop.SpeciesBreakdown.First());
 
                 context.SaveChanges();
 
                 // Culture
-                var agriBreak = new CultureBreakdown
-                {
-                    ParentId = pop.Id,
-                    Parent = pop,
-                    CultureId = context.Cultures.Single(x => x.Name == Agrarian.Name).Id,
-                    Percent = 0.5
-                };
-                var minbreak = new CultureBreakdown
-                {
-                    ParentId = pop.Id,
-                    Parent = pop,
-                    CultureId = context.Cultures.Single(x => x.Name == Miner.Name).Id,
-                    Percent = 0.25
-                };
-                var urbBreak = new CultureBreakdown
-                {
-                    ParentId = pop.Id,
-                    Parent = pop,
-                    CultureId = context.Cultures.Single(x => x.Name == Urbanite.Name).Id,
-                    Percent = 0.25
-                };
-                //pop.CultureBreakdown.Add(agriBreak);
-                //pop.CultureBreakdown.Add(minbreak);
-                //pop.CultureBreakdown.Add(urbBreak);
+                pop.ShiftCulturePercent(context.Cultures.Single(x => x.Name == Agrarian.Name), 1);
+                pop.ShiftCulturePercent(context.Cultures.Single(x => x.Name == Miner.Name), 1);
+                pop.ShiftCulturePercent(context.Cultures.Single(x => x.Name == Urbanite.Name), 1);
 
-                context.PopCultureBreakdowns.AddOrUpdate(x => new { x.ParentId, x.CultureId },
-                    agriBreak,
-                    minbreak,
-                    urbBreak);
+                foreach (var cult in pop.CultureBreakdown)
+                {
+                    context.PopCultureBreakdowns.AddOrUpdate(x => new { x.ParentId, x.CultureId },
+                        cult);
+                }
 
                 context.SaveChanges();
 
                 // political Group
-                var agcultBreak = new PoliticalBreakdown
-                {
-                    ParentId = pop.Id,
-                    Parent = pop,
-                    PoliticalGroupId = context.PoliticalGroups.Single(x => x.Name == Agricult.Name).Id,
-                    Percent = 0.25
-                };
-                var rurBreak = new PoliticalBreakdown
-                {
-                    ParentId = pop.Id,
-                    Parent = pop,
-                    PoliticalGroupId = context.PoliticalGroups.Single(x => x.Name == Ruralists.Name).Id,
-                    Percent = 0.50
-                };
-                var socBreak = new PoliticalBreakdown
-                {
-                    ParentId = pop.Id,
-                    Parent = pop,
-                    PoliticalGroupId = context.PoliticalGroups.Single(x => x.Name == Socialites.Name).Id,
-                    Percent = 0.25
-                };
-                //pop.PoliticalBreakdown.Add(agcultBreak);
-                //pop.PoliticalBreakdown.Add(rurBreak);
-                //pop.PoliticalBreakdown.Add(socBreak);
+                pop.ShiftPartyPercent(context.PoliticalGroups.Single(x => x.Name == Agricult.Name), 1);
+                pop.ShiftPartyPercent(context.PoliticalGroups.Single(x => x.Name == Socialites.Name), 1);
+                pop.ShiftPartyPercent(context.PoliticalGroups.Single(x => x.Name == Ruralists.Name), 1);
 
-                context.PopPoliticalBreakdowns.AddOrUpdate(x => new { x.ParentId, x.PoliticalGroupId },
-                    agcultBreak,
-                    rurBreak,
-                    socBreak);
+                foreach (var party in pop.PoliticalBreakdown)
+                {
+                    context.PopPoliticalBreakdowns.AddOrUpdate(x => new { x.ParentId, x.PoliticalGroupId },
+                        party);
+                }
 
                 context.SaveChanges();
             }

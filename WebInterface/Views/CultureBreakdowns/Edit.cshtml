@@ -1,0 +1,74 @@
+﻿@model EconModels.PopulationModel.CultureBreakdown
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Edit</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+<div class="form-horizontal">
+	<h4>CultureBreakdown</h4>
+	<hr />
+	@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+	@Html.HiddenFor(model => model.ParentId)
+
+	@Html.HiddenFor(model => model.CultureId)
+
+	<dl class="dl-horizontal">
+		<dt>
+			@Html.DisplayNameFor(model => model.Parent.Name)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Parent.Name)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Parent.Territory)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Parent.Territory.Name)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Parent.PrimaryJob)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Parent.PrimaryJob.Name)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Culture.Name)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Culture.Name)
+		</dd>
+
+	</dl>
+
+	<div class="form-group">
+		@Html.LabelFor(model => model.Percent, htmlAttributes: new { @class = "control-label col-md-2" })
+		<div class="col-md-10">
+			@Html.EditorFor(model => model.Percent, new { htmlAttributes = new { @class = "form-control" } })
+			@Html.ValidationMessageFor(model => model.Percent, "", new { @class = "text-danger" })
+		</div>
+	</div>
+
+	<div class="form-group">
+		<div class="col-md-offset-2 col-md-10">
+			<input type="submit" value="Save" class="btn btn-default" />
+		</div>
+	</div>
+</div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

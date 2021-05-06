@@ -1,0 +1,9 @@
+﻿Needed Sections:
+    Breakdown Pages:
+        Breakdowns need a page which takes existing culture/species/political group and
+        a selected Population Group. From there, you can select the percent of each
+        culture/species/party and save that. (0% values get dropped on save/creation.)
+        This should work for both creation and editing.
+        ☐ Culture Breakdown
+        ☐ Species Breakdown
+        ☐ Political Group Breakdown

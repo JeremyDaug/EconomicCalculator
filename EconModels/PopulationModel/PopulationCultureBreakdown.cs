@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -13,13 +14,15 @@ namespace EconModels.PopulationModel
         [Required]
         public int ParentId { get; set; }
 
-        [Required, ForeignKey("ParentId")]
+        [ForeignKey("ParentId")]
+        [DisplayName("Parent Pop")]
         public virtual PopulationGroup Parent { get; set; }
 
         [Required]
         public int CultureId { get; set; }
 
-        [Required, ForeignKey("CultureId")]
+        [ForeignKey("CultureId")]
+        [DisplayName("Culture")]
         public virtual Culture Culture { get; set; }
 
         /// <summary>

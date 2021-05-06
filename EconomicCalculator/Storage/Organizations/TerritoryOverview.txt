@@ -1,0 +1,44 @@
+﻿Territory
+
+Territory is the storage mechanism for physical space, there are a number of methods it
+can ... (more stuff think about this later, already have ideas that are relatively
+solid, write down later.)
+
+
+- Land, Land is a unique product which is attached to a territory. Territory generally
+  only has so much land, based on it's starting value, and it's often limited in how
+  much (if any) land can be reclaimed. Land of differing qualities can be used for
+  different things. How these differences are available need to be thought out more
+  but there are a few possible methods and ideas.
+  - Quality Method, this method treats land based on quality as the determinant. Each
+    quality level has a slightly different meaning relative to normal quality. How this
+	would be stored and decided in a territory would need to be thought out. (percentages?)
+	This would be the quickest to implement, but may create unforseen problem.
+	- 0, rugged, completely useless terrain. Not impossible to use, but requires 
+	  more advanced methods to make use of (IE stonecarved housing).
+	- 1, Marginal land or wasteland, not particularly fertile, but capable of
+	  supporting animals.
+	- 2, Arable Land, relatively fertile and capable of supporting crops easily
+	  in most cases, though not the best or most efficient.
+	- 3, Fertile Land, very fertile land, capable of supporting bountiful crops
+	  with ease.
+	- 4, Solid Land, land which is perfect for building on, and allows for large
+	  constructions with little support or modification to the surrounding terrain.
+	- 5, Premium land, not particularly useful in production, but seen as valued due
+	  to it's beauty or location (think seaside resort land).
+  - Variant Method, instead of using the quality of the land product, instead we use variant
+    to store additional data about the land. This means we could have (effectively) infinite
+	types of land. How this would be stored would, again, require some extra steps.
+	- Land Types
+	  - Rugged, unusable due to highly rugged terrain (such as rocks or sharp hills)
+	  - Marginal, difficult to impossible to farm, but capable of supporting some farm animals.
+	  - Arable, Farmable land, but not high quality.
+	  - Fertile, Farmable land of high quality.
+	  - Wastelands, land which is not really usable by civilization.
+	    - Swamps
+		- Deserts
+		- Rocky outcrops
+	  - Water Surface, territory which holds water and is thus impossible to build on directly.
+		- Ocean, reclaimable
+		- Lake, reclaimable
+		- River, must be redirected.

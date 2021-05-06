@@ -130,12 +130,14 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\CultureBreakdownsController.cs" />
     <Compile Include="Controllers\Cultures\CultureNeedsController.cs" />
     <Compile Include="Controllers\Cultures\CulturesController.cs" />
     <Compile Include="Controllers\Cultures\CultureTagsController.cs" />
     <Compile Include="Controllers\Cultures\CultureWantsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobsController.cs" />
+    <Compile Include="Controllers\PoliticalBreakdownsController.cs" />
     <Compile Include="Controllers\PoliticalGroupsController.cs" />
     <Compile Include="Controllers\PoliticalTagsController.cs" />
     <Compile Include="Controllers\Processes\ProcessCapitalsController.cs" />
@@ -145,6 +147,7 @@
     <Compile Include="Controllers\ProductFailsIntoController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\SkillsController.cs" />
+    <Compile Include="Controllers\SpeciesBreakdownsController.cs" />
     <Compile Include="Controllers\Species\SpeciesAnathemasController.cs" />
     <Compile Include="Controllers\Species\SpeciesAversionsController.cs" />
     <Compile Include="Controllers\Species\SpeciesController.cs" />
@@ -192,6 +195,7 @@
     <Content Include="Content\bootstrap-reboot.css.map" />
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
+    <Content Include="Controllers\WebInterfaceToDo" />
     <None Include="Scripts\jquery-3.6.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.6.0.js" />
     <Content Include="Scripts\jquery-3.6.0.min.js" />
@@ -397,6 +401,21 @@
     <Content Include="Views\PoliticalTags\Delete.cshtml" />
     <Content Include="Views\PoliticalTags\Details.cshtml" />
     <Content Include="Views\PoliticalTags\Index.cshtml" />
+    <Content Include="Views\SpeciesBreakdowns\Create.cshtml" />
+    <Content Include="Views\SpeciesBreakdowns\Delete.cshtml" />
+    <Content Include="Views\SpeciesBreakdowns\Details.cshtml" />
+    <Content Include="Views\SpeciesBreakdowns\Edit.cshtml" />
+    <Content Include="Views\SpeciesBreakdowns\Index.cshtml" />
+    <Content Include="Views\CultureBreakdowns\Create.cshtml" />
+    <Content Include="Views\CultureBreakdowns\Delete.cshtml" />
+    <Content Include="Views\CultureBreakdowns\Details.cshtml" />
+    <Content Include="Views\CultureBreakdowns\Edit.cshtml" />
+    <Content Include="Views\CultureBreakdowns\Index.cshtml" />
+    <Content Include="Views\PoliticalBreakdowns\Create.cshtml" />
+    <Content Include="Views\PoliticalBreakdowns\Delete.cshtml" />
+    <Content Include="Views\PoliticalBreakdowns\Details.cshtml" />
+    <Content Include="Views\PoliticalBreakdowns\Edit.cshtml" />
+    <Content Include="Views\PoliticalBreakdowns\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">

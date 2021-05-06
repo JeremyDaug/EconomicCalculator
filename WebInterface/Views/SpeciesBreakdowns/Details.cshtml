@@ -1,0 +1,42 @@
+﻿@model EconModels.PopulationModel.SpeciesBreakdown
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>SpeciesBreakdown</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Parent.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Parent.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Species.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Species.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Percent)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Percent)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { parentId = Model.ParentId, speciesId = Model.SpeciesId }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

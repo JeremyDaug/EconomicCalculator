@@ -2,8 +2,9 @@
 
 - Products are pretty much everything to the simulation. These are products that can be bought, sold,
 traded, and used. Overall, abstractly there are only 2 kinds of products, components, and goods.
-Goods are products which are used or consumed, and components are products which go into other
-products. This division isn't too useful, so instead we combine them and abstract the details away.
+Goods are products which are used or consumed to satisfy wants and needs, and components are
+products which go into other products. This division isn't too useful, so instead we combine them
+and abstract the details away.
 
 - Product Substitution, Product Substitution is the method by which one good can be used as
   an alternative for another. Substitution has a few dimensions in which it can be 
@@ -11,26 +12,26 @@ products. This division isn't too useful, so instead we combine them and abstrac
   - First is by varants of similar quality, goods of equivalent quality levels are a direct 
     one to one, and the one which is most cheaply produced is the one prefered to be bought.
 	These match based on the primary name of the product.
-  - Second is by variants of different qualities. Variants with higher qualities satisfy 
-    a desire for it more easily. One unit of higher quality satisfies more desire than one
-	unit of lower quality. Like the first, it matches on the primary name of the product.
-	Pops will always buy the most cost efficient product first
-	- Current math, satisfaction = 1 * (Quality * 0.25).
-	- *Possible option, higher quality goods are more effective when used in a process.*
-	  Hold off on this for now, making conservation of mass/energy is still something
-	  I'd like to make easy to have, even if it's isn't required. Maybe allow
-	  substitutes for Capital and Optional goods which produce failure outputs rather than
-	  process outputs. This would be easiest to implement and maintain my own sanity.
-  - Third is by want, when a population doesn't want a specific good, but instead is seeking
-    to meet some less specific need, such as food, shelter, protection, etc. These look for
-	matching Want tags, and allow for a much wider variety of goods to qualify. Rules 1 and
-	2 still apply.
+	- To give a direct benifit to buying/having higher quality goods goods of superior quality
+	  satisfy the want or need they go to more effectively.
+	  - Product Satisfaction = Unit * (1 + (Quality * 0.25))
+  - Second is by variants of different qualities. Variants can act as direct substitutions
+    for each other, often there will be marginal statistical differences in variants 
+	(+/- mass/bulk, different inputs to produce, etc).
+  - Third is by Want tags, want tags are attached to the good and allow them to be placed
+    in want groups. These groups are arbitrarily defined, but allow for products which
+	aren't variants to substitute for each other if it is just the want and not the specific
+	product being desired.
 	- Maybe allow this rule to follow with the second on Optional and Captial process 
 	  inputs, this would be more difficult, but not impossible. Not worth the cost most
 	  likely.
 	- Contemplate Allowing this for maintenance of products, similar problem as the previous
 	  however.
-
+	- Possible Special Tags, these are tags which may look at separate parameters rather than 
+	  the want tags.
+	  - Status Symbol, Any product of quality level 4 or 5 .
+	  - Frugality, Any product of quality 0 or 1.
+	  - Horde, Any product with a lifespan greater than 100 years and is not consumed on use.
 
 Subtypes
 - Product
