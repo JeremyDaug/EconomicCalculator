@@ -1,0 +1,180 @@
+﻿@model EconModels.PopulationModel.PopulationGroup
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>PopulationGroup</h4>
+    <hr />
+	<dl class="dl-horizontal">
+		<dt>
+			@Html.DisplayNameFor(model => model.PrimaryJob.Name)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.PrimaryJob.Name)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Territory.Name)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Territory.Name)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Name)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Name)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Infants)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Infants)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Children)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Children)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Adults)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Adults)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Seniors)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Seniors)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.SkillLevel)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.SkillLevel)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Priority)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Priority)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.SpeciesBreakdown)
+		</dt>
+
+		<dd>
+			<table class="table-bordered">
+				<tr>
+					<th>
+						Species
+					</th>
+					<th>
+						Percent
+					</th>
+				</tr>
+				@foreach (var spe in Model.SpeciesBreakdown)
+				{
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => spe.Species.Name)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => spe.Percent)
+						</td>
+					</tr>
+				}
+			</table>
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.CultureBreakdown)
+		</dt>
+
+		<dd>
+			<table class="table-bordered">
+				<tr>
+					<th>
+						Culture
+					</th>
+					<th>
+						Percent
+					</th>
+				</tr>
+				@foreach (var spe in Model.CultureBreakdown)
+				{
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => spe.Culture.Name)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => spe.Percent)
+						</td>
+					</tr>
+				}
+			</table>
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.PoliticalBreakdown)
+		</dt>
+
+		<dd>
+			<table class="table-bordered">
+				<tr>
+					<th>
+						Political Group
+					</th>
+					<th>
+						Percent
+					</th>
+				</tr>
+				@foreach (var spe in Model.PoliticalBreakdown)
+				{
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => spe.PoliticalGroup.Name)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => spe.Percent)
+						</td>
+					</tr>
+				}
+			</table>
+		</dd>
+
+	</dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

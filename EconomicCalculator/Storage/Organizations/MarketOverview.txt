@@ -10,6 +10,26 @@ Markets connect together
 		-> Governors primarily control territory and taxation.
 		-> Companies primarily control Jobs.
 
+
+Consolidation, Integration, and Disintegration
+	- Integration is the process by which markets merge. Integration happens naturally when 
+	  two adjacent markets have a high enough level of infrastructure that a person could
+	  (hypothetically) travel from any point to any other point and back in one market day.
+	  Integration takes these two territories and effectively combines them under the same
+	  market. Because this process is natural, it can happen with no intervention from the
+  	  governor and upkeep for this is covered by the upkeep needed for the infrastructure.
+	- Consolidation, like integration merges markets, covering multiple territories under
+	  one unified market. Unlike integration, this process is unnatural, instituted by a
+	  governor and has additional costs. This additional cost is in the form of bureaucrats
+	  and additional costs on all products in the consolidated market. While this is more
+	  expensive than Integration, it should help accelerate the process of integration.
+	- Disintegration is the opposite of Consolidation and Integration. When it occurs it
+	  causes the population in each to split in two. This causes immediate problems as local
+	  supply chains breakdown and must be overcome. Infrastructure workers between them
+	  shift immediately to adjacent merchants to cover this, but costs will still increase
+	  and efficiency will be lost.
+
+
 The Market Day
 	Each 'day', which could be a literal day or another arbitrarily defined unit of time,
 	the market goes through this cycle of actions to push the market forward.

@@ -18,6 +18,7 @@ namespace EconModels.PopulationModel
         public virtual PoliticalGroup PoliticalGroup { get; set; }
 
         [Required, Range(0, 1)]
+        [DisplayFormat(DataFormatString = "{0:P2}")]
         public double Percent { get; set; }
     }
 }

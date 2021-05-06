@@ -5,6 +5,25 @@ can ... (more stuff think about this later, already have ideas that are relative
 solid, write down later.)
 
 
+- Territory Combination - See Market Overview on how territories are combined and unified.
+
+- Territory Organization, Territories can be organized into groups artificially by the 
+  governors. These are organizations which help governors, and other organizations navigate
+  and organize. The (hypothetical) heirarchy of organization from the top down.
+  - Sector
+    - Subsector (Possibly Optional)
+	  - System
+	    - Planet
+		  - Continent
+		    - Region
+			  - State
+			    - Providince
+				  - Territory (base)
+  - Integration and Consolidation is discouraged between territories which are in different
+    parts of the same level. IE, Territories in the same providince take precedence over
+	territories in different providences when consolidation or integration is being sought.
+
+
 - Land, Land is a unique product which is attached to a territory. Territory generally
   only has so much land, based on it's starting value, and it's often limited in how
   much (if any) land can be reclaimed. Land of differing qualities can be used for

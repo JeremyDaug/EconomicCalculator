@@ -37,15 +37,19 @@ namespace EconModels.PopulationModel
 
         // The Total Population Count, should be equal to the sum of the culture breakdown.
         [Required, Range(0, double.MaxValue)]
+        [DisplayFormat(DataFormatString = "{0:0}")]
         public decimal Infants { get; set; }
 
         [Required, Range(0, double.MaxValue)]
+        [DisplayFormat(DataFormatString = "{0:0}")]
         public decimal Children { get; set; }
 
         [Required, Range(0, double.MaxValue)]
+        [DisplayFormat(DataFormatString = "{0:0}")]
         public decimal Adults { get; set; }
 
         [Required, Range(0, double.MaxValue)]
+        [DisplayFormat(DataFormatString = "{0:0}")]
         public decimal Seniors { get; set; }
 
         // Growth Rate depends on species and culture
@@ -59,7 +63,7 @@ namespace EconModels.PopulationModel
         [Required]
         public int PrimaryJobId { get; set; }
 
-        [Required, ForeignKey("PrimaryJobId")]
+        [ForeignKey("PrimaryJobId")]
         [DisplayName("Primary Job")]
         public virtual Job PrimaryJob { get; set; }
 

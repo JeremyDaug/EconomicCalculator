@@ -29,6 +29,7 @@ namespace EconModels.PopulationModel
         /// The member count of the parent population of this culture.
         /// </summary>
         [Required, Range(0, 1)]
+        [DisplayFormat(DataFormatString = "{0:P2}")]
         public double Percent { get; set; }
     }
 }

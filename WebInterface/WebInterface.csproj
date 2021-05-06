@@ -130,16 +130,17 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\CultureBreakdownsController.cs" />
+    <Compile Include="Controllers\Breakdowns\CultureBreakdownsController.cs" />
     <Compile Include="Controllers\Cultures\CultureNeedsController.cs" />
     <Compile Include="Controllers\Cultures\CulturesController.cs" />
     <Compile Include="Controllers\Cultures\CultureTagsController.cs" />
     <Compile Include="Controllers\Cultures\CultureWantsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobsController.cs" />
-    <Compile Include="Controllers\PoliticalBreakdownsController.cs" />
+    <Compile Include="Controllers\Breakdowns\PoliticalBreakdownsController.cs" />
     <Compile Include="Controllers\PoliticalGroupsController.cs" />
     <Compile Include="Controllers\PoliticalTagsController.cs" />
+    <Compile Include="Controllers\PopulationGroupsController.cs" />
     <Compile Include="Controllers\Processes\ProcessCapitalsController.cs" />
     <Compile Include="Controllers\Processes\ProcessesController.cs" />
     <Compile Include="Controllers\Processes\ProcessInputsController.cs" />
@@ -147,7 +148,7 @@
     <Compile Include="Controllers\ProductFailsIntoController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\SkillsController.cs" />
-    <Compile Include="Controllers\SpeciesBreakdownsController.cs" />
+    <Compile Include="Controllers\Breakdowns\SpeciesBreakdownsController.cs" />
     <Compile Include="Controllers\Species\SpeciesAnathemasController.cs" />
     <Compile Include="Controllers\Species\SpeciesAversionsController.cs" />
     <Compile Include="Controllers\Species\SpeciesController.cs" />
@@ -416,6 +417,11 @@
     <Content Include="Views\PoliticalBreakdowns\Details.cshtml" />
     <Content Include="Views\PoliticalBreakdowns\Edit.cshtml" />
     <Content Include="Views\PoliticalBreakdowns\Index.cshtml" />
+    <Content Include="Views\PopulationGroups\Create.cshtml" />
+    <Content Include="Views\PopulationGroups\Delete.cshtml" />
+    <Content Include="Views\PopulationGroups\Details.cshtml" />
+    <Content Include="Views\PopulationGroups\Edit.cshtml" />
+    <Content Include="Views\PopulationGroups\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EconModels\EconModels.csproj">
