@@ -297,7 +297,7 @@ namespace EconModels
                 .HasIndex(x => new { x.TerritoryId, x.PrimaryJobId })
                 .IsUnique();
 
-            // Territory Connections
+            // Territory
             modelBuilder.Entity<Territory>()
                 .HasIndex(x => x.Name);
 

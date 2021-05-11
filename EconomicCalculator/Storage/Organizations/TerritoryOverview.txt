@@ -23,16 +23,82 @@ solid, write down later.)
     parts of the same level. IE, Territories in the same providince take precedence over
 	territories in different providences when consolidation or integration is being sought.
 
+- Infrastructure, In Territories, infrastructure is a public good available to everyone, or
+  if not publicly available, is needed to tap into some other good.
+  - Roads/Rails/etc are the primary example. They either add an additional need to the
+  populations, roads add vehicle transportation (a want) with the goal of having as many
+  seats as there are people if not more. Trains have a ticket cost, which is represented 
+  as a cost to everyone in the territory. Merchants also pay to use Rails, but not roads.
+  Roads and rails have a throughput limit which must be purchased. If it's limited it becomes
+  a soft want. If it's made free and unlimited, shortages of supply will be made known.
+  - Communications, Like roads and rails, but instead of moving goods, it moves information.
+  Communication costs for organizations decrease as communications increase. Like roads and
+  rail, there is an upper limit on hom much they can handle, and so there is a cost.
+
+
+- Useful to know. 1 Acre = 4046.8564224 M^2
+    To flood an acre 1m deep with water, it would take 4046 (raound to 5000) m^3 of
+	water, that is roughly 0.000005 km^3
+- Area of a hexagon based on the distance from center to nearest edge is.
+    A = 1/2 * P * a
+	a is the distance from center to outer edge.
+	P is the perimiter which is equal to a/(3^(1/2)).
+	A = 1/2 * a^2 / 3^(1/2)
+- The area of a territory with Apothem radius 10km = 28.8675134 km^2,
+  which is 7,133.3184 Acres
+  - For sanity sake we'll round Km^2 to Acre so that it's 1km^2:250acres, this means
+    there are 2000 plots per km^2.
+  - We'll also round out a Territory to 25km for a 10km hex. Again, to maintain sanity.
+  - This means that it takes 2.5%(0.025) of a km^3 of water to cover a hex 1m deep.
+    A km^3 will fill a hex 40 m deep.
+- Waterways, Water is an important resource. There are 3 methods by which a territory
+  can have water. 
+  - First is Humidity, measured in annual Rainfall across the territory.
+  - Second is Water Level, which measures the amount of water in cubic km. Through some 
+    means we use the amount of water to lock off portions of the land.
+  - Third is HasRiver and RiverSize, which together state whether flowing body of water
+    exists in the territory. If true, then it has an attached flow rate, which defines
+	how much water flows through the body of water. It's size is defined by the water
+	level.
+
+  - Rivers automatically block off 1% of the available acrage of the territory. Any
+    water level in the Territory goes to this 1% first, before flooding the rest of the
+	Territory.
+  - If the difference between the river enterance and it's exit is particularly great,
+    and the river size is particularly large relative to the water level, then the river
+	is considered hard to navigate, and if it's bad enough it may be considered
+	unnavigable.
+  - Rivers and how they flow are defined by their adjacent neighbors. We know flow 
+    direction based on elevation of it's neighbors, water goes from high to low. 
+	Any neighbor that is higher is flowing in. Generally there should only ever be one
+	outflow, but if there are more, than the outflow is split evenly among them.
+  - Coastal lakes not possible in the current system. A territory which has a coast
+    cannot have a lake. Unrealistic, but a small price to pay.
+  - As we treat the Territory as being magically flat, flooding a territory goes
+    something like this.
+	- It takes 4000 m^3 of water to flood 1 acre of land (500m^3 for a plot). Once there
+	  is enough surface water for this to happen, one plot/acre is locked away as flooded.
+	- This follows the same logic until the entire Territory is flooded.
+	- Once an entire territory is flooded it will attempt to find other locations to put
+	  the water at an equivalent or lower elevation. If it finds a valid target it creates
+	  a water flow to that target.
+
 
 - Land, Land is a unique product which is attached to a territory. Territory generally
   only has so much land, based on it's starting value, and it's often limited in how
   much (if any) land can be reclaimed. Land of differing qualities can be used for
   different things. How these differences are available need to be thought out more
   but there are a few possible methods and ideas.
+  - Flat Methd, this method is by far the easiest and treats all land within the same
+    territory as equivalent. The only exceptions to this is land lost to water such as 
+	rivers, lakes, or oceans. This makes it harder to get detail in a individual territory
+	or market, but that problem disappears once the markets merge. This is what will be
+	used, a more advanced option can be added with relative ease later on.
   - Quality Method, this method treats land based on quality as the determinant. Each
     quality level has a slightly different meaning relative to normal quality. How this
 	would be stored and decided in a territory would need to be thought out. (percentages?)
-	This would be the quickest to implement, but may create unforseen problem.
+	This would be the quickest to implement, but may create unforseen problem, and is
+	limited to what is considered a valid quality level of the system.
 	- 0, rugged, completely useless terrain. Not impossible to use, but requires 
 	  more advanced methods to make use of (IE stonecarved housing).
 	- 1, Marginal land or wasteland, not particularly fertile, but capable of
@@ -47,7 +113,9 @@ solid, write down later.)
 	  to it's beauty or location (think seaside resort land).
   - Variant Method, instead of using the quality of the land product, instead we use variant
     to store additional data about the land. This means we could have (effectively) infinite
-	types of land. How this would be stored would, again, require some extra steps.
+	types of land. How this would be stored would, again, require some extra steps and a
+	breakdown. However, as the types are fixed from instantiation, it would just be an
+	expansion to any existing table of Territory Data.
 	- Land Types
 	  - Rugged, unusable due to highly rugged terrain (such as rocks or sharp hills)
 	  - Marginal, difficult to impossible to farm, but capable of supporting some farm animals.
@@ -59,5 +127,10 @@ solid, write down later.)
 		- Rocky outcrops
 	  - Water Surface, territory which holds water and is thus impossible to build on directly.
 		- Ocean, reclaimable
-		- Lake, reclaimable
+		- Lake, reclaimable, drainable.
 		- River, must be redirected.
+  - Land Ranks, land is divided by categories with the following axes.
+	- Fertility, Barren, Marginal, Arable, Fertile
+	- Passability, Open, Flat, Hilly, Rugged, Mountainous
+	- Humidity, Dry to wet
+	- Tempurature, fridgid to hot

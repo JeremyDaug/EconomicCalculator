@@ -1656,10 +1656,8 @@
 
             // Territories, to maintain sanity going forward for
             // generation.
+            #region Territories
 
-            #region PopulationGroups
-
-            // dummy territory
             var dumland = new Territory
             {
                 Name = "Dumland",
@@ -1677,12 +1675,35 @@
                 AvailableLand = 10 * 10 / (2 * 1.73205080757M)
             };
 
+            var marketrea = new Territory
+            {
+                Name = "Marketrea",
+                X = 0,
+                Y = 1,
+                Z = -1,
+                Extent = 10 * 10 / (2 * 1.73205080757M), // area of a hexagon. 10 km in radius
+                Elevation = 0,
+                WaterLevel = 0,
+                HasRiver = true,
+                WaterFlow = 5000,
+                Humidity = 20,
+                Tempurature = 20,
+                Roughness = 0,
+                InfrastructureLevel = 0,
+                AvailableLand = 10 * 10 / (2 * 1.73205080757M)
+            };
+
             if (!context.Territories.Any(x => x.Name == dumland.Name))
             {
                 context.Territories.Add(dumland);
             }
             context.SaveChanges();
             dumland = context.Territories.Single(x => x.Name == dumland.Name);
+
+            #endregion Territories
+
+            #region PopulationGroups
+
 
             // TODO make it do this for each territory.
             var Menials = new PopulationGroup
