@@ -9,95 +9,103 @@
 <div>
     <h4>Product</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
+	<dl class="dl-horizontal">
+		<dt>
+			@Html.DisplayNameFor(model => model.Name)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.Name)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.VariantName)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.VariantName)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.VariantName)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.VariantName)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.UnitName)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.UnitName)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.UnitName)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.UnitName)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Quality)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.Quality)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Quality)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.Quality)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.DefaultPrice)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.DefaultPrice)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.DefaultPrice)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.DefaultPrice)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Mass)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.Mass)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Mass)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.Mass)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Bulk)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.Bulk)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Bulk)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.Bulk)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.ProductTypes)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.ProductType)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.ProductTypes)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.ProductType)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Maintainable)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.Maintainable)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Maintainable)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.Maintainable)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Fractional)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.Fractional)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Fractional)
-        </dd>
+		<dd>
+			@Html.DisplayFor(model => model.Fractional)
+		</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.MeanTimeToFailure)
-        </dt>
+		<dt>
+			@Html.DisplayNameFor(model => model.Fluid)
+		</dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.MeanTimeToFailure)
-        </dd>
-    </dl>
+		<dd>
+			@Html.DisplayFor(model => model.Fluid)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.MeanTimeToFailure)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.MeanTimeToFailure)
+		</dd>
+	</dl>
 </div>
 
 @if (Model.FailsInto.Any())

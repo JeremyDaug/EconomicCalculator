@@ -99,16 +99,13 @@ namespace EconModels.TerritoryModel
         public virtual ICollection<PublicGood> PublicGoods { get; set; }
 
         /// <summary>
-        /// The available local resources like Mine Concentrations. Anything beyond this
+        /// The available local resources in the territory. Anything beyond this
         /// uses the common environmental breakdown to gather and extract resources.
         /// </summary>
         public virtual ICollection<LocalResource> LocalResources { get; set; }
 
-        /// <summary>
-        /// The ag
-        /// </summary>
-        [Required] // TODO expand this for multiple types and kinds of Infrastructure.
-        public int InfrastructureLevel { get; set; }
+        // Infrastructure is removed, it is based on the public goods in the territory and
+        // is not a singular value.
 
         // Adjacent Territories
         // These are special connections that are not generated

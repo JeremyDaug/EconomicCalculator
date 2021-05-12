@@ -26,6 +26,7 @@ namespace EconModels.ProductModel
         }
 
         public int Id { get; set; }
+
         // Index with VariantName
         [Required, StringLength(30, MinimumLength = 3)]
         public string Name { get; set; }
@@ -60,6 +61,14 @@ namespace EconModels.ProductModel
 
         [Required]
         public bool Fractional { get; set; }
+
+        /// <summary>
+        /// Whether the Product, when dumped into the environment, flows outwards or
+        /// stays in place.
+        /// </summary>
+        [Required, DefaultValue(false)]
+        [DisplayName("Fluid")]
+        public bool Fluid { get; set; }
 
         [Required]
         [DisplayName("Mean Time To Failure")]

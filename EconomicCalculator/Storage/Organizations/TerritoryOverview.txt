@@ -23,6 +23,21 @@ solid, write down later.)
     parts of the same level. IE, Territories in the same providince take precedence over
 	territories in different providences when consolidation or integration is being sought.
 
+- Resources in Territories.
+  - I can think of a few ways to limit resources in a territory. Some are reasonable but 
+    simple, many are crazy, but satisfy my desire for verisimilitude.
+	- Tap Method, the tap method treats the local resources of the territory as a tap into
+	  the global resources. This method makes resources of a territory effectively permanent
+	  but as it draws from the global pile, it simplifies the book keeping on both sides.
+	  The territory would only need the connection, to the parent body, nothing more.
+	  However, this makes biological resources harder to deal with as the planet's whole
+	  biosphere becomes interlinked too strongly.
+	- Pile Method, The pile Method gives a territory a strictly limited resources.
+	  Territories are given a strict amount of resources and these can and will eventually 
+	  be depleted. This method may be the best option and allow for more other resources
+	  such as trees and biology. This however could be very heavy on the DB and make
+	  managing the resources of a planet and their export/import may make it impossible.
+
 - Infrastructure, In Territories, infrastructure is a public good available to everyone, or
   if not publicly available, is needed to tap into some other good.
   - Roads/Rails/etc are the primary example. They either add an additional need to the

@@ -35,5 +35,13 @@ namespace EconModels.TerritoryModel
         /// density tags.
         /// </summary>
         public string Tag { get; set; }
+
+        /// <summary>
+        /// Whether the Infrastructure requirement is a discrete or
+        /// continuous feature.
+        /// Discrete move in discrete steps
+        /// Continuous update in fractional steps.
+        /// </summary>
+        public bool IsDiscrete { get; set; }
     }
 }
