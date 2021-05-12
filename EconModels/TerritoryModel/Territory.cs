@@ -33,7 +33,7 @@ namespace EconModels.TerritoryModel
 
         /// <summary>
         /// What is the maximum size of the Territory, assuming perfect
-        /// development.
+        /// development, measured in acres.
         /// </summary>
         [Required]
         public decimal Extent { get; set; }
@@ -71,8 +71,12 @@ namespace EconModels.TerritoryModel
         [Required, Range(0, int.MaxValue)]
         public decimal WaterStorage { get; set; }
 
-        // HasRiver is dropped. It has a river if it has both an inflow and
-        // outflow of water.
+        /// <summary>
+        /// The space that this natural water storage takes up in acre.
+        /// This space is reserved by the land.
+        /// </summary>
+        [Required, Range(0, int.MaxValue)]
+        public decimal WaterStorageSpace { get; set; }
 
         /// <summary>
         /// The amount of water flowing into the territory from neighbors.
@@ -93,6 +97,12 @@ namespace EconModels.TerritoryModel
         /// but difficult to impossible to protect actively.
         /// </summary>
         public virtual ICollection<PublicGood> PublicGoods { get; set; }
+
+        /// <summary>
+        /// The available local resources like Mine Concentrations. Anything beyond this
+        /// uses the common environmental breakdown to gather and extract resources.
+        /// </summary>
+        public virtual ICollection<LocalResource> LocalResources { get; set; }
 
         /// <summary>
         /// The ag

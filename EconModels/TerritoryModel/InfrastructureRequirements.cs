@@ -25,7 +25,8 @@ namespace EconModels.TerritoryModel
         public virtual Product Product { get; set; }
 
         /// <summary>
-        /// How dense per km^2 it must be to meet this condition.
+        /// How many units per km^2 it must be to meet this
+        /// condition.
         /// </summary>
         public decimal Density { get; set; }
 
@@ -33,12 +34,6 @@ namespace EconModels.TerritoryModel
         /// What this density grants. Tag should stack with lower
         /// density tags.
         /// </summary>
-        /// <example>
-        /// Infrastructure(X,Y) // For physical transportation
-        /// Electrified       
-        /// Communications(X, Y) // For Information Technologies
-        /// 
-        /// </example>
         public string Tag { get; set; }
     }
 }

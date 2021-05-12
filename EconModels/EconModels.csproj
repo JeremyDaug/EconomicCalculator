@@ -143,6 +143,7 @@
     <Compile Include="SkillsModel\Skill.cs" />
     <Compile Include="TerritoryModel\LandOwner.cs" />
     <Compile Include="TerritoryModel\InfrastructureRequirements.cs" />
+    <Compile Include="TerritoryModel\LocalResource.cs" />
     <Compile Include="TerritoryModel\PublicGood.cs" />
     <Compile Include="TerritoryModel\Territory.cs" />
     <Compile Include="TerritoryModel\TerritoryConnection.cs" />
