@@ -177,6 +177,34 @@
                 UnitName = "plot"
             };
             Land.AddWantTag(shelter); // Assume a simple hut is always available for now.
+            var waterLiter = new Product
+            {
+                Name = "Water",
+                VariantName = "Liter",
+                Bulk = 1, // 1 liter
+                Mass = 1, // 1 kg
+                DefaultPrice = 0.50M,
+                Fractional = true, // Water can be divided more.
+                Maintainable = false, // Water needs little care.
+                ProductType = ProductTypes.Consumable, // Not wholly acurate, but probably best.
+                Quality = 2, // water is water.
+                MeanTimeToFailure = -1, // Water doesn't degrade, it is only consumed by processes.
+                UnitName = "Liter"
+            };
+            var waterMeter = new Product
+            { // is this really necissary? simple conversion may be easier.
+                Name = "Water",
+                VariantName = "Cubic Meter",
+                Bulk = 1000, // 1 cubic meter
+                Mass = 1000, // 1 kg
+                DefaultPrice = 0.50M,
+                Fractional = true, // Water can be divided more.
+                Maintainable = false, // Water needs little care.
+                ProductType = ProductTypes.Consumable, // Not wholly acurate, but probably best.
+                Quality = 2, // water is water.
+                MeanTimeToFailure = -1, // Water doesn't degrade, it is only consumed by processes.
+                UnitName = "Cubic Meter"
+            };
             // Biowaste
             var BioWaste = new Product
             {
@@ -240,8 +268,8 @@
                 UnitName = "nugget",
                 Quality = 1,
                 DefaultPrice = 1.0M,
-                Bulk = 1,
-                Mass = 1,
+                Bulk = 0.1,
+                Mass = 0.1,
                 ProductType = ProductTypes.Currency,
                 Maintainable = false,
                 Fractional = true,
@@ -1664,15 +1692,16 @@
                 X = 0,
                 Y = 0,
                 Z = 0,
-                Extent = 10 * 10 / (2 * 1.73205080757M), // area of a hexagon. 10 km in radius
+                Extent = 25 * 250, // rounded area in a 10km hexagon.
                 Elevation = 0,
-                WaterLevel = 0,
-                HasRiver = false,
+                WaterStorage = 10_000_000,
+                WaterStorageSpace = 100_000_000,
+                WaterInFlow = 0,
+                WaterOutFlow = 0,
                 Humidity = 50,
                 Tempurature = 20,
                 Roughness = 0,
-                InfrastructureLevel = 0,
-                AvailableLand = 10 * 10 / (2 * 1.73205080757M)
+                AvailableLand = 25 * 250 * 8
             };
 
             var marketrea = new Territory
@@ -1681,24 +1710,31 @@
                 X = 0,
                 Y = 1,
                 Z = -1,
-                Extent = 10 * 10 / (2 * 1.73205080757M), // area of a hexagon. 10 km in radius
+                Extent = 25 * 250, // rounded area in a 10km hexagon.
                 Elevation = 0,
-                WaterLevel = 0,
-                HasRiver = true,
-                WaterFlow = 5000,
+                WaterStorage = 10_000,
+                WaterStorageSpace = 100_000,
+                WaterInFlow = 0,
+                WaterOutFlow = 0,
                 Humidity = 20,
                 Tempurature = 20,
                 Roughness = 0,
-                InfrastructureLevel = 0,
-                AvailableLand = 10 * 10 / (2 * 1.73205080757M)
+                AvailableLand = 25 * 250 * 8
             };
 
-            if (!context.Territories.Any(x => x.Name == dumland.Name))
+            var newTerritorries = new List<Territory>
             {
-                context.Territories.Add(dumland);
+                dumland,
+                marketrea
+            };
+
+            foreach (var territory in newTerritorries)
+            {
+                context.Territories.AddOrUpdate(x => new { x.Name }, territory);
             }
             context.SaveChanges();
             dumland = context.Territories.Single(x => x.Name == dumland.Name);
+            marketrea = context.Territories.Single(x => x.Name == marketrea.Name);
 
             #endregion Territories
 
@@ -1714,7 +1750,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            Menials.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            Menials.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var Farmers = new PopulationGroup
             {
                 Name = dumland.Name + " " + wheatFarmer.Name,
@@ -1723,7 +1759,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            Farmers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            Farmers.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var Millers = new PopulationGroup
             {
                 Name = dumland.Name + " " + grainMiller.Name,
@@ -1732,7 +1768,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            Millers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            Millers.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var Bakers = new PopulationGroup
             {
                 Name = dumland.Name + " " + baker.Name,
@@ -1741,7 +1777,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            Bakers.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            Bakers.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var IronMiners = new PopulationGroup
             {
                 Name = dumland.Name + " " + ironMiner.Name,
@@ -1750,7 +1786,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            IronMiners.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            IronMiners.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var IronSmelters = new PopulationGroup
             {
                 Name = dumland.Name + " " + ironSmelter.Name,
@@ -1759,7 +1795,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            IronSmelters.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            IronSmelters.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var GoldMiners = new PopulationGroup
             {
                 Name = dumland.Name + " " + goldMiner.Name,
@@ -1768,7 +1804,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            GoldMiners.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            GoldMiners.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var BlackSmiths = new PopulationGroup
             {
                 Name = dumland.Name + " " + BlackSmithing.Name,
@@ -1777,7 +1813,7 @@
                 SkillLevel = 2,
                 TerritoryId = dumland.Id
             };
-            BlackSmiths.SetPopulation(10000, 0.1M, 0.2M, 0.2M);
+            BlackSmiths.SetPopulation(10, 0.1M, 0.2M, 0.2M);
 
             var popGroups = new List<PopulationGroup>
             {
@@ -1803,7 +1839,7 @@
 
             context.SaveChanges();
 
-            // complete breakdowns (let's be lazy)
+            // complete breakdowns and ownership. (let's be lazy)
             foreach (var pop in popGroups)
             {
                 pop.ShiftSpeciesPercent(context.Species.Single(x => x.Name == human.Name), 1);
@@ -1839,165 +1875,22 @@
                 }
 
                 context.SaveChanges();
+
+                // Owned Property, keep it simple give them some currency.
+                var startingGold = new OwnedProperty
+                {
+                    OwnerId = context.PopulationGroups.Single(x => x.Name == pop.Name).Id,
+                    ProductId = context.Products.Single(x => x.Name == GoldOre.Name).Id,
+                    Amount = 100
+                };
+                    
+                pop.OwnedProperties.Add(startingGold);
+
+                context.OwnedProperties.AddOrUpdate(startingGold);
             }
 
             #endregion PopulationGroups
-
-            /*
-
-            #region Territory
-
-            var Marketrea = new TerritoryModel.Territory
-            {
-                Name = "Marketrea",
-                X = 0,
-                Y = 0,
-                Z = 0,
-                Extent = 665_000, // Hexagon 20 mi to a side
-                Elevation = 0,
-                WaterLevel = 0.1M,
-                HasRiver = false,
-                Humidity = 25,
-                Tempurature = 22,
-                Roughness = 1,
-                InfrastructureLevel = 0,
-                AvailableLand = 664_900 // No land currently owned.
-            };
-
-            // An undeveloped, unlived in tract of land
-            var Sucktopia = new TerritoryModel.Territory
-            {
-                Name = "Sucktopia",
-                X = 0,
-                Y = 0,
-                Z = 0,
-                Extent = 665_000, // Hexagon 20 mi to a side
-                Elevation = 0,
-                WaterLevel = 0.1M,
-                HasRiver = false,
-                Humidity = 25,
-                Tempurature = 22,
-                Roughness = 1,
-                InfrastructureLevel = 0,
-                AvailableLand = 665_000 // No land currently owned.
-            };
-
-            var MarkToSuck = new TerritoryConnection
-            {
-                Start = Marketrea,
-                End = Sucktopia
-            };
-
-            var SuckToMark = new TerritoryConnection
-            {
-                Start = Sucktopia,
-                End = Marketrea
-            };
-
-            Marketrea.OutgoingConnections.Add(MarkToSuck);
-            Sucktopia.OutgoingConnections.Add(SuckToMark);
-
-            Marketrea.IncomingConnections.Add(SuckToMark);
-            Sucktopia.IncomingConnections.Add(MarkToSuck);
-
-            var FarmLand = new LandOwner
-            {
-                Owner = farmers,
-                Territory = Marketrea,
-                Amount = 100
-            };
-
-            var MineLand = new LandOwner
-            {
-                Owner = miners,
-                Territory = Marketrea,
-                Amount = 100
-            };
-
-            Marketrea.LandOwners.Add(FarmLand);
-            Marketrea.LandOwners.Add(MineLand);
-
-            context.Territories.AddOrUpdate(
-                Marketrea,
-                Sucktopia);
-
-            context.TerritoryConnections.AddOrUpdate(
-                MarkToSuck,
-                SuckToMark);
-
-            context.LandOwners.AddOrUpdate(
-                FarmLand,
-                MineLand);
-
-            #endregion Territory
-
-            #region Market
-
-            var FirstMarket = new Market
-            {
-                Name = "Market of Marketrea",
-                Territory = Marketrea
-            };
-
-            // pops in market
-            FirstMarket.PopulationGroups.Add(farmers);
-            FirstMarket.PopulationGroups.Add(millers);
-            FirstMarket.PopulationGroups.Add(bakers);
-            FirstMarket.PopulationGroups.Add(miners);
-
-            // product prices
-            var bioWastePrice = new ProductPrices
-            {
-                Market = FirstMarket,
-                Product = bioWaste,
-                MarketPrice = 0.5M
-            };
-
-            var WheatPrice = new ProductPrices
-            {
-                Market = FirstMarket,
-                Product = WheatGrain,
-                MarketPrice = 1
-            };
-
-            var FlourPrice = new ProductPrices
-            {
-                Market = FirstMarket,
-                Product = Flour,
-                MarketPrice = 2
-            };
-
-            var BreadPrice = new ProductPrices
-            {
-                Market = FirstMarket,
-                Product = Bread,
-                MarketPrice = 4
-            };
-
-            var GoldPrice = new ProductPrices
-            {
-                Market = FirstMarket,
-                Product = GoldOre,
-                MarketPrice = 1
-            };
-
-            // prices to market
-            FirstMarket.ProductPrices.Add(bioWastePrice);
-            FirstMarket.ProductPrices.Add(WheatPrice);
-            FirstMarket.ProductPrices.Add(FlourPrice);
-            FirstMarket.ProductPrices.Add(BreadPrice);
-
-            context.Markets.AddOrUpdate(
-                FirstMarket);
-            context.MarketPrices.AddOrUpdate(
-                bioWastePrice,
-                WheatPrice,
-                FlourPrice,
-                BreadPrice,
-                GoldPrice);
-
-            #endregion Market
-            */
+            
             try
             {
                 context.SaveChanges();

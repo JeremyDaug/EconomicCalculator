@@ -27,38 +27,68 @@ namespace EconModels.ProductModel
 
         public int Id { get; set; }
 
-        // Index with VariantName
+        /// <summary>
+        /// The Name of the Product
+        /// </summary>
         [Required, StringLength(30, MinimumLength = 3)]
         public string Name { get; set; }
 
+        /// <summary>
+        /// The Variant Name of the Product
+        /// </summary>
         [DisplayName("Variant Name")]
         [StringLength(30)]
         public string VariantName { get; set; }
 
+        /// <summary>
+        /// The Name of the Unit it is measured in.
+        /// </summary>
         [DisplayName("Unit Name")]
         [Required, StringLength(15)]
         public string UnitName { get; set; }
 
+        /// <summary>
+        /// The quality of the product.
+        /// </summary>
         [Required, Range(0, int.MaxValue)]
         public int Quality { get; set; }
 
+        /// <summary>
+        /// The Default starting price, if no other price is
+        /// given.
+        /// </summary>
         [Required]
         [DisplayName("Default Price")]
         public decimal DefaultPrice { get; set; }
 
+        /// <summary>
+        /// The mass of the Product.
+        /// </summary>
         [Required, Range(0, double.MaxValue)]
         public double Mass { get; set; }
 
+        /// <summary>
+        /// The volume of the Product.
+        /// </summary>
         [Required, Range(0, double.MaxValue)]
         public double Bulk { get; set; }
 
+        /// <summary>
+        /// The type of product it is.
+        /// </summary>
         [Required]
         [DisplayName("Product Type")]
         public ProductTypes ProductType { get; set; }
 
+        /// <summary>
+        /// Whether the product can be maintained.
+        /// </summary>
         [Required]
         public bool Maintainable { get; set; }
 
+        /// <summary>
+        /// Whether the product can be divided further than it's units.
+        /// </summary>
         [Required]
         public bool Fractional { get; set; }
 
@@ -70,17 +100,32 @@ namespace EconModels.ProductModel
         [DisplayName("Fluid")]
         public bool Fluid { get; set; }
 
+        /// <summary>
+        /// The average time it takes for the product to fail.
+        /// </summary>
         [Required]
         [DisplayName("Mean Time To Failure")]
         public int MeanTimeToFailure { get; set; }
 
         // Navigation Properties
+        /// <summary>
+        /// Products it fails into.
+        /// </summary>
         public virtual ICollection<FailsIntoPair> FailsInto { get; set; }
 
+        /// <summary>
+        /// WHat products fail into it.
+        /// </summary>
         public virtual ICollection<FailsIntoPair> MadeFromFailure { get; set; }
 
+        /// <summary>
+        /// What the product is maintained by.
+        /// </summary>
         public virtual ICollection<MaintenancePair> MaintainedBy { get; set; }
 
+        /// <summary>
+        /// What this product maintains.
+        /// </summary>
         public virtual ICollection<MaintenancePair> Maintains { get; set; }
 
         /// <summary>
@@ -91,11 +136,22 @@ namespace EconModels.ProductModel
 
         // For jobs, because one way connections are just not in the cards.
         // Job.Labor
+        /// <summary>
+        /// The Jobs related to this product.
+        /// </summary>
         public virtual ICollection<Job> Jobs { get; set; }
 
         // To Skill.ValidLabors
+        /// <summary>
+        /// The Skills related to this Product.
+        /// </summary>
         public virtual ICollection<Skill> Skills { get; set; }
 
+        /// <summary>
+        /// Adds want tags to the product.
+        /// </summary>
+        /// <param name="tag">The tag to Add.</param>
+        /// <returns>The created want tag.</returns>
         public ProductWantTag AddWantTag(string tag)
         {
             var want = new ProductWantTag

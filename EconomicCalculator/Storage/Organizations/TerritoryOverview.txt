@@ -82,6 +82,7 @@ solid, write down later.)
   - For sanity sake we'll round Km^2 to Acre so that it's 1km^2:250acres, this means
     there are 2000 plots per km^2.
   - We'll also round out a Territory to 25km for a 10km hex. Again, to maintain sanity.
+  - This make as 10 km hex has 25 km^2 and 6250 acres.
   - This means that it takes 2.5%(0.025) of a km^3 of water to cover a hex 1m deep.
     A km^3 will fill a hex 40 m deep.
 - Waterways, Water is an important resource. There are 3 methods by which a territory

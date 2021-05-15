@@ -6,6 +6,20 @@ consider Tea to be a Daily Good, while "German" may instead see Coffee as a dail
 Likewise, it allows for various bits of additional data like religious, political, or
 other demographic tendencies to be included.
 
+- Cultural Moral Foundations, This is just an idea, and instead of going to Culture may go
+  to political group, but that's unlikely. The idea is that a culture has six moral
+  foundations and in varying degrees. Each would effect how they interact with culture and
+  how certain events (both random and systemic) would effect them. These would be on scales
+  of -1 to 1 to make calculations based on them easier.
+  - Harm, People shouldn't get hurt.
+    - These people would be in favor of ameliorating harm and
+  - Fairness, People should get what they deserve.
+  - Liberty, People shouldn't be oppressed.
+  - Loyalty, People should be loyal to the tribe.
+  - Authority, People should respect authority and their social superiors
+  - Purity, Integrity of form, whether through religion, genetics, or culture, out to be
+    maintained.
+
 All cultures have:
 
 	- Name, and variant name, which must be unique.

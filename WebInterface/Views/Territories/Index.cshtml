@@ -1,0 +1,111 @@
+﻿@model IEnumerable<EconModels.TerritoryModel.Territory>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.X)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Y)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Z)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Extent)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Elevation)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Humidity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Tempurature)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Roughness)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.WaterStorage)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.WaterStorageSpace)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.WaterInFlow)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.WaterOutFlow)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.AvailableLand)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.X)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Y)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Z)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Extent)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Elevation)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Humidity)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Tempurature)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Roughness)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.WaterStorage)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.WaterStorageSpace)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.WaterInFlow)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.WaterOutFlow)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.AvailableLand)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+        </td>
+    </tr>
+}
+
+</table>

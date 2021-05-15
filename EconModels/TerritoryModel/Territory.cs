@@ -16,6 +16,8 @@ namespace EconModels.TerritoryModel
             IncomingConnections = new List<TerritoryConnection>();
             Pops = new List<PopulationGroup>();
             LandOwners = new List<LandOwner>();
+            LocalResources = new List<LocalResource>();
+            PublicGoods = new List<PublicGood>();
         }
 
         public int Id { get; set; }
@@ -66,7 +68,7 @@ namespace EconModels.TerritoryModel
         /// <summary>
         /// The amount of water that is stored in the province, in cubic m.
         /// This is how much will be retained before flowing into adjacent
-        /// territories. Special storage.
+        /// territories. Special storage, as it's GOING to be used.
         /// </summary>
         [Required, Range(0, int.MaxValue)]
         public decimal WaterStorage { get; set; }
@@ -108,23 +110,41 @@ namespace EconModels.TerritoryModel
         // is not a singular value.
 
         // Adjacent Territories
-        // These are special connections that are not generated
+        /// <summary>
+        /// Territories that this territory connects to indirectly.
+        /// </summary>
         public virtual ICollection<TerritoryConnection> OutgoingConnections { get; set; }
 
-        // These are the incoming special connections.
+        /// <summary>
+        /// Territories that are connected to this territory inderectly.
+        /// </summary>
         public virtual ICollection<TerritoryConnection> IncomingConnections { get; set; }
 
         // Market Connection Placeholder.
-
+        /// <summary>
+        /// The population groups in the territory. If integrated, moves to integrated
+        /// territory.
+        /// </summary>
         public virtual ICollection<PopulationGroup> Pops { get; set; }
 
         // Governor Placeholder
 
-        // Land unclaimed by owners.
+        // Planetary parent placeholder.
+
+        /// <summary>
+        /// The Available land, unclaimed by landowners. Includes both land and
+        /// water territories.
+        /// </summary>
         [Required, Range(0, int.MaxValue)]
         public decimal AvailableLand { get; set; }
 
+        /// <summary>
+        /// The Table of Land Owners, pointing to the populations who own them and
+        /// what exactly they own.
+        /// </summary>
         public virtual ICollection<LandOwner> LandOwners { get; set; }
+
+        // TODO parent integration/Consolidation structure.
 
         // Claimants handled by governor not territory.
     }

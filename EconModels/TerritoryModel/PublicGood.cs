@@ -1,11 +1,22 @@
 ﻿using EconModels.ProductModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EconModels.TerritoryModel
 {
     public class PublicGood
     {
+        /// <summary>
+        /// Territory Id.
+        /// </summary>
+        [Required]
+        public int TerritoryId { get; set; }
 
+        /// <summary>
+        /// The Owning Territory.
+        /// </summary>
+        [ForeignKey("TerritoryId")]
+        public virtual Territory Territory { get; set; }
 
         /// <summary>
         /// The Public Good ID.
@@ -14,8 +25,9 @@ namespace EconModels.TerritoryModel
         public int GoodId { get; set; }
 
         /// <summary>
-        /// The Good
+        /// The Good owned.
         /// </summary>
+        [ForeignKey("GoodId")]
         public virtual Product Good { get; set; }
 
         /// <summary>

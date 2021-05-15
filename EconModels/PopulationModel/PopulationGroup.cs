@@ -17,7 +17,9 @@ namespace EconModels.PopulationModel
         {
             CultureBreakdown = new List<CultureBreakdown>();
             PoliticalBreakdown = new List<PoliticalBreakdown>();
-            SpeciesBreakdown = new List<SpeciesBreakdown>();        }
+            SpeciesBreakdown = new List<SpeciesBreakdown>();
+            OwnedProperties = new List<OwnedProperty>();
+        }
 
         public int Id { get; set; }
 
@@ -82,6 +84,13 @@ namespace EconModels.PopulationModel
         // Population Group Property, may go over storage limits later,
         public virtual ICollection<OwnedProperty>  OwnedProperties { get; set; }
 
+        /// <summary>
+        /// Sets population with these percents.
+        /// </summary>
+        /// <param name="count">The total Population.</param>
+        /// <param name="infant">Percent that are infants.</param>
+        /// <param name="children">Percent that are Children.</param>
+        /// <param name="seniors">Percent that are Seniors.</param>
         public void SetPopulation(int count, decimal infant, decimal children, decimal seniors)
         {
             Infants = count * infant;

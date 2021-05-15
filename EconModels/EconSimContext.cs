@@ -298,25 +298,58 @@ namespace EconModels
                 .IsUnique();
 
             // Territory
+            // Territory index
             modelBuilder.Entity<Territory>()
-                .HasIndex(x => x.Name);
+                .HasIndex(x => x.Name)
+                .IsUnique();
+
+            // Public Goods
+            modelBuilder.Entity<PublicGood>()
+                .HasKey(x => new { x.TerritoryId, x.GoodId });
 
             modelBuilder.Entity<Territory>()
-                .HasMany(x => x.Pops)
-                .WithRequired(x => x.Territory) // make required later.
-                .WillCascadeOnDelete(false);
+                .HasMany(x => x.PublicGoods)
+                .WithRequired(x => x.Territory)
+                .WillCascadeOnDelete(true);
 
+            // Local Resources
+            modelBuilder.Entity<LocalResource>()
+                .HasKey(x => new { x.ResourceId, x.TerritoryId });
+
+            modelBuilder.Entity<Territory>()
+                .HasMany(x => x.LocalResources)
+                .WithRequired(x => x.Territory)
+                .WillCascadeOnDelete(true);
+
+            // Outgoing Connections
+            modelBuilder.Entity<TerritoryConnection>()
+                .HasKey(x => new { x.StartId, x.EndId });
             modelBuilder.Entity<Territory>()
                 .HasMany(x => x.OutgoingConnections)
                 .WithRequired(x => x.Start)
                 .HasForeignKey(x => x.StartId)
                 .WillCascadeOnDelete(true);
 
+            // Incoming Connections
             modelBuilder.Entity<Territory>()
                 .HasMany(x => x.IncomingConnections)
                 .WithRequired(x => x.End)
                 .HasForeignKey(x => x.EndId)
                 .WillCascadeOnDelete(false);
+
+            // Pop Contained Connection
+            modelBuilder.Entity<Territory>()
+                .HasMany(x => x.Pops)
+                .WithRequired(x => x.Territory) // make required later.
+                .WillCascadeOnDelete(false);
+
+            // Land Owners
+            modelBuilder.Entity<LandOwner>()
+                .HasKey(x => new { x.TerritoryId, x.OwnerId });
+            modelBuilder.Entity<Territory>()
+                .HasMany(x => x.LandOwners)
+                .WithRequired(x => x.Territory)
+                .WillCascadeOnDelete(true);
         }
 
         public System.Data.Entity.DbSet<EconModels.PopulationModel.SpeciesTag> SpeciesTags { get; set; }
