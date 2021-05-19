@@ -12,7 +12,7 @@ namespace EconModels.TerritoryModel
         /// <summary>
         /// The ID of the Row.
         /// </summary>
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// The Id of the product for infrastructure.

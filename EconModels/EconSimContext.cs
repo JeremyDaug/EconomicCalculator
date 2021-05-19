@@ -89,30 +89,26 @@ namespace EconModels
             // Base Call, no big deal, just required.
             base.OnModelCreating(modelBuilder);
 
-            // Product Additions
+            #region Product
+
+            // Product Index
             modelBuilder.Entity<Product>()
                 .HasIndex(x => new { x.Name, x.VariantName })
                 .IsUnique();
 
-            // Failure
-            modelBuilder.Entity<FailsIntoPair>()
-                .HasKey(x => new { x.SourceId, x.ResultId });
-
+            // fails into
             modelBuilder.Entity<Product>()
                 .HasMany(x => x.FailsInto)
                 .WithRequired(x => x.Source)
                 .HasForeignKey(x => x.SourceId)
                 .WillCascadeOnDelete(true);
 
+            // Fails From
             modelBuilder.Entity<Product>()
                 .HasMany(x => x.MadeFromFailure)
                 .WithRequired(x => x.Result)
                 .HasForeignKey(x => x.ResultId)
                 .WillCascadeOnDelete(false);
-
-            // Want Tags
-            modelBuilder.Entity<ProductWantTag>()
-                .HasKey(x => new { x.ProductId, x.Tag });
 
             // Maintenance
             modelBuilder.Entity<MaintenancePair>()
@@ -141,6 +137,7 @@ namespace EconModels
                     x.MapRightKey("SkillId");
                     x.ToTable("SkillLabors");
                 });
+
             // Products <-> Jobs
             modelBuilder.Entity<Product>()
                 .HasMany(prod => prod.Jobs)
@@ -151,6 +148,30 @@ namespace EconModels
                     x.MapRightKey("JobId");
                     x.ToTable("JobLabors");
                 });
+
+            #endregion Product
+
+            #region FailsIntoPair
+
+            // Failure pairs
+            modelBuilder.Entity<FailsIntoPair>()
+                .HasKey(x => new { x.SourceId, x.ResultId });
+
+            // source and result handled by product.
+
+            #endregion
+
+            #region Want Tags
+
+            // Want Tags
+            modelBuilder.Entity<ProductWantTag>()
+                .HasKey(x => new { x.ProductId, x.Tag });
+
+            // product handled by product
+
+            #endregion
+
+            #region Process
 
             // Proces Index
             modelBuilder.Entity<Process>()
@@ -164,7 +185,6 @@ namespace EconModels
                 .HasKey(x => new { x.ProcessId, x.OutputId });
             modelBuilder.Entity<ProcessCapital>()
                 .HasKey(x => new { x.ProcessId, x.CapitalId });
-            // May not need, TODO test whether it's needed or not.
 
             // Process Navigation Properties
             // Processes <-> Job
@@ -177,6 +197,10 @@ namespace EconModels
                     x.MapRightKey("JobId");
                     x.ToTable("JobProcesses");
                 });
+
+            #endregion Process
+
+            #region Job
 
             // Job Connections
             // self connection Job <-> Job
@@ -197,6 +221,14 @@ namespace EconModels
                 .HasForeignKey(x => x.SkillId)
                 .WillCascadeOnDelete(false);
 
+            // Processes handled by Processes
+
+            // Products Handled by Products
+
+            #endregion Job
+
+            #region Skill
+
             // Skill Connections 
             // Skills <-> Skills
             modelBuilder.Entity<Skill>()
@@ -209,6 +241,14 @@ namespace EconModels
                     x.ToTable("RelatedSkills");
                 });
 
+            // Related products handled by products.
+
+            // Related Jobs handled by Jobs
+
+            #endregion Skill
+
+            #region Culture
+
             // Culture
             // Shouldn't need to explain many to one connections from culture out.
             modelBuilder.Entity<CultureNeed>()
@@ -217,6 +257,7 @@ namespace EconModels
                 .HasKey(p => new { p.CultureId, p.Want, p.NeedType });
             modelBuilder.Entity<CultureTag>()
                 .HasKey(p => new { p.CultureId, p.Tag });
+
             modelBuilder.Entity<Culture>()
                 .HasIndex(p => new { p.Name, p.VariantName })
                 .IsUnique();
@@ -231,6 +272,10 @@ namespace EconModels
                     x.MapRightKey("ChildId");
                     x.ToTable("RelatedCultures");
                 });
+
+            #endregion Culture
+
+            #region PoliticalGroups
 
             // Political Tag
             modelBuilder.Entity<PoliticalTag>()
@@ -260,6 +305,10 @@ namespace EconModels
                     x.ToTable("PoliticalEnemies");
                 });
 
+            #endregion PoliticalGroups
+
+            #region Species
+
             // Species
             modelBuilder.Entity<SpeciesWant>()
                 .HasKey(x => new { x.SpeciesId, x.Want });
@@ -271,6 +320,7 @@ namespace EconModels
                 .HasKey(x => new { x.SpeciesId, x.Aversion });
             modelBuilder.Entity<SpeciesAnathema>()
                 .HasKey(x => new { x.SpeciesId, x.AnathemaId });
+
             modelBuilder.Entity<Species>()
                 .HasIndex(x => new { x.Name, x.VariantName })
                 .IsUnique();
@@ -279,11 +329,28 @@ namespace EconModels
             // is all that is needed and must remain the main
             // method.
 
+            #endregion Species
+
+            #region OwnedProperty
+
             // property 
             modelBuilder.Entity<OwnedProperty>()
                 .HasKey(x => new { x.OwnerId, x.ProductId });
 
-            // Breakdowns
+            // product does not connect back to owned property.
+            // population group handles owner connection.
+
+            #endregion OwnedProperty
+
+            #region PopulationGroup
+
+            // Pop Group
+            // There should only be one pop group per job in each territory.
+            modelBuilder.Entity<PopulationGroup>()
+                .HasIndex(x => new { x.TerritoryId, x.PrimaryJobId })
+                .IsUnique();
+
+            // Breakdowns keys
             modelBuilder.Entity<SpeciesBreakdown>()
                 .HasKey(x => new { x.ParentId, x.SpeciesId });
             modelBuilder.Entity<CultureBreakdown>()
@@ -291,17 +358,22 @@ namespace EconModels
             modelBuilder.Entity<PoliticalBreakdown>()
                 .HasKey(x => new { x.ParentId, x.PoliticalGroupId });
 
-            // Pop Group Indeces
-            // There should only be one pop group per job in each territory.
-            modelBuilder.Entity<PopulationGroup>()
-                .HasIndex(x => new { x.TerritoryId, x.PrimaryJobId })
-                .IsUnique();
+            // connections handled by EF.
+            // Territory and Market connections handled by them.
+
+            #endregion PopulationGroup
+
+            #region Territory
 
             // Territory
             // Territory index
             modelBuilder.Entity<Territory>()
-                .HasIndex(x => x.Name)
+                .HasIndex(x => new { x.Name, x.PlanetId })
                 .IsUnique();
+
+            // planets handled by planet
+
+            #region PublicGood
 
             // Public Goods
             modelBuilder.Entity<PublicGood>()
@@ -312,6 +384,10 @@ namespace EconModels
                 .WithRequired(x => x.Territory)
                 .WillCascadeOnDelete(true);
 
+            #endregion PublicGood
+
+            #region LocalResource
+
             // Local Resources
             modelBuilder.Entity<LocalResource>()
                 .HasKey(x => new { x.ResourceId, x.TerritoryId });
@@ -320,6 +396,10 @@ namespace EconModels
                 .HasMany(x => x.LocalResources)
                 .WithRequired(x => x.Territory)
                 .WillCascadeOnDelete(true);
+
+            #endregion LocalResource
+
+            #region OutgoingConnections
 
             // Outgoing Connections
             modelBuilder.Entity<TerritoryConnection>()
@@ -330,6 +410,10 @@ namespace EconModels
                 .HasForeignKey(x => x.StartId)
                 .WillCascadeOnDelete(true);
 
+            #endregion OutgoingConnections
+
+            #region IncomingConnections
+
             // Incoming Connections
             modelBuilder.Entity<Territory>()
                 .HasMany(x => x.IncomingConnections)
@@ -337,11 +421,19 @@ namespace EconModels
                 .HasForeignKey(x => x.EndId)
                 .WillCascadeOnDelete(false);
 
+            #endregion IncomingConnections
+
+            #region Population
+
             // Pop Contained Connection
             modelBuilder.Entity<Territory>()
                 .HasMany(x => x.Pops)
-                .WithRequired(x => x.Territory) // make required later.
-                .WillCascadeOnDelete(false);
+                .WithRequired(x => x.Territory) 
+                .WillCascadeOnDelete(true);
+
+            #endregion Population
+
+            #region LandOwner
 
             // Land Owners
             modelBuilder.Entity<LandOwner>()
@@ -350,6 +442,97 @@ namespace EconModels
                 .HasMany(x => x.LandOwners)
                 .WithRequired(x => x.Territory)
                 .WillCascadeOnDelete(true);
+
+            #endregion LandOwner
+
+            // Region handled by Region
+            // Planet handled by planet
+
+            #endregion Territory
+
+            #region Region
+
+            // Region must have a unique name on a planetary basis.
+            modelBuilder.Entity<Region>()
+                .HasIndex(x => new { x.Name, x.PlanetId })
+                .IsUnique(true);
+
+            // child/parent connection.
+            modelBuilder.Entity<Region>()
+                .HasMany(x => x.Children)
+                .WithOptional(x => x.Parent)
+                .Map(x =>
+                {
+                    x.ToTable("RegionTree");
+                })
+                .WillCascadeOnDelete(true);
+
+            // planet handles connection
+
+            // Territory Connection
+            modelBuilder.Entity<Region>()
+                .HasOptional(x => x.Territory)
+                .WithOptionalPrincipal(x => x.Region)
+                .WillCascadeOnDelete(false);
+
+            #endregion Region
+
+            #region Planet
+
+            // planet index.
+            modelBuilder.Entity<Planet>()
+                .HasIndex(x => new { x.Name })
+                .IsUnique(true);
+
+            #region UntappedResources
+
+            // Untapped Resources
+            modelBuilder.Entity<PlanetResources>()
+                .HasKey(x => new { x.PlanetId, x.ResourceId });
+
+            modelBuilder.Entity<Planet>()
+                .HasMany(x => x.Untapped)
+                .WithRequired(x => x.Planet)
+                .WillCascadeOnDelete(true);
+
+            #endregion UntappedResources
+
+            #region RegionConnections
+
+            modelBuilder.Entity<Planet>()
+                .HasMany(x => x.Regions)
+                .WithRequired(x => x.Planet)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Planet>()
+                .HasRequired(x => x.HeadRegion);
+
+            #endregion RegionConnection
+
+            #region Territories
+
+            modelBuilder.Entity<Planet>()
+                .HasMany(x => x.Territories)
+                .WithRequired(x => x.Planet)
+                .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<Planet>()
+                .HasOptional(x => x.NorthPole);
+
+            modelBuilder.Entity<Planet>()
+                .HasOptional(x => x.SouthPole);
+
+            #endregion Territories
+
+            #endregion Planet
+
+            #region InfrastructureRequirements
+
+            modelBuilder.Entity<InfrastructureRequirements>()
+                .HasIndex(x => new { x.ProductId, x.Tag })
+                .IsUnique(true);
+
+            #endregion InfrastructureRequirements
         }
 
         public System.Data.Entity.DbSet<EconModels.PopulationModel.SpeciesTag> SpeciesTags { get; set; }

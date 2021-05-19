@@ -28,11 +28,9 @@ namespace EconModels.PopulationModel
         [DisplayName("Name")]
         public string Name { get; set; }
 
-        // Todo, Make Required
         [Required]
         public int TerritoryId { get; set; }
 
-        // Todo, Make Required
         [ForeignKey("TerritoryId")]
         [DisplayName("Territory")]
         public virtual Territory Territory { get; set; }

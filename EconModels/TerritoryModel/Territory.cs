@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +28,17 @@ namespace EconModels.TerritoryModel
         /// </summary>
         [Required, StringLength(40)]
         public string Name { get; set; }
+
+        /// <summary>
+        /// The Id of the territory's planet.
+        /// </summary>
+        [Required]
+        public int PlanetId { get; set; }
+
+        /// <summary>
+        /// The Planet this territory is attached to.
+        /// </summary>
+        public virtual Planet Planet { get; set; }
 
         // Coordinates for within an organized group
         public int? X { get; set; }
@@ -70,27 +82,27 @@ namespace EconModels.TerritoryModel
         /// This is how much will be retained before flowing into adjacent
         /// territories. Special storage, as it's GOING to be used.
         /// </summary>
-        [Required, Range(0, int.MaxValue)]
+        [Required, Range(0, double.MaxValue)]
         public decimal WaterStorage { get; set; }
 
         /// <summary>
         /// The space that this natural water storage takes up in acre.
         /// This space is reserved by the land.
         /// </summary>
-        [Required, Range(0, int.MaxValue)]
+        [Required, Range(0, double.MaxValue)]
         public decimal WaterStorageSpace { get; set; }
 
         /// <summary>
         /// The amount of water flowing into the territory from neighbors.
         /// Measured in m^3/day.
         /// </summary>
-        [Range(0, int.MaxValue)]
+        [Range(0, double.MaxValue)]
         public decimal WaterInFlow { get; set; }
 
         /// <summary>
         /// The amount of water flowing into the territory from neighbors.
         /// </summary>
-        [Range(0, int.MaxValue)]
+        [Range(0, double.MaxValue)]
         public decimal WaterOutFlow { get; set; }
 
         /// <summary>
@@ -129,13 +141,11 @@ namespace EconModels.TerritoryModel
 
         // Governor Placeholder
 
-        // Planetary parent placeholder.
-
         /// <summary>
         /// The Available land, unclaimed by landowners. Includes both land and
         /// water territories.
         /// </summary>
-        [Required, Range(0, int.MaxValue)]
+        [Required, Range(0, double.MaxValue)]
         public decimal AvailableLand { get; set; }
 
         /// <summary>
@@ -144,7 +154,16 @@ namespace EconModels.TerritoryModel
         /// </summary>
         public virtual ICollection<LandOwner> LandOwners { get; set; }
 
-        // TODO parent integration/Consolidation structure.
+        /// <summary>
+        /// The <see cref="Region"/> node which owns this.
+        /// </summary>
+        [Required]
+        public int RegionId { get; set; }
+
+        /// <summary>
+        /// The <see cref="Region"/> node which owns this.
+        /// </summary>
+        public virtual Region Region { get; set; }
 
         // Claimants handled by governor not territory.
     }

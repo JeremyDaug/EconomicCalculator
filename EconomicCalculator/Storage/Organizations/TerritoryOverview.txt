@@ -4,21 +4,96 @@ Territory is the storage mechanism for physical space, there are a number of met
 can ... (more stuff think about this later, already have ideas that are relatively
 solid, write down later.)
 
+- Planets, are the level of organization for commonly traversable territories. All
+  territories in a planet should be reachable by only land and sea. Planets are also not
+  necissarily planets, but can include both artificial structures and smaller bodies. 
+  Planets also centralize many common features of the territories beneath them. This includes:
+  - Primary Information, which defines the statistics of the planet.
+	- Untapped Resources, this represents the raw resources of the planet and should include
+      effectively everything that could be harvested. Territory Piles, when created, are
+	  subtracted from this. The sum of all of these resources, plus the piles, should add to
+	  the Mass of the planet.
+	- Mass, this is the current mass of the planet. This is everything on the planet in it's
+	  entirety and helps define the gravity of the planet surface. This is updated only when
+	  resources are removed or added to the planet (IE, when stuff is put into orbit or brought 
+	  down).
+	- Surface Area, the surface area of the planet. This should be equivalent to the sum of
+	  all territories on the planet. This is measured in Km^2 and should be a whole number.
+	- Territories, this is all of the territories of the planet. These are organized in two 
+	  methods. First loosely, as just a list for sanity connections, and as a tree, organizing 
+	  continents, regions, states, providences, and finally territories.
+	- Poles North and South, special territories which are designed to be filled with the
+	  rounding errors of the planet effectively. When a planet shrinks they also absorb the
+	  land and buildings from tiles that disappear and are the areas where land is created or
+	  destroyed.
+	- Atmospheric Pressure, the pressure of the atmosphere at sea level.
+	- Tempurature, the average tempurature of the planet.
+	  
+  - Derived Stats, calculated from other stats.
+    - Radius, based on the Surface area. We assume a density of 5g/cm^3 (5,000kg/m^3) for
+	  terrestrial planets, 1000kg/m^3 for Gas Planets, and 1.5 g/cm^3 (1500 kg/m^3) for normal
+	  stars, 4e17 kg/m^3 for neutron stars. Black holes have their schwarzchild radius.
+	- Gravity, based on radius and Mass.
+
+
+  - Planetary Composition. Because of how the system will have to work to maintain my sanity,
+    composition is based on existing materials. Gasses will be assumed to be in the atmosphere,
+	Liquids part of the water systems, and solids part of the ground. Unless specified the big
+	three (air, water, land), are equal parts of each untapped resource. Liquid water and air
+	may have concentrations, but only by generation from actors and they will disperse into
+	the air, giving local effects first. If they do not precipitate out of the air/water, they
+	will eventually be added to the atmosphere as a flat modifier. Land effects do not spread 
+	out, they simply pile up there.
+  - Planetary Mapping. There are 3 major components to the map. The two poles, and the grid.
+    The poles act as a buffer, any land which doesn't fit nicely into the grid is split evenly
+	between the two poles. The grid is made of regular sized hexes and seeks a common level.
+	The grid seeks to keep dimensions of X tall by 2X-1 wide. Any hexes added or destroyed
+	pull from or go to the poles. When adding the horizontal it alternates between left and
+	right sides. When adding rows it alternates between top and bottom.
+	- Starting from 1km^2, a planet starts with just the north pole. All space is added to
+	  it until it reaches enough space for 2 tiles, then it splits equally into North and
+	  South. It will add to both of them in equal portions until it reaches enough for six
+	  territory hexes, then it will create a grid 2 rows by 3 columns. Excess space will be
+	  added to the poles until enough for another strip can be added.
+
+	  if columns == 2 * rows - 1
+	      if rows is even
+		      add row to top
+		  else
+		      add row to bottom
+	  else
+	      if columns is odd
+		      add column to left
+		  else
+		      add column to right.
+	  When removing land from the poles it selects unused land first. If it must destroy land
+	  that is being used it will demolish anything on the land, liquidating any buildings into
+	  it's failed components.
+
+
 
 - Territory Combination - See Market Overview on how territories are combined and unified.
 
 - Territory Organization, Territories can be organized into groups artificially by the 
   governors. These are organizations which help governors, and other organizations navigate
   and organize. The (hypothetical) heirarchy of organization from the top down.
-  - Sector
-    - Subsector (Possibly Optional)
-	  - System
-	    - Planet
-		  - Continent
-		    - Region
-			  - State
-			    - Providince
-				  - Territory (base)
+  - Quadrant 10
+	- Cluster 9
+	  - Sector 8
+		- Subsector (Possibly Optional) 7
+		  - System 6
+			- Planet 5
+			  - Continent 4
+				- Region 3
+				  - State 2
+					- Providince 1
+					  - Territory (base) 0
+  - Water territories are separated from land, and changing land to water or water to land
+    switches their category. Seas also have a heirarchy for organization.
+	- Ocean
+	  - Sea
+	    - Gulf
+		  - Lake
   - Integration and Consolidation is discouraged between territories which are in different
     parts of the same level. IE, Territories in the same providince take precedence over
 	territories in different providences when consolidation or integration is being sought.
