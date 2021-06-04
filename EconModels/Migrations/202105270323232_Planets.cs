@@ -15,8 +15,11 @@
                     {
                         Id = c.Int(nullable: false, identity: true),
                         Name = c.String(nullable: false, maxLength: 30),
+                        Type = c.Int(nullable: false),
+                        Shape = c.Int(nullable: false),
                         Dead = c.Boolean(nullable: false),
                         Mass = c.Double(nullable: false),
+                        LossSafe = c.Double(nullable: false),
                         SurfaceArea = c.Decimal(nullable: false, precision: 18, scale: 2),
                         AirPressure = c.Decimal(nullable: false, precision: 18, scale: 2),
                         Tempurature = c.Decimal(nullable: false, precision: 18, scale: 2),
@@ -45,7 +48,7 @@
                         TerritoryId = c.Int(),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.Regions", t => t.ParentId, cascadeDelete: true)
+                .ForeignKey("dbo.Regions", t => t.ParentId, cascadeDelete: false)
                 .ForeignKey("dbo.Planets", t => t.PlanetId)
                 .Index(t => new { t.Name, t.PlanetId }, unique: true)
                 .Index(t => t.ParentId);
@@ -71,7 +74,7 @@
                         Id = c.Int(nullable: false, identity: true),
                         ProductId = c.Int(nullable: false),
                         Density = c.Decimal(nullable: false, precision: 18, scale: 2),
-                        Tag = c.String(),
+                        Tag = c.String(nullable: false, maxLength: 20),
                         IsDiscrete = c.Boolean(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
@@ -85,7 +88,7 @@
             CreateIndex("dbo.Territories", "Region_Id");
             AddForeignKey("dbo.Territories", "Region_Id", "dbo.Regions", "Id");
             AddForeignKey("dbo.Territories", "PlanetId", "dbo.Planets", "Id", cascadeDelete: true);
-            AddForeignKey("dbo.PopulationGroups", "TerritoryId", "dbo.Territories", "Id", cascadeDelete: true);
+            AddForeignKey("dbo.PopulationGroups", "TerritoryId", "dbo.Territories", "Id", cascadeDelete: false);
         }
         
         public override void Down()

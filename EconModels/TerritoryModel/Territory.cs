@@ -1,6 +1,7 @@
 ﻿using EconModels.PopulationModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -15,7 +16,6 @@ namespace EconModels.TerritoryModel
         {
             OutgoingConnections = new List<TerritoryConnection>();
             IncomingConnections = new List<TerritoryConnection>();
-            Pops = new List<PopulationGroup>();
             LandOwners = new List<LandOwner>();
             LocalResources = new List<LocalResource>();
             PublicGoods = new List<PublicGood>();
@@ -52,11 +52,36 @@ namespace EconModels.TerritoryModel
         [Required]
         public decimal Extent { get; set; }
 
+        // availble land is not stored, instead it is calculated based on
+        // the extent * (1-waterCaverage) - Land Owned.
+
         /// <summary>
         /// The elevation of the territory in meters relative to the planet.
         /// </summary>
         [Required]
         public int Elevation { get; set; }
+
+        /// <summary>
+        /// The percent of the land covered in water.
+        /// Includes space for rivers, which if they exist take up
+        /// a minimum of 5%.
+        /// </summary>
+        [Required, Range(0, 1)]
+        public float WaterCoverage { get; set; }
+
+        /// <summary>
+        /// The amount of water stored in the territory at all times.
+        /// Does not include flowing water, only stationary.
+        /// </summary>
+        [Required, Range(0, double.MaxValue)]
+        public decimal WaterQuantity { get; set; }
+
+        /// <summary>
+        /// Whether the territory has a river flowing through it or
+        /// not.
+        /// </summary>
+        [Required, DefaultValue(false)]
+        public bool HasRiver { get; set; }
 
         /// <summary>
         /// The average humidity of the territory, in the form of average cm of rainfall in a year.
@@ -77,33 +102,8 @@ namespace EconModels.TerritoryModel
         [Required]
         public int Roughness { get; set; }
 
-        /// <summary>
-        /// The amount of water that is stored in the province, in cubic m.
-        /// This is how much will be retained before flowing into adjacent
-        /// territories. Special storage, as it's GOING to be used.
-        /// </summary>
-        [Required, Range(0, double.MaxValue)]
-        public decimal WaterStorage { get; set; }
-
-        /// <summary>
-        /// The space that this natural water storage takes up in acre.
-        /// This space is reserved by the land.
-        /// </summary>
-        [Required, Range(0, double.MaxValue)]
-        public decimal WaterStorageSpace { get; set; }
-
-        /// <summary>
-        /// The amount of water flowing into the territory from neighbors.
-        /// Measured in m^3/day.
-        /// </summary>
-        [Range(0, double.MaxValue)]
-        public decimal WaterInFlow { get; set; }
-
-        /// <summary>
-        /// The amount of water flowing into the territory from neighbors.
-        /// </summary>
-        [Range(0, double.MaxValue)]
-        public decimal WaterOutFlow { get; set; }
+        // Plot is not stored as it's a composite of existing info here
+        // and the generic land product.
 
         /// <summary>
         /// This is the public infrastructure of the location. Includes everything
@@ -121,7 +121,13 @@ namespace EconModels.TerritoryModel
         // Infrastructure is removed, it is based on the public goods in the territory and
         // is not a singular value.
 
-        // Adjacent Territories
+        /// <summary>
+        /// The level of exploitation reached in the territory.
+        /// </summary>
+        [Required, Range(0, int.MaxValue)]
+        public int ExploitationLevel { get; set; }
+
+        // Adjacent Territories not covered by planetary grid connection.
         /// <summary>
         /// Territories that this territory connects to indirectly.
         /// </summary>
@@ -133,20 +139,10 @@ namespace EconModels.TerritoryModel
         public virtual ICollection<TerritoryConnection> IncomingConnections { get; set; }
 
         // Market Connection Placeholder.
-        /// <summary>
-        /// The population groups in the territory. If integrated, moves to integrated
-        /// territory.
-        /// </summary>
-        public virtual ICollection<PopulationGroup> Pops { get; set; }
+
+        // No population Connection as pops live in markets, not territories.
 
         // Governor Placeholder
-
-        /// <summary>
-        /// The Available land, unclaimed by landowners. Includes both land and
-        /// water territories.
-        /// </summary>
-        [Required, Range(0, double.MaxValue)]
-        public decimal AvailableLand { get; set; }
 
         /// <summary>
         /// The Table of Land Owners, pointing to the populations who own them and

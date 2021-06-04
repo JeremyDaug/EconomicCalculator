@@ -102,9 +102,13 @@
     <Compile Include="Migrations\202104260220229_PopGroupUpdate.designer.cs">
       <DependentUpon>202104260220229_PopGroupUpdate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202105190138308_Planets.cs" />
-    <Compile Include="Migrations\202105190138308_Planets.designer.cs">
-      <DependentUpon>202105190138308_Planets.cs</DependentUpon>
+    <Compile Include="Migrations\202105270323232_Planets.cs" />
+    <Compile Include="Migrations\202105270323232_Planets.designer.cs">
+      <DependentUpon>202105270323232_Planets.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202106040406015_ChangeTerritory.cs" />
+    <Compile Include="Migrations\202106040406015_ChangeTerritory.designer.cs">
+      <DependentUpon>202106040406015_ChangeTerritory.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
@@ -150,6 +154,8 @@
     <Compile Include="TerritoryModel\LocalResource.cs" />
     <Compile Include="TerritoryModel\Planet.cs" />
     <Compile Include="TerritoryModel\PlanetResources.cs" />
+    <Compile Include="TerritoryModel\PlanetTopography.cs" />
+    <Compile Include="TerritoryModel\PlanetType.cs" />
     <Compile Include="TerritoryModel\PublicGood.cs" />
     <Compile Include="TerritoryModel\Region.cs" />
     <Compile Include="TerritoryModel\Territory.cs" />
@@ -202,8 +208,11 @@
     <EmbeddedResource Include="Migrations\202104260220229_PopGroupUpdate.resx">
       <DependentUpon>202104260220229_PopGroupUpdate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202105190138308_Planets.resx">
-      <DependentUpon>202105190138308_Planets.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202105270323232_Planets.resx">
+      <DependentUpon>202105270323232_Planets.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202106040406015_ChangeTerritory.resx">
+      <DependentUpon>202106040406015_ChangeTerritory.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

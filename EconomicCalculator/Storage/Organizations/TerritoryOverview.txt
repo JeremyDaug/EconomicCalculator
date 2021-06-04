@@ -154,12 +154,17 @@ solid, write down later.)
 	A = 1/2 * a^2 / 3^(1/2)
 - The area of a territory with Apothem radius 10km = 28.8675134 km^2,
   which is 7,133.3184 Acres
+- 10km = 28.8675134 km^2 -> 25 km^2
+- 15km = 64.951905 km^2  -> 65 km^2
+- 20km = 115.470053 km^2 -> 115 km^2
+- 25km = 180.421959 km^2 -> 180 km^2
+- 30km = 259.807621 km^2 -> simplified to 250km^2 !! This one !!
   - For sanity sake we'll round Km^2 to Acre so that it's 1km^2:250acres, this means
     there are 2000 plots per km^2.
-  - We'll also round out a Territory to 25km for a 10km hex. Again, to maintain sanity.
-  - This make as 10 km hex has 25 km^2 and 6250 acres.
-  - This means that it takes 2.5%(0.025) of a km^3 of water to cover a hex 1m deep.
-    A km^3 will fill a hex 40 m deep.
+  - We'll also round out a Territory to 250km^2 for a 30km hex. Again, to maintain sanity.
+  - This make as 30 km hex has 250 km^2 and 62,500 acres.
+  - This means that it takes 25%(0.25) of a km^3 of water to cover a hex 1m deep.
+    A km^3 will fill a hex 4 m deep.
 - Waterways, Water is an important resource. There are 3 methods by which a territory
   can have water. 
   - First is Humidity, measured in annual Rainfall across the territory.

@@ -12,7 +12,7 @@ namespace EconomicCalculator.Storage.Organizations
     public class Territory : ITerritory
     {
         private int _elevation;
-        private double _waterLevel;
+        private double _waterCoverage;
         private int _roughness;
         private int _humidity;
         private double _infrastructureLevel;
@@ -63,14 +63,14 @@ namespace EconomicCalculator.Storage.Organizations
         /// The percentage of water that covers the land.
         /// Mostly meant for Coastal Territory, lakes, or seas.
         /// </summary>
-        public double WaterLevel
+        public double WaterCoverage
         {
-            get => _waterLevel;
+            get => _waterCoverage;
             set
             {
                 if (value < 0) // Water Level between 0 and 1 creates coast, 1 and above adds depth to a sea tile.
                     throw new ArgumentOutOfRangeException("Water Level must be greater than 1.");
-                _waterLevel = value;
+                _waterCoverage = value;
             }
         }
 
@@ -132,7 +132,7 @@ namespace EconomicCalculator.Storage.Organizations
         /// The level of infrastructure, is build in portions with
         /// each whole number increase being a major step and overcoming
         /// roughness.
-        /// This is a place holder and needs to be expanded upon.
+        /// TODO, update and replace with Public Goods as infrastructure.
         /// </summary>
         public double InfrastructureLevel
         {
@@ -145,6 +145,14 @@ namespace EconomicCalculator.Storage.Organizations
                 _infrastructureLevel = value;
             }
         }
+
+        // TODO Local Resources Will Go Here
+
+        /// <summary>
+        /// The depth of exploitation reached, and how much more it can be explored
+        /// for material resources.
+        /// </summary>
+        public int ExploitationLevel { get; set; }
 
         /// <summary>
         /// Links to the neighboring Hexes. Exact organization TBD.
@@ -171,6 +179,8 @@ namespace EconomicCalculator.Storage.Organizations
         /// </summary>
         public IPopulations Residents { get; set; }
 
+        // public IPlanet Planet { get; set; } TODO
+
         // planet connection Placeholder
 
         /// <summary>
@@ -181,11 +191,10 @@ namespace EconomicCalculator.Storage.Organizations
 
         /// <summary>
         /// The amount of land yet to be bought.
+        /// TODO, update this to include and update upon purchase ownership and
+        /// changes in water coverage.
         /// </summary>
-        public double AvailableLand
-        {
-            get => Extent - Ownership.Sum(x => x.Value);
-        }
+        public double AvailableLand { get; set; }
 
         /// <summary>
         /// Who owns land and how much.

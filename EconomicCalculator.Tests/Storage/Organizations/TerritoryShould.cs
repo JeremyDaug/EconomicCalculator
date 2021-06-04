@@ -63,7 +63,7 @@ namespace EconomicCalculator.Tests.Storage.Organizations
         [TestCase(-1)]
         public void ThrowIfWaterLevelIsLessThan0(double val)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => sut.WaterLevel = val);
+            Assert.Throws<ArgumentOutOfRangeException>(() => sut.WaterCoverage = val);
         }
 
         #endregion WaterLevel

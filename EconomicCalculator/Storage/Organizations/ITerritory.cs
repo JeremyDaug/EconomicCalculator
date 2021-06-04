@@ -43,7 +43,7 @@ namespace EconomicCalculator.Storage.Organizations
         /// The percentage of water that covers the land.
         /// Mostly meant for Coastal Territory, lakes, or seas.
         /// </summary>
-        double WaterLevel { get; }
+        double WaterCoverage { get; }
 
         /// <summary>
         /// Whether the territory has a river or not.

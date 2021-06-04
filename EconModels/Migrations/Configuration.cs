@@ -68,6 +68,7 @@
             string security = "security";
 
             #endregion Constants
+            
             #region Product
             // Types of labor
             var MenialLabor = new Product
@@ -1682,8 +1683,37 @@
 
             #endregion PoliticalGroup
 
-            // Territories, to maintain sanity going forward for
-            // generation.
+            // Planet Generation, should handle territory generation within.
+
+            #region Planet
+
+            // Only one planet made. This planet is alive.
+            // has resources based on earth's.
+
+            var planetia = new Planet
+            {
+                Name = "Planetia",
+                Type = PlanetType.Terran,
+                Shape = PlanetTopography.Sphere,
+                Dead = false,
+                // Untapped
+                Mass = 5.972e24, // earth mass
+                LossSafe = 0,
+                SurfaceArea = 510_064_472, // earth size
+                AirPressure = 1, // atmosphere.
+                Tempurature = 35, // WAG
+                // regions
+                // territories
+            };
+
+            // Generate the grid based on construction data.
+            planetia.GeneratePlanetSphere();
+
+            // Add planet to the db (territories are only added as needed.
+            
+
+            #endregion Planet
+
             #region Territories
 
             var dumland = new Territory
@@ -1694,14 +1724,13 @@
                 Z = 0,
                 Extent = 25 * 250, // rounded area in a 10km hexagon.
                 Elevation = 0,
-                WaterStorage = 10_000_000,
-                WaterStorageSpace = 100_000_000,
-                WaterInFlow = 0,
-                WaterOutFlow = 0,
+                WaterQuantity = 10_000_000,
+                WaterCoverage = 20,
+                ExploitationLevel = 0,
+                HasRiver = true,
                 Humidity = 50,
                 Tempurature = 20,
-                Roughness = 0,
-                AvailableLand = 25 * 250 * 8
+                Roughness = 0
             };
 
             var marketrea = new Territory
@@ -1712,14 +1741,13 @@
                 Z = -1,
                 Extent = 25 * 250, // rounded area in a 10km hexagon.
                 Elevation = 0,
-                WaterStorage = 10_000,
-                WaterStorageSpace = 100_000,
-                WaterInFlow = 0,
-                WaterOutFlow = 0,
+                WaterQuantity = 10_000,
+                WaterCoverage = 100_000,
+                ExploitationLevel = 0,
+                HasRiver = false,
                 Humidity = 20,
                 Tempurature = 20,
-                Roughness = 0,
-                AvailableLand = 25 * 250 * 8
+                Roughness = 0
             };
 
             var newTerritorries = new List<Territory>

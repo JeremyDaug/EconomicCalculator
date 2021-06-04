@@ -35,6 +35,24 @@ namespace EconModels.TerritoryModel
         public string Name { get; set; }
 
         /// <summary>
+        /// The seed for the terrain in generation.
+        /// </summary>
+        [Required]
+        public int Seed { get; set; }
+
+        /// <summary>
+        /// The planet type, lots of varieties here.
+        /// </summary>
+        [Required, DefaultValue(PlanetType.Terrestrial)]
+        public PlanetType Type { get; set; }
+
+        /// <summary>
+        /// The Shape of the planet.
+        /// </summary>
+        [Required, DefaultValue(PlanetTopography.None)]
+        public PlanetTopography Shape { get; set; }
+
+        /// <summary>
         /// Marks a planet as being effectively fixed and
         /// dead. Actions will not occur barring events.
         /// This will save cycles.
@@ -44,15 +62,28 @@ namespace EconModels.TerritoryModel
 
         /// <summary>
         /// The Available Planet resources that can be found and
-        /// tapped. When a territory creates a pile,
+        /// tapped. When a territory creates a pile. When generated, untapped resources
+        /// should add up to the mass of the planet (allow an error of 0.0000001% for sanity)
+        /// Note, The mass of the planet is a double, while this is a list of decimals.
+        /// Doubles have a lot more room, but any object above 10^32 is a black hole and
+        /// has no breakdown.
         /// </summary>
         public virtual ICollection<PlanetResources> Untapped { get; set; }
 
         /// <summary>
-        /// The mass of the planet in kg. Only Updated when needed.
+        /// The mass of the planet in kg. Only Updated when needed, IE, when mass leaves the
+        /// planet.
         /// </summary>
         [Required, Range(0, double.MaxValue)]
         public double Mass { get; set; }
+
+        /// <summary>
+        /// A catch to ensure no mass removed from the planet is lost. Removed mass is
+        /// first moved to here, then, if this will change the Actual mass, then it is removed
+        /// from that mass.
+        /// </summary>
+        [Required, Range(0, double.MaxValue), DefaultValue(0)]
+        public double LossSafe { get; set; }
 
         /// <summary>
         /// The area of the planet's surface in whole km^2.
@@ -72,6 +103,50 @@ namespace EconModels.TerritoryModel
         /// </summary>
         [Required]
         public decimal Tempurature { get; set; }
+
+        /// <summary>
+        /// The minimum row of the territory grid.
+        /// </summary>
+        public int RowMin { get; set; }
+
+        /// <summary>
+        /// The maximum row of the territory grid.
+        /// </summary>
+        public int RowMax { get; set; }
+
+        /// <summary>
+        /// The number of rows in the territory grid.
+        /// </summary>
+        [NotMapped]
+        public int Rows
+        {
+            get
+            {
+                return RowMax - RowMin + 1;
+            }
+        }
+
+        /// <summary>
+        /// The minimum column of the territory grid.
+        /// </summary>
+        public int ColMin { get; set; }
+
+        /// <summary>
+        /// The maximum column of the territory grid.
+        /// </summary>
+        public int ColMax { get; set; }
+
+        /// <summary>
+        /// The number of colums in the grid.
+        /// </summary>
+        [NotMapped]
+        public int Columns
+        {
+            get
+            {
+                return ColMax - ColMin + 1;
+            }
+        }
 
         /// <summary>
         /// The regions of the planet, disorganized.
@@ -117,12 +192,88 @@ namespace EconModels.TerritoryModel
         /// </summary>
         public virtual Territory SouthPole { get; set; }
 
-        /// <summary>
-        /// Generates the territory tiles from.
-        /// </summary>
-        public void GenerateTerritories()
+        private Territory TerrGen(int? x, int? y, int? z, string name)
         {
+            return new Territory
+            {
+                Name = name,
+                X = x,
+                Y = y,
+                Z = z,
+                Elevation = 0,
+                Extent = 25 * 250,
+                Humidity = 10,
+                Planet = this,
+                PlanetId = Id,
+                Roughness = 2,
+                Tempurature = 60,
+                WaterQuantity = 0,
+                WaterCoverage = 0.00F,
+                ExploitationLevel = 0,
+                HasRiver = false,
+            };
+        }
 
+        private int HexZ(int x, int y)
+        {
+            return -x - y;
+        }
+
+        /// <summary>
+        /// Generates the territory tiles for the planet.
+        /// </summary>
+        public void GeneratePlanetSphere()
+        {
+            // set rows and columns these need to be 0 no matter what.
+            RowMin = 0;
+            RowMax = 0;
+            ColMin = 0;
+            ColMax = 0;
+            Shape = PlanetTopography.Sphere;
+            // Hexes are 250km^2 (30km in radius)
+            // For earth size planet that is 20,402,578
+            var hexCount = Math.Floor(SurfaceArea / 250);
+
+            if (hexCount <= 1) // only one hex, just make north pole.
+            {
+                // Create North Pole
+                var NP = TerrGen(null, null, null, "North Pole");
+                // update it's extent in acres.
+                NP.Extent = SurfaceArea * 250;
+                // Add to territories.
+                Territories.Add(NP);
+                // set NP
+                NorthPole = NP;
+            }
+            else if (hexCount <= 8) // the smallest grid is 2x3
+            {
+                // Do north
+                var NP = TerrGen(null, null, null, "North Pole");
+                NP.Extent = Math.Floor(SurfaceArea) / 2 * 250;
+                Territories.Add(NP);
+                NorthPole = NP;
+                // Do south
+                var SP = TerrGen(null, null, null, "South Pole");
+                SP.Extent = Math.Floor(SurfaceArea) / 2 * 250;
+                Territories.Add(SP);
+                SouthPole = SP;
+            }
+            else // enough for the smallest grid.
+            {
+                // get the height and width of our map.
+
+                var height = Math.Sqrt((double)SurfaceArea / 2);
+
+                var rows = Math.Floor(height);
+                var columns = Math.Floor(2 * height);
+
+                // get rows, subtract 1 for the 0, divide by 2 and round up
+                // for Positive, down for negative.
+                RowMax = (int)Math.Ceiling((rows - 1) / 2);
+                RowMin = (int)Math.Floor((rows - 1) / 2);
+                ColMax = (int)Math.Ceiling((columns - 1) / 2);
+                ColMin = (int)Math.Floor((columns - 1) / 2);
+            }
         }
     }
 }

@@ -78,6 +78,12 @@ namespace EconModels
         public DbSet<TerritoryConnection> TerritoryConnections { get; set; }
         public DbSet<LandOwner> LandOwners { get; set; }
 
+        // Regions
+        public DbSet<Region> Retgions { get; set; }
+
+        // Planets
+        public DbSet<Planet> Planets { get; set; }
+
         // Market
         public DbSet<Market> Markets { get; set; }
         public DbSet<ProductPrices> MarketPrices { get; set; }
@@ -423,16 +429,6 @@ namespace EconModels
 
             #endregion IncomingConnections
 
-            #region Population
-
-            // Pop Contained Connection
-            modelBuilder.Entity<Territory>()
-                .HasMany(x => x.Pops)
-                .WithRequired(x => x.Territory) 
-                .WillCascadeOnDelete(true);
-
-            #endregion Population
-
             #region LandOwner
 
             // Land Owners
@@ -465,14 +461,14 @@ namespace EconModels
                 {
                     x.ToTable("RegionTree");
                 })
-                .WillCascadeOnDelete(true);
+                .WillCascadeOnDelete(false);
 
             // planet handles connection
 
             // Territory Connection
             modelBuilder.Entity<Region>()
-                .HasOptional(x => x.Territory)
-                .WithOptionalPrincipal(x => x.Region)
+                .HasMany(x => x.Territories)
+                .WithRequired(x => x.Region)
                 .WillCascadeOnDelete(false);
 
             #endregion Region
