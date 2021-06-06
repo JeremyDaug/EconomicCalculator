@@ -21,14 +21,14 @@ namespace EconModels.MarketModel
 
         public int Id { get; set; }
 
-        [Required, StringLength(40, MinimumLength = 3)]
+        [StringLength(40)]
         public string Name { get; set; }
 
         // Total Population, 
         // Summed from population Groups
 
         // Territory Placeholder
-        public virtual Territory Territory { get; set; }
+        public virtual ICollection<Territory> Territories { get; set; }
 
         // Barter Bool, not stored in DB as it should be build wide.
 

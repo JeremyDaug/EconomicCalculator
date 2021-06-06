@@ -1,4 +1,5 @@
-﻿using EconModels.PopulationModel;
+﻿using EconModels.MarketModel;
+using EconModels.PopulationModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -138,7 +139,9 @@ namespace EconModels.TerritoryModel
         /// </summary>
         public virtual ICollection<TerritoryConnection> IncomingConnections { get; set; }
 
-        // Market Connection Placeholder.
+        public int MarketId { get; set; }
+
+        public virtual Market Market { get; set; }
 
         // No population Connection as pops live in markets, not territories.
 

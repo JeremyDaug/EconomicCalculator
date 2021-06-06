@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -105,48 +106,14 @@ namespace EconModels.TerritoryModel
         public decimal Tempurature { get; set; }
 
         /// <summary>
-        /// The minimum row of the territory grid.
-        /// </summary>
-        public int RowMin { get; set; }
-
-        /// <summary>
-        /// The maximum row of the territory grid.
-        /// </summary>
-        public int RowMax { get; set; }
-
-        /// <summary>
         /// The number of rows in the territory grid.
         /// </summary>
-        [NotMapped]
-        public int Rows
-        {
-            get
-            {
-                return RowMax - RowMin + 1;
-            }
-        }
-
-        /// <summary>
-        /// The minimum column of the territory grid.
-        /// </summary>
-        public int ColMin { get; set; }
-
-        /// <summary>
-        /// The maximum column of the territory grid.
-        /// </summary>
-        public int ColMax { get; set; }
+        public int Rows { get; set; }
 
         /// <summary>
         /// The number of colums in the grid.
         /// </summary>
-        [NotMapped]
-        public int Columns
-        {
-            get
-            {
-                return ColMax - ColMin + 1;
-            }
-        }
+        public int Columns { get; set; }
 
         /// <summary>
         /// The regions of the planet, disorganized.
@@ -192,6 +159,8 @@ namespace EconModels.TerritoryModel
         /// </summary>
         public virtual Territory SouthPole { get; set; }
 
+        // Helper Functions below.
+
         private Territory TerrGen(int? x, int? y, int? z, string name)
         {
             return new Territory
@@ -214,6 +183,31 @@ namespace EconModels.TerritoryModel
             };
         }
 
+        /// <summary>
+        /// Adds a territory to the Planet
+        /// x and y are bound to between 0 and column(x)/Rows(y)
+        /// If location is taken, it returns false.
+        /// </summary>
+        /// <param name="x"/>
+        /// <param name="y"/>
+        /// <param name="terr">The territory to add.</param>
+        /// <param name="context">The context of the planet.</param>
+        public bool AddTerritoryToLocation(int x, int y, Territory terr, EconSimContext context)
+        {
+            // if the location is already taken, return false.
+            if (Territories.Any(t => t.X == x && t.Y == y && t.Z == HexZ(x, y)))
+                return false;
+
+            // it's not taken, so add it.
+            terr.PlanetId = Id;
+            Territories.Add(terr);
+
+            context.Territories.AddOrUpdate(terr);
+            context.SaveChanges();
+
+            return true;
+        }
+
         private int HexZ(int x, int y)
         {
             return -x - y;
@@ -225,10 +219,8 @@ namespace EconModels.TerritoryModel
         public void GeneratePlanetSphere()
         {
             // set rows and columns these need to be 0 no matter what.
-            RowMin = 0;
-            RowMax = 0;
-            ColMin = 0;
-            ColMax = 0;
+            Rows = 0;
+            Columns = 0;
             Shape = PlanetTopography.Sphere;
             // Hexes are 250km^2 (30km in radius)
             // For earth size planet that is 20,402,578
@@ -261,18 +253,10 @@ namespace EconModels.TerritoryModel
             else // enough for the smallest grid.
             {
                 // get the height and width of our map.
-
                 var height = Math.Sqrt((double)SurfaceArea / 2);
-
-                var rows = Math.Floor(height);
-                var columns = Math.Floor(2 * height);
-
-                // get rows, subtract 1 for the 0, divide by 2 and round up
-                // for Positive, down for negative.
-                RowMax = (int)Math.Ceiling((rows - 1) / 2);
-                RowMin = (int)Math.Floor((rows - 1) / 2);
-                ColMax = (int)Math.Ceiling((columns - 1) / 2);
-                ColMin = (int)Math.Floor((columns - 1) / 2);
+                Rows = (int)Math.Floor(height);
+                Columns = (int)Math.Floor(2 * height);
+                // We do not add any territories unless needed.
             }
         }
     }

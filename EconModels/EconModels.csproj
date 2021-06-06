@@ -102,13 +102,17 @@
     <Compile Include="Migrations\202104260220229_PopGroupUpdate.designer.cs">
       <DependentUpon>202104260220229_PopGroupUpdate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202105270323232_Planets.cs" />
-    <Compile Include="Migrations\202105270323232_Planets.designer.cs">
-      <DependentUpon>202105270323232_Planets.cs</DependentUpon>
+    <Compile Include="Migrations\202106051958215_PlanetUpdate.cs" />
+    <Compile Include="Migrations\202106051958215_PlanetUpdate.designer.cs">
+      <DependentUpon>202106051958215_PlanetUpdate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202106040406015_ChangeTerritory.cs" />
-    <Compile Include="Migrations\202106040406015_ChangeTerritory.designer.cs">
-      <DependentUpon>202106040406015_ChangeTerritory.cs</DependentUpon>
+    <Compile Include="Migrations\202106060221332_SimplePlanetGrid.cs" />
+    <Compile Include="Migrations\202106060221332_SimplePlanetGrid.designer.cs">
+      <DependentUpon>202106060221332_SimplePlanetGrid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202106060519330_RegionGridStoring.cs" />
+    <Compile Include="Migrations\202106060519330_RegionGridStoring.designer.cs">
+      <DependentUpon>202106060519330_RegionGridStoring.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
@@ -149,6 +153,7 @@
     <Compile Include="ProductModel\ProductWantTag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SkillsModel\Skill.cs" />
+    <Compile Include="TerritoryModel\RegionHexCoord.cs" />
     <Compile Include="TerritoryModel\LandOwner.cs" />
     <Compile Include="TerritoryModel\InfrastructureRequirements.cs" />
     <Compile Include="TerritoryModel\LocalResource.cs" />
@@ -208,11 +213,14 @@
     <EmbeddedResource Include="Migrations\202104260220229_PopGroupUpdate.resx">
       <DependentUpon>202104260220229_PopGroupUpdate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202105270323232_Planets.resx">
-      <DependentUpon>202105270323232_Planets.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202106051958215_PlanetUpdate.resx">
+      <DependentUpon>202106051958215_PlanetUpdate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202106040406015_ChangeTerritory.resx">
-      <DependentUpon>202106040406015_ChangeTerritory.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202106060221332_SimplePlanetGrid.resx">
+      <DependentUpon>202106060221332_SimplePlanetGrid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202106060519330_RegionGridStoring.resx">
+      <DependentUpon>202106060519330_RegionGridStoring.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

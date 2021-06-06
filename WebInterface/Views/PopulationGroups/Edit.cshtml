@@ -25,10 +25,10 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.TerritoryId, "TerritoryId", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.MarketId, "MarketId", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("TerritoryId", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.TerritoryId, "", new { @class = "text-danger" })
+                @Html.DropDownList("MarketId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.MarketId, "", new { @class = "text-danger" })
             </div>
         </div>
 

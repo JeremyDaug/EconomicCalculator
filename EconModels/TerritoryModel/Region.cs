@@ -53,6 +53,13 @@ namespace EconModels.TerritoryModel
         public virtual ICollection<Territory> Territories { get; set; }
 
         /// <summary>
+        /// The corner points the region contains on the grid.
+        /// Follow clockwise inclusion and everything between the 
+        /// lines is contained within. Edges are included.
+        /// </summary>
+        public virtual ICollection<RegionHexCoord> ContainedSpace { get; set; }
+
+        /// <summary>
         /// The planet this region is attached to.
         /// </summary>
         [Required]

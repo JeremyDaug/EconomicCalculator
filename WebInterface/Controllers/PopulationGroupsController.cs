@@ -23,7 +23,7 @@ namespace WebInterface.Controllers
                 .Include(p => p.SpeciesBreakdown)
                 .Include(p => p.PoliticalBreakdown)
                 .Include(p => p.PrimaryJob)
-                .Include(p => p.Territory);
+                .Include(p => p.Market);
             return View(populationGroups.ToList());
         }
 
@@ -46,7 +46,7 @@ namespace WebInterface.Controllers
         public ActionResult Create()
         {
             ViewBag.PrimaryJobId = new SelectList(db.Jobs, "Id", "Name");
-            ViewBag.TerritoryId = new SelectList(db.Territories, "Id", "Name");
+            ViewBag.MarketId = new SelectList(db.Markets, "Id", "Name");
             return View();
         }
 
@@ -55,7 +55,7 @@ namespace WebInterface.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name,TerritoryId,Infants,Children,Adults,Seniors,SkillLevel,PrimaryJobId,Priority")] PopulationGroup populationGroup)
+        public ActionResult Create([Bind(Include = "Id,Name,MarketId,Infants,Children,Adults,Seniors,SkillLevel,PrimaryJobId,Priority")] PopulationGroup populationGroup)
         {
             if (ModelState.IsValid)
             {
@@ -68,7 +68,7 @@ namespace WebInterface.Controllers
 
                 // get the new pop group.
                 var pop = db.PopulationGroups
-                    .Single(x => x.TerritoryId == populationGroup.TerritoryId &&
+                    .Single(x => x.MarketId == populationGroup.MarketId &&
                                  x.PrimaryJobId == populationGroup.PrimaryJobId);
 
                 // Set Default Species
@@ -106,7 +106,7 @@ namespace WebInterface.Controllers
             }
 
             ViewBag.PrimaryJobId = new SelectList(db.Jobs, "Id", "Name", populationGroup.PrimaryJobId);
-            ViewBag.TerritoryId = new SelectList(db.Territories, "Id", "Name", populationGroup.TerritoryId);
+            ViewBag.MarketId = new SelectList(db.Markets, "Id", "Name", populationGroup.MarketId);
             return View(populationGroup);
         }
 
@@ -123,7 +123,7 @@ namespace WebInterface.Controllers
                 return HttpNotFound();
             }
             ViewBag.PrimaryJobId = new SelectList(db.Jobs, "Id", "Name", populationGroup.PrimaryJobId);
-            ViewBag.TerritoryId = new SelectList(db.Territories, "Id", "Name", populationGroup.TerritoryId);
+            ViewBag.MarketId = new SelectList(db.Markets, "Id", "Name", populationGroup.MarketId);
             return View(populationGroup);
         }
 
@@ -132,7 +132,7 @@ namespace WebInterface.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name,TerritoryId,Infants,Children,Adults,Seniors,SkillLevel,PrimaryJobId,Priority")] PopulationGroup populationGroup)
+        public ActionResult Edit([Bind(Include = "Id,Name,MarketId,Infants,Children,Adults,Seniors,SkillLevel,PrimaryJobId,Priority")] PopulationGroup populationGroup)
         {
             if (ModelState.IsValid)
             {
@@ -141,7 +141,7 @@ namespace WebInterface.Controllers
                 return RedirectToAction("Index");
             }
             ViewBag.PrimaryJobId = new SelectList(db.Jobs, "Id", "Name", populationGroup.PrimaryJobId);
-            ViewBag.TerritoryId = new SelectList(db.Territories, "Id", "Name", populationGroup.TerritoryId);
+            ViewBag.MarketId = new SelectList(db.Markets, "Id", "Name", populationGroup.MarketId);
             return View(populationGroup);
         }
 

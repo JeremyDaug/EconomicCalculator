@@ -79,6 +79,7 @@ namespace EconModels
         public DbSet<LandOwner> LandOwners { get; set; }
 
         // Regions
+        public DbSet<RegionHexCoord> RegionHexCords { get; set; }
         public DbSet<Region> Retgions { get; set; }
 
         // Planets
@@ -351,9 +352,9 @@ namespace EconModels
             #region PopulationGroup
 
             // Pop Group
-            // There should only be one pop group per job in each territory.
+            // There should only be one pop group per job in each Market.
             modelBuilder.Entity<PopulationGroup>()
-                .HasIndex(x => new { x.TerritoryId, x.PrimaryJobId })
+                .HasIndex(x => new { x.MarketId, x.PrimaryJobId })
                 .IsUnique();
 
             // Breakdowns keys
@@ -365,9 +366,20 @@ namespace EconModels
                 .HasKey(x => new { x.ParentId, x.PoliticalGroupId });
 
             // connections handled by EF.
-            // Territory and Market connections handled by them.
+            // Market connections handled by them.
 
             #endregion PopulationGroup
+
+            #region RegionHexCoord
+
+            modelBuilder.Entity<RegionHexCoord>()
+                .HasKey(x => new { x.RegionId, x.X, x.Y, x.Z });
+
+            modelBuilder.Entity<RegionHexCoord>()
+                .HasRequired(x => x.Region)
+                .WithMany(x => x.ContainedSpace);
+
+            #endregion RegionHexCoord
 
             #region Territory
 
@@ -428,6 +440,15 @@ namespace EconModels
                 .WillCascadeOnDelete(false);
 
             #endregion IncomingConnections
+
+            #region Markets
+
+            modelBuilder.Entity<Territory>()
+                .HasRequired(x => x.Market)
+                .WithMany(x => x.Territories)
+                .WillCascadeOnDelete(false);
+
+            #endregion Markets
 
             #region LandOwner
 

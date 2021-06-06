@@ -7,13 +7,13 @@ namespace EconModels.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class Planets : IMigrationMetadata
+    public sealed partial class PlanetUpdate : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Planets));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(PlanetUpdate));
         
         string IMigrationMetadata.Id
         {
-            get { return "202105270323232_Planets"; }
+            get { return "202106051958215_PlanetUpdate"; }
         }
         
         string IMigrationMetadata.Source

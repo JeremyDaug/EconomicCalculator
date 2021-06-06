@@ -1,4 +1,5 @@
 ﻿using EconModels.JobModels;
+using EconModels.MarketModel;
 using EconModels.TerritoryModel;
 using System;
 using System.Collections.Generic;
@@ -28,12 +29,18 @@ namespace EconModels.PopulationModel
         [DisplayName("Name")]
         public string Name { get; set; }
 
+        /// <summary>
+        /// The market id.
+        /// </summary>
         [Required]
-        public int TerritoryId { get; set; }
+        public int MarketId { get; set; }
 
-        [ForeignKey("TerritoryId")]
-        [DisplayName("Territory")]
-        public virtual Territory Territory { get; set; }
+        /// <summary>
+        /// THe market the pop group exists in.
+        /// </summary>
+        public virtual Market Market { get; set; }
+
+        // Do not add other connections here. They won't be needed in the DB.
 
         // The Total Population Count, should be equal to the sum of the culture breakdown.
         [Required, Range(0, double.MaxValue)]
