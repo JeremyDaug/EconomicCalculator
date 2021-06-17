@@ -4,6 +4,13 @@ namespace EconModels.TerritoryModel
 {
     public class RegionHexCoord
     {
+        public RegionHexCoord(int X, int Y)
+        {
+            this.X = X;
+            this.Y = Y;
+            Z = -X - Y;
+        }
+
         /// <summary>
         /// The region it belongs to.
         /// </summary>

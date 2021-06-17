@@ -1710,12 +1710,6 @@
             // Generate the grid based on construction data.
             planetia.GeneratePlanetSphere();
 
-            // generate global region
-            var globRegion = new Region
-            {
-
-            };
-
             // Add planet to the db
             if (!context.Planets.Any(x => x.Name == planetia.Name))
             {
@@ -1728,23 +1722,73 @@
 
             #endregion Planet
 
+            #region Markets
+
+            // Simple markets for proof of concept.
+            var marketreaM = new Market
+            {
+                Name = "Markerea"
+            };
+
+            var sucktopiaM = new Market
+            {
+                Name = "Sucktopia"
+            };
+
+            var markets = new List<Market>
+            {
+                marketreaM,
+                sucktopiaM
+            };
+
+            // Add the markets.
+            foreach (var market in markets)
+            {
+                context.Markets.AddOrUpdate(x => new { x.Name }, market);
+                context.SaveChanges();
+            }
+
+            // ensure the market variables are synced.
+            marketreaM = context.Markets.Single(x => x.Name == marketreaM.Name);
+            sucktopiaM = context.Markets.Single(x => x.Name == sucktopiaM.Name);
+
+            #endregion Markets
+
             #region TerritoriesAndRegions
 
-            var dumland = new Territory
+            // create a region for testing purposes.
+            var dumland = new Region
             {
                 Name = "Dumland",
+                Rank = 1,
+                PlanetId = planetia.Id
+            };
+            // add to planet
+            planetia.Regions.Add(dumland);
+
+            // add region to db
+            context.Regions.AddOrUpdate(x => new { x.Name }, dumland);
+            // sync variable with db.
+            dumland = context.Regions.Single(x => x.Name == dumland.Name);
+
+            // Create Territories
+            var sucktopia = new Territory
+            {
+                Name = "Sucktopia",
                 X = 0,
                 Y = 0,
                 Z = 0,
                 Extent = 25 * 250, // rounded area in a 10km hexagon.
                 Elevation = 0,
                 WaterQuantity = 10_000_000,
-                WaterCoverage = 20,
+                WaterCoverage = 0.1F,
                 ExploitationLevel = 0,
                 HasRiver = true,
                 Humidity = 50,
                 Tempurature = 20,
-                Roughness = 0
+                Roughness = 0,
+                MarketId = sucktopiaM.Id,
+                PlanetId = planetia.Id
             };
 
             var marketrea = new Territory
@@ -1756,114 +1800,108 @@
                 Extent = 25 * 250, // rounded area in a 10km hexagon.
                 Elevation = 0,
                 WaterQuantity = 10_000,
-                WaterCoverage = 100_000,
+                WaterCoverage = 0.2F,
                 ExploitationLevel = 0,
                 HasRiver = false,
                 Humidity = 20,
                 Tempurature = 20,
-                Roughness = 0
+                Roughness = 0,
+                MarketId = sucktopiaM.Id,
+                PlanetId = planetia.Id
             };
 
             var newTerritorries = new List<Territory>
             {
-                dumland,
+                sucktopia,
                 marketrea
             };
 
             foreach (var territory in newTerritorries)
             {
-                planetia.AddTerritoryToLocation(territory.X.Value, territory.Y.Value, territory, context);
+                // add territory to planet
+                planetia.Territories.Add(territory);
+                // Add territories to their parent region.
+                dumland.Territories.Add(territory);
+
             }
-            dumland = context.Territories.Single(x => x.Name == dumland.Name);
+            sucktopia = context.Territories.Single(x => x.Name == sucktopia.Name);
             marketrea = context.Territories.Single(x => x.Name == marketrea.Name);
 
             #endregion TerritoriesAndRegions
 
             #region PopulationGroups
 
-            // Dummy Markets to place the pops.
-            var MarketreaMarket = new Market
-            {
-                Name = "Markerea"
-            };
-
-            var SucktopiaMarket = new Market
-            {
-                Name = "Sucktopia"
-            };
-
-
             // TODO make it do this for each territory.
             var Menials = new PopulationGroup
             {
-                Name = dumland.Name + " " + menialLaborer.Name,
+                Name = sucktopia.Name + " " + menialLaborer.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == menialLaborer.Name).Id,
                 Priority = 1,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             Menials.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var Farmers = new PopulationGroup
             {
-                Name = dumland.Name + " " + wheatFarmer.Name,
+                Name = sucktopia.Name + " " + wheatFarmer.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == wheatFarmer.Name).Id,
                 Priority = 2,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             Farmers.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var Millers = new PopulationGroup
             {
-                Name = dumland.Name + " " + grainMiller.Name,
+                Name = sucktopia.Name + " " + grainMiller.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == grainMiller.Name).Id,
                 Priority = 3,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             Millers.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var Bakers = new PopulationGroup
             {
-                Name = dumland.Name + " " + baker.Name,
+                Name = sucktopia.Name + " " + baker.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == baker.Name).Id,
                 Priority = 4,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             Bakers.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var IronMiners = new PopulationGroup
             {
-                Name = dumland.Name + " " + ironMiner.Name,
+                Name = sucktopia.Name + " " + ironMiner.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == ironMiner.Name).Id,
                 Priority = 5,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             IronMiners.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var IronSmelters = new PopulationGroup
             {
-                Name = dumland.Name + " " + ironSmelter.Name,
+                Name = sucktopia.Name + " " + ironSmelter.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == ironSmelter.Name).Id,
                 Priority = 6,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             IronSmelters.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var GoldMiners = new PopulationGroup
             {
-                Name = dumland.Name + " " + goldMiner.Name,
+                Name = sucktopia.Name + " " + goldMiner.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == goldMiner.Name).Id,
                 Priority = 7,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             GoldMiners.SetPopulation(10, 0.1M, 0.2M, 0.2M);
             var BlackSmiths = new PopulationGroup
             {
-                Name = dumland.Name + " " + BlackSmithing.Name,
+                Name = sucktopia.Name + " " + BlackSmithing.Name,
                 PrimaryJobId = context.Jobs.Single(x => x.Name == BlackSmithing.Name).Id,
                 Priority = 8,
                 SkillLevel = 2,
-                MarketId = MarketreaMarket.Id
+                MarketId = marketreaM.Id
             };
             BlackSmiths.SetPopulation(10, 0.1M, 0.2M, 0.2M);
 

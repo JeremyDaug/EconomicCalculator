@@ -114,6 +114,10 @@
     <Compile Include="Migrations\202106060519330_RegionGridStoring.designer.cs">
       <DependentUpon>202106060519330_RegionGridStoring.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202106081214260_HeadRegionUpdate.cs" />
+    <Compile Include="Migrations\202106081214260_HeadRegionUpdate.designer.cs">
+      <DependentUpon>202106081214260_HeadRegionUpdate.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelEnums\BuildingType.cs" />
     <Compile Include="ModelEnums\CashType.cs" />
@@ -221,6 +225,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202106060519330_RegionGridStoring.resx">
       <DependentUpon>202106060519330_RegionGridStoring.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202106081214260_HeadRegionUpdate.resx">
+      <DependentUpon>202106081214260_HeadRegionUpdate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

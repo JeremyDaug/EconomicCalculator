@@ -80,7 +80,7 @@ namespace EconModels
 
         // Regions
         public DbSet<RegionHexCoord> RegionHexCords { get; set; }
-        public DbSet<Region> Retgions { get; set; }
+        public DbSet<Region> Regions { get; set; }
 
         // Planets
         public DbSet<Planet> Planets { get; set; }
@@ -521,8 +521,8 @@ namespace EconModels
                 .WithRequired(x => x.Planet)
                 .WillCascadeOnDelete(false);
 
-            modelBuilder.Entity<Planet>()
-                .HasRequired(x => x.HeadRegion);
+            // Head region is not mapped, head region can be found by finding
+            // the region that has no parent.
 
             #endregion RegionConnection
 

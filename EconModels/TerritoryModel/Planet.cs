@@ -122,8 +122,9 @@ namespace EconModels.TerritoryModel
 
         /// <summary>
         /// The region at the head of the region tree.
+        /// Not required so single territory planets can exist.
         /// </summary>
-        [Required]
+        [NotMapped]
         public int HeadRegionId { get; set; }
 
         /// <summary>

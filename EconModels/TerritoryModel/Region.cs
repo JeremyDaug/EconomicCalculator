@@ -9,6 +9,13 @@ namespace EconModels.TerritoryModel
     /// </summary>
     public class Region
     {
+        public Region()
+        {
+            Children = new List<Region>();
+            Territories = new List<Territory>();
+            ContainedSpace = new List<RegionHexCoord>();
+        }
+
         /// <summary>
         /// The Id of the Region
         /// </summary>

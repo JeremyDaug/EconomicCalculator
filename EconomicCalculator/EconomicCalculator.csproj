@@ -65,7 +65,8 @@
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\Randomizer.cs" />
-    <Compile Include="Storage\HexCoord.cs" />
+    <Compile Include="Storage\Hexmap\HexCoord.cs" />
+    <Compile Include="Storage\Hexmap\Hexgrid.cs" />
     <Compile Include="Storage\IReadOnlyProductAmountCollection.cs" />
     <Compile Include="Storage\Jobs\Job.cs" />
     <Compile Include="Storage\Organizations\Company.cs" />
