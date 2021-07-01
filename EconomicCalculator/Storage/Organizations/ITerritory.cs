@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Storage.Population;
+﻿using EconomicCalculator.Storage.Hexmap;
+using EconomicCalculator.Storage.Population;
 using EconomicCalculator.Storage.Products;
 using System;
 using System.Collections.Generic;

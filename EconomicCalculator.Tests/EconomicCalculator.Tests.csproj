@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Folder Include="Generators\" />
+    <Folder Include="Storage\Planet\" />
   </ItemGroup>
 
 </Project>

@@ -22,6 +22,5 @@
         /// Undefined shape, form defined by user, no generation.
         /// </summary>
         None
-
     }
 }

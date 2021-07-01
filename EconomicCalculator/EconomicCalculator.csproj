@@ -57,14 +57,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums\CashType.cs" />
+    <Compile Include="Enums\EnumExtensions\ColorExtensions.cs" />
+    <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
     <Compile Include="Enums\NeedType.cs" />
+    <Compile Include="Enums\PlanetTopology.cs" />
+    <Compile Include="Enums\PlanetType.cs" />
     <Compile Include="Enums\ProductTypes.cs" />
     <Compile Include="Enums\ProcessGoodTag.cs" />
+    <Compile Include="Enums\WaterFlags.cs" />
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\Randomizer.cs" />
+    <Compile Include="Storage\Hexmap\HexColor.cs" />
     <Compile Include="Storage\Hexmap\HexCoord.cs" />
     <Compile Include="Storage\Hexmap\Hexgrid.cs" />
     <Compile Include="Storage\IReadOnlyProductAmountCollection.cs" />
@@ -82,6 +88,7 @@
     <Compile Include="Storage\Organizations\IMarket.cs" />
     <Compile Include="Storage\Jobs\ILaborer.cs" />
     <Compile Include="Storage\Organizations\Territory.cs" />
+    <Compile Include="Storage\Planet\Planet.cs" />
     <Compile Include="Storage\Population\Culture.cs" />
     <Compile Include="Storage\Population\ICulture.cs" />
     <Compile Include="Storage\Population\IPoliticalGroup.cs" />
@@ -113,6 +120,9 @@
     <Compile Include="Storage\ProductAmountCollection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="DotnetNoise, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotnetNoise.1.0.0\lib\netstandard2.0\DotnetNoise.dll</HintPath>
+    </Reference>
     <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
     </Reference>
