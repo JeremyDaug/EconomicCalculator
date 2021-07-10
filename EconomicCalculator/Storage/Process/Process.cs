@@ -25,6 +25,8 @@ namespace EconomicCalculator.Storage.Processes
 
         public string Name { get; set; }
 
+        public string VariantName { get; set; }
+
         /// <summary>
         /// The goods or items which need to be consumed to produce the good.
         /// This includes raw materials as well as labor costs.
