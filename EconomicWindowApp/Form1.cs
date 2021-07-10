@@ -27,5 +27,10 @@ namespace EconomicWindowApp
         {
             var sqlConnection = new SqlConnection("");
         }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
