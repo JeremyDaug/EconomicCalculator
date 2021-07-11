@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using EconomicCalculator.Generators;
 
 namespace EconomicCalculator.Storage.Planet
 {
@@ -23,8 +25,12 @@ namespace EconomicCalculator.Storage.Planet
             Terrain.hWrap = true;
             TerrainEx = new Hexgrid(100, 200);
             TerrainEx.hWrap = true;
+            SolarMap = new Hexgrid(100, 200);
+            SolarMap.hWrap = true;
             Climate = new Hexgrid(100, 200);
             Climate.hWrap = true;
+            ClimateEx = new Hexgrid(100, 200);
+            ClimateEx.hWrap = true;
             Regions = new List<Hexgrid>();
             Height = 100;
             Width = 200;
@@ -36,13 +42,23 @@ namespace EconomicCalculator.Storage.Planet
             Terrain.hWrap = true;
             TerrainEx = new Hexgrid(height, height * 2);
             TerrainEx.hWrap = true;
+            SolarMap = new Hexgrid(height, height * 2);
+            SolarMap.hWrap = true;
             Climate = new Hexgrid(height, height * 2);
             Climate.hWrap = true;
+            ClimateEx = new Hexgrid(height, height * 2);
+            ClimateEx.hWrap = true;
             Regions = new List<Hexgrid>();
             Height = height;
             Width = height * 2;
             Seed = seed;
         }
+
+        /// <summary>
+        /// The Manager of the class
+        /// TOOD remove this with a connection up the proper chain.
+        /// </summary>
+        public Manager manager { get; set; }
 
         /// <summary>
         /// The Id of the Planet
@@ -58,6 +74,23 @@ namespace EconomicCalculator.Storage.Planet
         /// The generation seed for the original planet surface.
         /// </summary>
         public int Seed { get; set; }
+
+        public double Frequency { get; set; }
+
+        /// <summary>
+        /// best between 1 and 8
+        /// </summary>
+        public int Octaves { get; set; }
+
+        /// <summary>
+        /// Best between 1 and 4
+        /// </summary>
+        public double Lacunarity { get; set; }
+
+        /// <summary>
+        /// Best between 0 and 1.
+        /// </summary>
+        public double Persistence { get; set; }
 
         /// <summary>
         /// The planet type, lots of varieties here.
@@ -105,7 +138,7 @@ namespace EconomicCalculator.Storage.Planet
         /// <summary>
         /// The area of the planet's surface in whole km^2.
         /// </summary>
-        public decimal SurfaceArea { get; set; }
+        public decimal SurfaceArea { get; }
 
         /// <summary>
         /// The Height that the sea level is at.
@@ -119,7 +152,7 @@ namespace EconomicCalculator.Storage.Planet
         public decimal AirPressure { get; set; }
 
         /// <summary>
-        /// The average tempurature of the planet.
+        /// The average tempurature of the planet. in C
         /// </summary>
         public decimal Tempurature { get; set; }
 
@@ -249,6 +282,93 @@ namespace EconomicCalculator.Storage.Planet
 
         //public ICollection<Territory> Territories { get; set; }
 
+        public string GetTerrainImageFile(string UniverseFolder)
+        {
+            var planetFolder = Path.Combine(UniverseFolder, Name);
+
+            return Path.Combine(planetFolder, nameof(Terrain) + ".PNG");
+        }
+
+        /// <summary>
+        /// Loads the planet from the selected folder.
+        /// </summary>
+        /// <param name="planetFolder">The folder to load from.</param>
+        public void LoadPlanet(string UniverseFolder, string planet)
+        {
+
+            var name = planet;
+
+            var planetFolder = Path.Combine(UniverseFolder, planet);
+            if (!Directory.Exists(planetFolder))
+                throw new FileNotFoundException(planetFolder);
+
+            Terrain.LoadFrom(planetFolder, nameof(Terrain));
+            Terrain.hWrap = true;
+            TerrainEx.LoadFrom(planetFolder, nameof(TerrainEx));
+            SolarMap.LoadFrom(planetFolder, nameof(SolarMap));
+            Climate.LoadFrom(planetFolder, nameof(Climate));
+            ClimateEx.LoadFrom(planetFolder, nameof(ClimateEx));
+        }
+
+        public void SavePlanet(string UniverseFolder)
+        {
+            // save hexmaps.
+            var planetFolder = Path.Combine(UniverseFolder, Name);
+
+            // if the directory does not exist, add it.
+            if (!Directory.Exists(planetFolder))
+            {
+                Directory.CreateDirectory(planetFolder);
+            }
+
+            Terrain.SaveAt(planetFolder, nameof(Terrain));
+            TerrainEx.SaveAt(planetFolder, nameof(TerrainEx));
+            SolarMap.SaveAt(planetFolder, nameof(SolarMap));
+            Climate.SaveAt(planetFolder, nameof(Climate));
+            ClimateEx.SaveAt(planetFolder, nameof(ClimateEx));
+        }
+
+        public void SaveTerrain()
+        {
+            var planetFolder = Path.Combine(manager.UniverseFolder, Name);
+
+            // if the directory does not exist, add it.
+            if (!Directory.Exists(planetFolder))
+            {
+                Directory.CreateDirectory(planetFolder);
+            }
+
+            Terrain.SaveAt(planetFolder, nameof(Terrain));
+        }
+
+        /// <summary>
+        /// Sets the planet parameters based on surface area.
+        /// </summary>
+        /// <param name="SurfaceArea">The surface area of the planet in km^2</param>
+        public void SetBySurfaceArea(decimal SurfaceArea)
+        {
+            // surface area can't be negative.
+            if (SurfaceArea < 0)
+                throw new ArgumentOutOfRangeException(nameof(SurfaceArea));
+
+            // get half the area and set in 250km^2 tiles
+            var halfArea = (double)SurfaceArea / 2 / 250;
+
+            // root of that is the height
+            var height = Math.Sqrt(halfArea);
+            Height = (int)Math.Floor(height);
+            // width is 2 * height.
+            Width = Height * 2;
+
+            // this is rounded down from a perfect match.
+            // Set bitmaps to match
+            Terrain = new Hexgrid(Height, Width, hWrap: true);
+            TerrainEx = new Hexgrid(Height, Width, hWrap: true);
+            SolarMap = new Hexgrid(Height, Width, hWrap: true);
+            Climate = new Hexgrid(Height, Width, hWrap: true);
+            ClimateEx = new Hexgrid(Height, Width, hWrap: true);
+        }
+
         /// <summary>
         /// Generates terrain for the planet, just the terrain and oceans 
         /// and some seas.
@@ -256,7 +376,12 @@ namespace EconomicCalculator.Storage.Planet
         public void GenerateSimpleTerrain()
         {
             // setup noise
-            var noise = new FastNoise(Seed);
+            NoiseSet noise = new NoiseSet(NoiseMethodType.Perlin, 3);
+            noise.Frequency = Frequency;
+            noise.Lacunarity = Lacunarity;
+            noise.Octaves = Octaves;
+            noise.Persistence = Persistence;
+            var rand = new Randomizer.Randomizer();
 
             var scale = 1;
 
@@ -264,12 +389,11 @@ namespace EconomicCalculator.Storage.Planet
             // use the origin of the noise to get a random value between -1 and 1.
             // We then modify that value to be between 0.5 and 1.5 so we can get a narrower range of 
             // sea levels for now. We can alter it later for more or less variety.
-            var SeaLevelRange = noise.GetPerlin(0, 0, 0) * 0.5 + 1;
+            //var SeaLevelRange = rand.NextDouble() + 1;
             // Sea level is between 0 and 65,536,
             // should be between 0.5 and 1.5 of 32_768
-            SeaLevel = (int)(32_768 * SeaLevelRange);
+            //SeaLevel = (int)(32_768 * SeaLevelRange);
 
-            // set the level of the terrain and sea level if terrain is lower than sea level.
             foreach (var pixel in Terrain)
             {
                 // sample the cylinder
@@ -303,7 +427,10 @@ namespace EconomicCalculator.Storage.Planet
                 } // sea has an albedo of 0 and so does not need to be set.
             }
 
+            SaveTerrain();
+
             // Check and add coasts to land next to sea.
+            /*
             foreach (var pixel in Terrain)
             {
                 var coord = pixel.Coord;
@@ -341,7 +468,7 @@ namespace EconomicCalculator.Storage.Planet
                 update += 20 << pixel.Color.ChannelOffsetA();
                 // set pixel color.
                 Terrain.SetPixelArgb(coord, update);
-            }
+            }*/
         }
 
         private int Direction(byte direction)
@@ -466,17 +593,6 @@ namespace EconomicCalculator.Storage.Planet
             // For a shortcut, just make a selection of high and low tempurature selections.
             foreach (var pixel in Terrain)
             {
-                // select random value between 0 and 255 for the tempurature 
-                // restricted further to 128 +/- 64
-                var tempurature = (int)(255 * (1 + CylinderSample(pixel.Coord.x, pixel.Coord.y, noise) / 4));
-                Climate.SetHexBlue(pixel.Coord, tempurature);
-
-                // set humidity between 0 and 255.
-                var hum = (int)(255 * (1 + CylinderSample(pixel.Coord.x, pixel.Coord.y, secNoise)) / 2);
-                Climate.SetHexGreen(pixel.Coord, hum);
-
-                // set rainfall equal to humidity for now
-                Climate.SetHexRed(pixel.Coord, hum);
             }
         }
 
@@ -487,24 +603,25 @@ namespace EconomicCalculator.Storage.Planet
         /// <param name="y"></param>
         /// <param name="seed"></param>
         /// <returns></returns>
-        public float CylinderSample(int x, int y, FastNoise noise)
+        private double CylinderSample(int x, int y, NoiseSet noise)
         {
             var scale = 1;
             // a cylender in 3d noise space
             // x is a portion of a with sized rotation around the center
-            float xPos = x / Width;
+            double xPos = x / Width;
             // with a reverse offset for the current row.
             xPos -= y / (Width * 2);
             // get the radian angle of it.
-            var angle = xPos * 2 * (float)Math.PI;
+            var angle = xPos * 2 * Math.PI;
             // radius = 1 for general purposes.
-            float xFin = (float)Math.Sin(angle) * scale;
+            double xFin = Math.Sin(angle) * scale;
             // divide y by height for consistency purposes.
-            float yFin = y / Height * scale;
-            float zFin = (float)Math.Cos(angle) * scale;
+            double yFin = y / Height * scale;
+            double zFin = Math.Cos(angle) * scale;
 
             // select random value between 0 and 2^16-1 for the height.
-            return noise.GetPerlin(xFin, yFin, zFin);
+            var vec = new Vector3(xFin, yFin, zFin);
+            return noise.DeepNoise(vec);
         }
     }
 }

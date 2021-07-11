@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Enums.EnumExtensions;
+using System.Drawing.Imaging;
+using System.IO;
 
 namespace EconomicCalculator.Storage.Hexmap
 {
@@ -255,6 +257,45 @@ namespace EconomicCalculator.Storage.Hexmap
             Bitmap.SetPixel(x, y, Color.FromArgb(argb));
         }
 
+        internal void LoadFrom(string folder, string fileName)
+        {
+            var filepath = Path.Combine(folder, fileName + ".png");
+
+            // check that file exists.
+            if (!File.Exists(filepath))
+                throw new FileNotFoundException(filepath);
+
+            // if it does, load it.
+            using (FileStream fs = new FileStream(filepath, FileMode.Open))
+            {
+                Bitmap = (Bitmap)Bitmap.FromStream(fs);
+                fs.Close();
+            }
+
+            Height = Bitmap.Height;
+            Width = Bitmap.Width;
+            // wraping is set by parent.
+        }
+
+        /// <summary>
+        /// Saves the hexmap's immage at the folder and file specified.
+        /// </summary>
+        /// <param name="folder">The folder it's saved to.</param>
+        /// <param name="file">The file name.</param>
+        public void SaveAt(string folder, string file)
+        {
+            var filepath = Path.Combine(folder, file + ".png");
+
+            if (File.Exists(filepath))
+            { // if it already exists then we need to delete it.
+                Bitmap.Save(filepath);
+            }
+            else
+            {
+                Bitmap.Save(filepath, ImageFormat.Png);
+            }
+        }
+
         /// <summary>
         /// Set's the pixel to the given arbg value
         /// </summary>
@@ -388,6 +429,32 @@ namespace EconomicCalculator.Storage.Hexmap
         public void SetHexGreen(HexCoord coord, int green)
         {
             SetHexGreen(coord.x, coord.y, green);
+        }
+
+        /// <summary>
+        /// Creates a dupilcate of the Hexgrid's bitmap, but offsets
+        /// it to create an image that's more accurate to the 
+        /// map image.
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap MakeOffsetImage()
+        {
+            var result = new Bitmap(Bitmap);
+
+            for (int y = 0; y < Bitmap.Height; ++y)
+            {
+                var offset = y / 2;
+                for (int x = 0; x < Bitmap.Width; ++x)
+                {
+                    var color = Bitmap.GetPixel(x, y);
+                    int newX = offset + x;
+                    if (newX > Bitmap.Width)
+                        newX -= Bitmap.Width;
+                    result.SetPixel(x, y, color);
+                }
+            }
+
+            return result;
         }
 
         public IEnumerator<HexColor> GetEnumerator()

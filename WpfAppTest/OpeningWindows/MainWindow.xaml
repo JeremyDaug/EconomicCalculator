@@ -11,9 +11,15 @@
                Margin="0,15,0,0" VerticalAlignment="Top"/>
         <Label Content="Alpha Version 0.1" HorizontalAlignment="Center"
                VerticalAlignment="Top" Margin="0,30,0,0" TextElement.Foreground="Gray"/>
-        <Button Name="LoadTestDataBtn" ClickMode="Release"
-            Content="Load Test Data" HorizontalAlignment="Center"
-                VerticalAlignment="Center" Width="100" />
+        <StackPanel HorizontalAlignment="Center" Height="100" Margin="0,0,0,0"
+                    VerticalAlignment="Center" Width="150">
+            <Button x:Name="LoadTestDataBtn" ClickMode="Release"
+                Content="Load Test Data" HorizontalAlignment="Center"
+                VerticalAlignment="Center" Width="100" Click="OnCLick1"/>
+            <Button x:Name="CreateNewBtn" ClickMode="Release" Width="130"
+                    HorizontalAlignment="Center"
+                    Content="Create Empty Data Set" Margin="0,3,0,0"/>
+        </StackPanel>
 
     </Grid>
 </Window>
