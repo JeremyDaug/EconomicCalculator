@@ -1,12 +1,12 @@
 ﻿using NUnit.Framework;
-using EconomicCalculator.Storage.Processes;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using EconomicCalculator.Storage.Jobs;
 using Moq;
-using EconomicCalculator.Storage.Products;
-using EconomicCalculator.Storage;
+using EconomicCalculator.Refactor.Storage.Processes;
+using EconomicCalculator.Refactor.Storage;
+using EconomicCalculator.Refactor.Storage.Jobs;
+using EconomicCalculator.Refactor.Storage.Products;
 
 namespace EconomicCalculator.Tests.Storage.Processes
 {

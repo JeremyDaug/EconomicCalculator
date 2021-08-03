@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 0,
+    "Name": "Wheat Grain",
+    "VariantName": null,
+    "UnitName": "kg",
+    "Quality": 1,
+    "Mass": 1,
+    "Bulk": 1,
+    "Fractional": true,
+    "Icon": null
+  },
+  {
+    "Id": 1,
+    "Name": "Wheat Flour",
+    "VariantName": "Nice",
+    "UnitName": "Bag",
+    "Quality": 3,
+    "Mass": 1.5,
+    "Bulk": 1.5,
+    "Fractional": true,
+    "Icon": "ProductImages\\flour.png"
+  }
+]

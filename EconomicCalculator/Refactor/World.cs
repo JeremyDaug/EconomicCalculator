@@ -1,7 +1,4 @@
-﻿using EconomicCalculator.Enums;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Jobs;
-using EconomicCalculator.Storage.Products;
+﻿using EconomicCalculator.Refactor.Storage;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;

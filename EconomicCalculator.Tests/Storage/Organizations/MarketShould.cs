@@ -1,14 +1,14 @@
 ﻿using EconomicCalculator.Randomizer;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Population;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.Refactor.Storage;
+using EconomicCalculator.Refactor.Storage.Population;
+using EconomicCalculator.Refactor.Storage.Products;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EconomicCalculator.Tests.Storage
+namespace EconomicCalculator.Refactor.Tests.Storage
 {
     [TestFixture]
     public class MarketShould

@@ -1,10 +1,10 @@
 ﻿using EconomicCalculator.Randomizer;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Jobs;
-using EconomicCalculator.Storage.Organizations;
-using EconomicCalculator.Storage.Population;
-using EconomicCalculator.Storage.Processes;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.Refactor.Storage;
+using EconomicCalculator.Refactor.Storage.Jobs;
+using EconomicCalculator.Refactor.Storage.Organizations;
+using EconomicCalculator.Refactor.Storage.Population;
+using EconomicCalculator.Refactor.Storage.Processes;
+using EconomicCalculator.Refactor.Storage.Products;
 using Ninject.Modules;
 using System;
 using System.Collections.Generic;

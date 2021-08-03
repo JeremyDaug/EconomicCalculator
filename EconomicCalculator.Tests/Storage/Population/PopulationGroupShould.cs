@@ -1,6 +1,6 @@
-﻿using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Jobs;
-using EconomicCalculator.Storage.Products;
+﻿using EconomicCalculator.Refactor.Storage;
+using EconomicCalculator.Refactor.Storage.Jobs;
+using EconomicCalculator.Refactor.Storage.Products;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -164,7 +164,7 @@ namespace EconomicCalculator.Tests.Storage
 
             sut = new PopulationGroup
             {
-                Id = TestId,
+                //Id = TestId,
                 Name = TestName,
                 Count = PopCount,
                 JobLabor = LaborMock.Object,
@@ -387,10 +387,10 @@ namespace EconomicCalculator.Tests.Storage
         public void RemoveAppropriateGoodsFromStorage()
         {
             // Add Failed Products to Need Mocks
-            LifeNeed.Setup(x => x.FailedProducts(100)).Returns(50);
-            DailyNeed.Setup(x => x.FailedProducts(100)).Returns(25);
-            LuxNeed.Setup(x => x.FailedProducts(100)).Returns(10);
-            JobCapital.Setup(x => x.FailedProducts(100)).Returns(0);
+            //LifeNeed.Setup(x => x.FailedProducts(100)).Returns(50);
+            //DailyNeed.Setup(x => x.FailedProducts(100)).Returns(25);
+            //LuxNeed.Setup(x => x.FailedProducts(100)).Returns(10);
+            //JobCapital.Setup(x => x.FailedProducts(100)).Returns(0);
 
             // Add goods to storage.
             sut.Storage.AddProducts(LifeNeed.Object, 100);

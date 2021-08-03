@@ -1,188 +1,101 @@
 ﻿using EconomicCalculator.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage.Products
 {
     /// <summary>
-    /// Products are goods which can be bought, sold, and consumed.
+    /// Interface for the underlying product data.
     /// </summary>
-    public interface IProduct : IEquatable<IProduct>, ISqlReader, IEqualityComparer<IProduct>
+    public interface IProduct
     {
-        #region GeneralData
+        /// <summary>
+        /// The Unique Id of the Product.
+        /// </summary>
+        int Id { get; }
 
         /// <summary>
-        /// The Unique identifier of the product.
+        /// The Name of the Product, cannot be empty.
         /// </summary>
-        Guid Id { get; }
-
-        /// <summary>
-        /// The name of the product.
-        /// </summary>
+        /// <remarks>
+        /// Name and VariantName should be a unique combo among all products.
+        /// </remarks>
         string Name { get; }
 
         /// <summary>
-        /// A unique name to differentiate between the same product made through
-        /// different means, in different locations, or by methods.
-        /// </summary> 
+        /// Variant Name of the product. 
+        /// </summary>
+        /// <remarks>
+        /// Name and VariantName should be a unique combo among all products.
+        /// </remarks>
         string VariantName { get; }
 
         /// <summary>
-        /// What is the name or type of unit used to buy and
-        /// sell this product.
-        /// </summary> 
+        /// The name of the unit the product is measured in.
+        /// </summary>
         string UnitName { get; }
 
         /// <summary>
-        /// The quality of the item, higher is better.
-        /// 0 is garbage or roughly equivalent, 
-        /// 1 is poverty level,
-        /// 2 is basic
-        /// 3 is desireable
-        /// 4 is the highest quality
+        /// The Quality of the product, the lower the value, the lower the quality and
+        /// vice versa.
         /// </summary>
         int Quality { get; }
 
+        // Default Price? Skip for now, may not need.
+
         /// <summary>
-        /// The default/starting price of the product.
+        /// The Mass of the product in Kg.
         /// </summary>
-        double DefaultPrice { get; }
+        decimal Mass { get; }
 
         /// <summary>
-        /// How much the product weighs, used primarily for transportation, in Kg.
+        /// The space the product takes up in m^3.
         /// </summary>
-        double Mass { get; }
+        decimal Bulk { get; }
 
-        // TODO, consider adding a Mass Breakdown to the product.
-
-        /// <summary>
-        /// How much space it takes up, used in both storage and transportation.
-        /// </summary>
-        double Bulk { get; }
+        // No Product Tags, not needed anymore, covered by Tags.
 
         /// <summary>
-        /// The type of product this is.
-        /// </summary>
-        /// <remarks>
-        /// Any storage requirements are based on this.
-        /// </remarks>
-        ProductTypes ProductType { get; }
-
-        /// <summary>
-        /// If the product allows for maintenance.
-        /// </summary>
-        bool Maintainable { get; }
-
-        /// <summary>
-        /// Can the good can be divided effectively indefinitely.
+        /// If the product can be divided into subunit sizes.
         /// </summary>
         bool Fractional { get; }
 
-        /// <summary>
-        /// The technology required for the product.
-        /// This is a partial placeholder.
-        /// </summary>
-        string Technology { get; }
-
-        #endregion GeneralData
-
-        #region FailureData
+        // TODO Technology Connection Placeholder.
 
         /// <summary>
-        /// The Average time for the item to break irrepairably.
-        /// 0 cannot be stored beyond at all.
-        /// -1 never breaks down.
+        /// The average time for the product to break in days.
+        /// -1 means it never breaks, 0 means it cannot be stored and breaksdown immediately.
+        /// 1 means it can be stored but will breakdown immediately.
         /// </summary>
-        int MTTF { get; }
+        //int MTTF { get; }
 
         /// <summary>
-        /// The chance that on any given day, the product will break.
-        /// Calculated from <see cref="MTTF"/>.
+        /// The products this product fails into or is consumed into.
+        /// The key is the <see cref="Id"/> of the product is fails into.
+        /// The Value is the amount it fails into per unit of this product.
         /// </summary>
-        double DailyFailureChance { get; }
+        //IReadOnlyDictionary<int, decimal> FailsInto { get; }
 
         /// <summary>
-        /// A unit of the product, when it fails or is consumed, turns into these products,
-        /// and how much of each.
+        /// If the product can be maintained.
         /// </summary>
-        /// <remarks>Services don't turn into</remarks>
-        IReadOnlyProductAmountCollection FailsInto { get; }
-
-        #endregion FailureData
-
-        #region FailureFunctions
+        //bool Maintainable { get; }
 
         /// <summary>
-        /// Takes a number of failed products, and returns the resulting outputs.
+        /// The products which maintain this product.
+        /// The Key is the <see cref="Id"/> of the product which maintains this.
+        /// The amount of that product needed per unit of this product.
         /// </summary>
-        /// <param name="failedProducts">How many failed products there are.</param>
-        /// <returns>The products that have been failed into.</returns>
-        IReadOnlyProductAmountCollection FailureResults(double failedProducts);
+        // TOOD, come back to this later. Maybe offload it into specific
+        // processes.
+        //IReadOnlyDictionary<int, decimal> Maintenance { get; }
 
         /// <summary>
-        /// The probability that after a number of days, failure will occur.
+        /// The Icon used by the product.
         /// </summary>
-        /// <param name="days">How many days to calculate for.</param>
-        /// <returns>The probability that the product breaks.</returns>
-        double FailureProbability(int days);
-
-        /// <summary>
-        /// The probability that after a number of days, failure will occur.
-        /// </summary>
-        /// <param name="days">How many days to calculate for.</param>
-        /// <param name="MaintenanceMet">The percent of maintenance carried out.</param>
-        /// <returns>The probability that the product breaks.</returns>
-        double FailureProbability(int days, double MaintenanceMet);
-
-        /// <summary>
-        /// Products destroyed by decay.
-        /// </summary>
-        /// <param name="amount">The amount being checked against.</param>
-        /// <returns>The number of failed products.</returns>
-        double FailedProducts(double amount);
-
-        /// <summary>
-        /// Products destroyed by decay.
-        /// </summary>
-        /// <param name="amount">The amount being checked against.</param>
-        /// <param name="MaintenanceMet">The percent of maintenance met.</param>
-        /// <returns>The number of failed products.</returns>
-        double FailedProducts(double amount, double MaintenanceMet);
-
-        #endregion FailureFunctions
-
-        #region ConsumptionAction
-
-        // Placeholder for consumption results. I need to work on the Entity Framework stuff first.
-
-        #endregion ConsumptionAction
-
-        #region MaintenanceData
-
-        /// <summary>
-        /// The maintenance required to keep a unit of the product working.
-        /// Products used in maintenance must be consumed.
-        /// This is added to the needs of anyone who holds the product.
-        /// Not meeting maintenance increases failure chance.
-        /// </summary>
-        IReadOnlyProductAmountCollection Maintenance { get; }
-
-        // TODO, consider adding unmaintained failure chance.
-        // The current system just doubles the failure chance if unmaintained.
-
-        #endregion MaintenanceData
-
-        #region MaintenanceFunctions
-
-        /// <summary>
-        /// Runs maintenance on a number of products.
-        /// </summary>
-        /// <param name="products">The number of products we are maintaining.</param>
-        /// <param name="MaintenanceProducts">The products being used to maintain the products.</param>
-        /// <param name="Satisfaction">How much was satisfied.</param>
-        /// <returns>The items consumed.</returns>
-        IProductAmountCollection RunMaintenance(double products, IReadOnlyProductAmountCollection MaintenanceProducts, out double Satisfaction);
-
-        #endregion MaintenanceFunctions
+        string Icon { get; }
     }
 }
