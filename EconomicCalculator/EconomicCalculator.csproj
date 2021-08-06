@@ -50,6 +50,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Data\CommonProducts.json" />
+    <None Include="Data\CommonWants.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -127,6 +128,8 @@
     <Compile Include="Refactor\Storage\ProductAmountCollection.cs" />
     <Compile Include="Storage\Products\IProduct.cs" />
     <Compile Include="Storage\Products\Product.cs" />
+    <Compile Include="Storage\Wants\IWant.cs" />
+    <Compile Include="Storage\Wants\Want.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotnetNoise, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

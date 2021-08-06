@@ -75,6 +75,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Wants\WantsListWindow.xaml.cs">
+      <DependentUpon>WantsListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Wants\WantWindow.xaml.cs">
+      <DependentUpon>WantWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="Maps\PlanetViewWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -102,12 +108,20 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Wants\WantsListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Wants\WantWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Products\ProductListWindow.xaml.cs">
       <DependentUpon>ProductListWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Products\ProductValidationRules.cs" />
+    <Compile Include="ValidationRules\ProductValidationRules.cs" />
     <Compile Include="Products\ProductWindow.xaml.cs">
       <DependentUpon>ProductWindow.xaml</DependentUpon>
     </Compile>

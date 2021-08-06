@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfAppTest.Products"
+        xmlns:valid="clr-namespace:WpfAppTest.ValidationRules"
         xmlns:src="clr-namespace:EconomicCalculator.Storage.Products;assembly=EconomicCalculator"
         mc:Ignorable="d"
         Title="Product Editor" Height="450" Width="800">
@@ -87,7 +88,7 @@
                     <Binding Path="Name" Source="{StaticResource product}"
                              UpdateSourceTrigger="PropertyChanged" Mode="OneWayToSource">
                         <Binding.ValidationRules>
-                            <local:NoEmptyStringValidationRule/>
+                            <valid:NoEmptyStringValidationRule/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox.Text>
@@ -115,7 +116,7 @@
                     <Binding Path="UnitName" Source="{StaticResource product}"
                              UpdateSourceTrigger="PropertyChanged">
                         <Binding.ValidationRules>
-                            <local:NoEmptyStringValidationRule/>
+                            <valid:NoEmptyStringValidationRule/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox.Text>
@@ -132,7 +133,7 @@
                     <Binding Path="Quality" Source="{StaticResource product}"
                              UpdateSourceTrigger="PropertyChanged">
                         <Binding.ValidationRules>
-                            <local:IsIntegerRule Min="0" Max="5"/>
+                            <valid:IsIntegerRule Min="0" Max="5"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox.Text>
@@ -149,7 +150,7 @@
                     <Binding Path="Mass" Source="{StaticResource product}"
                              UpdateSourceTrigger="PropertyChanged">
                         <Binding.ValidationRules>
-                            <local:IsDecimalRule Min="0"/>
+                            <valid:IsDecimalRule Min="0"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox.Text>
@@ -166,7 +167,7 @@
                     <Binding Path="Bulk" Source="{StaticResource product}"
                              UpdateSourceTrigger="PropertyChanged">
                         <Binding.ValidationRules>
-                            <local:IsDecimalRule Min="0"/>
+                            <valid:IsDecimalRule Min="0"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox.Text>

@@ -1,0 +1,99 @@
+﻿<Window x:Class="WpfAppTest.Wants.WantWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfAppTest.Wants"
+        xmlns:valid="clr-namespace:WpfAppTest.ValidationRules"
+        mc:Ignorable="d"
+        xmlns:src="clr-namespace:EconomicCalculator.Storage.Wants;assembly=EconomicCalculator"
+        Style="{StaticResource SharedMenu}"
+        Title="WantWindow" Height="450" Width="800">
+    <Window.CommandBindings>
+        <CommandBinding Command="Close" Executed="CloseBind_Executed"/>
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Key="Esc" Command="Close"/>
+    </Window.InputBindings>
+    <Window.Resources>
+        <src:Want x:Key="want"/>
+        <ControlTemplate x:Key="validationTemplate">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                    <Grid Width="12" Height="12">
+                        <Ellipse Width="12" Height="12"
+                                 Fill="Red" HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Foreground="White" FontWeight="Heavy"
+                                   FontSize="8" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" TextAlignment="Center"
+                                   ToolTip="{Binding ElementName=ErrorAdorned,
+                                   Path=AdornedElement.(Validation.Errors)/ErrorContent}">X</TextBlock>
+                    </Grid>
+                    <TextBlock Foreground="Red" FontSize="12" Margin="2,0,0,0"
+                               Text="{Binding ElementName=ErrorAdorned,
+                               Path=AdornedElement.(Validation.Errors)/ErrorContent}"/>
+                </StackPanel>
+                <AdornedElementPlaceholder Name="ErrorAdorned"/>
+            </DockPanel>
+        </ControlTemplate>
+
+        <Style x:Key="textboxInError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                        Path=(Validation.Errors)/ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="150"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Want" Grid.Row="2" Grid.Column="1"
+               HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <TextBox Name="WantName" Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                 Style="{StaticResource textboxInError}"
+                 Grid.Row="2" Grid.Column="2" Height="23" Width="150"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <TextBox.Text>
+                <Binding Path="Name" Source="{StaticResource want}"
+                         UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:NoEmptyStringValidationRule MinLength="1"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Id" Grid.Row="4" Grid.Column="1"
+               HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <TextBox Name="WantId" Height="23" Width="150" Background="Gray"
+                 Grid.Row="4" Grid.Column="2" IsReadOnly="True"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+
+        <Button Content="Commit" Grid.Column="2" Grid.Row="6"
+                ClickMode="Release" Click="CommitWant"/>
+
+        <Button Content="Commit and Quit" Grid.Column="3" Grid.Row="6"
+                ClickMode="Release" Click="CommitAndQuit"/>
+
+    </Grid>
+</Window>

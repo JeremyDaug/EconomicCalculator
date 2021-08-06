@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace WpfAppTest.Products
+namespace WpfAppTest.ValidationRules
 {
     class NoEmptyStringValidationRule : ValidationRule
     {

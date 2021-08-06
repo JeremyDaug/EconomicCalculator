@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator;
 using EconomicCalculator.Storage.Products;
+using EconomicCalculator.Storage.Wants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WpfAppTest.Wants;
 
 namespace WpfAppTest.Products
 {
@@ -21,8 +23,6 @@ namespace WpfAppTest.Products
     /// </summary>
     public partial class ProductListWindow : Window
     {
-        private List<Product> products;
-
         private Manager manager;
 
         public ProductListWindow()
@@ -44,7 +44,18 @@ namespace WpfAppTest.Products
 
             Window win = new ProductWindow(newProduct);
             win.ShowDialog();
-            
+
+            ProductGrid.ItemsSource = manager.Products.Values;
+            ProductGrid.Items.Refresh();
+        }
+
+        private void NewWant(object sender, RoutedEventArgs e)
+        {
+            var newWant = new Want();
+
+            newWant.Id = manager.NewWantId;
+            Window win = new WantWindow(newWant);
+            win.ShowDialog();
         }
 
         private void BackToWelcomeScreen(object sender, RoutedEventArgs e)
@@ -93,6 +104,9 @@ namespace WpfAppTest.Products
             Window win = new ProductWindow(dup);
 
             win.ShowDialog();
+
+            ProductGrid.ItemsSource = manager.Products.Values;
+            ProductGrid.Items.Refresh();
         }
     }
 }

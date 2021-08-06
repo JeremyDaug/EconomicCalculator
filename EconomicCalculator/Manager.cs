@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using EconomicCalculator.Storage.Wants;
 
 namespace EconomicCalculator
 {
@@ -29,7 +30,8 @@ namespace EconomicCalculator
             UniverseName = "";
             Planets = new Dictionary<int, Planet>();
             Technologies = new Dictionary<int, ITechnology>();
-            Products = new Dictionary<int, Product>();
+            Products = new Dictionary<int, IProduct>();
+            Wants = new Dictionary<int, IWant>();
         }
 
         /// <summary>
@@ -63,7 +65,9 @@ namespace EconomicCalculator
         /// </summary>
         public IDictionary<int, ITechnology> Technologies { get; }
 
-        public IDictionary<int, Product> Products { get; set; }
+        public IDictionary<int, IProduct> Products { get; set; }
+
+        public IDictionary<int, IWant> Wants { get; set; }
 
         #endregion DataStorage
 
@@ -78,10 +82,20 @@ namespace EconomicCalculator
         /// </summary>
         /// <param name="product">The product to check against.</param>
         /// <returns></returns>
-        public bool ContainsProduct(Product product)
+        public bool ContainsProduct(IProduct product)
         {
             // if the id is contained then yes, it exists.
             return Products.ContainsKey(product.Id);
+        }
+        
+        /// <summary>
+        /// Checks if a want already exists. Does not check for duplicates.
+        /// </summary>
+        /// <param name="want">The want to check for.</param>
+        /// <returns></returns>
+        public bool ContainsWant(IWant want)
+        {
+            return Wants.ContainsKey(want.Id);
         }
 
         /// <summary>
@@ -89,7 +103,7 @@ namespace EconomicCalculator
         /// </summary>
         /// <param name="product">The product to check for.</param>
         /// <returns></returns>
-        public bool IsDuplicate(Product product)
+        public bool IsDuplicate(IProduct product)
         {
             // get all products which share both a name and variant name.
             var matches = Products
@@ -112,7 +126,7 @@ namespace EconomicCalculator
             // is a duplicate.
             return true;
         }
-        
+
         /// <summary>
         /// Finds the duplicate product, if it exists. Returns null if not found.
         /// If it shares an ID with a product, it will not return that product.
@@ -120,7 +134,7 @@ namespace EconomicCalculator
         /// </summary>
         /// <param name="product">The product to find the duplicate of.</param>
         /// <returns></returns>
-        public Product FindDuplicate(Product product)
+        public IProduct FindDuplicate(IProduct product)
         {
             var matches = Products
                 .Where(x => x.Value.Name == product.Name
@@ -141,13 +155,37 @@ namespace EconomicCalculator
             return matches.Values.First(x => x.Id != product.Id);
         }
 
+        /// <summary>
+        /// Finds whether there is a duplicate or not and returns it if it is.
+        /// </summary>
+        /// <param name="want">The want to check against.</param>
+        /// <returns>The duplicate want, null if there is no duplicate.</returns>
+        public IWant FindDuplicate(IWant want)
+        {
+            // get all wants which share a name
+            var matches = Wants
+                .Where(x => x.Value.Name == want.Name)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            // if no matches fonud, return null
+            if (matches.Count() == 0)
+                return null;
+
+            // if one match found and it shares an id, return null
+            if (matches.Count() == 1 && matches.ContainsKey(want.Id))
+                return null;
+
+            // otherwise it returns the duplicate
+            return matches.Values.First(x => x.Id != want.Id);
+        }
+
         public string UniverseName { get; set; }
 
         public string UniverseFolder => Path.Combine(DataFolder, UniverseName);
 
         public Dictionary<int, Planet> Planets { get; }
 
-        public int _newProductId;
+        private int _newProductId;
 
         /// <summary>
         /// Helper to retrieve a new, unused, product Id.
@@ -156,12 +194,26 @@ namespace EconomicCalculator
         {
             get
             {
-                while (Products.Keys.Contains(_newProductId))
-                {
+                while (Products.ContainsKey(_newProductId))
                     ++_newProductId;
-                }
 
                 return _newProductId;
+            }
+        }
+
+        private int _newWantId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, want Id.
+        /// </summary>
+        public int NewWantId
+        {
+            get
+            {
+                while (Wants.ContainsKey(_newWantId))
+                    ++_newWantId;
+
+                return _newWantId;
             }
         }
 
@@ -170,7 +222,7 @@ namespace EconomicCalculator
             var json = File.ReadAllText(fileName);
             List<Product> prods = JsonSerializer.Deserialize<List<Product>>(json);
 
-            Products = prods.ToDictionary(x => x.Id, y => y);
+            Products = prods.ToDictionary(x => x.Id, y => (IProduct)y);
         }
 
         public void SaveProducts(string fileName)
@@ -179,6 +231,22 @@ namespace EconomicCalculator
             options.WriteIndented = true;
             string json = JsonSerializer.Serialize(Products.Values.ToList(), options);
             File.WriteAllText(fileName, json);
+        }
+
+        public void LoadWants(string fileName)
+        {
+            var json = File.ReadAllText(fileName);
+            List<Want> wants = JsonSerializer.Deserialize<List<Want>>(json);
+
+            Wants = wants.ToDictionary(x => x.Id, y => (IWant)y);
+        }
+
+        public void SaveWants(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            string json = JsonSerializer.Serialize(Wants.Values.ToList(), options);
+            File.WriteAllText(filename, json);
         }
 
         public bool LoadData(string UniverseName)

@@ -2,13 +2,13 @@
   {
     "Id": 0,
     "Name": "Wheat Grain",
-    "VariantName": null,
+    "VariantName": "",
     "UnitName": "kg",
     "Quality": 1,
     "Mass": 1,
     "Bulk": 1,
     "Fractional": true,
-    "Icon": null
+    "Icon": "ProductImages\\wheat.png"
   },
   {
     "Id": 1,
