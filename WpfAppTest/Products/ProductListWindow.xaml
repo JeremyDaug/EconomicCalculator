@@ -14,39 +14,49 @@
         <KeyBinding Key="Esc" Command="Close"/>
     </Window.InputBindings>
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="30"/>
-            </Grid.RowDefinitions>
-            <DataGrid Name="ProductGrid" HorizontalAlignment="Stretch"
-                  Margin="0,0,0,0" VerticalAlignment="Stretch"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <DataGrid Name="ProductGrid" HorizontalAlignment="Stretch"
+                  Margin="0,0,0,0" VerticalAlignment="Stretch" AutoGenerateColumns="False"
                   AlternatingRowBackground="LightGray" AlternationCount="2"
                   IsReadOnly="True" Grid.Row="0" MouseDoubleClick="EditProduct">
-
-            </DataGrid>
-            <Grid Grid.Row="1" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Button Content="New _Product" HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Width="75"
-                        Grid.Row="0" Grid.Column="0" ClickMode="Release"
-                        Click="NewProduct"/>
-                <Button Content="_Edit Product" HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Width="75"
-                        Grid.Row="0" Grid.Column="1" ClickMode="Release"
-                        Click="EditProduct"/>
-                <Button Content="_Copy Product" HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Width="75"
-                        Grid.Row="0" Grid.Column="2" ClickMode="Release"
-                        Click="CopyProduct"/>
-                <Button Content="_Save Products" HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Width="80"
-                        Grid.Row="0" Grid.Column="3" ClickMode="Release"
-                        Click="SaveToFile"/>
-            </Grid>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="VariantName" Binding="{Binding VariantName}"/>
+                <DataGridTextColumn Header="Unit" Binding="{Binding UnitName}"/>
+                <DataGridTextColumn Header="Quality" Binding="{Binding Quality}"/>
+                <DataGridTextColumn Header="Mass" Binding="{Binding Mass}"/>
+                <DataGridTextColumn Header="Bulk" Binding="{Binding Bulk}"/>
+                <DataGridCheckBoxColumn Header="Fractional" Binding="{Binding Fractional}"/>
+                <DataGridTextColumn Header="Wants" Binding="{Binding WantString}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Grid Grid.Row="1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="New _Product" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="75"
+                    Grid.Row="0" Grid.Column="0" ClickMode="Release"
+                    Click="NewProduct"/>
+            <Button Content="_Edit Product" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="75"
+                    Grid.Row="0" Grid.Column="1" ClickMode="Release"
+                    Click="EditProduct"/>
+            <Button Content="_Copy Product" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="75"
+                    Grid.Row="0" Grid.Column="2" ClickMode="Release"
+                    Click="CopyProduct"/>
+            <Button Content="_Save Products" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="80"
+                    Grid.Row="0" Grid.Column="3" ClickMode="Release"
+                    Click="SaveToFile"/>
         </Grid>
+    </Grid>
 </Window>

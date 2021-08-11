@@ -1,6 +1,6 @@
 ﻿using EconomicCalculator;
 using EconomicCalculator.Storage.Products;
-using Newtonsoft.Json;
+using EconomicCalculator.Storage.Wants;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,12 +28,22 @@ namespace WpfAppTest.Products
         private Manager manager;
         private Product product;
 
+        private List<WantWeight> wants;
+        private List<string> availableWants;
+
         public ProductWindow()
         {
             InitializeComponent();
 
             // get the manager
             manager = Manager.Instance;
+
+            availableWants = manager.Wants.Values.Select(x => x.Name).ToList();
+
+            wants = new List<WantWeight>();
+
+            WantsGrid.ItemsSource = wants;
+            Name.ItemsSource = availableWants;
         }
 
         public ProductWindow(Product product)
@@ -54,6 +64,22 @@ namespace WpfAppTest.Products
             IsFractional.IsChecked = product.Fractional;
             ProductId.Text = product.Id.ToString();
             ImageSelected.Text = product.Icon;
+
+            wants = new List<WantWeight>();
+            foreach (var want in product.Wants)
+            {
+                wants.Add(new WantWeight
+                {
+                    Name = manager.Wants[want.Key].Name,
+                    Satisfaction = want.Value
+                });
+            }
+
+            WantsGrid.ItemsSource = wants;
+
+            availableWants = manager.Wants.Values.Select(x => x.Name).ToList();
+
+            Name.ItemsSource = availableWants;
 
             // get image if any
             var imgLoc = "";
@@ -76,20 +102,46 @@ namespace WpfAppTest.Products
         /// <param name="e"></param>
         private void Save_Product(object sender, RoutedEventArgs e)
         {
+            // sanity checks
+            // ensure no wants appear twice.
+            var wants = WantsGrid.Items.OfType<WantWeight>().Select(x => x.Name);
+            if (wants.GroupBy(x => x).Any(c => c.Count() > 1))
+            {
+                MessageBox.Show("Duplicate Want found. Please remove duplicates.");
+                return;
+            }
+
             try
             {
+                // easy product stuff.
                 product = new Product
                 {
                     Id = product.Id,
-                    Name = ProductName.Text,
-                    VariantName = VariantName.Text,
-                    UnitName = Unit.Text,
+                    Name = ProductName.Text.Trim(),
+                    VariantName = VariantName.Text.Trim(),
+                    UnitName = Unit.Text.Trim(),
                     Quality = int.Parse(Quality.Text),
                     Mass = decimal.Parse(Mass.Text),
                     Bulk = decimal.Parse(Bulk.Text),
                     Fractional = IsFractional.IsChecked.Value,
                     Icon = product.Icon
                 };
+
+                // Wants
+                foreach (WantWeight want in WantsGrid.Items.OfType<WantWeight>())
+                {
+                    var origin = manager.GetWantByName(want.Name);
+
+                    product.Wants[origin.Id] = want.Satisfaction;
+                }
+
+                // WantString
+                foreach (var wantId in product.Wants.Keys.OrderBy(x => x))
+                {
+                    var want = manager.Wants[wantId];
+                    product.WantStrings
+                        .Add(want.ToSatisfactionString(product.Wants[wantId]));
+                }
             }
             catch (Exception error)
             {
@@ -115,21 +167,6 @@ namespace WpfAppTest.Products
             }
 
             manager.Products[product.Id] = product;
-        }
-
-        /// <summary>
-        /// Loads product from the manager.
-        /// TODO delete this entirely, this should not be used here.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Load_Products(object sender, RoutedEventArgs e)
-        {
-            using (StreamReader file = File.OpenText(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json"))
-            {
-                JsonSerializer jser = new JsonSerializer();
-                product = (Product)jser.Deserialize(file, typeof(Product));
-            }
         }
 
         private void BackToWelcomeScreen(object sender, RoutedEventArgs e)

@@ -50,6 +50,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Data\CommonProducts.json" />
+    <None Include="Data\CommonTags.json" />
     <None Include="Data\CommonWants.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -126,8 +127,10 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Refactor\Storage\Technology\ITechnology.cs" />
     <Compile Include="Refactor\Storage\ProductAmountCollection.cs" />
+    <Compile Include="Storage\ProductTags\IProductTagInfo.cs" />
     <Compile Include="Storage\Products\IProduct.cs" />
     <Compile Include="Storage\Products\Product.cs" />
+    <Compile Include="Storage\ProductTags\ProductTagInfo.cs" />
     <Compile Include="Storage\Wants\IWant.cs" />
     <Compile Include="Storage\Wants\Want.cs" />
   </ItemGroup>

@@ -63,6 +63,25 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         bool Fractional { get; }
 
+        /// <summary>
+        /// The wants the product satisfies. The Key is the Want Id.
+        /// The Value is the amount satisfied per unit.
+        /// </summary>
+        Dictionary<int, decimal> Wants { get; set; }
+
+        /// <summary>
+        /// Alternative storage method for wants.
+        /// </summary>
+        List<string> WantStrings { get; set; }
+
+        /// <summary>
+        /// The tags of the Product.
+        /// Key is the ID of the tag,
+        /// The list is the parameters given.
+        /// If list is null then there are no parameters.
+        /// </summary>
+        //Dictionary<int, List<int>> Tags { get; }
+
         // TODO Technology Connection Placeholder.
 
         /// <summary>

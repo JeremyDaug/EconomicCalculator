@@ -31,7 +31,7 @@ namespace WpfAppTest.Products
 
             manager = Manager.Instance;
 
-            manager.LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
+            manager.LoadAll();
 
             ProductGrid.ItemsSource = manager.Products.Values;
         }
@@ -69,6 +69,9 @@ namespace WpfAppTest.Products
         private void EditProduct(object sender, RoutedEventArgs e)
         {
             var selected = (Product)ProductGrid.SelectedItem;
+
+            if (selected == null)
+                return;
 
             Window win = new ProductWindow(selected);
 

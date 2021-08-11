@@ -2,8 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:WpfAppTest"
-             StartupUri="Wants/WantsListWindow.xaml">
+             StartupUri="Products/ProductListWindow.xaml">
     <Application.Resources>
+        
         <Style x:Key="SharedMenu" TargetType="Window">
             <Setter Property="Template">
                 <Setter.Value>
@@ -24,5 +25,17 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <Style x:Key="textboxInError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                        Path=(Validation.Errors)/ErrorContent}"/>
+                    <Setter Property="TextBox.Background" Value="OrangeRed"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
     </Application.Resources>
 </Application>

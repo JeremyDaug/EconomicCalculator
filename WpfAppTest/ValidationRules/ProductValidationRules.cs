@@ -41,6 +41,42 @@ namespace WpfAppTest.ValidationRules
         }
     }
 
+    public class NoWhitespaceRule : ValidationRule
+    {
+        public int MinLength { get; set; }
+        public int MaxLength { get; set; }
+
+        public NoWhitespaceRule()
+        {
+            MinLength = 0;
+            MaxLength = int.MaxValue;
+        }
+
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        {
+            var name = (string)value;
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return new ValidationResult(false, "Cannot be empty or whitespace.");
+            }
+            if (name.Any(x => char.IsWhiteSpace(x)))
+            {
+                return new ValidationResult(false, "Cannot contain any whitespace.");
+            }
+            if (name.Count() < MinLength)
+            {
+                return new ValidationResult(false, "Must have " + MinLength + " or more characters.");
+            }
+            if (name.Count() > MaxLength)
+            {
+                return new ValidationResult(false, "Must have " + MaxLength + " or Less characters.");
+            }
+
+            return ValidationResult.ValidResult;
+        }
+    }
+
     public class IsIntegerRule : ValidationRule
     {
         public int Min { get; set; }

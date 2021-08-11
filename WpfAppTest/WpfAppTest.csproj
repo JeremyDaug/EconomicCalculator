@@ -75,6 +75,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Products\WantWeight.cs" />
     <Compile Include="Wants\WantsListWindow.xaml.cs">
       <DependentUpon>WantsListWindow.xaml</DependentUpon>
     </Compile>
@@ -162,6 +163,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ProductTags\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

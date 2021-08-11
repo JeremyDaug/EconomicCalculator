@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage.Products
@@ -16,7 +17,8 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         public Product()
         {
-
+            Wants = new Dictionary<int, decimal>();
+            WantStrings = new List<string>();
         }
 
         /// <summary>
@@ -34,6 +36,8 @@ namespace EconomicCalculator.Storage.Products
             Bulk = old.Bulk;
             Fractional = old.Fractional;
             Icon = old.Icon;
+            Wants = new Dictionary<int, decimal>(old.Wants);
+            WantStrings = new List<string>(old.WantStrings);
         }
 
         /// <summary>
@@ -68,8 +72,6 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         public int Quality { get; set; }
 
-        // Default Price? Skip for now, may not need.
-
         /// <summary>
         /// The Mass of the product in Kg.
         /// </summary>
@@ -84,6 +86,49 @@ namespace EconomicCalculator.Storage.Products
         /// If the product can be divided into subunit sizes.
         /// </summary>
         public bool Fractional { get; set; }
+
+        /// <summary>
+        /// The wants the product satisfies. The Key is the Want Id.
+        /// The Value is the amount satisfied per unit.
+        /// </summary>
+        public Dictionary<int, decimal>  Wants { get; set; }
+
+        /// <summary>
+        /// Alternative storage method for wants.
+        /// Ordered by Id number of the want.
+        /// </summary>
+        public List<string> WantStrings { get; set; }
+
+        /// <summary>
+        /// A Helper to view the want strings.
+        /// Ordered in the same way as <seealso cref="WantStrings"/>.
+        /// </summary>
+        [JsonIgnore]
+        public string WantString
+        {
+            get
+            {
+                var result = "";
+                foreach (var s in WantStrings)
+                    result += s + ";";
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// The tags of the Product.
+        /// Key is the ID of the tag,
+        /// The list is the parameters given.
+        /// If list is null then there are no parameters.
+        /// </summary>
+        //[JsonIgnore]
+        //public Dictionary<int, List<int>> Tags { get; set; }
+
+        /// <summary>
+        /// Alternative storage method for Tags, used for text and 
+        /// </summary>
+        //[JsonPropertyName("Tags")]
+        //public List<string> TagStrings { get; set; }
 
         // TODO Technology Connection Placeholder.
 

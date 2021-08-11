@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
 using EconomicCalculator.Storage.Wants;
+using System.Text.Encodings.Web;
 
 namespace EconomicCalculator
 {
@@ -128,6 +129,22 @@ namespace EconomicCalculator
         }
 
         /// <summary>
+        /// Returns the Id of a want of the given name.
+        /// </summary>
+        /// <param name="name">The name we want the Id of.</param>
+        /// <returns>The Id of the want with our name.</returns>
+        /// <exception cref="InvalidOperationException">Want was not found.</exception>
+        public int GetWantId(string name)
+        {
+            return Wants.Values.Single(x => x.Name == name).Id;
+        }
+
+        public IWant GetWantByName(string name)
+        {
+            return Wants.Values.Single(x => x.Name == name);
+        }
+
+        /// <summary>
         /// Finds the duplicate product, if it exists. Returns null if not found.
         /// If it shares an ID with a product, it will not return that product.
         /// Only those who are proper duplicates.
@@ -217,10 +234,37 @@ namespace EconomicCalculator
             }
         }
 
+        /// <summary>
+        /// A helper function which goes through all of the info in the system
+        /// and ensures no data is duplicated and all ids actually exist.
+        /// </summary>
+        /// <exception cref="Exception">Throws an exception if any inconsistency is found.</exception>
+        public void SanityCheck()
+        {
+            // TODO, this thing. Build as feels needed.
+        }
+
         public void LoadProducts(string fileName)
         {
             var json = File.ReadAllText(fileName);
             List<Product> prods = JsonSerializer.Deserialize<List<Product>>(json);
+
+            // ensure wants are loaded
+            foreach (var prod in prods)
+            {
+                // if all wants loaded also, skip loading from text.
+                if (prod.Wants.Count() == prod.WantStrings.Count())
+                    continue;
+
+                foreach (var want in prod.WantStrings)
+                {
+                    var data = Want.DataFromString(want);
+
+                    var wantId = GetWantByName(data.Item1).Id;
+
+                    prod.Wants[wantId] = data.Item2;
+                }
+            }
 
             Products = prods.ToDictionary(x => x.Id, y => (IProduct)y);
         }
@@ -229,6 +273,7 @@ namespace EconomicCalculator
         {
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
             string json = JsonSerializer.Serialize(Products.Values.ToList(), options);
             File.WriteAllText(fileName, json);
         }
@@ -247,6 +292,18 @@ namespace EconomicCalculator
             options.WriteIndented = true;
             string json = JsonSerializer.Serialize(Wants.Values.ToList(), options);
             File.WriteAllText(filename, json);
+        }
+
+        /// <summary>
+        /// A Test Funciton, should be removed later.
+        /// </summary>
+        public void LoadAll()
+        {
+            // Basic stuff loaded first
+            LoadWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonWants.json");
+
+            // More advanced stuff next.
+            LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
         }
 
         public bool LoadData(string UniverseName)
