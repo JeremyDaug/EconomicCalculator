@@ -22,10 +22,10 @@
     "Bulk": 1.5,
     "Fractional": true,
     "Wants": {
-      "0": 1
+      "0": 1.04
     },
     "WantStrings": [
-      "Luxury<1>"
+      "Luxury<1.04>"
     ],
     "Icon": "ProductImages\\flour.png"
   }

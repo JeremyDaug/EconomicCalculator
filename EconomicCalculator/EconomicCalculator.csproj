@@ -65,6 +65,7 @@
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
     <Compile Include="Enums\NeedType.cs" />
+    <Compile Include="Enums\ParameterType.cs" />
     <Compile Include="Enums\PlanetTopology.cs" />
     <Compile Include="Enums\PlanetType.cs" />
     <Compile Include="Enums\ProductTypes.cs" />

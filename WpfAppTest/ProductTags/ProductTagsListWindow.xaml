@@ -1,0 +1,50 @@
+﻿<Window x:Class="WpfAppTest.ProductTags.ProductTagsListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfAppTest.ProductTags"
+        mc:Ignorable="d"
+        Style="{StaticResource SharedMenu}"
+        Title="ProductTagsList" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <DataGrid Name="ProductTagGrid" AutoGenerateColumns="False"
+                  AlternatingRowBackground="LightGray" AlternationCount="2"
+                  IsReadOnly="True" MouseDoubleClick="EditTag">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Tag}"/>
+                <DataGridTextColumn Header="Parameters" Binding="{Binding Params}"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="New Tag" HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" Width="75" 
+                    Grid.Row="0" Grid.Column="0" ClickMode="Release"
+                    Click="NewProductTag"/>
+            <Button Content="Edit Tag" HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" Width="75" 
+                    Grid.Row="0" Grid.Column="1" ClickMode="Release"
+                    Click="EditTag"/>
+            <Button Content="Copy Tag" HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" Width="75" 
+                    Grid.Row="0" Grid.Column="2" ClickMode="Release"
+                    Click="CopyTag"/>
+            <Button Content="Save Tags" HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" Width="75" 
+                    Grid.Row="0" Grid.Column="3" ClickMode="Release"
+                    Click="SaveToFile"/>
+        </Grid>
+    </Grid>
+</Window>

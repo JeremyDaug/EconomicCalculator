@@ -1,0 +1,80 @@
+﻿<Window x:Class="WpfAppTest.ProductTags.ProductTagInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfAppTest.ProductTags"
+        xmlns:valid="clr-namespace:WpfAppTest.ValidationRules"
+        xmlns:src="clr-namespace:EconomicCalculator.Storage.ProductTags;assembly=EconomicCalculator"
+        mc:Ignorable="d"
+        Style="{StaticResource SharedMenu}"
+        Title="ProductTagInfoWindow" Height="450" Width="800">
+    <Window.Resources>
+        <src:ProductTagInfo x:Key="Tag"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label Content="Tag Name" HorizontalAlignment="Right"
+               VerticalAlignment="Bottom" 
+               Grid.Row="0" Grid.Column="0"/>
+        <TextBox Name="TagName"
+                 Style="{StaticResource textboxInError}"
+                 Grid.Row="0" Grid.Column="1" Height="23" Width="150"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <TextBox.Text>
+                <Binding Path="Name" Source="{StaticResource Tag}"
+                         UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:NoWhitespaceRule MinLength="1"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Parameter Count" HorizontalAlignment="Right"
+               VerticalAlignment="Bottom"
+               Grid.Row="1" Grid.Column="0"/>
+        <TextBox Name="Params"
+                 Style="{StaticResource textboxInError}"
+                 Grid.Row="1" Grid.Column="1" Height="23" Width="150"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <TextBox.Text>
+                <Binding Path="Name" Source="{StaticResource Tag}"
+                         UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:IsIntegerRule Min="0"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Tag Description" HorizontalAlignment="Right"
+               VerticalAlignment="Bottom"
+               Grid.Row="2" Grid.Column="0"/>
+        <TextBlock Name="Description" Grid.Row="2" Grid.Column="1"
+                   Margin="0,5,0,0" TextWrapping="Wrap"
+                   Background="White"/>
+
+        <Label Content="Tag Id" HorizontalAlignment="Right" 
+               VerticalAlignment="Bottom" 
+               Grid.Row="3" Grid.Column="0"/>
+        <TextBox Name="TagId" Background="Gray" IsReadOnly="True"
+                 Grid.Row="3" Grid.Column="1" Height="23" Width="150"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+        
+        
+    </Grid>
+</Window>

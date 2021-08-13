@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using EconomicCalculator.Storage.Wants;
 using System.Text.Encodings.Web;
+using EconomicCalculator.Storage.ProductTags;
 
 namespace EconomicCalculator
 {
@@ -29,10 +30,11 @@ namespace EconomicCalculator
         private Manager()
         {
             UniverseName = "";
-            Planets = new Dictionary<int, Planet>();
+            //Planets = new Dictionary<int, Planet>();
             Technologies = new Dictionary<int, ITechnology>();
             Products = new Dictionary<int, IProduct>();
             Wants = new Dictionary<int, IWant>();
+            ProductTagInfo = new Dictionary<int, IProductTagInfo>();
         }
 
         /// <summary>
@@ -69,6 +71,8 @@ namespace EconomicCalculator
         public IDictionary<int, IProduct> Products { get; set; }
 
         public IDictionary<int, IWant> Wants { get; set; }
+
+        public IDictionary<int, IProductTagInfo> ProductTagInfo { get; set; }
 
         #endregion DataStorage
 
@@ -139,6 +143,11 @@ namespace EconomicCalculator
             return Wants.Values.Single(x => x.Name == name).Id;
         }
 
+        /// <summary>
+        /// Gets a want by it's name.
+        /// </summary>
+        /// <param name="name"/>
+        /// <returns></returns>
         public IWant GetWantByName(string name)
         {
             return Wants.Values.Single(x => x.Name == name);
@@ -200,8 +209,6 @@ namespace EconomicCalculator
 
         public string UniverseFolder => Path.Combine(DataFolder, UniverseName);
 
-        public Dictionary<int, Planet> Planets { get; }
-
         private int _newProductId;
 
         /// <summary>
@@ -231,6 +238,22 @@ namespace EconomicCalculator
                     ++_newWantId;
 
                 return _newWantId;
+            }
+        }
+
+        private int _newProductInfoTagId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, ProductTagInfo Id.
+        /// </summary>
+        public int NewProductInfoTagId
+        {
+            get
+            {
+                while (Wants.ContainsKey(_newProductInfoTagId))
+                    ++_newProductInfoTagId;
+
+                return _newProductInfoTagId;
             }
         }
 
@@ -269,6 +292,28 @@ namespace EconomicCalculator
             Products = prods.ToDictionary(x => x.Id, y => (IProduct)y);
         }
 
+        public void LoadWants(string fileName)
+        {
+            var json = File.ReadAllText(fileName);
+            List<Want> wants = JsonSerializer.Deserialize<List<Want>>(json);
+
+            Wants = wants.ToDictionary(x => x.Id, y => (IWant)y);
+        }
+
+        public void LoadProductTagInfo(string filename)
+        {
+            var json = File.ReadAllText(filename);
+            List<ProductTagInfo> tags = JsonSerializer.Deserialize<List<ProductTagInfo>>(json);
+
+            ProductTagInfo = tags.ToDictionary(x => x.Id, y => (IProductTagInfo)y);
+        }
+
+        #region SaveFunctions
+
+        /// <summary>
+        /// Saves all products to file.
+        /// </summary>
+        /// <param name="fileName"></param>
         public void SaveProducts(string fileName)
         {
             var options = new JsonSerializerOptions();
@@ -278,14 +323,6 @@ namespace EconomicCalculator
             File.WriteAllText(fileName, json);
         }
 
-        public void LoadWants(string fileName)
-        {
-            var json = File.ReadAllText(fileName);
-            List<Want> wants = JsonSerializer.Deserialize<List<Want>>(json);
-
-            Wants = wants.ToDictionary(x => x.Id, y => (IWant)y);
-        }
-
         public void SaveWants(string filename)
         {
             var options = new JsonSerializerOptions();
@@ -293,6 +330,16 @@ namespace EconomicCalculator
             string json = JsonSerializer.Serialize(Wants.Values.ToList(), options);
             File.WriteAllText(filename, json);
         }
+
+        public void SaveProductTagInfo(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            string json = JsonSerializer.Serialize(ProductTagInfo.Values.ToList(), options);
+            File.WriteAllText(filename, json);
+        }
+
+        #endregion SaveFunctions
 
         /// <summary>
         /// A Test Funciton, should be removed later.
@@ -306,6 +353,12 @@ namespace EconomicCalculator
             LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
         }
 
+        /// <summary>
+        /// Old load function, remove/replace this with actual load function.
+        /// </summary>
+        /// <param name="UniverseName"></param>
+        /// <returns></returns>
+        [Obsolete]
         public bool LoadData(string UniverseName)
         {
             this.UniverseName = UniverseName;
@@ -331,7 +384,7 @@ namespace EconomicCalculator
 
             //earth.SavePlanet(UniverseFolder);
 
-            Planets.Add(earth.Id, earth);
+            //Planets.Add(earth.Id, earth);
 
             return true;
         }

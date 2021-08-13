@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,23 @@ namespace EconomicCalculator.Storage.ProductTags
     public class ProductTagInfo : IProductTagInfo
     {
         /// <summary>
+        /// Default Ctor
+        /// </summary>
+        public ProductTagInfo() {}
+
+        /// <summary>
+        /// Copy constructor.
+        /// </summary>
+        /// <param name="selected">What we are copying.</param>
+        public ProductTagInfo(ProductTagInfo c)
+        {
+            Id = c.Id;
+            Tag = c.Tag;
+            Params = c.Params;
+            Description = c.Description;
+        }
+
+        /// <summary>
         /// The tag's Id.
         /// </summary>
         public int Id { get; set; }
@@ -22,13 +40,39 @@ namespace EconomicCalculator.Storage.ProductTags
         public string Tag { get; set; }
 
         /// <summary>
-        /// How many Parameters it can accept.
+        /// How many Parameters it expects.
         /// </summary>
-        public int Params { get; set; }
+        public List<ParameterType> Params { get; set; }
 
         /// <summary>
-        /// The data of the Product Tag
+        /// Describes the product tag and how it's parameters are meant to function.
         /// </summary>
         public string Description { get; set; }
+
+        public int ParamCount => Params.Count();
+
+        public string RegexPattern
+        {
+            get
+            {
+                string result = Tag;
+
+                if (ParamCount > 0)
+                {
+                    result += "<";
+
+                    foreach (var param in Params)
+                    {
+                        result += ParameterHelper.RegexType(param) + ";";
+                    }
+
+                    result.TrimEnd(';');
+
+                    result += ">";
+                }
+
+                return result;
+            }
+        }
     }
 }

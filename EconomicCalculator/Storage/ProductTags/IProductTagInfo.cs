@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,9 +23,19 @@ namespace EconomicCalculator.Storage.ProductTags
         string Tag { get; }
 
         /// <summary>
-        /// How may params the tag accepts.
+        /// What params does this tag expect.
         /// </summary>
-        int Params { get; }
+        List<ParameterType> Params { get; }
+
+        /// <summary>
+        /// The number of Params expected
+        /// </summary>
+        int ParamCount { get; }
+
+        /// <summary>
+        /// The Regex Pattern of the tag.
+        /// </summary>
+        string RegexPattern { get; }
 
         /// <summary>
         /// The Description for the tag and how it's parameters are used.

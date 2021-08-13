@@ -16,9 +16,6 @@
     </Window.InputBindings>
     <DockPanel>
         <Grid>
-            <Grid.Resources>
-                <local:WantWindow x:Key="wants"/>
-            </Grid.Resources>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="30"/>

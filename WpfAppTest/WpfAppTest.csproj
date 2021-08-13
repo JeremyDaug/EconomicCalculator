@@ -76,6 +76,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Products\WantWeight.cs" />
+    <Compile Include="ProductTags\ProductTagInfoWindow.xaml.cs">
+      <DependentUpon>ProductTagInfoWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProductTags\ProductTagsListWindow.xaml.cs">
+      <DependentUpon>ProductTagsListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Wants\WantsListWindow.xaml.cs">
       <DependentUpon>WantsListWindow.xaml</DependentUpon>
     </Compile>
@@ -106,6 +112,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Products\ProductWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProductTags\ProductTagInfoWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProductTags\ProductTagsListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -164,8 +178,6 @@
   <ItemGroup>
     <Resource Include="license.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ProductTags\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

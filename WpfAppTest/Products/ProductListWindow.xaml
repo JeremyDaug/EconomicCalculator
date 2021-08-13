@@ -13,7 +13,7 @@
     <Window.InputBindings>
         <KeyBinding Key="Esc" Command="Close"/>
     </Window.InputBindings>
-        <Grid>
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="30"/>
