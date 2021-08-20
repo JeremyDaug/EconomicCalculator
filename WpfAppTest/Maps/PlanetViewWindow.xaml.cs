@@ -35,19 +35,7 @@ namespace WpfAppTest.Maps
         }
 
         internal void LoadData(string dataName)
-        {
-            // get instance of Manager.
-            manager = Manager.Instance;
-
-            // Load requested universe/Dataset.
-            manager.LoadData(dataName);
-
-            Planet = manager.Planets[0];
-
-            var terrain = Planet.GetTerrainImageFile(manager.UniverseFolder);
-
-            PlanetMap.Source = new BitmapImage(new Uri(terrain));
-        }
+        {}
 
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
         public static extern bool DeleteObject(IntPtr hObject);

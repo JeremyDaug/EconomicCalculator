@@ -1,0 +1,10 @@
+[
+  {
+    "Id": 0,
+    "Tag": "Luxury",
+    "Params": [
+      "Integer"
+    ],
+    "Description": "Lux"
+  }
+]

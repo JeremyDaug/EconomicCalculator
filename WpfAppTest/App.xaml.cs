@@ -21,14 +21,16 @@ namespace WpfAppTest
         private void BackToMenu(object sender, RoutedEventArgs e)
         {
             // reopen main window
-            Window win = new MainWindow();
-            win.Show();
+            Window win = new OpeningWindows.NavigationMenu();
+            
 
             // close all other windows and go back to menu.
             foreach (var window in Current.Windows.OfType<Window>().Where(x => x.IsActive))
             {
                 window.Close();
             }
+
+            win.Show();
         }
 
         private void NewProduct(object sender, RoutedEventArgs e)

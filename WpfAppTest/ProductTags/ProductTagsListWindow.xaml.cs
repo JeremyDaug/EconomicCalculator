@@ -30,7 +30,11 @@ namespace WpfAppTest.ProductTags
 
             manager = Manager.Instance;
 
+            manager.LoadProductTagInfo(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProductTagInfo.json");
+
             tags = manager.ProductTagInfo.Values.ToList();
+
+            DataContext = tags;
 
             ProductTagGrid.ItemsSource = tags;
         }
@@ -49,6 +53,9 @@ namespace WpfAppTest.ProductTags
         private void EditTag(object sender, RoutedEventArgs e)
         {
             var selected = (ProductTagInfo)ProductTagGrid.SelectedItem;
+
+            if (selected == null)
+                return;
 
             Window win = new ProductTagInfoWindow(selected);
             win.ShowDialog();
@@ -74,7 +81,7 @@ namespace WpfAppTest.ProductTags
         {
             if (MessageBox.Show("Are you sure?", "Save Tags", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                manager.SaveWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProductTagInfo.json");
+                manager.SaveProductTagInfo(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProductTagInfo.json");
                 MessageBox.Show("Saved!", "Wants Saved", MessageBoxButton.OK);
             }
         }

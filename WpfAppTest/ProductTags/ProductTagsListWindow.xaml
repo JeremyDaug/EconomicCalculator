@@ -4,9 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfAppTest.ProductTags"
+        xmlns:converters="clr-namespace:WpfAppTest.Converters"
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
         Title="ProductTagsList" Height="450" Width="800">
+    <Window.Resources>
+        <converters:EnumListToStringConverter x:Key="converter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -17,8 +21,10 @@
                   IsReadOnly="True" MouseDoubleClick="EditTag">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
-                <DataGridTextColumn Header="Name" Binding="{Binding Tag}"/>
-                <DataGridTextColumn Header="Parameters" Binding="{Binding Params}"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Tag}" Width="100"/>
+                <DataGridTextColumn Header="Parameters" 
+                                    Binding="{Binding Params, Converter={StaticResource converter}}"
+                                    Width="150" />
                 <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
             </DataGrid.Columns>
         </DataGrid>

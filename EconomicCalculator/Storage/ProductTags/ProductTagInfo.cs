@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage.ProductTags
@@ -15,7 +17,10 @@ namespace EconomicCalculator.Storage.ProductTags
         /// <summary>
         /// Default Ctor
         /// </summary>
-        public ProductTagInfo() {}
+        public ProductTagInfo()
+        {
+            Params = new List<ParameterType>();
+        }
 
         /// <summary>
         /// Copy constructor.
@@ -25,7 +30,7 @@ namespace EconomicCalculator.Storage.ProductTags
         {
             Id = c.Id;
             Tag = c.Tag;
-            Params = c.Params;
+            Params = c.Params.ToList();
             Description = c.Description;
         }
 
@@ -49,8 +54,10 @@ namespace EconomicCalculator.Storage.ProductTags
         /// </summary>
         public string Description { get; set; }
 
+        [JsonIgnore]
         public int ParamCount => Params.Count();
 
+        [JsonIgnore]
         public string RegexPattern
         {
             get

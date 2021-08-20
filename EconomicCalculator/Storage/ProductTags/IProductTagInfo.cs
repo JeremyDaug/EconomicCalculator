@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage.ProductTags
@@ -30,11 +31,13 @@ namespace EconomicCalculator.Storage.ProductTags
         /// <summary>
         /// The number of Params expected
         /// </summary>
+        [JsonIgnore]
         int ParamCount { get; }
 
         /// <summary>
         /// The Regex Pattern of the tag.
         /// </summary>
+        [JsonIgnore]
         string RegexPattern { get; }
 
         /// <summary>

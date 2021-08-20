@@ -150,7 +150,8 @@
                 </TextBox.Text>
             </TextBox>
 
-            <Label Content="Product Wants" Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+            <Label Content="Product Wants" Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"/>
             <DataGrid Name="WantsGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       Grid.Row="1" Grid.Column="3" Grid.RowSpan="3" AutoGenerateColumns="False"
                       ItemsSource="{Binding wantWeights}" CanUserAddRows="True" CanUserDeleteRows="True"
@@ -182,7 +183,7 @@
                     ClickMode="Release" Click="SelectImage"/>
 
             <Button Content="Commit Product" Grid.Column="7" HorizontalAlignment="Center"
-                    Margin="0,0,0,0" Grid.Row="5" VerticalAlignment="Center" Width="75"
+                    Margin="0,0,0,0" Grid.Row="5" VerticalAlignment="Center"
                     ClickMode="Release" Click="Save_Product" 
                     ToolTip="Adds the product to the system. Does not save it to the file."/>
 

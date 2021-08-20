@@ -11,6 +11,7 @@ using System.Text.Json;
 using EconomicCalculator.Storage.Wants;
 using System.Text.Encodings.Web;
 using EconomicCalculator.Storage.ProductTags;
+using System.Text.Json.Serialization;
 
 namespace EconomicCalculator
 {
@@ -80,6 +81,16 @@ namespace EconomicCalculator
         public string DataFolder => "D:\\Projects\\EconomicCalculator\\EconomicCalculator\\Data\\";
 
         public string DefaultIcon => @"ProductImages\DefaultIcon.png";
+
+        /// <summary>
+        /// Checks if a Product Tag already exists in the system.
+        /// </summary>
+        /// <param name="tag">The tag we're looking for.</param>
+        /// <returns></returns>
+        public bool ContainsProductTag(IProductTagInfo tag)
+        {
+            return ProductTagInfo.ContainsKey(tag.Id);
+        }
 
         /// <summary>
         /// Checks if a product already exists.
@@ -205,6 +216,30 @@ namespace EconomicCalculator
             return matches.Values.First(x => x.Id != want.Id);
         }
 
+        /// <summary>
+        /// Finds wether there is a duplicate or not and returns it if there is.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public IProductTagInfo FindDuplicate(IProductTagInfo tag)
+        {
+            // find matches with the same name.
+            var matches = ProductTagInfo
+                .Where(x => x.Value.Tag == tag.Tag)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            // if empty return null.
+            if (!matches.Any())
+                return null;
+
+            // if only match is itself (id match) return null
+            if (matches.Count() == 1 && matches.ContainsKey(tag.Id))
+                return null;
+
+            // if anything else, return the first which doesn't share an Id.
+            return matches.Values.First(x => x.Id != tag.Id);
+        }
+
         public string UniverseName { get; set; }
 
         public string UniverseFolder => Path.Combine(DataFolder, UniverseName);
@@ -303,6 +338,10 @@ namespace EconomicCalculator
         public void LoadProductTagInfo(string filename)
         {
             var json = File.ReadAllText(filename);
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            };
             List<ProductTagInfo> tags = JsonSerializer.Deserialize<List<ProductTagInfo>>(json);
 
             ProductTagInfo = tags.ToDictionary(x => x.Id, y => (IProductTagInfo)y);
@@ -335,6 +374,8 @@ namespace EconomicCalculator
         {
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            options.Converters.Add(new JsonStringEnumConverter());
             string json = JsonSerializer.Serialize(ProductTagInfo.Values.ToList(), options);
             File.WriteAllText(filename, json);
         }
