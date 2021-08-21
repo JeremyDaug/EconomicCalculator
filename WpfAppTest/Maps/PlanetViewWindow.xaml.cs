@@ -18,7 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace WpfAppTest.Maps
+namespace EditorInterface.Maps
 {
     /// <summary>
     /// Interaction logic for PlanetViewWindow.xaml

@@ -82,6 +82,8 @@ namespace EconomicCalculator
 
         public string DefaultIcon => @"ProductImages\DefaultIcon.png";
 
+        #region ContainsXFunctions
+
         /// <summary>
         /// Checks if a Product Tag already exists in the system.
         /// </summary>
@@ -113,6 +115,8 @@ namespace EconomicCalculator
         {
             return Wants.ContainsKey(want.Id);
         }
+
+        #endregion ContainsXFunctions
 
         /// <summary>
         /// Checks if a product is a duplicate of another or not.
@@ -163,6 +167,8 @@ namespace EconomicCalculator
         {
             return Wants.Values.Single(x => x.Name == name);
         }
+
+        #region FindDuplicate
 
         /// <summary>
         /// Finds the duplicate product, if it exists. Returns null if not found.
@@ -240,9 +246,13 @@ namespace EconomicCalculator
             return matches.Values.First(x => x.Id != tag.Id);
         }
 
+        #endregion FindDuplicate
+
         public string UniverseName { get; set; }
 
         public string UniverseFolder => Path.Combine(DataFolder, UniverseName);
+
+        #region NewIds
 
         private int _newProductId;
 
@@ -291,6 +301,8 @@ namespace EconomicCalculator
                 return _newProductInfoTagId;
             }
         }
+
+        #endregion NewIds
 
         /// <summary>
         /// A helper function which goes through all of the info in the system

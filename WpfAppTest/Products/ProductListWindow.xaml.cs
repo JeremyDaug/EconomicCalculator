@@ -14,9 +14,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using WpfAppTest.Wants;
+using EditorInterface.Wants;
 
-namespace WpfAppTest.Products
+namespace EditorInterface.Products
 {
     /// <summary>
     /// Interaction logic for ProductListWindow.xaml

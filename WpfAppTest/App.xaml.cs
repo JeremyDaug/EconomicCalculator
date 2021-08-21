@@ -6,10 +6,10 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using WpfAppTest.Products;
-using WpfAppTest.Wants;
+using EditorInterface.Products;
+using EditorInterface.Wants;
 
-namespace WpfAppTest
+namespace EditorInterface
 {
     /// <summary>
     /// Interaction logic for App.xaml

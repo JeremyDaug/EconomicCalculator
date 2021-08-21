@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EconomicCalculator.IntTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconModels", "EconModels\EconModels.csproj", "{8E205D41-9825-45F0-8F73-3002277FAF32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfAppTest", "WpfAppTest\WpfAppTest.csproj", "{C68E2BAF-9543-4616-85B7-F5AA36A176EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorInterface", "WpfAppTest\EditorInterface.csproj", "{C68E2BAF-9543-4616-85B7-F5AA36A176EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

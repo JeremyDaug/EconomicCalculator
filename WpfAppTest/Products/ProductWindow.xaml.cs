@@ -18,7 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using MessageBox = System.Windows.MessageBox;
 
-namespace WpfAppTest.Products
+namespace EditorInterface.Products
 {
     /// <summary>
     /// Interaction logic for ProductWindow.xaml

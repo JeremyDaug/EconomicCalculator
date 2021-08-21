@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace WpfAppTest.Products
+namespace EditorInterface.Products
 {
     public class WantWeight : INotifyPropertyChanged
     {

@@ -1,10 +1,10 @@
-﻿<Window x:Class="WpfAppTest.Wants.WantsListWindow"
+﻿<Window x:Class="EditorInterface.Wants.WantsListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfAppTest.Wants"
-        xmlns:menu="clr-namespace:WpfAppTest"
+        xmlns:local="clr-namespace:EditorInterface.Wants"
+        xmlns:menu="clr-namespace:EditorInterface"
         mc:Ignorable="d" Name="UI"
         Style="{StaticResource SharedMenu}"
         Title="Wants List" Height="450" Width="800">

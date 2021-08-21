@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 
-namespace WpfAppTest.Helpers
+namespace EditorInterface.Helpers
 {
     public class EnumBindingSourceExtension : MarkupExtension
     {

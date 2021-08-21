@@ -1,9 +1,9 @@
-﻿<Window x:Class="WpfAppTest.OpeningWindows.NavigationMenu"
+﻿<Window x:Class="EditorInterface.OpeningWindows.NavigationMenu"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfAppTest.OpeningWindows"
+        xmlns:local="clr-namespace:EditorInterface.OpeningWindows"
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
         Title="NavigationMenu" Height="450" Width="800">
@@ -26,11 +26,11 @@
                 ClickMode="Release" Click="ToProducts"/>
 
         <Button Content="To Wants" Height="25" Width="100"
-                Grid.Row="0" Grid.Column="1" Keyboard.KeyUp="Button_KeyUp"
+                Grid.Row="0" Grid.Column="1"
                 ClickMode="Release" Click="ToWants"/>
 
         <Button Content="To Product Tags" Height="25" Width="100"
-                Grid.Row="0" Grid.Column="2" Keyboard.KeyUp="ProductTagsShortcut"
+                Grid.Row="0" Grid.Column="2"
                 ClickMode="Release" Click="ToProductTags"/>
     </Grid>
 </Window>

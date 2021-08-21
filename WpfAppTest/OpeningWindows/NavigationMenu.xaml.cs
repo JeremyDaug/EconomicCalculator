@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace WpfAppTest.OpeningWindows
+namespace EditorInterface.OpeningWindows
 {
     /// <summary>
     /// Interaction logic for NavigationMenu.xaml
@@ -49,15 +49,6 @@ namespace WpfAppTest.OpeningWindows
             win.Show();
 
             this.Close();
-        }
-
-        private void ProductTagsShortcut(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.D3)
-            {
-                ToProductTags(sender, e);
-            }
-            return;
         }
     }
 }
