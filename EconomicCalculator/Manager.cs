@@ -35,7 +35,18 @@ namespace EconomicCalculator
             Technologies = new Dictionary<int, ITechnology>();
             Products = new Dictionary<int, IProduct>();
             Wants = new Dictionary<int, IWant>();
-            ProductTagInfo = new Dictionary<int, IProductTagInfo>();
+        }
+
+        /// <summary>
+        /// Retrieves a product based on it's name and variant name.
+        /// </summary>
+        /// <param name="name">The name and variant name combined.</param>
+        /// <returns></returns>
+        public IProduct GetProductByName(string name)
+        {
+            Tuple<string, string> names = Product.GetProductNames(name);
+            return Products.Values.Single(x => x.Name == names.Item1
+                                        && x.VariantName == names.Item2);
         }
 
         /// <summary>
@@ -73,8 +84,6 @@ namespace EconomicCalculator
 
         public IDictionary<int, IWant> Wants { get; set; }
 
-        public IDictionary<int, IProductTagInfo> ProductTagInfo { get; set; }
-
         #endregion DataStorage
 
         // TODO make this less shitty.
@@ -83,16 +92,6 @@ namespace EconomicCalculator
         public string DefaultIcon => @"ProductImages\DefaultIcon.png";
 
         #region ContainsXFunctions
-
-        /// <summary>
-        /// Checks if a Product Tag already exists in the system.
-        /// </summary>
-        /// <param name="tag">The tag we're looking for.</param>
-        /// <returns></returns>
-        public bool ContainsProductTag(IProductTagInfo tag)
-        {
-            return ProductTagInfo.ContainsKey(tag.Id);
-        }
 
         /// <summary>
         /// Checks if a product already exists.
@@ -222,30 +221,6 @@ namespace EconomicCalculator
             return matches.Values.First(x => x.Id != want.Id);
         }
 
-        /// <summary>
-        /// Finds wether there is a duplicate or not and returns it if there is.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        public IProductTagInfo FindDuplicate(IProductTagInfo tag)
-        {
-            // find matches with the same name.
-            var matches = ProductTagInfo
-                .Where(x => x.Value.Tag == tag.Tag)
-                .ToDictionary(x => x.Key, x => x.Value);
-
-            // if empty return null.
-            if (!matches.Any())
-                return null;
-
-            // if only match is itself (id match) return null
-            if (matches.Count() == 1 && matches.ContainsKey(tag.Id))
-                return null;
-
-            // if anything else, return the first which doesn't share an Id.
-            return matches.Values.First(x => x.Id != tag.Id);
-        }
-
         #endregion FindDuplicate
 
         public string UniverseName { get; set; }
@@ -347,18 +322,6 @@ namespace EconomicCalculator
             Wants = wants.ToDictionary(x => x.Id, y => (IWant)y);
         }
 
-        public void LoadProductTagInfo(string filename)
-        {
-            var json = File.ReadAllText(filename);
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter() }
-            };
-            List<ProductTagInfo> tags = JsonSerializer.Deserialize<List<ProductTagInfo>>(json);
-
-            ProductTagInfo = tags.ToDictionary(x => x.Id, y => (IProductTagInfo)y);
-        }
-
         #region SaveFunctions
 
         /// <summary>
@@ -379,16 +342,6 @@ namespace EconomicCalculator
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
             string json = JsonSerializer.Serialize(Wants.Values.ToList(), options);
-            File.WriteAllText(filename, json);
-        }
-
-        public void SaveProductTagInfo(string filename)
-        {
-            var options = new JsonSerializerOptions();
-            options.WriteIndented = true;
-            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-            options.Converters.Add(new JsonStringEnumConverter());
-            string json = JsonSerializer.Serialize(ProductTagInfo.Values.ToList(), options);
             File.WriteAllText(filename, json);
         }
 

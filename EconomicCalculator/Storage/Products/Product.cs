@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Storage.ProductTags;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -116,19 +117,15 @@ namespace EconomicCalculator.Storage.Products
         }
 
         /// <summary>
-        /// The tags of the Product.
-        /// Key is the ID of the tag,
-        /// The list is the parameters given.
-        /// If list is null then there are no parameters.
+        /// String form of our tags.
         /// </summary>
-        //[JsonIgnore]
-        //public Dictionary<int, List<int>> Tags { get; set; }
+        public List<string> TagStrings { get; set; }
 
         /// <summary>
-        /// Alternative storage method for Tags, used for text and 
+        /// Product Tags in proper form.
         /// </summary>
-        //[JsonPropertyName("Tags")]
-        //public List<string> TagStrings { get; set; }
+        [JsonIgnore]
+        public List<IAttachedProductTag> Tags { get; }
 
         // TODO Technology Connection Placeholder.
 
@@ -180,6 +177,39 @@ namespace EconomicCalculator.Storage.Products
             if (!string.IsNullOrEmpty(VariantName))
                 result += " : " + VariantName;
             return result;
+        }
+
+        /// <summary>
+        /// Characters a product's name and variant name cannot accept.
+        /// <> () [] ; , . \whitespace
+        /// </summary>
+        public static char[] InvalidNameCharacters
+        {
+            get
+            {
+
+                string val = "<>;";
+
+                return val.ToCharArray();
+            }
+        }
+
+        /// <summary>
+        /// Given a name, it returns it and any variant name contained in a string.
+        /// </summary>
+        /// <param name="name">The name(vairant) name we are processing.</param>
+        /// <returns></returns>
+        public static Tuple<string, string> GetProductNames(string name)
+        {
+            if (name.Contains("("))
+            {
+                var prodNames = name.Split('(');
+                var prodName = prodNames[0];
+                var varName = prodNames[1].TrimEnd(')');
+                return new Tuple<string, string>(prodName, varName);
+            }
+            else
+                return new Tuple<string, string>(name, null);
         }
     }
 }

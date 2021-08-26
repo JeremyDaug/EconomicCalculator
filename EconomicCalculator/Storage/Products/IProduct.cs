@@ -1,8 +1,10 @@
 ﻿using EconomicCalculator.Enums;
+using EconomicCalculator.Storage.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage.Products
@@ -72,7 +74,19 @@ namespace EconomicCalculator.Storage.Products
         /// <summary>
         /// Alternative storage method for wants.
         /// </summary>
+        [JsonIgnore]
         List<string> WantStrings { get; set; }
+
+        /// <summary>
+        /// String form of our tags.
+        /// </summary>
+        List<string> TagStrings { get; set; }
+
+        /// <summary>
+        /// Product Tags in proper form.
+        /// </summary>
+        [JsonIgnore]
+        List<IAttachedProductTag> Tags { get; }
 
         /// <summary>
         /// The tags of the Product.

@@ -167,6 +167,12 @@
                 </DataGrid.Columns>
             </DataGrid>
 
+            <Label Content="Product Tags" Grid.Row="4" Grid.Column="3" HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"/>
+            <DataGrid Name="TagGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      Grid.Row="5" Grid.Column="3" Grid.RowSpan="3" AutoGenerateColumns="True"
+                      ItemsSource="{Binding productTags}" />
+
             <Label Content="Token Image" HorizontalAlignment="Center" VerticalAlignment="Center"
                    Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="2"/>
             <Border BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="2" Grid.Column="5"

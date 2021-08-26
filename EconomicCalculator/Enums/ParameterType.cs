@@ -8,28 +8,39 @@ using System.Threading.Tasks;
 namespace EconomicCalculator.Enums
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
+    [Flags]
     public enum ParameterType
     {
         /// <summary>
+        /// Placeholder, it expects anything.
+        /// </summary>
+        Any = 0,
+
+        /// <summary>
         /// Expects the Parameter to be an integer.
         /// </summary>
-        Integer,
+        Integer = 1,
 
         /// <summary>
         /// Expects the parameter to be a decimal value.
         /// </summary>
-        Decimal,
+        Decimal = 2,
 
         /// <summary>
         /// Expects the Parameter to be a product, variant may or may not
         /// be included.
         /// </summary>
-        Product,
+        Product = 4,
 
         /// <summary>
         /// Expects the parameter to be a want.
         /// </summary>
-        Want
+        Want = 8,
+
+        /// <summary>
+        /// Expects a word or words in CamelCase.
+        /// </summary>
+        Word = 16
     }
 
     public static class ParameterHelper
@@ -41,7 +52,7 @@ namespace EconomicCalculator.Enums
                 case ParameterType.Integer:
                     return @"-?\d*"; // any integer.
                 case ParameterType.Decimal:
-                    return @"\d*(\.\d*)?";  // any decimal.
+                    return @"-?\d*(\.\d*)?";  // any decimal.
                 case ParameterType.Product:
                     return @"\w+(\(\w+\))?"; // any string with another string in ( )
                 case ParameterType.Want:

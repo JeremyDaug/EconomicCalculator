@@ -78,12 +78,6 @@
       <DependentUpon>NavigationMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="Products\WantWeight.cs" />
-    <Compile Include="ProductTags\ProductTagInfoWindow.xaml.cs">
-      <DependentUpon>ProductTagInfoWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ProductTags\ProductTagsListWindow.xaml.cs">
-      <DependentUpon>ProductTagsListWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Wants\WantsListWindow.xaml.cs">
       <DependentUpon>WantsListWindow.xaml</DependentUpon>
     </Compile>
@@ -121,14 +115,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ProductTags\ProductTagInfoWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ProductTags\ProductTagsListWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Wants\WantsListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -142,7 +128,7 @@
     <Compile Include="Products\ProductListWindow.xaml.cs">
       <DependentUpon>ProductListWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ValidationRules\ProductValidationRules.cs" />
+    <Compile Include="ValidationRules\ValidationRules.cs" />
     <Compile Include="Products\ProductWindow.xaml.cs">
       <DependentUpon>ProductWindow.xaml</DependentUpon>
     </Compile>

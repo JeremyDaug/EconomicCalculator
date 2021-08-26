@@ -3,83 +3,146 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage.ProductTags
 {
-    /// <summary>
-    /// A Product tag and it's information.
-    /// </summary>
-    public class ProductTagInfo : IProductTagInfo
+    public static class ProductTagInfo
     {
         /// <summary>
-        /// Default Ctor
+        /// Get's the expected Regex for a tag.
         /// </summary>
-        public ProductTagInfo()
+        /// <param name="tag">The tag we want the Regex for.</param>
+        /// <returns>The Desired Regex String.</returns>
+        public static string GetRegex(ProductTag tag)
         {
-            Params = new List<ParameterType>();
-        }
-
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
-        /// <param name="selected">What we are copying.</param>
-        public ProductTagInfo(ProductTagInfo c)
-        {
-            Id = c.Id;
-            Tag = c.Tag;
-            Params = c.Params.ToList();
-            Description = c.Description;
-        }
-
-        /// <summary>
-        /// The tag's Id.
-        /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// The tag's name and text.
-        /// </summary>
-        public string Tag { get; set; }
-
-        /// <summary>
-        /// How many Parameters it expects.
-        /// </summary>
-        public List<ParameterType> Params { get; set; }
-
-        /// <summary>
-        /// Describes the product tag and how it's parameters are meant to function.
-        /// </summary>
-        public string Description { get; set; }
-
-        [JsonIgnore]
-        public int ParamCount => Params.Count();
-
-        [JsonIgnore]
-        public string RegexPattern
-        {
-            get
+            var result = "^" + tag.ToString();
+            switch (tag)
             {
-                string result = Tag;
-
-                if (ParamCount > 0)
-                {
-                    result += "<";
-
-                    foreach (var param in Params)
-                    {
-                        result += ParameterHelper.RegexType(param) + ";";
-                    }
-
-                    result.TrimEnd(';');
-
-                    result += ">";
-                }
-
-                return result;
+                case ProductTag.Bargain:
+                case ProductTag.Luxury:
+                    // Decimal; String extra checking needed on string.
+                    result += "<" + RegexHelper.Decimal + ";" + RegexHelper.Word
+                        + ">$";
+                    return result;
+                case ProductTag.Claim:
+                    // String, Must be a checked against products/firms
+                    result += "<" + RegexHelper.Word + ">$";
+                    return result;
+                case ProductTag.Atomic:
+                    // Integer and Integer, check for negative.
+                    result += "<" + RegexHelper.Integer + ";"
+                        + RegexHelper.Integer + ">$";
+                    return result;
+                case ProductTag.Energy:
+                    // Decimal, should be positive.
+                    result += "<" + RegexHelper.Decimal + ">$";
+                    return result;
+                default: // default tag has no parameters, just the tagName.
+                    return result + "$";
             }
+        }
+
+        /// <summary>
+        /// Retrieve the Parameters expected by a tag.
+        /// </summary>
+        /// <param name="tag">The Tag in question.</param>
+        /// <returns>The list of parameters Expected.</returns>
+        public static IList<ParameterType> GetTagParameterTypes(ProductTag tag)
+        {
+            var result = new List<ParameterType>();
+
+            switch (tag)
+            {
+                case ProductTag.Bargain:
+                case ProductTag.Luxury:
+                    // Decimal; String extra checking needed on string.
+                    result.Add(ParameterType.Decimal);
+                    result.Add(ParameterType.Want);
+                    return result;
+                case ProductTag.Claim:
+                    // String, Must be a checked against products/firms
+                    result.Add(ParameterType.Word);
+                    return result;
+                case ProductTag.Atomic:
+                    // Integer and Integer, check for negative.
+                    result.Add(ParameterType.Integer);
+                    result.Add(ParameterType.Integer);
+                    return result;
+                case ProductTag.Energy:
+                    // Decimal, should be positive.
+                    result.Add(ParameterType.Decimal);
+                    return result;
+                default: // default tag has no parameters.
+                    return result;
+            }
+        }
+
+        public static IAttachedProductTag ProcessTagString(string tag)
+        {
+            var result = new AttachedProductTag();
+
+            // if < contained, then it has parameters.
+            if (tag.Contains("<"))
+            {
+                result.Tag = (ProductTag)Enum.Parse(typeof(ProductTag), tag.Split('<')[0]);
+            }
+            else // no params
+            {
+                result.Tag = (ProductTag)Enum.Parse(typeof(ProductTag), tag);
+            }
+
+            // with tag, double check regex validation.
+            Regex rg = new Regex(GetRegex(result.Tag));
+            if (!rg.IsMatch(tag))
+            {
+                throw new ArgumentException(
+                    string.Format("Tag '{0}' is of an invalid format and must be of the form {1}",
+                    tag, rg.ToString()));
+            }
+
+            // since it's valid, go through and get the parameters.
+            var parameters = GetTagParameterTypes(result.Tag);
+
+            // if no parameters sought, return the result so far.
+            if (!parameters.Any())
+                return result;
+
+            // split parameters in text, everything after <, remove > at the end, and split along ';'
+            var paramStrings = tag.Split('<')[1].TrimEnd('>').Split(';');
+
+            // ensure params got and params expected match.
+            if (paramStrings.Count() != parameters.Count())
+                throw new ArgumentException(string.Format("Tag Parameter Count does not match. Expected {0}", parameters.Count()));
+
+            // go through each param and parse it.
+            for (int i = 0; i < parameters.Count(); ++i)
+            {
+                switch (parameters[i])
+                {
+                    case ParameterType.Decimal:
+                        result.Add(decimal.Parse(paramStrings[i]));
+                        break;
+                    case ParameterType.Integer:
+                        result.Add(int.Parse(paramStrings[i]));
+                        break;
+                    case ParameterType.Product:
+                        var prodId = Manager.Instance.GetProductByName(paramStrings[i]).Id;
+                        result.Add(prodId);
+                        break;
+                    case ParameterType.Want:
+                        var wantId = Manager.Instance.GetWantByName(paramStrings[i]).Id;
+                        result.Add(wantId);
+                        break;
+                    default:
+                        result.Add(paramStrings[i]);
+                        break;
+                }
+            }
+
+            // everything has been gotten. Return new AttachedTag.
+            return result;
         }
     }
 }

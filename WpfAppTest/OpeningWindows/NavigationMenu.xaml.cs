@@ -41,14 +41,5 @@ namespace EditorInterface.OpeningWindows
 
             this.Close();
         }
-
-        private void ToProductTags(object sender, RoutedEventArgs e)
-        {
-            var win = new ProductTags.ProductTagsListWindow();
-
-            win.Show();
-
-            this.Close();
-        }
     }
 }
