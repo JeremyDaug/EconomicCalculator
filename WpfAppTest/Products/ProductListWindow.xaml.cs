@@ -31,7 +31,7 @@ namespace EditorInterface.Products
 
             manager = Manager.Instance;
 
-            manager.LoadAll();
+            //manager.LoadAll();
 
             ProductGrid.ItemsSource = manager.Products.Values;
         }

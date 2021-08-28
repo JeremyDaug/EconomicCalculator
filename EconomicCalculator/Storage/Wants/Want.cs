@@ -42,13 +42,24 @@ namespace EconomicCalculator.Storage.Wants
             return Name;
         }
 
-        public static readonly string Pattern = @"\w+<\d+>$";
+        /// <summary>
+        /// Want<1.0> Want name can only have letters. 
+        /// Parameter must be a number (with or without decimals).
+        /// </summary>
+        public static readonly string Pattern = @"^[a-zA-Z]+<\d+(\.\d+)?>$";
 
         public static readonly string FormatPattern = @"{0}<{1}>";
 
         public static bool IsValid(string s)
         {
             Regex rg = new Regex(Pattern);
+
+            return rg.IsMatch(s);
+        }
+
+        public static bool NameIsValid(string s)
+        {
+            Regex rg = new Regex("[a-zA-Z]+");
 
             return rg.IsMatch(s);
         }

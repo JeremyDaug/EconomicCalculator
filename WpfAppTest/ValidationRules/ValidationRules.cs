@@ -83,7 +83,7 @@ namespace EditorInterface.ValidationRules
         public int MinLength { get; set; }
         public int MaxLength { get; set; }
 
-        public Regex valid => new Regex(@"[\w-]+");
+        public Regex valid => new Regex(@"^[a-zA-Z]+$");
 
         public NameStringValidation()
         {
@@ -106,7 +106,7 @@ namespace EditorInterface.ValidationRules
                 return new ValidationResult(false, "Cannot contain any whitespace.");
             }
             // can't contain invalid characters, can only contain
-            // a-zA-Z0-9 and _
+            // a-zA-Z
             if (!valid.IsMatch(name))
             {
                 return new ValidationResult(false, "Name can only include a-zA-Z0-9_-.");

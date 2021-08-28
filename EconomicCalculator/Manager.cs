@@ -289,6 +289,10 @@ namespace EconomicCalculator
             // TODO, this thing. Build as feels needed.
         }
 
+        /// <summary>
+        /// Load Products from File.
+        /// </summary>
+        /// <param name="fileName">The file to load from.</param>
         public void LoadProducts(string fileName)
         {
             var json = File.ReadAllText(fileName);
@@ -308,6 +312,17 @@ namespace EconomicCalculator
                     var wantId = GetWantByName(data.Item1).Id;
 
                     prod.Wants[wantId] = data.Item2;
+                }
+            }
+
+            // ensure all tags are loaded
+            foreach (var prod in prods)
+            {
+                foreach (var tag in prod.TagStrings)
+                {
+                    var data = ProductTagInfo.ProcessTagString(tag);
+
+                    prod.Tags.Add(data);
                 }
             }
 

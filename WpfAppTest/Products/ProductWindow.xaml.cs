@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator;
 using EconomicCalculator.Storage.Products;
+using EconomicCalculator.Storage.ProductTags;
 using EconomicCalculator.Storage.Wants;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WpfAppTest.Products;
 using MessageBox = System.Windows.MessageBox;
 
 namespace EditorInterface.Products
@@ -31,6 +33,8 @@ namespace EditorInterface.Products
         private List<WantWeight> wants;
         private List<string> availableWants;
 
+        private List<TagData> ProductTags;
+
         public ProductWindow()
         {
             InitializeComponent();
@@ -44,6 +48,10 @@ namespace EditorInterface.Products
 
             WantsGrid.ItemsSource = wants;
             Name.ItemsSource = availableWants;
+
+            ProductTags = new List<TagData>();
+
+            TagGrid.ItemsSource = ProductTags;
         }
 
         public ProductWindow(Product product)
@@ -76,10 +84,14 @@ namespace EditorInterface.Products
             }
 
             WantsGrid.ItemsSource = wants;
-
             availableWants = manager.Wants.Values.Select(x => x.Name).ToList();
-
             Name.ItemsSource = availableWants;
+
+            ProductTags = new List<TagData>();
+            foreach (var tag in product.TagStrings)
+                ProductTags.Add(new TagData { Tag = tag });
+
+            TagGrid.ItemsSource = ProductTags;
 
             // get image if any
             var imgLoc = "";
@@ -142,6 +154,23 @@ namespace EditorInterface.Products
                     product.WantStrings
                         .Add(want.ToSatisfactionString(product.Wants[wantId]));
                 }
+
+                // Tags
+                foreach (string tag in ProductTags.Select(x => x.Tag))
+                {
+                    try
+                    {
+                        var newTag = ProductTagInfo.ProcessTagString(tag);
+                        product.Tags.Add(newTag);
+                        product.TagStrings.Add(tag);
+                    }
+                    catch (ArgumentException tagError)
+                    {
+                        MessageBox.Show(tagError.Message, "Invalid Tag", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                }
             }
             catch (Exception error)
             {
@@ -195,6 +224,20 @@ namespace EditorInterface.Products
                 ImageSelected.Text = location;
                 ImageView.Source = new BitmapImage(new Uri(img.FileName));
             }
+        }
+
+        private void AddTag(object sender, RoutedEventArgs e)
+        {
+            ProductTagSelector win = new ProductTagSelector();
+            win.ShowDialog();
+
+            var newTag = win.SelectedTag;
+
+            var example = ProductTagInfo.GetProductExample(newTag);
+
+            ProductTags.Add(new TagData { Tag = example });
+
+            TagGrid.Items.Refresh();
         }
     }
 }

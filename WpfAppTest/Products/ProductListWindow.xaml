@@ -32,6 +32,7 @@
                 <DataGridTextColumn Header="Bulk" Binding="{Binding Bulk}"/>
                 <DataGridCheckBoxColumn Header="Fractional" Binding="{Binding Fractional}"/>
                 <DataGridTextColumn Header="Wants" Binding="{Binding WantString}"/>
+                <DataGridTextColumn Header="Tags" Binding="{Binding TagString}"/>
             </DataGrid.Columns>
         </DataGrid>
         <Grid Grid.Row="1" >

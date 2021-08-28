@@ -20,6 +20,8 @@ namespace EconomicCalculator.Storage.Products
         {
             Wants = new Dictionary<int, decimal>();
             WantStrings = new List<string>();
+            Tags = new List<IAttachedProductTag>();
+            TagStrings = new List<string>();
         }
 
         /// <summary>
@@ -39,6 +41,8 @@ namespace EconomicCalculator.Storage.Products
             Icon = old.Icon;
             Wants = new Dictionary<int, decimal>(old.Wants);
             WantStrings = new List<string>(old.WantStrings);
+            Tags = new List<IAttachedProductTag>(old.Tags);
+            TagStrings = new List<string>(old.TagStrings);
         }
 
         /// <summary>
@@ -126,6 +130,21 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         [JsonIgnore]
         public List<IAttachedProductTag> Tags { get; }
+
+        /// <summary>
+        /// String form of all our tags.
+        /// </summary>
+        [JsonIgnore]
+        public string TagString
+        {
+            get
+            {
+                var result = "";
+                foreach (var s in TagStrings)
+                    result += s + ";";
+                return result;
+            }
+        }
 
         // TODO Technology Connection Placeholder.
 

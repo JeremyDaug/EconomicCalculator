@@ -15,7 +15,7 @@ namespace EconomicCalculator.Storage.ProductTags
         /// Luxury<D;S>, the good becomes more efficient at satisfying
         /// desires as its' price rises above the average and falls below it.
         /// D is the Multiplier of the effect. S is the name of the want or desire.
-        /// S may be a Want, Self, for the specific product, or all for everything the
+        /// S may be a Want, self, for the specific product, or all for everything the
         /// product gives.
         /// </summary>
         Luxury,

@@ -8,8 +8,8 @@
     "Mass": 1,
     "Bulk": 1,
     "Fractional": true,
-    "Wants": {},
     "WantStrings": [],
+    "TagStrings": [],
     "Icon": "ProductImages\\wheat.png"
   },
   {
@@ -21,11 +21,12 @@
     "Mass": 1.5,
     "Bulk": 1.5,
     "Fractional": true,
-    "Wants": {
-      "0": 1.04
-    },
     "WantStrings": [
-      "Luxury<1.04>"
+      "Luxury<1.75>"
+    ],
+    "TagStrings": [
+      "Luxury<1.5;Luxury>",
+      "ConsumerGood"
     ],
     "Icon": "ProductImages\\flour.png"
   }

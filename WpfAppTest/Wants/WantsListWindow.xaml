@@ -7,7 +7,7 @@
         xmlns:menu="clr-namespace:EditorInterface"
         mc:Ignorable="d" Name="UI"
         Style="{StaticResource SharedMenu}"
-        Title="Wants List" Height="450" Width="800">
+        Title="Wants List" Height="450" Width="400">
     <Window.CommandBindings>
         <CommandBinding Command="Close" Executed="CloseBind_Executed"/>
     </Window.CommandBindings>

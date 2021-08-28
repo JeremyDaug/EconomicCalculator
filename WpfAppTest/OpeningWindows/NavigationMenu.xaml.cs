@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,8 @@ namespace EditorInterface.OpeningWindows
         public NavigationMenu()
         {
             InitializeComponent();
+
+            Manager.Instance.LoadAll();
         }
 
         private void ToProducts(object sender, RoutedEventArgs e)

@@ -77,6 +77,10 @@
     <Compile Include="OpeningWindows\NavigationMenu.xaml.cs">
       <DependentUpon>NavigationMenu.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Products\ProductTagSelector.xaml.cs">
+      <DependentUpon>ProductTagSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Products\TagData.cs" />
     <Compile Include="Products\WantWeight.cs" />
     <Compile Include="Wants\WantsListWindow.xaml.cs">
       <DependentUpon>WantsListWindow.xaml</DependentUpon>
@@ -108,6 +112,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Products\ProductListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Products\ProductTagSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

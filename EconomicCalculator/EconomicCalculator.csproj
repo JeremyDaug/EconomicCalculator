@@ -50,7 +50,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Data\CommonProducts.json" />
-    <None Include="Data\CommonProductTagInfo.json" />
     <None Include="Data\CommonWants.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -52,14 +52,14 @@ namespace EconomicCalculator.Storage.ProductTags
         public static IList<ParameterType> GetTagParameterTypes(ProductTag tag)
         {
             var result = new List<ParameterType>();
-
+            
             switch (tag)
             {
                 case ProductTag.Bargain:
                 case ProductTag.Luxury:
                     // Decimal; String extra checking needed on string.
                     result.Add(ParameterType.Decimal);
-                    result.Add(ParameterType.Want);
+                    result.Add(ParameterType.Word);
                     return result;
                 case ProductTag.Claim:
                     // String, Must be a checked against products/firms
@@ -77,6 +77,60 @@ namespace EconomicCalculator.Storage.ProductTags
                 default: // default tag has no parameters.
                     return result;
             }
+        }
+
+        /// <summary>
+        /// Gets a list of all productTags in string form.
+        /// Parameters not included.
+        /// </summary>
+        public static List<string> GetProductTags()
+        {
+            var result = new List<string>();
+            foreach (var tag in Enum.GetNames(typeof(ProductTag)))
+            {
+                result.Add(tag);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get's an example tag string based on a tag.
+        /// </summary>
+        /// <param name="tag">The tag we want an example of.</param>
+        /// <returns></returns>
+        public static string GetProductExample(string tag)
+        {
+            return GetProductExample((ProductTag)Enum.Parse(typeof(ProductTag), tag));
+        }
+
+        /// <summary>
+        /// Get's an example tag string based on a tag.
+        /// </summary>
+        /// <param name="tag">The tag we want an example of.</param>
+        /// <returns></returns>
+        public static string GetProductExample(ProductTag tag)
+        {
+            var example = tag.ToString();
+
+            var parameters = GetTagParameterTypes(tag);
+
+            if (parameters.Count() == 0)
+                return example;
+            example += "<";
+
+            // do each parameter
+            foreach (var param in parameters)
+            {
+                example += ParameterHelper.ParameterExample(param) + ";";
+            }
+
+            // remove trailing ;
+            example = example.Remove(example.Length-1);
+
+            example += ">";
+
+            return example;
         }
 
         public static IAttachedProductTag ProcessTagString(string tag)
@@ -138,6 +192,32 @@ namespace EconomicCalculator.Storage.ProductTags
                     default:
                         result.Add(paramStrings[i]);
                         break;
+                }
+
+                // Extra checking here.
+                // Bargains and Luxuries and the word parameter
+                if ((result.Tag == ProductTag.Bargain ||
+                    result.Tag == ProductTag.Luxury) &&
+                    parameters[i].HasFlag(ParameterType.Word))
+                {
+                    // ensure it's either self, all, or an existing want.
+                    var val = paramStrings[i];
+                    if (string.Equals(val, "self") ||
+                        string.Equals(val, "all"))
+                    {
+                        result[1] = val;
+                    }
+                    else
+                    {// an existing want
+                        try
+                        {
+                            result[1] = Manager.Instance.GetWantByName(paramStrings[i]);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            throw new ArgumentException(string.Format("Invalid parameter. {0} must be self, all, or a want", paramStrings[i]));
+                        }
+                    }
                 }
             }
 

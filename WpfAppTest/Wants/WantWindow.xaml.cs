@@ -64,9 +64,9 @@ namespace EditorInterface.Wants
             };
 
             // check it's valid.
-            if (string.IsNullOrWhiteSpace(want.Name))
+            if (Want.NameIsValid(want.Name))
             {
-                MessageBox.Show("Name Cannot be empty or whitespace.");
+                MessageBox.Show("Name Cannot have whitespace, and can only contain letters.");
                 return;
             }
 

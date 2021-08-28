@@ -18,6 +18,7 @@
     <Window.Resources>
         <src:Product x:Key="product" />
         <local:WantWeight x:Key="wantWeight"/>
+        <local:TagData x:Key="TagData"/>
     </Window.Resources>
     <DockPanel>
         <Grid>
@@ -170,8 +171,14 @@
             <Label Content="Product Tags" Grid.Row="4" Grid.Column="3" HorizontalAlignment="Center"
                    VerticalAlignment="Bottom"/>
             <DataGrid Name="TagGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      Grid.Row="5" Grid.Column="3" Grid.RowSpan="3" AutoGenerateColumns="True"
-                      ItemsSource="{Binding productTags}" />
+                      Grid.Row="5" Grid.Column="3" Grid.RowSpan="3" IsReadOnly="False"
+                      SelectionMode="Single" AutoGenerateColumns="True"
+                      ItemsSource="{Binding ProductTags}">
+            </DataGrid>
+
+            <Button Content="AddTag" Grid.Row="6" Grid.Column="5" Width="75"
+                    VerticalAlignment="Center" HorizontalAlignment="Center"
+                    ClickMode="Release" Click="AddTag"/>
 
             <Label Content="Token Image" HorizontalAlignment="Center" VerticalAlignment="Center"
                    Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="2"/>

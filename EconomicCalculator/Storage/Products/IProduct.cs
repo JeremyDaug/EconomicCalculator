@@ -69,13 +69,20 @@ namespace EconomicCalculator.Storage.Products
         /// The wants the product satisfies. The Key is the Want Id.
         /// The Value is the amount satisfied per unit.
         /// </summary>
+        [JsonIgnore]
         Dictionary<int, decimal> Wants { get; set; }
 
         /// <summary>
         /// Alternative storage method for wants.
         /// </summary>
-        [JsonIgnore]
         List<string> WantStrings { get; set; }
+
+        /// <summary>
+        /// A Helper to view the want strings.
+        /// Ordered in the same way as <seealso cref="WantStrings"/>.
+        /// </summary>
+        [JsonIgnore]
+        string WantString { get; }
 
         /// <summary>
         /// String form of our tags.
@@ -87,6 +94,12 @@ namespace EconomicCalculator.Storage.Products
         /// </summary>
         [JsonIgnore]
         List<IAttachedProductTag> Tags { get; }
+
+        /// <summary>
+        /// String form of all our tags.
+        /// </summary>
+        [JsonIgnore]
+        string TagString { get; }
 
         /// <summary>
         /// The tags of the Product.
