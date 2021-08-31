@@ -50,6 +50,8 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Data\CommonProducts.json" />
+    <None Include="Data\CommonSkillGroups.json" />
+    <None Include="Data\CommonSkills.json" />
     <None Include="Data\CommonWants.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -134,6 +136,11 @@
     <Compile Include="Storage\Products\IProduct.cs" />
     <Compile Include="Storage\Products\Product.cs" />
     <Compile Include="Storage\RegexHelper.cs" />
+    <Compile Include="Storage\Skills\ISkill.cs" />
+    <Compile Include="Storage\Skills\ISkillGroup.cs" />
+    <Compile Include="Storage\Skills\Skill.cs" />
+    <Compile Include="Storage\Skills\SkillGroup.cs" />
+    <Compile Include="Storage\Skills\SkillsGraph.cs" />
     <Compile Include="Storage\Wants\IWant.cs" />
     <Compile Include="Storage\Wants\Want.cs" />
   </ItemGroup>

@@ -12,6 +12,7 @@ using EconomicCalculator.Storage.Wants;
 using System.Text.Encodings.Web;
 using EconomicCalculator.Storage.ProductTags;
 using System.Text.Json.Serialization;
+using EconomicCalculator.Storage.Skills;
 
 namespace EconomicCalculator
 {
@@ -35,19 +36,9 @@ namespace EconomicCalculator
             Technologies = new Dictionary<int, ITechnology>();
             Products = new Dictionary<int, IProduct>();
             Wants = new Dictionary<int, IWant>();
-        }
-
-        /// <summary>
-        /// Retrieves a product based on it's name and variant name.
-        /// </summary>
-        /// <param name="name">The name and variant name combined.</param>
-        /// <returns></returns>
-        public IProduct GetProductByName(string name)
-        {
-            Tuple<string, string> names = Product.GetProductNames(name);
-            return Products.Values.Single(x => x.Name == names.Item1
-                                        && x.VariantName == names.Item2);
-        }
+            Skills = new Dictionary<int, ISkill>();
+            SkillGroups = new Dictionary<int, ISkillGroup>();
+        }        
 
         /// <summary>
         /// The current available instance.
@@ -84,6 +75,10 @@ namespace EconomicCalculator
 
         public IDictionary<int, IWant> Wants { get; set; }
 
+        public IDictionary<int, ISkill> Skills { get; set; }
+
+        public IDictionary<int, ISkillGroup> SkillGroups { get; set; }
+
         #endregion DataStorage
 
         // TODO make this less shitty.
@@ -116,6 +111,56 @@ namespace EconomicCalculator
         }
 
         #endregion ContainsXFunctions
+
+        #region GetFunctions
+
+        #region ByName
+
+        /// <summary>
+        /// Retrieves a product based on it's name and variant name.
+        /// </summary>
+        /// <param name="name">The name and variant name combined.</param>
+        /// <returns></returns>
+        public IProduct GetProductByName(string name)
+        {
+            Tuple<string, string> names = Product.GetProductNames(name);
+            return Products.Values.Single(x => x.Name == names.Item1
+                                        && x.VariantName == names.Item2);
+        }
+
+        /// <summary>
+        /// Gets a want by it's name.
+        /// </summary>
+        /// <param name="name"/>
+        /// <returns></returns>
+        public IWant GetWantByName(string name)
+        {
+            return Wants.Values.Single(x => x.Name == name);
+        }
+
+        /// <summary>
+        /// Retrieve a Skill GRoup based on it's name.
+        /// </summary>
+        /// <param name="name">The desired Group.</param>
+        /// <returns></returns>
+        public ISkillGroup GetSkillGroupByName(string name)
+        {
+            return SkillGroups.Values.Single(x => x.Name == name);
+        }
+
+        /// <summary>
+        /// Retrieve a Skill based on it's name.
+        /// </summary>
+        /// <param name="name">The name of the Skill</param>
+        /// <returns></returns>
+        public ISkill GetSkillByName(string name)
+        {
+            return Skills.Values.Single(x => x.Name == name);
+        }
+
+        #endregion ByName
+
+        #endregion GetFunctions
 
         /// <summary>
         /// Checks if a product is a duplicate of another or not.
@@ -155,16 +200,6 @@ namespace EconomicCalculator
         public int GetWantId(string name)
         {
             return Wants.Values.Single(x => x.Name == name).Id;
-        }
-
-        /// <summary>
-        /// Gets a want by it's name.
-        /// </summary>
-        /// <param name="name"/>
-        /// <returns></returns>
-        public IWant GetWantByName(string name)
-        {
-            return Wants.Values.Single(x => x.Name == name);
         }
 
         #region FindDuplicate
@@ -277,6 +312,38 @@ namespace EconomicCalculator
             }
         }
 
+        private int _newSkillId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, Skill Id.
+        /// </summary>
+        public int NewSKillId
+        {
+            get
+            {
+                while (Skills.ContainsKey(_newSkillId))
+                    ++_newSkillId;
+
+                return _newSkillId;
+            }
+        }
+
+        private int _newSkillGroupId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, Skill Group Id.
+        /// </summary>
+        public int NewSkillGroupId
+        {
+            get
+            {
+                while (SkillGroups.ContainsKey(_newSkillGroupId))
+                    ++_newSkillGroupId;
+
+                return _newSkillGroupId;
+            }
+        }
+
         #endregion NewIds
 
         /// <summary>
@@ -288,6 +355,8 @@ namespace EconomicCalculator
         {
             // TODO, this thing. Build as feels needed.
         }
+
+        #region LoadFunctions
 
         /// <summary>
         /// Load Products from File.
@@ -329,6 +398,10 @@ namespace EconomicCalculator
             Products = prods.ToDictionary(x => x.Id, y => (IProduct)y);
         }
 
+        /// <summary>
+        /// Loads wants from file.
+        /// </summary>
+        /// <param name="fileName">The file to load from.</param>
         public void LoadWants(string fileName)
         {
             var json = File.ReadAllText(fileName);
@@ -336,6 +409,33 @@ namespace EconomicCalculator
 
             Wants = wants.ToDictionary(x => x.Id, y => (IWant)y);
         }
+
+
+        /// <summary>
+        /// Load Skills from file.
+        /// </summary>
+        /// <param name="filename">The file to load from.</param>
+        public void LoadSkills(string filename)
+        {
+            var json = File.ReadAllText(filename);
+            List<Skill> skills = JsonSerializer.Deserialize<List<Skill>>(json);
+
+            Skills = skills.ToDictionary(x => x.Id, y => (ISkill)y);
+        }
+
+        /// <summary>
+        /// Load Skill Groups from file.
+        /// </summary>
+        /// <param name="filename">The file to load from.</param>
+        public void LoadSkillGroups(string filename)
+        {
+            var json = File.ReadAllText(filename);
+            List<SkillGroup> groups = JsonSerializer.Deserialize<List<SkillGroup>>(json);
+
+            SkillGroups = groups.ToDictionary(x => x.Id, y => (ISkillGroup)y);
+        }
+
+        #endregion LoadFunctions
 
         #region SaveFunctions
 
@@ -352,11 +452,39 @@ namespace EconomicCalculator
             File.WriteAllText(fileName, json);
         }
 
+        /// <summary>
+        /// Saves wants to the given file.
+        /// </summary>
+        /// <param name="filename">The file to save it to.</param>
         public void SaveWants(string filename)
         {
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
             string json = JsonSerializer.Serialize(Wants.Values.ToList(), options);
+            File.WriteAllText(filename, json);
+        }
+
+        /// <summary>
+        /// Save Skill Groups to the given file.
+        /// </summary>
+        /// <param name="filename">The file to save it to.</param>
+        public void SaveSkillGroups(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            string json = JsonSerializer.Serialize(SkillGroups.Values.ToList(), options);
+            File.WriteAllText(filename, json);
+        }
+
+        /// <summary>
+        /// Save skills to file.
+        /// </summary>
+        /// <param name="filename">The file to save it to.</param>
+        public void SaveSkills(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            string json = JsonSerializer.Serialize(Skills.Values.ToList(), options);
             File.WriteAllText(filename, json);
         }
 
@@ -372,6 +500,12 @@ namespace EconomicCalculator
 
             // More advanced stuff next.
             LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
+
+            // Get all skill groups
+            LoadSkillGroups(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkillGroups.json");
+
+            // Get All Skills
+            LoadSkills(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkills.json");
         }
 
         /// <summary>

@@ -28,5 +28,9 @@
         <Button Content="To Wants" Height="25" Width="100"
                 Grid.Row="0" Grid.Column="1"
                 ClickMode="Release" Click="ToWants"/>
+
+        <Button Content="To Skills" Height="25" Width="100"
+                Grid.Row="0" Grid.Column="2"
+                ClickMode="Release" Click="ToSkills"/>
     </Grid>
 </Window>

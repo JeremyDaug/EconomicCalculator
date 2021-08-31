@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C68E2BAF-9543-4616-85B7-F5AA36A176EC}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>WpfAppTest</RootNamespace>
-    <AssemblyName>WpfAppTest</AssemblyName>
+    <RootNamespace>EditorInterface</RootNamespace>
+    <AssemblyName>EditorInterface</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -82,6 +82,12 @@
     </Compile>
     <Compile Include="Products\TagData.cs" />
     <Compile Include="Products\WantWeight.cs" />
+    <Compile Include="Skills\SkillEditorWindow.xaml.cs">
+      <DependentUpon>SkillEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Skills\SkillsListWindow.xaml.cs">
+      <DependentUpon>SkillsListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Wants\WantsListWindow.xaml.cs">
       <DependentUpon>WantsListWindow.xaml</DependentUpon>
     </Compile>
@@ -120,6 +126,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Products\ProductWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Skills\SkillEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Skills\SkillsListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

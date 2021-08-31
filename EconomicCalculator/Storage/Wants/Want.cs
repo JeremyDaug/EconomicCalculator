@@ -42,7 +42,6 @@ namespace EconomicCalculator.Storage.Wants
             return Name;
         }
 
-        /// <summary>
         /// Want<1.0> Want name can only have letters. 
         /// Parameter must be a number (with or without decimals).
         /// </summary>

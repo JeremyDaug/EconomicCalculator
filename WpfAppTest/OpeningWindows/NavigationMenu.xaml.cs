@@ -44,5 +44,14 @@ namespace EditorInterface.OpeningWindows
 
             this.Close();
         }
+
+        private void ToSkills(object sender, RoutedEventArgs e)
+        {
+            var win = new Skills.SkillsListWindow();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

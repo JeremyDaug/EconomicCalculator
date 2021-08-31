@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 1,
+    "Name": "Lugging",
+    "GroupStrings": [
+      "Physical"
+    ],
+    "RelatedStrings": {
+      "Running": 0.8
+    },
+    "Description": "For moving stuff around by hand."
+  },
+  {
+    "Id": 2,
+    "Name": "Running",
+    "GroupStrings": [
+      "Physical"
+    ],
+    "RelatedStrings": {
+      "Lugging": 0.8
+    },
+    "Description": "Running about swiftly and efficiently."
+  }
+]
