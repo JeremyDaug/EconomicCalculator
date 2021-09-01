@@ -73,6 +73,7 @@ namespace EditorInterface.Products
             ProductId.Text = product.Id.ToString();
             ImageSelected.Text = product.Icon;
 
+            // Set wants
             wants = new List<WantWeight>();
             foreach (var want in product.Wants)
             {
@@ -87,6 +88,7 @@ namespace EditorInterface.Products
             availableWants = manager.Wants.Values.Select(x => x.Name).ToList();
             Name.ItemsSource = availableWants;
 
+            // Set Tags
             ProductTags = new List<TagData>();
             foreach (var tag in product.TagStrings)
                 ProductTags.Add(new TagData { Tag = tag });

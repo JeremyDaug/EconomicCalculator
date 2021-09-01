@@ -85,6 +85,9 @@
     <Compile Include="Skills\SkillEditorWindow.xaml.cs">
       <DependentUpon>SkillEditorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Skills\SkillGroupEditor.xaml.cs">
+      <DependentUpon>SkillGroupEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Skills\SkillsListWindow.xaml.cs">
       <DependentUpon>SkillsListWindow.xaml</DependentUpon>
     </Compile>
@@ -130,6 +133,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Skills\SkillEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Skills\SkillGroupEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

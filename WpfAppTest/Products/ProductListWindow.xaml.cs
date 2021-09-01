@@ -56,14 +56,9 @@ namespace EditorInterface.Products
             newWant.Id = manager.NewWantId;
             Window win = new WantWindow(newWant);
             win.ShowDialog();
-        }
 
-        private void BackToWelcomeScreen(object sender, RoutedEventArgs e)
-        {
-            Window win = new MainWindow();
-
-            win.Show();
-            this.Close();
+            ProductGrid.ItemsSource = manager.Products.Values;
+            ProductGrid.Items.Refresh();
         }
 
         private void EditProduct(object sender, RoutedEventArgs e)
@@ -110,6 +105,14 @@ namespace EditorInterface.Products
 
             ProductGrid.ItemsSource = manager.Products.Values;
             ProductGrid.Items.Refresh();
+        }
+
+        private void BackToWelcomeScreen(object sender, RoutedEventArgs e)
+        {
+            Window win = new MainWindow();
+
+            win.Show();
+            this.Close();
         }
     }
 }

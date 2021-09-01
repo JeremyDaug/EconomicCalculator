@@ -1,6 +1,6 @@
 [
   {
-    "Id": 1,
+    "Id": 0,
     "Name": "Physical",
     "Default": 0.6,
     "Description": "Skills based on physical prowess."

@@ -163,8 +163,7 @@
                                             DisplayMemberPath="{Binding Name}"/>
                     <!--DataGridTextColumn Header="Want" MinWidth="60" Binding="{Binding Name}"/-->
                     <DataGridTextColumn Header="Satisfaction" 
-                                        Binding="{Binding Satisfaction}">
-                    </DataGridTextColumn>
+                                        Binding="{Binding Satisfaction}"/>
                 </DataGrid.Columns>
             </DataGrid>
 

@@ -356,6 +356,12 @@ namespace EconomicCalculator
             // TODO, this thing. Build as feels needed.
         }
 
+        #region DeleteFunctions
+
+        // TODO delete functions for all objects in our system.
+
+        #endregion DeleteFunctions
+
         #region LoadFunctions
 
         /// <summary>
@@ -421,6 +427,9 @@ namespace EconomicCalculator
             List<Skill> skills = JsonSerializer.Deserialize<List<Skill>>(json);
 
             Skills = skills.ToDictionary(x => x.Id, y => (ISkill)y);
+
+            foreach (var skill in skills)
+                skill.SetDataFromStrings();
         }
 
         /// <summary>

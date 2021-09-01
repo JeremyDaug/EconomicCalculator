@@ -39,8 +39,7 @@ namespace EditorInterface.Products
 
         private void RaisePropertyChanged(string caller)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(caller));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

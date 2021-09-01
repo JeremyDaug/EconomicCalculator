@@ -6,19 +6,33 @@
       "Physical"
     ],
     "RelatedStrings": {
-      "Running": 0.8
+      "Running": 0.8,
+      "Sports": 0.5
     },
     "Description": "For moving stuff around by hand."
   },
   {
-    "Id": 2,
+    "Id": 0,
     "Name": "Running",
     "GroupStrings": [
       "Physical"
     ],
     "RelatedStrings": {
-      "Lugging": 0.8
+      "Lugging": 0.8,
+      "Sports": 0.7
     },
     "Description": "Running about swiftly and efficiently."
+  },
+  {
+    "Id": 2,
+    "Name": "Sports",
+    "GroupStrings": [
+      "Physical"
+    ],
+    "RelatedStrings": {
+      "Lugging": 0.5,
+      "Running": 0.7
+    },
+    "Description": "Physical Activity for the Entertainment of the Masses."
   }
 ]
