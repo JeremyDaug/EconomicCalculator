@@ -60,23 +60,58 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\BuildingType.cs" />
     <Compile Include="Enums\CashType.cs" />
-    <Compile Include="Enums\EnumExtensions\ColorExtensions.cs" />
-    <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
+    <Compile Include="Enums\CropType.cs" />
     <Compile Include="Enums\JobCategory.cs" />
     <Compile Include="Enums\JobTypes.cs" />
+    <Compile Include="Enums\MineType.cs" />
     <Compile Include="Enums\NeedType.cs" />
-    <Compile Include="Enums\ParameterType.cs" />
     <Compile Include="Enums\PlanetTopology.cs" />
     <Compile Include="Enums\PlanetType.cs" />
-    <Compile Include="Storage\ProductTags\AttachedProductTag.cs" />
-    <Compile Include="Storage\ProductTags\IAttachedProductTag.cs" />
-    <Compile Include="Storage\ProductTags\ProductTagInfo.cs" />
-    <Compile Include="Storage\ProductTags\ProductTag.cs" />
-    <Compile Include="Enums\ProductTypes.cs" />
     <Compile Include="Enums\ProcessGoodTag.cs" />
+    <Compile Include="Enums\ProductTypes.cs" />
+    <Compile Include="Enums\RockType.cs" />
     <Compile Include="Enums\TechCategory.cs" />
     <Compile Include="Enums\WaterFlags.cs" />
+    <Compile Include="Refactor\CashType.cs" />
+    <Compile Include="Enums\EnumExtensions\ColorExtensions.cs" />
+    <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
+    <Compile Include="Refactor\JobCategory.cs" />
+    <Compile Include="Refactor\JobTypes.cs" />
+    <Compile Include="Refactor\NeedType.cs" />
+    <Compile Include="Enums\ParameterType.cs" />
+    <Compile Include="Refactor\PlanetTopology.cs" />
+    <Compile Include="Refactor\PlanetType.cs" />
+    <Compile Include="Refactor\Storage\Products\Building.cs" />
+    <Compile Include="Refactor\Storage\Products\Currency.cs" />
+    <Compile Include="Refactor\Storage\Products\IBuilding.cs" />
+    <Compile Include="Refactor\Storage\Products\ICurrency.cs" />
+    <Compile Include="Refactor\Storage\Products\IPlot.cs" />
+    <Compile Include="Refactor\Storage\Products\IProduct.cs" />
+    <Compile Include="Refactor\Storage\Products\Plot.cs" />
+    <Compile Include="Storage\Processes\IDivisionEffects.cs" />
+    <Compile Include="Storage\Processes\ProcessTags\AttachedProcessTag.cs" />
+    <Compile Include="Storage\Processes\ProductionTags\AttachedProductionTag.cs" />
+    <Compile Include="Storage\Processes\ProcessTags\IAttachedProcessTag.cs" />
+    <Compile Include="Storage\Processes\ProductionTags\IAttachedProductionTag.cs" />
+    <Compile Include="Storage\Processes\ProcessProduct.cs" />
+    <Compile Include="Storage\Processes\ProcessSection.cs" />
+    <Compile Include="Storage\Processes\ProcessTags\ProcessTag.cs" />
+    <Compile Include="Storage\Processes\ProcessTags\ProcessTagInfo.cs" />
+    <Compile Include="Storage\Processes\ProcessWant.cs" />
+    <Compile Include="Storage\Processes\ProductionTags\ProductionTag.cs" />
+    <Compile Include="Refactor\Storage\Products\Product.cs" />
+    <Compile Include="Storage\Processes\IProcess.cs" />
+    <Compile Include="Storage\Processes\IProcessProduct.cs" />
+    <Compile Include="Storage\Processes\IProcessWant.cs" />
+    <Compile Include="Storage\Processes\ProductionTags\ProductionTagInfo.cs" />
+    <Compile Include="Storage\Products\ProductTags\AttachedProductTag.cs" />
+    <Compile Include="Storage\Products\ProductTags\IAttachedProductTag.cs" />
+    <Compile Include="Storage\Products\ProductTags\ProductTagInfo.cs" />
+    <Compile Include="Storage\Products\ProductTags\ProductTag.cs" />
+    <Compile Include="Refactor\TechCategory.cs" />
+    <Compile Include="Refactor\WaterFlags.cs" />
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Generators\Noise.cs" />
     <Compile Include="Generators\Vector2.cs" />
@@ -95,9 +130,9 @@
     <Compile Include="Refactor\Storage\Jobs\IFarmer.cs" />
     <Compile Include="Refactor\Storage\Jobs\IJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Enums\MineType.cs" />
-    <Compile Include="Enums\RockType.cs" />
-    <Compile Include="Enums\CropType.cs" />
+    <Compile Include="Refactor\MineType.cs" />
+    <Compile Include="Refactor\RockType.cs" />
+    <Compile Include="Refactor\CropType.cs" />
     <Compile Include="Refactor\Storage\ICrop.cs" />
     <Compile Include="Refactor\Storage\Organizations\IMarket.cs" />
     <Compile Include="Refactor\Storage\Jobs\ILaborer.cs" />
@@ -108,22 +143,14 @@
     <Compile Include="Refactor\Storage\Population\IPoliticalGroup.cs" />
     <Compile Include="Refactor\Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Refactor\Storage\Population\IPopulations.cs" />
-    <Compile Include="Enums\BuildingType.cs" />
-    <Compile Include="Refactor\Storage\Products\Building.cs" />
-    <Compile Include="Refactor\Storage\Products\Currency.cs" />
-    <Compile Include="Refactor\Storage\Products\IBuilding.cs" />
-    <Compile Include="Refactor\Storage\Products\ICurrency.cs" />
-    <Compile Include="Refactor\Storage\Products\IPlot.cs" />
+    <Compile Include="Refactor\BuildingType.cs" />
     <Compile Include="Refactor\Storage\Process\IProcess.cs" />
-    <Compile Include="Refactor\Storage\Products\IProduct.cs" />
     <Compile Include="Refactor\Storage\IProductAmountCollection.cs" />
     <Compile Include="Refactor\Storage\ISqlReader.cs" />
     <Compile Include="Refactor\Storage\Organizations\Market.cs" />
     <Compile Include="Refactor\Storage\Population\PopulationGroup.cs" />
     <Compile Include="Refactor\Storage\Population\Populations.cs" />
     <Compile Include="Refactor\Storage\Process\Process.cs" />
-    <Compile Include="Refactor\Storage\Products\Plot.cs" />
-    <Compile Include="Refactor\Storage\Products\Product.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -240,6 +267,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Runner\" />
+    <Folder Include="Storage\Technology\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

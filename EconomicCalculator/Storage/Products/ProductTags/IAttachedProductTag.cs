@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage.ProductTags
+namespace EconomicCalculator.Storage.Products.ProductTags
 {
     /// <summary>
     /// Interface for Product Tag that's attached to a product.

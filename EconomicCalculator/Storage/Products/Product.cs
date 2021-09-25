@@ -199,21 +199,6 @@ namespace EconomicCalculator.Storage.Products
         }
 
         /// <summary>
-        /// Characters a product's name and variant name cannot accept.
-        /// <> () [] ; , . \whitespace
-        /// </summary>
-        public static char[] InvalidNameCharacters
-        {
-            get
-            {
-
-                string val = "<>;";
-
-                return val.ToCharArray();
-            }
-        }
-
-        /// <summary>
         /// Given a name, it returns it and any variant name contained in a string.
         /// </summary>
         /// <param name="name">The name(vairant) name we are processing.</param>
@@ -229,6 +214,15 @@ namespace EconomicCalculator.Storage.Products
             }
             else
                 return new Tuple<string, string>(name, null);
+        }
+
+        /// <summary>
+        /// Gets the product's name in Product(Variant) format.
+        /// </summary>
+        /// <returns></returns>
+        public string GetName()
+        {
+            return Name + "(" + VariantName + ")";
         }
     }
 }

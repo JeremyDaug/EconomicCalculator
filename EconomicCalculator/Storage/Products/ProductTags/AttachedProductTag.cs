@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Enums;
 
-namespace EconomicCalculator.Storage.ProductTags
+namespace EconomicCalculator.Storage.Products.ProductTags
 {
     /// <summary>
     /// Product Tag attached to a product.
@@ -37,7 +37,8 @@ namespace EconomicCalculator.Storage.ProductTags
         /// <param name="i">The index To Access</param>
         /// <returns>The Parameter at that index.</returns>
         /// <exception cref="IndexOutOfRangeException"/>
-        public object this[int i] {
+        public object this[int i]
+        {
             get
             {
                 return parameters[i];

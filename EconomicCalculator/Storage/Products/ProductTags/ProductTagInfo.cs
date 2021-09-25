@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage.ProductTags
+namespace EconomicCalculator.Storage.Products.ProductTags
 {
     public static class ProductTagInfo
     {
@@ -20,6 +20,12 @@ namespace EconomicCalculator.Storage.ProductTags
             var result = "^" + tag.ToString();
             switch (tag)
             {
+                case ProductTag.Storage:
+                    result += string.Format("<{0};{1};{2}>$",
+                        RegexHelper.Word, 
+                        RegexHelper.Decimal, 
+                        RegexHelper.Decimal);
+                    return result;
                 case ProductTag.Bargain:
                 case ProductTag.Luxury:
                     // Decimal; String extra checking needed on string.
@@ -55,6 +61,11 @@ namespace EconomicCalculator.Storage.ProductTags
             
             switch (tag)
             {
+                case ProductTag.Storage:
+                    result.Add(ParameterType.Word);
+                    result.Add(ParameterType.Decimal);
+                    result.Add(ParameterType.Decimal);
+                    return result;
                 case ProductTag.Bargain:
                 case ProductTag.Luxury:
                     // Decimal; String extra checking needed on string.
@@ -85,13 +96,7 @@ namespace EconomicCalculator.Storage.ProductTags
         /// </summary>
         public static List<string> GetProductTags()
         {
-            var result = new List<string>();
-            foreach (var tag in Enum.GetNames(typeof(ProductTag)))
-            {
-                result.Add(tag);
-            }
-
-            return result;
+            return Enum.GetNames(typeof(ProductTag)).ToList();
         }
 
         /// <summary>

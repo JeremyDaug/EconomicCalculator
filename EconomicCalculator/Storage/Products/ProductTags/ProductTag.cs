@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage.ProductTags
+namespace EconomicCalculator.Storage.Products.ProductTags
 {
     /// <summary>
     /// The existant product tags in our system.
@@ -42,7 +42,8 @@ namespace EconomicCalculator.Storage.ProductTags
         /// </summary>
         Claim,
         /// <summary>
-        /// The product is exclusively a consumeable, using it always consumes it.
+        /// The product is exclusively a consumeable, using it for itself or it's wants
+        /// consumes the product.
         /// </summary>
         Consumable,
         /// <summary>
@@ -118,6 +119,14 @@ namespace EconomicCalculator.Storage.ProductTags
         /// Energy<J>, the product is or contains some form of energy. J is the amount of energy
         /// a unit of the product contains. This energy is released as heat when it fails.
         /// </summary>
-        Energy
+        Energy,
+        /// <summary>
+        /// Storage<type,Volume,Mass>
+        /// This product can store other products. It can store goods of 
+        /// the defined type (Basic, Liquid, Gas, Energy), as well as 
+        /// a defined volume and mass. Setting either to -1 gives it infinite
+        /// storage (IE magical Storage).
+        /// </summary>
+        Storage
     }
 }

@@ -41,6 +41,11 @@ namespace EconomicCalculator.Enums
         /// Expects a word or words in CamelCase.
         /// </summary>
         Word = 16,
+
+        /// <summary>
+        /// Expects a singular Character.
+        /// </summary>
+        Character = 32,
     }
 
     public static class ParameterHelper
@@ -58,6 +63,8 @@ namespace EconomicCalculator.Enums
                 case ParameterType.Want:
                 case ParameterType.Word:
                     return @"\w+"; // any string
+                case ParameterType.Character:
+                    return @"\w";
                 default:
                     throw new ArgumentException("Parameter does not exist.");
             }
@@ -82,6 +89,8 @@ namespace EconomicCalculator.Enums
                     return "Want";
                 case ParameterType.Word:
                     return "Word";
+                case ParameterType.Character:
+                    return "A";
                 default:
                     throw new ArgumentException("Parameter does not exist.");
             }

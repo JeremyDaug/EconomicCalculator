@@ -26,11 +26,16 @@ namespace EconomicCalculator.Storage
         /// <summary>
         /// Regex for Products
         /// </summary>
-        public static string Product => @"\w+(\(\w+\))?";
+        public static string Product => @"[a-zA-Z]+(\([a-zA-Z]+\))?";
 
         /// <summary>
         /// Regex for Wants
         /// </summary>
-        public static string Want => @"\w+";
+        public static string Want => @"[a-zA-Z]+";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string Character => @"\w";
     }
 }

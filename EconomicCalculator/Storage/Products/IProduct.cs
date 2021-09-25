@@ -143,5 +143,11 @@ namespace EconomicCalculator.Storage.Products
         /// The Icon used by the product.
         /// </summary>
         string Icon { get; }
+
+        /// <summary>
+        /// Gets the product's name in Product(Variant) format.
+        /// </summary>
+        /// <returns></returns>
+        string GetName();
     }
 }
