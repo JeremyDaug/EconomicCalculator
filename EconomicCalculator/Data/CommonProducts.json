@@ -1,33 +1,45 @@
 [
-  {
-    "Id": 0,
-    "Name": "Wheat Grain",
-    "VariantName": "",
-    "UnitName": "kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 1,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": "ProductImages\\wheat.png"
-  },
-  {
-    "Id": 1,
-    "Name": "Wheat Flour",
-    "VariantName": "Nice",
-    "UnitName": "Bag",
-    "Quality": 3,
-    "Mass": 1.5,
-    "Bulk": 1.5,
-    "Fractional": true,
-    "WantStrings": [
-      "Luxury<1.75>"
-    ],
-    "TagStrings": [
-      "Luxury<1.5;Luxury>",
-      "ConsumerGood"
-    ],
-    "Icon": "ProductImages\\flour.png"
-  }
+	{
+		"Id": 0,
+		"Name": "Wheat Grain",
+		"VariantName": "",
+		"UnitName": "kg",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 1,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": "ProductImages\\wheat.png"
+	},
+	{
+		"Id": 1,
+		"Name": "Wheat Flour",
+		"VariantName": "",
+		"UnitName": "kg",
+		"Quality": 2,
+		"Mass": 1,
+		"Bulk": 1,
+		"Fractional": true,
+		"WantStrings": [
+			"Luxury<1.75>"
+		],
+		"TagStrings": [
+			"Luxury<1.5;Luxury>",
+			"ConsumerGood"
+		],
+		"Icon": "ProductImages\\flour.png"
+	},
+	{
+		"Id": 2,
+		"Name": "Bio Waste",
+		"UnitName": "kg",
+		"Quality": 0,
+		"Mass": 1,
+		"Bulk": 0.4,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": "ProductImages\\bin.png"
+	}
 ]

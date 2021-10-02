@@ -1,5 +1,5 @@
 ﻿using EconomicCalculator.Enums;
-using EconomicCalculator.Storage.ProductTags;
+using EconomicCalculator.Storage.Products.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.Linq;

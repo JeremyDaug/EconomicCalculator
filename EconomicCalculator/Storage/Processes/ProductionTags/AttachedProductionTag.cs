@@ -3,7 +3,7 @@ using EconomicCalculator.Enums;
 
 namespace EconomicCalculator.Storage.Processes.ProductionTags
 {
-    internal class AttachedProductionTag : IAttachedProductionTag
+    public class AttachedProductionTag : IAttachedProductionTag
     {
         /// <summary>
         /// Default Constructor.

@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.Storage.ProductTags;
+﻿using EconomicCalculator.Storage.Products.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -222,7 +222,11 @@ namespace EconomicCalculator.Storage.Products
         /// <returns></returns>
         public string GetName()
         {
-            return Name + "(" + VariantName + ")";
+            // if it has a variant name.
+            if (!string.IsNullOrWhiteSpace(VariantName))
+                return Name + "(" + VariantName + ")";
+            // if it doesn't.
+            return Name;
         }
     }
 }

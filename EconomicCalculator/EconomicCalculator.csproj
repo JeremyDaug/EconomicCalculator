@@ -49,6 +49,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Data\CommonProcesses.json" />
     <None Include="Data\CommonProducts.json" />
     <None Include="Data\CommonSkillGroups.json" />
     <None Include="Data\CommonSkills.json" />
@@ -74,15 +75,9 @@
     <Compile Include="Enums\RockType.cs" />
     <Compile Include="Enums\TechCategory.cs" />
     <Compile Include="Enums\WaterFlags.cs" />
-    <Compile Include="Refactor\CashType.cs" />
     <Compile Include="Enums\EnumExtensions\ColorExtensions.cs" />
     <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
-    <Compile Include="Refactor\JobCategory.cs" />
-    <Compile Include="Refactor\JobTypes.cs" />
-    <Compile Include="Refactor\NeedType.cs" />
     <Compile Include="Enums\ParameterType.cs" />
-    <Compile Include="Refactor\PlanetTopology.cs" />
-    <Compile Include="Refactor\PlanetType.cs" />
     <Compile Include="Refactor\Storage\Products\Building.cs" />
     <Compile Include="Refactor\Storage\Products\Currency.cs" />
     <Compile Include="Refactor\Storage\Products\IBuilding.cs" />
@@ -90,7 +85,9 @@
     <Compile Include="Refactor\Storage\Products\IPlot.cs" />
     <Compile Include="Refactor\Storage\Products\IProduct.cs" />
     <Compile Include="Refactor\Storage\Products\Plot.cs" />
+    <Compile Include="Storage\AbstractConverter.cs" />
     <Compile Include="Storage\Processes\IDivisionEffects.cs" />
+    <Compile Include="Storage\Processes\Process.cs" />
     <Compile Include="Storage\Processes\ProcessTags\AttachedProcessTag.cs" />
     <Compile Include="Storage\Processes\ProductionTags\AttachedProductionTag.cs" />
     <Compile Include="Storage\Processes\ProcessTags\IAttachedProcessTag.cs" />
@@ -110,8 +107,6 @@
     <Compile Include="Storage\Products\ProductTags\IAttachedProductTag.cs" />
     <Compile Include="Storage\Products\ProductTags\ProductTagInfo.cs" />
     <Compile Include="Storage\Products\ProductTags\ProductTag.cs" />
-    <Compile Include="Refactor\TechCategory.cs" />
-    <Compile Include="Refactor\WaterFlags.cs" />
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Generators\Noise.cs" />
     <Compile Include="Generators\Vector2.cs" />
@@ -130,9 +125,6 @@
     <Compile Include="Refactor\Storage\Jobs\IFarmer.cs" />
     <Compile Include="Refactor\Storage\Jobs\IJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Refactor\MineType.cs" />
-    <Compile Include="Refactor\RockType.cs" />
-    <Compile Include="Refactor\CropType.cs" />
     <Compile Include="Refactor\Storage\ICrop.cs" />
     <Compile Include="Refactor\Storage\Organizations\IMarket.cs" />
     <Compile Include="Refactor\Storage\Jobs\ILaborer.cs" />
@@ -143,7 +135,6 @@
     <Compile Include="Refactor\Storage\Population\IPoliticalGroup.cs" />
     <Compile Include="Refactor\Storage\Population\IPopulationGroup.cs" />
     <Compile Include="Refactor\Storage\Population\IPopulations.cs" />
-    <Compile Include="Refactor\BuildingType.cs" />
     <Compile Include="Refactor\Storage\Process\IProcess.cs" />
     <Compile Include="Refactor\Storage\IProductAmountCollection.cs" />
     <Compile Include="Refactor\Storage\ISqlReader.cs" />
@@ -229,6 +220,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\ProductImages\bin.png" />
     <Content Include="Data\ProductImages\DefaultIcon.png" />
     <Content Include="Data\ProductImages\Attribution.txt" />
     <Content Include="Data\ProductImages\bread.png" />

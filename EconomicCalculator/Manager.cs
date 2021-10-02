@@ -10,9 +10,11 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using EconomicCalculator.Storage.Wants;
 using System.Text.Encodings.Web;
-using EconomicCalculator.Storage.ProductTags;
 using System.Text.Json.Serialization;
 using EconomicCalculator.Storage.Skills;
+using EconomicCalculator.Storage.Processes;
+using EconomicCalculator.Storage.Products.ProductTags;
+using EconomicCalculator.Storage;
 
 namespace EconomicCalculator
 {
@@ -38,6 +40,7 @@ namespace EconomicCalculator
             Wants = new Dictionary<int, IWant>();
             Skills = new Dictionary<int, ISkill>();
             SkillGroups = new Dictionary<int, ISkillGroup>();
+            Processes = new Dictionary<int, IProcess>();
         }        
 
         /// <summary>
@@ -78,6 +81,8 @@ namespace EconomicCalculator
         public IDictionary<int, ISkill> Skills { get; set; }
 
         public IDictionary<int, ISkillGroup> SkillGroups { get; set; }
+
+        public IDictionary<int, IProcess> Processes { get; set; }
 
         #endregion DataStorage
 
@@ -156,6 +161,13 @@ namespace EconomicCalculator
         public ISkill GetSkillByName(string name)
         {
             return Skills.Values.Single(x => x.Name == name);
+        }
+
+        public IProcess GetProcessByName(string name)
+        {
+            Tuple<string, string> names = Process.GetProcessNames(name);
+            return Processes.Values.Single(x => x.Name == names.Item1
+                                        && x.VariantName == names.Item2);
         }
 
         #endregion ByName
@@ -344,6 +356,22 @@ namespace EconomicCalculator
             }
         }
 
+        private int _newProcessId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, Process Id.
+        /// </summary>
+        public int NewProcessId
+        {
+            get
+            {
+                while (SkillGroups.ContainsKey(_newProcessId))
+                    ++_newProcessId;
+
+                return _newProcessId;
+            }
+        }
+
         #endregion NewIds
 
         /// <summary>
@@ -444,6 +472,26 @@ namespace EconomicCalculator
             SkillGroups = groups.ToDictionary(x => x.Id, y => (ISkillGroup)y);
         }
 
+        /// <summary>
+        /// Load Processes from file.
+        /// </summary>
+        /// <param name="filename">The file to load from.</param>
+        public void LoadProcesses(string filename)
+        {
+            var json = File.ReadAllText(filename);
+            
+            List<Process> groups = JsonSerializer.Deserialize<List<Process>>(json, 
+                new JsonSerializerOptions
+                {
+                    Converters = {
+                        new AbstractConverter<ProcessProduct, IProcessProduct>(),
+                        new AbstractConverter<ProcessWant, IProcessWant>()
+                    }
+                });
+
+            Processes = groups.ToDictionary(x => x.Id, y => (IProcess)y);
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -497,6 +545,18 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        /// <summary>
+        /// Save Processes to file.
+        /// </summary>
+        /// <param name="filename">The file to save it to.</param>
+        public void SaveProcesses(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            string json = JsonSerializer.Serialize(Processes.Values.ToList(), options);
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -515,6 +575,9 @@ namespace EconomicCalculator
 
             // Get All Skills
             LoadSkills(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkills.json");
+
+            // Get All Processes
+            //LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
         }
 
         /// <summary>

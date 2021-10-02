@@ -1,7 +1,9 @@
-﻿using System;
+﻿using EconomicCalculator.Storage.Processes.ProductionTags;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.Storage.Processes
@@ -19,6 +21,7 @@ namespace EconomicCalculator.Storage.Processes
         /// <summary>
         /// The Want it desires.
         /// </summary>
+        [JsonIgnore]
         int WantId { get; }
 
         /// <summary>
@@ -27,9 +30,20 @@ namespace EconomicCalculator.Storage.Processes
         decimal Amount { get; }
 
         /// <summary>
+        /// String form of our tags.
+        /// </summary>
+        List<string> TagStrings { get; }
+
+        /// <summary>
         /// What tags this Want has for the production process.
         /// </summary>
-        IList<IAttachedProductionTag> Tags { get; }
+        [JsonIgnore]
+        List<IAttachedProductionTag> Tags { get; }
         
+        /// <summary>
+        /// String form of all our tags.
+        /// </summary>
+        [JsonIgnore]
+        string TagString { get; }
     }
 }

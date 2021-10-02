@@ -53,5 +53,14 @@ namespace EditorInterface.OpeningWindows
 
             this.Close();
         }
+
+        private void ToProcesses(object sender, RoutedEventArgs e)
+        {
+            var win = new ProcessWindows.ProcessListWindow();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

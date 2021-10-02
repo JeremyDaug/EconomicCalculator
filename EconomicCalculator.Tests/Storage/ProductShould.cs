@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Randomizer;
+using EconomicCalculator.Refactor.Storage;
 using EconomicCalculator.Storage;
 using EconomicCalculator.Storage.Products;
 using Moq;

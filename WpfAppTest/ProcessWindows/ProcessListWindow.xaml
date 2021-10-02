@@ -1,0 +1,35 @@
+﻿<Window x:Class="EditorInterface.ProcessWindows.ProcessListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EditorInterface.ProcessWindows"
+        mc:Ignorable="d"
+        Style="{StaticResource SharedMenu}"
+        Title="ProcessListWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <DataGrid Name="ProcessGrid" HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch" AutoGenerateColumns="False"
+                  AlternatingRowBackground="LightGray" AlternationCount="2"
+                  IsReadOnly="True" Grid.Row="0" MouseDoubleClick="EditProcess">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="Variant Name" Binding="{Binding VariantName}"/>
+                <DataGridTextColumn Header="Variant Name" Binding="{Binding MinimumTime}"/>
+                <DataGridTextColumn Header="Variant Name" Binding="{Binding TagStrings}"/>
+                <DataGridTextColumn Header="Skill" Binding="{Binding SkillName}"/>
+                <DataGridTextColumn Header="Skill" Binding="{Binding SkillMinimum}"/>
+                <DataGridTextColumn Header="Skill" Binding="{Binding SkillMaximum}"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+                <DataGridTextColumn Header="Inputs" Binding="{Binding InputString}"/>
+                <DataGridTextColumn Header="Capital" Binding="{Binding CapitalString}"/>
+                <DataGridTextColumn Header="Output" Binding="{Binding OutputString}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

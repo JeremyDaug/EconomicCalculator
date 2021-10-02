@@ -1,0 +1,38 @@
+[
+  {
+    "Id": 0,
+    "Name": "Wheat Milling",
+    "VariantName": "",
+    "MinimumTime": 0.05,
+    "InputProducts": [
+      {
+        "ProductName": "Wheat Grain",
+        "Amount": 1,
+        "TagStrings": []
+      }
+    ],
+    "InputWants": [],
+    "CapitalProducts": [],
+    "CapitalWants": [],
+    "Outputs": [
+      {
+        "ProductName": "Wheat Flour",
+        "Amount": 0.7,
+        "TagStrings": []
+      },
+      {
+        "ProductName": "Bio Waste",
+        "Amount": 0.3,
+        "TagStrings": []
+      }
+    ],
+    "TagStrings": [
+      "Consumption"
+    ],
+    "SkillName": "Lugging",
+    "SkillMinimum": 1,
+    "SkillMaximum": 3,
+    "Description": "Grind Wheat Grain into Flour",
+    "Icon": "ProductImages\\flour.png"
+  }
+]

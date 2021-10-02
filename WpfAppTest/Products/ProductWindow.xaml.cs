@@ -1,6 +1,6 @@
 ﻿using EconomicCalculator;
 using EconomicCalculator.Storage.Products;
-using EconomicCalculator.Storage.ProductTags;
+using EconomicCalculator.Storage.Products.ProductTags;
 using EconomicCalculator.Storage.Wants;
 using System;
 using System.Collections.Generic;
@@ -235,7 +235,15 @@ namespace EditorInterface.Products
 
             var newTag = win.SelectedTag;
 
-            var example = ProductTagInfo.GetProductExample(newTag);
+            string example;
+            try
+            {
+                example = ProductTagInfo.GetProductExample(newTag);
+            }
+            catch (ArgumentNullException)
+            { // if the user didn't select anything, just return out.
+                return;
+            }
 
             ProductTags.Add(new TagData { Tag = example });
 

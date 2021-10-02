@@ -77,6 +77,9 @@
     <Compile Include="OpeningWindows\NavigationMenu.xaml.cs">
       <DependentUpon>NavigationMenu.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProcessWindows\ProcessListWindow.xaml.cs">
+      <DependentUpon>ProcessListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Products\ProductTagSelector.xaml.cs">
       <DependentUpon>ProductTagSelector.xaml</DependentUpon>
     </Compile>
@@ -117,6 +120,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="OpeningWindows\NavigationMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
