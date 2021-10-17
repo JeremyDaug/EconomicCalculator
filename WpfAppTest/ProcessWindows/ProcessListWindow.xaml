@@ -20,16 +20,40 @@
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
                 <DataGridTextColumn Header="Variant Name" Binding="{Binding VariantName}"/>
-                <DataGridTextColumn Header="Variant Name" Binding="{Binding MinimumTime}"/>
-                <DataGridTextColumn Header="Variant Name" Binding="{Binding TagStrings}"/>
+                <DataGridTextColumn Header="Minimum Time" Binding="{Binding MinimumTime}"/>
+                <DataGridTextColumn Header="Tags" Binding="{Binding TagString}"/>
                 <DataGridTextColumn Header="Skill" Binding="{Binding SkillName}"/>
-                <DataGridTextColumn Header="Skill" Binding="{Binding SkillMinimum}"/>
-                <DataGridTextColumn Header="Skill" Binding="{Binding SkillMaximum}"/>
+                <DataGridTextColumn Header="Skill Minimum" Binding="{Binding SkillMinimum}"/>
+                <DataGridTextColumn Header="Skill Maximum" Binding="{Binding SkillMaximum}"/>
                 <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
                 <DataGridTextColumn Header="Inputs" Binding="{Binding InputString}"/>
                 <DataGridTextColumn Header="Capital" Binding="{Binding CapitalString}"/>
                 <DataGridTextColumn Header="Output" Binding="{Binding OutputString}"/>
             </DataGrid.Columns>
         </DataGrid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="New Process" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="75"
+                    Grid.Row="0" Grid.Column="0" ClickMode="Release"
+                    Click="NewProcess"/>
+            <Button Content="Edit Process" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="75"
+                    Grid.Row="0" Grid.Column="1" ClickMode="Release"
+                    Click="EditProcess"/>
+            <Button Content="Copy Process" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="75"
+                    Grid.Row="0" Grid.Column="2" ClickMode="Release"
+                    Click="CopyProcess"/>
+            <Button Content="Save Processes" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Width="75"
+                    Grid.Row="0" Grid.Column="3" ClickMode="Release"
+                    Click="SaveToFile"/>
+        </Grid>
     </Grid>
 </Window>

@@ -31,57 +31,6 @@ namespace EditorInterface.ProcessWindows
 
             manager = Manager.Instance;
 
-            // test space for new processes and save/loading
-
-            /*
-            var proc = new Process
-            {
-                Id = 0,
-                Name = "Wheat Milling",
-                VariantName = "",
-                MinimumTime = 0.05m,
-                SkillId = 1,
-                SkillName = "Lugging",
-                SkillMinimum = 1,
-                SkillMaximum = 3,
-                Tags = new List<IAttachedProcessTag>
-                {
-                    new AttachedProcessTag
-                    {
-                        Tag = ProcessTag.Consumption
-                    }
-                },
-                TagStrings = new List<string>
-                {
-                    "Consumption"
-                },
-                InputProducts = new List<IProcessProduct>
-                {
-                    new ProcessProduct
-                    {
-                        ProductId = 0,
-                        Amount = 1
-                    }
-                },
-                Outputs = new List<IProcessProduct>
-                {
-                    new ProcessProduct
-                    { // Wheat Flour
-                        ProductId = 1,
-                        Amount = 0.7m
-                    },
-                    new ProcessProduct
-                    { // Bio waste
-                        ProductId = 2,
-                        Amount = 0.3m
-                    }
-                },
-                Icon = "ProductImages\\flour.png",
-                Description = "Grind Wheat Grain into Flour"
-            };
-
-            manager.Processes[proc.Id] = proc;
-            */
             manager.LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
 
             ProcessGrid.ItemsSource = manager.Processes.Values;
@@ -89,10 +38,33 @@ namespace EditorInterface.ProcessWindows
 
         private void NewProcess(object sender, RoutedEventArgs e)
         {
+            var newProcess = new Process();
 
+            newProcess.Id = manager.NewProcessId;
+
+            Window win = new ProcessWindow(newProcess);
+            win.ShowDialog();
+
+            ProcessGrid.ItemsSource = manager.Processes.Values;
+            ProcessGrid.Items.Refresh();
         }
 
         private void EditProcess(object sender, RoutedEventArgs e)
+        {
+            var selected = (Process)ProcessGrid.SelectedItem;
+
+            if (selected == null)
+                return;
+
+            Window win = new ProcessWindow(selected);
+
+            win.ShowDialog();
+
+            ProcessGrid.ItemsSource = manager.Processes.Values;
+            ProcessGrid.Items.Refresh();
+        }
+
+        private void CopyProcess(object sender, RoutedEventArgs e)
         {
 
         }

@@ -16,7 +16,17 @@ namespace EconomicCalculator.Storage.Processes
         /// <summary>
         /// The want's name.
         /// </summary>
-        public string WantName => Manager.Instance.Wants[WantId].Name;
+        public string WantName
+        {
+            get
+            {
+                return Manager.Instance.Wants[WantId].Name;
+            }
+            set
+            {
+                WantId = Manager.Instance.GetWantByName(value).Id;
+            }
+        }
 
         /// <summary>
         /// The Want it desires.

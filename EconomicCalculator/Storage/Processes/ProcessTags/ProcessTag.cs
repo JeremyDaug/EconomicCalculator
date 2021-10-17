@@ -31,6 +31,12 @@ namespace EconomicCalculator.Storage.Processes.ProcessTags
         /// </summary>
         Maintenance,
         /// <summary>
+        /// This process is a use process for a product. It is 
+        /// primarily for products that are not conusmed in their
+        /// use. Instead it asks for inputs
+        /// </summary>
+        Use,
+        /// <summary>
         /// This process is a process with outputs that are not guaranteed.
         /// At least one output should have a Chance ProductionTag Attached to it.
         /// </summary>

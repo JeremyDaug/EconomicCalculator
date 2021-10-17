@@ -73,12 +73,23 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\EnumListToStringConverter.cs" />
+    <Compile Include="Helpers\Converters.cs" />
+    <Compile Include="Helpers\DummyDecimalBinding.cs" />
     <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
+    <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="OpeningWindows\NavigationMenu.xaml.cs">
       <DependentUpon>NavigationMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="ProcessWindows\ProcessListWindow.xaml.cs">
       <DependentUpon>ProcessListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessWindows\ProcessProductModel.cs" />
+    <Compile Include="ProcessWindows\ProcessProductViewModel.cs" />
+    <Compile Include="ProcessWindows\ProcessProductWindow.xaml.cs">
+      <DependentUpon>ProcessProductWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessWindows\ProcessWindow.xaml.cs">
+      <DependentUpon>ProcessWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Products\ProductTagSelector.xaml.cs">
       <DependentUpon>ProductTagSelector.xaml</DependentUpon>
@@ -124,6 +135,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ProcessWindows\ProcessListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessProductWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

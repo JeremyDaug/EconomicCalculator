@@ -1,6 +1,7 @@
 ﻿using EconomicCalculator.Storage.Products.ProductTags;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -64,6 +65,7 @@ namespace EconomicCalculator.Storage.Products
         /// <remarks>
         /// Name and VariantName should be a unique combo among all products.
         /// </remarks>
+        [DefaultValue("")]
         public string VariantName { get; set; }
 
         /// <summary>
@@ -213,7 +215,7 @@ namespace EconomicCalculator.Storage.Products
                 return new Tuple<string, string>(prodName, varName);
             }
             else
-                return new Tuple<string, string>(name, null);
+                return new Tuple<string, string>(name, "");
         }
 
         /// <summary>

@@ -78,7 +78,12 @@ namespace EconomicCalculator.Storage.Processes
         /// <summary>
         /// Product Outputs.
         /// </summary>
-        List<IProcessProduct> Outputs { get; }
+        List<IProcessProduct> OutputProducts { get; set; }
+
+        /// <summary>
+        /// Want outputs of the process.
+        /// </summary>
+        List<IProcessWant> OutputWants { get; set; }
 
         /// <summary>
         /// String form of outputs for nice view.

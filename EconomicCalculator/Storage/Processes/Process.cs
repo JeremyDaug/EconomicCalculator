@@ -21,7 +21,8 @@ namespace EconomicCalculator.Storage.Processes
             InputWants = new List<IProcessWant>();
             CapitalProducts = new List<IProcessProduct>();
             CapitalWants = new List<IProcessWant>();
-            Outputs = new List<IProcessProduct>();
+            OutputProducts = new List<IProcessProduct>();
+            OutputWants = new List<IProcessWant>();
             Tags = new List<IAttachedProcessTag>();
         }
 
@@ -114,7 +115,12 @@ namespace EconomicCalculator.Storage.Processes
         /// <summary>
         /// Product Outputs.
         /// </summary>
-        public List<IProcessProduct> Outputs { get; set; }
+        public List<IProcessProduct> OutputProducts { get; set; }
+
+        /// <summary>
+        /// Want outputs of the process.
+        /// </summary>
+        public List<IProcessWant> OutputWants { get; set; }
         
         /// <summary>
         /// String form of outputs for nice view.
@@ -126,7 +132,9 @@ namespace EconomicCalculator.Storage.Processes
             {
                 var result = "";
 
-                foreach (var output in Outputs)
+                foreach (var output in OutputProducts)
+                    result += output.ToString() + "\n";
+                foreach (var output in OutputWants)
                     result += output.ToString() + "\n";
 
                 return result;
@@ -199,7 +207,7 @@ namespace EconomicCalculator.Storage.Processes
                     return false;
                 if (CapitalProducts.Any(x => !Manager.Instance.Products[x.ProductId].Fractional))
                     return false;
-                if (Outputs.Any(x => !Manager.Instance.Products[x.ProductId].Fractional))
+                if (OutputProducts.Any(x => !Manager.Instance.Products[x.ProductId].Fractional))
                     return false;
                 return true;
             }

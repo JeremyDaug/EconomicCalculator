@@ -203,4 +203,28 @@ namespace EditorInterface.ValidationRules
             return new ValidationResult(true, null);
         }
     }
+
+    public class Uppercase : ValidationRule
+    {
+        public Uppercase() {}
+
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        {
+            var val = (string)value;
+
+            if (val.Length > 1)
+            {
+                return new ValidationResult(false,
+                    "Must be a singular Uppercase Character.");
+            }
+
+            if (!char.IsUpper(val[0]))
+            {
+                return new ValidationResult(false,
+                    "Character Must be Uppercase.");
+            }
+
+            return ValidationResult.ValidResult;
+        }
+    }
 }

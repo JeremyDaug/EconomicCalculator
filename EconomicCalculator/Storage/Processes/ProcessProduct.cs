@@ -26,7 +26,17 @@ namespace EconomicCalculator.Storage.Processes
         /// <summary>
         /// The name of the product desired.
         /// </summary>
-        public string ProductName => Manager.Instance.Products[ProductId].GetName();
+        public string ProductName
+        {
+            get
+            {
+                return Manager.Instance.Products[ProductId].GetName();
+            }
+            set
+            {
+                ProductId = Manager.Instance.GetProductByName(value).Id;
+            }
+        }
 
         /// <summary>
         /// The product it desires.
@@ -76,6 +86,13 @@ namespace EconomicCalculator.Storage.Processes
                     Manager.Instance.Products[ProductId].UnitName);
 
             return result;
+        }
+
+        public void AddTag(AttachedProductionTag tag)
+        {
+            Tags.Add(tag);
+
+            TagStrings.Add(tag.ToString());
         }
     }
 }

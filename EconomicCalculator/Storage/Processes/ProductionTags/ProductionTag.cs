@@ -19,23 +19,18 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
         /// at normal throughput.
         /// The amount requested does scale with other throughput increases.
         /// Optional goods use their own consumption process and do not need
-        /// to be taken into account.
+        /// to be taken into account. <seealso cref="Consumed"/>
         /// </summary>
         Optional,
         /// <summary>
         /// An input that is consumed. It's consumption process should be
-        /// comibne with this one implicitly.
+        /// combine with this one implicitly, rather than be destroyed and 
+        /// the process take care of it's output.
         /// </summary>
         Consumed,
         /// <summary>
-        /// ConsumedOptional<#>
-        /// An optional product that is consumed, Like normal consumption but there
-        /// is no throughput bonus.
-        /// </summary>
-        ConsumedOptional,
-        /// <summary>
         /// A fixed want or product. No matter how much a process increases,
-        /// only this amount will be requested for a unit of process.
+        /// only this amount will be requested for a 
         /// </summary>
         Fixed,
         /// <summary>
@@ -77,6 +72,6 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
         /// </summary>
         DivisionInput,
         AutomationCapital,
-        AutomationLabor
+        AutomationInput
     }
 }

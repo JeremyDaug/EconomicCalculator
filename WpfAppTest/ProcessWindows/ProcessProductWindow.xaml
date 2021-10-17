@@ -1,0 +1,198 @@
+﻿<Window x:Class="EditorInterface.ProcessWindows.ProcessProductWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EditorInterface.ProcessWindows"
+        xmlns:valid="clr-namespace:EditorInterface.ValidationRules"
+        xmlns:src="clr-namespace:EconomicCalculator.Storage.Processes;assembly=EconomicCalculator"
+        xmlns:helpers="clr-namespace:EditorInterface.Helpers"
+        mc:Ignorable="d"
+        Title="ProcessProductWindow" Height="520" Width="800">
+    <Window.Resources>
+        <src:ProcessProduct x:Key="processProduct"/>
+        <helpers:BoolToHiddenConverter x:Key="BoolToHiddenConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Product Name" Grid.Row="0" Grid.Column="0"
+               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ComboBox Name="ProductOptions" Width="150" Height="25"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Grid.Row="0" Grid.Column="1" 
+                  ItemsSource="{Binding AvailableProducts}"
+                  SelectedItem="{Binding Product}"/>
+
+        <Label Content="{Binding Section}" Name="SectionType" Grid.Row="0" Grid.Column="2"
+               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <Label Content="Product Amount" Grid.Row="1" Grid.Column="0"
+               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBox Name="Amount" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Style="{StaticResource textboxInError}"
+                 Height="23" Width="150"
+                 Grid.Row="1" Grid.Column="1">
+            <TextBox.Text>
+                <Binding Path="Amount" UpdateSourceTrigger="LostFocus">
+                    <Binding.ValidationRules>
+                        <valid:IsDecimalRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Tags" Grid.Row="2" Grid.Column="0"
+               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <Label Content="Any" Grid.Row="2" Grid.Column="1"
+               HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <CheckBox Content="Fixed" Name="Fixed"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  IsChecked="{Binding Fixed}" IsEnabled="{Binding FixedEnabled}"
+                  Grid.Row="2" Grid.Column="1" Margin="10,32,140,69" Height="17"/>
+
+        <Label Content="Input Or Capital" Grid.Row="3" Grid.Column="0"
+               HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <CheckBox Content="Optional" Name="Optional"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  IsChecked="{Binding Optional}" IsEnabled="{Binding OptionalEnabled}"
+                  VerticalContentAlignment="Center"
+                  Grid.Row="3" Grid.Column="0" Margin="10,77,116,17" 
+                  Height="24" Width="72" />
+        <TextBox Name="OptionalAmount" Grid.Row="3" Grid.Column="0" 
+                 Height="25" Margin="103,76,10,16" 
+                 IsEnabled="{Binding Optional, Mode=TwoWay}"
+                 Style="{StaticResource textboxInError}">
+            <TextBox.Text>
+                <Binding Path="OptionalBonus" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:IsDecimalRule Min="0"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        
+
+        <Label Content="Input Only Tags" Grid.Row="3" Grid.Column="1"
+               HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <CheckBox Content="Consumed" Name="Consumed"
+                  IsChecked="{Binding Consumed}" IsEnabled="{Binding ConsumedEnabled}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Grid.Row="3" Grid.Column="1" Margin="10,31,105,69" Width="83" Height="17"/>
+        <CheckBox Content="Investment" Name="Investment"
+                  IsChecked="{Binding Investment}" IsEnabled="{Binding InvestmentEnabled}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Grid.Row="3" Grid.Column="1" Margin="10,54,106,46" Width="82" Height="18"/>
+
+        <Label Content="Output Only Tags" Grid.Row="3" Grid.Column="2"
+               HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <CheckBox Content="Pollutant" Name="Pollutant"
+                  IsChecked="{Binding Pollutant}" IsEnabled="{Binding PollutantEnabled}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Grid.Row="3" Grid.Column="2" Margin="10,34,112,69" Width="76"/>
+        <CheckBox Content="Offset" Name="Offset" 
+                  IsChecked="{Binding Offset}" IsEnabled="{Binding OffsetEnabled}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Grid.Row="3" Grid.Column="2" Margin="10,62,112,40" Width="76"/>
+
+
+        <!-- TODO add options parameter slot. Keep this around for now.-->
+
+        <Label Content="Division" Grid.Row="2" Grid.Column="2"
+               VerticalAlignment="Top" HorizontalAlignment="Center" Margin="20,0,126,0"/>
+        <CheckBox Content="Input" Name="DivisionInput"
+                  IsChecked="{Binding DivisionInput}" IsEnabled="{Binding DivisionInputEnabled}"
+                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                  Grid.Row="2" Grid.Column="2" Margin="10,30,140,59"/>
+        <CheckBox Content="Capital" Name="DivisionCapital"
+                  IsChecked="{Binding DivisionCapital}" IsEnabled="{Binding DivisionCapitalEnabled}"
+                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                  Grid.Row="2" Grid.Column="2" Margin="10,50,126,39" Width="62"/>
+
+        <Label Content="Automation" Grid.Row="2" Grid.Column="2"
+               VerticalAlignment="Top" HorizontalAlignment="Center" Margin="109,0,16,0" Width="73"/>
+        <CheckBox Content="Input" Name="AutomationInput"
+                  IsChecked="{Binding AutomationInput}" IsEnabled="{Binding AutomationInputEnabled}"
+                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                  Grid.Row="2" Grid.Column="2" Margin="120,30,30,59"/>
+        <CheckBox Content="Capital" Name="AutomationCapital"
+                  IsChecked="{Binding AutomationCapital}" IsEnabled="{Binding AutomationCapitalEnabled}"
+                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                  Grid.Row="2" Grid.Column="2" Margin="120,50,16,39" Width="62"/>
+
+        <Grid Grid.Row="2" Grid.Column="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Chance Data" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                   HorizontalContentAlignment="Center"
+                    VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <CheckBox Content="Chance" Name="Chance"
+                        IsChecked="{Binding Chance}" IsEnabled="{Binding ChanceEnabled}"
+                        Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                        VerticalAlignment="Center" HorizontalAlignment="Center" />
+            <Label Content="Chance Group" Grid.Row="2" Grid.Column="0"
+                    VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBox  Grid.Row="3" Grid.Column="0" IsEnabled="{Binding ChanceGroupEnabled}"
+                      Height="25" MinWidth="25"
+                      TextAlignment="Center">
+                <TextBox.Text>
+                    <Binding Path="ChanceGroup" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <valid:Uppercase/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+
+            <Label Content="Chance Weight" Grid.Row="2" Grid.Column="1"
+                    VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBox  Grid.Row="3" Grid.Column="1" IsEnabled="{Binding ChanceWeight}"
+                      Height="25" MinWidth="50"
+                      TextAlignment="Center">
+                <TextBox.Text>
+                    <Binding Path="ChanceWeight" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <valid:IsIntegerRule Min="1"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+        </Grid>
+
+        <Button Content="Commit" Grid.Row="0" Grid.Column="3"
+                Width="100" Height="25" ClickMode="Release"
+                Command="{Binding Commit}"
+                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Label Content="Ready, Will save on exit."
+               Foreground="Green"
+               Visibility="{Binding ValidCommited, Converter={StaticResource BooleanToVisibilityConverter}}"
+               HorizontalAlignment="Center" VerticalAlignment="Bottom"
+               Grid.Row="0" Grid.Column="3"/>
+        <Label Content="Not Ready, will not save."
+               Foreground="Red"
+               Visibility="{Binding ValidCommited, Converter={StaticResource BoolToHiddenConverter}}"
+               HorizontalAlignment="Center" VerticalAlignment="Bottom"
+               Grid.Row="0" Grid.Column="3"/>
+    </Grid>
+</Window>

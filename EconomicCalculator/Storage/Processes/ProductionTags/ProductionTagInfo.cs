@@ -51,6 +51,7 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
                 case ProductionTag.Optional:
                     result.Add(ParameterType.Decimal);
                     return result;
+                // Automation and Division of Labor not included yet.
                 default:
                     return result;
             }
@@ -101,6 +102,38 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
             example += ">";
 
             return example;
+        }
+
+        public static IAttachedProductionTag GenerateFromTag(ProductionTag tag)
+        {
+            var result = new AttachedProductionTag();
+
+            result.Tag = tag;
+
+            var parameters = GetTagParameterTypes(tag);
+
+            // if no tags
+            if (!parameters.Any())
+                return result;
+
+            // tags
+            foreach (var parameter in parameters)
+            {
+                switch (parameter)
+                {
+                    case ParameterType.Decimal:
+                        result.Add(0.0M);
+                        break;
+                    case ParameterType.Integer:
+                        result.Add(0);
+                        break;
+                    case ParameterType.Character:
+                        result.Add('a');
+                        break;
+                }
+            }
+
+            return result;
         }
            
         /// <summary>
@@ -205,12 +238,11 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
             return new List<ProductionTag>
             {
                 ProductionTag.Consumed,
-                ProductionTag.ConsumedOptional,
                 ProductionTag.Pollutant,
                 ProductionTag.Chance,
                 ProductionTag.Offset,
                 ProductionTag.DivisionInput,
-                ProductionTag.AutomationLabor
+                ProductionTag.AutomationInput
             };
         }
 
@@ -223,9 +255,8 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
             return new List<ProductionTag>
             {
                 ProductionTag.AutomationCapital,
-                ProductionTag.AutomationLabor,
+                ProductionTag.AutomationInput,
                 ProductionTag.Consumed,
-                ProductionTag.ConsumedOptional,
                 ProductionTag.Optional,
                 ProductionTag.Fixed,
                 ProductionTag.DivisionCapital,
@@ -247,13 +278,10 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
             {
                 case ProductionTag.Optional:
                 case ProductionTag.Consumed:
-                case ProductionTag.ConsumedOptional:
                     if (tag != ProductionTag.Optional)
                         result.Add(ProductionTag.Optional);
                     if (tag != ProductionTag.Consumed)
                         result.Add(ProductionTag.Consumed);
-                    if (tag != ProductionTag.ConsumedOptional)
-                        result.Add(ProductionTag.ConsumedOptional);
                     result.Add(ProductionTag.Fixed);
                     result.Add(ProductionTag.Pollutant);
                     result.Add(ProductionTag.Chance);
@@ -261,19 +289,18 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
                     result.Add(ProductionTag.DivisionInput);
                     result.Add(ProductionTag.DivisionCapital);
                     result.Add(ProductionTag.AutomationCapital);
-                    result.Add(ProductionTag.AutomationLabor);
+                    result.Add(ProductionTag.AutomationInput);
                     return result;
                 case ProductionTag.Fixed:
                     result.Add(ProductionTag.Optional);
                     result.Add(ProductionTag.Consumed);
-                    result.Add(ProductionTag.ConsumedOptional);
                     result.Add(ProductionTag.Pollutant);
                     result.Add(ProductionTag.Chance);
                     result.Add(ProductionTag.Offset);
                     result.Add(ProductionTag.DivisionInput);
                     result.Add(ProductionTag.DivisionCapital);
                     result.Add(ProductionTag.AutomationCapital);
-                    result.Add(ProductionTag.AutomationLabor);
+                    result.Add(ProductionTag.AutomationInput);
                     return result;
                 case ProductionTag.Investment:
                     return result;
@@ -286,6 +313,7 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
                     return result;
                 case ProductionTag.Offset:
                     result.AddRange(InvalidOutputTags());
+                    result.Add(ProductionTag.Pollutant);
                     return result;
                 default:
                     return result;

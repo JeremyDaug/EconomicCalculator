@@ -51,5 +51,24 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
         public IList<ParameterType> TagParameterTypes { get; set; }
 
         private IList<object> parameters;
+
+        public override string ToString()
+        {
+            var result = Tag.ToString();
+
+            if (parameters.Count == 0)
+                return result;
+
+            result += "<";
+
+            foreach (var item in parameters)
+                result += item.ToString() + ";";
+
+            result.TrimEnd(';');
+
+            result += ">";
+
+            return result;
+        }
     }
 }
