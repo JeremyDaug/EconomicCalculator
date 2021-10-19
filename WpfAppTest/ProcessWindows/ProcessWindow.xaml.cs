@@ -62,17 +62,17 @@ namespace EditorInterface.ProcessWindows
 
         private void DeleteInputProduct(object sender, RoutedEventArgs e)
         {
-
+            DeleteProduct(ProcessSection.Input);
         }
 
         private void NewInputWant(object sender, RoutedEventArgs args)
         {
-
+            NewWant(ProcessSection.Input);
         }
 
         private void DeleteInputWant(object sender, RoutedEventArgs args)
         {
-
+            DeleteWant(ProcessSection.Input);
         }
 
         #endregion Inputs
@@ -85,17 +85,17 @@ namespace EditorInterface.ProcessWindows
 
         private void DeleteCapitalProduct(object sender, RoutedEventArgs e)
         {
-
+            DeleteProduct(ProcessSection.Capital);
         }
 
         private void NewCapitalWant(object sender, RoutedEventArgs args)
         {
-
+            NewWant(ProcessSection.Capital);
         }
 
         private void DeleteCapitalWant(object sender, RoutedEventArgs args)
         {
-
+            DeleteWant(ProcessSection.Capital);
         }
 
         #endregion Capital
@@ -108,17 +108,17 @@ namespace EditorInterface.ProcessWindows
 
         private void DeleteOutputProduct(object sender, RoutedEventArgs e)
         {
-
+            DeleteProduct(ProcessSection.Output);
         }
 
         private void NewOutputWant(object sender, RoutedEventArgs args)
         {
-
+            NewWant(ProcessSection.Output);
         }
 
         private void DeleteOutputWant(object sender, RoutedEventArgs args)
         {
-
+            DeleteWant(ProcessSection.Output);
         }
 
         #endregion Output
@@ -178,7 +178,136 @@ namespace EditorInterface.ProcessWindows
                     break;
             }
 
-            prod = win.ViewModel.ProcessProduct;
+            RefreshGrids();
+        }
+
+        private void DeleteProduct(ProcessSection sec)
+        {
+            ProcessProduct selected = null;
+
+            switch (sec)
+            {
+                case ProcessSection.Input:
+                    selected = (ProcessProduct)InputProductGrid.SelectedItem;
+                    break;
+                case ProcessSection.Capital:
+                    selected = (ProcessProduct)CapitalProductGrid.SelectedItem;
+                    break;
+                case ProcessSection.Output:
+                    selected = (ProcessProduct)OutputProductGrid.SelectedItem;
+                    break;
+            }
+
+            if (selected == null)
+                return;
+
+            switch (sec)
+            {
+                case ProcessSection.Input:
+                    process.InputProducts.Remove(selected);
+                    break;
+                case ProcessSection.Capital:
+                    process.CapitalProducts.Remove(selected);
+                    break;
+                case ProcessSection.Output:
+                    process.OutputProducts.Remove(selected);
+                    break;
+            }
+
+            RefreshGrids();
+        }
+
+        private void NewWant(ProcessSection sec)
+        {
+            var want = new ProcessWant();
+
+            var win = new ProcessWantWindow(want, sec);
+
+            win.ShowDialog();
+
+            if (!win.ViewModel.ValidCommited)
+            {// if comit was never hit, return.
+                return;
+            }
+
+            switch (sec)
+            {
+                case ProcessSection.Input:
+                    process.InputWants.Add(win.ViewModel.ProcessWant);
+                    break;
+                case ProcessSection.Capital:
+                    process.InputWants.Add(win.ViewModel.ProcessWant);
+                    break;
+                case ProcessSection.Output:
+                    process.InputWants.Add(win.ViewModel.ProcessWant);
+                    break;
+            }
+
+            RefreshGrids();
+        }
+
+        private void EditWant(ProcessWant want, ProcessSection sec)
+        {
+            var win = new ProcessWantWindow(want, sec);
+
+            win.ShowDialog();
+
+            if (!win.ViewModel.ValidCommited)
+            {
+                return;
+            }
+
+            switch (sec)
+            {
+                case ProcessSection.Input:
+                    process.InputWants.Remove(want);
+                    process.InputWants.Add(win.ViewModel.ProcessWant);
+                    break;
+                case ProcessSection.Capital:
+                    process.CapitalWants.Remove(want);
+                    process.CapitalWants.Add(win.ViewModel.ProcessWant);
+                    break;
+                case ProcessSection.Output:
+                    process.OutputWants.Remove(want);
+                    process.OutputWants.Add(win.ViewModel.ProcessWant);
+                    break;
+            }
+
+            RefreshGrids();
+        }
+
+        private void DeleteWant(ProcessSection sec)
+        {
+            ProcessWant selected = null;
+
+            switch (sec)
+            {
+                case ProcessSection.Input:
+                    selected = (ProcessWant)InputWantGrid.SelectedItem;
+                    break;
+                case ProcessSection.Capital:
+                    selected = (ProcessWant)CapitalWantGrid.SelectedItem;
+                    break;
+                case ProcessSection.Output:
+                    selected = (ProcessWant)OutputWantGrid.SelectedItem;
+                    break;
+            }
+
+            if (selected == null)
+                return;
+
+            switch (sec)
+            {
+                case ProcessSection.Input:
+                    process.InputWants.Remove(selected);
+                    break;
+                case ProcessSection.Capital:
+                    process.CapitalWants.Remove(selected);
+                    break;
+                case ProcessSection.Output:
+                    process.OutputWants.Remove(selected);
+                    break;
+            }
 
             RefreshGrids();
         }
@@ -209,7 +338,9 @@ namespace EditorInterface.ProcessWindows
 
         private void InputWantGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            var selection = (ProcessWant)InputWantGrid.SelectedItem;
 
+            EditWant(selection, ProcessSection.Input);
         }
 
         private void CapitalProductGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -221,7 +352,9 @@ namespace EditorInterface.ProcessWindows
 
         private void CapitalWantGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            var selection = (ProcessWant)CapitalWantGrid.SelectedItem;
 
+            EditWant(selection, ProcessSection.Capital);
         }
 
         private void OutputProductGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -233,7 +366,9 @@ namespace EditorInterface.ProcessWindows
 
         private void OutputWantGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            var selection = (ProcessWant)OutputWantGrid.SelectedItem;
 
+            EditWant(selection, ProcessSection.Output);
         }
     }
 }

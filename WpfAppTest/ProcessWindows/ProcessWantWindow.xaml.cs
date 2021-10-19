@@ -1,6 +1,4 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.Storage.Processes;
-using EconomicCalculator.Storage.Processes.ProductionTags;
+﻿using EconomicCalculator.Storage.Processes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,16 +16,16 @@ using System.Windows.Shapes;
 namespace EditorInterface.ProcessWindows
 {
     /// <summary>
-    /// Interaction logic for ProcessProductWindow.xaml
+    /// Interaction logic for ProcessWantWindow.xaml
     /// </summary>
-    public partial class ProcessProductWindow : Window
+    public partial class ProcessWantWindow : Window
     {
-        public ProcessProduct product;
-        public ProcessProductViewModel ViewModel;
+        public ProcessWant product;
+        public ProcessWantViewModel ViewModel;
 
-        public ProcessProductWindow(ProcessProduct procProd, ProcessSection section)
+        public ProcessWantWindow(ProcessWant procWant, ProcessSection section)
         {
-            ViewModel = new ProcessProductViewModel(procProd, section);
+            ViewModel = new ProcessWantViewModel(procWant, section);
 
             DataContext = ViewModel;
 

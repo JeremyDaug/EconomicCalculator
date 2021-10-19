@@ -88,6 +88,11 @@
     <Compile Include="ProcessWindows\ProcessProductWindow.xaml.cs">
       <DependentUpon>ProcessProductWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProcessWindows\ProcessWantModel.cs" />
+    <Compile Include="ProcessWindows\ProcessWantViewModel.cs" />
+    <Compile Include="ProcessWindows\ProcessWantWindow.xaml.cs">
+      <DependentUpon>ProcessWantWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ProcessWindows\ProcessWindow.xaml.cs">
       <DependentUpon>ProcessWindow.xaml</DependentUpon>
     </Compile>
@@ -139,6 +144,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ProcessWindows\ProcessProductWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessWantWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

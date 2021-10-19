@@ -13,6 +13,12 @@ namespace EconomicCalculator.Storage.Processes
     /// </summary>
     public class ProcessWant : IProcessWant
     {
+        public ProcessWant()
+        {
+            TagStrings = new List<string>();
+            Tags = new List<IAttachedProductionTag>();
+        }
+
         /// <summary>
         /// The want's name.
         /// </summary>
@@ -75,6 +81,13 @@ namespace EconomicCalculator.Storage.Processes
                     WantName, TagString, Amount);
 
             return result;
+        }
+
+        public void AddTag(AttachedProductionTag tag)
+        {
+            Tags.Add(tag);
+
+            TagStrings.Add(tag.ToString());
         }
     }
 }
