@@ -17,6 +17,7 @@ using EconomicCalculator.Storage;
 using EconomicCalculator.Storage.Processes;
 using EconomicCalculator.Storage.Processes.ProcessTags;
 using EconomicCalculator.Storage.Processes.ProductionTags;
+using EconomicCalculator.Storage.Products;
 using EditorInterface.Helpers;
 
 namespace EditorInterface.ProcessWindows
@@ -990,7 +991,19 @@ namespace EditorInterface.ProcessWindows
                 return;
             }
 
+            // if failure check it can attach to that product.
+            if (Failure)
+            {
+                var prod = manager.Products[InputProducts.First().ProductId];
 
+                // if product has a failure and it's not me, we have a problem.
+                if(prod.Failure != null && prod.Failure.Id != newProc.Id)
+                {
+                    System.Windows.MessageBox.Show("Selected Product already has a failure process. Products can only have one failure process.",
+                        "Error", MessageBoxButton.OK);
+                    return;
+                }
+            }
 
             // inputs
             newProc.InputProducts = InputProducts.ToList();
@@ -1014,7 +1027,7 @@ namespace EditorInterface.ProcessWindows
                     CapitalWants.Any() ||
                     (InputProducts.Count() > 1) ||
                     !InputProducts.Any() ||
-                    InputProducts.Any(x => x.ProductName == SelectedProduct) ||
+                    !InputProducts.Any(x => x.ProductName == SelectedProduct) ||
                     (InputProducts.First().Amount != 1))
                 {
                     System.Windows.MessageBox
@@ -1127,6 +1140,12 @@ namespace EditorInterface.ProcessWindows
 
             System.Windows.MessageBox.Show("Changes Commited, Remember to save your changes in the list view.");
             process = newProc;
+
+            if (Failure)
+            {
+                var prod = manager.Products[process.InputProducts.First().ProductId];
+                ((Product)prod).Failure = process;
+            }
 
             manager.Processes[process.Id] = process;
         }
