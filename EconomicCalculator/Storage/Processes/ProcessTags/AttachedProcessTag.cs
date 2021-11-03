@@ -41,5 +41,24 @@ namespace EconomicCalculator.Storage.Processes.ProcessTags
         public ProcessTag Tag { get; set; }
 
         public IList<ParameterType> TagParameterTypes { get; set; }
+
+        public override string ToString()
+        {
+            var result = Tag.ToString();
+
+            if (parameters.Count == 0)
+                return result;
+
+            result += "<";
+
+            foreach (var item in parameters)
+                result += item.ToString() + ";";
+
+            result = result.TrimEnd(';');
+
+            result += ">";
+
+            return result;
+        }
     }
 }

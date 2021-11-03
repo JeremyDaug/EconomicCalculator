@@ -14,7 +14,7 @@
     "InputWants": [],
     "CapitalProducts": [],
     "CapitalWants": [],
-    "Outputs": [
+    "OutputProducts": [
       {
         "ProductName": "Wheat Flour",
         "Amount": 0.7,
@@ -26,13 +26,60 @@
         "TagStrings": []
       }
     ],
-    "TagStrings": [
-      "Consumption"
-    ],
+    "OutputWants": [],
+    "TagStrings": [],
     "SkillName": "Lugging",
     "SkillMinimum": 1,
     "SkillMaximum": 3,
     "Description": "Grind Wheat Grain into Flour",
     "Icon": "ProductImages\\flour.png"
+  },
+  {
+    "Id": 1,
+    "Name": "Baking",
+    "VariantName": "Shitty",
+    "MinimumTime": 0.1,
+    "InputProducts": [
+      {
+        "ProductName": "Wheat Flour",
+        "Amount": 2,
+        "TagStrings": []
+      }
+    ],
+    "InputWants": [],
+    "CapitalProducts": [],
+    "CapitalWants": [],
+    "OutputProducts": [
+      {
+        "ProductName": "Bio Waste",
+        "Amount": 2,
+        "TagStrings": [
+          "Chance<a;1>"
+        ]
+      },
+      {
+        "ProductName": "Bread",
+        "Amount": 1,
+        "TagStrings": [
+          "Chance<b;1>"
+        ]
+      },
+      {
+        "ProductName": "Wheat Flour",
+        "Amount": 2,
+        "TagStrings": [
+          "Chance<c;1>"
+        ]
+      }
+    ],
+    "OutputWants": [],
+    "TagStrings": [
+      "Chance"
+    ],
+    "SkillName": "Running",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "Description": null,
+    "Icon": "D:\\Projects\\EconomicCalculator\\EconomicCalculator\\Data\\ProductImages\\bread.png"
   }
 ]

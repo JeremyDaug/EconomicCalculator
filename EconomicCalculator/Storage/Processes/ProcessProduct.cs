@@ -94,5 +94,13 @@ namespace EconomicCalculator.Storage.Processes
 
             TagStrings.Add(tag.ToString());
         }
+
+        public void SetTagsFromStrings()
+        {
+            foreach (var tag in TagStrings)
+            {
+                Tags.Add(ProductionTagInfo.ProcessTagString(tag));
+            }
+        }
     }
 }

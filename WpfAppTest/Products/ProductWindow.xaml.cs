@@ -42,6 +42,10 @@ namespace EditorInterface.Products
             // get the manager
             manager = Manager.Instance;
 
+            product = new Product();
+
+            product.Id = manager.NewProductId;
+
             availableWants = manager.Wants.Values.Select(x => x.Name).ToList();
 
             wants = new List<WantWeight>();

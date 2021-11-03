@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
         MinWidth="1500"
-        Title="ProcessWindow" Height="450" Width="1500">
+        Title="ProcessWindow" Height="600" Width="1500">
     <Window.Resources>
         <src:Process x:Key="process"/>
     </Window.Resources>
@@ -25,9 +25,12 @@
             <ColumnDefinition Width="130"/>
             <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="5"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
@@ -43,7 +46,7 @@
                Grid.Row="0" Grid.Column="1" Height="26" Width="20"/>
         <TextBox Name="ProcessId" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
                  Grid.Row="0" Grid.Column="2" Height="23" Background="LightGray"
-                 IsReadOnly="True"/>
+                 Text="{Binding ProcessId}" IsReadOnly="True"/>
 
         <Label Content="Name" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                Grid.Row="1" Grid.Column="1" Height="26" Width="42"/>
@@ -52,10 +55,9 @@
                      Height="23" 
                      Grid.Row="1" Grid.Column="2">
             <TextBox.Text>
-                <Binding Path="Name" Source="{StaticResource process}"
-                             UpdateSourceTrigger="PropertyChanged" Mode="OneWayToSource">
+                <Binding Path="ProcessName" UpdateSourceTrigger="PropertyChanged">
                     <Binding.ValidationRules>
-                        <valid:NoEmptyStringValidationRule/>
+                        <valid:NoEmptyStringValidationRule MinLength="3"/>
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -64,22 +66,16 @@
         <Label Content="Variant Name" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                Grid.Row="2" Grid.Column="1" Height="26" Width="82"/>
         <TextBox Name="VariantName" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                     Height="23" 
-                     Grid.Row="2" Grid.Column="2">
-            <TextBox.Text>
-                <Binding Path="VariantName" Source="{StaticResource process}"
-                             UpdateSourceTrigger="PropertyChanged"/>
-            </TextBox.Text>
-        </TextBox>
+                 Height="23" Text="{Binding VariantName}"
+                 Grid.Row="2" Grid.Column="2"/>
+
 
         <Label Content="Minimum Time" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                Grid.Row="3" Grid.Column="1" Height="26" Width="90"/>
         <TextBox Name="MinimumTime" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                     Height="23" 
-                     Grid.Row="3" Grid.Column="2">
+                 Height="23" Grid.Row="3" Grid.Column="2">
             <TextBox.Text>
-                <Binding Path="MinimumTime" Source="{StaticResource process}"
-                             UpdateSourceTrigger="PropertyChanged">
+                <Binding Path="MinTime" UpdateSourceTrigger="LostFocus">
                     <Binding.ValidationRules>
                         <valid:IsDecimalRule Min="0"/>
                     </Binding.ValidationRules>
@@ -90,7 +86,7 @@
         <Label Content="Skill" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                Grid.Row="4" Grid.Column="1" Height="26" Width="31"/>
         <ComboBox Name="ProcessSkill" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                  SelectionChanged="ProcessSkill_SelectionChanged"
+                  SelectedValue="{Binding Skill}" ItemsSource="{Binding AvailableSkills}"
                   Grid.Row="4" Grid.Column="2" Height="22"/>
 
         <Label Content="Minimum Skill Level" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -99,8 +95,7 @@
                      Height="23" 
                      Grid.Row="5" Grid.Column="2">
             <TextBox.Text>
-                <Binding Path="SkillMinimum" Source="{StaticResource process}"
-                             UpdateSourceTrigger="PropertyChanged">
+                <Binding Path="MinSkill" UpdateSourceTrigger="PropertyChanged">
                     <Binding.ValidationRules>
                         <valid:IsDecimalRule Min="0"/>
                     </Binding.ValidationRules>
@@ -114,8 +109,7 @@
                      Height="23" 
                      Grid.Row="6" Grid.Column="2">
             <TextBox.Text>
-                <Binding Path="SkillMaximum" Source="{StaticResource process}"
-                             UpdateSourceTrigger="PropertyChanged">
+                <Binding Path="MaxSkill" UpdateSourceTrigger="PropertyChanged">
                     <Binding.ValidationRules>
                         <valid:IsDecimalRule Min="0"/>
                     </Binding.ValidationRules>
@@ -129,7 +123,9 @@
                Grid.Row="0" Grid.Column="4" Height="26" Margin="81,0" Width="88"/>
         <DataGrid Name="InputProductGrid" Grid.Row="1" Grid.Column="4"
                   Grid.RowSpan="3" MouseDoubleClick="InputProductGrid_MouseDoubleClick"
-                  IsReadOnly="True"
+                  IsReadOnly="True" ItemsSource="{Binding InputProducts}"
+                  IsEnabled="{Binding InputsProductsEnabled}"
+                  SelectedItem="{Binding SelectedInputProduct}"
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Product" Width="100" Binding="{Binding ProductName}"/>
@@ -139,17 +135,20 @@
         </DataGrid>
 
         <Button Content="New Input Product" Grid.Row="1" Grid.Column="5" 
-                Height="25" VerticalAlignment="Top"
-                ClickMode="Release" Click="NewInputProduct" Margin="0,24,0,0"/>
+                Height="25" VerticalAlignment="Top" Command="{Binding NewInputProduct}"
+                ClickMode="Release" Margin="0,24,0,0"/>
 
         <Button Content="Delete Input Product" Grid.Row="2" Grid.Column="5"
-                Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="DeleteInputProduct"/>
+                Height="25" VerticalAlignment="Bottom" Command="{Binding DeleteInputProduct}"
+                ClickMode="Release"/>
 
         <Label Content="Input Wants" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                Grid.Row="4" Grid.Column="4" Height="26" Margin="88,0" Width="74"/>
         <DataGrid Name="InputWantGrid" Grid.Row="5" Grid.Column="4" IsReadOnly="True"
                   Grid.RowSpan="3" MouseDoubleClick="InputWantGrid_MouseDoubleClick"
+                  ItemsSource="{Binding InputWants}" SelectedItem="{Binding SelectedInputWant}"
+                  IsEnabled="{Binding InputWantsEnabled}"
+                  ToolTip="Input wants are wants that are provided by Consumption processes."
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Want" Width="70" Binding="{Binding WantName}"/>
@@ -160,18 +159,20 @@
 
         <Button Content="New Input Want" Grid.Row="5" Grid.Column="5" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="NewInputWant"/>
+                ClickMode="Release" Command="{Binding NewInputWant}"/>
 
         <Button Content="Delete Input Want" Grid.Row="6" Grid.Column="5" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="DeleteInputWant"/>
+                ClickMode="Release" Command="{Binding DeleteInputWant}"/>
 
         <!-- Capital Columns -->
 
         <Label Content="Capital Products" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-               Grid.Row="0" Grid.Column="6" Height="26" Margin="88,0" Width="74"/>
+               Grid.Row="0" Grid.Column="6" Height="26"/>
         <DataGrid Name="CapitalProductGrid" Grid.Row="1" Grid.Column="6" IsReadOnly="True"
                   Grid.RowSpan="3" MouseDoubleClick="CapitalProductGrid_MouseDoubleClick"
+                  ItemsSource="{Binding CapitalProducts}" SelectedItem="{Binding SelectedCapitalProduct}"
+                  IsEnabled="{Binding CapitalProductsEnabled}"
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Product" Width="70" Binding="{Binding ProductName}"/>
@@ -182,17 +183,20 @@
 
         <Button Content="New Capital Product" Grid.Row="1" Grid.Column="7" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="NewCapitalProduct"/>
+                ClickMode="Release" Command="{Binding NewCapitalProduct}"/>
 
         <Button Content="Delete Capital Product" Grid.Row="2" Grid.Column="7" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="DeleteCapitalProduct"/>
+                ClickMode="Release" Command="{Binding DeleteCapitalProduct}"/>
 
 
         <Label Content="Capital Wants" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-               Grid.Row="4" Grid.Column="6" Height="26" Margin="88,0" Width="74"/>
+               Grid.Row="4" Grid.Column="6" Height="26" />
         <DataGrid Name="CapitalWantGrid" Grid.Row="5" Grid.Column="6" IsReadOnly="True"
                   Grid.RowSpan="3" MouseDoubleClick="CapitalWantGrid_MouseDoubleClick"
+                  ItemsSource="{Binding CapitalWants}" SelectedItem="{Binding SelectedCapitalWant}"
+                  IsEnabled="{Binding CapitalWantsEnabled}"
+                  ToolTip="Capital wants must be fulfilled by either the use process of a product or by the product itself."
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Want" Width="70" Binding="{Binding WantName}"/>
@@ -203,11 +207,11 @@
 
         <Button Content="New Capital Want" Grid.Row="5" Grid.Column="7" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="NewCapitalWant"/>
+                ClickMode="Release" Command="{Binding NewCapitalWant}"/>
 
         <Button Content="Delete Capital Want" Grid.Row="6" Grid.Column="7" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="DeleteCapitalWant"/>
+                ClickMode="Release" Command="{Binding DeleteCapitalWant}"/>
 
         <!-- Outputs Column -->
 
@@ -215,6 +219,8 @@
                Grid.Row="0" Grid.Column="8" Height="26" Width="74"/>
         <DataGrid Name="OutputProductGrid" Grid.Row="1" Grid.Column="8" IsReadOnly="True"
                   Grid.RowSpan="3" MouseDoubleClick="OutputProductGrid_MouseDoubleClick"
+                  ItemsSource="{Binding OutputProducts}" SelectedItem="{Binding SelectedOutputProduct}"
+                  IsEnabled="{Binding OutputProductsEnabled}"
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Product" Width="70" Binding="{Binding ProductName}"/>
@@ -225,17 +231,20 @@
 
         <Button Content="New Output Product" Grid.Row="1" Grid.Column="9" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="NewOutputProduct"/>
+                ClickMode="Release" Command="{Binding NewOutputProduct}"/>
 
         <Button Content="Delete Output Product" Grid.Row="2" Grid.Column="9" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="DeleteOutputProduct"/>
+                ClickMode="Release" Command="{Binding DeleteOutputProduct}"/>
 
 
         <Label Content="Output Wants" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                Grid.Row="4" Grid.Column="8" />
         <DataGrid Name="OutputWantGrid" Grid.Row="5" Grid.Column="8" IsReadOnly="True"
                   MouseDoubleClick="OutputWantGrid_MouseDoubleClick"
+                  ToolTip="Output wants must typically be consumed."
+                  ItemsSource="{Binding OutputWants}" SelectedItem="{Binding SelectedOutputWant}"
+                  IsEnabled="{Binding OutputWantsEnabled}"
                   Grid.RowSpan="3" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Want" Width="70" Binding="{Binding WantName}"/>
@@ -246,11 +255,94 @@
 
         <Button Content="New Output Want" Grid.Row="5" Grid.Column="9" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="NewOutputWant"/>
+                ClickMode="Release" Command="{Binding NewOutputWant}"/>
 
         <Button Content="Delete Output Want" Grid.Row="6" Grid.Column="9" 
                 Height="25" VerticalAlignment="Bottom"
-                ClickMode="Release" Click="DeleteOutputWant"/>
+                ClickMode="Release" Command="{Binding DeleteOutputWant}"/>
 
+        <StackPanel Grid.Row="1" Grid.Column="10"
+                Grid.RowSpan="3">
+            <Image Name="ImageView" Height="100" Width="100" Source="{Binding IconImage}" />
+            <TextBox Name="ImageSelected" IsReadOnly="True" HorizontalAlignment="Stretch"
+                 VerticalAlignment="Center" Grid.Row="3" Grid.Column="10" Height="40"
+                 Text="{Binding SelectedImage}"
+                 Background="DarkGray" TextWrapping="Wrap"/>
+        </StackPanel>
+        
+        <Button Content="Select Image" Grid.Row="4" Grid.Column="10" HorizontalAlignment="Center"
+                VerticalAlignment="Center" Command="{Binding SelectImage}"
+                ClickMode="Release"/>
+
+        <Button Content="Commit" Grid.Row="5" Grid.Column="10" 
+                Height="25" Width="100" VerticalAlignment="Top"
+                ClickMode="Release" Command="{Binding Commit}"/>
+
+        <Label Content="Description" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+               Grid.Row="8" Grid.Column="1"/>
+        <TextBox Name="Description" Grid.Row="8" Grid.Column="2" TextWrapping="Wrap"
+                 AcceptsReturn="True" AcceptsTab="True"
+                 Text="{Binding Description}"
+                 Grid.RowSpan="2" Grid.ColumnSpan="3"/>
+
+        <Grid Grid.Row="8" Grid.Column="5" Grid.RowSpan="2" Grid.ColumnSpan="3" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Content="Failure Process" Grid.Row="0" Grid.Column="0" 
+                      IsChecked="{Binding Failure}" IsEnabled="{Binding FailureEnabled}"
+                      ToolTip="Allows only 1 input, the product which is failing, and no capital. &#x0a;Will Remove All existing products."/>
+            <CheckBox Content="Consumption Process" Grid.Row="1" Grid.Column="0" 
+                      IsChecked="{Binding Consumption}" IsEnabled="{Binding ConsumptionEnabled}"
+                      ToolTip="Allows only one input, the product consumed, and no capital. &#x0a;Will delete existing invalid products."/>
+            <CheckBox Content="Maintenance Process" Grid.Row="2" Grid.Column="0" 
+                      IsChecked="{Binding Maintenance}" IsEnabled="{Binding MaintenanceEnabled}"
+                      ToolTip="Requires the product Be an input to the process."/>
+            <CheckBox Content="Use Process" Grid.Row="3" Grid.Column="0" 
+                      IsChecked="{Binding Use}" IsEnabled="{Binding UseEnabled}"
+                      ToolTip="Requires the Product be a Capital Good in the process."/>
+            <Label Content="Selected Product" Grid.Row="1" Grid.Column="1"/>
+            <ComboBox Grid.Row="2" Grid.Column="1" 
+                      ItemsSource="{Binding AvailableProducts}" SelectedItem="{Binding SelectedProduct}"
+                      IsEnabled="{Binding SelectedProductEnabled}"/>
+
+            <CheckBox Content="Chance" Grid.Row="0" Grid.Column="2"
+                      IsChecked="{Binding Chance}" IsEnabled="{Binding ChanceEnabled}"
+                      ToolTip="Process has outputs which are not guaranteed. &#x0a;At least some outputs must contain chance Tags."/>
+            <CheckBox Content="Mine" Grid.Row="1" Grid.Column="2"
+                      IsChecked="{Binding Mine}" IsEnabled="{Binding MineEnabled}"
+                      ToolTip="Process is a Mining process, it implicitly takes a resource node of some density."/>
+            <CheckBox Content="Crop" Grid.Row="2" Grid.Column="2"
+                      IsChecked="{Binding Crop}" IsEnabled="{Binding CropEnabled}"
+                      ToolTip="Process is a Crop or similar process. &#x0a;It implicitly takes singular plot of land (1/8 acre) and scales based on it's fertility."/>
+        </Grid>
+        <Grid Grid.Row="8" Grid.Column="8" Grid.ColumnSpan="3" Grid.RowSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <DataGrid Grid.Row="0" Grid.Column="0" Height="50" AutoGenerateColumns="False"
+                      ItemsSource="{Binding InputMass}" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Part" Width="70" Binding="{Binding Part}"/>
+                    <DataGridTextColumn Header="Mass" Width="70" Binding="{Binding Mass}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <DataGrid Grid.Row="0" Grid.Column="1" AutoGenerateColumns="False"
+                      ItemsSource="{Binding OutputMass}" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Part" Width="120" Binding="{Binding Part}"/>
+                    <DataGridTextColumn Header="Mass" Width="70" Binding="{Binding Mass}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
     </Grid>
 </Window>

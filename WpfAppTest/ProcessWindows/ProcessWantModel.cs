@@ -29,6 +29,11 @@ namespace EditorInterface.ProcessWindows
                 ChanceGroup = (char)want.Tags.Single(x => x.Tag == ProductionTag.Chance)[0];
                 ChanceWeight = (int)want.Tags.Single(x => x.Tag == ProductionTag.Chance)[1];
             }
+            else
+            {
+                ChanceGroup = 'a';
+                ChanceWeight = 1;
+            }
             Offset = want.Tags.Any(x => x.Tag == ProductionTag.Offset);
             DivisionCapital = want.Tags.Any(x => x.Tag == ProductionTag.DivisionCapital);
             DivisionInput = want.Tags.Any(x => x.Tag == ProductionTag.DivisionInput);

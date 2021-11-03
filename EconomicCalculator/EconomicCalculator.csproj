@@ -227,6 +227,7 @@
     <Content Include="Data\ProductImages\flour.png" />
     <Content Include="Data\ProductImages\wheat.png" />
     <Content Include="Data\ProductImages\wheatIcon.png" />
+    <Content Include="Data\ProductImages\windmill.png" />
     <Content Include="Data\TestData\TestTerra\Climate.png" />
     <Content Include="Data\TestData\TestTerra\ClimateEx.png" />
     <Content Include="Data\TestData\TestTerra\SolarMap.png" />

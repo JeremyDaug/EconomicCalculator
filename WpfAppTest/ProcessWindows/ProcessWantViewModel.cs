@@ -451,6 +451,50 @@ namespace EditorInterface.ProcessWindows
             }
         }
 
+        public string ChanceGroup
+        {
+            get
+            {
+                return model.ChanceGroup.ToString();
+            }
+            set
+            {
+                if (value.Length == 1)
+                {
+                    model.ChanceGroup = value[0];
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public int ChanceWeight
+        {
+            get
+            {
+                return model.ChanceWeight;
+            }
+            set
+            {
+                if (model.ChanceWeight != value)
+                {
+                    model.ChanceWeight = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public bool ChanceOptionsEnabled
+        {
+            get
+            {
+                if (Chance)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public ICommand Commit
         {
             get
@@ -563,7 +607,7 @@ namespace EditorInterface.ProcessWindows
                     Tag = ProductionTag.Chance
                 };
 
-                if (char.IsLetter(model.ChanceGroup))
+                if (!char.IsLetter(model.ChanceGroup))
                 {
                     MessageBox.Show("Chance Group must be a letter.");
                     return;
@@ -606,6 +650,7 @@ namespace EditorInterface.ProcessWindows
             RaisePropertyChanged(nameof(PollutantEnabled));
             RaisePropertyChanged(nameof(OffsetEnabled));
             RaisePropertyChanged(nameof(Chance));
+            RaisePropertyChanged(nameof(ChanceOptionsEnabled));
         }
     }
 }

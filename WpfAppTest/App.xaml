@@ -14,10 +14,11 @@
                                 <MenuItem Header="_Menu">
                                     <MenuItem Header="Back to WelcomeScreen" Click="BackToMenu"/>
                                 </MenuItem>
-                                <MenuItem Header="_New">
+                                <!--MenuItem Header="_New">
+                                    TOOD quick news save properly.
                                     <MenuItem Header="New _Product" Click="NewProduct"/>
                                     <MenuItem Header="New _Want" Click="NewWant"/>
-                                </MenuItem>
+                                </-->
                             </Menu>
                             <ContentPresenter/>
                         </DockPanel>

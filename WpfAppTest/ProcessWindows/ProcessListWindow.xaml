@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EditorInterface.ProcessWindows"
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
-        Title="ProcessListWindow" Height="450" Width="800">
+        Title="ProcessListWindow" Height="450" Width="1300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

@@ -122,12 +122,12 @@ namespace EconomicCalculator.Storage.Processes
         /// <summary>
         /// The minimum level of the skill.
         /// </summary>
-        int SkillMinimum { get; }
+        decimal SkillMinimum { get; }
 
         /// <summary>
         /// The maximum level of the skill
         /// </summary>
-        int SkillMaximum { get; }
+        decimal SkillMaximum { get; }
 
         /// <summary>
         /// Whether the process is allowed to produce fractional goods.
@@ -154,5 +154,12 @@ namespace EconomicCalculator.Storage.Processes
         /// The Icon for the process
         /// </summary>
         string Icon { get; }
+
+        /// <summary>
+        /// Get the Name(VariantName) of the process in
+        /// standard form.
+        /// </summary>
+        /// <returns></returns>
+        string GetName();
     }
 }

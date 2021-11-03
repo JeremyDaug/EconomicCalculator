@@ -31,8 +31,6 @@ namespace EditorInterface.ProcessWindows
 
             manager = Manager.Instance;
 
-            manager.LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
-
             ProcessGrid.ItemsSource = manager.Processes.Values;
         }
 
@@ -66,17 +64,30 @@ namespace EditorInterface.ProcessWindows
 
         private void CopyProcess(object sender, RoutedEventArgs e)
         {
+            var selected = (Process)ProcessGrid.SelectedItem;
 
+            if (selected == null)
+                return;
+
+            var copy = new Process(selected);
+            copy.Id = manager.NewProcessId;
+
+            ProcessWindow win = new ProcessWindow(copy);
+
+            win.ShowDialog();
+
+            ProcessGrid.ItemsSource = manager.Processes.Values;
+            ProcessGrid.Items.Refresh();
         }
 
         private void SaveToFile(object sender, RoutedEventArgs e)
         {
-
+            manager.SaveProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
         }
 
         private void LoadFromFile(object sender, RoutedEventArgs e)
         {
-
+            // TODO, load button.
         }
     }
 }

@@ -210,21 +210,23 @@ namespace EditorInterface.ValidationRules
 
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            var val = (string)value;
+            var strForm = ((string)value);
 
-            if (val.Length > 1)
+            if (strForm.Count() > 1)
             {
                 return new ValidationResult(false,
-                    "Must be a singular Uppercase Character.");
+                    "Can only be 1 character long.");
             }
 
-            if (!char.IsUpper(val[0]))
+            var val = strForm[0];
+
+            if (!char.IsUpper(val))
             {
                 return new ValidationResult(false,
                     "Character Must be Uppercase.");
             }
 
-            return ValidationResult.ValidResult;
+            return new ValidationResult(true, null);
         }
     }
 }

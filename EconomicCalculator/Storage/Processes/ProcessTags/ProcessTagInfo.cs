@@ -176,5 +176,25 @@ namespace EconomicCalculator.Storage.Processes.ProcessTags
 
             return result;
         }
+
+        public static IAttachedProcessTag ConstructTag(ProcessTag tag)
+        {
+            // currently, no process tags have parameters
+            switch (tag)
+            {
+                case ProcessTag.Scrapping:
+                    var temp = new AttachedProcessTag
+                    {
+                        Tag = tag
+                    };
+                    temp.Add(Manager.Instance.Products.Values.First().GetName());
+                    return temp;
+                default:
+                    return new AttachedProcessTag
+                    {
+                        Tag = tag,
+                    };
+            }
+        }
     }
 }

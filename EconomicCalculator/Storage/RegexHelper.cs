@@ -34,8 +34,20 @@ namespace EconomicCalculator.Storage
         public static string Want => @"[a-zA-Z]+";
 
         /// <summary>
-        /// 
+        /// Regex for individual Character.
         /// </summary>
         public static string Character => @"\w";
+
+        /// <summary>
+        /// Regex for Phrase of letters and whitespace.
+        /// Any characters except parentheses.
+        /// </summary>
+        public static string Phrase => @"[^()]+";
+
+        /// <summary>
+        /// Regex for Full Process Name.
+        /// Any Character except parentheses, no space, then parentheses and another name.
+        /// </summary>
+        public static string Process => @"[^()]+[^() ](\([a-zA-Z ]+\))?";
     }
 }

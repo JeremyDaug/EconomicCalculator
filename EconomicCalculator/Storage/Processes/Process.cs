@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicCalculator.Storage.Processes.ProcessTags;
+using EconomicCalculator.Storage.Processes.ProductionTags;
 using EconomicCalculator.Storage.Skills;
 
 namespace EconomicCalculator.Storage.Processes
@@ -24,6 +25,33 @@ namespace EconomicCalculator.Storage.Processes
             OutputProducts = new List<IProcessProduct>();
             OutputWants = new List<IProcessWant>();
             Tags = new List<IAttachedProcessTag>();
+            TagStrings = new List<string>();
+        }
+
+        /// <summary>
+        /// Copy Constructor
+        /// </summary>
+        /// <param name="process"></param>
+        public Process(Process process)
+        {
+            Id = process.Id;
+            Name = process.Name;
+            VariantName = process.VariantName;
+            MinimumTime = process.MinimumTime;
+            InputProducts = new List<IProcessProduct>(process.InputProducts);
+            InputWants = new List<IProcessWant>(process.InputWants);
+            CapitalProducts = new List<IProcessProduct>(process.CapitalProducts);
+            CapitalWants = new List<IProcessWant>(process.CapitalWants);
+            OutputProducts = new List<IProcessProduct>(process.OutputProducts);
+            OutputWants = new List<IProcessWant>(process.OutputWants);
+            Tags = new List<IAttachedProcessTag>(process.Tags);
+            TagStrings = new List<string>(process.TagStrings);
+            SkillId = process.SkillId;
+            SkillName = process.SkillName;
+            SkillMinimum = process.SkillMinimum;
+            SkillMaximum = process.SkillMaximum;
+            Description = process.Description;
+            Icon = process.Icon;
         }
 
         /// <summary>
@@ -185,12 +213,12 @@ namespace EconomicCalculator.Storage.Processes
         /// <summary>
         /// The minimum level of the skill.
         /// </summary>
-        public int SkillMinimum { get; set; }
+        public decimal SkillMinimum { get; set; }
 
         /// <summary>
         /// The maximum level of the skill
         /// </summary>
-        public int SkillMaximum { get; set; }
+        public decimal SkillMaximum { get; set; }
 
         /// <summary>
         /// Whether the process is allowed to produce fractional goods.
@@ -234,6 +262,19 @@ namespace EconomicCalculator.Storage.Processes
         public string Icon { get; set; }
 
         /// <summary>
+        /// Get the Name(VariantName) of the process in
+        /// standard form.
+        /// </summary>
+        /// <returns></returns>
+        public string GetName()
+        {
+            if (string.IsNullOrEmpty(VariantName))
+                return Name;
+            else
+                return Name + "(" + VariantName + ")";
+        }
+
+        /// <summary>
         /// Given a name, it returns it and any variant name contained in a string.
         /// </summary>
         /// <param name="name">The name(vairant) name we are processing.</param>
@@ -249,6 +290,29 @@ namespace EconomicCalculator.Storage.Processes
             }
             else
                 return new Tuple<string, string>(name, null);
+        }
+
+        public void SetTagsFromStrings()
+        {
+            foreach (var tag in TagStrings)
+            {
+                Tags.Add(ProcessTagInfo.ProcessTagString(tag));
+            }
+
+            InputProducts.ForEach(x => x.SetTagsFromStrings());
+            CapitalProducts.ForEach(x => x.SetTagsFromStrings());
+            OutputProducts.ForEach(x => x.SetTagsFromStrings());
+
+            InputWants.ForEach(x => x.SetTagsFromStrings());
+            CapitalWants.ForEach(x => x.SetTagsFromStrings());
+            OutputWants.ForEach(x => x.SetTagsFromStrings());
+        }
+
+        public void AddTag(IAttachedProcessTag attachedProcessTag)
+        {
+            Tags.Add(attachedProcessTag);
+
+            TagStrings.Add(attachedProcessTag.ToString());
         }
     }
 }

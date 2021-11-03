@@ -20,7 +20,7 @@ namespace EconomicCalculator.Storage.Processes.ProcessTags
         /// <summary>
         /// This process is a consumption process for a product.
         /// It has exactly one input (a unit of the product), and
-        /// No Captial Period. It may or may not have an output.
+        /// No Captial. It may or may not have an output.
         /// </summary>
         Consumption,
         /// <summary>
@@ -33,7 +33,7 @@ namespace EconomicCalculator.Storage.Processes.ProcessTags
         /// <summary>
         /// This process is a use process for a product. It is 
         /// primarily for products that are not conusmed in their
-        /// use. Instead it asks for inputs
+        /// use. This requires one unit of the product as capital.
         /// </summary>
         Use,
         /// <summary>
@@ -79,6 +79,11 @@ namespace EconomicCalculator.Storage.Processes.ProcessTags
         /// or failure process. This is for turning processed goods into simpler goods, usually
         /// more condusive to being made into other things.
         /// </summary>
-        Scrapping
+        Scrapping,
+        /// <summary>
+        /// Scrubbing, a special kind of process that allows for one or more offset(s) in the 
+        /// outputs, typically of another product that is a pollutant.
+        /// </summary>
+        Scrubber
     }
 }

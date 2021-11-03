@@ -54,6 +54,9 @@
             </TextBox.Text>
         </TextBox>
 
+        <Label Content="{Binding MassCalc}" Grid.Row="1" Grid.Column="2" 
+               HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
         <Label Content="Tags" Grid.Row="2" Grid.Column="0"
                HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
@@ -153,13 +156,13 @@
                         VerticalAlignment="Center" HorizontalAlignment="Center" />
             <Label Content="Chance Group" Grid.Row="2" Grid.Column="0"
                     VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <TextBox  Grid.Row="3" Grid.Column="0" IsEnabled="{Binding ChanceGroupEnabled}"
-                      Height="25" MinWidth="25"
+            <TextBox  Grid.Row="3" Grid.Column="0" IsEnabled="{Binding ChanceOptionsEnabled}"
+                      Height="25" MinWidth="25" MaxLength="1"
                       TextAlignment="Center">
                 <TextBox.Text>
                     <Binding Path="ChanceGroup" UpdateSourceTrigger="PropertyChanged">
                         <Binding.ValidationRules>
-                            <valid:Uppercase/>
+                            <valid:NameStringValidation MinLength="0" MaxLength="1"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox.Text>
@@ -167,11 +170,11 @@
 
             <Label Content="Chance Weight" Grid.Row="2" Grid.Column="1"
                     VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <TextBox  Grid.Row="3" Grid.Column="1" IsEnabled="{Binding ChanceWeight}"
+            <TextBox  Grid.Row="3" Grid.Column="1" IsEnabled="{Binding ChanceOptionsEnabled}"
                       Height="25" MinWidth="50"
                       TextAlignment="Center">
                 <TextBox.Text>
-                    <Binding Path="ChanceWeight" UpdateSourceTrigger="PropertyChanged">
+                    <Binding Path="ChanceWeight" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
                             <valid:IsIntegerRule Min="1"/>
                         </Binding.ValidationRules>

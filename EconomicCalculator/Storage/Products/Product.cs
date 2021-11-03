@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Storage.Products.ProductTags;
+﻿using EconomicCalculator.Storage.Processes;
+using EconomicCalculator.Storage.Products.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -181,6 +182,12 @@ namespace EconomicCalculator.Storage.Products
         /// The Icon used by the product.
         /// </summary>
         public string Icon { get; set; }
+
+        /// <summary>
+        /// The failure process of the product
+        /// </summary>
+        [JsonIgnore]
+        public IProcess Failure { get; set; }
 
         public override int GetHashCode()
         {

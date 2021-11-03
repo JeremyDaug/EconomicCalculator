@@ -64,7 +64,7 @@ namespace EconomicCalculator.Storage.Processes.ProductionTags
             foreach (var item in parameters)
                 result += item.ToString() + ";";
 
-            result.TrimEnd(';');
+            result = result.TrimEnd(';');
 
             result += ">";
 

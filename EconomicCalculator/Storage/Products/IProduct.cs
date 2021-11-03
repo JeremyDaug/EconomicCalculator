@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator.Enums;
+using EconomicCalculator.Storage.Processes;
 using EconomicCalculator.Storage.Products.ProductTags;
 using System;
 using System.Collections.Generic;
@@ -101,48 +102,18 @@ namespace EconomicCalculator.Storage.Products
         [JsonIgnore]
         string TagString { get; }
 
-        /// <summary>
-        /// The tags of the Product.
-        /// Key is the ID of the tag,
-        /// The list is the parameters given.
-        /// If list is null then there are no parameters.
-        /// </summary>
-        //Dictionary<int, List<int>> Tags { get; }
-
         // TODO Technology Connection Placeholder.
-
-        /// <summary>
-        /// The average time for the product to break in days.
-        /// -1 means it never breaks, 0 means it cannot be stored and breaksdown immediately.
-        /// 1 means it can be stored but will breakdown immediately.
-        /// </summary>
-        //int MTTF { get; }
-
-        /// <summary>
-        /// The products this product fails into or is consumed into.
-        /// The key is the <see cref="Id"/> of the product is fails into.
-        /// The Value is the amount it fails into per unit of this product.
-        /// </summary>
-        //IReadOnlyDictionary<int, decimal> FailsInto { get; }
-
-        /// <summary>
-        /// If the product can be maintained.
-        /// </summary>
-        //bool Maintainable { get; }
-
-        /// <summary>
-        /// The products which maintain this product.
-        /// The Key is the <see cref="Id"/> of the product which maintains this.
-        /// The amount of that product needed per unit of this product.
-        /// </summary>
-        // TOOD, come back to this later. Maybe offload it into specific
-        // processes.
-        //IReadOnlyDictionary<int, decimal> Maintenance { get; }
 
         /// <summary>
         /// The Icon used by the product.
         /// </summary>
         string Icon { get; }
+
+        /// <summary>
+        /// The failure process of the product
+        /// </summary>
+        [JsonIgnore]
+        IProcess Failure { get; }
 
         /// <summary>
         /// Gets the product's name in Product(Variant) format.

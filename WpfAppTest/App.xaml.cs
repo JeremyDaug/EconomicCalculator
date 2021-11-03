@@ -51,12 +51,13 @@ namespace EditorInterface
 
         private void NewWant(object sender, RoutedEventArgs e)
         {
-            Window win = new ProductWindow();
+            Window win = new WantWindow();
             win.ShowDialog();
             var Windows = (WantsListWindow)Current.Windows
                 .OfType<Window>()
                 .Where(x => x.IsActive)
                 .SingleOrDefault(x => x.GetType() == typeof(WantsListWindow));
+
 
             if (Windows != null)
             {

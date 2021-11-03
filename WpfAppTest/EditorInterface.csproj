@@ -83,11 +83,14 @@
     <Compile Include="ProcessWindows\ProcessListWindow.xaml.cs">
       <DependentUpon>ProcessListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProcessWindows\ProcessMassGroup.cs" />
+    <Compile Include="ProcessWindows\ProcessModel.cs" />
     <Compile Include="ProcessWindows\ProcessProductModel.cs" />
     <Compile Include="ProcessWindows\ProcessProductViewModel.cs" />
     <Compile Include="ProcessWindows\ProcessProductWindow.xaml.cs">
       <DependentUpon>ProcessProductWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProcessWindows\ProcessViewModel.cs" />
     <Compile Include="ProcessWindows\ProcessWantModel.cs" />
     <Compile Include="ProcessWindows\ProcessWantViewModel.cs" />
     <Compile Include="ProcessWindows\ProcessWantWindow.xaml.cs">

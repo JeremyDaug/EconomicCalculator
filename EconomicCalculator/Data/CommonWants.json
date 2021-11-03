@@ -14,5 +14,9 @@
   {
     "Id": 3,
     "Name": "Food"
+  },
+  {
+    "Id": 4,
+    "Name": "Heat"
   }
 ]

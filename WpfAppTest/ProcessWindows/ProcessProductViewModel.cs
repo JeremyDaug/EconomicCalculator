@@ -84,8 +84,25 @@ namespace EditorInterface.ProcessWindows
             }
             set
             {
-                model.Amount = value;
-                RaisePropertyChanged();
+                if (Amount != value)
+                {
+                    model.Amount = value;
+                    RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(MassCalc));
+                }
+            }
+        }
+
+        public string MassCalc
+        {
+            get
+            {
+                var result = "Total Mass: {0} kg";
+                decimal weight = 0;
+                if (!string.IsNullOrEmpty(Product))
+                    weight = Manager.Instance.GetProductByName(Product).Mass * Amount;
+
+                return string.Format(result, weight);
             }
         }
 
@@ -451,6 +468,50 @@ namespace EditorInterface.ProcessWindows
             }
         }
 
+        public string ChanceGroup
+        {
+            get
+            {
+                return model.ChanceGroup.ToString();
+            }
+            set
+            {
+                if (value.Length == 1)
+                {
+                    model.ChanceGroup = value[0];
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public int ChanceWeight
+        {
+            get
+            {
+                return model.ChanceWeight;
+            }
+            set
+            {
+                if (model.ChanceWeight != value)
+                {
+                    model.ChanceWeight = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public bool ChanceOptionsEnabled
+        {
+            get
+            {
+                if (Chance)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public ICommand Commit
         {
             get
@@ -485,6 +546,13 @@ namespace EditorInterface.ProcessWindows
             else if (!model.Offset && model.Amount <= 0)
             {
                 MessageBox.Show("Amount must be Positive");
+                return;
+            }
+            else if (Section == ProcessSection.Output &&
+                !Manager.Instance.GetProductByName(Product).Fractional &&
+                Amount % 1 > 0)
+            {
+                MessageBox.Show("Output products of non-fractional goods must be whole numbers.");
                 return;
             }
             ProcessProduct.Amount = model.Amount;
@@ -563,7 +631,7 @@ namespace EditorInterface.ProcessWindows
                     Tag = ProductionTag.Chance
                 };
 
-                if (char.IsLetter(model.ChanceGroup))
+                if (!char.IsLetter(model.ChanceGroup))
                 {
                     MessageBox.Show("Chance Group must be a letter.");
                     return;
@@ -605,7 +673,8 @@ namespace EditorInterface.ProcessWindows
             RaisePropertyChanged(nameof(ConsumedEnabled));
             RaisePropertyChanged(nameof(PollutantEnabled));
             RaisePropertyChanged(nameof(OffsetEnabled));
-            RaisePropertyChanged(nameof(Chance));
+            RaisePropertyChanged(nameof(ChanceEnabled));
+            RaisePropertyChanged(nameof(ChanceOptionsEnabled));
         }
     }
 }

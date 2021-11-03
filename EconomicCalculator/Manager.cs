@@ -15,6 +15,7 @@ using EconomicCalculator.Storage.Skills;
 using EconomicCalculator.Storage.Processes;
 using EconomicCalculator.Storage.Products.ProductTags;
 using EconomicCalculator.Storage;
+using EconomicCalculator.Storage.Processes.ProcessTags;
 
 namespace EconomicCalculator
 {
@@ -176,6 +177,11 @@ namespace EconomicCalculator
             return Skills.Values.Single(x => x.Name == name);
         }
 
+        /// <summary>
+        /// Retrieve a process based on it's name.
+        /// </summary>
+        /// <param name="name">Name of the process.</param>
+        /// <returns></returns>
         public IProcess GetProcessByName(string name)
         {
             Tuple<string, string> names = Process.GetProcessNames(name);
@@ -213,6 +219,30 @@ namespace EconomicCalculator
             // if there was more than 1 match, or the one match
             // contained did not share the id, then the product
             // is a duplicate.
+            return true;
+        }
+
+        /// <summary>
+        /// check if a product is a duplicate of another or not.
+        /// </summary>
+        /// <param name="process">The process to check for.</param>
+        /// <returns></returns>
+        public bool IsDuplicate(IProcess process)
+        {
+            var matches = Processes
+                .Where(x => x.Value.Name == process.Name
+                        && x.Value.VariantName == process.VariantName)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            // if empty, then no matches exist.
+            if (matches.Count() == 0)
+                return false;
+
+            // if 1 and it's id matches, we are updating that one then.
+            if (matches.Count() == 1 && matches.ContainsKey(process.Id))
+                return false;
+
+            // if more than 1 or 1 but id's don't match, then we have a duplicate.
             return true;
         }
 
@@ -378,7 +408,7 @@ namespace EconomicCalculator
         {
             get
             {
-                while (SkillGroups.ContainsKey(_newProcessId))
+                while (Processes.ContainsKey(_newProcessId))
                     ++_newProcessId;
 
                 return _newProcessId;
@@ -395,6 +425,24 @@ namespace EconomicCalculator
         public void SanityCheck()
         {
             // TODO, this thing. Build as feels needed.
+            ProcessesValid();
+        }
+
+        private bool ProcessesValid()
+        {
+            // Processes with faliure tags should connect to a
+            // product a product should only have 1 failure process.
+            var failures = Processes.Values.Where(x => x.Tags.Any(y => y.Tag == ProcessTag.Failure));
+
+            // the first input product is the product it is connected to.
+            var productsWithFailures = new HashSet<int>();
+
+            // insert each until either success or failure.
+            foreach (var failure in failures)
+                if (productsWithFailures.Add(failure.InputProducts.First().ProductId))
+                    return false;
+
+            return true;
         }
 
         #region DeleteFunctions
@@ -457,7 +505,6 @@ namespace EconomicCalculator
             Wants = wants.ToDictionary(x => x.Id, y => (IWant)y);
         }
 
-
         /// <summary>
         /// Load Skills from file.
         /// </summary>
@@ -501,6 +548,25 @@ namespace EconomicCalculator
                         new AbstractConverter<ProcessWant, IProcessWant>()
                     }
                 });
+
+            groups.ForEach(x => x.SetTagsFromStrings());
+
+            // if products are loaded.
+            if (Products.Any())
+            {
+                // update failure processes on products
+                var failures = groups.Where(x => x.Tags.Any(y => y.Tag == ProcessTag.Failure));
+
+                // get attach to the first (and only) input product in the process
+                foreach (var failure in failures)
+                {
+                    var prod = Products[failure.InputProducts.First().ProductId];
+
+                    if (prod.Failure != null)
+                        throw new InvalidDataException("Product has 2 failure processes.");
+                    ((Product)prod).Failure = failure;
+                }
+            }
 
             Processes = groups.ToDictionary(x => x.Id, y => (IProcess)y);
         }
@@ -566,6 +632,7 @@ namespace EconomicCalculator
         {
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
             string json = JsonSerializer.Serialize(Processes.Values.ToList(), options);
             File.WriteAllText(filename, json);
         }
@@ -590,7 +657,7 @@ namespace EconomicCalculator
             LoadSkills(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkills.json");
 
             // Get All Processes
-            //LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
+            LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
         }
 
         /// <summary>

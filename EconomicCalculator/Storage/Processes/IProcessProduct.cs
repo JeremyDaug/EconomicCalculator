@@ -45,5 +45,10 @@ namespace EconomicCalculator.Storage.Processes
         /// </summary>
         [JsonIgnore]
         string TagString { get; }
+
+        /// <summary>
+        /// Set Tags from strings.
+        /// </summary>
+        void SetTagsFromStrings();
     }
 }
