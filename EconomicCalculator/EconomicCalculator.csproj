@@ -225,6 +225,7 @@
     <Content Include="Data\ProductImages\Attribution.txt" />
     <Content Include="Data\ProductImages\bread.png" />
     <Content Include="Data\ProductImages\flour.png" />
+    <Content Include="Data\ProductImages\IronIngot.png" />
     <Content Include="Data\ProductImages\wheat.png" />
     <Content Include="Data\ProductImages\wheatIcon.png" />
     <Content Include="Data\ProductImages\windmill.png" />
