@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage.Hexmap
+namespace EconomicCalculator.DTOs.Hexmap
 {
     /// <summary>
     /// A class for containing both Hex location and the color contained.

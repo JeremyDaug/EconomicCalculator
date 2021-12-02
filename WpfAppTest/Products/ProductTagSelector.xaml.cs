@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.Storage.Products.ProductTags;
+﻿using EconomicCalculator.DTOs.Products.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage.Technology
+namespace EconomicCalculator.DTOs.Technology
 {
     public interface ITechnology
     {

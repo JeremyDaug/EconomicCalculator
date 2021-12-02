@@ -85,28 +85,30 @@
     <Compile Include="Refactor\Storage\Products\IPlot.cs" />
     <Compile Include="Refactor\Storage\Products\IProduct.cs" />
     <Compile Include="Refactor\Storage\Products\Plot.cs" />
-    <Compile Include="Storage\AbstractConverter.cs" />
-    <Compile Include="Storage\Processes\IDivisionEffects.cs" />
-    <Compile Include="Storage\Processes\Process.cs" />
-    <Compile Include="Storage\Processes\ProcessTags\AttachedProcessTag.cs" />
-    <Compile Include="Storage\Processes\ProductionTags\AttachedProductionTag.cs" />
-    <Compile Include="Storage\Processes\ProcessTags\IAttachedProcessTag.cs" />
-    <Compile Include="Storage\Processes\ProductionTags\IAttachedProductionTag.cs" />
-    <Compile Include="Storage\Processes\ProcessProduct.cs" />
-    <Compile Include="Storage\Processes\ProcessSection.cs" />
-    <Compile Include="Storage\Processes\ProcessTags\ProcessTag.cs" />
-    <Compile Include="Storage\Processes\ProcessTags\ProcessTagInfo.cs" />
-    <Compile Include="Storage\Processes\ProcessWant.cs" />
-    <Compile Include="Storage\Processes\ProductionTags\ProductionTag.cs" />
+    <Compile Include="DTOs\AbstractConverter.cs" />
+    <Compile Include="DTOs\Jobs\IJob.cs" />
+    <Compile Include="DTOs\Jobs\Job.cs" />
+    <Compile Include="DTOs\Processes\IDivisionEffects.cs" />
+    <Compile Include="DTOs\Processes\Process.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\AttachedProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\AttachedProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\IAttachedProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\IAttachedProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessProduct.cs" />
+    <Compile Include="DTOs\Processes\ProcessSection.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\ProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\ProcessTagInfo.cs" />
+    <Compile Include="DTOs\Processes\ProcessWant.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\ProductionTag.cs" />
     <Compile Include="Refactor\Storage\Products\Product.cs" />
-    <Compile Include="Storage\Processes\IProcess.cs" />
-    <Compile Include="Storage\Processes\IProcessProduct.cs" />
-    <Compile Include="Storage\Processes\IProcessWant.cs" />
-    <Compile Include="Storage\Processes\ProductionTags\ProductionTagInfo.cs" />
-    <Compile Include="Storage\Products\ProductTags\AttachedProductTag.cs" />
-    <Compile Include="Storage\Products\ProductTags\IAttachedProductTag.cs" />
-    <Compile Include="Storage\Products\ProductTags\ProductTagInfo.cs" />
-    <Compile Include="Storage\Products\ProductTags\ProductTag.cs" />
+    <Compile Include="DTOs\Processes\IProcess.cs" />
+    <Compile Include="DTOs\Processes\IProcessProduct.cs" />
+    <Compile Include="DTOs\Processes\IProcessWant.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\ProductionTagInfo.cs" />
+    <Compile Include="DTOs\Products\ProductTags\AttachedProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\IAttachedProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\ProductTagInfo.cs" />
+    <Compile Include="DTOs\Products\ProductTags\ProductTag.cs" />
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Generators\Noise.cs" />
     <Compile Include="Generators\Vector2.cs" />
@@ -151,16 +153,16 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Refactor\Storage\Technology\ITechnology.cs" />
     <Compile Include="Refactor\Storage\ProductAmountCollection.cs" />
-    <Compile Include="Storage\Products\IProduct.cs" />
-    <Compile Include="Storage\Products\Product.cs" />
-    <Compile Include="Storage\RegexHelper.cs" />
-    <Compile Include="Storage\Skills\ISkill.cs" />
-    <Compile Include="Storage\Skills\ISkillGroup.cs" />
-    <Compile Include="Storage\Skills\Skill.cs" />
-    <Compile Include="Storage\Skills\SkillGroup.cs" />
-    <Compile Include="Storage\Skills\SkillsGraph.cs" />
-    <Compile Include="Storage\Wants\IWant.cs" />
-    <Compile Include="Storage\Wants\Want.cs" />
+    <Compile Include="DTOs\Products\IProduct.cs" />
+    <Compile Include="DTOs\Products\Product.cs" />
+    <Compile Include="DTOs\RegexHelper.cs" />
+    <Compile Include="DTOs\Skills\ISkill.cs" />
+    <Compile Include="DTOs\Skills\ISkillGroup.cs" />
+    <Compile Include="DTOs\Skills\Skill.cs" />
+    <Compile Include="DTOs\Skills\SkillGroup.cs" />
+    <Compile Include="DTOs\Skills\SkillsGraph.cs" />
+    <Compile Include="DTOs\Wants\IWant.cs" />
+    <Compile Include="DTOs\Wants\Want.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotnetNoise, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -260,8 +262,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DTOs\Technology\" />
     <Folder Include="Runner\" />
-    <Folder Include="Storage\Technology\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

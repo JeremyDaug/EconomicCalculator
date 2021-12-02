@@ -1,7 +1,7 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.Storage.Products;
-using EconomicCalculator.Storage.Products.ProductTags;
-using EconomicCalculator.Storage.Wants;
+using EconomicCalculator.DTOs.Products;
+using EconomicCalculator.DTOs.Products.ProductTags;
+using EconomicCalculator.DTOs.Wants;
 using System;
 using System.Collections.Generic;
 using System.IO;

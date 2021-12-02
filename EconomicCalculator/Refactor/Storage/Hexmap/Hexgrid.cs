@@ -10,7 +10,7 @@ using EconomicCalculator.Enums.EnumExtensions;
 using System.Drawing.Imaging;
 using System.IO;
 
-namespace EconomicCalculator.Storage.Hexmap
+namespace EconomicCalculator.DTOs.Hexmap
 {
     public class Hexgrid : IEnumerable<HexColor>
     {

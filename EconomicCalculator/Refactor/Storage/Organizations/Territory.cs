@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Refactor.Storage.Population;
 using EconomicCalculator.Refactor.Storage.Products;
-using EconomicCalculator.Storage.Hexmap;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.DTOs.Hexmap;
+using EconomicCalculator.DTOs.Products;
 
 namespace EconomicCalculator.Refactor.Storage.Organizations
 {

@@ -1,6 +1,6 @@
 ﻿using DotnetNoise;
 using EconomicCalculator.Enums;
-using EconomicCalculator.Storage.Hexmap;
+using EconomicCalculator.DTOs.Hexmap;
 using EconomicCalculator.Enums.EnumExtensions;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.IO;
 using EconomicCalculator.Generators;
 
-namespace EconomicCalculator.Storage.Planet
+namespace EconomicCalculator.DTOs.Planet
 {
     /// <summary>
     /// Organizer for planetary bodies ranging from a small as asteroids

@@ -13,11 +13,11 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using EconomicCalculator;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Processes;
-using EconomicCalculator.Storage.Processes.ProcessTags;
-using EconomicCalculator.Storage.Processes.ProductionTags;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.DTOs;
+using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProcessTags;
+using EconomicCalculator.DTOs.Processes.ProductionTags;
+using EconomicCalculator.DTOs.Products;
 using EditorInterface.Helpers;
 
 namespace EditorInterface.ProcessWindows

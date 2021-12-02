@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EditorInterface.Wants"
         xmlns:valid="clr-namespace:EditorInterface.ValidationRules"
         mc:Ignorable="d"
-        xmlns:src="clr-namespace:EconomicCalculator.Storage.Wants;assembly=EconomicCalculator"
+        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Wants;assembly=EconomicCalculator"
         Style="{StaticResource SharedMenu}"
         Title="WantWindow" Height="250" Width="500">
     <Window.CommandBindings>

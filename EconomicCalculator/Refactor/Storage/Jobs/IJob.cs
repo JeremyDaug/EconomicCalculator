@@ -1,7 +1,7 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Refactor.Storage.Processes;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.DTOs;
+using EconomicCalculator.DTOs.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;

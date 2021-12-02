@@ -1,8 +1,8 @@
 ﻿using EconomicCalculator.Refactor.Storage;
 using EconomicCalculator.Refactor.Storage.Organizations;
 using EconomicCalculator.Refactor.Storage.Products;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.DTOs;
+using EconomicCalculator.DTOs.Products;
 using Moq;
 using NUnit.Framework;
 using System;

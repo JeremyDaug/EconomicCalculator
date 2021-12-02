@@ -1,6 +1,6 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Processes;
+using EconomicCalculator.DTOs;
+using EconomicCalculator.DTOs.Processes;
 using System;
 using System.Collections.Generic;
 using System.IO;

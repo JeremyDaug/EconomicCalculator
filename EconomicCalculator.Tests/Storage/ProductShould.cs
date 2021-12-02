@@ -1,8 +1,8 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Randomizer;
 using EconomicCalculator.Refactor.Storage;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.DTOs;
+using EconomicCalculator.DTOs.Products;
 using Moq;
 using NUnit.Framework;
 using System;

@@ -1,4 +1,4 @@
-﻿namespace EconomicCalculator.Storage.Products
+﻿namespace EconomicCalculator.DTOs.Products
 {
     public enum BuildingType
     {

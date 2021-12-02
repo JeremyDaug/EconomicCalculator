@@ -1,7 +1,7 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.Storage.Processes;
-using EconomicCalculator.Storage.Processes.ProcessTags;
-using EconomicCalculator.Storage.Processes.ProductionTags;
+using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProcessTags;
+using EconomicCalculator.DTOs.Processes.ProductionTags;
 using System;
 using System.Collections.Generic;
 using System.Linq;

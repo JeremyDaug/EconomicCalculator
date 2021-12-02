@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage.Hexmap
+namespace EconomicCalculator.DTOs.Hexmap
 {
     /// <summary>
     /// Hex Grid Coordinates, based on here https://www.redblobgames.com/grids/hexagons/

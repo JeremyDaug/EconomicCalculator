@@ -1,6 +1,6 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.Storage.Products;
-using EconomicCalculator.Storage.Wants;
+using EconomicCalculator.DTOs.Products;
+using EconomicCalculator.DTOs.Wants;
 using System;
 using System.Collections.Generic;
 using System.Linq;

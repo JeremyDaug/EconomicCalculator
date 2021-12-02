@@ -1,5 +1,5 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.Storage.Skills;
+using EconomicCalculator.DTOs.Skills;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

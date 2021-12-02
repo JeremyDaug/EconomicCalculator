@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Storage
+namespace EconomicCalculator.DTOs
 {
     public interface ICrop
     {

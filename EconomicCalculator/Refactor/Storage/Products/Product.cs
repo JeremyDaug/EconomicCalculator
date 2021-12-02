@@ -1,6 +1,6 @@
 ﻿using EconomicCalculator.Enums;
 using EconomicCalculator.Randomizer;
-using EconomicCalculator.Storage;
+using EconomicCalculator.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;

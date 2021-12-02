@@ -1,5 +1,5 @@
-﻿using EconomicCalculator.Storage.Processes;
-using EconomicCalculator.Storage.Processes.ProcessTags;
+﻿using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProcessTags;
 using System;
 using System.Collections;
 using System.Collections.Generic;

@@ -1,5 +1,5 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.Storage.Wants;
+using EconomicCalculator.DTOs.Wants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;

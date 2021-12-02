@@ -1,6 +1,6 @@
-﻿using EconomicCalculator.Storage.Planet;
-using EconomicCalculator.Storage.Products;
-using EconomicCalculator.Storage.Technology;
+﻿using EconomicCalculator.DTOs.Planet;
+using EconomicCalculator.DTOs.Products;
+using EconomicCalculator.DTOs.Technology;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,14 +8,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
-using EconomicCalculator.Storage.Wants;
+using EconomicCalculator.DTOs.Wants;
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
-using EconomicCalculator.Storage.Skills;
-using EconomicCalculator.Storage.Processes;
-using EconomicCalculator.Storage.Products.ProductTags;
-using EconomicCalculator.Storage;
-using EconomicCalculator.Storage.Processes.ProcessTags;
+using EconomicCalculator.DTOs.Skills;
+using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Products.ProductTags;
+using EconomicCalculator.DTOs;
+using EconomicCalculator.DTOs.Processes.ProcessTags;
 
 namespace EconomicCalculator
 {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Enums;
 using EconomicCalculator.Refactor.Storage.Processes;
-using EconomicCalculator.Storage.Products;
+using EconomicCalculator.DTOs.Products;
 
 namespace EconomicCalculator.Refactor.Storage.Jobs
 {

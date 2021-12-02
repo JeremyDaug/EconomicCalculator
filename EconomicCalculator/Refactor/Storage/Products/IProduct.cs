@@ -1,5 +1,5 @@
 ﻿using EconomicCalculator.Enums;
-using EconomicCalculator.Storage;
+using EconomicCalculator.DTOs;
 using System;
 using System.Collections.Generic;
 

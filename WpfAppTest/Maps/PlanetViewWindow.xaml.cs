@@ -1,5 +1,5 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.Storage.Planet;
+using EconomicCalculator.DTOs.Planet;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
