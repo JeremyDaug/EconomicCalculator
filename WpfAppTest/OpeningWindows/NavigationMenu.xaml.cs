@@ -62,5 +62,14 @@ namespace EditorInterface.OpeningWindows
 
             this.Close();
         }
+
+        private void ToJobs(object sender, RoutedEventArgs e)
+        {
+            var win = new Jobs.JobsListWindow();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

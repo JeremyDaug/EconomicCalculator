@@ -16,6 +16,7 @@ using EconomicCalculator.DTOs.Processes;
 using EconomicCalculator.DTOs.Products.ProductTags;
 using EconomicCalculator.DTOs;
 using EconomicCalculator.DTOs.Processes.ProcessTags;
+using EconomicCalculator.DTOs.Jobs;
 
 namespace EconomicCalculator
 {
@@ -84,6 +85,8 @@ namespace EconomicCalculator
         public IDictionary<int, ISkillGroup> SkillGroups { get; set; }
 
         public IDictionary<int, IProcess> Processes { get; set; }
+
+        public IDictionary<int, IJob> Jobs { get; set; }
 
         #endregion DataStorage
 
@@ -247,6 +250,30 @@ namespace EconomicCalculator
         }
 
         /// <summary>
+        /// Checksi if a job is a duplicate of another or not.
+        /// </summary>
+        /// <param name="job">The job to check for.</param>
+        /// <returns></returns>
+        public bool IsDupilcate(IJob job)
+        {
+            var matches = Jobs
+                .Where(x => x.Value.Name == job.Name
+                            && x.Value.VariantName == job.VariantName)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            // if empty, then no matches.
+            if (matches.Count() == 0)
+                return false;
+
+            // if 1 and it's id matches, we are updating that one then.
+            if (matches.Count() == 1 && matches.ContainsKey(job.Id))
+                return false;
+
+            // if more than 1 or 1 but id's don't match, then we have a duplicate.
+            return true;
+        }
+
+        /// <summary>
         /// Returns the Id of a want of the given name.
         /// </summary>
         /// <param name="name">The name we want the Id of.</param>
@@ -309,6 +336,30 @@ namespace EconomicCalculator
 
             // otherwise it returns the duplicate
             return matches.Values.First(x => x.Id != want.Id);
+        }
+
+        /// <summary>
+        /// Finds whether a of the given job.
+        /// </summary>
+        /// <param name="job">The job to find a duplicate of.</param>
+        /// <returns>A duplicate job, null if there is no duplicate.</returns>
+        public IJob FindDuplicate(IJob job)
+        {
+            var matches = Jobs
+                .Where(x => x.Value.Name == job.Name
+                            && x.Value.VariantName == job.VariantName)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            // if empty, then no matches.
+            if (matches.Count() == 0)
+                return null;
+
+            // if 1 and it's id matches, we are updating that one then.
+            if (matches.Count() == 1 && matches.ContainsKey(job.Id))
+                return null;
+
+            // if more than 1 or 1 but id's don't match, then we have a duplicate.
+            return matches.Values.First(x => x.Id != job.Id);
         }
 
         #endregion FindDuplicate
@@ -571,6 +622,19 @@ namespace EconomicCalculator
             Processes = groups.ToDictionary(x => x.Id, y => (IProcess)y);
         }
 
+        /// <summary>
+        /// Load Jobs from file.
+        /// </summary>
+        /// <param name="filename">The file to load frime.</param>
+        public void LoadJobs(string filename)
+        {
+            var json = File.ReadAllText(filename);
+
+            List<Job> groups = JsonSerializer.Deserialize<List<Job>>(json);
+
+            Jobs = groups.ToDictionary(x => x.Id, y => (IJob)y);
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -637,6 +701,19 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        /// <summary>
+        /// Save Jobs to file.
+        /// </summary>
+        /// <param name="filename">The file to save it to.</param>
+        public void SaveJobs(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(Jobs.Values.ToList(), options);
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -658,6 +735,8 @@ namespace EconomicCalculator
 
             // Get All Processes
             LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
+
+
         }
 
         /// <summary>

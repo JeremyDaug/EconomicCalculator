@@ -51,7 +51,15 @@ namespace EconomicCalculator.DTOs.Jobs
         /// </summary>
         string Skill { get; }
 
-
+        /// <summary>
+        /// The processes which are part of the jod.
+        /// </summary>
         List<string> ProcessNames { get; }
+
+        /// <summary>
+        /// The Id's of the processes which are part of the job.
+        /// </summary>
+        [JsonIgnore]
+        List<int> ProcessIds { get; }
     }
 }

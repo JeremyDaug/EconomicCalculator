@@ -36,5 +36,9 @@
         <Button Content="To Processes" Height="25" Width="100"
                 Grid.Row="0" Grid.Column="3"
                 ClickMode="Release" Click="ToProcesses"/>
+
+        <Button Content="To Jobs" Height="25" Width="100"
+                Grid.Row="1" Grid.Column="0"
+                ClickMode="Release" Click="ToJobs"/>
     </Grid>
 </Window>
