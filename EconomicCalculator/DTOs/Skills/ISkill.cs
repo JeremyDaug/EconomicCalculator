@@ -15,6 +15,7 @@ namespace EconomicCalculator.DTOs.Skills
         /// <summary>
         /// Skill Id
         /// </summary>
+        [JsonIgnore]
         int Id { get; }
 
         /// <summary>

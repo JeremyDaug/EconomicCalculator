@@ -41,6 +41,7 @@ namespace EconomicCalculator.DTOs.Processes
         /// <summary>
         /// The product it desires.
         /// </summary>
+        [JsonIgnore]
         public int ProductId { get; set; }
 
         /// <summary>

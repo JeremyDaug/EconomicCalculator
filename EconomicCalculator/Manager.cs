@@ -17,6 +17,7 @@ using EconomicCalculator.DTOs.Products.ProductTags;
 using EconomicCalculator.DTOs;
 using EconomicCalculator.DTOs.Processes.ProcessTags;
 using EconomicCalculator.DTOs.Jobs;
+using System.Windows.Forms;
 
 namespace EconomicCalculator
 {
@@ -43,6 +44,7 @@ namespace EconomicCalculator
             Skills = new Dictionary<int, ISkill>();
             SkillGroups = new Dictionary<int, ISkillGroup>();
             Processes = new Dictionary<int, IProcess>();
+            Jobs = new Dictionary<int, IJob>();
         }        
 
         /// <summary>
@@ -466,6 +468,21 @@ namespace EconomicCalculator
             }
         }
 
+        private int _newJobId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, Job Id.
+        /// </summary>
+        public int NewJobId
+        {
+            get
+            {
+                while (Jobs.ContainsKey(_newJobId))
+                    ++_newJobId;
+                return _newJobId;
+            }
+        }
+
         #endregion NewIds
 
         /// <summary>
@@ -501,6 +518,79 @@ namespace EconomicCalculator
         // TODO delete functions for all objects in our system.
 
         #endregion DeleteFunctions
+
+        #region GenerationFunctions
+
+        public void GenerateSkillLabors()
+        {
+            // for all skills
+            foreach (var skill in Skills.Values)
+            {
+                // check that no product of the same name exists.
+                var preex = Products.Values
+                    .SingleOrDefault(x => x.Name == skill.Name);
+
+                // if it does exist and it's a service, skip it.
+                if (preex != null &&
+                    preex.ContainsTag(ProductTag.Service))
+                    continue;
+                // if labor exists duplicate exists, create it
+                if (preex == null)
+                {
+                    var labor = new Product
+                    {
+                        Id = NewProductId,
+                        Name = skill.Name,
+                        Mass = 0,
+                        Quality = 1,
+                        Fractional = true,
+                        UnitName = "man hour",
+                        Bulk = 0
+                    };
+
+                    Products.Add(labor.Id, labor);
+                    continue;
+                }
+
+                // if a product with the same name exists, but is not 
+                // a service, request authority to override.
+                if (preex != null && 
+                    !preex.ContainsTag(ProductTag.Service))
+                {
+                    // currently we raise a message box, letting you
+                    // either override, skip, or cancel out.
+                    var result = MessageBox.Show("Duplicate non-service found, do you wish to override it? Yes, override, no Skip, Cancel, stop.", "Dupilcate found.", MessageBoxButtons.YesNoCancel);
+
+                    // override
+                    if (result == DialogResult.Yes)
+                    {
+                        preex = new Product
+                        {
+                            Id = preex.Id,
+                            Name = skill.Name,
+                            Mass = 0,
+                            Quality = 1,
+                            Fractional = true,
+                            UnitName = "man hour",
+                            Bulk = 0
+                        };
+
+                        Products.Add(preex.Id, preex);
+                        continue;
+                    }
+                    else if (result == DialogResult.No)
+                    {
+                        continue;
+                    }
+                    else if (result == DialogResult.Cancel)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
+        #endregion GenerationFunctions
 
         #region LoadFunctions
 
@@ -541,7 +631,13 @@ namespace EconomicCalculator
                 }
             }
 
-            Products = prods.ToDictionary(x => x.Id, y => (IProduct)y);
+            // Save all products.
+            _newProductId = 0;
+            foreach (var prod in prods)
+            {
+                prod.Id = NewProductId;
+                Products.Add(prod.Id, prod);
+            }
         }
 
         /// <summary>
@@ -553,7 +649,12 @@ namespace EconomicCalculator
             var json = File.ReadAllText(fileName);
             List<Want> wants = JsonSerializer.Deserialize<List<Want>>(json);
 
-            Wants = wants.ToDictionary(x => x.Id, y => (IWant)y);
+            _newWantId = 0;
+            foreach (var want in wants)
+            {
+                want.Id = NewWantId;
+                Wants.Add(want.Id, want);
+            }
         }
 
         /// <summary>
@@ -565,7 +666,12 @@ namespace EconomicCalculator
             var json = File.ReadAllText(filename);
             List<Skill> skills = JsonSerializer.Deserialize<List<Skill>>(json);
 
-            Skills = skills.ToDictionary(x => x.Id, y => (ISkill)y);
+            _newSkillId = 0;
+            foreach (var skill in skills)
+            {
+                skill.Id = NewSKillId;
+                Skills.Add(skill.Id, skill);
+            }
 
             foreach (var skill in skills)
                 skill.SetDataFromStrings();
@@ -580,6 +686,13 @@ namespace EconomicCalculator
             var json = File.ReadAllText(filename);
             List<SkillGroup> groups = JsonSerializer.Deserialize<List<SkillGroup>>(json);
 
+            _newSkillGroupId = 0;
+            foreach (var group in groups)
+            {
+                group.Id = NewSkillGroupId;
+                SkillGroups.Add(group.Id, group);
+            }
+
             SkillGroups = groups.ToDictionary(x => x.Id, y => (ISkillGroup)y);
         }
 
@@ -591,7 +704,7 @@ namespace EconomicCalculator
         {
             var json = File.ReadAllText(filename);
             
-            List<Process> groups = JsonSerializer.Deserialize<List<Process>>(json, 
+            List<Process> processes = JsonSerializer.Deserialize<List<Process>>(json, 
                 new JsonSerializerOptions
                 {
                     Converters = {
@@ -600,13 +713,20 @@ namespace EconomicCalculator
                     }
                 });
 
-            groups.ForEach(x => x.SetTagsFromStrings());
+            _newProcessId = 0;
+            foreach (var process in processes)
+            {
+                process.Id = NewProcessId;
+                Processes.Add(process.Id, process);
+            }
+
+            processes.ForEach(x => x.SetTagsFromStrings());
 
             // if products are loaded.
             if (Products.Any())
             {
                 // update failure processes on products
-                var failures = groups.Where(x => x.Tags.Any(y => y.Tag == ProcessTag.Failure));
+                var failures = processes.Where(x => x.Tags.Any(y => y.Tag == ProcessTag.Failure));
 
                 // get attach to the first (and only) input product in the process
                 foreach (var failure in failures)
@@ -618,8 +738,6 @@ namespace EconomicCalculator
                     ((Product)prod).Failure = failure;
                 }
             }
-
-            Processes = groups.ToDictionary(x => x.Id, y => (IProcess)y);
         }
 
         /// <summary>
@@ -630,9 +748,14 @@ namespace EconomicCalculator
         {
             var json = File.ReadAllText(filename);
 
-            List<Job> groups = JsonSerializer.Deserialize<List<Job>>(json);
+            List<Job> jobs = JsonSerializer.Deserialize<List<Job>>(json);
 
-            Jobs = groups.ToDictionary(x => x.Id, y => (IJob)y);
+            _newJobId = 0;
+            foreach (var job in jobs)
+            {
+                job.Id = NewJobId;
+                Jobs.Add(job.Id, job);
+            }
         }
 
         #endregion LoadFunctions
@@ -736,7 +859,8 @@ namespace EconomicCalculator
             // Get All Processes
             LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
 
-
+            // Get all Jobs.
+            LoadJobs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonJobs.json");
         }
 
         /// <summary>

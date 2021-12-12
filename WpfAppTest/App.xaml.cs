@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using EditorInterface.Products;
 using EditorInterface.Wants;
+using EditorInterface.OpeningWindows;
 
 namespace EditorInterface
 {
@@ -23,7 +24,6 @@ namespace EditorInterface
             // reopen main window
             Window win = new OpeningWindows.NavigationMenu();
             
-
             // close all other windows and go back to menu.
             foreach (var window in Current.Windows.OfType<Window>().Where(x => x.IsActive))
             {
@@ -63,6 +63,19 @@ namespace EditorInterface
             {
                 Windows.WantGrid.Items.Refresh();
             }
+        }
+
+        private void BackToNavigation(object sender, RoutedEventArgs e)
+        {
+            Window win = new NavigationMenu();
+
+            // close all other windows and go back to menu.
+            foreach (var window in Current.Windows.OfType<Window>().Where(x => x.IsActive))
+            {
+                window.Close();
+            }
+
+            win.Show();
         }
     }
 }

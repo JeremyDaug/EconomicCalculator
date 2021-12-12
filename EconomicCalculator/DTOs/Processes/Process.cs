@@ -57,6 +57,7 @@ namespace EconomicCalculator.DTOs.Processes
         /// <summary>
         /// The Id of the process
         /// </summary>
+        [JsonIgnore]
         public int Id { get; set; }
 
         /// <summary>

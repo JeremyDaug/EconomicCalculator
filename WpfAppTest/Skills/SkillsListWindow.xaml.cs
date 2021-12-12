@@ -150,5 +150,12 @@ namespace EditorInterface.Skills
             // Get All Skills
             manager.SaveSkills(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkills.json");
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            manager.GenerateSkillLabors();
+
+            MessageBox.Show("Generation Completd, be sure to go to Products and confirm them.");
+        }
     }
 }

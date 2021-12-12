@@ -24,7 +24,9 @@ namespace EditorInterface.OpeningWindows
         {
             InitializeComponent();
 
-            Manager.Instance.LoadAll();
+            // if anything is loaded, don't reload
+            if (!Manager.Instance.Products.Any())
+                Manager.Instance.LoadAll();
         }
 
         private void ToProducts(object sender, RoutedEventArgs e)

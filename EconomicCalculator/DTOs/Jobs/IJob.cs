@@ -15,6 +15,7 @@ namespace EconomicCalculator.DTOs.Jobs
         /// <summary>
         /// The unique Id of the job
         /// </summary>
+        [JsonIgnore]
         int Id { get; }
 
         /// <summary>
@@ -55,6 +56,12 @@ namespace EconomicCalculator.DTOs.Jobs
         /// The processes which are part of the jod.
         /// </summary>
         List<string> ProcessNames { get; }
+
+        /// <summary>
+        /// Retrieve the processes in a nicer format.
+        /// </summary>
+        [JsonIgnore]
+        string ProcessesString { get; }
 
         /// <summary>
         /// The Id's of the processes which are part of the job.

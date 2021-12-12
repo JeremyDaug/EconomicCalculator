@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.DTOs.Skills
@@ -14,6 +15,7 @@ namespace EconomicCalculator.DTOs.Skills
         /// <summary>
         /// The Id of the skill Group
         /// </summary>
+        [JsonIgnore]
         int Id { get; }
 
         /// <summary>

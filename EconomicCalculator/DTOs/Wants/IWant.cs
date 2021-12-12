@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.DTOs.Wants
@@ -14,6 +15,7 @@ namespace EconomicCalculator.DTOs.Wants
         /// <summary>
         /// The Want Id
         /// </summary>
+        [JsonIgnore]
         int Id { get; }
 
         /// <summary>

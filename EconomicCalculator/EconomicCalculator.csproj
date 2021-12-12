@@ -49,6 +49,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Data\CommonJobs.json" />
     <None Include="Data\CommonProcesses.json" />
     <None Include="Data\CommonProducts.json" />
     <None Include="Data\CommonSkillGroups.json" />

@@ -12,7 +12,8 @@
                         <DockPanel Background="LightGray">
                             <Menu DockPanel.Dock="Top">
                                 <MenuItem Header="_Menu">
-                                    <MenuItem Header="Back to WelcomeScreen" Click="BackToMenu"/>
+                                    <MenuItem Header="Back to Welcome Screen" Click="BackToMenu"/>
+                                    <MenuItem Header="Back to Navigation Screen" Click="BackToNavigation"/>
                                 </MenuItem>
                                 <!--MenuItem Header="_New">
                                     TOOD quick news save properly.

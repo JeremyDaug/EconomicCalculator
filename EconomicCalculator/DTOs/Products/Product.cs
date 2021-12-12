@@ -50,6 +50,7 @@ namespace EconomicCalculator.DTOs.Products
         /// <summary>
         /// The Unique Id of the Product.
         /// </summary>
+        [JsonIgnore]
         public int Id { get; set; }
 
         /// <summary>
@@ -236,6 +237,21 @@ namespace EconomicCalculator.DTOs.Products
                 return Name + "(" + VariantName + ")";
             // if it doesn't.
             return Name;
+        }
+
+        /// <summary>
+        /// Check if a product has a tag or not.
+        /// </summary>
+        /// <param name="tag">The tag we want to check for.</param>
+        /// <returns>True if found, false otherwise.</returns>
+        public bool ContainsTag(ProductTag tag)
+        {
+            foreach (var currentTags in Tags)
+            {
+                if (currentTags.Tag == tag)
+                    return true;
+            }
+            return false;
         }
     }
 }

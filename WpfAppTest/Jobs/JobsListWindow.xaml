@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.Jobs"
         mc:Ignorable="d"
+        Style="{StaticResource SharedMenu}"
         Title="JobsListWindow" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -15,10 +16,16 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <DataGrid Name="JobsGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-             Margin="0,0,0,0" AutoGenerateColumns="True"
+             Margin="0,0,0,0" AutoGenerateColumns="False"
              AlternatingRowBackground="LightGray" AlternationCount="2" IsReadOnly="True"
-                  Grid.Row="0" MouseDoubleClick="EditWant">
-            
+                  Grid.Row="0" MouseDoubleClick="JobsGrid_MouseDoubleClick">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="Variant Name" Binding="{Binding VariantName}"/>
+                <DataGridTextColumn Header="Labor" Binding="{Binding Labor}"/>
+                <DataGridTextColumn Header="Skill" Binding="{Binding Skill}"/>
+                <DataGridTextColumn Header="Processes" Binding="{Binding ProcessesString}"/>
+            </DataGrid.Columns>
         </DataGrid>
     </Grid>
 </Window>

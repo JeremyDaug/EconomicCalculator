@@ -29,18 +29,16 @@ namespace EditorInterface.Jobs
         {
             InitializeComponent();
 
-            var testJob = new Job
-            {
-                Id = 0,
-                Name = "Farming",
-                VariantName = null
-            };
-
             manager = Manager.Instance;
 
             jobs = manager.Jobs.Values.ToList();
 
             JobsGrid.ItemsSource = jobs;
+        }
+
+        private void JobsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+
         }
     }
 }

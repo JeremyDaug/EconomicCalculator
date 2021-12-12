@@ -1,6 +1,5 @@
 [
 	{
-		"Id": 1,
 		"Name": "Lugging",
 		"GroupStrings": [
 			"Physical"
@@ -12,7 +11,6 @@
 		"Description": "For moving stuff around by hand."
 	},
 	{
-		"Id": 0,
 		"Name": "Running",
 		"GroupStrings": [
 			"Physical"
@@ -24,7 +22,6 @@
 		"Description": "Running about swiftly and efficiently."
 	},
 	{
-		"Id": 2,
 		"Name": "Sports",
 		"GroupStrings": [
 			"Physical"
@@ -36,7 +33,6 @@
 		"Description": "Physical Activity for the Entertainment of the Masses."
 	},
 	{
-		"Id": 3,
 		"Name": "Wheat Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -46,7 +42,6 @@
 		"Description": "The Specialized Skill for Farming Wheat"
 	},
 	{
-		"Id": 4,
 		"Name": "Grain Milling",
 		"GroupStrings": [
 			"Food Processing",
@@ -57,7 +52,6 @@
 		"Description": "The skill of managing the quality of milled grain."
 	},
 	{
-		"Id": 5,
 		"Name": "Cooking",
 		"GroupStrings": [
 			"Cooking"
@@ -68,7 +62,6 @@
 		"Description": "The general cooking skill."
 	},
 	{
-		"Id": 6,
 		"Name": "Baking",
 		"GroupStrings": [
 			"Cooking"
@@ -79,7 +72,6 @@
 		"Description": "The specialized skill of cooking various breads."
 	},
 	{
-		"Id": 7,
 		"Name": "Mine Engineer",
 		"GroupStrings": [
 			"Geology",
@@ -90,7 +82,6 @@
 		"Description": "The Skill for managing and organizing Mining operations."
 	},
 	{
-		"Id": 8,
 		"Name": "Smelting",
 		"GroupStrings": [
 			"Metallurgy"
@@ -100,7 +91,6 @@
 		"Description": "The skill for smelting raw metal ores into refined ingots."
 	},
 	{
-		"Id": 9,
 		"Name": "Herder",
 		"GroupStrings": [
 			"Animal Husbandry"
@@ -110,7 +100,6 @@
 		"Description": "Animal Herding and care for the sake of food."
 	},
 	{
-		"Id": 10,
 		"Name": "Cotton Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -120,7 +109,6 @@
 		"Description": "The skill of caring for a Cotton Plantation."
 	},
 	{
-		"Id": 11,
 		"Name": "Silkworm Farming",
 		"GroupStrings": [
 			"Animal Husbandry"
@@ -130,7 +118,6 @@
 		"Description": "A farmer who harvests silk worms for their silk."
 	},
 	{
-		"Id": 12,
 		"Name": "Weaving",
 		"GroupStrings": [
 			"Textiles"
@@ -140,7 +127,6 @@
 		"Description": "The skill of weaving threads into cloth."
 	},
 	{
-		"Id": 13,
 		"Name": "Spinner",
 		"GroupStrings": [
 			"Textiles"
@@ -150,7 +136,6 @@
 		"Description": "The Skill of spinning raw threads into useful spun threads."
 	},
 	{
-		"Id": 14,
 		"Name": "Tailoring",
 		"GroupStrings": [
 			"Textiles"
@@ -160,7 +145,6 @@
 		"Description": "The skill of taking basic cloth and forming clothing from it."
 	},
 	{
-		"Id": 15,
 		"Name": "Panning",
 		"GroupStrings": [
 			"Geology"
@@ -170,7 +154,6 @@
 		"Description": "The art of pulling gold out of bodies of water."
 	},
 	{
-		"Id": 16,
 		"Name": "Minting",
 		"GroupStrings": [
 			"Metalworking"
@@ -180,7 +163,6 @@
 		"Description": "The craft of turning precious metals into coinage efficiently."
 	},
 	{
-		"Id": 17,
 		"Name": "Goldsmithing",
 		"GroupStrings": [
 			"Metalworking"
@@ -190,7 +172,6 @@
 		"Description": "The art of crafting gold into various bits of jewelry."
 	},
 	{
-		"Id": 18,
 		"Name": "Coffee Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -200,7 +181,6 @@
 		"Description": "The skill of managing and caring for a Coffee plant."
 	},
 	{
-		"Id": 19,
 		"Name": "Dyeing",
 		"GroupStrings": [
 			"Textiles"
@@ -210,7 +190,6 @@
 		"Description": "The skill of dying cloth evenly and efficiently."
 	},
 	{
-		"Id": 20,
 		"Name": "Fishing",
 		"GroupStrings": [
 			"Seafairing"
@@ -220,7 +199,6 @@
 		"Description": "The skill of fishing."
 	},
 	{
-		"Id": 21,
 		"Name": "Oil Drilling",
 		"GroupStrings": [
 			"Geology"
@@ -230,7 +208,6 @@
 		"Description": "The skills of running and drilling oil."
 	},
 	{
-		"Id": 22,
 		"Name": "Steelworking",
 		"GroupStrings": [
 			"Metalworking"
@@ -240,7 +217,6 @@
 		"Description": "The skill of forming steel into various forms."
 	},
 	{
-		"Id": 23,
 		"Name": "Opium Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -250,7 +226,6 @@
 		"Description": "The skill of caring for Opium Plants."
 	},
 	{
-		"Id": 24,
 		"Name": "Apple Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -260,7 +235,6 @@
 		"Description": "The skill of caring for Apple Trees."
 	},
 	{
-		"Id": 25,
 		"Name": "Rubber Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -270,7 +244,6 @@
 		"Description": "The skill of farming rubber trees."
 	},
 	{
-		"Id": 26,
 		"Name": "Shepherding",
 		"GroupStrings": [
 			"Animal Husbandry"
@@ -280,7 +253,6 @@
 		"Description": "The skill of herding sheep and goats."
 	},
 	{
-		"Id": 27,
 		"Name": "Tea Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -290,7 +262,6 @@
 		"Description": "The skill of farming Tea plants."
 	},
 	{
-		"Id": 28,
 		"Name": "Lumberjacking",
 		"GroupStrings": [
 			"Woodworking"
@@ -300,7 +271,6 @@
 		"Description": "The skill of efficiently cutting down trees."
 	},
 	{
-		"Id": 29,
 		"Name": "Tobacco Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -310,7 +280,6 @@
 		"Description": "The skill of caring for Tobacco plants."
 	},
 	{
-		"Id": 30,
 		"Name": "Laborer",
 		"GroupStrings": [
 			"Physical"
@@ -320,7 +289,6 @@
 		"Description": "A general Purpose Laborer."
 	},
 	{
-		"Id": 31,
 		"Name": "Shipwright",
 		"GroupStrings": [
 			"Engineering",
@@ -331,7 +299,6 @@
 		"Description": "The Skill of Making Ships."
 	},
 	{
-		"Id": 32,
 		"Name": "Chemistry",
 		"GroupStrings": [
 			"Chemistry"
@@ -341,7 +308,6 @@
 		"Description": "The skill of mixing substances to create useful products."
 	},
 	{
-		"Id": 33,
 		"Name": "Glassworking",
 		"GroupStrings": [
 		],

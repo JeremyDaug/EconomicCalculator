@@ -60,7 +60,7 @@
                         Grid.Row="0" Grid.Column="2" ClickMode="Release"
                         Click="CopySkill"/>
             <Button Content="_Save All" HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Width="80" Grid.RowSpan="2"
+                        VerticalAlignment="Center" Width="80"
                         Grid.Row="0" Grid.Column="3" ClickMode="Release"
                         Click="SaveToFile"/>
 
@@ -76,6 +76,10 @@
                         VerticalAlignment="Center" Width="75"
                         Grid.Row="1" Grid.Column="2" ClickMode="Release"
                         Click="CopyGroup"/>
+            <Button Content="Generate Labors" HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Width="100"
+                        Grid.Row="1" Grid.Column="3" ClickMode="Release"
+                        Click="Button_Click"/>
         </Grid>
     </Grid>
 </Window>
