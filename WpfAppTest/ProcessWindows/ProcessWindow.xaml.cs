@@ -28,13 +28,6 @@ namespace EditorInterface.ProcessWindows
         private Manager manager;
         private Process process;
 
-        private List<IProcessProduct> inputProducts;
-        private List<IProcessWant> inputWants;
-        private List<IProcessProduct> capitalProducts;
-        private List<IProcessWant> capitalWants;
-        private List<IProcessProduct> outputProducts;
-        private List<IProcessWant> outputWants;
-
         private ProcessViewModel viewModel;
 
         public ProcessWindow()

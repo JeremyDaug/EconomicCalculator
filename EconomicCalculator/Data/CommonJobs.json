@@ -2,8 +2,20 @@
   {
     "Name": "Farming",
     "VariantName": null,
-    "Labor": null,
-    "Skill": null,
-    "ProcessNames": null
+    "Labor": "Wheat Farming",
+    "Skill": "Wheat Farming",
+    "ProcessNames": [
+      "Wheat Farming",
+      "Baking(Shitty)"
+    ]
+  },
+  {
+    "Name": "Baker",
+    "VariantName": null,
+    "Labor": "Baking",
+    "Skill": "Baking",
+    "ProcessNames": [
+      "Baking(Shitty)"
+    ]
   }
 ]

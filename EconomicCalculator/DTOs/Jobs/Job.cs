@@ -75,7 +75,7 @@ namespace EconomicCalculator.DTOs.Jobs
             get
             {
                 if (ProcessNames != null)
-                    return string.Join("/n", ProcessNames);
+                    return string.Join("\n", ProcessNames);
                 return "";
             }
         }

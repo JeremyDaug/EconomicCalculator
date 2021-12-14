@@ -545,8 +545,16 @@ namespace EconomicCalculator
                         Quality = 1,
                         Fractional = true,
                         UnitName = "man hour",
-                        Bulk = 0
+                        Bulk = 0,
                     };
+
+                    labor.Tags.Add(new AttachedProductTag
+                    {
+                        Tag = ProductTag.Service
+                    });
+                    labor.TagStrings
+                        .Add(ProductTagInfo
+                             .GetProductExample(ProductTag.Service));
 
                     Products.Add(labor.Id, labor);
                     continue;

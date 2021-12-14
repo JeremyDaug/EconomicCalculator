@@ -290,7 +290,7 @@ namespace EconomicCalculator.DTOs.Processes
                 return new Tuple<string, string>(prodName, varName);
             }
             else
-                return new Tuple<string, string>(name, null);
+                return new Tuple<string, string>(name, "");
         }
 
         public void SetTagsFromStrings()

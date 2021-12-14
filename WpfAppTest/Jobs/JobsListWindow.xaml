@@ -27,5 +27,29 @@
                 <DataGridTextColumn Header="Processes" Binding="{Binding ProcessesString}"/>
             </DataGrid.Columns>
         </DataGrid>
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="New Job" Grid.Row="0" Grid.Column="0"
+                    Width="75" Height="25" ClickMode="Release"
+                    Click="NewJob"/>
+            <Button Content="Copy Job" Grid.Row="0" Grid.Column="1"
+                    Width="75" Height="25" ClickMode="Release"
+                    Click="CopyJob"/>
+            <Button Content="Edit Job" Grid.Row="0" Grid.Column="2"
+                    Width="75" Height="25" ClickMode="Release"
+                    Click="EditJob"/>
+            <Button Content="Delete Job" Grid.Row="0" Grid.Column="3"
+                    Width="75" Height="25" ClickMode="Release"
+                    Click="DeleteJob"/>
+            <Button Content="Save Jobs" Grid.Row="0" Grid.Column="4"
+                    Width="75" Height="25" ClickMode="Release"
+                    Click="SaveJobs"/>
+        </Grid>
     </Grid>
 </Window>

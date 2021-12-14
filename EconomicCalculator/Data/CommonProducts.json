@@ -591,403 +591,471 @@
     "Bulk": 0,
     "Fractional": true,
     "WantStrings": [],
-    "TagStrings": [],
+		"TagStrings": [
+			"Service"
+		],
     "Icon": null
   },
-  {
-    "Name": "Running",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Sports",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Wheat Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Grain Milling",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Cooking",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Baking",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Mine Engineer",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Smelting",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Herder",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Cotton Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Silkworm Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Weaving",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Spinner",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Tailoring",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Panning",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Minting",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Goldsmithing",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Coffee Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Dyeing",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Fishing",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Oil Drilling",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Steelworking",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Opium Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Apple Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Rubber Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Shepherding",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Tea Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Lumberjacking",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Tobacco Farming",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Laborer",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Shipwright",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Chemistry",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  },
-  {
-    "Name": "Glassworking",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": null
-  }
+	{
+		"Name": "Running",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Sports",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Wheat Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Grain Milling",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Cooking",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Baking",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Mine Engineer",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Smelting",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Herder",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Cotton Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Silkworm Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Weaving",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Spinner",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Tailoring",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Panning",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Minting",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Goldsmithing",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Coffee Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Dyeing",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Fishing",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Oil Drilling",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Steelworking",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Opium Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Apple Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Rubber Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Shepherding",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Tea Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Lumberjacking",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Tobacco Farming",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Laborer",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Shipwright",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Chemistry",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
+	{
+		"Name": "Glassworking",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	}
 ]

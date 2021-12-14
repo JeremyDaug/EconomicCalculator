@@ -77,9 +77,14 @@
     <Compile Include="Helpers\DummyDecimalBinding.cs" />
     <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Jobs\JobEditorWindow.xaml.cs">
+      <DependentUpon>JobEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Jobs\JobModel.cs" />
     <Compile Include="Jobs\JobsListWindow.xaml.cs">
       <DependentUpon>JobsListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Jobs\JobViewModel.cs" />
     <Compile Include="OpeningWindows\NavigationMenu.xaml.cs">
       <DependentUpon>NavigationMenu.xaml</DependentUpon>
     </Compile>
@@ -122,6 +127,10 @@
     <Compile Include="Wants\WantWindow.xaml.cs">
       <DependentUpon>WantWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Jobs\JobEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Jobs\JobsListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
