@@ -36,7 +36,7 @@ namespace EditorInterface.Wants
             InitializeComponent();
 
             WantName.Text = want.Name;
-            WantId.Text = want.Id.ToString();
+            WantDescription.Text = want.Description;
         }
 
         public WantWindow(Want want)
@@ -46,7 +46,7 @@ namespace EditorInterface.Wants
             InitializeComponent();
 
             WantName.Text = want.Name;
-            WantId.Text = want.Id.ToString();
+            WantDescription.Text = want.Description;
         }
 
         private void CloseBind_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -59,8 +59,9 @@ namespace EditorInterface.Wants
         {
             want = new Want
             {
-                Id = int.Parse(WantId.Text),
-                Name = WantName.Text
+                Id = want.Id,
+                Name = WantName.Text,
+                Description = WantDescription.Text
             };
 
             // check it's valid.
@@ -84,9 +85,8 @@ namespace EditorInterface.Wants
                 if (result == MessageBoxResult.Yes)
                 {
                     want.Id = dup.Id;
+                    want.Description = WantDescription.Text;
                     manager.Wants[want.Id] = want;
-
-                    WantId.Text = want.Id.ToString();
                 }
 
                 return;
@@ -100,8 +100,9 @@ namespace EditorInterface.Wants
         {
             want = new Want
             {
-                Id = int.Parse(WantId.Text),
-                Name = WantName.Text
+                Id = want.Id,
+                Name = WantName.Text,
+                Description = WantDescription.Text
             };
 
             // check it's valid.
@@ -126,8 +127,6 @@ namespace EditorInterface.Wants
                 {
                     want.Id = dup.Id;
                     manager.Wants[want.Id] = want;
-
-                    WantId.Text = want.Id.ToString();
                 }
 
                 return;

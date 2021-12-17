@@ -1,601 +1,607 @@
 [
-  {
-    "Name": "Plot",
-    "VariantName": "Waste land",
-    "UnitName": "1/8 Acre",
-    "Quality": 0,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [
-      "Fixed",
-      "Storage<All;1000;-1>"
-    ],
-    "Icon": ""
-  },
-  {
-    "Name": "Plot",
-    "VariantName": "Marginal Land",
-    "UnitName": "1/8 Acre",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [
-      "Fixed",
-      "Storage<All;1000;-1>"
-    ],
-    "Icon": ""
-  },
-  {
-    "Name": "Plot",
-    "VariantName": "Scrub Land",
-    "UnitName": "1/8 Acre",
-    "Quality": 2,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [
-      "Fixed",
-      "Storage<All;1000;-1>"
-    ],
-    "Icon": ""
-  },
-  {
-    "Name": "Plot",
-    "VariantName": "Quality Land",
-    "UnitName": "1/8 Acre",
-    "Quality": 3,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [
-      "Fixed",
-      "Storage<All;1000;-1>"
-    ],
-    "Icon": ""
-  },
-  {
-    "Name": "Plot",
-    "VariantName": "Fertile Land",
-    "UnitName": "1/8 Acre",
-    "Quality": 4,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [
-      "Fixed",
-      "Storage<All;-1;-1>"
-    ],
-    "Icon": ""
-  },
-  {
-    "Name": "Plot",
-    "VariantName": "Very Fertile Land",
-    "UnitName": "1/8 Acre",
-    "Quality": 4,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [
-      "Fixed",
-      "Storage<All;-1;-1>"
-    ],
-    "Icon": ""
-  },
-  {
-    "Name": "Wheat Grain",
-    "VariantName": "",
-    "UnitName": "kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 1,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": "ProductImages\\wheat.png"
-  },
-  {
-    "Name": "Cotton",
-    "VariantName": "",
-    "UnitName": "Kg",
-    "Quality": 2,
-    "Mass": 1,
-    "Bulk": 0.0006,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Opium",
-    "VariantName": "",
-    "UnitName": "Kg",
-    "Quality": 3,
-    "Mass": 1,
-    "Bulk": 0.0001,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Apples",
-    "VariantName": "",
-    "UnitName": "Apple",
-    "Quality": 1,
-    "Mass": 0.215,
-    "Bulk": 0.000242,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Tea",
-    "VariantName": "",
-    "UnitName": "cup",
-    "Quality": 1,
-    "Mass": 0.0005,
-    "Bulk": 0.000000005,
-    "Fractional": false,
-    "WantStrings": [
-      "Food<1>"
-    ],
-    "TagStrings": [
-      "Consumable"
-    ],
-    "Icon": ""
-  },
-  {
-    "Name": "Tobacco",
-    "VariantName": "",
-    "UnitName": "g",
-    "Quality": 1,
-    "Mass": 0.001,
-    "Bulk": 0.00000005,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Cattle",
-    "VariantName": "Cow",
-    "UnitName": "Cow",
-    "Quality": 2,
-    "Mass": 560,
-    "Bulk": 18,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Sheep",
-    "VariantName": "",
-    "UnitName": "Sheep",
-    "Quality": 2,
-    "Mass": 560,
-    "Bulk": 18,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Goat",
-    "VariantName": "",
-    "UnitName": "Goat",
-    "Quality": 2,
-    "Mass": 560,
-    "Bulk": 18,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Chicken",
-    "VariantName": "",
-    "UnitName": "Chicken",
-    "Quality": 2,
-    "Mass": 560,
-    "Bulk": 18,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Pig",
-    "VariantName": "",
-    "UnitName": "Pig",
-    "Quality": 2,
-    "Mass": 560,
-    "Bulk": 18,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Silk",
-    "VariantName": "",
-    "UnitName": "Bundle",
-    "Quality": 4,
-    "Mass": 5,
-    "Bulk": 0.0001,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Coffee",
-    "VariantName": "",
-    "UnitName": "Bag",
-    "Quality": 4,
-    "Mass": 5,
-    "Bulk": 0.001,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Fish",
-    "VariantName": "",
-    "UnitName": "Fish",
-    "Quality": 1,
-    "Mass": 2,
-    "Bulk": 0.00001,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Iron Ore",
-    "VariantName": "",
-    "UnitName": "kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 0.00025,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Coal",
-    "VariantName": "Anthracite",
-    "UnitName": "Kg",
-    "Quality": 4,
-    "Mass": 1,
-    "Bulk": 0.0006,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Gold Nugget",
-    "VariantName": "",
-    "UnitName": "Kg",
-    "Quality": 3,
-    "Mass": 1,
-    "Bulk": 0.00005,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Oil",
-    "VariantName": "Crude",
-    "UnitName": "Cubic Meter",
-    "Quality": 1,
-    "Mass": 800,
-    "Bulk": 1,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Wool",
-    "VariantName": "",
-    "UnitName": "Kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 0.001,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Sulphur",
-    "VariantName": "",
-    "UnitName": "Kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 0.0000005,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Timber",
-    "VariantName": "",
-    "UnitName": "Log",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 0.0000005,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Tropical Wood",
-    "VariantName": "",
-    "UnitName": "Log",
-    "Quality": 3,
-    "Mass": 1,
-    "Bulk": 0.0000005,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Wheat Flour",
-    "VariantName": "",
-    "UnitName": "kg",
-    "Quality": 2,
-    "Mass": 1,
-    "Bulk": 1,
-    "Fractional": true,
-    "WantStrings": [
-      "Luxury<1.75>"
-    ],
-    "TagStrings": [
-      "Luxury<1.5;Luxury>",
-      "ConsumerGood"
-    ],
-    "Icon": "ProductImages\\flour.png"
-  },
-  {
-    "Name": "Bio Waste",
-    "VariantName": null,
-    "UnitName": "kg",
-    "Quality": 0,
-    "Mass": 1,
-    "Bulk": 0.4,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": "ProductImages\\bin.png"
-  },
-  {
-    "Name": "Bread",
-    "VariantName": "",
-    "UnitName": "Loaf",
-    "Quality": 1,
-    "Mass": 2,
-    "Bulk": 0.01,
-    "Fractional": false,
-    "WantStrings": [
-      "Food<2>"
-    ],
-    "TagStrings": [
-      "Consumable"
-    ],
-    "Icon": "ProductImages\\bread.png"
-  },
-  {
-    "Name": "Gold Bar",
-    "VariantName": "",
-    "UnitName": "Bar",
-    "Quality": 4,
-    "Mass": 25,
-    "Bulk": 0.001,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Iron Ingots",
-    "VariantName": "",
-    "UnitName": "Ingot",
-    "Quality": 1,
-    "Mass": 10,
-    "Bulk": 0.00125,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Steel Ingot",
-    "VariantName": "",
-    "UnitName": "Ingot",
-    "Quality": 1,
-    "Mass": 10,
-    "Bulk": 0.00125,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Fabric",
-    "VariantName": "Cotton",
-    "UnitName": "Square Meter",
-    "Quality": 2,
-    "Mass": 0.117,
-    "Bulk": 0.00001,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Clothes",
-    "VariantName": "Cotton",
-    "UnitName": "Set",
-    "Quality": 2,
-    "Mass": 0.15,
-    "Bulk": 0.001,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Clothes",
-    "VariantName": "Silk",
-    "UnitName": "Set",
-    "Quality": 4,
-    "Mass": 0.13,
-    "Bulk": 0.001,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Gold Coin",
-    "VariantName": "Guinea",
-    "UnitName": "Coin",
-    "Quality": 4,
-    "Mass": 0.003,
-    "Bulk": 0.00000015,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Gold Jewelry",
-    "VariantName": "",
-    "UnitName": "Item",
-    "Quality": 4,
-    "Mass": 0.5,
-    "Bulk": 0.00025,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Dye",
-    "VariantName": "",
-    "UnitName": "Kg",
-    "Quality": 2,
-    "Mass": 1,
-    "Bulk": 0.00001,
-    "Fractional": true,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Oil",
-    "VariantName": "Crude Barrel",
-    "UnitName": "Barrel",
-    "Quality": 1,
-    "Mass": 124.7379,
-    "Bulk": 0.16,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Barrel",
-    "VariantName": "Steel",
-    "UnitName": "Barrel",
-    "Quality": 1,
-    "Mass": 20,
-    "Bulk": 0.16,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Cement",
-    "VariantName": "Portland",
-    "UnitName": "Kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 0.00151,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Ship",
-    "VariantName": "",
-    "UnitName": "Ship",
-    "Quality": 1,
-    "Mass": 10000,
-    "Bulk": 500,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Fertilizer",
-    "VariantName": "Animal",
-    "UnitName": "Kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 0.01,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Glass",
-    "VariantName": "",
-    "UnitName": "Kg",
-    "Quality": 1,
-    "Mass": 1,
-    "Bulk": 0.0004,
-    "Fractional": false,
-    "WantStrings": [],
-    "TagStrings": [],
-    "Icon": ""
-  },
-  {
-    "Name": "Lugging",
-    "VariantName": null,
-    "UnitName": "man hour",
-    "Quality": 1,
-    "Mass": 0,
-    "Bulk": 0,
-    "Fractional": true,
-    "WantStrings": [],
+	{
+		"Name": "Plot",
+		"VariantName": "",
+		"UnitName": "1/8 Acre",
+		"Quality": 3,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [
+			"Fixed",
+			"Abstract",
+			"Storage<All;1000;-1>"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Plot",
+		"VariantName": "Waste land",
+		"UnitName": "1/8 Acre",
+		"Quality": 0,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [
+			"Fixed",
+			"Storage<All;1000;-1>"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Plot",
+		"VariantName": "Marginal Land",
+		"UnitName": "1/8 Acre",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [
+			"Fixed",
+			"Storage<All;1000;-1>"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Plot",
+		"VariantName": "Scrub Land",
+		"UnitName": "1/8 Acre",
+		"Quality": 2,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [
+			"Fixed",
+			"Storage<All;1000;-1>"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Plot",
+		"VariantName": "Quality Land",
+		"UnitName": "1/8 Acre",
+		"Quality": 3,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [
+			"Fixed",
+			"Storage<All;1000;-1>"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Plot",
+		"VariantName": "Fertile Land",
+		"UnitName": "1/8 Acre",
+		"Quality": 4,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [
+			"Fixed",
+			"Storage<All;-1;-1>"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Plot",
+		"VariantName": "Very Fertile Land",
+		"UnitName": "1/8 Acre",
+		"Quality": 4,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [
+			"Fixed",
+			"Storage<All;-1;-1>"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Wheat Grain",
+		"VariantName": "",
+		"UnitName": "kg",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 1,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": "ProductImages\\wheat.png"
+	},
+	{
+		"Name": "Cotton",
+		"VariantName": "",
+		"UnitName": "Kg",
+		"Quality": 2,
+		"Mass": 1,
+		"Bulk": 0.0006,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Opium",
+		"VariantName": "",
+		"UnitName": "Kg",
+		"Quality": 3,
+		"Mass": 1,
+		"Bulk": 0.0001,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Apple",
+		"VariantName": "",
+		"UnitName": "Apple",
+		"Quality": 1,
+		"Mass": 0.215,
+		"Bulk": 0.000242,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Tea",
+		"VariantName": "",
+		"UnitName": "cup",
+		"Quality": 1,
+		"Mass": 0.0005,
+		"Bulk": 0.000000005,
+		"Fractional": false,
+		"WantStrings": [
+			"Food<1>"
+		],
+		"TagStrings": [
+			"Consumable"
+		],
+		"Icon": ""
+	},
+	{
+		"Name": "Tobacco",
+		"VariantName": "",
+		"UnitName": "g",
+		"Quality": 1,
+		"Mass": 0.001,
+		"Bulk": 0.00000005,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Cattle",
+		"VariantName": "Cow",
+		"UnitName": "Cow",
+		"Quality": 2,
+		"Mass": 560,
+		"Bulk": 18,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Sheep",
+		"VariantName": "",
+		"UnitName": "Sheep",
+		"Quality": 2,
+		"Mass": 560,
+		"Bulk": 18,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Goat",
+		"VariantName": "",
+		"UnitName": "Goat",
+		"Quality": 2,
+		"Mass": 560,
+		"Bulk": 18,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Chicken",
+		"VariantName": "",
+		"UnitName": "Chicken",
+		"Quality": 2,
+		"Mass": 560,
+		"Bulk": 18,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Pig",
+		"VariantName": "",
+		"UnitName": "Pig",
+		"Quality": 2,
+		"Mass": 560,
+		"Bulk": 18,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Silk",
+		"VariantName": "",
+		"UnitName": "Bundle",
+		"Quality": 4,
+		"Mass": 5,
+		"Bulk": 0.0001,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Coffee",
+		"VariantName": "",
+		"UnitName": "Bag",
+		"Quality": 4,
+		"Mass": 5,
+		"Bulk": 0.001,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Fish",
+		"VariantName": "",
+		"UnitName": "Fish",
+		"Quality": 1,
+		"Mass": 2,
+		"Bulk": 0.00001,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Iron Ore",
+		"VariantName": "",
+		"UnitName": "kg",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 0.00025,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Coal",
+		"VariantName": "Anthracite",
+		"UnitName": "Kg",
+		"Quality": 4,
+		"Mass": 1,
+		"Bulk": 0.0006,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Gold Nugget",
+		"VariantName": "",
+		"UnitName": "Kg",
+		"Quality": 3,
+		"Mass": 1,
+		"Bulk": 0.00005,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Wool",
+		"VariantName": "",
+		"UnitName": "Kg",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 0.001,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Timber",
+		"VariantName": "",
+		"UnitName": "Log",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 0.0000005,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Timber",
+		"VariantName": "Tropical",
+		"UnitName": "Log",
+		"Quality": 3,
+		"Mass": 1,
+		"Bulk": 0.0000005,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Wheat Flour",
+		"VariantName": "",
+		"UnitName": "kg",
+		"Quality": 2,
+		"Mass": 1,
+		"Bulk": 1,
+		"Fractional": true,
+		"WantStrings": [
+			"Luxury<1.75>"
+		],
+		"TagStrings": [
+			"Luxury<1.5;Luxury>",
+			"ConsumerGood"
+		],
+		"Icon": "ProductImages\\flour.png"
+	},
+	{
+		"Name": "Bio Waste",
+		"VariantName": "",
+		"UnitName": "kg",
+		"Quality": 0,
+		"Mass": 1,
+		"Bulk": 0.4,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": "ProductImages\\bin.png"
+	},
+	{
+		"Name": "Bread",
+		"VariantName": "",
+		"UnitName": "Loaf",
+		"Quality": 1,
+		"Mass": 2,
+		"Bulk": 0.01,
+		"Fractional": false,
+		"WantStrings": [
+			"Food<2>"
+		],
+		"TagStrings": [
+			"Consumable"
+		],
+		"Icon": "ProductImages\\bread.png"
+	},
+	{
+		"Name": "Gold Bar",
+		"VariantName": "",
+		"UnitName": "Bar",
+		"Quality": 4,
+		"Mass": 25,
+		"Bulk": 0.001,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Iron Ingots",
+		"VariantName": "",
+		"UnitName": "Ingot",
+		"Quality": 1,
+		"Mass": 10,
+		"Bulk": 0.00125,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Steel Ingot",
+		"VariantName": "",
+		"UnitName": "Ingot",
+		"Quality": 1,
+		"Mass": 10,
+		"Bulk": 0.00125,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Fabric",
+		"VariantName": "Cotton",
+		"UnitName": "Square Meter",
+		"Quality": 2,
+		"Mass": 0.117,
+		"Bulk": 0.00001,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Clothes",
+		"VariantName": "Cotton",
+		"UnitName": "Set",
+		"Quality": 2,
+		"Mass": 0.15,
+		"Bulk": 0.001,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Clothes",
+		"VariantName": "Silk",
+		"UnitName": "Set",
+		"Quality": 4,
+		"Mass": 0.13,
+		"Bulk": 0.001,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Gold Coin",
+		"VariantName": "Guinea",
+		"UnitName": "Coin",
+		"Quality": 4,
+		"Mass": 0.003,
+		"Bulk": 0.00000015,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Gold Jewelry",
+		"VariantName": "",
+		"UnitName": "Item",
+		"Quality": 4,
+		"Mass": 0.5,
+		"Bulk": 0.00025,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Dye",
+		"VariantName": "",
+		"UnitName": "Kg",
+		"Quality": 2,
+		"Mass": 1,
+		"Bulk": 0.00001,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Oil",
+		"VariantName": "Crude Barrel",
+		"UnitName": "Barrel",
+		"Quality": 1,
+		"Mass": 124.7379,
+		"Bulk": 0.16,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Barrel",
+		"VariantName": "Steel",
+		"UnitName": "Barrel",
+		"Quality": 1,
+		"Mass": 20,
+		"Bulk": 0.16,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Cement",
+		"VariantName": "Portland",
+		"UnitName": "Kg",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 0.00151,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Ship",
+		"VariantName": "",
+		"UnitName": "Ship",
+		"Quality": 1,
+		"Mass": 10000,
+		"Bulk": 500,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Fertilizer",
+		"VariantName": "Animal",
+		"UnitName": "Kg",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 0.01,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Glass",
+		"VariantName": "",
+		"UnitName": "Kg",
+		"Quality": 1,
+		"Mass": 1,
+		"Bulk": 0.0004,
+		"Fractional": false,
+		"WantStrings": [],
+		"TagStrings": [],
+		"Icon": ""
+	},
+	{
+		"Name": "Lugging",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
 		"TagStrings": [
 			"Service"
 		],
-    "Icon": null
-  },
+		"Icon": null
+	},
+	{
+		"Name": "Hard Labor",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"WantStrings": [],
+		"TagStrings": [
+			"Service"
+		],
+		"Icon": null
+	},
 	{
 		"Name": "Running",
 		"VariantName": null,

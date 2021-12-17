@@ -7,7 +7,7 @@
         xmlns:menu="clr-namespace:EditorInterface"
         mc:Ignorable="d" Name="UI"
         Style="{StaticResource SharedMenu}"
-        Title="Wants List" Height="450" Width="400">
+        Title="Wants List" Height="450" Width="500">
     <Window.CommandBindings>
         <CommandBinding Command="Close" Executed="CloseBind_Executed"/>
     </Window.CommandBindings>
@@ -25,8 +25,8 @@
                   AlternatingRowBackground="LightGray" AlternationCount="2" IsReadOnly="True"
                   Grid.Row="0" MouseDoubleClick="EditWant">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" MinWidth="50"/>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}"  MinWidth="100"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}"  MinWidth="100"/>
                 </DataGrid.Columns>
             </DataGrid>
             <Grid Grid.Row="1">

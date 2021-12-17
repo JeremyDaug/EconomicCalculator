@@ -24,6 +24,12 @@ namespace EconomicCalculator.DTOs.Wants
         string Name { get; }
 
         /// <summary>
+        /// A short description of the want and how it is should be
+        /// used elsewhere.
+        /// </summary>
+        string Description { get; }
+
+        /// <summary>
         /// Takes the want and creates a satisfaction string for
         /// it.
         /// </summary>

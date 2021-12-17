@@ -44,7 +44,8 @@ namespace EconomicCalculator.DTOs.Processes.ProcessTags
         /// <summary>
         /// This process is a farming process and so draws parts of it's effects
         /// from the fertility of the land it is on. The more fertile the more
-        /// efficient the process is.
+        /// efficient the process is. 
+        /// Net 1:1 of base process requires Land of quality 3.
         /// </summary>
         Crop,
         /// <summary>

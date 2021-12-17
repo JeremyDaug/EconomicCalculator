@@ -39,6 +39,12 @@ namespace EconomicCalculator.DTOs.Wants
         /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// A short description of the want and how it is should be
+        /// used elsewhere.
+        /// </summary>
+        public string Description { get; set; }
+
         public override string ToString()
         {
             return Name;

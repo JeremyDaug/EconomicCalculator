@@ -1,17 +1,26 @@
 [
   {
-    "Name": "Luxury"
+		"Name": "Luxury",
+		"Description": "A product which satisfies a desire for nice things."
   },
-  {
-    "Name": "Inferior"
-  },
-  {
-    "Name": "Security"
-  },
-  {
-    "Name": "Food"
-  },
-  {
-    "Name": "Heat"
-  }
+	{
+		"Name": "Inferior",
+		"Description": "A product which is cheap, and poorly made, but may be attractive to the frugal."
+	},
+	{
+		"Name": "Security",
+		"Description": "A product which gives a sense of physical security."
+	},
+	{
+		"Name": "Food",
+		"Description": "A product which can stand in for roughly one meal 1 meal (1000 calories)."
+	},
+	{
+		"Name": "Heat",
+		"Description": "A rough measure of about 1 kw of energy released by the product."
+	},
+	{
+		"Name": "Land",
+		"Description": "A plot of land worth roughly 1/8 of an acre."
+	}
 ]

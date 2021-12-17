@@ -135,21 +135,29 @@ namespace EconomicCalculator
         public IProduct GetProductByName(string name)
         {
             Tuple<string, string> names = Product.GetProductNames(name);
-            return Products.Values.Single(x =>
+            try
             {
-                if (!string.Equals(x.Name, names.Item1))
-                {// if primary name doesn't match.
+                return Products.Values.Single(x =>
+                {
+                    if (!string.Equals(x.Name, names.Item1))
+                    {// if primary name doesn't match.
                     return false;
-                }
-                else if (string.IsNullOrEmpty(names.Item2))
-                {// if second name is expected to be null.
+                    }
+                    else if (string.IsNullOrEmpty(names.Item2))
+                    {// if second name is expected to be null.
                     return string.IsNullOrEmpty(x.VariantName);
-                }
-                else
-                { // if second name is not null.
+                    }
+                    else
+                    { // if second name is not null.
                     return string.Equals(x.VariantName, names.Item2);
-                }
-            });
+                    }
+                });
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException(
+                    string.Format("Did not find product {0}", names));
+            }
         }
 
         /// <summary>

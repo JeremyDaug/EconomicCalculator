@@ -5,10 +5,18 @@
 			"Physical"
 		],
 		"RelatedStrings": {
-			"Running": 0.8,
-			"Sports": 0.5
 		},
 		"Description": "For moving stuff around by hand."
+	},
+	{
+		"Name": "Hard Labor",
+		"GroupStrings": [
+			"Physical"
+		],
+		"RelatedStrings": {
+			"Lugging" :  0.9
+		},
+		"Description": "The hard work that needs to be done."
 	},
 	{
 		"Name": "Running",

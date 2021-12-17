@@ -1,13 +1,598 @@
 [
 	{
+		"Name": "Wheat Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Wheat Grain",
+				"Amount": 7,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Wheat Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Wheat Grain",
+				"Amount": 28,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Wheat Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest wheat.",
+		"Icon": ""
+	},
+	{
+		"Name": "Cotton Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Cotton",
+				"Amount": 1,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Cotton Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Cotton",
+				"Amount": 145,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Cotton Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest Cotton.",
+		"Icon": ""
+	},
+	{
+		"Name": "Opium Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Opium",
+				"Amount": 0.5,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Opium Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Opium",
+				"Amount": 375,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Opium Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest Opium.",
+		"Icon": ""
+	},
+	{
+		"Name": "Apple Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Apple",
+				"Amount": 1,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Apple Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Apple",
+				"Amount": 1100,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Apple Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest Apple.",
+		"Icon": ""
+	},
+	{
+		"Name": "Tea Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Tea",
+				"Amount": 1,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Tea Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Tea",
+				"Amount": 100,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Tea Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest Tea.",
+		"Icon": ""
+	},
+	{
+		"Name": "Tobacco Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Tobacco",
+				"Amount": 1,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Tobacco Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Tobacco",
+				"Amount": 56,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Tobacco Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest Tobacco.",
+		"Icon": ""
+	},
+
+	{
+		"Name": "Silk Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Silk",
+				"Amount": 1,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Silkworm Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Silk",
+				"Amount": 100,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Silkworm Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest Silkworm.",
+		"Icon": ""
+	},
+	{
+		"Name": "Coffee Farming",
+		"VariantName": "",
+		"MinimumTime": 120,
+		"InputProducts": [
+			{
+				"ProductName": "Coffee",
+				"Amount": 1,
+				"TagStrings": [
+					"Fixed"
+				]
+			},
+			{
+				"ProductName": "Coffee Farming",
+				"Amount": 0.00625,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Coffee",
+				"Amount": 56,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Crop"
+		],
+		"SkillName": "Coffee Farming",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Sow, Grow, and Harvest Coffee.",
+		"Icon": ""
+	},
+	{
+		"Name": "Fishing",
+		"VariantName": "Rod",
+		"MinimumTime": 0,
+		"InputProducts": [
+			{
+				"ProductName": "Fishing",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Fish",
+				"Amount": 5,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Extractor"
+		],
+		"SkillName": "Fishing",
+		"SkillMinimum": 0,
+		"SkillMaximum": 3,
+		"Description": "Fishing with a Rod.",
+		"Icon": ""
+	},
+	{
+		"Name": "Iron Mining",
+		"VariantName": "Pit",
+		"MinimumTime": 0,
+		"InputProducts": [
+			{
+				"ProductName": "Hard Labor",
+				"Amount": 1,
+				"TagStrings": []
+			},
+			{
+				"ProductName": "Mine Engineer",
+				"Amount": 0.1,
+				"TagStrings": [
+					"Optional<20>"
+				]
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 0.05,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Iron Ore",
+				"Amount": 5,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Tap"
+		],
+		"SkillName": "Mine Engineer",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Mining Iron Ore from the ground.",
+		"Icon": ""
+	},
+	{
+		"Name": "Gold Mining",
+		"VariantName": "Pit",
+		"MinimumTime": 0,
+		"InputProducts": [
+			{
+				"ProductName": "Hard Labor",
+				"Amount": 1,
+				"TagStrings": []
+			},
+			{
+				"ProductName": "Mine Engineer",
+				"Amount": 0.1,
+				"TagStrings": [
+					"Optional<20>"
+				]
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 0.05,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Gold Nugget",
+				"Amount": 5,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Tap"
+		],
+		"SkillName": "Mine Engineer",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Mining Iron Ore from the ground.",
+		"Icon": ""
+	},
+	{
+		"Name": "Gold Panning",
+		"VariantName": "",
+		"MinimumTime": 0,
+		"InputProducts": [
+			{
+				"ProductName": "Panning",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Gold Nugget",
+				"Amount": 0.01,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [
+			"Extractor"
+		],
+		"SkillName": "Mine Engineer",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Mining Iron Ore from the ground.",
+		"Icon": ""
+	},
+	{
+		"Name": "Shepherding",
+		"VariantName": "",
+		"MinimumTime": 1,
+		"InputProducts": [
+			{
+				"ProductName": "Shepherding",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 8,
+				"TagStrings": []
+			},
+			{
+				"ProductName": "Sheep",
+				"Amount": 4,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Wool",
+				"Amount": 10,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [],
+		"SkillName": "Mine Engineer",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Mining Iron Ore from the ground.",
+		"Icon": ""
+	},
+	{
+		"Name": "Lumber",
+		"VariantName": "",
+		"MinimumTime": 0,
+		"InputProducts": [
+			{
+				"ProductName": "Lumberjacking",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [
+			{
+				"ProductName": "Plot",
+				"Amount": 0.1,
+				"TagStrings": []
+			}
+		],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
+				"ProductName": "Timber",
+				"Amount": 10,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [],
+		"SkillName": "Lumberjacking",
+		"SkillMinimum": 1,
+		"SkillMaximum": 5,
+		"Description": "Cutting down trees for lumber.",
+		"Icon": ""
+	},
+	{
 		"Name": "Wheat Milling",
 		"VariantName": "",
-		"MinimumTime": 0.05,
+		"MinimumTime": 0,
 		"InputProducts": [
 			{
 				"ProductName": "Wheat Grain",
 				"Amount": 1,
 				"TagStrings": []
+			},
+			{
+				"ProductName": "Grain Milling",
+				"Amount": 0.01,
+				"TagStrings": [
+					"Fixed"
+				]
 			}
 		],
 		"InputWants": [],
@@ -27,7 +612,7 @@
 		],
 		"OutputWants": [],
 		"TagStrings": [],
-		"SkillName": "Lugging",
+		"SkillName": "Wheat Milling",
 		"SkillMinimum": 1,
 		"SkillMaximum": 3,
 		"Description": "Grind Wheat Grain into Flour",
@@ -35,7 +620,7 @@
 	},
 	{
 		"Name": "Baking",
-		"VariantName": "Shitty",
+		"VariantName": "",
 		"MinimumTime": 0.1,
 		"InputProducts": [
 			{
@@ -49,24 +634,46 @@
 		"CapitalWants": [],
 		"OutputProducts": [
 			{
+				"ProductName": "Bread",
+				"Amount": 1,
+				"TagStrings": []
+			}
+		],
+		"OutputWants": [],
+		"TagStrings": [],
+		"SkillName": "Running",
+		"SkillMinimum": 0,
+		"SkillMaximum": 5,
+		"Description": "Common Baking Process",
+		"Icon": "D:\\Projects\\EconomicCalculator\\EconomicCalculator\\Data\\ProductImages\\bread.png"
+	},
+	{
+		"Name": "Decay",
+		"VariantName": "Wheat Grain",
+		"MinimumTime": 0,
+		"InputProducts": [
+			{
+				"ProductName": "Wheat Grain",
+				"Amount": 1 ,
+				"TagStrings": []
+			}
+		],
+		"InputWants": [],
+		"CapitalProducts": [],
+		"CapitalWants": [],
+		"OutputProducts": [
+			{
 				"ProductName": "Bio Waste",
-				"Amount": 2,
+				"Amount": 1,
 				"TagStrings": [
 					"Chance<a;1>"
 				]
 			},
 			{
-				"ProductName": "Bread",
+				"ProductName": "Wheat Grain",
 				"Amount": 1,
 				"TagStrings": [
-					"Chance<b;1>"
-				]
-			},
-			{
-				"ProductName": "Wheat Flour",
-				"Amount": 2,
-				"TagStrings": [
-					"Chance<c;1>"
+					"Chance<b;99>"
 				]
 			}
 		],
@@ -77,24 +684,7 @@
 		"SkillName": "Running",
 		"SkillMinimum": 0,
 		"SkillMaximum": 5,
-		"Description": null,
-		"Icon": "D:\\Projects\\EconomicCalculator\\EconomicCalculator\\Data\\ProductImages\\bread.png"
-	},
-	{
-		"Name": "Wheat Farming",
-		"VariantName": "",
-		"MinimumTime": 120,
-		"InputProducts": [],
-		"InputWants": [],
-		"CapitalProducts": [],
-		"CapitalWants": [],
-		"OutputProducts": [],
-		"OutputWants": [],
-		"TagStrings": [],
-		"SkillName": "Running",
-		"SkillMinimum": 0,
-		"SkillMaximum": 5,
-		"Description": null,
+		"Description": "",
 		"Icon": ""
 	}
 ]
