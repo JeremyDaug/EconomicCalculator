@@ -143,7 +143,7 @@ namespace EditorInterface.Jobs
                 Name = model.Name,
                 VariantName = model.VariantName,
                 Labor = model.Labor,
-                LaborId = manager.GetProductByName(model.Labor).Id,
+                LaborId = manager.GetProductByFullName(model.Labor).Id,
                 Skill = model.Skill,
                 SkillId = manager.GetSkillByName(model.Skill).Id
             };

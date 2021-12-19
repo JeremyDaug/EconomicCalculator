@@ -187,7 +187,7 @@ namespace EconomicCalculator.DTOs.Products.ProductTags
                         result.Add(int.Parse(paramStrings[i]));
                         break;
                     case ParameterType.Product:
-                        var prodId = Manager.Instance.GetProductByName(paramStrings[i]).Id;
+                        var prodId = Manager.Instance.GetProductByFullName(paramStrings[i]).Id;
                         result.Add(prodId);
                         break;
                     case ParameterType.Want:

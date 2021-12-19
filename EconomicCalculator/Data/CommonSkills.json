@@ -19,28 +19,6 @@
 		"Description": "The hard work that needs to be done."
 	},
 	{
-		"Name": "Running",
-		"GroupStrings": [
-			"Physical"
-		],
-		"RelatedStrings": {
-			"Lugging": 0.8,
-			"Sports": 0.7
-		},
-		"Description": "Running about swiftly and efficiently."
-	},
-	{
-		"Name": "Sports",
-		"GroupStrings": [
-			"Physical"
-		],
-		"RelatedStrings": {
-			"Lugging": 0.5,
-			"Running": 0.7
-		},
-		"Description": "Physical Activity for the Entertainment of the Masses."
-	},
-	{
 		"Name": "Wheat Farming",
 		"GroupStrings": [
 			"Agriculture"
@@ -117,15 +95,6 @@
 		"Description": "The skill of caring for a Cotton Plantation."
 	},
 	{
-		"Name": "Silkworm Farming",
-		"GroupStrings": [
-			"Animal Husbandry"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "A farmer who harvests silk worms for their silk."
-	},
-	{
 		"Name": "Weaving",
 		"GroupStrings": [
 			"Textiles"
@@ -180,24 +149,6 @@
 		"Description": "The art of crafting gold into various bits of jewelry."
 	},
 	{
-		"Name": "Coffee Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of managing and caring for a Coffee plant."
-	},
-	{
-		"Name": "Dyeing",
-		"GroupStrings": [
-			"Textiles"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of dying cloth evenly and efficiently."
-	},
-	{
 		"Name": "Fishing",
 		"GroupStrings": [
 			"Seafairing"
@@ -207,67 +158,13 @@
 		"Description": "The skill of fishing."
 	},
 	{
-		"Name": "Oil Drilling",
-		"GroupStrings": [
-			"Geology"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skills of running and drilling oil."
-	},
-	{
-		"Name": "Steelworking",
+		"Name": "Blacksmithing",
 		"GroupStrings": [
 			"Metalworking"
 		],
 		"RelatedStrings": {
 		},
 		"Description": "The skill of forming steel into various forms."
-	},
-	{
-		"Name": "Opium Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of caring for Opium Plants."
-	},
-	{
-		"Name": "Apple Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of caring for Apple Trees."
-	},
-	{
-		"Name": "Rubber Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of farming rubber trees."
-	},
-	{
-		"Name": "Shepherding",
-		"GroupStrings": [
-			"Animal Husbandry"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of herding sheep and goats."
-	},
-	{
-		"Name": "Tea Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of farming Tea plants."
 	},
 	{
 		"Name": "Lumberjacking",
@@ -279,15 +176,6 @@
 		"Description": "The skill of efficiently cutting down trees."
 	},
 	{
-		"Name": "Tobacco Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of caring for Tobacco plants."
-	},
-	{
 		"Name": "Laborer",
 		"GroupStrings": [
 			"Physical"
@@ -295,32 +183,5 @@
 		"RelatedStrings": {
 		},
 		"Description": "A general Purpose Laborer."
-	},
-	{
-		"Name": "Shipwright",
-		"GroupStrings": [
-			"Engineering",
-			"Seafairing"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The Skill of Making Ships."
-	},
-	{
-		"Name": "Chemistry",
-		"GroupStrings": [
-			"Chemistry"
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of mixing substances to create useful products."
-	},
-	{
-		"Name": "Glassworking",
-		"GroupStrings": [
-		],
-		"RelatedStrings": {
-		},
-		"Description": "The skill of working glass."
 	}
 ]

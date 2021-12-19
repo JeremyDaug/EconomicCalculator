@@ -34,7 +34,7 @@ namespace EconomicCalculator.DTOs.Processes
             }
             set
             {
-                ProductId = Manager.Instance.GetProductByName(value).Id;
+                ProductId = Manager.Instance.GetProductByFullName(value).Id;
             }
         }
 

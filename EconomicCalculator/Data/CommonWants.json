@@ -1,8 +1,8 @@
 [
-  {
+	{
 		"Name": "Luxury",
 		"Description": "A product which satisfies a desire for nice things."
-  },
+	},
 	{
 		"Name": "Inferior",
 		"Description": "A product which is cheap, and poorly made, but may be attractive to the frugal."
@@ -21,6 +21,26 @@
 	},
 	{
 		"Name": "Land",
-		"Description": "A plot of land worth roughly 1/8 of an acre."
+		"Description": "A plot of land worth roughly 1/8 of an acre that can be built on or farmed."
+	},
+	{
+		"Name": "Life",
+		"Description": "The product is alive. Should only ever have 1."
+	},
+	{
+		"Name": "Clothing",
+		"Description":  "The product can act as clothing, protecting the owner from the environment."
+	},
+	{
+		"Name": "Warmth",
+		"Description": "The product helps retain heat."
+	},
+	{
+		"Name": "Waste",
+		"Description": "This product is a waste product and no one wants it."
+	},
+	{
+		"Name": "Housing",
+		"Description": "A product which offers an owner a space to call their own."
 	}
 ]

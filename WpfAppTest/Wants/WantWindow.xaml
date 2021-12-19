@@ -45,7 +45,7 @@
                 <Binding Path="Name" Source="{StaticResource want}"
                          UpdateSourceTrigger="PropertyChanged">
                     <Binding.ValidationRules>
-                        <valid:NameStringValidation MinLength="1"/>
+                        <valid:NoEmptyStringValidationRule MinLength="1"/>
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>

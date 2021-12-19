@@ -100,7 +100,7 @@ namespace EditorInterface.ProcessWindows
                 var result = "Total Mass: {0} kg";
                 decimal weight = 0;
                 if (!string.IsNullOrEmpty(Product))
-                    weight = Manager.Instance.GetProductByName(Product).Mass * Amount;
+                    weight = Manager.Instance.GetProductByFullName(Product).Mass * Amount;
 
                 return string.Format(result, weight);
             }
@@ -549,7 +549,7 @@ namespace EditorInterface.ProcessWindows
                 return;
             }
             else if (Section == ProcessSection.Output &&
-                !Manager.Instance.GetProductByName(Product).Fractional &&
+                !Manager.Instance.GetProductByFullName(Product).Fractional &&
                 Amount % 1 > 0)
             {
                 MessageBox.Show("Output products of non-fractional goods must be whole numbers.");

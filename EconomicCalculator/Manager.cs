@@ -132,7 +132,7 @@ namespace EconomicCalculator
         /// </summary>
         /// <param name="name">The name and variant name combined.</param>
         /// <returns></returns>
-        public IProduct GetProductByName(string name)
+        public IProduct GetProductByFullName(string name)
         {
             Tuple<string, string> names = Product.GetProductNames(name);
             try

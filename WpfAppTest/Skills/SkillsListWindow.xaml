@@ -23,10 +23,10 @@
                   MouseDoubleClick="EditSkill">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
-                    <DataGridTextColumn Header="Id" Binding="{Binding Name}"/>
-                    <DataGridTextColumn Header="Id" Binding="{Binding GroupString}"/>
-                    <DataGridTextColumn Header="Id" Binding="{Binding RelatedString}"/>
-                    <DataGridTextColumn Header="Id" Binding="{Binding Description}"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                    <DataGridTextColumn Header="Group" Binding="{Binding GroupString}"/>
+                    <DataGridTextColumn Header="Relations" Binding="{Binding RelatedString}"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <DataGrid Name="GroupList" AutoGenerateColumns="True"

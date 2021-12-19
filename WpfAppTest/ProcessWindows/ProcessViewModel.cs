@@ -1123,7 +1123,7 @@ namespace EditorInterface.ProcessWindows
             // having gone through everything, add product connection.
             if (Failure)
             {
-                var prod = manager.GetProductByName(selectedProduct);
+                var prod = manager.GetProductByFullName(selectedProduct);
             }
             if (Maintenance)
             {
