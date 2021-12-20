@@ -137,5 +137,10 @@ namespace EconomicCalculator.DTOs.Skills
                 Related[id] = related.Value;
             }
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

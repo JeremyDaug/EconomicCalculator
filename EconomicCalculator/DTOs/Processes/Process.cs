@@ -315,5 +315,15 @@ namespace EconomicCalculator.DTOs.Processes
 
             TagStrings.Add(attachedProcessTag.ToString());
         }
+
+        public override string ToString()
+        {
+            var result = Name;
+
+            if (string.IsNullOrWhiteSpace(VariantName))
+                result += "<" + VariantName + ">";
+
+            return result;
+        }
     }
 }

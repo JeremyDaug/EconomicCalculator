@@ -71,6 +71,10 @@ namespace EditorInterface.ProcessWindows
                 .Any(x => x.Tag == ProcessTag.Mine);
             Crop = process.Tags
                 .Any(x => x.Tag == ProcessTag.Crop);
+            extractor = process.Tags
+                .Any(x => x.Tag == ProcessTag.Extractor);
+            tap = process.Tags
+                .Any(x => x.Tag == ProcessTag.Tap);
 
             if (Failure ||
                 Consumption ||

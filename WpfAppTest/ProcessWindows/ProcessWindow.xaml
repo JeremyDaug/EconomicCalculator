@@ -323,6 +323,12 @@
             <CheckBox Content="Crop" Grid.Row="2" Grid.Column="2"
                       IsChecked="{Binding Crop}" IsEnabled="{Binding CropEnabled}"
                       ToolTip="Process is a Crop or similar process. &#x0a;It implicitly takes singular plot of land (1/8 acre) and scales based on it's fertility."/>
+            <CheckBox Content="Extractor" Grid.Row="3" Grid.Column="1"
+                      IsChecked="{Binding Extractor}" IsEnabled="{Binding ExtractorEnabled}"
+                      ToolTip="Process is an Extractor process, connecting it to the territory it's in, and drawing relative to that territory."/>
+            <CheckBox Content="Tap" Grid.Row="3" Grid.Column="2"
+                      IsChecked="{Binding Tap}" IsEnabled="{Binding TapEnabled}"
+                      ToolTip="Process is a Tap process, it implicitly connects to an entire planet, "/>
         </Grid>
         <Grid Grid.Row="8" Grid.Column="8" Grid.ColumnSpan="3" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>

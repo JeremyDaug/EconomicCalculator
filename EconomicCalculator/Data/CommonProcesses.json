@@ -301,7 +301,7 @@
 		],
 		"OutputWants": [],
 		"TagStrings": [],
-		"SkillName": "Wheat Milling",
+		"SkillName": "Grain Milling",
 		"SkillMinimum": 1,
 		"SkillMaximum": 3,
 		"Description": "Grind Wheat Grain into Flour",
@@ -330,7 +330,7 @@
 		],
 		"OutputWants": [],
 		"TagStrings": [],
-		"SkillName": "Running",
+		"SkillName": "Hard Labor",
 		"SkillMinimum": 0,
 		"SkillMaximum": 5,
 		"Description": "Common Baking Process",
@@ -370,7 +370,7 @@
 		"TagStrings": [
 			"Chance"
 		],
-		"SkillName": "Running",
+		"SkillName": "Hard Labor",
 		"SkillMinimum": 0,
 		"SkillMaximum": 5,
 		"Description": "",

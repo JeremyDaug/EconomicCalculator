@@ -714,7 +714,12 @@ namespace EconomicCalculator
 
         /// <summary>
         /// Load Processes from file.
+        /// Should be loaded after Products, Wants, and Skills to ensure all connections
+        /// are made.
         /// </summary>
+        /// <remarks>
+        /// Processes should be loaded after Products, Wants, and Skills.
+        /// </remarks>
         /// <param name="filename">The file to load from.</param>
         public void LoadProcesses(string filename)
         {
@@ -753,6 +758,29 @@ namespace EconomicCalculator
                         throw new InvalidDataException("Product has 2 failure processes.");
                     ((Product)prod).Failure = failure;
                 }
+            }
+
+            bool warned = false;
+            // load skills
+            foreach (var process in Processes.Values)
+            {
+                var skillName = process.SkillName;
+
+                if (string.IsNullOrEmpty(skillName))
+                { // if null or empty, just continue, the process has no skill.
+                    continue;
+                }
+                else if (string.IsNullOrWhiteSpace(skillName) && !warned)
+                { // if skill name is not empty, but whitespace, then throw a warning message.
+                    warned = true;
+                    MessageBox.Show("Skills on processes should be Either Empty or Null if not given a skill name.", "Invalid Skill Name",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ((Process)process).SkillName = "";
+                    continue;
+                }
+
+                // if not null or empty, it must be a skill
+                ((Process)process).SkillId = GetSkillByName(skillName).Id;
             }
         }
 

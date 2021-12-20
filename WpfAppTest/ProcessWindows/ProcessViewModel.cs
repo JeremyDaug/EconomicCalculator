@@ -106,6 +106,8 @@ namespace EditorInterface.ProcessWindows
                     Mass = mass + sharedMass,
                 });
             }
+
+            // set checkboxes
         }
 
         #region ListData
@@ -599,6 +601,8 @@ namespace EditorInterface.ProcessWindows
                     model.Consumption ||
                     model.Maintenance ||
                     model.Use ||
+                    model.Extractor ||
+                    model.Tap ||
                     model.Crop)
                 {
                     return false;
@@ -615,6 +619,8 @@ namespace EditorInterface.ProcessWindows
                     model.Mine ||
                     model.Maintenance ||
                     model.Use ||
+                    model.Extractor ||
+                    model.Tap ||
                     model.Crop)
                 {
                     return false;
@@ -631,6 +637,8 @@ namespace EditorInterface.ProcessWindows
                     model.Consumption ||
                     model.Mine ||
                     model.Use ||
+                    model.Extractor ||
+                    model.Tap ||
                     model.Crop)
                 {
                     return false;
@@ -647,6 +655,8 @@ namespace EditorInterface.ProcessWindows
                     model.Consumption ||
                     model.Maintenance ||
                     model.Mine ||
+                    model.Extractor ||
+                    model.Tap ||
                     model.Crop)
                 {
                     return false;
@@ -671,6 +681,8 @@ namespace EditorInterface.ProcessWindows
                     model.Consumption ||
                     model.Maintenance ||
                     model.Use ||
+                    model.Extractor ||
+                    model.Tap ||
                     model.Mine)
                 {
                     return false;
@@ -687,6 +699,42 @@ namespace EditorInterface.ProcessWindows
                     model.Consumption ||
                     model.Maintenance ||
                     model.Use ||
+                    model.Extractor ||
+                    model.Tap ||
+                    model.Crop)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public bool ExtractorEnabled
+        {
+            get
+            {
+                if (model.Failure ||
+                    model.Consumption ||
+                    model.Maintenance ||
+                    model.Use ||
+                    model.Tap ||
+                    model.Crop)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public bool TapEnabled
+        {
+            get
+            {
+                if (model.Failure ||
+                    model.Consumption ||
+                    model.Maintenance ||
+                    model.Use ||
+                    model.Extractor ||
                     model.Crop)
                 {
                     return false;

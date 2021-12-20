@@ -438,20 +438,6 @@
 
 
 	{
-		"Name": "Lugging",
-		"VariantName": null,
-		"UnitName": "man hour",
-		"Quality": 1,
-		"Mass": 0,
-		"Bulk": 0,
-		"Fractional": true,
-		"WantStrings": [],
-		"TagStrings": [
-			"Service"
-		],
-		"Icon": null
-	},
-	{
 		"Name": "Hard Labor",
 		"VariantName": null,
 		"UnitName": "man hour",
