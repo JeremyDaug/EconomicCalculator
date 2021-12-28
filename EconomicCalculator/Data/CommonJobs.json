@@ -6,7 +6,7 @@
     "Skill": "Wheat Farming",
     "ProcessNames": [
       "Wheat Farming",
-      "Baking(Shitty)"
+      "Baking"
     ]
   },
   {
@@ -15,7 +15,7 @@
     "Labor": "Baking",
     "Skill": "Baking",
     "ProcessNames": [
-      "Baking(Shitty)"
+      "Baking"
     ]
   }
 ]

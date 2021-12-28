@@ -62,6 +62,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTOs\Firms\FirmRank.cs" />
+    <Compile Include="DTOs\Firms\IFirm.cs" />
+    <Compile Include="DTOs\Firms\OwnershipStructure.cs" />
+    <Compile Include="DTOs\Firms\ProfitStructure.cs" />
+    <Compile Include="DTOs\Firms\WageType.cs" />
+    <Compile Include="DTOs\Pops\IPopulationGroup.cs" />
+    <Compile Include="DTOs\Pops\PopModifiers\PopModifiers.cs" />
+    <Compile Include="DTOs\Pops\PopWants\IPopWant.cs" />
+    <Compile Include="DTOs\Pops\Species\ICohort.cs" />
+    <Compile Include="DTOs\Pops\Species\ISpecies.cs" />
+    <Compile Include="DTOs\Pops\Species\ISubtype.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesTags.cs" />
     <Compile Include="Enums\BuildingType.cs" />
     <Compile Include="Enums\CashType.cs" />
     <Compile Include="Enums\CropType.cs" />
@@ -263,6 +275,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DTOs\Market\" />
+    <Folder Include="DTOs\Pops\Culture\" />
+    <Folder Include="DTOs\Pops\Politics\" />
+    <Folder Include="DTOs\Pops\PopNeeds\" />
+    <Folder Include="DTOs\Pops\Religion\" />
     <Folder Include="DTOs\Technology\" />
     <Folder Include="Runner\" />
   </ItemGroup>
