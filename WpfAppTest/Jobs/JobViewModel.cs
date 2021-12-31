@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Jobs;
-using EconomicCalculator.DTOs.Products.ProductTags;
+﻿using EconDTOs;
+using EconDTOs.DTOs.Jobs;
+using EconDTOs.DTOs.Products.ProductTags;
 using EditorInterface.Helpers;
 using System;
 using System.Collections.Generic;

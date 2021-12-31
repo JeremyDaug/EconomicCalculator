@@ -1,6 +1,5 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs;
-using EconomicCalculator.DTOs.Processes;
+﻿using EconDTOs;
+using EconDTOs.DTOs.Processes;
 using System;
 using System.Collections.Generic;
 using System.IO;

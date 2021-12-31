@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.Products"
         xmlns:valid="clr-namespace:EditorInterface.ValidationRules"
-        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Products;assembly=EconomicCalculator"
+        xmlns:src="clr-namespace:EconDTOs.DTOs.Products;assembly=EconModels"
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
         Title="Product Editor" Height="450" Width="800">

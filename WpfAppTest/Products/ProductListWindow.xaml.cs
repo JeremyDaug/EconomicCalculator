@@ -1,7 +1,4 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Products;
-using EconomicCalculator.DTOs.Wants;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using EconDTOs;
+using EconDTOs.DTOs.Products;
+using EconDTOs.DTOs.Wants;
 using EditorInterface.Wants;
 
 namespace EditorInterface.Products

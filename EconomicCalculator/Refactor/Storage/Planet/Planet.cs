@@ -58,7 +58,7 @@ namespace EconomicCalculator.DTOs.Planet
         /// The Manager of the class
         /// TOOD remove this with a connection up the proper chain.
         /// </summary>
-        public Manager manager { get; set; }
+        //public Manager manager { get; set; }
 
         /// <summary>
         /// The Id of the Planet
@@ -330,7 +330,7 @@ namespace EconomicCalculator.DTOs.Planet
 
         public void SaveTerrain()
         {
-            var planetFolder = Path.Combine(manager.UniverseFolder, Name);
+            var planetFolder = Path.Combine("manager.UniverseFolder", Name);
 
             // if the directory does not exist, add it.
             if (!Directory.Exists(planetFolder))

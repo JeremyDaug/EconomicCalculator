@@ -12,12 +12,12 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using EconomicCalculator;
-using EconomicCalculator.DTOs;
-using EconomicCalculator.DTOs.Processes;
-using EconomicCalculator.DTOs.Processes.ProcessTags;
-using EconomicCalculator.DTOs.Processes.ProductionTags;
-using EconomicCalculator.DTOs.Products;
+using EconDTOs;
+using EconDTOs.DTOs;
+using EconDTOs.DTOs.Processes;
+using EconDTOs.DTOs.Processes.ProcessTags;
+using EconDTOs.DTOs.Processes.ProductionTags;
+using EconDTOs.DTOs.Products;
 using EditorInterface.Helpers;
 
 namespace EditorInterface.ProcessWindows

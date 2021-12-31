@@ -63,9 +63,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EconModels\EconModels.csproj">
+    <ProjectReference Include="..\EconModels\EconDTOs.csproj">
       <Project>{8E205D41-9825-45F0-8F73-3002277FAF32}</Project>
-      <Name>EconModels</Name>
+      <Name>EconDTOs</Name>
     </ProjectReference>
     <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
       <Project>{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}</Project>

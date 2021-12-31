@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.DTOs.Products.ProductTags;
+﻿using EconDTOs.DTOs.Products.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +21,6 @@ namespace WpfAppTest.Products
     public partial class ProductTagSelector : Window
     {
         public string SelectedTag { get; set; }
-
-
 
         public ProductTagSelector()
         {

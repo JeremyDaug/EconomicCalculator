@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.ProcessWindows"
         xmlns:valid="clr-namespace:EditorInterface.ValidationRules"
-        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Processes;assembly=EconomicCalculator"
+        xmlns:src="clr-namespace:EconDTOs.DTOs.Processes;assembly=EconModels"
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
         MinWidth="1500"

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconDTOs.DTOs.Jobs;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,7 +17,7 @@ namespace EditorInterface.Jobs
         private string labor;
         private string skill;
 
-        public JobModel(EconomicCalculator.DTOs.Jobs.Job job)
+        public JobModel(Job job)
         {
             Name = job.Name;
             VariantName = job.VariantName;

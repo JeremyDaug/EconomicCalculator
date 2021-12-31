@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.DTOs.Processes;
+﻿using EconDTOs.DTOs.Processes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

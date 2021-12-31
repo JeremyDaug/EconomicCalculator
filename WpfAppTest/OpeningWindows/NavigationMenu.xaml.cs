@@ -1,4 +1,4 @@
-﻿using EconomicCalculator;
+﻿using EconDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

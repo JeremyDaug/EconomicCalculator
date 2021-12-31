@@ -1,5 +1,4 @@
-﻿using EconomicCalculator;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -9,6 +8,7 @@ using System.Windows;
 using EditorInterface.Products;
 using EditorInterface.Wants;
 using EditorInterface.OpeningWindows;
+using EconDTOs;
 
 namespace EditorInterface
 {

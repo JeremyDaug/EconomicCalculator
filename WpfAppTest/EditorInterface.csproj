@@ -135,10 +135,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Maps\PlanetViewWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="OpeningWindows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -146,9 +142,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Maps\PlanetViewWindow.xaml.cs">
-      <DependentUpon>PlanetViewWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="OpeningWindows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -242,9 +235,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
-      <Project>{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}</Project>
-      <Name>EconomicCalculator</Name>
+    <ProjectReference Include="..\EconModels\EconDTOs.csproj">
+      <Project>{8E205D41-9825-45F0-8F73-3002277FAF32}</Project>
+      <Name>EconDTOs</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +246,8 @@
   <ItemGroup>
     <Resource Include="license.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Maps\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
