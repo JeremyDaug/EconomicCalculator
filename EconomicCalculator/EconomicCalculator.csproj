@@ -82,6 +82,8 @@
     <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
     <Compile Include="Enums\ParameterType.cs" />
     <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
+    <Compile Include="Objects\Processes\IProcess.cs" />
+    <Compile Include="Objects\Processes\ProcessTags\ProcessTag.cs" />
     <Compile Include="Objects\Products\IProduct.cs" />
     <Compile Include="Objects\Products\Product.cs" />
     <Compile Include="Objects\Products\ProductTags\ProductTag.cs" />
@@ -248,10 +250,15 @@
     <Folder Include="Objects\Jobs\" />
     <Folder Include="Objects\Market\" />
     <Folder Include="Objects\Pops\" />
-    <Folder Include="Objects\Processes\" />
     <Folder Include="Objects\Skills\" />
     <Folder Include="Objects\Technology\" />
     <Folder Include="Runner\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EconModels\EconDTOs.csproj">
+      <Project>{8e205d41-9825-45f0-8f73-3002277faf32}</Project>
+      <Name>EconDTOs</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets" Condition="Exists('..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets')" />

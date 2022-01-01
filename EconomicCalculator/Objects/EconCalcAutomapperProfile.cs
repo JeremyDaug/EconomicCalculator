@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EconomicCalculator.Objects.Products;
+using EconomicCalculator.Objects.Wants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,8 @@ namespace EconomicCalculator.Objects
     {
         public EconCalcAutomapperProfile()
         {
-            
+            CreateMap<Want, EconDTOs.DTOs.Wants.Want>();
+            CreateMap<Product, EconDTOs.DTOs.Products.Product>();
         }
     }
 }

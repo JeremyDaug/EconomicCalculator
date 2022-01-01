@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EconomicCalculator.Objects.Processes;
+using EconomicCalculator.Objects.Processes.ProcessTags;
 using EconomicCalculator.Objects.Products.ProductTags;
 using EconomicCalculator.Objects.Wants;
 
@@ -13,6 +15,7 @@ namespace EconomicCalculator.Objects.Products
     /// </summary>
     internal class Product : IProduct
     {
+        private List<IProcess> _productProcesses;
         private List<IProductTagData> _productTags;
         private List<Tuple<IWant, decimal>> _wants;
 
@@ -20,6 +23,7 @@ namespace EconomicCalculator.Objects.Products
         {
             _productTags = new List<IProductTagData>();
             _wants = new List<Tuple<IWant, decimal>>();
+            _productProcesses = new List<IProcess>();
         }
 
         /// <summary>
@@ -85,5 +89,65 @@ namespace EconomicCalculator.Objects.Products
         /// Item2 is how much it gives (or takes)
         /// </summary>
         public IReadOnlyList<Tuple<IWant, decimal>> Wants { get => _wants; }
+
+        #region RelatedProcesses
+
+        /// <summary>
+        /// The processes related to this product.
+        /// IE, Failure, Use, Consumption, and Maintenance processes.
+        /// product.
+        /// </summary>
+        public IReadOnlyList<IProcess> ProductProcesses => _productProcesses;
+
+        /// <summary>
+        /// The failure Process of the product, may be empty.
+        /// </summary>
+        public IProcess FailureProcess
+        {
+            get
+            {
+                return ProductProcesses.SingleOrDefault(x => x.ProcessTags.Contains(ProcessTag.Failure));
+            }
+        }
+
+        /// <summary>
+        /// The Use Processes of the Product
+        /// </summary>
+        public IReadOnlyList<IProcess> UseProcesses
+        {
+            get
+            {
+                return ProductProcesses.Where(x => x.ProcessTags.Contains(ProcessTag.Use)).ToList();
+            }
+        }
+
+        /// <summary>
+        /// The ways the product can be used.
+        /// </summary>
+        public IReadOnlyList<IProcess> ConsumptionProcesses
+        {
+            get
+            {
+                return ProductProcesses.Where(x => x.ProcessTags.Contains(ProcessTag.Consumption)).ToList();
+            }
+        }
+
+        /// <summary>
+        /// They ways the product can be maintained.
+        /// </summary>
+        public IReadOnlyList<IProcess> MaintenanceProcesses
+        {
+            get
+            {
+                return ProductProcesses.Where(x => x.ProcessTags.Contains(ProcessTag.Maintenance)).ToList();
+            }
+        }
+
+        #endregion RelatedProcesses
+
+        public override string ToString()
+        {
+            return Name + ":" + VariantName;
+        }
     }
 }

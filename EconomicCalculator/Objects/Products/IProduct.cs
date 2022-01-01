@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Objects.Products.ProductTags;
+﻿using EconomicCalculator.Objects.Processes;
+using EconomicCalculator.Objects.Products.ProductTags;
 using EconomicCalculator.Objects.Wants;
 using System;
 using System.Collections.Generic;
@@ -76,5 +77,32 @@ namespace EconomicCalculator.Objects.Products
         /// Item2 is how much it gives (or takes)
         /// </summary>
         IReadOnlyList<Tuple<IWant, decimal>> Wants { get; }
+
+        /// <summary>
+        /// Other processes related to this product.
+        /// Use, Consumption, and Maintenance products for this
+        /// product.
+        /// </summary>
+        IReadOnlyList<IProcess> ProductProcesses { get; }
+
+        /// <summary>
+        /// The failure Process of the product, may be empty.
+        /// </summary>
+        IProcess FailureProcess { get; }
+
+        /// <summary>
+        /// The Use Processes of the Product
+        /// </summary>
+        IReadOnlyList<IProcess> UseProcesses { get; }
+
+        /// <summary>
+        /// The ways the product can be used.
+        /// </summary>
+        IReadOnlyList<IProcess> ConsumptionProcesses { get; }
+
+        /// <summary>
+        /// They ways the product can be maintained.
+        /// </summary>
+        IReadOnlyList<IProcess> MaintenanceProcesses { get; }
     }
 }
