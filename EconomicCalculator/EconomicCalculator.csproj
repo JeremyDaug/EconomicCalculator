@@ -89,6 +89,10 @@
     <Compile Include="Objects\Products\ProductTags\ProductTag.cs" />
     <Compile Include="Objects\Products\ProductTags\IProductTagData.cs" />
     <Compile Include="Objects\Products\ProductTags\ProductTagData.cs" />
+    <Compile Include="Objects\Skills\ISkill.cs" />
+    <Compile Include="Objects\Skills\ISkillGroup.cs" />
+    <Compile Include="Objects\Skills\Skill.cs" />
+    <Compile Include="Objects\Skills\SkillGroup.cs" />
     <Compile Include="Objects\Wants\IWant.cs" />
     <Compile Include="Objects\Wants\Want.cs" />
     <Compile Include="Refactor\Storage\Products\Building.cs" />
@@ -250,7 +254,6 @@
     <Folder Include="Objects\Jobs\" />
     <Folder Include="Objects\Market\" />
     <Folder Include="Objects\Pops\" />
-    <Folder Include="Objects\Skills\" />
     <Folder Include="Objects\Technology\" />
     <Folder Include="Runner\" />
   </ItemGroup>
