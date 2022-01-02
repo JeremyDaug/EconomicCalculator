@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator.Objects.Processes.ProcessTags;
+using EconomicCalculator.Objects.Skills;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +39,49 @@ namespace EconomicCalculator.Objects.Processes
         /// </summary>
         decimal MinimumTime { get; }
 
-        // Process inputs/outputs/capital
+        #region InCapOut
+
+        /// <summary>
+        /// All the products that go into or come out of the process.
+        /// </summary>
+        IReadOnlyList<IProcessProduct> ProcessProducts { get; }
+
+        /// <summary>
+        /// All the wants that go into or come out of the process.
+        /// </summary>
+        IReadOnlyList<IProcessWant> ProcessWants { get; }
+
+        /// <summary>
+        /// Input Products, consumed by the process.
+        /// </summary>
+        IReadOnlyList<IProcessProduct> InputProducts { get; }
+
+        /// <summary>
+        /// Capital Products, used, but not consumed by the process.
+        /// </summary>
+        IReadOnlyList<IProcessProduct> CapitalProducts { get; }
+
+        /// <summary>
+        /// Output Products, resulting products from the process.
+        /// </summary>
+        IReadOnlyList<IProcessProduct> OutputProducts { get; }
+
+        /// <summary>
+        /// Input Wants, consumed by the process.
+        /// </summary>
+        IReadOnlyList<IProcessWant> InputWants { get; }
+
+        /// <summary>
+        /// Capital Wants, used by the process.
+        /// </summary>
+        IReadOnlyList<IProcessWant> CapitalWants { get; }
+
+        /// <summary>
+        /// Output Wants, created by the process.
+        /// </summary>
+        IReadOnlyList<IProcessWant> OutputWants { get; }
+
+        #endregion InCapOut
 
         /// <summary>
         /// The process Tags of the Process
@@ -46,14 +89,9 @@ namespace EconomicCalculator.Objects.Processes
         IReadOnlyList<ProcessTag> ProcessTags { get; }
 
         /// <summary>
-        /// The Skill the process uses.
+        /// The Skill the Process Uses.
         /// </summary>
-        int SkillId { get; }
-
-        /// <summary>
-        /// The name of the skill the process uses.
-        /// </summary>
-        string SkillName { get; }
+        ISkill Skill { get; }
 
         /// <summary>
         /// The minimum level of the skill.
