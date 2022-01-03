@@ -82,6 +82,7 @@
     <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
     <Compile Include="Enums\ParameterType.cs" />
     <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
+    <Compile Include="Objects\Jobs\IJob.cs" />
     <Compile Include="Objects\Processes\IProcess.cs" />
     <Compile Include="Objects\Processes\IProcessProduct.cs" />
     <Compile Include="Objects\Processes\IProcessWant.cs" />
@@ -102,6 +103,11 @@
     <Compile Include="Objects\Skills\ISkillGroup.cs" />
     <Compile Include="Objects\Skills\Skill.cs" />
     <Compile Include="Objects\Skills\SkillGroup.cs" />
+    <Compile Include="Objects\Technology\ITechFamily.cs" />
+    <Compile Include="Objects\Technology\ITechnology.cs" />
+    <Compile Include="Objects\Technology\TechCategory.cs" />
+    <Compile Include="Objects\Technology\TechFamily.cs" />
+    <Compile Include="Objects\Technology\Technology.cs" />
     <Compile Include="Objects\Wants\IWant.cs" />
     <Compile Include="Objects\Wants\Want.cs" />
     <Compile Include="Refactor\Storage\Products\Building.cs" />
@@ -260,10 +266,8 @@
   <ItemGroup>
     <Folder Include="Objects\Firms\" />
     <Folder Include="Objects\Government\" />
-    <Folder Include="Objects\Jobs\" />
     <Folder Include="Objects\Market\" />
     <Folder Include="Objects\Pops\" />
-    <Folder Include="Objects\Technology\" />
     <Folder Include="Runner\" />
   </ItemGroup>
   <ItemGroup>

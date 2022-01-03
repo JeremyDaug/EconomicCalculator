@@ -117,8 +117,7 @@ namespace EconomicCalculator.Objects.Processes
             get
             {
                 return
-                    !InputProducts.Any(x => !x.Product.Fractional)
-                    ||
+                    !InputProducts.Any(x => !x.Product.Fractional) ||
                     !OutputProducts.Any(x => !x.Product.Fractional);
             }
         }
