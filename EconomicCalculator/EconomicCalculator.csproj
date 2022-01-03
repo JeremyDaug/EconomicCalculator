@@ -83,6 +83,7 @@
     <Compile Include="Enums\ParameterType.cs" />
     <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
     <Compile Include="Objects\Jobs\IJob.cs" />
+    <Compile Include="Objects\Jobs\Job.cs" />
     <Compile Include="Objects\Processes\IProcess.cs" />
     <Compile Include="Objects\Processes\IProcessProduct.cs" />
     <Compile Include="Objects\Processes\IProcessWant.cs" />
