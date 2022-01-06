@@ -81,9 +81,21 @@
     <Compile Include="Enums\EnumExtensions\ColorExtensions.cs" />
     <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
     <Compile Include="Enums\ParameterType.cs" />
+    <Compile Include="Helpers\Pair.cs" />
     <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
+    <Compile Include="Objects\Firms\Firm.cs" />
+    <Compile Include="Objects\Firms\FirmRank.cs" />
+    <Compile Include="Objects\Firms\IFirm.cs" />
+    <Compile Include="Objects\Firms\OwnershipStructure.cs" />
+    <Compile Include="Objects\Firms\ProfitStructure.cs" />
+    <Compile Include="Objects\Firms\WageType.cs" />
+    <Compile Include="Objects\Government\IGovernor.cs" />
+    <Compile Include="Objects\Government\IInstitution.cs" />
     <Compile Include="Objects\Jobs\IJob.cs" />
     <Compile Include="Objects\Jobs\Job.cs" />
+    <Compile Include="Objects\Market\IMarket.cs" />
+    <Compile Include="Objects\Market\Market.cs" />
+    <Compile Include="Objects\Pops\IPopGroup.cs" />
     <Compile Include="Objects\Processes\IProcess.cs" />
     <Compile Include="Objects\Processes\IProcessProduct.cs" />
     <Compile Include="Objects\Processes\IProcessWant.cs" />
@@ -109,6 +121,7 @@
     <Compile Include="Objects\Technology\TechCategory.cs" />
     <Compile Include="Objects\Technology\TechFamily.cs" />
     <Compile Include="Objects\Technology\Technology.cs" />
+    <Compile Include="Objects\Territory\ITerritory.cs" />
     <Compile Include="Objects\Wants\IWant.cs" />
     <Compile Include="Objects\Wants\Want.cs" />
     <Compile Include="Refactor\Storage\Products\Building.cs" />
@@ -265,10 +278,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Objects\Firms\" />
-    <Folder Include="Objects\Government\" />
-    <Folder Include="Objects\Market\" />
-    <Folder Include="Objects\Pops\" />
     <Folder Include="Runner\" />
   </ItemGroup>
   <ItemGroup>
