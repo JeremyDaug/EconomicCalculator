@@ -131,14 +131,6 @@
     <Compile Include="Objects\Territory\ITerritory.cs" />
     <Compile Include="Objects\Wants\IWant.cs" />
     <Compile Include="Objects\Wants\Want.cs" />
-    <Compile Include="Refactor\Storage\Products\Building.cs" />
-    <Compile Include="Refactor\Storage\Products\Currency.cs" />
-    <Compile Include="Refactor\Storage\Products\IBuilding.cs" />
-    <Compile Include="Refactor\Storage\Products\ICurrency.cs" />
-    <Compile Include="Refactor\Storage\Products\IPlot.cs" />
-    <Compile Include="Refactor\Storage\Products\IProduct.cs" />
-    <Compile Include="Refactor\Storage\Products\Plot.cs" />
-    <Compile Include="Refactor\Storage\Products\Product.cs" />
     <Compile Include="Generators\EconModule.cs" />
     <Compile Include="Generators\Noise.cs" />
     <Compile Include="Generators\Vector2.cs" />
@@ -148,40 +140,15 @@
     <Compile Include="Refactor\Storage\Hexmap\HexColor.cs" />
     <Compile Include="Refactor\Storage\Hexmap\HexCoord.cs" />
     <Compile Include="Refactor\Storage\Hexmap\Hexgrid.cs" />
-    <Compile Include="Refactor\Storage\IReadOnlyProductAmountCollection.cs" />
-    <Compile Include="Refactor\Storage\Jobs\Job.cs" />
-    <Compile Include="Refactor\Storage\Organizations\Company.cs" />
-    <Compile Include="Refactor\Storage\Organizations\IGovernor.cs" />
-    <Compile Include="Refactor\Storage\Organizations\ITerritory.cs" />
-    <Compile Include="Refactor\Storage\Jobs\IFarmer.cs" />
-    <Compile Include="Refactor\Storage\Jobs\IJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Refactor\Storage\ICrop.cs" />
-    <Compile Include="Refactor\Storage\Organizations\IMarket.cs" />
-    <Compile Include="Refactor\Storage\Jobs\ILaborer.cs" />
-    <Compile Include="Refactor\Storage\Organizations\Territory.cs" />
     <Compile Include="Refactor\Storage\Planet\Planet.cs" />
-    <Compile Include="Refactor\Storage\Population\Culture.cs" />
-    <Compile Include="Refactor\Storage\Population\ICulture.cs" />
-    <Compile Include="Refactor\Storage\Population\IPoliticalGroup.cs" />
-    <Compile Include="Refactor\Storage\Population\IPopulationGroup.cs" />
-    <Compile Include="Refactor\Storage\Population\IPopulations.cs" />
-    <Compile Include="Refactor\Storage\Process\IProcess.cs" />
-    <Compile Include="Refactor\Storage\IProductAmountCollection.cs" />
     <Compile Include="Refactor\Storage\ISqlReader.cs" />
-    <Compile Include="Refactor\Storage\Organizations\Market.cs" />
-    <Compile Include="Refactor\Storage\Population\PopulationGroup.cs" />
-    <Compile Include="Refactor\Storage\Population\Populations.cs" />
-    <Compile Include="Refactor\Storage\Process\Process.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Refactor\World.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="Refactor\Storage\Technology\ITechnology.cs" />
-    <Compile Include="Refactor\Storage\ProductAmountCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AutoMapper, Version=10.0.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
@@ -260,16 +227,16 @@
     <Content Include="Data\TestData\TestTerra\Terrain.png" />
     <Content Include="Data\TestData\TestTerra\TerrainEx.png" />
     <Content Include="license.txt" />
-    <Content Include="Refactor\Storage\Jobs\IntermarketTradeOverviewAndBrainstorms.txt" />
-    <Content Include="Refactor\Storage\Jobs\JobOverview.txt" />
-    <Content Include="Refactor\Storage\Organizations\MarketOverview.txt" />
-    <Content Include="Refactor\Storage\Organizations\OrganizationOverview.txt" />
-    <Content Include="Refactor\Storage\Organizations\TerritoryOverview.txt" />
-    <Content Include="Refactor\Storage\Population\CultureBrainstormDoc.txt" />
-    <Content Include="Refactor\Storage\Population\PoliticalGroupOverview.txt" />
-    <Content Include="Refactor\Storage\Population\PopulationOverviewAndBrainstorming.txt" />
-    <Content Include="Refactor\Storage\Process\ProcessOverviewAndBrainstorm.txt" />
-    <Content Include="Refactor\Storage\Products\ProductOverview.txt" />
+    <Content Include="Brainstorms\IntermarketTradeOverviewAndBrainstorms.txt" />
+    <Content Include="Brainstorms\JobOverview.txt" />
+    <Content Include="Brainstorms\MarketOverview.txt" />
+    <Content Include="Brainstorms\OrganizationOverview.txt" />
+    <Content Include="Brainstorms\TerritoryOverview.txt" />
+    <Content Include="Brainstorms\CultureBrainstormDoc.txt" />
+    <Content Include="Brainstorms\PoliticalGroupOverview.txt" />
+    <Content Include="Brainstorms\PopulationOverviewAndBrainstorming.txt" />
+    <Content Include="Brainstorms\ProcessOverviewAndBrainstorm.txt" />
+    <Content Include="Brainstorms\ProductOverview.txt" />
     <Content Include="Windows Logo.png" />
   </ItemGroup>
   <ItemGroup>
