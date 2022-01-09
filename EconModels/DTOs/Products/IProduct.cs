@@ -1,5 +1,4 @@
-﻿using EconomicCalculator.Enums;
-using EconDTOs.DTOs.Processes;
+﻿using EconDTOs.DTOs.Processes;
 using EconDTOs.DTOs.Products.ProductTags;
 using System;
 using System.Collections.Generic;

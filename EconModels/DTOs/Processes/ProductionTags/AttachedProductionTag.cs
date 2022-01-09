@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using EconomicCalculator.Enums;
+﻿using EconDTOs.DTOs.Enums;
+using System.Collections.Generic;
 
 namespace EconDTOs.DTOs.Processes.ProductionTags
 {

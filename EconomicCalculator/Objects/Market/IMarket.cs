@@ -54,9 +54,14 @@ namespace EconomicCalculator.Objects.Market
         IReadOnlyList<ITerritory> Territories { get; }
 
         /// <summary>
-        /// The Markets which are considered adjacent to this one.
+        /// The Markets which are considered adjacent to this one
+        /// and their distance measured in km. 
+        /// (Default distance is measured from center to center of
+        /// the respective territories).
+        /// These Neighbors should be reachable by foot assuming no
+        /// rivers.
         /// </summary>
-        IReadOnlyList<IMarket> Neighbors { get; }
+        IReadOnlyList<Pair<IMarket, decimal>> Neighbors { get; }
 
         /// <summary>
         /// The resources that are loose in the market, unowned.

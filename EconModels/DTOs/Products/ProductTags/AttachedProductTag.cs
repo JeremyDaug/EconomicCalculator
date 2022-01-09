@@ -1,9 +1,9 @@
-﻿using System;
+﻿using EconDTOs.DTOs.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EconomicCalculator.Enums;
 
 namespace EconDTOs.DTOs.Products.ProductTags
 {

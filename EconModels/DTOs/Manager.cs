@@ -1,6 +1,4 @@
-﻿using EconomicCalculator.DTOs.Planet;
-using EconomicCalculator.DTOs.Technology;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,7 +36,7 @@ namespace EconDTOs
         {
             UniverseName = "";
             //Planets = new Dictionary<int, Planet>();
-            Technologies = new Dictionary<int, ITechnology>();
+            //Technologies = new Dictionary<int, ITechnology>();
             Products = new Dictionary<int, IProduct>();
             Wants = new Dictionary<int, IWant>();
             Skills = new Dictionary<int, ISkill>();
@@ -76,7 +74,7 @@ namespace EconDTOs
         /// <summary>
         /// The Technologies available to the system, accessible by Id.
         /// </summary>
-        public IDictionary<int, ITechnology> Technologies { get; }
+        //public IDictionary<int, ITechnology> Technologies { get; }
 
         public IDictionary<int, IProduct> Products { get; set; }
 
@@ -915,30 +913,6 @@ namespace EconDTOs
         [Obsolete]
         public bool LoadData(string UniverseName)
         {
-            this.UniverseName = UniverseName;
-
-            // TODO, actually load from files. 
-            // Load set equal to earth in effect.
-            var earth = new Planet();
-
-            earth.LoadPlanet(UniverseFolder, "TestTerra");
-
-            earth.Name = "TestTerra";
-            earth.Id = 0;
-            // topography is default to sphere
-            // type is not used.
-            earth.SetBySurfaceArea(510_064_472);
-            // Set arbitrary seed for now.
-            earth.Seed = 1;
-            earth.Dead = false;
-            earth.Mass = 5.972e24;
-            earth.AirPressure = 1;
-            earth.Tempurature = 14;
-
-            //earth.SavePlanet(UniverseFolder);
-
-            //Planets.Add(earth.Id, earth);
-
             return true;
         }
     }

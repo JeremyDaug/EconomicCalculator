@@ -1,4 +1,10 @@
-﻿using System;
+﻿using EconomicCalculator.Helpers;
+using EconomicCalculator.Objects.Firms;
+using EconomicCalculator.Objects.Jobs;
+using EconomicCalculator.Objects.Market;
+using EconomicCalculator.Objects.Products;
+using EconomicCalculator.Objects.Skills;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +14,42 @@ namespace EconomicCalculator.Objects.Pops
 {
     public interface IPopGroup
     {
+        /// <summary>
+        /// Pop Id
+        /// </summary>
+        int Id { get; }
+
+        /// <summary>
+        /// The Total Size of the Population group.
+        /// </summary>
+        int Count { get; }
+
+        /// <summary>
+        /// The job the Pop Group does.
+        /// </summary>
+        IJob Job { get; }
+
+        /// <summary>
+        /// The business they work at.
+        /// </summary>
+        IFirm Firm { get; }
+
+        /// <summary>
+        /// The market the pop is in.
+        /// </summary>
+        IMarket Market { get; }
+
+        /// <summary>
+        /// Their level in the skill.
+        /// Skill is contained at <see cref="Job.Skill"/>.
+        /// </summary>
+        decimal SkillLevel { get; }
+
+        /// <summary>
+        /// The Property of the group.
+        /// </summary>
+        IReadOnlyList<Pair<IProduct, decimal>> Property { get; }
+
+        
     }
 }

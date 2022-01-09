@@ -106,8 +106,10 @@
     <Compile Include="DTOs\Jobs\IJob.cs" />
     <Compile Include="DTOs\Jobs\Job.cs" />
     <Compile Include="DTOs\Manager.cs" />
+    <Compile Include="DTOs\Pops\ConsumptionModifiers\ConsumptionModifiers.cs" />
     <Compile Include="DTOs\Pops\IPopulationGroup.cs" />
     <Compile Include="DTOs\Pops\PopModifiers\PopModifiers.cs" />
+    <Compile Include="DTOs\Pops\PopNeeds\IPopNeeds.cs" />
     <Compile Include="DTOs\Pops\PopWants\IPopWant.cs" />
     <Compile Include="DTOs\Pops\Species\ICohort.cs" />
     <Compile Include="DTOs\Pops\Species\ISpecies.cs" />
@@ -165,8 +167,7 @@
     <Folder Include="DTOs\Market\" />
     <Folder Include="DTOs\Pops\Culture\" />
     <Folder Include="DTOs\Pops\Politics\" />
-    <Folder Include="DTOs\Pops\PopNeeds\" />
-    <Folder Include="DTOs\Pops\Religion\" />
+    <Folder Include="DTOs\Pops\Worldview\" />
     <Folder Include="DTOs\Technology\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

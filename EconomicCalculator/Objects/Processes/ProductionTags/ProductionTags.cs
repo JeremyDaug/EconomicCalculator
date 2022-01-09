@@ -74,3 +74,4 @@ namespace EconomicCalculator.Objects.Processes.ProductionTags
         AutomationCapital,
         AutomationInput
     }
+}

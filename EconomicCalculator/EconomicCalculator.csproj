@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>EconomicCalculator</RootNamespace>
     <AssemblyName>EconomicCalculator</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -29,6 +29,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -91,11 +92,17 @@
     <Compile Include="Objects\Firms\WageType.cs" />
     <Compile Include="Objects\Government\IGovernor.cs" />
     <Compile Include="Objects\Government\IInstitution.cs" />
+    <Compile Include="Objects\ITagData.cs" />
     <Compile Include="Objects\Jobs\IJob.cs" />
     <Compile Include="Objects\Jobs\Job.cs" />
     <Compile Include="Objects\Market\IMarket.cs" />
     <Compile Include="Objects\Market\Market.cs" />
     <Compile Include="Objects\Pops\IPopGroup.cs" />
+    <Compile Include="Objects\Pops\PopNeeds\IPopNeed.cs" />
+    <Compile Include="Objects\Pops\PopNeeds\PopNeed.cs" />
+    <Compile Include="Objects\Pops\PopWants\IPopWants.cs" />
+    <Compile Include="Objects\Pops\PopWants\PopWant.cs" />
+    <Compile Include="Objects\Pops\Worldview\ISpecies.cs" />
     <Compile Include="Objects\Processes\IProcess.cs" />
     <Compile Include="Objects\Processes\IProcessProduct.cs" />
     <Compile Include="Objects\Processes\IProcessWant.cs" />
@@ -278,6 +285,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Objects\Pops\Culture\" />
+    <Folder Include="Objects\Pops\Politics\" />
+    <Folder Include="Objects\Pops\PopModifiers\" />
+    <Folder Include="Objects\Pops\Species\" />
     <Folder Include="Runner\" />
   </ItemGroup>
   <ItemGroup>

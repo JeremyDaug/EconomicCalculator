@@ -19,7 +19,7 @@ namespace EconomicCalculator.Objects.Market
     {
         public List<IInstitution> _institutions;
         public List<ITerritory> _territories;
-        public List<IMarket> _neighbors;
+        public List<Pair<IMarket, decimal>> _neighbors;
         public List<Pair<IProduct, decimal>> _resources;
         public List<IPopGroup> _pops;
         public List<IFirm> _firms;
@@ -28,7 +28,7 @@ namespace EconomicCalculator.Objects.Market
         {
             _institutions = new List<IInstitution>();
             _territories = new List<ITerritory>();
-            _neighbors = new List<IMarket>();
+            _neighbors = new List<Pair<IMarket, decimal>>();
             _resources = new List<Pair<IProduct, decimal>>();
             _pops = new List<IPopGroup>();
             _firms = new List<IFirm>();
@@ -71,9 +71,14 @@ namespace EconomicCalculator.Objects.Market
         public IReadOnlyList<ITerritory> Territories => _territories;
 
         /// <summary>
-        /// The Markets which are considered adjacent to this one.
+        /// The Markets which are considered adjacent to this one
+        /// and their distance measured in km. 
+        /// (Default distance is measured from center to center of
+        /// the respective territories).
+        /// These Neighbors should be reachable by foot assuming no
+        /// rivers.
         /// </summary>
-        public IReadOnlyList<IMarket> Neighbors => _neighbors;
+        public IReadOnlyList<Pair<IMarket, decimal>> Neighbors => _neighbors;
 
         /// <summary>
         /// The resources that are loose in the market, unowned.
