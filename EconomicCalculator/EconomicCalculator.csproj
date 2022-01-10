@@ -82,7 +82,7 @@
     <Compile Include="Enums\EnumExtensions\ColorExtensions.cs" />
     <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
     <Compile Include="Enums\ParameterType.cs" />
-    <Compile Include="Helpers\Pair.cs" />
+    <Compile Include="Helpers\TagData.cs" />
     <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
     <Compile Include="Objects\Firms\Firm.cs" />
     <Compile Include="Objects\Firms\FirmRank.cs" />
@@ -91,18 +91,23 @@
     <Compile Include="Objects\Firms\ProfitStructure.cs" />
     <Compile Include="Objects\Firms\WageType.cs" />
     <Compile Include="Objects\Government\IGovernor.cs" />
-    <Compile Include="Objects\Government\IInstitution.cs" />
-    <Compile Include="Objects\ITagData.cs" />
+    <Compile Include="Helpers\ITagData.cs" />
     <Compile Include="Objects\Jobs\IJob.cs" />
     <Compile Include="Objects\Jobs\Job.cs" />
     <Compile Include="Objects\Market\IMarket.cs" />
     <Compile Include="Objects\Market\Market.cs" />
+    <Compile Include="Objects\Pops\Culture\Culture.cs" />
+    <Compile Include="Objects\Pops\Culture\CultureTags.cs" />
+    <Compile Include="Objects\Pops\Culture\ICulture.cs" />
+    <Compile Include="Objects\Pops\DesireTier.cs" />
     <Compile Include="Objects\Pops\IPopGroup.cs" />
     <Compile Include="Objects\Pops\PopNeeds\IPopNeed.cs" />
     <Compile Include="Objects\Pops\PopNeeds\PopNeed.cs" />
     <Compile Include="Objects\Pops\PopWants\IPopWants.cs" />
     <Compile Include="Objects\Pops\PopWants\PopWant.cs" />
-    <Compile Include="Objects\Pops\Worldview\ISpecies.cs" />
+    <Compile Include="Objects\Pops\Species\ISpecies.cs" />
+    <Compile Include="Objects\Pops\Species\Species.cs" />
+    <Compile Include="Objects\Pops\Species\SpeciesTag.cs" />
     <Compile Include="Objects\Processes\IProcess.cs" />
     <Compile Include="Objects\Processes\IProcessProduct.cs" />
     <Compile Include="Objects\Processes\IProcessWant.cs" />
@@ -111,14 +116,10 @@
     <Compile Include="Objects\Processes\ProcessProduct.cs" />
     <Compile Include="Objects\Processes\ProcessTags\ProcessTag.cs" />
     <Compile Include="Objects\Processes\ProcessWant.cs" />
-    <Compile Include="Objects\Processes\ProductionTags\IProductionTagData.cs" />
-    <Compile Include="Objects\Processes\ProductionTags\ProductionTagData.cs" />
     <Compile Include="Objects\Processes\ProductionTags\ProductionTags.cs" />
     <Compile Include="Objects\Products\IProduct.cs" />
     <Compile Include="Objects\Products\Product.cs" />
     <Compile Include="Objects\Products\ProductTags\ProductTag.cs" />
-    <Compile Include="Objects\Products\ProductTags\IProductTagData.cs" />
-    <Compile Include="Objects\Products\ProductTags\ProductTagData.cs" />
     <Compile Include="Objects\Skills\ISkill.cs" />
     <Compile Include="Objects\Skills\ISkillGroup.cs" />
     <Compile Include="Objects\Skills\Skill.cs" />
@@ -252,10 +253,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Objects\Pops\Culture\" />
-    <Folder Include="Objects\Pops\Politics\" />
     <Folder Include="Objects\Pops\PopModifiers\" />
-    <Folder Include="Objects\Pops\Species\" />
     <Folder Include="Runner\" />
   </ItemGroup>
   <ItemGroup>

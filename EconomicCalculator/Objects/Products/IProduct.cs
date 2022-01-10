@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Objects.Processes;
+﻿using EconomicCalculator.Helpers;
+using EconomicCalculator.Objects.Processes;
 using EconomicCalculator.Objects.Products.ProductTags;
 using EconomicCalculator.Objects.Wants;
 using System;
@@ -69,7 +70,7 @@ namespace EconomicCalculator.Objects.Products
         /// <summary>
         /// THe tags of the product.
         /// </summary>
-        IReadOnlyList<IProductTagData> ProductTags { get; }
+        IReadOnlyList<ITagData<ProductTag>> ProductTags { get; }
 
         /// <summary>
         /// What wants the product satisfies by just owning.

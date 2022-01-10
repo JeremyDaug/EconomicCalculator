@@ -1,7 +1,8 @@
-﻿using EconomicCalculator.Helpers;
-using EconomicCalculator.Objects.Firms;
+﻿using EconomicCalculator.Objects.Firms;
 using EconomicCalculator.Objects.Jobs;
 using EconomicCalculator.Objects.Market;
+using EconomicCalculator.Objects.Pops.Culture;
+using EconomicCalculator.Objects.Pops.Species;
 using EconomicCalculator.Objects.Products;
 using EconomicCalculator.Objects.Skills;
 using System;
@@ -48,8 +49,16 @@ namespace EconomicCalculator.Objects.Pops
         /// <summary>
         /// The Property of the group.
         /// </summary>
-        IReadOnlyList<Pair<IProduct, decimal>> Property { get; }
+        IReadOnlyList<(IProduct, decimal)> Property { get; }
 
-        
+        /// <summary>
+        /// The species that make up this pop.
+        /// </summary>
+        IReadOnlyList<(ISpecies, int)> Species { get; }
+
+        /// <summary>
+        /// The cultures that make up this pop.
+        /// </summary>
+        IReadOnlyList<(ICulture, int)> Cultures { get; }
     }
 }

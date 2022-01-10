@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EconomicCalculator.Helpers;
 using EconomicCalculator.Objects.Processes;
 using EconomicCalculator.Objects.Processes.ProcessTags;
 using EconomicCalculator.Objects.Products.ProductTags;
@@ -16,12 +17,12 @@ namespace EconomicCalculator.Objects.Products
     internal class Product : IProduct
     {
         private List<IProcess> _productProcesses;
-        private List<IProductTagData> _productTags;
+        private List<ITagData<ProductTag>> _productTags;
         private List<Tuple<IWant, decimal>> _wants;
 
         public Product()
         {
-            _productTags = new List<IProductTagData>();
+            _productTags = new List<ITagData<ProductTag>>();
             _wants = new List<Tuple<IWant, decimal>>();
             _productProcesses = new List<IProcess>();
         }
@@ -81,7 +82,7 @@ namespace EconomicCalculator.Objects.Products
         /// <summary>
         /// THe tags of the product.
         /// </summary>
-        public IReadOnlyList<IProductTagData> ProductTags { get => _productTags; }
+        public IReadOnlyList<ITagData<ProductTag>> ProductTags { get => _productTags; }
 
         /// <summary>
         /// What wants the product satisfies by just owning.

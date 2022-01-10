@@ -16,17 +16,17 @@ namespace EconomicCalculator.Objects.Firms
     internal class Firm : IFirm
     {
         public List<IMarket> _regions;
-        public List<Pair<IProduct, decimal>> _resources;
-        public List<Pair<IProduct, decimal>> _products;
-        public List<Pair<IJob, WageType, decimal>> _jobs;
+        public List<(IProduct, decimal)> _resources;
+        public List<(IProduct, decimal)> _products;
+        public List<(IJob, WageType, decimal)> _jobs;
         public List<IFirm> _children;
 
         public Firm()
         {
             _regions = new List<IMarket>();
-            _resources = new List<Pair<IProduct, decimal>>();
-            _products = new List<Pair<IProduct, decimal>>();
-            _jobs = new List<Pair<IJob, WageType, decimal>>();
+            _resources = new List<(IProduct, decimal)>();
+            _products =  new List<(IProduct, decimal)>();
+            _jobs =      new List<(IJob, WageType, decimal)>();
             _children = new List<IFirm>();
         }
 
@@ -69,19 +69,19 @@ namespace EconomicCalculator.Objects.Firms
         /// The Jobs the Firm oversees, how it pays them, 
         /// and at what rate it pays.
         /// </summary>
-        public IReadOnlyList<Pair<IJob, WageType, decimal>> Jobs { get => _jobs; }
+        public IReadOnlyList<(IJob, WageType, decimal)> Jobs { get => _jobs; }
         // TODO, bring pops into here.
 
         /// <summary>
         /// The products that this firm tries to sell.
         /// </summary>
-        public IReadOnlyList<Pair<IProduct, decimal>> Products { get => _products; }
+        public IReadOnlyList<(IProduct, decimal)> Products { get => _products; }
 
         /// <summary>
         /// What resources the Firm owns. Bought goods go here,
         /// made goods go here and are sold from here.
         /// </summary>
-        public IReadOnlyList<Pair<IProduct, decimal>> Resources { get => _resources; }
+        public IReadOnlyList<(IProduct, decimal)> Resources { get => _resources; }
 
         /// <summary>
         /// The market which the Firm is centered out of.

@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Objects.Processes.ProductionTags;
+﻿using EconomicCalculator.Helpers;
+using EconomicCalculator.Objects.Processes.ProductionTags;
 using EconomicCalculator.Objects.Wants;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace EconomicCalculator.Objects.Processes
         /// <summary>
         /// The Tag Data of the want.
         /// </summary>
-        IReadOnlyList<IProductionTagData> TagData { get; }
+        IReadOnlyList<ITagData<ProductionTag>> TagData { get; }
 
         /// <summary>
         /// The Part of the process it belongs to.

@@ -54,19 +54,19 @@ namespace EconomicCalculator.Objects.Firms
         /// The Jobs the Firm oversees, how it pays them, 
         /// and at what rate it pays.
         /// </summary>
-        IReadOnlyList<Pair<IJob, WageType, decimal>> Jobs { get; }
+        IReadOnlyList<(IJob, WageType, decimal)> Jobs { get; }
         // TODO, bring pops into here.
 
         /// <summary>
         /// The products that this firm tries to sell.
         /// </summary>
-        IReadOnlyList<Pair<IProduct, decimal>> Products { get; }
+        IReadOnlyList<(IProduct, decimal)> Products { get; }
 
         /// <summary>
         /// What resources the Firm owns. Bought goods go here,
         /// made goods go here and are sold from here.
         /// </summary>
-        IReadOnlyList<Pair<IProduct, decimal>> Resources { get; }
+        IReadOnlyList<(IProduct, decimal)> Resources { get; }
 
         /// <summary>
         /// The market which the Firm is centered out of.

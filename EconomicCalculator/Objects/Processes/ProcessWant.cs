@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EconomicCalculator.Helpers;
 using EconomicCalculator.Objects.Processes.ProductionTags;
 using EconomicCalculator.Objects.Wants;
 
@@ -18,7 +19,7 @@ namespace EconomicCalculator.Objects.Processes
         /// </summary>
         public ProcessWant()
         {
-            tagData = new List<IProductionTagData>();
+            tagData = new List<ITagData<ProductionTag>>();
         }
 
         /// <summary>
@@ -34,12 +35,12 @@ namespace EconomicCalculator.Objects.Processes
         /// <summary>
         /// The Read Only Tag Data
         /// </summary>
-        public IReadOnlyList<IProductionTagData> TagData => tagData;
+        public IReadOnlyList<ITagData<ProductionTag>> TagData => tagData;
 
         /// <summary>
         /// The editable tag data.
         /// </summary>
-        public List<IProductionTagData> tagData { get; set; }
+        public List<ITagData<ProductionTag>> tagData { get; set; }
 
         /// <summary>
         /// The part the want belongs to.

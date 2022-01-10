@@ -17,19 +17,17 @@ namespace EconomicCalculator.Objects.Market
     /// </summary>
     internal class Market : IMarket
     {
-        public List<IInstitution> _institutions;
         public List<ITerritory> _territories;
-        public List<Pair<IMarket, decimal>> _neighbors;
-        public List<Pair<IProduct, decimal>> _resources;
+        public List<(IMarket, decimal)> _neighbors;
+        public List<(IProduct, decimal)> _resources;
         public List<IPopGroup> _pops;
         public List<IFirm> _firms;
 
         public Market()
         {
-            _institutions = new List<IInstitution>();
             _territories = new List<ITerritory>();
-            _neighbors = new List<Pair<IMarket, decimal>>();
-            _resources = new List<Pair<IProduct, decimal>>();
+            _neighbors = new List<(IMarket, decimal)>();
+            _resources = new List<(IProduct, decimal)>();
             _pops = new List<IPopGroup>();
             _firms = new List<IFirm>();
         }
@@ -61,11 +59,6 @@ namespace EconomicCalculator.Objects.Market
         public IGovernor Governor { get; set; }
 
         /// <summary>
-        /// The institutions which have sway over this region.
-        /// </summary>
-        public IReadOnlyList<IInstitution> Institutions => _institutions;
-
-        /// <summary>
         /// The Territories the Market Contains.
         /// </summary>
         public IReadOnlyList<ITerritory> Territories => _territories;
@@ -78,11 +71,11 @@ namespace EconomicCalculator.Objects.Market
         /// These Neighbors should be reachable by foot assuming no
         /// rivers.
         /// </summary>
-        public IReadOnlyList<Pair<IMarket, decimal>> Neighbors => _neighbors;
+        public IReadOnlyList<(IMarket, decimal)> Neighbors => _neighbors;
 
         /// <summary>
         /// The resources that are loose in the market, unowned.
         /// </summary>
-        public IReadOnlyList<Pair<IProduct, decimal>> Resources => _resources;
+        public IReadOnlyList<(IProduct, decimal)> Resources => _resources;
     }
 }

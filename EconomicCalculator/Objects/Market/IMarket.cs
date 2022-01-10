@@ -44,11 +44,6 @@ namespace EconomicCalculator.Objects.Market
         IGovernor Governor { get; }
 
         /// <summary>
-        /// The institutions which have sway over this region.
-        /// </summary>
-        IReadOnlyList<IInstitution> Institutions { get; }
-
-        /// <summary>
         /// The Territories the Market Contains.
         /// </summary>
         IReadOnlyList<ITerritory> Territories { get; }
@@ -61,11 +56,11 @@ namespace EconomicCalculator.Objects.Market
         /// These Neighbors should be reachable by foot assuming no
         /// rivers.
         /// </summary>
-        IReadOnlyList<Pair<IMarket, decimal>> Neighbors { get; }
+        IReadOnlyList<(IMarket, decimal)> Neighbors { get; }
 
         /// <summary>
         /// The resources that are loose in the market, unowned.
         /// </summary>
-        IReadOnlyList<Pair<IProduct, decimal>> Resources { get; }
+        IReadOnlyList<(IProduct, decimal)> Resources { get; }
     }
 }

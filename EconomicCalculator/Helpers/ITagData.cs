@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EconomicCalculator.Objects
+namespace EconomicCalculator.Helpers
 {
-    public interface ITagData<T>
+    /// <summary>
+    /// Generic holder for Tags and any attached Data.
+    /// </summary>
+    /// <typeparam name="T">An Enum of some kind.</typeparam>
+    public interface ITagData<T> where T : Enum
     {
         /// <summary>
         /// The attached tag.
