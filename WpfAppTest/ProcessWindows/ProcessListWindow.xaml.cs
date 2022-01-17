@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Processes;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Processes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,20 +21,20 @@ namespace EditorInterface.ProcessWindows
     /// </summary>
     public partial class ProcessListWindow : Window
     {
-        private Manager manager;
+        private DTOManager manager;
 
         public ProcessListWindow()
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             ProcessGrid.ItemsSource = manager.Processes.Values;
         }
 
         private void NewProcess(object sender, RoutedEventArgs e)
         {
-            var newProcess = new Process();
+            var newProcess = new ProcessDTO();
 
             newProcess.Id = manager.NewProcessId;
 
@@ -47,7 +47,7 @@ namespace EditorInterface.ProcessWindows
 
         private void EditProcess(object sender, RoutedEventArgs e)
         {
-            var selected = (Process)ProcessGrid.SelectedItem;
+            var selected = (ProcessDTO)ProcessGrid.SelectedItem;
 
             if (selected == null)
                 return;
@@ -62,12 +62,12 @@ namespace EditorInterface.ProcessWindows
 
         private void CopyProcess(object sender, RoutedEventArgs e)
         {
-            var selected = (Process)ProcessGrid.SelectedItem;
+            var selected = (ProcessDTO)ProcessGrid.SelectedItem;
 
             if (selected == null)
                 return;
 
-            var copy = new Process(selected);
+            var copy = new ProcessDTO(selected);
             copy.Id = manager.NewProcessId;
 
             ProcessWindow win = new ProcessWindow(copy);

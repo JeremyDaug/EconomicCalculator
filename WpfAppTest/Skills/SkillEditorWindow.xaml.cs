@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Skills;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Skills;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,8 +23,8 @@ namespace EditorInterface.Skills
     /// </summary>
     public partial class SkillEditorWindow : Window
     {
-        private Manager manager;
-        private Skill skill;
+        private DTOManager manager;
+        private SkillDTO skill;
 
         private List<string> availableGroups;
         private List<string> availableRelations;
@@ -39,10 +39,10 @@ namespace EditorInterface.Skills
             InitializeComponent();
         }
 
-        public SkillEditorWindow(Skill skill)
+        public SkillEditorWindow(SkillDTO skill)
         {
             InitializeComponent();
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
             this.skill = skill;
 
             // set easy data.
@@ -82,7 +82,7 @@ namespace EditorInterface.Skills
         private void CommitSkill(object sender, RoutedEventArgs e)
         {
             // create new skill.
-            var newSkill = new Skill
+            var newSkill = new SkillDTO
             {
                 Id = skill.Id,
                 Name = SkillName.Text,

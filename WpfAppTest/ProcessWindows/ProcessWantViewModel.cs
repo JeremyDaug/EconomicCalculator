@@ -1,6 +1,6 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Processes;
-using EconDTOs.DTOs.Processes.ProductionTags;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProductionTags;
 using EditorInterface.Helpers;
 using System;
 using System.Collections.Generic;
@@ -19,23 +19,23 @@ namespace EditorInterface.ProcessWindows
     {
         ProcessWantModel model;
         private ICommand commit;
-        public ProcessWant ProcessWant;
+        public ProcessWantDTO ProcessWant;
         private bool _validCommit;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ObservableCollection<string> AvailableWants { get; set; }
 
-        public ProcessWantViewModel(ProcessWant want, ProcessSection section)
+        public ProcessWantViewModel(ProcessWantDTO want, ProcessSection section)
         {
             model = new ProcessWantModel(want);
             model.Section = section;
             // copy the processproduct so we don't override without commiting.
 
-            ProcessWant = new ProcessWant();
+            ProcessWant = new ProcessWantDTO();
 
             AvailableWants = new ObservableCollection<string>(
-                Manager.Instance.Wants.Values.Select(x => x.Name));
+                DTOManager.Instance.Wants.Values.Select(x => x.Name));
             ValidCommited = false;
             RefreshEnableds();
         }

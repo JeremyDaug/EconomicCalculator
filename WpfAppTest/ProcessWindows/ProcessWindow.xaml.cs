@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Processes;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Processes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,8 +24,8 @@ namespace EditorInterface.ProcessWindows
     /// </summary>
     public partial class ProcessWindow : Window
     {
-        private Manager manager;
-        private Process process;
+        private DTOManager manager;
+        private ProcessDTO process;
 
         private ProcessViewModel viewModel;
 
@@ -33,9 +33,9 @@ namespace EditorInterface.ProcessWindows
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
-            process = new Process();
+            process = new ProcessDTO();
             process.Id = manager.NewProcessId;
             ImageSelected.Text = manager.DefaultIcon;
             ImageView.Source = new BitmapImage(new Uri(process.Icon));
@@ -44,11 +44,11 @@ namespace EditorInterface.ProcessWindows
             DataContext = viewModel;
         }
 
-        public ProcessWindow(Process process)
+        public ProcessWindow(ProcessDTO process)
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             this.process = process;
 
@@ -63,42 +63,42 @@ namespace EditorInterface.ProcessWindows
 
         private void InputProductGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var selection = (ProcessProduct)InputProductGrid.SelectedItem;
+            var selection = (ProcessProductDTO)InputProductGrid.SelectedItem;
 
             viewModel.EditProduct(selection, ProcessSection.Input);
         }
 
         private void InputWantGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var selection = (ProcessWant)InputWantGrid.SelectedItem;
+            var selection = (ProcessWantDTO)InputWantGrid.SelectedItem;
 
             viewModel.EditWant(selection, ProcessSection.Input);
         }
 
         private void CapitalProductGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var selection = (ProcessProduct)CapitalProductGrid.SelectedItem;
+            var selection = (ProcessProductDTO)CapitalProductGrid.SelectedItem;
 
             viewModel.EditProduct(selection, ProcessSection.Capital);
         }
 
         private void CapitalWantGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var selection = (ProcessWant)CapitalWantGrid.SelectedItem;
+            var selection = (ProcessWantDTO)CapitalWantGrid.SelectedItem;
 
             viewModel.EditWant(selection, ProcessSection.Capital);
         }
 
         private void OutputProductGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var selection = (ProcessProduct)OutputProductGrid.SelectedItem;
+            var selection = (ProcessProductDTO)OutputProductGrid.SelectedItem;
 
             viewModel.EditProduct(selection, ProcessSection.Output);
         }
 
         private void OutputWantGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var selection = (ProcessWant)OutputWantGrid.SelectedItem;
+            var selection = (ProcessWantDTO)OutputWantGrid.SelectedItem;
 
             viewModel.EditWant(selection, ProcessSection.Output);
         }

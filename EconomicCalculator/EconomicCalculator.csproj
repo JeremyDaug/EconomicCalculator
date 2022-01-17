@@ -65,6 +65,55 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTOs\AbstractConverter.cs" />
+    <Compile Include="DTOs\Enums\ParameterType.cs" />
+    <Compile Include="DTOs\Firms\FirmRank.cs" />
+    <Compile Include="DTOs\Firms\IFirmDTO.cs" />
+    <Compile Include="DTOs\Firms\OwnershipStructure.cs" />
+    <Compile Include="DTOs\Firms\ProfitStructure.cs" />
+    <Compile Include="DTOs\Firms\WageType.cs" />
+    <Compile Include="DTOs\Jobs\IJobDTO.cs" />
+    <Compile Include="DTOs\Jobs\JobDTO.cs" />
+    <Compile Include="DTOs\DTOManager.cs" />
+    <Compile Include="DTOs\Pops\ConsumptionModifiers\ConsumptionModifiers.cs" />
+    <Compile Include="DTOs\Pops\IPopulationGroupDTO.cs" />
+    <Compile Include="DTOs\Pops\PopModifiers\PopModifiers.cs" />
+    <Compile Include="DTOs\Pops\PopNeeds\IPopNeedsDTO.cs" />
+    <Compile Include="DTOs\Pops\PopWants\IPopWantDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\ICohortDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\ISpeciesDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\ISubtypeDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesTags.cs" />
+    <Compile Include="DTOs\Processes\IDivisionEffects.cs" />
+    <Compile Include="DTOs\Processes\IProcessDTO.cs" />
+    <Compile Include="DTOs\Processes\IProcessProductDTO.cs" />
+    <Compile Include="DTOs\Processes\IProcessWantDTO.cs" />
+    <Compile Include="DTOs\Processes\ProcessDTO.cs" />
+    <Compile Include="DTOs\Processes\ProcessProductDTO.cs" />
+    <Compile Include="DTOs\Processes\ProcessSection.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\AttachedProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\IAttachedProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\ProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\ProcessTagInfo.cs" />
+    <Compile Include="DTOs\Processes\ProcessWantDTO.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\AttachedProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\IAttachedProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\ProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\ProductionTagInfo.cs" />
+    <Compile Include="DTOs\Products\IProductDTO.cs" />
+    <Compile Include="DTOs\Products\ProductDTO.cs" />
+    <Compile Include="DTOs\Products\ProductTags\AttachedProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\IAttachedProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\ProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\ProductTagInfo.cs" />
+    <Compile Include="DTOs\RegexHelper.cs" />
+    <Compile Include="DTOs\Skills\ISkillDTO.cs" />
+    <Compile Include="DTOs\Skills\ISkillGroupDTO.cs" />
+    <Compile Include="DTOs\Skills\SkillDTO.cs" />
+    <Compile Include="DTOs\Skills\SkillGroupDTO.cs" />
+    <Compile Include="DTOs\Skills\SkillsGraph.cs" />
+    <Compile Include="DTOs\Wants\IWantDTO.cs" />
+    <Compile Include="DTOs\Wants\WantDTO.cs" />
     <Compile Include="Enums\BuildingType.cs" />
     <Compile Include="Enums\CashType.cs" />
     <Compile Include="Enums\CropType.cs" />
@@ -83,6 +132,7 @@
     <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
     <Compile Include="Enums\ParameterType.cs" />
     <Compile Include="Helpers\TagData.cs" />
+    <Compile Include="Objects\DataContext.cs" />
     <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
     <Compile Include="Objects\Firms\Firm.cs" />
     <Compile Include="Objects\Firms\FirmRank.cs" />
@@ -93,6 +143,7 @@
     <Compile Include="Objects\Government\IGovernor.cs" />
     <Compile Include="Helpers\ITagData.cs" />
     <Compile Include="Objects\Government\TaxTarget.cs" />
+    <Compile Include="Objects\IDataContext.cs" />
     <Compile Include="Objects\Jobs\IJob.cs" />
     <Compile Include="Objects\Jobs\Job.cs" />
     <Compile Include="Objects\Market\IMarket.cs" />
@@ -253,14 +304,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DTOs\Market\" />
+    <Folder Include="DTOs\Pops\Culture\" />
+    <Folder Include="DTOs\Pops\Politics\" />
+    <Folder Include="DTOs\Pops\Worldview\" />
+    <Folder Include="DTOs\Technology\" />
     <Folder Include="Objects\Pops\PopModifiers\" />
     <Folder Include="Runner\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EconModels\EconDTOs.csproj">
-      <Project>{8e205d41-9825-45f0-8f73-3002277faf32}</Project>
-      <Name>EconDTOs</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets" Condition="Exists('..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets')" />

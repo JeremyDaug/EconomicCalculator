@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.ProcessWindows"
         xmlns:valid="clr-namespace:EditorInterface.ValidationRules"
-        xmlns:src="clr-namespace:EconDTOs.DTOs.Processes;assembly=EconModels"
+        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Processes;assembly=EconomicCalculator"
         xmlns:helpers="clr-namespace:EditorInterface.Helpers"
         mc:Ignorable="d"
         Title="ProcessWant Window" Height="520" Width="1000">
     <Window.Resources>
-        <src:ProcessProduct x:Key="processProduct"/>
+        <src:ProcessProductDTO x:Key="processProduct"/>
         <helpers:BoolToHiddenConverter x:Key="BoolToHiddenConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>

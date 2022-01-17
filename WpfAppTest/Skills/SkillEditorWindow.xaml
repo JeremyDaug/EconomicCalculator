@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.Skills"
         xmlns:valid="clr-namespace:EditorInterface.ValidationRules"
-        xmlns:src="clr-namespace:EconDTOs.DTOs.Skills;assembly=EconModels"
+        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Skills;assembly=EconomicCalculator"
         mc:Ignorable="d"
         Title="SkillEditorWindow" Height="450" Width="800">
     <Window.Resources>
-        <src:Skill x:Key="skill"/>
+        <src:SkillDTO x:Key="skill"/>
         <local:SkillRelation x:Key="skillRelation"/>
     </Window.Resources>
     <Grid>

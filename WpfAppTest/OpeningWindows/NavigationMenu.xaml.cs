@@ -1,4 +1,4 @@
-﻿using EconDTOs;
+﻿using EconomicCalculator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +25,8 @@ namespace EditorInterface.OpeningWindows
             InitializeComponent();
 
             // if anything is loaded, don't reload
-            if (!Manager.Instance.Products.Any())
-                Manager.Instance.LoadAll();
+            if (!DTOManager.Instance.Products.Any())
+                DTOManager.Instance.LoadAll();
         }
 
         private void ToProducts(object sender, RoutedEventArgs e)

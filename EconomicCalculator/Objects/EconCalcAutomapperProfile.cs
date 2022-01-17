@@ -13,8 +13,10 @@ namespace EconomicCalculator.Objects
     {
         public EconCalcAutomapperProfile()
         {
-            CreateMap<Want, EconDTOs.DTOs.Wants.Want>();
-            CreateMap<Product, EconDTOs.DTOs.Products.Product>();
+            CreateMap<IWant, EconomicCalculator.DTOs.Wants.IWantDTO>()
+                .As<EconomicCalculator.DTOs.Wants.WantDTO>();
+            CreateMap<EconomicCalculator.DTOs.Wants.IWantDTO, IWant>()
+                .As<Want>();
         }
     }
 }

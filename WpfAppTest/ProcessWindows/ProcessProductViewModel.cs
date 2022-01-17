@@ -1,6 +1,6 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Processes;
-using EconDTOs.DTOs.Processes.ProductionTags;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProductionTags;
 using EditorInterface.Helpers;
 using System;
 using System.Collections.Generic;
@@ -19,23 +19,23 @@ namespace EditorInterface.ProcessWindows
     {
         ProcessProductModel model;
         private ICommand commit;
-        public ProcessProduct ProcessProduct;
+        public ProcessProductDTO ProcessProduct;
         private bool _validCommit;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ObservableCollection<string> AvailableProducts { get; set; }
 
-        public ProcessProductViewModel(ProcessProduct proc, ProcessSection section)
+        public ProcessProductViewModel(ProcessProductDTO proc, ProcessSection section)
         {
             model = new ProcessProductModel(proc);
             model.Section = section;
             // copy the processproduct so we don't override without commiting.
 
-            ProcessProduct = new ProcessProduct();
+            ProcessProduct = new ProcessProductDTO();
 
             AvailableProducts = new ObservableCollection<string>(
-                Manager.Instance.Products.Values.Select(x => x.GetName()));
+                DTOManager.Instance.Products.Values.Select(x => x.GetName()));
             ValidCommited = false;
             RefreshEnableds();
         }
@@ -100,7 +100,7 @@ namespace EditorInterface.ProcessWindows
                 var result = "Total Mass: {0} kg";
                 decimal weight = 0;
                 if (!string.IsNullOrEmpty(Product))
-                    weight = Manager.Instance.GetProductByFullName(Product).Mass * Amount;
+                    weight = DTOManager.Instance.GetProductByFullName(Product).Mass * Amount;
 
                 return string.Format(result, weight);
             }
@@ -549,7 +549,7 @@ namespace EditorInterface.ProcessWindows
                 return;
             }
             else if (Section == ProcessSection.Output &&
-                !Manager.Instance.GetProductByFullName(Product).Fractional &&
+                !DTOManager.Instance.GetProductByFullName(Product).Fractional &&
                 Amount % 1 > 0)
             {
                 MessageBox.Show("Output products of non-fractional goods must be whole numbers.");

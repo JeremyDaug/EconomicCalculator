@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EconomicCalculator.Objects.Processes.ProcessTags;
 using EconomicCalculator.Objects.Skills;
+using EconomicCalculator.Objects.Technology;
 
 namespace EconomicCalculator.Objects.Processes
 {
@@ -131,6 +132,12 @@ namespace EconomicCalculator.Objects.Processes
         /// The Location of the Icon representing the process.
         /// </summary>
         public string Icon { get; set; }
+
+        /// <summary>
+        /// The tech required see/do this process.
+        /// </summary>
+        public ITechnology TechRequirement { get; set; }
+        ITechnology IProcess.TechRequirement => TechRequirement;
 
         /// <summary>
         /// Retrieve the name of the process.

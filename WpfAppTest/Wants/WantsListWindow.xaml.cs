@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Wants;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Wants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -12,14 +12,14 @@ namespace EditorInterface.Wants
     /// </summary>
     public partial class WantsListWindow : Window
     {
-        private Manager manager;
-        private List<Want> wants;
+        private DTOManager manager;
+        private List<WantDTO> wants;
 
         public WantsListWindow()
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             manager.LoadWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonWants.json");
 
@@ -42,7 +42,7 @@ namespace EditorInterface.Wants
 
         private void NewWant(object sender, RoutedEventArgs e)
         {
-            var newWant = new Want();
+            var newWant = new WantDTO();
 
             newWant.Id = manager.NewWantId;
             Window win = new WantWindow(newWant);
@@ -54,7 +54,7 @@ namespace EditorInterface.Wants
 
         private void EditWant(object sender, RoutedEventArgs e)
         {
-            var selected = (Want)WantGrid.SelectedItem;
+            var selected = (WantDTO)WantGrid.SelectedItem;
 
             Window win = new WantWindow(selected);
             win.ShowDialog();
@@ -65,8 +65,8 @@ namespace EditorInterface.Wants
 
         private void CopyWant(object sender, RoutedEventArgs e)
         {
-            var selected = (Want)WantGrid.SelectedItem;
-            var dup = new Want(selected);
+            var selected = (WantDTO)WantGrid.SelectedItem;
+            var dup = new WantDTO(selected);
             dup.Id = manager.NewWantId;
 
             Window win = new WantWindow(dup);

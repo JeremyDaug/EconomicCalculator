@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.757
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomicCalculator", "EconomicCalculator\EconomicCalculator.csproj", "{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}"
 EndProject
@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EconomicCalculator.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EconomicCalculator.IntTests", "EconomicCalculator.IntTests\EconomicCalculator.IntTests.csproj", "{B50310D3-7F94-4781-A455-4373F9212B92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconDTOs", "EconModels\EconDTOs.csproj", "{8E205D41-9825-45F0-8F73-3002277FAF32}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorInterface", "WpfAppTest\EditorInterface.csproj", "{C68E2BAF-9543-4616-85B7-F5AA36A176EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{70DAEB3D-C79A-4297-9F55-685D25D09295}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,14 +31,14 @@ Global
 		{B50310D3-7F94-4781-A455-4373F9212B92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B50310D3-7F94-4781-A455-4373F9212B92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B50310D3-7F94-4781-A455-4373F9212B92}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8E205D41-9825-45F0-8F73-3002277FAF32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8E205D41-9825-45F0-8F73-3002277FAF32}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8E205D41-9825-45F0-8F73-3002277FAF32}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8E205D41-9825-45F0-8F73-3002277FAF32}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C68E2BAF-9543-4616-85B7-F5AA36A176EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C68E2BAF-9543-4616-85B7-F5AA36A176EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C68E2BAF-9543-4616-85B7-F5AA36A176EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C68E2BAF-9543-4616-85B7-F5AA36A176EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70DAEB3D-C79A-4297-9F55-685D25D09295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70DAEB3D-C79A-4297-9F55-685D25D09295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70DAEB3D-C79A-4297-9F55-685D25D09295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70DAEB3D-C79A-4297-9F55-685D25D09295}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

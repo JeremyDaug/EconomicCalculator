@@ -15,16 +15,19 @@ namespace EconomicCalculator.Objects.Wants
         /// THe Id of the want.
         /// </summary>
         public int Id { get; set; }
+        int IWant.Id => Id;
 
         /// <summary>
         /// Want's name.
         /// </summary>
         public string Name { get; set; }
+        string IWant.Name => Name;
 
         /// <summary>
         /// A short explanation of what the want is for.
         /// </summary>
         public string Description { get; set; }
+        string IWant.Description => Description;
 
         public override string ToString()
         {

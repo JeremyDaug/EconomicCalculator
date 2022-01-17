@@ -7,6 +7,7 @@ using EconomicCalculator.Helpers;
 using EconomicCalculator.Objects.Processes;
 using EconomicCalculator.Objects.Processes.ProcessTags;
 using EconomicCalculator.Objects.Products.ProductTags;
+using EconomicCalculator.Objects.Technology;
 using EconomicCalculator.Objects.Wants;
 
 namespace EconomicCalculator.Objects.Products
@@ -145,6 +146,14 @@ namespace EconomicCalculator.Objects.Products
         }
 
         #endregion RelatedProcesses
+
+        /// <summary>
+        /// The Technology required for this product to be know about or build
+        /// may be null.
+        /// </summary>
+        public ITechnology TechRequirement { get; set; }
+
+        ITechnology IProduct.TechRequirement => TechRequirement;
 
         public override string ToString()
         {

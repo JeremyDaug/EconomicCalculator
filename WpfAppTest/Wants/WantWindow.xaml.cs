@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Wants;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Wants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +21,14 @@ namespace EditorInterface.Wants
     /// </summary>
     public partial class WantWindow : Window
     {
-        private Manager manager;
-        private Want want;
+        private DTOManager manager;
+        private WantDTO want;
 
         public WantWindow()
         {
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
-            want = new Want
+            want = new WantDTO
             {
                 Id = manager.NewWantId
             };
@@ -39,10 +39,10 @@ namespace EditorInterface.Wants
             WantDescription.Text = want.Description;
         }
 
-        public WantWindow(Want want)
+        public WantWindow(WantDTO want)
         {
             this.want = want;
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
             InitializeComponent();
 
             WantName.Text = want.Name;
@@ -57,7 +57,7 @@ namespace EditorInterface.Wants
 
         private void CommitWant(object sender, RoutedEventArgs e)
         {
-            want = new Want
+            want = new WantDTO
             {
                 Id = want.Id,
                 Name = WantName.Text,
@@ -65,7 +65,7 @@ namespace EditorInterface.Wants
             };
 
             // check it's valid.
-            if (Want.NameIsValid(want.Name))
+            if (WantDTO.NameIsValid(want.Name))
             {
                 MessageBox.Show("Name Cannot have whitespace, and can only contain letters.");
                 return;
@@ -98,7 +98,7 @@ namespace EditorInterface.Wants
 
         private void CommitAndQuit(object sender, RoutedEventArgs e)
         {
-            want = new Want
+            want = new WantDTO
             {
                 Id = want.Id,
                 Name = WantName.Text,

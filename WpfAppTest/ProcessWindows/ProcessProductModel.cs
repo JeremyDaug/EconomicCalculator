@@ -1,5 +1,5 @@
-﻿using EconDTOs.DTOs.Processes;
-using EconDTOs.DTOs.Processes.ProductionTags;
+﻿using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProductionTags;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +12,7 @@ namespace EditorInterface.ProcessWindows
 {
     public class ProcessProductModel : INotifyPropertyChanged
     {
-        public ProcessProductModel(ProcessProduct product)
+        public ProcessProductModel(ProcessProductDTO product)
         {
             ProductName = product.ProductName;
             Amount = product.Amount;

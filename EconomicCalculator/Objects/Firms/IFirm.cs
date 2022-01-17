@@ -2,6 +2,7 @@
 using EconomicCalculator.Objects.Jobs;
 using EconomicCalculator.Objects.Market;
 using EconomicCalculator.Objects.Products;
+using EconomicCalculator.Objects.Technology;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,5 +80,12 @@ namespace EconomicCalculator.Objects.Firms
         /// this market to do so.
         /// </summary>
         IReadOnlyList<IMarket> Regions { get; }
+
+        /// <summary>
+        /// The techs available to the Firm.
+        /// </summary>
+        IReadOnlyList<ITechnology> Techs { get; }
+
+        // Research stuff here.
     }
 }

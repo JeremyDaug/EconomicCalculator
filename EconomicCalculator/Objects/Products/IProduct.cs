@@ -1,6 +1,7 @@
 ﻿using EconomicCalculator.Helpers;
 using EconomicCalculator.Objects.Processes;
 using EconomicCalculator.Objects.Products.ProductTags;
+using EconomicCalculator.Objects.Technology;
 using EconomicCalculator.Objects.Wants;
 using System;
 using System.Collections.Generic;
@@ -105,5 +106,11 @@ namespace EconomicCalculator.Objects.Products
         /// They ways the product can be maintained.
         /// </summary>
         IReadOnlyList<IProcess> MaintenanceProcesses { get; }
+
+        /// <summary>
+        /// The tech required to know/build this product.
+        /// May be null.
+        /// </summary>
+        ITechnology TechRequirement { get; }
     }
 }

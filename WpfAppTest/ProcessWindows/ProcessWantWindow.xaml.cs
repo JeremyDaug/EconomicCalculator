@@ -1,4 +1,4 @@
-﻿using EconDTOs.DTOs.Processes;
+﻿using EconomicCalculator.DTOs.Processes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +20,10 @@ namespace EditorInterface.ProcessWindows
     /// </summary>
     public partial class ProcessWantWindow : Window
     {
-        public ProcessWant product;
+        public ProcessWantDTO product;
         public ProcessWantViewModel ViewModel;
 
-        public ProcessWantWindow(ProcessWant procWant, ProcessSection section)
+        public ProcessWantWindow(ProcessWantDTO procWant, ProcessSection section)
         {
             ViewModel = new ProcessWantViewModel(procWant, section);
 

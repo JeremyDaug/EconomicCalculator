@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Skills;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Skills;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +21,14 @@ namespace EditorInterface.Skills
     /// </summary>
     public partial class SkillGroupEditor : Window
     {
-        private SkillGroup group;
+        private SkillGroupDTO group;
 
         public SkillGroupEditor()
         {
             InitializeComponent();
         }
 
-        public SkillGroupEditor(SkillGroup g)
+        public SkillGroupEditor(SkillGroupDTO g)
         {
             InitializeComponent();
             group = g;
@@ -41,14 +41,14 @@ namespace EditorInterface.Skills
 
         private void CommitGroup(object sender, RoutedEventArgs e)
         {
-            var newGroup = new SkillGroup
+            var newGroup = new SkillGroupDTO
             {
                 Id = group.Id,
                 Name = GroupName.Text,
                 Default = decimal.Parse(GroupDefault.Text),
                 Description = GroupDesc.Text
             };
-            Manager.Instance.SkillGroups[newGroup.Id] = newGroup;
+            DTOManager.Instance.SkillGroups[newGroup.Id] = newGroup;
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Windows;
 using EditorInterface.Products;
 using EditorInterface.Wants;
 using EditorInterface.OpeningWindows;
-using EconDTOs;
+using EconomicCalculator;
 
 namespace EditorInterface
 {
@@ -17,7 +17,7 @@ namespace EditorInterface
     /// </summary>
     public partial class App : Application
     {
-        Manager manager;
+        DTOManager manager;
 
         private void BackToMenu(object sender, RoutedEventArgs e)
         {

@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Jobs;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,15 +21,15 @@ namespace EditorInterface.Jobs
     /// </summary>
     public partial class JobsListWindow : Window
     {
-        public IList<IJob> jobs;
+        public IList<IJobDTO> jobs;
 
-        private Manager manager;
+        private DTOManager manager;
 
         public JobsListWindow()
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             jobs = manager.Jobs.Values.ToList();
 
@@ -43,7 +43,7 @@ namespace EditorInterface.Jobs
 
         private void NewJob(object sender, RoutedEventArgs e)
         {
-            var job = new Job
+            var job = new JobDTO
             {
                 Id = manager.NewJobId,
                 Name = ""
@@ -58,11 +58,11 @@ namespace EditorInterface.Jobs
 
         private void CopyJob(object sender, RoutedEventArgs e)
         {
-            var selected = ((Job)JobsGrid.SelectedItem);
+            var selected = ((JobDTO)JobsGrid.SelectedItem);
             if (selected == null)
                 return;
 
-            var job = new Job
+            var job = new JobDTO
             {
                 Id = manager.NewJobId,
                 Labor = selected.Labor,
@@ -81,7 +81,7 @@ namespace EditorInterface.Jobs
 
         private void EditJob(object sender, RoutedEventArgs e)
         {
-            var selected = ((Job)JobsGrid.SelectedItem);
+            var selected = ((JobDTO)JobsGrid.SelectedItem);
             if (selected == null)
                 return;
 
@@ -94,7 +94,7 @@ namespace EditorInterface.Jobs
 
         private void DeleteJob(object sender, RoutedEventArgs e)
         {
-            var selected = ((Job)JobsGrid.SelectedItem);
+            var selected = ((JobDTO)JobsGrid.SelectedItem);
             if (selected == null)
                 return;
 

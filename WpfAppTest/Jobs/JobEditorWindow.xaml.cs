@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Jobs;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,17 +21,17 @@ namespace EditorInterface.Jobs
     /// </summary>
     public partial class JobEditorWindow : Window
     {
-        private Job job;
-        private Manager manager;
+        private JobDTO job;
+        private DTOManager manager;
         private JobViewModel viewModel;
 
         public JobEditorWindow()
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
-            job = new Job();
+            job = new JobDTO();
             job.Id = manager.NewJobId;
 
 
@@ -39,7 +39,7 @@ namespace EditorInterface.Jobs
             DataContext = viewModel;
         }
 
-        public JobEditorWindow(Job job)
+        public JobEditorWindow(JobDTO job)
         {
             InitializeComponent();
 

@@ -1,5 +1,6 @@
 ﻿using EconomicCalculator.Objects.Processes.ProcessTags;
 using EconomicCalculator.Objects.Skills;
+using EconomicCalculator.Objects.Technology;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,6 +128,11 @@ namespace EconomicCalculator.Objects.Processes
         /// The Icon for the process
         /// </summary>
         string Icon { get; }
+
+        /// <summary>
+        /// The tech required see/do this process.
+        /// </summary>
+        ITechnology TechRequirement { get; }
 
         /// <summary>
         /// Get the Name(VariantName) of the process in

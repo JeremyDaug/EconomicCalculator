@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EditorInterface.Wants"
         xmlns:valid="clr-namespace:EditorInterface.ValidationRules"
         mc:Ignorable="d"
-        xmlns:src="clr-namespace:EconDTOs.DTOs.Wants;assembly=EconModels"
+        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Wants;assembly=EconomicCalculator"
         Style="{StaticResource SharedMenu}"
         Title="WantWindow" Height="250" Width="500">
     <Window.CommandBindings>
@@ -16,7 +16,7 @@
         <KeyBinding Key="Esc" Command="Close"/>
     </Window.InputBindings>
     <Window.Resources>
-        <src:Want x:Key="want"/>
+        <src:WantDTO x:Key="want"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>

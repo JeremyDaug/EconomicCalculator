@@ -10,9 +10,10 @@ using System.Threading.Tasks;
 
 namespace EconomicCalculator.Objects
 {
-    internal static class RequiredItems
+    public static class RequiredItems
     {
         private static Dictionary<string, IProduct> _products = new Dictionary<string, IProduct>();
+        private static Dictionary<string, IWant> _wants = new Dictionary<string, IWant>();
 
         public readonly static IWant Land = new Want
         {
@@ -21,6 +22,32 @@ namespace EconomicCalculator.Objects
             Description = "A space of land, roughly 1/8 of an acre in size."
         };
 
+        /// <summary>
+        /// Abstract land which all other lands are variations of .
+        /// </summary>
+        public readonly static IProduct AbstractLand = new Product
+        {
+            Id = 0,
+            Name = "Land",
+            VariantName = "",
+            UnitName = "1/8 Acre",
+            Quality = 0,
+            Mass = 0,
+            Bulk = 0,
+            Fractional = false,
+            _wants = new List<Tuple<IWant, decimal>>
+                    {
+                        new Tuple<IWant, decimal>(Land, 1)
+                    },
+            _productTags = new Dictionary<ProductTag, List<object>>
+                    {
+                        {ProductTag.Fixed, null},
+                        {ProductTag.Nondegrading, null},
+                        {ProductTag.Storage, new List<object>{"All", 1000, -1} },
+                        {ProductTag.Abstract, null},
+                    },
+            Icon = ""
+        };
         public readonly static IProduct Wasteland = new Product
         {
             Id = 0,
@@ -169,6 +196,7 @@ namespace EconomicCalculator.Objects
 
                     // Standard Lands Set
                     // Lands (Wasteland, Marginal, Scrub, Quality, Fertile, Very Fertile)
+                    _products[AbstractLand.Name] = AbstractLand;
                     _products[Wasteland.VariantName] = Wasteland;
                     _products[MarginalLand.VariantName] = MarginalLand;
                     _products[Scrubland.VariantName] = Scrubland;
@@ -190,5 +218,21 @@ namespace EconomicCalculator.Objects
             (FertileLand, 1.2M),
             (VeryFertileLand, 1.4M)
         };
+
+        /// <summary>
+        /// The wants required by the system.
+        /// </summary>
+        public static IReadOnlyDictionary<string, IWant> Wants
+        {
+            get
+            {
+                if (_wants.Count == 0)
+                {
+                    _wants[Land.Name] = Land;
+                }
+
+                return _wants;
+            }
+        }
     }
 }

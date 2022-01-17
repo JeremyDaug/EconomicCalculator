@@ -12,20 +12,20 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using EconDTOs;
-using EconDTOs.DTOs;
-using EconDTOs.DTOs.Processes;
-using EconDTOs.DTOs.Processes.ProcessTags;
-using EconDTOs.DTOs.Processes.ProductionTags;
-using EconDTOs.DTOs.Products;
+using EconomicCalculator;
+using EconomicCalculator.DTOs;
+using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProcessTags;
+using EconomicCalculator.DTOs.Processes.ProductionTags;
+using EconomicCalculator.DTOs.Products;
 using EditorInterface.Helpers;
 
 namespace EditorInterface.ProcessWindows
 {
     public class ProcessViewModel : INotifyPropertyChanged
     {
-        private Process process;
-        private Manager manager;
+        private ProcessDTO process;
+        private DTOManager manager;
         public ProcessModel model;
 
         private ICommand commit;
@@ -47,11 +47,11 @@ namespace EditorInterface.ProcessWindows
         private Bitmap iconBitmap;
         private string selectedProduct;
 
-        public ProcessViewModel(Process process)
+        public ProcessViewModel(ProcessDTO process)
         {
             model = new ProcessModel(process);
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             AvailableSkills = new ObservableCollection<string>
                 (manager.Skills.Values.Select(x => x.Name));
@@ -421,53 +421,53 @@ namespace EditorInterface.ProcessWindows
             }
         }
 
-        public ObservableCollection<IProcessProduct> InputProducts
+        public ObservableCollection<IProcessProductDTO> InputProducts
         {
             get => model.InputProducts;
             private set => model.InputProducts = value;
         }
 
-        public IProcessProduct SelectedInputProduct { get; set; }
+        public IProcessProductDTO SelectedInputProduct { get; set; }
 
-        public ObservableCollection<IProcessWant> InputWants
+        public ObservableCollection<IProcessWantDTO> InputWants
         {
             get => model.InputWants;
             private set => model.InputWants = value;
         }
 
-        public IProcessProduct SelectedInputWant { get; set; }
+        public IProcessProductDTO SelectedInputWant { get; set; }
 
-        public ObservableCollection<IProcessProduct> CapitalProducts
+        public ObservableCollection<IProcessProductDTO> CapitalProducts
         {
             get => model.CapitalProducts;
             private set => model.CapitalProducts = value;
         }
 
-        public IProcessProduct SelectedCapitalProduct { get; set; }
+        public IProcessProductDTO SelectedCapitalProduct { get; set; }
 
-        public ObservableCollection<IProcessWant> CapitalWants
+        public ObservableCollection<IProcessWantDTO> CapitalWants
         {
             get => model.CapitalWants;
             private set => model.CapitalWants = value;
         }
 
-        public IProcessProduct SelectedCapitalWant { get; set; }
+        public IProcessProductDTO SelectedCapitalWant { get; set; }
 
-        public ObservableCollection<IProcessProduct> OutputProducts
+        public ObservableCollection<IProcessProductDTO> OutputProducts
         {
             get => model.OutputProducts;
             private set => model.OutputProducts = value;
         }
 
-        public IProcessProduct SelectedOutputProduct { get; set; }
+        public IProcessProductDTO SelectedOutputProduct { get; set; }
 
-        public ObservableCollection<IProcessWant> OutputWants
+        public ObservableCollection<IProcessWantDTO> OutputWants
         {
             get => model.OutputWants;
             private set => model.OutputWants = value;
         }
 
-        public IProcessProduct SelectedOutputWant { get; set; }
+        public IProcessProductDTO SelectedOutputWant { get; set; }
 
         public ObservableCollection<string> AvailableProducts { get; set; }
 
@@ -1017,7 +1017,7 @@ namespace EditorInterface.ProcessWindows
 
             // wants and products should be confirmed safely up to this point and no
             // more checking should be required
-            var newProc = new Process
+            var newProc = new ProcessDTO
             {
                 Id = process.Id,
                 Name = ProcessName.Trim(),
@@ -1192,7 +1192,7 @@ namespace EditorInterface.ProcessWindows
             if (Failure)
             {
                 var prod = manager.Products[process.InputProducts.First().ProductId];
-                ((Product)prod).Failure = process;
+                ((ProductDTO)prod).Failure = process;
             }
 
             manager.Processes[process.Id] = process;
@@ -1278,7 +1278,7 @@ namespace EditorInterface.ProcessWindows
 
         private void NewProduct(ProcessSection sec)
         {
-            var prod = new ProcessProduct();
+            var prod = new ProcessProductDTO();
 
             var win = new ProcessProductWindow(prod, sec);
 
@@ -1352,7 +1352,7 @@ namespace EditorInterface.ProcessWindows
             }
         }
 
-        public void EditProduct(ProcessProduct prod, ProcessSection sec)
+        public void EditProduct(ProcessProductDTO prod, ProcessSection sec)
         {
             var win = new ProcessProductWindow(prod, sec);
 
@@ -1429,7 +1429,7 @@ namespace EditorInterface.ProcessWindows
 
         private void DeleteProduct(ProcessSection sec)
         {
-            IProcessProduct selected = null;
+            IProcessProductDTO selected = null;
 
             switch (sec)
             {
@@ -1511,7 +1511,7 @@ namespace EditorInterface.ProcessWindows
 
         private void NewWant(ProcessSection sec)
         {
-            var want = new ProcessWant();
+            var want = new ProcessWantDTO();
 
             var win = new ProcessWantWindow(want, sec);
 
@@ -1536,7 +1536,7 @@ namespace EditorInterface.ProcessWindows
             }
         }
 
-        public void EditWant(ProcessWant want, ProcessSection sec)
+        public void EditWant(ProcessWantDTO want, ProcessSection sec)
         {
             var win = new ProcessWantWindow(want, sec);
 
@@ -1566,7 +1566,7 @@ namespace EditorInterface.ProcessWindows
 
         private void DeleteWant(ProcessSection sec)
         {
-            ProcessWant selected = null;
+            ProcessWantDTO selected = null;
 
             switch (sec)
             {
@@ -1647,7 +1647,7 @@ namespace EditorInterface.ProcessWindows
                         if (Failure || Consumption)
                             InputProducts.Clear();
 
-                        var newInput = new ProcessProduct();
+                        var newInput = new ProcessProductDTO();
                         newInput.ProductName = SelectedProduct;
                         newInput.Amount = 1;
 
@@ -1674,7 +1674,7 @@ namespace EditorInterface.ProcessWindows
                     {
                         // clear old products that are unacceptable
 
-                        var newCap = new ProcessProduct();
+                        var newCap = new ProcessProductDTO();
                         newCap.ProductName = SelectedProduct;
                         newCap.Amount = 1;
 
@@ -1699,7 +1699,7 @@ namespace EditorInterface.ProcessWindows
                     // if true add our selected product.
                     if (Maintenance)
                     {
-                        var newOutput = new ProcessProduct();
+                        var newOutput = new ProcessProductDTO();
                         newOutput.ProductName = SelectedProduct;
                         newOutput.Amount = 1;
 
@@ -1732,7 +1732,7 @@ namespace EditorInterface.ProcessWindows
                 }
 
                 // add new product
-                var newProd = new ProcessProduct();
+                var newProd = new ProcessProductDTO();
                 newProd.ProductName = newProduct;
                 newProd.Amount = 1;
 
@@ -1748,7 +1748,7 @@ namespace EditorInterface.ProcessWindows
                 }
 
                 // add new
-                var newCap = new ProcessProduct();
+                var newCap = new ProcessProductDTO();
                 newCap.ProductName = newProduct;
                 newCap.Amount = 1;
 

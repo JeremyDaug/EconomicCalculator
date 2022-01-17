@@ -11,9 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using EconDTOs;
-using EconDTOs.DTOs.Products;
-using EconDTOs.DTOs.Wants;
+using EconomicCalculator;
+using EconomicCalculator.DTOs.Products;
+using EconomicCalculator.DTOs.Wants;
 using EditorInterface.Wants;
 
 namespace EditorInterface.Products
@@ -23,13 +23,13 @@ namespace EditorInterface.Products
     /// </summary>
     public partial class ProductListWindow : Window
     {
-        private Manager manager;
+        private DTOManager manager;
 
         public ProductListWindow()
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             //manager.LoadAll();
 
@@ -38,7 +38,7 @@ namespace EditorInterface.Products
 
         private void NewProduct(object sender, RoutedEventArgs e)
         {
-            var newProduct = new Product();
+            var newProduct = new ProductDTO();
 
             newProduct.Id = manager.NewProductId;
 
@@ -51,7 +51,7 @@ namespace EditorInterface.Products
 
         private void NewWant(object sender, RoutedEventArgs e)
         {
-            var newWant = new Want();
+            var newWant = new WantDTO();
 
             newWant.Id = manager.NewWantId;
             Window win = new WantWindow(newWant);
@@ -63,7 +63,7 @@ namespace EditorInterface.Products
 
         private void EditProduct(object sender, RoutedEventArgs e)
         {
-            var selected = (Product)ProductGrid.SelectedItem;
+            var selected = (ProductDTO)ProductGrid.SelectedItem;
 
             if (selected == null)
                 return;
@@ -93,9 +93,9 @@ namespace EditorInterface.Products
 
         private void CopyProduct(object sender, RoutedEventArgs e)
         {
-            var selected = (Product)ProductGrid.SelectedItem;
+            var selected = (ProductDTO)ProductGrid.SelectedItem;
 
-            var dup = new Product(selected);
+            var dup = new ProductDTO(selected);
 
             dup.Id = manager.NewProductId;
 

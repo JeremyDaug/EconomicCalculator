@@ -1,5 +1,5 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Skills;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Skills;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,16 +21,16 @@ namespace EditorInterface.Skills
     /// </summary>
     public partial class SkillsListWindow : Window
     {
-        public IList<ISkill> skills;
-        public IList<ISkillGroup> skillGroups;
+        public IList<ISkillDTO> skills;
+        public IList<ISkillGroupDTO> skillGroups;
 
-        private Manager manager;
+        private DTOManager manager;
 
         public SkillsListWindow()
         {
             InitializeComponent();
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             skills = manager.Skills.Values.ToList();
             skillGroups = manager.SkillGroups.Values.ToList();
@@ -41,7 +41,7 @@ namespace EditorInterface.Skills
 
         private void NewSkill(object sender, RoutedEventArgs e)
         {
-            var newSkill = new Skill
+            var newSkill = new SkillDTO
             {
                 Id = manager.NewSKillId,
                 Name = "",
@@ -57,7 +57,7 @@ namespace EditorInterface.Skills
 
         private void EditSkill(object sender, RoutedEventArgs e)
         {
-            var selected = ((Skill)SkillList.SelectedItem);
+            var selected = ((SkillDTO)SkillList.SelectedItem);
             if (selected == null)
                 return;
 
@@ -70,11 +70,11 @@ namespace EditorInterface.Skills
 
         private void CopySkill(object sender, RoutedEventArgs e)
         {
-            var selected = ((Skill)SkillList.SelectedItem);
+            var selected = ((SkillDTO)SkillList.SelectedItem);
             if (selected == null)
                 return;
 
-            var copy = new Skill
+            var copy = new SkillDTO
             {
                 Id = manager.NewSKillId,
                 Name = selected.Name,
@@ -94,7 +94,7 @@ namespace EditorInterface.Skills
 
         private void NewGroup(object sender, RoutedEventArgs e)
         {
-            var newGroup = new SkillGroup
+            var newGroup = new SkillGroupDTO
             {
                 Id = manager.NewSkillGroupId,
                 Name = "",
@@ -110,7 +110,7 @@ namespace EditorInterface.Skills
 
         private void EditGroup(object sender, RoutedEventArgs e)
         {
-            var selected = ((SkillGroup)GroupList.SelectedItem);
+            var selected = ((SkillGroupDTO)GroupList.SelectedItem);
             if (selected == null)
                 return;
 
@@ -123,11 +123,11 @@ namespace EditorInterface.Skills
 
         private void CopyGroup(object sender, RoutedEventArgs e)
         {
-            var selected = ((SkillGroup)GroupList.SelectedItem);
+            var selected = ((SkillGroupDTO)GroupList.SelectedItem);
             if (selected == null)
                 return;
 
-            var copy = new SkillGroup
+            var copy = new SkillGroupDTO
             {
                 Id = manager.NewSkillGroupId,
                 Name = selected.Name,

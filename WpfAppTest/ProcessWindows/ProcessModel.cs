@@ -1,5 +1,5 @@
-﻿using EconDTOs.DTOs.Processes;
-using EconDTOs.DTOs.Processes.ProcessTags;
+﻿using EconomicCalculator.DTOs.Processes;
+using EconomicCalculator.DTOs.Processes.ProcessTags;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace EditorInterface.ProcessWindows
 {
     public class ProcessModel : INotifyPropertyChanged
     {
-        private Process process;
+        private ProcessDTO process;
 
         private int id;
         private string name;
@@ -38,7 +38,7 @@ namespace EditorInterface.ProcessWindows
         private string selectedProduct;
         private string selectedImage;
 
-        public ProcessModel(Process process)
+        public ProcessModel(ProcessDTO process)
         {
             ProcessId = process.Id;
             Name = process.Name;
@@ -50,12 +50,12 @@ namespace EditorInterface.ProcessWindows
             Description = process.Description;
             selectedImage = process.Icon;
 
-            InputProducts = new ObservableCollection<IProcessProduct>(process.InputProducts);
-            InputWants = new ObservableCollection<IProcessWant>(process.InputWants);
-            CapitalProducts = new ObservableCollection<IProcessProduct>(process.CapitalProducts);
-            CapitalWants = new ObservableCollection<IProcessWant>(process.CapitalWants);
-            OutputProducts = new ObservableCollection<IProcessProduct>(process.OutputProducts);
-            OutputWants = new ObservableCollection<IProcessWant>(process.OutputWants);
+            InputProducts = new ObservableCollection<IProcessProductDTO>(process.InputProducts);
+            InputWants = new ObservableCollection<IProcessWantDTO>(process.InputWants);
+            CapitalProducts = new ObservableCollection<IProcessProductDTO>(process.CapitalProducts);
+            CapitalWants = new ObservableCollection<IProcessWantDTO>(process.CapitalWants);
+            OutputProducts = new ObservableCollection<IProcessProductDTO>(process.OutputProducts);
+            OutputWants = new ObservableCollection<IProcessWantDTO>(process.OutputWants);
 
             Failure = process.Tags
                 .Any(x => x.Tag == ProcessTag.Failure);
@@ -233,17 +233,17 @@ namespace EditorInterface.ProcessWindows
             }
         }
 
-        public ObservableCollection<IProcessProduct> InputProducts { get; set; }
+        public ObservableCollection<IProcessProductDTO> InputProducts { get; set; }
 
-        public ObservableCollection<IProcessWant> InputWants { get; set; }
+        public ObservableCollection<IProcessWantDTO> InputWants { get; set; }
 
-        public ObservableCollection<IProcessProduct> CapitalProducts { get; set; }
+        public ObservableCollection<IProcessProductDTO> CapitalProducts { get; set; }
 
-        public ObservableCollection<IProcessWant> CapitalWants { get; set; }
+        public ObservableCollection<IProcessWantDTO> CapitalWants { get; set; }
 
-        public ObservableCollection<IProcessProduct> OutputProducts { get; set; }
+        public ObservableCollection<IProcessProductDTO> OutputProducts { get; set; }
 
-        public ObservableCollection<IProcessWant> OutputWants { get; set; }
+        public ObservableCollection<IProcessWantDTO> OutputWants { get; set; }
 
         public bool Failure
         {

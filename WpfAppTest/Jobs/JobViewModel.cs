@@ -1,6 +1,6 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Jobs;
-using EconDTOs.DTOs.Products.ProductTags;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Jobs;
+using EconomicCalculator.DTOs.Products.ProductTags;
 using EditorInterface.Helpers;
 using System;
 using System.Collections.Generic;
@@ -17,8 +17,8 @@ namespace EditorInterface.Jobs
 {
     public class JobViewModel : INotifyPropertyChanged
     {
-        private Job job;
-        private Manager manager;
+        private JobDTO job;
+        private DTOManager manager;
         private JobModel model;
 
         private ICommand shiftToJob;
@@ -27,11 +27,11 @@ namespace EditorInterface.Jobs
         private string _selectedProc;
         private string _selectedProcInJob;
 
-        public JobViewModel(Job job)
+        public JobViewModel(JobDTO job)
         {
             this.job = job;
 
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             model = new JobModel(job);
 
@@ -137,7 +137,7 @@ namespace EditorInterface.Jobs
             // no processes required.
 
             // save
-            var newJob = new Job
+            var newJob = new JobDTO
             {
                 Id = job.Id,
                 Name = model.Name,

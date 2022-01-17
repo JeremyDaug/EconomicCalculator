@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>EditorInterface.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
@@ -235,9 +238,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EconModels\EconDTOs.csproj">
-      <Project>{8E205D41-9825-45F0-8F73-3002277FAF32}</Project>
-      <Name>EconDTOs</Name>
+    <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
+      <Project>{b912ac5b-4dfe-4d8c-83ab-de9a0f2a4b0e}</Project>
+      <Name>EconomicCalculator</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

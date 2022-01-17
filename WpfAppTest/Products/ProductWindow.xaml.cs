@@ -1,6 +1,6 @@
-﻿using EconDTOs;
-using EconDTOs.DTOs.Products;
-using EconDTOs.DTOs.Products.ProductTags;
+﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Products;
+using EconomicCalculator.DTOs.Products.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,8 +26,8 @@ namespace EditorInterface.Products
     /// </summary>
     public partial class ProductWindow : Window
     {
-        private Manager manager;
-        private Product product;
+        private DTOManager manager;
+        private ProductDTO product;
 
         private List<WantWeight> wants;
         private List<string> availableWants;
@@ -39,9 +39,9 @@ namespace EditorInterface.Products
             InitializeComponent();
 
             // get the manager
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
-            product = new Product();
+            product = new ProductDTO();
 
             product.Id = manager.NewProductId;
 
@@ -57,10 +57,10 @@ namespace EditorInterface.Products
             TagGrid.ItemsSource = ProductTags;
         }
 
-        public ProductWindow(Product product)
+        public ProductWindow(ProductDTO product)
         {
             // get manager
-            manager = Manager.Instance;
+            manager = DTOManager.Instance;
 
             InitializeComponent();
 
@@ -131,7 +131,7 @@ namespace EditorInterface.Products
             try
             {
                 // easy product stuff.
-                product = new Product
+                product = new ProductDTO
                 {
                     Id = product.Id,
                     Name = ProductName.Text.Trim(),
