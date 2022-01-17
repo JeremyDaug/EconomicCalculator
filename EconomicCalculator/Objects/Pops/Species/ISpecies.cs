@@ -37,12 +37,12 @@ namespace EconomicCalculator.Objects.Pops.Species
         /// <summary>
         /// The Product desires a species has by default.
         /// </summary>
-        IReadOnlyList<(IProduct, decimal, DesireTier)> Needs { get; }
+        IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs { get; }
 
         /// <summary>
         /// The Wants desired by the species.
         /// </summary>
-        IReadOnlyList<(IWant, decimal, DesireTier)> Wants { get; }
+        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants { get; }
 
         /// <summary>
         /// The tags which modify how a species acts more broadly.

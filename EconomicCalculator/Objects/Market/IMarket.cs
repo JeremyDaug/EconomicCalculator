@@ -41,7 +41,7 @@ namespace EconomicCalculator.Objects.Market
         /// <summary>
         /// The governing body of the market.
         /// </summary>
-        IGovernor Governor { get; }
+        //IGovernor Governor { get; }
 
         /// <summary>
         /// The Territories the Market Contains.

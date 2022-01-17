@@ -5,6 +5,7 @@ using EconomicCalculator.Objects.Pops.Culture;
 using EconomicCalculator.Objects.Pops.Species;
 using EconomicCalculator.Objects.Products;
 using EconomicCalculator.Objects.Skills;
+using EconomicCalculator.Objects.Wants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,11 @@ namespace EconomicCalculator.Objects.Pops
         IMarket Market { get; }
 
         /// <summary>
+        /// The skill the pop has.
+        /// </summary>
+        ISkill Skill { get; }
+
+        /// <summary>
         /// Their level in the skill.
         /// Skill is contained at <see cref="Job.Skill"/>.
         /// </summary>
@@ -49,16 +55,26 @@ namespace EconomicCalculator.Objects.Pops
         /// <summary>
         /// The Property of the group.
         /// </summary>
-        IReadOnlyList<(IProduct, decimal)> Property { get; }
+        IReadOnlyList<(IProduct product, decimal amount)> Property { get; }
 
         /// <summary>
         /// The species that make up this pop.
         /// </summary>
-        IReadOnlyList<(ISpecies, int)> Species { get; }
+        IReadOnlyList<(ISpecies species, int amount)> Species { get; }
 
         /// <summary>
         /// The cultures that make up this pop.
         /// </summary>
-        IReadOnlyList<(ICulture, int)> Cultures { get; }
+        IReadOnlyList<(ICulture culture, int amount)> Cultures { get; }
+
+        /// <summary>
+        /// The products desired by this pop.
+        /// </summary>
+        IReadOnlyList<(IProduct prod, DesireTier tier, decimal amount)> Needs { get; }
+
+        /// <summary>
+        /// The wants desired by this pop.
+        /// </summary>
+        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants { get; }
     }
 }

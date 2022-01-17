@@ -42,12 +42,12 @@ namespace EconomicCalculator.Objects.Pops.Culture
         /// <summary>
         /// The products desired by this culture.
         /// </summary>
-        IReadOnlyList<(IProduct, decimal, DesireTier)> Needs { get; }
+        IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs { get; }
 
         /// <summary>
         /// The wants desired by this culture.
         /// </summary>
-        IReadOnlyList<(IWant, decimal, DesireTier)> Wants { get; }
+        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants { get; }
 
         /// <summary>
         /// The Culture's Tags.

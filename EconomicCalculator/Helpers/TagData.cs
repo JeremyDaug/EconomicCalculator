@@ -8,9 +8,20 @@ namespace EconomicCalculator.Helpers
 {
     internal class TagData<T> : ITagData<T> where T : Enum
     {
+
+
         public TagData()
         {
             data = new List<object>();
+        }
+
+        public TagData(T tag,  params object[] data )
+        {
+            if (data == null)
+                this.data = new List<object>();
+            else
+                this.data = new List<object>(data);
+            Tag = tag;
         }
 
         private List<object> data;

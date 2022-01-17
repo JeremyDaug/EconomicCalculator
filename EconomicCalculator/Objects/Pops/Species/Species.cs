@@ -14,17 +14,17 @@ namespace EconomicCalculator.Objects.Pops.Species
     /// </summary>
     internal class Species : ISpecies
     {
-        public List<(IWant, decimal, DesireTier)> wants;
+        public List<(IWant, DesireTier, decimal)> wants;
         public List<ITagData<SpeciesTag>> tags;
         public List<ISpecies> relatedSpecies;
-        public List<(IProduct, decimal, DesireTier)> needs;
+        public List<(IProduct, DesireTier, decimal)> needs;
 
         public Species()
         {
-            wants = new List<(IWant, decimal, DesireTier)>();
+            wants = new List<(IWant, DesireTier, decimal)>();
             tags = new List<ITagData<SpeciesTag>>();
             relatedSpecies = new List<ISpecies>();
-            needs = new List<(IProduct, decimal, DesireTier)>();
+            needs = new List<(IProduct, DesireTier, decimal)>();
         }
 
         /// <summary>
@@ -50,12 +50,12 @@ namespace EconomicCalculator.Objects.Pops.Species
         /// <summary>
         /// The Products desired by the species.
         /// </summary>
-        public IReadOnlyList<(IProduct, decimal, DesireTier)> Needs => needs;
+        public IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs => needs;
 
         /// <summary>
         /// The wants desired by the species.
         /// </summary>
-        public IReadOnlyList<(IWant, decimal, DesireTier)> Wants => wants;
+        public IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants => wants;
 
         /// <summary>
         /// The Tags attached to the species and  their data.

@@ -15,8 +15,8 @@ namespace EconomicCalculator.Objects.Pops.Culture
     internal class Culture : ICulture
     {
         private readonly IReadOnlyList<ITagData<CultureTags>> tags;
-        private readonly IReadOnlyList<(IWant, decimal, DesireTier)> wants;
-        private readonly IReadOnlyList<(IProduct, decimal, DesireTier)> needs;
+        private readonly IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> wants;
+        private readonly IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> needs;
 
         /// <summary>
         /// The Culture's Id.
@@ -46,12 +46,12 @@ namespace EconomicCalculator.Objects.Pops.Culture
         /// <summary>
         /// The products desired by members of the culture.
         /// </summary>
-        public IReadOnlyList<(IProduct, decimal, DesireTier)> Needs => needs;
+        public IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs => needs;
 
         /// <summary>
         /// Wants desired by members of the Culture.
         /// </summary>
-        public IReadOnlyList<(IWant, decimal, DesireTier)> Wants => wants;
+        public IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants => wants;
         
         /// <summary>
         /// The Culture's Tags.

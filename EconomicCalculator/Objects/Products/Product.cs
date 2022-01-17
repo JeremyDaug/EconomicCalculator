@@ -16,13 +16,13 @@ namespace EconomicCalculator.Objects.Products
     /// </summary>
     internal class Product : IProduct
     {
-        private List<IProcess> _productProcesses;
-        private List<ITagData<ProductTag>> _productTags;
-        private List<Tuple<IWant, decimal>> _wants;
+        public List<IProcess> _productProcesses;
+        public Dictionary<ProductTag, List<object>> _productTags;
+        public List<Tuple<IWant, decimal>> _wants;
 
         public Product()
         {
-            _productTags = new List<ITagData<ProductTag>>();
+            _productTags = new Dictionary<ProductTag, List<object>>();
             _wants = new List<Tuple<IWant, decimal>>();
             _productProcesses = new List<IProcess>();
         }
@@ -82,7 +82,7 @@ namespace EconomicCalculator.Objects.Products
         /// <summary>
         /// THe tags of the product.
         /// </summary>
-        public IReadOnlyList<ITagData<ProductTag>> ProductTags { get => _productTags; }
+        public IReadOnlyDictionary<ProductTag, List<object>> ProductTags { get => _productTags; }
 
         /// <summary>
         /// What wants the product satisfies by just owning.

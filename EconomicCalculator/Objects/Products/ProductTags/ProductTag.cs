@@ -127,6 +127,11 @@ namespace EconomicCalculator.Objects.Products.ProductTags
         /// a defined volume and mass. Setting either to -1 gives it infinite
         /// storage (IE magical Storage).
         /// </summary>
-        Storage
+        Storage,
+        /// <summary>
+        /// Nondegrading
+        /// The product does not degrade, any 'failure' roll is skipped for it.
+        /// </summary>
+        Nondegrading
     }
 }
