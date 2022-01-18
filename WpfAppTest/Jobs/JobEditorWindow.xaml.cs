@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace EditorInterface.Jobs
+namespace Editor.Jobs
 {
     /// <summary>
     /// Interaction logic for JobEditorWindow.xaml

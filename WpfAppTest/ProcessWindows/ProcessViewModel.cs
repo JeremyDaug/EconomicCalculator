@@ -18,9 +18,9 @@ using EconomicCalculator.DTOs.Processes;
 using EconomicCalculator.DTOs.Processes.ProcessTags;
 using EconomicCalculator.DTOs.Processes.ProductionTags;
 using EconomicCalculator.DTOs.Products;
-using EditorInterface.Helpers;
+using Editor.Helpers;
 
-namespace EditorInterface.ProcessWindows
+namespace Editor.ProcessWindows
 {
     public class ProcessViewModel : INotifyPropertyChanged
     {

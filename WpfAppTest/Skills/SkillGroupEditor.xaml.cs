@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace EditorInterface.Skills
+namespace Editor.Skills
 {
     /// <summary>
     /// Interaction logic for SkillGroupEditor.xaml

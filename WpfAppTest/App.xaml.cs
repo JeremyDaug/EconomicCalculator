@@ -5,12 +5,12 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using EditorInterface.Products;
-using EditorInterface.Wants;
-using EditorInterface.OpeningWindows;
+using Editor.Products;
+using Editor.Wants;
+using Editor.OpeningWindows;
 using EconomicCalculator;
 
-namespace EditorInterface
+namespace Editor
 {
     /// <summary>
     /// Interaction logic for App.xaml

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace EditorInterface.ValidationRules
+namespace Editor.ValidationRules
 {
     class NoEmptyStringValidationRule : ValidationRule
     {

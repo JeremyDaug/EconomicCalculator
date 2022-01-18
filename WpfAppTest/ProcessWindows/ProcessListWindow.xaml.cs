@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace EditorInterface.ProcessWindows
+namespace Editor.ProcessWindows
 {
     /// <summary>
     /// Interaction logic for ProcessListWindow.xaml

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace EditorInterface.Products
+namespace Editor.Products
 {
     public class WantWeight : INotifyPropertyChanged
     {

@@ -14,9 +14,9 @@ using System.Windows.Shapes;
 using EconomicCalculator;
 using EconomicCalculator.DTOs.Products;
 using EconomicCalculator.DTOs.Wants;
-using EditorInterface.Wants;
+using Editor.Wants;
 
-namespace EditorInterface.Products
+namespace Editor.Products
 {
     /// <summary>
     /// Interaction logic for ProductListWindow.xaml

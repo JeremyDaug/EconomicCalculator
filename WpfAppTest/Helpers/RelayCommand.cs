@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace EditorInterface.Helpers
+namespace Editor.Helpers
 {
     public class RelayCommand : ICommand
     {

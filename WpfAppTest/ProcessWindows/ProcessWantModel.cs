@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EditorInterface.ProcessWindows
+namespace Editor.ProcessWindows
 {
     public class ProcessWantModel : INotifyPropertyChanged
     {

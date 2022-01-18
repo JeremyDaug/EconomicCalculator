@@ -19,7 +19,7 @@ using System.Windows.Shapes;
 using WpfAppTest.Products;
 using MessageBox = System.Windows.MessageBox;
 
-namespace EditorInterface.Products
+namespace Editor.Products
 {
     /// <summary>
     /// Interaction logic for ProductWindow.xaml

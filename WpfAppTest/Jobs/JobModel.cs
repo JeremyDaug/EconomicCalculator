@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EditorInterface.Jobs
+namespace Editor.Jobs
 {
     public class JobModel : INotifyPropertyChanged
     {

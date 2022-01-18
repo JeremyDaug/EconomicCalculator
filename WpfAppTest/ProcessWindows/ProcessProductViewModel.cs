@@ -1,7 +1,7 @@
 ﻿using EconomicCalculator;
 using EconomicCalculator.DTOs.Processes;
 using EconomicCalculator.DTOs.Processes.ProductionTags;
-using EditorInterface.Helpers;
+using Editor.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace EditorInterface.ProcessWindows
+namespace Editor.ProcessWindows
 {
     public class ProcessProductViewModel : INotifyPropertyChanged
     {

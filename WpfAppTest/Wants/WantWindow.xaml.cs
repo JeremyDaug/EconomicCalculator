@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace EditorInterface.Wants
+namespace Editor.Wants
 {
     /// <summary>
     /// Interaction logic for WantWindow.xaml

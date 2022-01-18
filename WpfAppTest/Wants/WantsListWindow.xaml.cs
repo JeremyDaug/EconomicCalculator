@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
-namespace EditorInterface.Wants
+namespace Editor.Wants
 {
     /// <summary>
     /// Interaction logic for WantsListWindow.xaml

@@ -1,4 +1,4 @@
-﻿namespace EditorInterface.Products
+﻿namespace Editor.Products
 {
     public class TagData
     {
