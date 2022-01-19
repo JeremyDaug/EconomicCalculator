@@ -78,7 +78,7 @@ namespace EconomicCalculator.Objects.Products
         /// Item1 is the want it applies to
         /// Item2 is how much it gives (or takes)
         /// </summary>
-        IReadOnlyList<Tuple<IWant, decimal>> Wants { get; }
+        IReadOnlyList<(IWant want, decimal amount)> Wants { get; }
 
         /// <summary>
         /// Other processes related to this product.

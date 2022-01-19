@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
+using EconomicCalculator.DTOs.Products;
+using EconomicCalculator.DTOs.Wants;
 using EconomicCalculator.Objects.Products;
+using EconomicCalculator.Objects.Products.ProductTags;
 using EconomicCalculator.Objects.Wants;
 using System;
 using System.Collections.Generic;
@@ -13,10 +16,55 @@ namespace EconomicCalculator.Objects
     {
         public EconCalcAutomapperProfile()
         {
-            CreateMap<IWant, EconomicCalculator.DTOs.Wants.IWantDTO>()
-                .As<EconomicCalculator.DTOs.Wants.WantDTO>();
-            CreateMap<EconomicCalculator.DTOs.Wants.IWantDTO, IWant>()
-                .As<Want>();
+            CreateMap<Want, WantDTO>();
+
+
+
+            CreateMap<Product, ProductDTO>()
+                .ForMember(dest => dest.Wants,
+                           act => act.MapFrom(src => ProductWantsToProductDTOWants(src.Wants)))
+                .ForMember(dest => dest.WantStrings,
+                           act => act.MapFrom(src => 
+                               new List<string>(src.Wants
+                                   .Select(x => x.Item1.Name + "<" + x.Item2.ToString() + ">"))))
+                .ForMember(dest => dest.TagStrings,
+                           act => act.MapFrom(src => ProductTagToDTOString(src.ProductTags)));
+        }
+
+        private Dictionary<int, decimal> ProductWantsToProductDTOWants(IReadOnlyList<(IWant want, decimal amount)> wants)
+        {
+            var result = new Dictionary<int, decimal>();
+
+            foreach (var pair in wants)
+            {
+                result[pair.want.Id] = pair.amount;
+            }
+
+            return result;
+        }
+
+        private List<string> ProductTagToDTOString(IReadOnlyDictionary<ProductTag, List<object>> tags)
+        {
+            var result = new List<string>();
+
+            foreach (var tag in tags)
+            {
+                var tempTag = tag.Key.ToString();
+                // if tag params greater than 0, add those too.
+                if (tag.Value != null)
+                {
+                    tempTag += "<";
+                    foreach (var item in tag.Value)
+                    {
+                        tempTag += item.ToString() + ";";
+                    }
+                    // remove trailing ; and close >
+                    tempTag = tempTag.TrimEnd(';') + ">";
+
+                }
+                result.Add(tempTag);
+            }
+            return result;
         }
     }
 }

@@ -35,9 +35,9 @@ namespace EconomicCalculator.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            _wants = new List<Tuple<IWant, decimal>>
+            Wants = new List<(IWant want, decimal amount)>
                     {
-                        new Tuple<IWant, decimal>(Land, 1)
+                        (Land, 1)
                     },
             _productTags = new Dictionary<ProductTag, List<object>>
                     {
@@ -50,7 +50,7 @@ namespace EconomicCalculator.Objects
         };
         public readonly static IProduct Wasteland = new Product
         {
-            Id = 0,
+            Id = 1,
             Name = "Land",
             VariantName = "Wasteland",
             UnitName = "1/8 Acre",
@@ -58,9 +58,9 @@ namespace EconomicCalculator.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            _wants = new List<Tuple<IWant, decimal>>
+            Wants = new List<(IWant want, decimal amount)>
                     {
-                        new Tuple<IWant, decimal>(Land, 1)
+                        (Land, 1)
                     },
             _productTags = new Dictionary<ProductTag, List<object>>
                     {
@@ -72,7 +72,7 @@ namespace EconomicCalculator.Objects
         };
         public readonly static IProduct MarginalLand = new Product
         {
-            Id = 1,
+            Id = 2,
             Name = "Land",
             VariantName = "Marginal Land",
             UnitName = "1/8 Acre",
@@ -80,9 +80,9 @@ namespace EconomicCalculator.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            _wants = new List<Tuple<IWant, decimal>>
+            Wants = new List<(IWant want, decimal amount)>
                     {
-                        new Tuple<IWant, decimal>(Land, 1)
+                        (Land, 1)
                     },
             _productTags = new Dictionary<ProductTag, List<object>>
                     {
@@ -94,7 +94,7 @@ namespace EconomicCalculator.Objects
         };
         public readonly static IProduct Scrubland = new Product
         {
-            Id = 2,
+            Id = 3,
             Name = "Land",
             VariantName = "Scrubland",
             UnitName = "1/8 Acre",
@@ -102,9 +102,9 @@ namespace EconomicCalculator.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            _wants = new List<Tuple<IWant, decimal>>
+            Wants = new List<(IWant want, decimal amount)>
                     {
-                        new Tuple<IWant, decimal>(Land, 1)
+                        (Land, 1)
                     },
             _productTags = new Dictionary<ProductTag, List<object>>
                     {
@@ -116,7 +116,7 @@ namespace EconomicCalculator.Objects
         };
         public readonly static IProduct QualityLand = new Product
         {
-            Id = 3,
+            Id = 4,
             Name = "Land",
             VariantName = "Quality Land",
             UnitName = "1/8 Acre",
@@ -124,9 +124,9 @@ namespace EconomicCalculator.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            _wants = new List<Tuple<IWant, decimal>>
+            Wants = new List<(IWant want, decimal amount)>
                     {
-                        new Tuple<IWant, decimal>(Land, 1)
+                        (Land, 1)
                     },
             _productTags = new Dictionary<ProductTag, List<object>>
                     {
@@ -138,7 +138,7 @@ namespace EconomicCalculator.Objects
         };
         public readonly static IProduct FertileLand = new Product
         {
-            Id = 4,
+            Id = 5,
             Name = "Land",
             VariantName = "Fertile Land",
             UnitName = "1/8 Acre",
@@ -146,9 +146,9 @@ namespace EconomicCalculator.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            _wants = new List<Tuple<IWant, decimal>>
+            Wants = new List<(IWant want, decimal amount)>
                     {
-                        new Tuple<IWant, decimal>(Land, 1)
+                        (Land, 1)
                     },
             _productTags = new Dictionary<ProductTag, List<object>>
                     {
@@ -160,7 +160,7 @@ namespace EconomicCalculator.Objects
         };
         public readonly static IProduct VeryFertileLand = new Product
         {
-            Id = 5,
+            Id = 6,
             Name = "Land",
             VariantName = "Very Fertile Land",
             UnitName = "1/8 Acre",
@@ -168,9 +168,9 @@ namespace EconomicCalculator.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            _wants = new List<Tuple<IWant, decimal>>
+            Wants = new List<(IWant want, decimal amount)>
                     {
-                        new Tuple<IWant, decimal>(Land, 1)
+                        (Land, 1)
                     },
             _productTags = new Dictionary<ProductTag, List<object>>
                     {

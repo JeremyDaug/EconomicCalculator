@@ -268,7 +268,7 @@ namespace EconomicCalculator
         /// </summary>
         /// <param name="job">The job to check for.</param>
         /// <returns></returns>
-        public bool IsDupilcate(IJobDTO job)
+        public bool IsDuplicate(IJobDTO job)
         {
             var matches = Jobs
                 .Where(x => x.Value.Name == job.Name
@@ -655,6 +655,11 @@ namespace EconomicCalculator
             _newProductId = 0;
             foreach (var prod in prods)
             {
+                // Check that there are no dups on load. No dups allowed.
+                if (IsDuplicate(prod))
+                    throw new InvalidDataException(
+                        string.Format("Duplicate product of name '{0}' found. No duplicates allowd.", prod.GetName()));
+
                 prod.Id = NewProductId;
                 Products.Add(prod.Id, prod);
             }
@@ -672,6 +677,11 @@ namespace EconomicCalculator
             _newWantId = 0;
             foreach (var want in wants)
             {
+                // check for name clashes
+                if (Wants.Any(x => x.Value.Name == want.Name))
+                    throw new InvalidOperationException(
+                        string.Format("Want of the name '{0}' already exists. Cannot load duplicates.", want.Name));
+
                 want.Id = NewWantId;
                 Wants.Add(want.Id, want);
             }
@@ -894,7 +904,7 @@ namespace EconomicCalculator
         {
             var mapper = InitMapper();
 
-            // Load Required items
+            // Load Required Wants
             foreach (var item in RequiredItems.Wants.Values)
             {
                 var newWant = mapper.Map<WantDTO>(item);
@@ -904,20 +914,31 @@ namespace EconomicCalculator
             // Basic stuff loaded first
             LoadWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonWants.json");
 
+            // Load Tech Families
+
+            // Load Technologies
+
+            // load required products.
+            foreach (var item in RequiredItems.Products.Values)
+            {
+                var newProd = mapper.Map<ProductDTO>(item);
+                Products.Add(newProd.Id, newProd);
+            }
+
             // More advanced stuff next.
-            //LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
+            LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
 
             // Get all skill groups
-            //LoadSkillGroups(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkillGroups.json");
+            LoadSkillGroups(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkillGroups.json");
 
             // Get All Skills
-            //LoadSkills(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkills.json");
+            LoadSkills(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkills.json");
 
             // Get All Processes
-            //LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
+            LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
 
             // Get all Jobs.
-            //LoadJobs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonJobs.json");
+            LoadJobs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonJobs.json");
         }
 
         private Mapper InitMapper()

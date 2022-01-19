@@ -21,8 +21,6 @@ namespace Editor.Wants
 
             manager = DTOManager.Instance;
 
-            manager.LoadWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonWants.json");
-
             WantGrid.ItemsSource = manager.Wants.Values.ToList();
         }
 

@@ -20,10 +20,6 @@
 		"Description": "A rough measure of about 1 kw of energy released by the product."
 	},
 	{
-		"Name": "Land",
-		"Description": "A plot of land worth roughly 1/8 of an acre that can be built on or farmed."
-	},
-	{
 		"Name": "Life",
 		"Description": "The product is alive. Should only ever have 1."
 	},

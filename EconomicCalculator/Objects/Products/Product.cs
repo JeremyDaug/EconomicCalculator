@@ -19,12 +19,11 @@ namespace EconomicCalculator.Objects.Products
     {
         public List<IProcess> _productProcesses;
         public Dictionary<ProductTag, List<object>> _productTags;
-        public List<Tuple<IWant, decimal>> _wants;
 
         public Product()
         {
             _productTags = new Dictionary<ProductTag, List<object>>();
-            _wants = new List<Tuple<IWant, decimal>>();
+            Wants = new List<(IWant want, decimal amount)>();
             _productProcesses = new List<IProcess>();
         }
 
@@ -90,7 +89,9 @@ namespace EconomicCalculator.Objects.Products
         /// Item1 is the want it applies to
         /// Item2 is how much it gives (or takes)
         /// </summary>
-        public IReadOnlyList<Tuple<IWant, decimal>> Wants { get => _wants; }
+        public List<(IWant want, decimal amount)> Wants { get; set; }
+
+        IReadOnlyList<(IWant want, decimal amount)> IProduct.Wants => Wants;
 
         #region RelatedProcesses
 
