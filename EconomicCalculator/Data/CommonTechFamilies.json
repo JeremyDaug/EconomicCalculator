@@ -1,0 +1,18 @@
+[
+  {
+    "Name": "Physics",
+    "RelatedFamilyStrings": [
+      "Mathematics"
+    ],
+    "TechStrings": [],
+    "Description": "The study of the natural world through mathematics."
+  },
+  {
+    "Name": "Mathematics",
+    "RelatedFamilyStrings": [
+      "Physics"
+    ],
+    "TechStrings": [],
+    "Description": "The study of logical rules for the use of calculation."
+  }
+]

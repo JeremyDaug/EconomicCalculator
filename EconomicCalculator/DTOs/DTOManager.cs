@@ -19,6 +19,7 @@ using EconomicCalculator.DTOs;
 using EconomicCalculator.Objects;
 using AutoMapper;
 using EconomicCalculator.Objects.Wants;
+using EconomicCalculator.DTOs.Technology;
 
 namespace EconomicCalculator
 {
@@ -48,6 +49,7 @@ namespace EconomicCalculator
             SkillGroups = new Dictionary<int, ISkillGroupDTO>();
             Processes = new Dictionary<int, IProcessDTO>();
             Jobs = new Dictionary<int, IJobDTO>();
+            TechFamilies = new Dictionary<int, ITechFamilyDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -93,6 +95,8 @@ namespace EconomicCalculator
         public IDictionary<int, IProcessDTO> Processes { get; set; }
 
         public IDictionary<int, IJobDTO> Jobs { get; set; }
+
+        public IDictionary<int, ITechFamilyDTO> TechFamilies { get; set; }
 
         #endregion DataStorage
 
@@ -495,6 +499,21 @@ namespace EconomicCalculator
             }
         }
 
+        private int _newTechFamilyId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, job Id.
+        /// </summary>
+        public int NewTechFamilyId
+        {
+            get
+            {
+                while (TechFamilies.ContainsKey(_newTechFamilyId))
+                    ++_newTechFamilyId;
+                return _newTechFamilyId;
+            }
+        }
+
         #endregion NewIds
 
         /// <summary>
@@ -658,7 +677,8 @@ namespace EconomicCalculator
                 // Check that there are no dups on load. No dups allowed.
                 if (IsDuplicate(prod))
                     throw new InvalidDataException(
-                        string.Format("Duplicate product of name '{0}' found. No duplicates allowd.", prod.GetName()));
+                        string.Format("Duplicate product of name '{0}' found. No duplicates allowd.",
+                                prod.GetName()));
 
                 prod.Id = NewProductId;
                 Products.Add(prod.Id, prod);
@@ -816,6 +836,29 @@ namespace EconomicCalculator
             }
         }
 
+        public void LoadTechFamilies(string filename)
+        {
+            var json = File.ReadAllText(filename);
+
+            List<TechFamilyDTO> techFamilies = JsonSerializer.Deserialize<List<TechFamilyDTO>>(json);
+
+            _newJobId = 0;
+            foreach (var fam in techFamilies)
+            {
+                // ensure no duplicate tech family names.
+                if (TechFamilies.Values.Any(x => x.Name == fam.Name))
+                    throw new InvalidDataException(
+                        string.Format("Duplicate Tech Family of name '{0}' found. No duplicates allowd.", 
+                                 fam.Name));
+
+                fam.Id = NewTechFamilyId;
+                TechFamilies.Add(fam.Id, fam);
+            }
+
+            foreach (var fam in techFamilies)
+                fam.SetRelatedFamiliesFromStrings();
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -895,6 +938,19 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        /// <summary>
+        /// Save Tech Families to file.
+        /// </summary>
+        /// <param name="filename">The file to save it to.</param>
+        public void SaveTechFamilies(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(TechFamilies.Values.ToList(), options);
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -914,7 +970,8 @@ namespace EconomicCalculator
             // Basic stuff loaded first
             LoadWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonWants.json");
 
-            // Load Tech Families
+            // Get All Tech Families
+            LoadTechFamilies(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonTechFamilies.json");
 
             // Load Technologies
 

@@ -73,5 +73,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToTechFamilies(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.TechFamilies.TechFamiliesListWindow();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

@@ -54,6 +54,9 @@ namespace Editor.Wants
         {
             var selected = (WantDTO)WantGrid.SelectedItem;
 
+            if (selected == null)
+                return;
+
             Window win = new WantWindow(selected);
             win.ShowDialog();
 

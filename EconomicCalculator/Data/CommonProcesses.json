@@ -58,7 +58,7 @@
 		"InputWants": [],
 		"CapitalProducts": [
 			{
-				"ProductName": "Plot",
+				"ProductName": "Land",
 				"Amount": 1,
 				"TagStrings": []
 			}
@@ -133,7 +133,7 @@
 		"InputWants": [],
 		"CapitalProducts": [
 			{
-				"ProductName": "Plot",
+				"ProductName": "Land",
 				"Amount": 0.05,
 				"TagStrings": []
 			}
@@ -177,7 +177,7 @@
 		"InputWants": [],
 		"CapitalProducts": [
 			{
-				"ProductName": "Plot",
+				"ProductName": "Land",
 				"Amount": 0.05,
 				"TagStrings": []
 			}
@@ -245,7 +245,7 @@
 		"InputWants": [],
 		"CapitalProducts": [
 			{
-				"ProductName": "Plot",
+				"ProductName": "Land",
 				"Amount": 0.1,
 				"TagStrings": []
 			}

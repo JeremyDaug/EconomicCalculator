@@ -40,5 +40,9 @@
         <Button Content="To Jobs" Height="25" Width="100"
                 Grid.Row="1" Grid.Column="0"
                 ClickMode="Release" Click="ToJobs"/>
+
+        <Button Content="To Tech Families" Height="25" Width="100"
+                Grid.Row="1" Grid.Column="1"
+                ClickMode="Release" Click="ToTechFamilies"/>
     </Grid>
 </Window>

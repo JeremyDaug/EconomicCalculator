@@ -125,6 +125,12 @@
     <Compile Include="Skills\SkillsListWindow.xaml.cs">
       <DependentUpon>SkillsListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TechFamilies\TechFamiliesListWindow.xaml.cs">
+      <DependentUpon>TechFamiliesListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TechFamilies\TechFamilyWindow.xaml.cs">
+      <DependentUpon>TechFamilyWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Wants\WantsListWindow.xaml.cs">
       <DependentUpon>WantsListWindow.xaml</DependentUpon>
     </Compile>
@@ -192,6 +198,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Skills\SkillsListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TechFamilies\TechFamiliesListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TechFamilies\TechFamilyWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
