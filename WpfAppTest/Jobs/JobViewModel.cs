@@ -169,11 +169,7 @@ namespace Editor.Jobs
             }
         }
 
-        public ObservableCollection<string> AvailableProcesses
-        {
-            get;
-            set;
-        }
+        public ObservableCollection<string> AvailableProcesses { get; set; }
 
         public ObservableCollection<string> AvailableLabors { get; set; }
 

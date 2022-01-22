@@ -128,6 +128,8 @@
     <Compile Include="TechFamilies\TechFamiliesListWindow.xaml.cs">
       <DependentUpon>TechFamiliesListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TechFamilies\TechFamilyModel.cs" />
+    <Compile Include="TechFamilies\TechFamilyViewModel.cs" />
     <Compile Include="TechFamilies\TechFamilyWindow.xaml.cs">
       <DependentUpon>TechFamilyWindow.xaml</DependentUpon>
     </Compile>
