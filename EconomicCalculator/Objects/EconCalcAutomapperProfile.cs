@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EconomicCalculator.DTOs.Products;
+using EconomicCalculator.DTOs.Technology;
 using EconomicCalculator.DTOs.Wants;
 using EconomicCalculator.Objects.Products;
 using EconomicCalculator.Objects.Products.ProductTags;
@@ -18,7 +19,21 @@ namespace EconomicCalculator.Objects
         {
             CreateMap<Want, WantDTO>();
 
+            CreateMap<Technology.Technology, TechnologyDTO>()
+                .ForMember(dest => dest.FamilyIds,
+                           act => act.MapFrom(src => src.Families.Select(x => x.Id)))
+                .ForMember(dest => dest.Families,
+                           act => act.MapFrom(src => src.Families.Select(x => x.Name)))
 
+                .ForMember(dest => dest.Children,
+                           act => act.MapFrom(src => src.Children.Select(x => x.Name)))
+                .ForMember(dest => dest.ChildrenIds,
+                           act => act.MapFrom(src => src.Children.Select(x => x.Id)))
+                
+                .ForMember(dest => dest.Parents,
+                           act => act.MapFrom(src => src.Children.Select(x => x.Name)))
+                .ForMember(dest => dest.ParentIds,
+                           act => act.MapFrom(src => src.Children.Select(x => x.Id)));
 
             CreateMap<Product, ProductDTO>()
                 .ForMember(dest => dest.Wants,

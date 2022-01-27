@@ -1,6 +1,7 @@
 ﻿using EconomicCalculator.Helpers;
 using EconomicCalculator.Objects.Products;
 using EconomicCalculator.Objects.Products.ProductTags;
+using EconomicCalculator.Objects.Technology;
 using EconomicCalculator.Objects.Wants;
 using System;
 using System.Collections.Generic;
@@ -180,6 +181,30 @@ namespace EconomicCalculator.Objects
                     },
             Icon = ""
         };
+
+        /// <summary>
+        /// The first technology, the ability to solve problems and learn from the solution.
+        /// </summary>
+        public readonly static ITechnology Brainstorming = new Technology.Technology
+        {
+            Id = 0,
+            Name = "Brainstorming",
+            TechCostBase = 0,
+            Tier = 0,
+            Description = "The simplist thing an intelligent creature can do. Think of things, find problems, find solutions, and learn from doing so.",
+            Category = TechCategory.Primary,
+            Families = new List<ITechFamily>(),
+            Children = new List<ITechnology>(),
+            Parents = new List<ITechnology>()
+        };
+
+        public static IReadOnlyDictionary<string, ITechnology> Technologies
+        {
+            get
+            {
+                return new Dictionary<string, ITechnology> { { Brainstorming.Name, Brainstorming } };
+            }
+        }
 
         /// <summary>
         /// The products available.

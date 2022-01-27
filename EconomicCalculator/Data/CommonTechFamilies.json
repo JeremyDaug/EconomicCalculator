@@ -14,5 +14,11 @@
     ],
     "TechStrings": [],
     "Description": "The study of logical rules for the use of calculation."
+  },
+  {
+    "Name": "Agriculture",
+    "RelatedFamilyStrings": [],
+    "TechStrings": [],
+    "Description": "The study of sowing and harvesting plants."
   }
 ]

@@ -1,0 +1,161 @@
+﻿<Window x:Class="EditorInterface.Techs.TechnologyEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EditorInterface.Techs"
+        xmlns:valid="clr-namespace:Editor.ValidationRules"
+        mc:Ignorable="d"
+        Style="{StaticResource SharedMenu}"
+        Title="TechnologyEditorWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Name" Grid.Row="1" Grid.Column="1"/>
+        <TextBox Grid.Row="1" Grid.Column="1" 
+                 Height="30" Width="100"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Center"
+                 Style="{StaticResource textboxInError}">
+            <TextBox.Text>
+                <Binding Path="Name" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:NoEmptyStringValidationRule MinLength="3"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Tech Base Cost" HorizontalAlignment="Right"
+               Grid.Row="1" Grid.Column="1" Margin="0,0,10,0"/>
+        <TextBox Grid.Row="1" Grid.Column="1" 
+                 Height="30" Width="100" Margin="0,0,10,0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Style="{StaticResource textboxInError}">
+            <TextBox.Text>
+                <Binding Path="TechBaseCost" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:IsIntegerRule Min="0"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Tech Category"
+               Grid.Row="1" Grid.Column="2"/>
+        <ComboBox Name="TechCategoryBox" Width="100" Height="25"
+                  Grid.Row="1" Grid.Column="2"
+                  HorizontalAlignment="Left" VerticalAlignment="Center"
+                  ItemsSource="{Binding AllCategories}"
+                  SelectedItem="{Binding TechCategory}"/>
+
+        <Label Content="Tech Tier" Margin="0,0,10,0"
+               Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right"/>
+        <TextBox Grid.Row="1" Grid.Column="2" 
+                 Height="30" Width="100" Margin="0,0,10,0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Style="{StaticResource textboxInError}">
+            <TextBox.Text>
+                <Binding Path="Tier" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:IsIntegerRule Min="0"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Description" Margin="10,0,0,0"
+               Grid.Row="1" Grid.Column="3" HorizontalAlignment="Left"/>
+        <TextBox Grid.Row="1" Grid.Column="3" 
+                 Height="70" Width="150" Margin="0,0,10,0"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                 TextWrapping="Wrap"
+                 Text="{Binding Description}"/>
+
+        <Button Content="Commit" Grid.Row="1" Grid.Column="3"
+                Height="30" Width="75" 
+                Command="{Binding Commit}"
+                VerticalAlignment="Center" HorizontalAlignment="Right"/>
+
+        <Label Content="Families"
+               HorizontalAlignment="Center" VerticalAlignment="Top"
+               Grid.Row="2" Grid.Column="1"/>
+        <ComboBox Grid.Row="2" Grid.Column="1"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Width="100" Height="30"
+                  ItemsSource="{Binding AvailableFamilies}"
+                  SelectedItem="{Binding SelectedFamily}"/>
+        <Button Content="Add Family" Grid.Row="2" Grid.Column="1"
+                VerticalAlignment="Bottom" HorizontalAlignment="Left" 
+                Width="100" Height="30" Margin="20,0,0,0"
+                Command="{Binding AddFam}"/>
+        <Button Content="Remove Family" Grid.Row="2" Grid.Column="1"
+                VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                Width="100" Height="30" Margin="0,0,20,0"
+                Command="{Binding RemoveFam}"/>
+        <ListBox Grid.Row="3" Grid.Column="1" Grid.RowSpan="2"
+                 ItemsSource="{Binding Families}"
+                 SelectedItem="{Binding SelectedFam}"
+                 SelectionMode="Single" Margin="5,5,5,5"
+                 MouseDoubleClick="RemoveFamily"/>
+
+        <Label Content="Parent Techs"
+               HorizontalAlignment="Center" VerticalAlignment="Top"
+               Grid.Row="2" Grid.Column="2"/>
+        <ComboBox Grid.Row="2" Grid.Column="2"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Width="100" Height="30"
+                  ItemsSource="{Binding AvailableTechs}"
+                  SelectedItem="{Binding SelectedParentTech}"/>
+        <Button Content="Add Parent" Grid.Row="2" Grid.Column="2"
+                VerticalAlignment="Bottom" HorizontalAlignment="Left" 
+                Width="100" Height="30" Margin="20,0,0,0"
+                Command="{Binding AddParent}"/>
+        <Button Content="Remove Parent" Grid.Row="2" Grid.Column="2"
+                VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                Width="100" Height="30" Margin="0,0,20,0"
+                Command="{Binding RemoveParent}"/>
+        <ListBox Grid.Row="3" Grid.Column="2" Grid.RowSpan="2"
+                 ItemsSource="{Binding Parents}"
+                 SelectedItem="{Binding SelectedParent}"
+                 SelectionMode="Single" Margin="5,5,5,5"
+                 MouseDoubleClick="RemoveParent"/>
+
+        <Label Content="Child Techs"
+               HorizontalAlignment="Center" VerticalAlignment="Top"
+               Grid.Row="2" Grid.Column="3"/>
+        <ComboBox Grid.Row="2" Grid.Column="3"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Width="100" Height="30"
+                  ItemsSource="{Binding AvailableTechs}"
+                  SelectedItem="{Binding SelectedChildren}"/>
+        <Button Content="Add Child" Grid.Row="2" Grid.Column="3"
+                VerticalAlignment="Bottom" HorizontalAlignment="Left" 
+                Width="100" Height="30" Margin="20,0,0,0"
+                Command="{Binding AddChild}"/>
+        <Button Content="Remove Child" Grid.Row="2" Grid.Column="3"
+                VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                Width="100" Height="30" Margin="0,0,20,0"
+                Command="{Binding RemoveChild}"/>
+        <ListBox Grid.Row="3" Grid.Column="3" Grid.RowSpan="2"
+                 ItemsSource="{Binding Children}"
+                 SelectedItem="{Binding SelectedChild}"
+                 SelectionMode="Single" Margin="5,5,5,5"
+                 MouseDoubleClick="RemoveChild"/>
+
+    </Grid>
+</Window>

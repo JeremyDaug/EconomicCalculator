@@ -11,15 +11,11 @@ namespace EconomicCalculator.Objects.Technology
     /// </summary>
     internal class Technology : ITechnology
     {
-        public List<ITechFamily> _families;
-        public List<ITechnology> _parents;
-        public List<ITechnology> _children;
-
         public Technology()
         {
-            _families = new List<ITechFamily>();
-            _parents = new List<ITechnology>();
-            _children = new List<ITechnology>();
+            Families = new List<ITechFamily>();
+            Parents = new List<ITechnology>();
+            Children = new List<ITechnology>();
         }
 
         /// <summary>
@@ -45,17 +41,20 @@ namespace EconomicCalculator.Objects.Technology
         /// <summary>
         /// The families this tech belongs to.
         /// </summary>
-        public IReadOnlyList<ITechFamily> Families => _families;
+        public List<ITechFamily> Families { get; set; }
+        IReadOnlyList<ITechFamily> ITechnology.Families => Families;
         
         /// <summary>
         /// The techs that can come from this one.
         /// </summary>
-        public IReadOnlyList<ITechnology> Children => _children;
+        public List<ITechnology> Children { get; set; }
+        IReadOnlyList<ITechnology> ITechnology.Children => Children;
 
         /// <summary>
         /// The techs this tech can come from.
         /// </summary>
-        public IReadOnlyList<ITechnology> Parents => _parents;
+        public List<ITechnology> Parents { get; set; }
+        IReadOnlyList<ITechnology> ITechnology.Parents => Parents;
         
         /// <summary>
         /// The base cost of discovering the tech. Modified by

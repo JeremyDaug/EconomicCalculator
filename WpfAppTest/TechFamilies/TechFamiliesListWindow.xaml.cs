@@ -66,6 +66,10 @@ namespace EditorInterface.TechFamilies
         private void CopyTechFamily(object sender, RoutedEventArgs e)
         {
             var selected = (TechFamilyDTO)TechFamGrid.SelectedItem;
+
+            if (selected == null)
+                return;
+            
             var dup = new TechFamilyDTO
             {
                 Id = manager.NewTechFamilyId,
@@ -77,10 +81,7 @@ namespace EditorInterface.TechFamilies
                 TechStrings = new List<string>(selected.TechStrings)
             };
 
-            if (selected == null)
-                return;
-
-            Window win = new TechFamilyWindow(selected);
+            Window win = new TechFamilyWindow(dup);
             win.ShowDialog();
 
             TechFamGrid.ItemsSource = manager.TechFamilies.Values.ToList();

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace EditorInterface.TechFamilies
@@ -112,6 +113,17 @@ namespace EditorInterface.TechFamilies
 
         public void Commit()
         {
+            if (string.IsNullOrEmpty(techFamily.Name))
+            {
+                MessageBox.Show("Name cannot be empty.", "Empty Name", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (techFamily.Name.Length < 3)
+            {
+                MessageBox.Show("Name must be longer than 3 characters.", "Name too short", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             var newFam = new TechFamilyDTO
             {
                 Name = techFamily.Name,

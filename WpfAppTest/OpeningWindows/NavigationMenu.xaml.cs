@@ -82,5 +82,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToTechs(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.Techs.TechListWindow();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

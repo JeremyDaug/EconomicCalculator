@@ -160,5 +160,13 @@ namespace EconomicCalculator.Objects.Products
         {
             return Name + ":" + VariantName;
         }
+
+        public string GetName()
+        {
+            // if has variant name, add that to name.
+            if (!string.IsNullOrWhiteSpace(VariantName))
+                return Name + "(" + VariantName + ")";
+            return Name;
+        }
     }
 }

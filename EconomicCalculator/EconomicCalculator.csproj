@@ -61,6 +61,7 @@
     <None Include="Data\CommonSkillGroups.json" />
     <None Include="Data\CommonSkills.json" />
     <None Include="Data\CommonTechFamilies.json" />
+    <None Include="Data\CommonTechs.json" />
     <None Include="Data\CommonWants.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -117,7 +118,9 @@
     <Compile Include="DTOs\Skills\SkillGroupDTO.cs" />
     <Compile Include="DTOs\Skills\SkillsGraph.cs" />
     <Compile Include="DTOs\Technology\ITechFamilyDTO.cs" />
+    <Compile Include="DTOs\Technology\ITechnologyDTO.cs" />
     <Compile Include="DTOs\Technology\TechFamilyDTO.cs" />
+    <Compile Include="DTOs\Technology\TechnologyDTO.cs" />
     <Compile Include="DTOs\Wants\IWantDTO.cs" />
     <Compile Include="DTOs\Wants\WantDTO.cs" />
     <Compile Include="Enums\BuildingType.cs" />

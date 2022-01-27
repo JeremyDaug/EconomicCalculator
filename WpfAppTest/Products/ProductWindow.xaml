@@ -175,7 +175,7 @@
                       ItemsSource="{Binding ProductTags}">
             </DataGrid>
 
-            <Button Content="AmddTag" Grid.Row="6" Grid.Column="5" Width="75"
+            <Button Content="Add Tag" Grid.Row="6" Grid.Column="5" Width="75"
                     VerticalAlignment="Center" HorizontalAlignment="Center"
                     ClickMode="Release" Click="AddTag"/>
 

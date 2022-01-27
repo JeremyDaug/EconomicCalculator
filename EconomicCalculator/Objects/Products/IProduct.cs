@@ -112,5 +112,11 @@ namespace EconomicCalculator.Objects.Products
         /// May be null.
         /// </summary>
         ITechnology TechRequirement { get; }
+
+        /// <summary>
+        /// Get's the proper Name(variant) name of the Product.
+        /// </summary>
+        /// <returns></returns>
+        string GetName();
     }
 }

@@ -40,7 +40,7 @@ namespace Editor.Helpers
 
         #endregion // Constructors
 
-        #region ICommand Members
+        #region ICommandMembers
 
         [DebuggerStepThrough]
         public bool CanExecute(object parameters)
@@ -59,6 +59,6 @@ namespace Editor.Helpers
             _execute(parameters);
         }
 
-        #endregion // ICommand Members
+        #endregion ICommandMembers
     }
 }

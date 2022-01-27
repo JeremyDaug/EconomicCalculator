@@ -133,6 +133,14 @@
     <Compile Include="TechFamilies\TechFamilyWindow.xaml.cs">
       <DependentUpon>TechFamilyWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Techs\TechListWindow.xaml.cs">
+      <DependentUpon>TechListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Techs\TechnologyEditorModel.cs" />
+    <Compile Include="Techs\TechnologyEditorViewModel.cs" />
+    <Compile Include="Techs\TechnologyEditorWindow.xaml.cs">
+      <DependentUpon>TechnologyEditorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Wants\WantsListWindow.xaml.cs">
       <DependentUpon>WantsListWindow.xaml</DependentUpon>
     </Compile>
@@ -208,6 +216,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TechFamilies\TechFamilyWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Techs\TechListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Techs\TechnologyEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

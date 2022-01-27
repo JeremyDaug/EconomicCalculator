@@ -20,6 +20,7 @@ using EconomicCalculator.Objects;
 using AutoMapper;
 using EconomicCalculator.Objects.Wants;
 using EconomicCalculator.DTOs.Technology;
+using EconomicCalculator.Enums;
 
 namespace EconomicCalculator
 {
@@ -50,6 +51,7 @@ namespace EconomicCalculator
             Processes = new Dictionary<int, IProcessDTO>();
             Jobs = new Dictionary<int, IJobDTO>();
             TechFamilies = new Dictionary<int, ITechFamilyDTO>();
+            Technologies = new Dictionary<int, ITechnologyDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -97,6 +99,8 @@ namespace EconomicCalculator
         public IDictionary<int, IJobDTO> Jobs { get; set; }
 
         public IDictionary<int, ITechFamilyDTO> TechFamilies { get; set; }
+
+        public IDictionary<int, ITechnologyDTO> Technologies { get; set; }
 
         #endregion DataStorage
 
@@ -502,7 +506,7 @@ namespace EconomicCalculator
         private int _newTechFamilyId;
 
         /// <summary>
-        /// Helper to retrieve a new, unused, job Id.
+        /// Helper to retrieve a new, unused, TechFamily Id.
         /// </summary>
         public int NewTechFamilyId
         {
@@ -511,6 +515,21 @@ namespace EconomicCalculator
                 while (TechFamilies.ContainsKey(_newTechFamilyId))
                     ++_newTechFamilyId;
                 return _newTechFamilyId;
+            }
+        }
+
+        private int _newTechId;
+
+        /// <summary>
+        /// Helper to retrieve a new, unused, Tech Id.
+        /// </summary>
+        public int NewTechId
+        {
+            get
+            {
+                while (Technologies.ContainsKey(_newTechId)) 
+                    ++_newTechId;
+                return _newTechId;
             }
         }
 
@@ -836,6 +855,10 @@ namespace EconomicCalculator
             }
         }
 
+        /// <summary>
+        /// Load Tech Families from file.
+        /// </summary>
+        /// <param name="filename">The file to load frime.</param>
         public void LoadTechFamilies(string filename)
         {
             var json = File.ReadAllText(filename);
@@ -859,6 +882,52 @@ namespace EconomicCalculator
                 fam.SetRelatedFamiliesFromStrings();
         }
 
+        /// <summary>
+        /// Load Technologies from file.
+        /// </summary>
+        /// <param name="filename">The file to load frime.</param>
+        public void LoadTechs(string filename)
+        {
+            var json = File.ReadAllText(filename);
+
+            List<TechnologyDTO> techs = JsonSerializer.Deserialize<List<TechnologyDTO>>(json);
+
+            _newTechId = 0;
+            // set families
+            foreach (var tech in techs)
+            {
+                foreach (var fam in tech.Families)
+                {
+                    tech.FamilyIds.Add(TechFamilies.Values.Single(x => x.Name == fam).Id);
+                }
+            }
+
+            // add techs to the list
+            foreach (var tech in techs)
+            {
+                tech.Id = NewTechId;
+
+                // check if duplicate name.
+                if (Technologies.Values
+                    .Select(x => x.Name).Contains(tech.Name))
+                    throw new InvalidDataException(
+                        string.Format("Duplicate Technology of name '{0}' found. No duplicates allowd.",
+                                 tech.Name));
+
+                Technologies.Add(tech.Id, tech);
+            }
+
+            // connect techs to parents and children.
+            foreach (var tech in techs)
+            { 
+                foreach (var child in tech.Children)
+                    tech.ChildrenIds.Add(Technologies.Values.Single(x => x.Name == child).Id);
+
+                foreach (var parent in tech.Parents)
+                    tech.ParentIds.Add(Technologies.Values.Single(x => x.Name == parent).Id);
+            }
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -872,7 +941,14 @@ namespace EconomicCalculator
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
             options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-            string json = JsonSerializer.Serialize(Products.Values.ToList(), options);
+            // add all but the required items.
+            string json = JsonSerializer.Serialize(Products.Values
+                .Where(x => !RequiredItems
+                    .Products
+                    .Values
+                    .Select(y => y.GetName())
+                    .Contains(x.GetName()))
+                .ToList(), options);
             File.WriteAllText(fileName, json);
         }
 
@@ -884,7 +960,13 @@ namespace EconomicCalculator
         {
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
-            string json = JsonSerializer.Serialize(Wants.Values.ToList(), options);
+            string json = JsonSerializer.Serialize(Wants.Values
+                .Where(x => !RequiredItems
+                    .Wants
+                    .Values
+                    .Select(y => y.Name)
+                    .Contains(x.Name))
+                .ToList(), options);
             File.WriteAllText(filename, json);
         }
 
@@ -947,7 +1029,27 @@ namespace EconomicCalculator
             var options = new JsonSerializerOptions();
             options.WriteIndented = true;
             options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-            string json = JsonSerializer.Serialize(TechFamilies.Values.ToList(), options);
+            string json = JsonSerializer.Serialize(TechFamilies.Values
+                .ToList(), options);
+            File.WriteAllText(filename, json);
+        }
+
+        /// <summary>
+        /// Save Technologies to file.
+        /// </summary>
+        /// <param name="filename">The file to save it to.</param>
+        public void SaveTechs(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(Technologies.Values
+                .Where(x => !RequiredItems
+                    .Technologies
+                    .Values
+                    .Select(y => y.Name)
+                    .Contains(x.Name))
+                .ToList(), options);
             File.WriteAllText(filename, json);
         }
 
@@ -966,14 +1068,21 @@ namespace EconomicCalculator
                 var newWant = mapper.Map<WantDTO>(item);
                 Wants.Add(newWant.Id, newWant);
             }
-
             // Basic stuff loaded first
             LoadWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonWants.json");
 
             // Get All Tech Families
             LoadTechFamilies(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonTechFamilies.json");
 
+            // Get Require Techs
+            foreach (var item in RequiredItems.Technologies)
+            {
+                var newTech = mapper.Map<TechnologyDTO>(item.Value);
+                Technologies.Add(newTech.Id, newTech);
+            }
             // Load Technologies
+            LoadTechs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonTechs.json");
+
 
             // load required products.
             foreach (var item in RequiredItems.Products.Values)
@@ -981,7 +1090,6 @@ namespace EconomicCalculator
                 var newProd = mapper.Map<ProductDTO>(item);
                 Products.Add(newProd.Id, newProd);
             }
-
             // More advanced stuff next.
             LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
 
