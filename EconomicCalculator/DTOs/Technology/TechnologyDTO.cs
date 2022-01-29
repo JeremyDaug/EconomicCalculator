@@ -25,7 +25,20 @@ namespace EconomicCalculator.DTOs.Technology
 
         public string Name { get; set; }
 
-        public TechCategory Category { get; set; }
+        [JsonIgnore]
+        public TechCategory CategoryEnum { get; set; }
+
+        public string Category 
+        {
+            get
+            {
+                return CategoryEnum.ToString();
+            }
+            set
+            {
+                CategoryEnum = (TechCategory)Enum.Parse(typeof(TechCategory), value);
+            }
+        }
 
         public int TechBaseCost { get; set; }
 

@@ -451,7 +451,7 @@ namespace EditorInterface.Techs
                 TechBaseCost = TechBaseCost,
                 Tier = Tier,
                 Description = Description,
-                Category = (TechCategory)Enum.Parse(typeof(TechCategory), TechCategory)
+                Category = TechCategory
             };
 
             // families

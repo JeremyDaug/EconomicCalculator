@@ -24,7 +24,10 @@ namespace EconomicCalculator.DTOs.Technology
         /// <summary>
         /// The category of the Technology.
         /// </summary>
-        TechCategory Category { get; }
+        [JsonIgnore]
+        TechCategory CategoryEnum { get; }
+
+        string Category { get; }
 
         int TechBaseCost { get; }
 
