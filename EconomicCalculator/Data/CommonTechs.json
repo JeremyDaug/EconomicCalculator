@@ -1,7 +1,7 @@
 [
   {
     "Name": "Counting",
-    "Category": 0,
+    "Category": "Primary",
     "TechBaseCost": 10,
     "Tier": 1,
     "Description": "Even simple counting helps a lot",
@@ -17,9 +17,9 @@
   },
   {
     "Name": "Addition and Subtraction",
-    "Category": 0,
+    "Category": "Secondary",
     "TechBaseCost": 10,
-    "Tier": 1,
+    "Tier": 2,
     "Description": "The taking of Sums and Differences to calculate more efficiently.",
     "Families": [
       "Mathematics"

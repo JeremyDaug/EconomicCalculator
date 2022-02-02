@@ -29,6 +29,11 @@ namespace EconomicCalculator.DTOs
         public static string Product => @"[a-zA-Z]+(\([a-zA-Z]+\))?";
 
         /// <summary>
+        /// Regex for Cultures
+        /// </summary>
+        public static string Culture => @"[a-zA-Z]+(\([a-zA-Z]+\))?";
+
+        /// <summary>
         /// Regex for Wants
         /// </summary>
         public static string Want => @"[a-zA-Z]+";

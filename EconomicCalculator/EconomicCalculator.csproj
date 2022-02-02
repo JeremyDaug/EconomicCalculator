@@ -60,6 +60,7 @@
     <None Include="Data\CommonProducts.json" />
     <None Include="Data\CommonSkillGroups.json" />
     <None Include="Data\CommonSkills.json" />
+    <None Include="Data\CommonSpecies.json" />
     <None Include="Data\CommonTechFamilies.json" />
     <None Include="Data\CommonTechs.json" />
     <None Include="Data\CommonWants.json" />
@@ -85,10 +86,15 @@
     <Compile Include="DTOs\Pops\PopModifiers\PopModifiers.cs" />
     <Compile Include="DTOs\Pops\PopNeeds\IPopNeedsDTO.cs" />
     <Compile Include="DTOs\Pops\PopWants\IPopWantDTO.cs" />
-    <Compile Include="DTOs\Pops\Species\ICohortDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\AttachedTagData\AttachedSpeciesTag.cs" />
+    <Compile Include="DTOs\Pops\Species\AttachedTagData\IAttachedSpeciesTag.cs" />
+    <Compile Include="DTOs\Pops\Species\AttachedTagData\SpeciesTagInfo.cs" />
     <Compile Include="DTOs\Pops\Species\ISpeciesDTO.cs" />
-    <Compile Include="DTOs\Pops\Species\ISubtypeDTO.cs" />
-    <Compile Include="DTOs\Pops\Species\SpeciesTags.cs" />
+    <Compile Include="DTOs\Pops\Species\ISpeciesNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\ISpeciesWantDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesWantDTO.cs" />
     <Compile Include="DTOs\Processes\IDivisionEffects.cs" />
     <Compile Include="DTOs\Processes\IProcessDTO.cs" />
     <Compile Include="DTOs\Processes\IProcessProductDTO.cs" />
@@ -316,7 +322,6 @@
     <Folder Include="DTOs\Market\" />
     <Folder Include="DTOs\Pops\Culture\" />
     <Folder Include="DTOs\Pops\Politics\" />
-    <Folder Include="DTOs\Pops\Worldview\" />
     <Folder Include="Objects\Pops\PopModifiers\" />
     <Folder Include="Runner\" />
   </ItemGroup>

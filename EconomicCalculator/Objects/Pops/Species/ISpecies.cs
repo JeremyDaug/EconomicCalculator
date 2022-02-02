@@ -25,6 +25,11 @@ namespace EconomicCalculator.Objects.Pops.Species
         string Name { get; }
 
         /// <summary>
+        /// The variant name of the species.
+        /// </summary>
+        string VariantName { get; set; }
+
+        /// <summary>
         /// The natural growth rate of the Species.
         /// </summary>
         decimal GrowthRate { get; }

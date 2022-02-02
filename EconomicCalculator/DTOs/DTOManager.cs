@@ -21,6 +21,8 @@ using AutoMapper;
 using EconomicCalculator.Objects.Wants;
 using EconomicCalculator.DTOs.Technology;
 using EconomicCalculator.Enums;
+using EconomicCalculator.DTOs.Pops.Species;
+using EconomicCalculator.DTOs.Pops.Species.AttachedTagData;
 
 namespace EconomicCalculator
 {
@@ -52,6 +54,7 @@ namespace EconomicCalculator
             Jobs = new Dictionary<int, IJobDTO>();
             TechFamilies = new Dictionary<int, ITechFamilyDTO>();
             Technologies = new Dictionary<int, ITechnologyDTO>();
+            Species = new Dictionary<int, ISpeciesDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -81,11 +84,6 @@ namespace EconomicCalculator
 
         #region DataStorage
 
-        /// <summary>
-        /// The Technologies available to the system, accessible by Id.
-        /// </summary>
-        //public IDictionary<int, ITechnology> Technologies { get; }
-
         public IDictionary<int, IProductDTO> Products { get; set; }
 
         public IDictionary<int, IWantDTO> Wants { get; set; }
@@ -101,6 +99,8 @@ namespace EconomicCalculator
         public IDictionary<int, ITechFamilyDTO> TechFamilies { get; set; }
 
         public IDictionary<int, ITechnologyDTO> Technologies { get; set; }
+
+        public IDictionary<int, ISpeciesDTO> Species { get; set; }
 
         #endregion DataStorage
 
@@ -533,6 +533,20 @@ namespace EconomicCalculator
             }
         }
 
+        private int _newSpeciesId;
+        /// <summary>
+        /// Helper to retrieve a new, unused, Tech Id.
+        /// </summary>
+        public int NewSpeciesId
+        {
+            get
+            {
+                while (Species.ContainsKey(_newSpeciesId))
+                    ++_newSpeciesId;
+                return _newSpeciesId;
+            }
+        }
+
         #endregion NewIds
 
         /// <summary>
@@ -928,6 +942,40 @@ namespace EconomicCalculator
             }
         }
 
+        public void LoadSpecies(string filename) 
+        {
+            var json = File.ReadAllText(filename);
+
+            List<SpeciesDTO> species = JsonSerializer.Deserialize<List<SpeciesDTO>>(json
+                , new JsonSerializerOptions
+                {
+                    Converters = {
+                        new AbstractConverter<SpeciesNeedDTO, ISpeciesNeedDTO>(),
+                        new AbstractConverter<SpeciesWantDTO, ISpeciesWantDTO>()
+                    }
+                });
+
+            // get products for needs
+            foreach (var spec in species)
+            {
+                // add to storage
+                Species.Add(NewSpeciesId, spec);
+
+                // get needs.
+                foreach (var need in spec.Needs)
+                {
+                    ((SpeciesNeedDTO)need).ProductId = GetProductByFullName(need.Product).Id;
+                }
+                // get wants
+                foreach (var want in spec.Wants)
+                {
+                    ((SpeciesWantDTO)want).WantId = Wants.Values.Single(x => x.Name == want.Want).Id;
+                }
+            }
+
+            // TODO: add relations
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -1053,6 +1101,16 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        public void SaveSpecies(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(Species.Values, options);
+
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -1104,6 +1162,9 @@ namespace EconomicCalculator
 
             // Get all Jobs.
             LoadJobs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonJobs.json");
+
+            // Get all Species
+            LoadSpecies(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSpecies.json");
         }
 
         private Mapper InitMapper()

@@ -14,17 +14,12 @@ namespace EconomicCalculator.Objects.Pops.Species
     /// </summary>
     internal class Species : ISpecies
     {
-        public List<(IWant, DesireTier, decimal)> wants;
-        public List<ITagData<SpeciesTag>> tags;
-        public List<ISpecies> relatedSpecies;
-        public List<(IProduct, DesireTier, decimal)> needs;
-
         public Species()
         {
-            wants = new List<(IWant, DesireTier, decimal)>();
-            tags = new List<ITagData<SpeciesTag>>();
-            relatedSpecies = new List<ISpecies>();
-            needs = new List<(IProduct, DesireTier, decimal)>();
+            Wants = new List<(IWant, DesireTier, decimal)>();
+            Tags = new List<ITagData<SpeciesTag>>();
+            RelatedSpecies = new List<ISpecies>();
+            Needs = new List<(IProduct, DesireTier, decimal)>();
         }
 
         /// <summary>
@@ -38,33 +33,46 @@ namespace EconomicCalculator.Objects.Pops.Species
         public string Name { get; set; }
 
         /// <summary>
+        /// The variant name of the species.
+        /// </summary>
+        public string VariantName { get; set; }
+
+        /// <summary>
         /// The natural growth rate of the Species
+        /// Percent.
         /// </summary>
         public decimal GrowthRate { get; set; }
 
         /// <summary>
         /// The Rate at which the population dies naturally.
+        /// Percent
         /// </summary>
         public decimal DeathRate { get; set; }
 
         /// <summary>
         /// The Products desired by the species.
         /// </summary>
-        public IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs => needs;
+        public List<(IProduct product, DesireTier tier, decimal amount)> Needs { get; set; }
+        
+        IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> ISpecies.Needs => Needs;
 
         /// <summary>
         /// The wants desired by the species.
         /// </summary>
-        public IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants => wants;
+        public List<(IWant want, DesireTier tier, decimal amount)> Wants { get; set; }
+        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> ISpecies.Wants => Wants;
 
         /// <summary>
         /// The Tags attached to the species and  their data.
         /// </summary>
-        public IReadOnlyList<ITagData<SpeciesTag>> Tags => tags;
+        public List<ITagData<SpeciesTag>> Tags { get; set; }
+
+        IReadOnlyList<ITagData<SpeciesTag>> ISpecies.Tags => Tags;
 
         /// <summary>
         /// Related Species
         /// </summary>
-        public IReadOnlyList<ISpecies> RelatedSpecies => relatedSpecies;
+        public List<ISpecies> RelatedSpecies { get; set; }
+        IReadOnlyList<ISpecies> ISpecies.RelatedSpecies => RelatedSpecies;
     }
 }

@@ -1,0 +1,24 @@
+[
+  {
+    "Name": "Human",
+    "VariantName": "Baseline",
+    "GrowthRate": 0.02,
+    "DeathRate": 0.01,
+    "Needs": [
+      {
+        "Product": "Bread",
+        "Tier": "Daily",
+        "Amount": 3
+      }
+    ],
+    "Wants": [
+      {
+        "Want": "Food",
+        "Tier": "Life",
+        "Amount": 5
+      }
+    ],
+    "TagStrings": [],
+    "RelatedSpecies": []
+  }
+]
