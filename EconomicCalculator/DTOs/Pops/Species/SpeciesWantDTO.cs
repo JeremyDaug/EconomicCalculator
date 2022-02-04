@@ -34,7 +34,7 @@ namespace EconomicCalculator.DTOs.Pops.Species
 
         public override string ToString()
         {
-            var result = "{0}({1})>{2}";
+            var result = "{0}[{1}]->{2}";
 
             return string.Format(result, Want, Tier, Amount);
         }

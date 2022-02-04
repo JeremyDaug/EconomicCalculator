@@ -972,8 +972,6 @@ namespace EconomicCalculator
                     ((SpeciesWantDTO)want).WantId = Wants.Values.Single(x => x.Name == want.Want).Id;
                 }
             }
-
-            // TODO: add relations
         }
 
         #endregion LoadFunctions

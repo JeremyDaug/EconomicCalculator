@@ -29,7 +29,7 @@ namespace EconomicCalculator.DTOs.Pops.Species
 
         public decimal GrowthRate { get; set; }
 
-        public decimal DeathRate { get; set; }
+        public decimal LifeSpan { get; set; }
 
         #region Needs
 
@@ -112,9 +112,40 @@ namespace EconomicCalculator.DTOs.Pops.Species
         /// </summary>
         public List<string> RelatedSpecies { get; set; }
 
+        [JsonIgnore]
+        public string RelatedSpeciesString 
+        {
+            get
+            {
+                var result = "";
+
+                foreach (var rel in RelatedSpecies)
+                    result += rel + ";";
+
+                return result;
+            }
+        }
+
         public override string ToString()
         {
             return Name + "(" + VariantName + ")";
+        }
+
+        public static (string Name, string VariantName) ProcessName(string fullName)
+        {
+            // if it has a varaint,
+            if (fullName.Contains('('))
+            {
+                var results = fullName.Split('(');
+
+                var variant = results[1].TrimEnd(')');
+
+                return (results[0], variant);
+            }
+            else
+            {
+                return (fullName, "");
+            }
         }
     }
 }

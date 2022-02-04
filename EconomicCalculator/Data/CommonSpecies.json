@@ -3,7 +3,7 @@
     "Name": "Human",
     "VariantName": "Baseline",
     "GrowthRate": 0.02,
-    "DeathRate": 0.01,
+    "Lifespan": 75,
     "Needs": [
       {
         "Product": "Bread",

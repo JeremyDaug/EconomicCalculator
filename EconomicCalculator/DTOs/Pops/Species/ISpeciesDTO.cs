@@ -38,9 +38,9 @@ namespace EconomicCalculator.DTOs.Pops.Species
         decimal GrowthRate { get; }
 
         /// <summary>
-        /// The Rate at which the population dies naturally.
+        /// How long a member of thes species naturally survives for.
         /// </summary>
-        decimal DeathRate { get; }
+        decimal LifeSpan { get; }
 
         #region Needs
 
@@ -93,5 +93,11 @@ namespace EconomicCalculator.DTOs.Pops.Species
         /// Related Species
         /// </summary>
         List<string> RelatedSpecies { get; }
+
+        /// <summary>
+        /// Related Species in string form.
+        /// </summary>
+        [JsonIgnore]
+        string RelatedSpeciesString { get; }
     }
 }

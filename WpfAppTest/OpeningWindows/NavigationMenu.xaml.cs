@@ -91,5 +91,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToSpecies(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.Species.SpeciesListWindow();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }
