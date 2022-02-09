@@ -854,7 +854,7 @@ namespace EconomicCalculator
         /// <summary>
         /// Load Jobs from file.
         /// </summary>
-        /// <param name="filename">The file to load frime.</param>
+        /// <param name="filename">The file to load from.</param>
         public void LoadJobs(string filename)
         {
             var json = File.ReadAllText(filename);
@@ -872,7 +872,7 @@ namespace EconomicCalculator
         /// <summary>
         /// Load Tech Families from file.
         /// </summary>
-        /// <param name="filename">The file to load frime.</param>
+        /// <param name="filename">The file to load from.</param>
         public void LoadTechFamilies(string filename)
         {
             var json = File.ReadAllText(filename);
@@ -899,7 +899,7 @@ namespace EconomicCalculator
         /// <summary>
         /// Load Technologies from file.
         /// </summary>
-        /// <param name="filename">The file to load frime.</param>
+        /// <param name="filename">The file to load from.</param>
         public void LoadTechs(string filename)
         {
             var json = File.ReadAllText(filename);
@@ -942,6 +942,10 @@ namespace EconomicCalculator
             }
         }
 
+        /// <summary>
+        /// Load Species from file.
+        /// </summary>
+        /// <param name="filename">The file to load from.</param>
         public void LoadSpecies(string filename) 
         {
             var json = File.ReadAllText(filename);
@@ -955,11 +959,12 @@ namespace EconomicCalculator
                     }
                 });
 
-            // get products for needs
+            // get desires
             foreach (var spec in species)
             {
+                spec.Id = NewSpeciesId;
                 // add to storage
-                Species.Add(NewSpeciesId, spec);
+                Species.Add(spec.Id, spec);
 
                 // get needs.
                 foreach (var need in spec.Needs)
@@ -970,6 +975,17 @@ namespace EconomicCalculator
                 foreach (var want in spec.Wants)
                 {
                     ((SpeciesWantDTO)want).WantId = Wants.Values.Single(x => x.Name == want.Want).Id;
+                }
+            }
+
+            // add species relations
+            foreach (var spec in species)
+            {
+                foreach (var rel in spec.RelatedSpecies)
+                {
+                    spec.RelatedSpeciesIds
+                        .Add(Species.Values
+                                    .Single(x => x.ToString() == rel).Id);
                 }
             }
         }

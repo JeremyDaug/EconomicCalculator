@@ -40,7 +40,12 @@ namespace EconomicCalculator.DTOs.Pops.Species
         /// <summary>
         /// How long a member of thes species naturally survives for.
         /// </summary>
-        decimal LifeSpan { get; }
+        int LifeSpan { get; }
+
+        /// <summary>
+        /// A description of the species.
+        /// </summary>
+        string Description { get; }
 
         #region Needs
 

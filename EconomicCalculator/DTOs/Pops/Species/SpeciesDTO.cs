@@ -29,7 +29,9 @@ namespace EconomicCalculator.DTOs.Pops.Species
 
         public decimal GrowthRate { get; set; }
 
-        public decimal LifeSpan { get; set; }
+        public int LifeSpan { get; set; }
+
+        public string Description { get; set; }
 
         #region Needs
 
@@ -128,6 +130,8 @@ namespace EconomicCalculator.DTOs.Pops.Species
 
         public override string ToString()
         {
+            if (string.IsNullOrWhiteSpace(VariantName))
+                return Name;
             return Name + "(" + VariantName + ")";
         }
 

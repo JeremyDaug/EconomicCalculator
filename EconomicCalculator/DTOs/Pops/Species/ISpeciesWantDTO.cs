@@ -20,7 +20,7 @@ namespace EconomicCalculator.DTOs.Pops.Species
 
         string Tier { get; }
 
-        decimal Amount { get; }
+        decimal Amount { get; set; }
 
         // Need Tag modifiers
     }

@@ -93,9 +93,9 @@ namespace EditorInterface.Species
 
         private void SaveSpecies(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Are you sure?", "Save Species", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.OK)
+            if (MessageBox.Show("Are you sure?", "Save Species", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                manager.SaveTechs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSpecies.json");
+                manager.SaveSpecies(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSpecies.json");
                 MessageBox.Show("Saved!", "Species Saved.", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }

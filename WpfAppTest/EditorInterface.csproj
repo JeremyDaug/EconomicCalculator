@@ -80,6 +80,7 @@
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DummyDecimalBinding.cs" />
     <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Jobs\JobEditorWindow.xaml.cs">
       <DependentUpon>JobEditorWindow.xaml</DependentUpon>
@@ -125,12 +126,25 @@
     <Compile Include="Skills\SkillsListWindow.xaml.cs">
       <DependentUpon>SkillsListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Species\SelectorClass.cs" />
     <Compile Include="Species\SpeciesEditor.xaml.cs">
       <DependentUpon>SpeciesEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Species\SpeciesEditorModel.cs" />
+    <Compile Include="Species\SpeciesEditorViewModel.cs" />
     <Compile Include="Species\SpeciesListWindow.xaml.cs">
       <DependentUpon>SpeciesListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Species\SpeciesNeedEditor\NeedEditorModel.cs" />
+    <Compile Include="Species\SpeciesNeedEditor\NeedEditorView.xaml.cs">
+      <DependentUpon>NeedEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Species\SpeciesNeedEditor\NeedEditorViewModel.cs" />
+    <Compile Include="Species\SpeciesWantEditor\WantEditorModel.cs" />
+    <Compile Include="Species\SpeciesWantEditor\WantEditorView.xaml.cs">
+      <DependentUpon>WantEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Species\SpeciesWantEditor\WantEditorViewModel.cs" />
     <Compile Include="TechFamilies\TechFamiliesListWindow.xaml.cs">
       <DependentUpon>TechFamiliesListWindow.xaml</DependentUpon>
     </Compile>
@@ -222,6 +236,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Species\SpeciesListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Species\SpeciesNeedEditor\NeedEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Species\SpeciesWantEditor\WantEditorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

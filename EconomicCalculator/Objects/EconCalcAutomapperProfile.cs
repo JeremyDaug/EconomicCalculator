@@ -36,6 +36,10 @@ namespace EconomicCalculator.Objects
                            act => act.MapFrom(src => src.Children.Select(x => x.Id)));
 
             CreateMap<Product, ProductDTO>()
+                .ForMember(dest => dest.Name,
+                           act => act.MapFrom(src => src.Name))
+                .ForMember(dest => dest.VariantName,
+                           act => act.MapFrom(src => src.VariantName))
                 .ForMember(dest => dest.Wants,
                            act => act.MapFrom(src => ProductWantsToProductDTOWants(src.Wants)))
                 .ForMember(dest => dest.WantStrings,

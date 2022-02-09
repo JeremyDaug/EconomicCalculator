@@ -34,7 +34,7 @@
             <TextBox.Text>
                 <Binding Path="Name" UpdateSourceTrigger="PropertyChanged">
                     <Binding.ValidationRules>
-                        <valid:NoEmptyStringValidationRule MinLength="3"/>
+                        <valid:NameStringValidation MinLength="3"/>
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
