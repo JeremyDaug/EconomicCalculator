@@ -74,7 +74,7 @@ namespace EditorInterface.Species
                 Id = manager.NewSpeciesId,
                 Name = selected.Name,
                 VariantName = selected.VariantName,
-                GrowthRate = selected.GrowthRate,
+                BirthRate = selected.BirthRate,
                 LifeSpan = selected.LifeSpan,
                 Needs = selected.Needs.ToList(),
                 RelatedSpecies = selected.RelatedSpecies.ToList(),
@@ -84,7 +84,7 @@ namespace EditorInterface.Species
                 Wants = selected.Wants.ToList(),
             };
 
-            Window win = new SpeciesEditor(selected);
+            Window win = new SpeciesEditor(dup);
             win.ShowDialog();
 
             SpeciesGrid.ItemsSource = manager.Species.Values;

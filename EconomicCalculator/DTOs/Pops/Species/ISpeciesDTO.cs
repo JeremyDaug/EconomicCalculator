@@ -35,7 +35,7 @@ namespace EconomicCalculator.DTOs.Pops.Species
         /// <summary>
         /// The natural growth rate of the Species
         /// </summary>
-        decimal GrowthRate { get; }
+        decimal BirthRate { get; }
 
         /// <summary>
         /// How long a member of thes species naturally survives for.

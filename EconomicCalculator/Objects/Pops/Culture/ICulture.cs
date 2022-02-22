@@ -52,6 +52,6 @@ namespace EconomicCalculator.Objects.Pops.Culture
         /// <summary>
         /// The Culture's Tags.
         /// </summary>
-        IReadOnlyList<ITagData<CultureTags>> Tags { get; }
+        IReadOnlyList<ITagData<CultureTag>> Tags { get; }
     }
 }

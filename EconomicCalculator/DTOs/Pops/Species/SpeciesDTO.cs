@@ -27,7 +27,7 @@ namespace EconomicCalculator.DTOs.Pops.Species
 
         public string VariantName { get; set; }
 
-        public decimal GrowthRate { get; set; }
+        public decimal BirthRate { get; set; }
 
         public int LifeSpan { get; set; }
 

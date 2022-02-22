@@ -52,5 +52,9 @@
         <Button Content="To Species" Height="25" Width="100"
                 Grid.Row="1" Grid.Column="3"
                 ClickMode="Release" Click="ToSpecies"/>
+
+        <Button Content="To Cultures" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="0"
+                ClickMode="Release" Click="ToCultures"/>
     </Grid>
 </Window>

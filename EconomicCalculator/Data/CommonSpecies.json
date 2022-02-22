@@ -2,7 +2,7 @@
   {
     "Name": "Human",
     "VariantName": "Baseline",
-    "GrowthRate": 0.02,
+    "BirthRate": 0.02,
     "LifeSpan": 75,
     "Description": "A simple human example.",
     "Needs": [
@@ -21,14 +21,13 @@
     ],
     "TagStrings": [],
     "RelatedSpecies": [
-      "Human(Variant)",
-      "Nord"
+      "Human(Variant)"
     ]
   },
   {
     "Name": "Human",
     "VariantName": "Variant",
-    "GrowthRate": 0.015,
+    "BirthRate": 0.015,
     "LifeSpan": 80,
     "Description": "A simple Variant human example.",
     "Needs": [
@@ -53,7 +52,7 @@
   {
     "Name": "Vulcan",
     "VariantName": "",
-    "GrowthRate": 0.015,
+    "BirthRate": 0.015,
     "LifeSpan": 140,
     "Description": "A human like creature, but with pointy ears.",
     "Needs": [
@@ -78,7 +77,7 @@
   {
     "Name": "Romulan",
     "VariantName": "",
-    "GrowthRate": 0.015,
+    "BirthRate": 0.015,
     "LifeSpan": 80,
     "Description": "A Vulcan, but not really?",
     "Needs": [
@@ -103,7 +102,7 @@
   {
     "Name": "Klingon",
     "VariantName": "",
-    "GrowthRate": 0.015,
+    "BirthRate": 0.015,
     "LifeSpan": 60,
     "Description": "A wrinkly headed humanoid who likes fighting.",
     "Needs": [
@@ -126,7 +125,7 @@
   {
     "Name": "Imperial",
     "VariantName": "",
-    "GrowthRate": 0.025,
+    "BirthRate": 0.025,
     "LifeSpan": 100,
     "Description": "Stop! You've Violated the Law!",
     "Needs": [

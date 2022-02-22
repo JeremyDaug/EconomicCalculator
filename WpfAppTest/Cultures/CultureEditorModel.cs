@@ -1,5 +1,4 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops.Species;
+﻿using EconomicCalculator.DTOs.Pops.Culture;
 using EditorInterface.Helpers;
 using System;
 using System.Collections.Generic;
@@ -10,41 +9,35 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EditorInterface.Species
+namespace EditorInterface.Cultures
 {
-    internal class SpeciesEditorModel : INotifyPropertyChanged
+    internal class CultureEditorModel : INotifyPropertyChanged
     {
-        private SpeciesDTO original;
-
         private string name;
         private string variantName;
-        private decimal growthRate;
-        private int lifeSpan;
+        private decimal growthMod;
+        private decimal deathMod;
         private string description;
 
-        DTOManager manager;
+        private CultureDTO original;
 
-        public SpeciesEditorModel(SpeciesDTO original)
+        public CultureEditorModel(CultureDTO original)
         {
             this.original = original;
 
-            manager = DTOManager.Instance;
-
             Name = original.Name;
-            VariantName = original.VariantName;
-            GrowthRate = original.BirthRate;
-            LifeSpan = original.LifeSpan;
+            variantName = original.VariantName;
+            GrowthMod = original.BirthModifier;
+            deathMod = original.DeathModifier;
             Description = original.Description;
 
-            Needs = new ObservableCollection<ISpeciesNeedDTO>(
-                original.Needs);
-            Wants = new ObservableCollection<ISpeciesWantDTO>(
-                original.Wants);
+            Wants = new ObservableCollection<ICultureWantDTO>(original.Wants);
+            Needs = new ObservableCollection<ICultureNeedDTO>(original.Needs);
             Relations = new ObservableCollection<SelectorClass>();
 
-            foreach (var rel in original.RelatedSpecies)
+            foreach (var rel in original.RelatedCultures)
             {
-                Relations.Add(new SelectorClass { Selection = rel });
+                Relations.Add(new SelectorClass {  Selection = rel });
             }
         }
 
@@ -52,11 +45,11 @@ namespace EditorInterface.Species
         {
             get
             {
-                return name; 
+                return name;
             }
             set
             {
-                if (name != value)
+                if (value != name)
                 {
                     name = value;
                     RaisePropertyChanged();
@@ -66,10 +59,7 @@ namespace EditorInterface.Species
 
         public string VariantName
         {
-            get
-            {
-                return variantName;
-            }
+            get { return variantName; }
             set
             {
                 if (variantName != value)
@@ -80,33 +70,27 @@ namespace EditorInterface.Species
             }
         }
 
-        public decimal GrowthRate
+        public decimal GrowthMod
         {
-            get
-            {
-                return growthRate;
-            }
+            get { return growthMod; }
             set
             {
-                if (growthRate != value)
+                if (growthMod != value)
                 {
-                    growthRate = value;
+                    growthMod = value;
                     RaisePropertyChanged();
                 }
             }
         }
 
-        public int LifeSpan
+        public decimal DeathMod
         {
-            get
-            {
-                return lifeSpan;
-            }
+            get => deathMod;
             set
             {
-                if (lifeSpan != value)
+                if (deathMod != value)
                 {
-                    lifeSpan = value;
+                    deathMod = value;
                     RaisePropertyChanged();
                 }
             }
@@ -128,13 +112,15 @@ namespace EditorInterface.Species
             }
         }
 
-        public ObservableCollection<ISpeciesNeedDTO> Needs { get; set; }
+        public ObservableCollection<ICultureWantDTO> Wants { get; set; }
 
-        public ObservableCollection<ISpeciesWantDTO> Wants { get; set; }
+        public ObservableCollection<ICultureNeedDTO> Needs { get; set; }
+
+        // culture tags
 
         public ObservableCollection<SelectorClass> Relations { get; set; }
 
-        private void RaisePropertyChanged([CallerMemberName]string name = null)
+        private void RaisePropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

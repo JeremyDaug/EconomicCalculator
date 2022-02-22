@@ -1,10 +1,9 @@
 ﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops.Species;
-using EconomicCalculator.Objects.Pops;
+using EconomicCalculator.DTOs.Pops.Culture;
 using Editor.Helpers;
+using EditorInterface.Cultures.CultureNeedEditor;
+using EditorInterface.Cultures.CultureWantEditor;
 using EditorInterface.Helpers;
-using EditorInterface.Species.SpeciesNeedEditor;
-using EditorInterface.Species.SpeciesWantEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,43 +15,34 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace EditorInterface.Species
+namespace EditorInterface.Cultures
 {
-    internal class SpeciesEditorViewModel : INotifyPropertyChanged
+    internal class CultureEditorViewModel : INotifyPropertyChanged
     {
-        private SpeciesEditorModel model;
+        private CultureEditorModel model;
 
-        private SpeciesDTO original;
+        private CultureDTO original;
 
-        private DTOManager manager;
-        private ISpeciesNeedDTO selectedNeed;
-        private ISpeciesWantDTO selectedWant;
+        private DTOManager manager = DTOManager.Instance;
+        private ICultureNeedDTO selectedNeed;
+        private ICultureWantDTO selectedWant;
 
         private ICommand addNeed;
         private ICommand removeNeed;
         private ICommand addWant;
         private ICommand removeWant;
 
-        public SpeciesEditorViewModel(SpeciesDTO original)
+        public CultureEditorViewModel(CultureDTO original)
         {
-            model = new SpeciesEditorModel(original);
-
             this.original = original;
-
-            manager = DTOManager.Instance;
-
-            AllSpecies = new ObservableCollection<string>(
-                manager.Species.Values
-                .Select(x => x.ToString())
-                .Where(x => x != original.ToString()));
+            model = new CultureEditorModel(original);
+            AllCultures = new ObservableCollection<string>(manager.Cultures
+                .Values.Where(x => x.Name != original.Name && x.VariantName != original.VariantName).Select(x => x.ToString()));
         }
 
         public string Name
         {
-            get
-            {
-                return model.Name;
-            }
+            get { return model.Name; }
             set
             {
                 if (model.Name != value)
@@ -65,47 +55,38 @@ namespace EditorInterface.Species
 
         public string VariantName
         {
-            get
-            {
-                return model.VariantName;
-            }
+            get { return model.VariantName; }
             set
             {
-                if (model.VariantName != value)
-                {
+                if (value != model.VariantName)
+                { 
                     model.VariantName = value;
                     RaisePropertyChanged();
                 }
             }
         }
 
-        public decimal GrowthRate
+        public decimal BirthModifier
         {
-            get
-            {
-                return model.GrowthRate;
-            }
+            get { return model.GrowthMod; }
             set
             {
-                if (model.GrowthRate != value)
+                if (value != model.GrowthMod)
                 {
-                    model.GrowthRate = value;
+                    model.GrowthMod = value;
                     RaisePropertyChanged();
                 }
             }
         }
 
-        public int LifeSpan
+        public decimal DeathModifier
         {
-            get
-            {
-                return model.LifeSpan;
-            }
+            get { return model.DeathMod; }
             set
             {
-                if (model.LifeSpan != value)
+                if (model.DeathMod != value)
                 {
-                    model.LifeSpan = value;
+                    model.DeathMod = value;
                     RaisePropertyChanged();
                 }
             }
@@ -127,7 +108,7 @@ namespace EditorInterface.Species
             }
         }
 
-        public ISpeciesNeedDTO SelectedNeed
+        public ICultureNeedDTO SelectedNeed
         {
             get
             {
@@ -143,7 +124,7 @@ namespace EditorInterface.Species
             }
         }
 
-        public ISpeciesWantDTO SelectedWant
+        public ICultureWantDTO SelectedWant
         {
             get
             {
@@ -159,13 +140,13 @@ namespace EditorInterface.Species
             }
         }
 
-        public ObservableCollection<ISpeciesNeedDTO> Needs => model.Needs;
+        public ObservableCollection<ICultureNeedDTO> Needs => model.Needs;
 
-        public ObservableCollection<ISpeciesWantDTO> Wants => model.Wants;
+        public ObservableCollection<ICultureWantDTO> Wants => model.Wants;
 
         public ObservableCollection<SelectorClass> Relations => model.Relations;
 
-        public ObservableCollection<string> AllSpecies { get; set; }
+        public ObservableCollection<string> AllCultures { get; set; }
 
         public ICommand AddNeed
         {
@@ -224,17 +205,17 @@ namespace EditorInterface.Species
             // check each box.
             if (string.IsNullOrWhiteSpace(Name))
             {
-                MessageBox.Show("Species Must have a name.", "Bad Name",
+                MessageBox.Show("Culture Must have a name.", "Bad Name",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (GrowthRate < 0)
+            if (BirthModifier < 0)
             {
                 MessageBox.Show("Growth must be non-negative.", "Invalid Growth",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (LifeSpan < 0)
+            if (DeathModifier < 0)
             {
                 MessageBox.Show("Life Span must be non-negative.", "Invalid Lifespan",
                     MessageBoxButton.OK, MessageBoxImage.Error);
@@ -248,8 +229,8 @@ namespace EditorInterface.Species
             original.Name = Name;
             original.VariantName = VariantName == null ? "" : VariantName;
             original.Description = Description;
-            original.LifeSpan = LifeSpan;
-            original.BirthRate = GrowthRate;
+            original.BirthModifier = BirthModifier;
+            original.DeathModifier = DeathModifier;
 
             // Ignore Duplicate Relations
             original.Needs = Needs.ToList();
@@ -257,54 +238,53 @@ namespace EditorInterface.Species
 
             // get old connections for later.
             List<(int id, string name)> oldRels = new List<(int id, string name)>();
-            for (int i = 0; i < original.RelatedSpeciesIds.Count; ++i)
+            for (int i = 0; i < original.RelatedCulturesIds.Count; ++i)
             {
-                oldRels.Add((original.RelatedSpeciesIds[i], original.RelatedSpecies[i]));
+                oldRels.Add((original.RelatedCulturesIds[i], original.RelatedCultures[i]));
             }
 
-            original.RelatedSpecies = Relations
+            original.RelatedCultures = Relations
                 .Select(x => x.Selection)
                 .Distinct().ToList();
 
             // clear out related Ids before refilling it.
-            original.RelatedSpeciesIds.Clear();
+            original.RelatedCulturesIds.Clear();
 
-            // add relations to referenced species while we're at it.
-            foreach (var rel in original.RelatedSpecies)
+            // add relations to referenced Culture while we're at it.
+            foreach (var rel in original.RelatedCultures)
             {
-                var procName = SpeciesDTO.ProcessName(rel);
+                var procName = CultureDTO.ProcessName(rel);
                 // get related Id
-                var related = manager.Species.Values
+                var related = manager.Cultures.Values
                                 .Single(x => x.Name == procName.Name
                                     && x.VariantName == procName.VariantName);
-                original.RelatedSpeciesIds.Add(related.Id);
-                // go to related species and add this relation if it's not already there.
-                if (!manager.Species[related.Id].RelatedSpeciesIds.Contains(original.Id))
+                original.RelatedCulturesIds.Add(related.Id);
+                // go to related Culture and add this relation if it's not already there.
+                if (!manager.Cultures[related.Id].RelatedCulturesIds.Contains(original.Id))
                 {
-                    related.RelatedSpeciesIds.Add(original.Id);
-                    related.RelatedSpecies.Add(original.ToString());
+                    related.RelatedCulturesIds.Add(original.Id);
+                    related.RelatedCultures.Add(original.ToString());
                 }
             }
 
             // remove destroyed connections.
-            oldRels = oldRels.Where(x => !original.RelatedSpeciesIds.Contains(x.id)).ToList();
+            oldRels = oldRels.Where(x => !original.RelatedCulturesIds.Contains(x.id)).ToList();
 
             foreach (var remRel in oldRels)
             {
-                var old = manager.Species[remRel.id];
-                old.RelatedSpecies.Remove(original.ToString());
-                old.RelatedSpeciesIds.Remove(original.Id);
+                var old = manager.Cultures[remRel.id];
+                old.RelatedCultures.Remove(original.ToString());
+                old.RelatedCulturesIds.Remove(original.Id);
             }
 
-            if (!manager.Species.ContainsKey(original.Id))
-                manager.Species[original.Id] = original;
+            manager.Cultures[original.Id] = original;
 
-            MessageBox.Show("Species Commited, be sure to save.", "Species commited.", MessageBoxButton.OK);
+            MessageBox.Show("Culture Commited, be sure to save.", "Culture commited.", MessageBoxButton.OK);
         }
 
         private void CreateAndAddNeed()
         {
-            var newNeed = new SpeciesNeedDTO();
+            var newNeed = new CultureNeedDTO();
 
             NeedEditorView win = new NeedEditorView(newNeed);
 
@@ -330,7 +310,7 @@ namespace EditorInterface.Species
             if (SelectedNeed == null)
                 return;
 
-            NeedEditorView win = new NeedEditorView((SpeciesNeedDTO)SelectedNeed);
+            NeedEditorView win = new NeedEditorView((CultureNeedDTO)SelectedNeed);
 
             win.ShowDialog();
 
@@ -339,7 +319,7 @@ namespace EditorInterface.Species
                 var data = win.viewModel;
 
                 // create new product
-                var newNeed = new SpeciesNeedDTO
+                var newNeed = new CultureNeedDTO
                 {
                     ProductId = manager.GetProductByFullName(data.Product).Id,
                     Product = data.Product,
@@ -365,7 +345,7 @@ namespace EditorInterface.Species
 
         private void AddNewWant()
         {
-            var newWant = new SpeciesWantDTO();
+            var newWant = new CultureWantDTO();
 
             WantEditorView win = new WantEditorView(newWant);
 
@@ -391,7 +371,7 @@ namespace EditorInterface.Species
             if (SelectedWant == null)
                 return;
 
-            WantEditorView win = new WantEditorView((SpeciesWantDTO)SelectedWant);
+            WantEditorView win = new WantEditorView((CultureWantDTO)SelectedWant);
 
             win.ShowDialog();
 
@@ -400,7 +380,7 @@ namespace EditorInterface.Species
                 var data = win.viewModel;
 
                 // create new product
-                var newWant = new SpeciesWantDTO
+                var newWant = new CultureWantDTO
                 {
                     WantId = manager.GetWantByName(data.Want).Id,
                     Want = data.Want,
@@ -425,7 +405,7 @@ namespace EditorInterface.Species
 
         private void RaisePropertyChanged([CallerMemberName] string name = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(name, new PropertyChangedEventArgs(name));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

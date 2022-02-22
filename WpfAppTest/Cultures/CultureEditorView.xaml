@@ -1,13 +1,12 @@
-﻿<Window x:Class="EditorInterface.Species.SpeciesEditor"
+﻿<Window x:Class="EditorInterface.Cultures.CultureEditorView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EditorInterface.Species"
+        xmlns:local="clr-namespace:EditorInterface.Cultures"
         xmlns:valid="clr-namespace:Editor.ValidationRules"
         mc:Ignorable="d"
-        Style="{StaticResource SharedMenu}"
-        Title="SpeciesEditor" Height="350" Width="950">
+        Title="CultureEditorView" Height="350" Width="950">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -59,14 +58,14 @@
                  Text="{Binding Description}"
                  Grid.RowSpan="2" Grid.ColumnSpan="2"/>
 
-        <Label Content="Birth Rate" Grid.Row="2" Grid.Column="0"/>
+        <Label Content="Birth Rate Modifier" Grid.Row="2" Grid.Column="0"/>
         <TextBox Grid.Row="3" Grid.Column="0"
                  Width="150" Height="30"
                  ToolTip="Daily Growth Rate"
                  HorizontalAlignment="Left" VerticalAlignment="Bottom"
                  Style="{StaticResource textboxInError}">
             <TextBox.Text>
-                <Binding Path="GrowthRate" UpdateSourceTrigger="LostFocus">
+                <Binding Path="BirthModifier" UpdateSourceTrigger="LostFocus">
                     <Binding.ValidationRules>
                         <valid:IsDecimalRule Min="0" Max="1"/>
                     </Binding.ValidationRules>
@@ -74,14 +73,14 @@
             </TextBox.Text>
         </TextBox>
 
-        <Label Content="Life Span" Grid.Row="2" Grid.Column="1"/>
+        <Label Content="Death Rate Modifier" Grid.Row="2" Grid.Column="1"/>
         <TextBox Grid.Row="3" Grid.Column="1" 
                  Width="150" Height="30"
                  ToolTip="Sets effective death rate, 100% should die after this many days."
                  HorizontalAlignment="Left" VerticalAlignment="Bottom"
                  Style="{StaticResource textboxInError}">
             <TextBox.Text>
-                <Binding Path="LifeSpan" UpdateSourceTrigger="PropertyChanged">
+                <Binding Path="DeathModifier" UpdateSourceTrigger="PropertyChanged">
                     <Binding.ValidationRules>
                         <valid:IsIntegerRule Min="0"/>
                     </Binding.ValidationRules>

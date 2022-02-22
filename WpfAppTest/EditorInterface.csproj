@@ -77,6 +77,24 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\EnumListToStringConverter.cs" />
+    <Compile Include="Cultures\CultureEditorModel.cs" />
+    <Compile Include="Cultures\CultureEditorView.xaml.cs">
+      <DependentUpon>CultureEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureEditorViewModel.cs" />
+    <Compile Include="Cultures\CultureListView.xaml.cs">
+      <DependentUpon>CultureListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureNeedEditor\NeedEditorModel.cs" />
+    <Compile Include="Cultures\CultureNeedEditor\NeedEditorView.xaml.cs">
+      <DependentUpon>NeedEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureNeedEditor\NeedEditorViewModel.cs" />
+    <Compile Include="Cultures\CultureWantEditor\WantEditorModel.cs" />
+    <Compile Include="Cultures\CultureWantEditor\WantEditorView.xaml.cs">
+      <DependentUpon>WantEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureWantEditor\WantEditorViewModel.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DummyDecimalBinding.cs" />
     <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
@@ -126,7 +144,7 @@
     <Compile Include="Skills\SkillsListWindow.xaml.cs">
       <DependentUpon>SkillsListWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Species\SelectorClass.cs" />
+    <Compile Include="Helpers\SelectorClass.cs" />
     <Compile Include="Species\SpeciesEditor.xaml.cs">
       <DependentUpon>SpeciesEditor.xaml</DependentUpon>
     </Compile>
@@ -167,6 +185,22 @@
     <Compile Include="Wants\WantWindow.xaml.cs">
       <DependentUpon>WantWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Cultures\CultureEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Cultures\CultureListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Cultures\CultureNeedEditor\NeedEditorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Cultures\CultureWantEditor\WantEditorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Jobs\JobEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

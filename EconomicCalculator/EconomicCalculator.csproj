@@ -55,6 +55,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Data\CommonCultures.json" />
     <None Include="Data\CommonJobs.json" />
     <None Include="Data\CommonProcesses.json" />
     <None Include="Data\CommonProducts.json" />
@@ -82,6 +83,15 @@
     <Compile Include="DTOs\Jobs\JobDTO.cs" />
     <Compile Include="DTOs\DTOManager.cs" />
     <Compile Include="DTOs\Pops\ConsumptionModifiers\ConsumptionModifiers.cs" />
+    <Compile Include="DTOs\Pops\Culture\AttachedTagData\AttachedCultureTag.cs" />
+    <Compile Include="DTOs\Pops\Culture\AttachedTagData\CultureTagInfo.cs" />
+    <Compile Include="DTOs\Pops\Culture\AttachedTagData\IAttachedCultureTag.cs" />
+    <Compile Include="DTOs\Pops\Culture\CultureDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\CultureNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\CultureWantDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\ICultureDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\ICultureNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\ICultureWantDTO.cs" />
     <Compile Include="DTOs\Pops\IPopulationGroupDTO.cs" />
     <Compile Include="DTOs\Pops\PopModifiers\PopModifiers.cs" />
     <Compile Include="DTOs\Pops\PopNeeds\IPopNeedsDTO.cs" />
@@ -164,7 +174,7 @@
     <Compile Include="Objects\Market\IMarket.cs" />
     <Compile Include="Objects\Market\Market.cs" />
     <Compile Include="Objects\Pops\Culture\Culture.cs" />
-    <Compile Include="Objects\Pops\Culture\CultureTags.cs" />
+    <Compile Include="Objects\Pops\Culture\CultureTag.cs" />
     <Compile Include="Objects\Pops\Culture\ICulture.cs" />
     <Compile Include="Objects\Pops\DesireTier.cs" />
     <Compile Include="Objects\Pops\IPopGroup.cs" />
@@ -320,7 +330,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DTOs\Market\" />
-    <Folder Include="DTOs\Pops\Culture\" />
     <Folder Include="DTOs\Pops\Politics\" />
     <Folder Include="Objects\Pops\PopModifiers\" />
     <Folder Include="Runner\" />

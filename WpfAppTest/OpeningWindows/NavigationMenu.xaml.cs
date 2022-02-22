@@ -100,5 +100,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToCultures(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.Cultures.CultureListView();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

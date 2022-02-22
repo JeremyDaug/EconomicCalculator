@@ -23,6 +23,7 @@ using EconomicCalculator.DTOs.Technology;
 using EconomicCalculator.Enums;
 using EconomicCalculator.DTOs.Pops.Species;
 using EconomicCalculator.DTOs.Pops.Species.AttachedTagData;
+using EconomicCalculator.DTOs.Pops.Culture;
 
 namespace EconomicCalculator
 {
@@ -55,6 +56,7 @@ namespace EconomicCalculator
             TechFamilies = new Dictionary<int, ITechFamilyDTO>();
             Technologies = new Dictionary<int, ITechnologyDTO>();
             Species = new Dictionary<int, ISpeciesDTO>();
+            Cultures = new Dictionary<int, ICultureDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -101,6 +103,8 @@ namespace EconomicCalculator
         public IDictionary<int, ITechnologyDTO> Technologies { get; set; }
 
         public IDictionary<int, ISpeciesDTO> Species { get; set; }
+
+        public IDictionary<int, ICultureDTO> Cultures { get; set; }
 
         #endregion DataStorage
 
@@ -535,7 +539,7 @@ namespace EconomicCalculator
 
         private int _newSpeciesId;
         /// <summary>
-        /// Helper to retrieve a new, unused, Tech Id.
+        /// Helper to retrieve a new, unused, Species Id.
         /// </summary>
         public int NewSpeciesId
         {
@@ -544,6 +548,20 @@ namespace EconomicCalculator
                 while (Species.ContainsKey(_newSpeciesId))
                     ++_newSpeciesId;
                 return _newSpeciesId;
+            }
+        }
+
+        private int _newCultureId;
+        /// <summary>
+        /// Helper to retrieve a new, unused, Culture Id.
+        /// </summary>
+        public int NewCultureId
+        {
+            get
+            {
+                while (Cultures.ContainsKey(_newCultureId))
+                    ++_newCultureId;
+                return _newCultureId;
             }
         }
 
@@ -988,6 +1006,54 @@ namespace EconomicCalculator
                                     .Single(x => x.ToString() == rel).Id);
                 }
             }
+
+            // TODO Species Tags
+        }
+
+        public void LoadCultures(string fileName)
+        {
+            var json = File.ReadAllText(fileName);
+
+            List<CultureDTO> cultures = JsonSerializer.Deserialize<List<CultureDTO>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new AbstractConverter<CultureNeedDTO, ICultureNeedDTO>(),
+                        new AbstractConverter<CultureWantDTO, ICultureWantDTO>()
+                    }
+                });
+
+            // get desires
+            foreach (var culture in cultures)
+            {
+                culture.Id = NewCultureId;
+                Cultures.Add(culture.Id, culture);
+
+                // get needs
+                foreach (var need in culture.Needs)
+                {
+                    ((CultureNeedDTO)need).ProductId = GetProductByFullName(need.Product).Id;
+                }
+                // get wants
+                foreach (var want in culture.Wants)
+                {
+                    ((CultureWantDTO)want).WantId = Wants.Values.Single(x => x.Name == want.Want).Id;
+                }
+            }
+
+            // add Culture relations
+            foreach (var culture in cultures)
+            {
+                foreach (var rel in culture.RelatedCultures)
+                {
+                    culture.RelatedCulturesIds
+                        .Add(Species.Values
+                                    .Single(x => x.ToString() == rel).Id);
+                }
+            }
+
+            // TODO Culutre Tags
         }
 
         #endregion LoadFunctions
@@ -1125,6 +1191,16 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        public void SaveCultures(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(Cultures.Values, options);
+
+            File.WriteAllText (filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -1179,6 +1255,9 @@ namespace EconomicCalculator
 
             // Get all Species
             LoadSpecies(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSpecies.json");
+
+            // Get All Cultures
+            LoadCultures(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonCultures.json");
         }
 
         private Mapper InitMapper()
