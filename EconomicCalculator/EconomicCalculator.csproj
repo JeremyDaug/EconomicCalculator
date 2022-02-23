@@ -92,9 +92,14 @@
     <Compile Include="DTOs\Pops\Culture\ICultureDTO.cs" />
     <Compile Include="DTOs\Pops\Culture\ICultureNeedDTO.cs" />
     <Compile Include="DTOs\Pops\Culture\ICultureWantDTO.cs" />
-    <Compile Include="DTOs\Pops\IPopulationGroupDTO.cs" />
+    <Compile Include="DTOs\Pops\IPopCulturePortion.cs" />
+    <Compile Include="DTOs\Pops\IPopDTO.cs" />
+    <Compile Include="DTOs\Pops\IPopSpeciesPortion.cs" />
+    <Compile Include="DTOs\Pops\PopCulturePortion.cs" />
+    <Compile Include="DTOs\Pops\PopDTO.cs" />
     <Compile Include="DTOs\Pops\PopModifiers\PopModifiers.cs" />
     <Compile Include="DTOs\Pops\PopNeeds\IPopNeedsDTO.cs" />
+    <Compile Include="DTOs\Pops\PopSpeciesPortion.cs" />
     <Compile Include="DTOs\Pops\PopWants\IPopWantDTO.cs" />
     <Compile Include="DTOs\Pops\Species\AttachedTagData\AttachedSpeciesTag.cs" />
     <Compile Include="DTOs\Pops\Species\AttachedTagData\IAttachedSpeciesTag.cs" />
