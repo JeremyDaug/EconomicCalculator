@@ -1,0 +1,55 @@
+﻿<Window x:Class="EditorInterface.Populations.PopsListView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EditorInterface.Populations"
+        mc:Ignorable="d"
+        Title="Populations List" Height="500" Width="850">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="0" AutoGenerateColumns="False" Name="PopGrid"
+                  MouseDoubleClick="PopGrid_MouseDoubleClick" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Count" Binding="{Binding Count}"  Width="100"/>
+                <DataGridTextColumn Header="Job" Binding="{Binding Job}"  Width="100"/>
+                <DataGridTextColumn Header="Firm" Binding="{Binding Firm}"  Width="100"/>
+                <DataGridTextColumn Header="Market" Binding="{Binding Market}"  Width="100"/>
+                <DataGridTextColumn Header="Skill" Binding="{Binding Skill}" Width="100"/>
+                <DataGridTextColumn Header="SkillLevel" Binding="{Binding SkillLevel}"  Width="100"/>
+                <DataGridTextColumn Header="Species" Binding="{Binding SpeciesString}"  Width="100"/>
+                <DataGridTextColumn Header="Cultures" Binding="{Binding CultureString}"  Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!--Button Content="New Pop" Grid.Column="0" 
+                    Height="25" Width="100" 
+                    ClickMode="Release" Click="NewCulture"/-->
+
+            <Button Content="Edit Pop" Grid.Column="1" 
+                    Height="25" Width="100" 
+                    ClickMode="Release" Click="EditPop"/>
+
+            <!--Button Content="Copy Pop" Grid.Column="2" 
+                    Height="25" Width="100" 
+                    ClickMode="Release" Click="CopyCulture"/-->
+
+            <Button Content="Save Pops" Grid.Column="3" 
+                    Height="25" Width="100" 
+                    ClickMode="Release" Click="SavePops"/>
+
+        </Grid>
+    </Grid>
+</Window>

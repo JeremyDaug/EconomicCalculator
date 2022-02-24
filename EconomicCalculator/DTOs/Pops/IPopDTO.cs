@@ -62,12 +62,17 @@ namespace EconomicCalculator.DTOs.Pops
         /// The Skill of the Pop.
         /// </summary>
         [JsonIgnore]
-        int Skill { get; }
+        int SkillId { get; }
 
         /// <summary>
         /// The name of the Pop's Skill.
         /// </summary>
-        string SkillName { get; }
+        string Skill { get; }
+
+        /// <summary>
+        /// The population's skill level.
+        /// </summary>
+        decimal SkillLevel { get; }
 
         // population Properties.
 
@@ -77,11 +82,15 @@ namespace EconomicCalculator.DTOs.Pops
         /// </summary>
         List<IPopSpeciesPortion> SpeciesPortions { get; }
 
+        string SpeciesString { get; }
+
         /// <summary>
         /// The portion of cultures in the pop.
         /// Should add to <see cref="Count"/> or less.
         /// </summary>
         List<IPopCulturePortion> CulturePortions { get; }
+
+        string CultureString { get; }
 
         // Desires Placeholder, storage not needed,
         // calculated from Species and Culture.

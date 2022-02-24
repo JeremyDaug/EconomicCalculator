@@ -65,6 +65,7 @@
     <None Include="Data\CommonTechFamilies.json" />
     <None Include="Data\CommonTechs.json" />
     <None Include="Data\CommonWants.json" />
+    <None Include="Data\Pops.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -294,6 +295,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\Errors.txt" />
     <Content Include="Data\ProductImages\bin.png" />
     <Content Include="Data\ProductImages\DefaultIcon.png" />
     <Content Include="Data\ProductImages\Attribution.txt" />

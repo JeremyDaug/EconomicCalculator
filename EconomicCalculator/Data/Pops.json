@@ -1,0 +1,22 @@
+[
+  {
+    "Count": 100,
+    "Job": "Farming",
+    "Firm": "Wheaters of Alicia",
+    "Market": "Alicia",
+    "Skill": "Wheat Farming",
+    "SkillLevel": 2,
+    "SpeciesPortions": [
+      {
+        "Species": "Human(Baseline)",
+        "Amount": 100
+      }
+    ],
+    "CulturePortions": [
+      {
+        "Culture": "Cringe",
+        "Amount": 100
+      }
+    ]
+  }
+]

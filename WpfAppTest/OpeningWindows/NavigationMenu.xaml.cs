@@ -109,5 +109,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToPops(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.Populations.PopsListView();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

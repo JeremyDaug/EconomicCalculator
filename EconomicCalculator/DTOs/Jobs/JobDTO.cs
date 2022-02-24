@@ -85,5 +85,18 @@ namespace EconomicCalculator.DTOs.Jobs
         /// </summary>
         [JsonIgnore]
         public List<int> ProcessIds { get; set; }
+
+        public static (string Name, string VariantName) GetJobNames(string name)
+        {
+            if (name.Contains("("))
+            {
+                var names = name.Split('(');
+                var primaryName = names[0];
+                var varName = names[1].TrimEnd(')');
+                return (primaryName, varName);
+            }
+            else
+                return (name, "");
+        }
     }
 }

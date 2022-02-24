@@ -56,5 +56,9 @@
         <Button Content="To Cultures" Height="25" Width="100"
                 Grid.Row="2" Grid.Column="0"
                 ClickMode="Release" Click="ToCultures"/>
+
+        <Button Content="To Pops" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="1"
+                ClickMode="Release" Click="ToPops"/>
     </Grid>
 </Window>

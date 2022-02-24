@@ -24,6 +24,7 @@ using EconomicCalculator.Enums;
 using EconomicCalculator.DTOs.Pops.Species;
 using EconomicCalculator.DTOs.Pops.Species.AttachedTagData;
 using EconomicCalculator.DTOs.Pops.Culture;
+using EconomicCalculator.DTOs.Pops;
 
 namespace EconomicCalculator
 {
@@ -57,6 +58,7 @@ namespace EconomicCalculator
             Technologies = new Dictionary<int, ITechnologyDTO>();
             Species = new Dictionary<int, ISpeciesDTO>();
             Cultures = new Dictionary<int, ICultureDTO>();
+            Pops = new Dictionary<int, IPopDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -105,6 +107,8 @@ namespace EconomicCalculator
         public IDictionary<int, ISpeciesDTO> Species { get; set; }
 
         public IDictionary<int, ICultureDTO> Cultures { get; set; }
+
+        public IDictionary<int, IPopDTO> Pops { get; set; }
 
         #endregion DataStorage
 
@@ -216,6 +220,47 @@ namespace EconomicCalculator
             Tuple<string, string> names = ProcessDTO.GetProcessNames(name);
             return Processes.Values.Single(x => x.Name == names.Item1
                                         && x.VariantName == names.Item2);
+        }
+
+        /// <summary>
+        /// Retrieve a Species based on it's name.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <returns></returns>
+        public ISpeciesDTO GetSpeciesByName(string culture)
+        {
+
+            var names = SpeciesDTO.ProcessName(culture);
+
+            return Species.Values.Single(x => x.Name == names.Name
+                                        && x.VariantName == names.VariantName);
+        }
+
+        /// <summary>
+        /// Retrieve a Culture based on it's name.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <returns></returns>
+        public ICultureDTO GetCultureByName(string species)
+        {
+
+            var names = CultureDTO.ProcessName(species);
+
+            return Cultures.Values.Single(x => x.Name == names.Name
+                                        && x.VariantName == names.VariantName);
+        }
+
+        /// <summary>
+        /// Retrieve a job based on it's name.
+        /// </summary>
+        /// <param name="species"></param>
+        /// <returns></returns>
+        public IJobDTO GetJobByName(string job)
+        {
+            var names = JobDTO.GetJobNames(job);
+
+            return Jobs.Values.Single(x => x.Name == names.Name
+                                        && x.VariantName == names.VariantName);
         }
 
         #endregion ByName
@@ -562,6 +607,20 @@ namespace EconomicCalculator
                 while (Cultures.ContainsKey(_newCultureId))
                     ++_newCultureId;
                 return _newCultureId;
+            }
+        }
+
+        private int _newPopId;
+        /// <summary>
+        /// Helper to retrieve a new, unused, Pop Id.
+        /// </summary>
+        public int NewPopId
+        {
+            get
+            {
+                while (Pops.ContainsKey(_newPopId))
+                    ++_newPopId;
+                return _newPopId;
             }
         }
 
@@ -1056,6 +1115,48 @@ namespace EconomicCalculator
             // TODO Culutre Tags
         }
 
+        public void LoadPops(string filename)
+        {
+            var json = File.ReadAllText(filename);
+
+            List<PopDTO> pops = JsonSerializer.Deserialize<List<PopDTO>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new AbstractConverter<PopCulturePortion, IPopCulturePortion>(),
+                        new AbstractConverter<PopSpeciesPortion, IPopSpeciesPortion>()
+                    }
+                });
+
+            // connect Everything else
+            foreach (var pop in pops)
+            {
+                pop.JobId = GetJobByName(pop.Job).Id;
+
+                // firms and markets set pops from their end.
+
+                pop.SkillId = GetSkillByName(pop.Skill).Id;
+
+                // species
+                foreach (var spec in pop.SpeciesPortions)
+                {
+                    ((PopSpeciesPortion)spec).SpeciesId = GetSpeciesByName(spec.Species).Id;
+                }
+
+                // Cultures
+                foreach (var culture in pop.CulturePortions)
+                {
+                    ((PopCulturePortion)culture).CultureId = GetCultureByName(culture.Culture).Id;
+                }
+            }
+
+            foreach (var pop in pops)
+            {
+                Pops.Add(pop.Id, pop);
+            }
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -1201,6 +1302,16 @@ namespace EconomicCalculator
             File.WriteAllText (filename, json);
         }
 
+        public void SavePops(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(Pops.Values, options);
+
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -1258,6 +1369,9 @@ namespace EconomicCalculator
 
             // Get All Cultures
             LoadCultures(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonCultures.json");
+
+            // Get All Pops
+            LoadPops(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Pops.json");
         }
 
         private Mapper InitMapper()

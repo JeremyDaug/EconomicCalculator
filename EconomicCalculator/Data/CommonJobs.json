@@ -1,7 +1,7 @@
 [
   {
     "Name": "Farming",
-    "VariantName": null,
+    "VariantName": "",
     "Labor": "Wheat Farming",
     "Skill": "Wheat Farming",
     "ProcessNames": [
@@ -11,7 +11,7 @@
   },
   {
     "Name": "Baker",
-    "VariantName": null,
+    "VariantName": "",
     "Labor": "Baking",
     "Skill": "Baking",
     "ProcessNames": [

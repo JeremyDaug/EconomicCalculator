@@ -15,5 +15,10 @@ namespace EconomicCalculator.DTOs.Pops
         public string Species { get; set; }
 
         public ulong Amount { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0}: {1}", Species, Amount);
+        }
     }
 }
