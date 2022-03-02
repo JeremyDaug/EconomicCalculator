@@ -14,10 +14,6 @@ namespace EconomicCalculator.Objects.Pops.Culture
     /// </summary>
     internal class Culture : ICulture
     {
-        private readonly IReadOnlyList<ITagData<CultureTag>> tags;
-        private readonly IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> wants;
-        private readonly IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> needs;
-
         /// <summary>
         /// The Culture's Id.
         /// </summary>
@@ -46,16 +42,28 @@ namespace EconomicCalculator.Objects.Pops.Culture
         /// <summary>
         /// The products desired by members of the culture.
         /// </summary>
-        public IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs => needs;
+        public List<(IProduct product, DesireTier tier, decimal amount)> Needs { get; set; }
+        IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> ICulture.Needs => Needs;
 
         /// <summary>
         /// Wants desired by members of the Culture.
         /// </summary>
-        public IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants => wants;
-        
+        public List<(IWant want, DesireTier tier, decimal amount)> Wants { get; set; }
+        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> ICulture.Wants => Wants;
+
         /// <summary>
         /// The Culture's Tags.
         /// </summary>
-        public IReadOnlyList<ITagData<CultureTag>> Tags => tags;
+        public List<ITagData<CultureTag>> Tags { get; set; }
+        IReadOnlyList<ITagData<CultureTag>> ICulture.Tags => Tags;
+
+        public override string ToString()
+        {
+            if (string.IsNullOrEmpty(VariantName))
+            {
+                return Name;
+            }
+            return string.Format("{0}({1})", Name, VariantName);
+        }
     }
 }

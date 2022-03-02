@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Pops;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,15 @@ namespace EditorInterface.Populations
 
         private void EditPop(object sender, RoutedEventArgs e)
         {
+            if (PopGrid.SelectedItem == null)
+                return;
 
+            PopEditorView win = new PopEditorView((PopDTO)PopGrid.SelectedItem);
+
+            win.ShowDialog();
+
+            PopGrid.ItemsSource = manager.Pops.Values;
+            PopGrid.Items.Refresh();
         }
 
         private void SavePops(object sender, RoutedEventArgs e)

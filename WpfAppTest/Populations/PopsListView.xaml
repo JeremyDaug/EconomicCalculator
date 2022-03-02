@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.Populations"
         mc:Ignorable="d"
-        Title="Populations List" Height="500" Width="850">
+        Title="Populations List" Height="500" Width="900">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -21,8 +21,8 @@
                 <DataGridTextColumn Header="Market" Binding="{Binding Market}"  Width="100"/>
                 <DataGridTextColumn Header="Skill" Binding="{Binding Skill}" Width="100"/>
                 <DataGridTextColumn Header="SkillLevel" Binding="{Binding SkillLevel}"  Width="100"/>
-                <DataGridTextColumn Header="Species" Binding="{Binding SpeciesString}"  Width="100"/>
-                <DataGridTextColumn Header="Cultures" Binding="{Binding CultureString}"  Width="100"/>
+                <DataGridTextColumn Header="Species" Binding="{Binding SpeciesString}"  Width="150"/>
+                <DataGridTextColumn Header="Cultures" Binding="{Binding CultureString}"  Width="150"/>
             </DataGrid.Columns>
         </DataGrid>
         

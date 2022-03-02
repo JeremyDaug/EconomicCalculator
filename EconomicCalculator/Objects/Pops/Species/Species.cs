@@ -74,5 +74,14 @@ namespace EconomicCalculator.Objects.Pops.Species
         /// </summary>
         public List<ISpecies> RelatedSpecies { get; set; }
         IReadOnlyList<ISpecies> ISpecies.RelatedSpecies => RelatedSpecies;
+
+        public override string ToString()
+        {
+            if (string.IsNullOrEmpty(VariantName))
+            {
+                return Name;
+            }
+            return string.Format("{0}({1})", Name, VariantName);
+        }
     }
 }

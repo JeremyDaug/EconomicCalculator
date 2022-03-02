@@ -111,6 +111,11 @@
     <Compile Include="OpeningWindows\NavigationMenu.xaml.cs">
       <DependentUpon>NavigationMenu.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Populations\PopEditorModel.cs" />
+    <Compile Include="Populations\PopEditorView.xaml.cs">
+      <DependentUpon>PopEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Populations\PopEditorViewModel.cs" />
     <Compile Include="Populations\PopsListView.xaml.cs">
       <DependentUpon>PopsListView.xaml</DependentUpon>
     </Compile>
@@ -225,6 +230,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="OpeningWindows\NavigationMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Populations\PopEditorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
