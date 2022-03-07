@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EconomicCalculator.Enums
 {
     [Flags]
-    public enum WaterFlags : int
+    public enum WaterFlag : int
     {
         /// <summary>
         /// Water to the North East

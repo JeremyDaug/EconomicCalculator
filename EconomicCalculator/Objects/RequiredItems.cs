@@ -49,6 +49,7 @@ namespace EconomicCalculator.Objects
                     },
             Icon = ""
         };
+
         public readonly static IProduct Wasteland = new Product
         {
             Id = 1,

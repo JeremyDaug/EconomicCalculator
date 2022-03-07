@@ -1,4 +1,5 @@
-﻿using EconomicCalculator.Objects.Products;
+﻿using EconomicCalculator.DTOs.Hexmap;
+using EconomicCalculator.Objects.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace EconomicCalculator.Objects.Territory
     /// </summary>
     internal class Territory : ITerritory
     {
-        private long land;
+        private ulong land;
         public List<long> plots;
         public List<(ITerritory neighbor, decimal distance)> neighbors;
         public List<(IProduct resource, decimal stockpile, int depth)> nodes;
@@ -26,6 +27,11 @@ namespace EconomicCalculator.Objects.Territory
             nodes = new List<(IProduct resource, decimal stockpile, int depth)>();
             resources = new List<(IProduct resource, decimal amount)>();
         }
+
+        /// <summary>
+        /// The Location of the territory in the hex grid which contains them.
+        /// </summary>
+        public HexCoord Coords { get; }
 
         /// <summary>
         /// The name of the territory (may be empty)
@@ -45,12 +51,12 @@ namespace EconomicCalculator.Objects.Territory
         /// <summary>
         /// The size of the Territory in Acres.
         /// </summary>
-        public long Size { get; set; }
+        public ulong Size { get; set; }
 
         /// <summary>
         /// The actual land available in the territory in acres.
         /// </summary>
-        public long Land
+        public ulong Land
         {
             get
             {
@@ -65,7 +71,7 @@ namespace EconomicCalculator.Objects.Territory
         /// <summary>
         /// The area that is taken up by water in acres.
         /// </summary>
-        public long Water
+        public ulong Water
         {
             get
             {
