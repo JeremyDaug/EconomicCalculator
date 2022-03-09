@@ -143,6 +143,9 @@
     </Compile>
     <Compile Include="Products\TagData.cs" />
     <Compile Include="Products\WantWeight.cs" />
+    <Compile Include="SimpleTerritory\SimpleTerritoryList.xaml.cs">
+      <DependentUpon>SimpleTerritoryList.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Skills\SkillEditorWindow.xaml.cs">
       <DependentUpon>SkillEditorWindow.xaml</DependentUpon>
     </Compile>
@@ -266,6 +269,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Products\ProductWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SimpleTerritory\SimpleTerritoryList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,0 +1,63 @@
+[
+  {
+    "Coords": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "Name": "Alicia",
+    "Coastal": true,
+    "Lake": true,
+    "Size": 1000000000000,
+    "Land": 900000000000,
+    "Water": 100000000000,
+    "Plots": [
+      150000000000,
+      150000000000,
+      150000000000,
+      150000000000,
+      150000000000,
+      150000000000
+    ],
+    "Neighbors": [],
+    "Nodes": [
+      {
+        "Resource": "Iron Ore",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Coal(Anthracite)",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Gold Nugget",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      }
+    ],
+    "Resources": [
+      {
+        "Resource": "Timber",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Wheat Grain",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cotton",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cattle(Beef)",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Fish",
+        "Amount": 1000000000000
+      }
+    ]
+  }
+]

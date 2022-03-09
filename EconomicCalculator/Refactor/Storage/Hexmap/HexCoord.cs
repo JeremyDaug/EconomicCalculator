@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.DTOs.Hexmap
@@ -150,11 +151,17 @@ namespace EconomicCalculator.DTOs.Hexmap
 
         #region DirectionalSteps
 
+        [JsonIgnore]
         public HexCoord ToNE => this + NE;
+        [JsonIgnore]
         public HexCoord ToE => this + E;
+        [JsonIgnore]
         public HexCoord ToSE => this + SE;
+        [JsonIgnore]
         public HexCoord ToSW => this + SW;
+        [JsonIgnore]
         public HexCoord ToW => this + W;
+        [JsonIgnore]
         public HexCoord ToNW => this + NW;
 
         #endregion DirectionalSteps

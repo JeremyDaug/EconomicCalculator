@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator.DTOs.Hexmap;
+using EconomicCalculator.Enums;
 using EconomicCalculator.Objects.Products;
 using System;
 using System.Collections.Generic;
@@ -16,14 +17,14 @@ namespace EconomicCalculator.Objects.Territory
     {
         private ulong land;
         public List<long> plots;
-        public List<(ITerritory neighbor, decimal distance)> neighbors;
+        public List<(ITerritory neighbor, decimal distance, TerritoryConnectionType type)> neighbors;
         public List<(IProduct resource, decimal stockpile, int depth)> nodes;
         public List<(IProduct resource, decimal amount)> resources;
 
         public Territory()
         {
             plots = new List<long>();
-            neighbors = new List<(ITerritory neighbor, decimal distance)>();
+            neighbors = new List<(ITerritory neighbor, decimal distance, TerritoryConnectionType type)>();
             nodes = new List<(IProduct resource, decimal stockpile, int depth)>();
             resources = new List<(IProduct resource, decimal amount)>();
         }
@@ -85,7 +86,7 @@ namespace EconomicCalculator.Objects.Territory
 
         public IReadOnlyList<long> Plots { get => plots; }
 
-        public IReadOnlyList<(ITerritory neighbor, decimal distance)> Neighbors { get => neighbors; }
+        public IReadOnlyList<(ITerritory neighbor, decimal distance, TerritoryConnectionType type)> Neighbors { get => neighbors; }
 
         public IReadOnlyList<(IProduct resource, decimal stockpile, int depth)> Nodes { get => nodes; }
 

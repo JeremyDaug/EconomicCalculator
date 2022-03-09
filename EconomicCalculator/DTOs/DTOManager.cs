@@ -25,6 +25,8 @@ using EconomicCalculator.DTOs.Pops.Species;
 using EconomicCalculator.DTOs.Pops.Species.AttachedTagData;
 using EconomicCalculator.DTOs.Pops.Culture;
 using EconomicCalculator.DTOs.Pops;
+using EconomicCalculator.DTOs.Territory;
+using EconomicCalculator.DTOs.Hexmap;
 
 namespace EconomicCalculator
 {
@@ -59,6 +61,7 @@ namespace EconomicCalculator
             Species = new Dictionary<int, ISpeciesDTO>();
             Cultures = new Dictionary<int, ICultureDTO>();
             Pops = new Dictionary<int, IPopDTO>();
+            SimpleTerritories = new List<ISimpleTerritoryDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -109,6 +112,8 @@ namespace EconomicCalculator
         public IDictionary<int, ICultureDTO> Cultures { get; set; }
 
         public IDictionary<int, IPopDTO> Pops { get; set; }
+
+        public IList<ISimpleTerritoryDTO> SimpleTerritories { get; set; }
 
         #endregion DataStorage
 
@@ -261,6 +266,19 @@ namespace EconomicCalculator
 
             return Jobs.Values.Single(x => x.Name == names.Name
                                         && x.VariantName == names.VariantName);
+        }
+
+        /// <summary>
+        /// Retrieves the Territory of the given name.
+        /// </summary>
+        /// <param name="territory">The name of the territory desired.</param>
+        /// <returns>The territory selected.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// If territory does not exist, or a duplicate is found.
+        /// </exception>
+        public ISimpleTerritoryDTO GetTerritoryByName(string territory)
+        {
+            return SimpleTerritories.Single(x => x.Name.Equals(territory));
         }
 
         #endregion ByName
@@ -651,6 +669,46 @@ namespace EconomicCalculator
                 if (productsWithFailures.Add(failure.InputProducts.First().ProductId))
                     return false;
 
+            return true;
+        }
+
+        private bool TerritoriesValid()
+        {
+            // for all territories
+            foreach (var terr in SimpleTerritories)
+            {
+                // ensure that size = land + water
+                if (terr.Size != (terr.Land + terr.Water))
+                {
+                    // make note.
+                    return false;
+                }
+
+                // ensure that all plots add up to the territory size * 8
+                if (terr.Land * 8 != (terr.Plots.Aggregate((a, c) => a + c)))
+                {
+                    // make note
+                    return false;
+                }
+
+                // nodes must be either -1 or greater than 0
+                if (terr.Nodes.Any(x => x.Stockpile != -1 || x.Stockpile < 0))
+                {
+                    // make note
+                    return false;
+                }
+
+                // Resources must be either -1 or greater than 0
+                if (terr.Resources.Any(x => x.Amount != -1 || x.Amount < 0))
+                {
+                    // make note
+                    return false;
+                }
+
+                // Resources in Territory must be physical.
+
+                // nodes must conatin real goods (not services)
+            }
             return true;
         }
 
@@ -1157,6 +1215,40 @@ namespace EconomicCalculator
             }
         }
 
+        public void LoadSimpleTerritories(string filename)
+        {
+            var json = File.ReadAllText(filename);
+
+            List<SimpleTerritoryDTO> territories = JsonSerializer.Deserialize<List<SimpleTerritoryDTO>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new AbstractConverter<NeighborConnection, INeighboringConnection>(),
+                        new AbstractConverter<ResourceNode, IResourceNode>(),
+                        new AbstractConverter<TerritoryResource, ITerritoryResource>()
+                    }
+                });
+
+            // link stuff up.
+            foreach (var terr in territories)
+            {
+                // Node Product Ids
+                foreach (var node in terr.Nodes)
+                {
+                    ((ResourceNode)node).ResourceId 
+                        = GetProductByFullName(node.Resource).Id;
+                }
+
+                // Resource Product Ids.
+                foreach (var resource in terr.Resources)
+                {
+                    ((TerritoryResource)resource).ResourceId 
+                        = GetProductByFullName(resource.Resource).Id;
+                }
+            }
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -1312,6 +1404,16 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        public void SaveSimpleTerritories(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(SimpleTerritories, options);
+
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -1372,6 +1474,9 @@ namespace EconomicCalculator
 
             // Get All Pops
             LoadPops(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Pops.json");
+
+            // Get All Territories
+            LoadSimpleTerritories(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Territories.json");
         }
 
         private Mapper InitMapper()

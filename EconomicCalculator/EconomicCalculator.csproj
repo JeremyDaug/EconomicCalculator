@@ -66,6 +66,7 @@
     <None Include="Data\CommonTechs.json" />
     <None Include="Data\CommonWants.json" />
     <None Include="Data\Pops.json" />
+    <None Include="Data\Territories.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -80,7 +81,7 @@
     <Compile Include="DTOs\Firms\OwnershipStructure.cs" />
     <Compile Include="DTOs\Firms\ProfitStructure.cs" />
     <Compile Include="DTOs\Firms\WageType.cs" />
-    <Compile Include="DTOs\ISimpleTerritoryDTO.cs" />
+    <Compile Include="DTOs\Territory\ISimpleTerritoryDTO.cs" />
     <Compile Include="DTOs\Jobs\IJobDTO.cs" />
     <Compile Include="DTOs\Jobs\JobDTO.cs" />
     <Compile Include="DTOs\DTOManager.cs" />
@@ -144,8 +145,13 @@
     <Compile Include="DTOs\Technology\ITechnologyDTO.cs" />
     <Compile Include="DTOs\Technology\TechFamilyDTO.cs" />
     <Compile Include="DTOs\Technology\TechnologyDTO.cs" />
-    <Compile Include="DTOs\Territory\ISimpleTerritoryDTO.cs" />
+    <Compile Include="DTOs\Territory\INeighboringConnection.cs" />
+    <Compile Include="DTOs\Territory\IResourceNode.cs" />
+    <Compile Include="DTOs\Territory\ITerritoryResource.cs" />
+    <Compile Include="DTOs\Territory\NeighborConnection.cs" />
+    <Compile Include="DTOs\Territory\ResourceNode.cs" />
     <Compile Include="DTOs\Territory\SimpleTerritoryDTO.cs" />
+    <Compile Include="DTOs\Territory\TerritoryResource.cs" />
     <Compile Include="DTOs\Wants\IWantDTO.cs" />
     <Compile Include="DTOs\Wants\WantDTO.cs" />
     <Compile Include="Enums\TempStorage\BuildingType.cs" />
