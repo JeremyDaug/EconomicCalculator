@@ -145,7 +145,7 @@
     <Compile Include="DTOs\Technology\ITechnologyDTO.cs" />
     <Compile Include="DTOs\Technology\TechFamilyDTO.cs" />
     <Compile Include="DTOs\Technology\TechnologyDTO.cs" />
-    <Compile Include="DTOs\Territory\INeighboringConnection.cs" />
+    <Compile Include="DTOs\Territory\INeighborConnection.cs" />
     <Compile Include="DTOs\Territory\IResourceNode.cs" />
     <Compile Include="DTOs\Territory\ITerritoryResource.cs" />
     <Compile Include="DTOs\Territory\NeighborConnection.cs" />

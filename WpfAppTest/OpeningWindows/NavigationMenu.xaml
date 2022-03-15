@@ -60,5 +60,9 @@
         <Button Content="To Pops" Height="25" Width="100"
                 Grid.Row="2" Grid.Column="1"
                 ClickMode="Release" Click="ToPops"/>
+
+        <Button Content="To Territories" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="2"
+                ClickMode="Release" Click="ToTerritories"/>
     </Grid>
 </Window>

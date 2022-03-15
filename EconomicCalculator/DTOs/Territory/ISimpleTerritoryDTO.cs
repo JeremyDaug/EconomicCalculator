@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.DTOs.Territory
@@ -28,12 +29,12 @@ namespace EconomicCalculator.DTOs.Territory
         /// <summary>
         /// Whether the Territory is costal or not.
         /// </summary>
-        bool Coastal { get; }
+        bool IsCoastal { get; }
 
         /// <summary>
         /// Whether the Territory has a static body of water.
         /// </summary>
-        bool Lake { get; }
+        bool HasLake { get; }
 
         /// <summary>
         /// The total size in acres, including water.
@@ -57,10 +58,16 @@ namespace EconomicCalculator.DTOs.Territory
         /// </summary>
         List<ulong> Plots { get; }
 
+        [JsonIgnore]
+        string PlotsString { get; }
+
         /// <summary>
         /// The Id of the territory
         /// </summary>
-        List<INeighboringConnection> Neighbors { get; }
+        List<INeighborConnection> Neighbors { get; }
+
+        [JsonIgnore]
+        string NeighborsString { get; }
 
         /// <summary>
         /// The Nodes within the territory and the depth at which it can be mined.
@@ -68,10 +75,16 @@ namespace EconomicCalculator.DTOs.Territory
         /// </summary>
         List<IResourceNode> Nodes { get; }
         
+        [JsonIgnore]
+        string NodesString { get; }
+
         /// <summary>
         /// The Resources available on the surface of the territory
         /// Amount of -1 means infinite.
         /// </summary>
         List<ITerritoryResource> Resources { get; }
+
+        [JsonIgnore]
+        string ResourcesString { get; }
     }
 }

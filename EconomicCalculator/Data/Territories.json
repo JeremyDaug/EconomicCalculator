@@ -1,25 +1,82 @@
 [
   {
     "Coords": {
+      "x": 20,
+      "y": 0,
+      "z": -20
+    },
+    "Name": "Bobistan",
+    "IsCoastal": true,
+    "HasLake": false,
+    "Size": 1000,
+    "Land": 900,
+    "Water": 100,
+    "Plots": [
+      0,
+      450,
+      450,
+      900,
+      1800,
+      3600
+    ],
+    "Neighbors": [
+      {
+        "Territory": "Alicia",
+        "Distance": 100,
+        "ConnectionType": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Iron Ore",
+        "Stockpile": 10000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Coal(Anthracite)",
+        "Stockpile": 10000000,
+        "Depth": 2
+      },
+      {
+        "Resource": "Gold Nugget",
+        "Stockpile": 10000000,
+        "Depth": 3
+      }
+    ],
+    "Resources": [
+      {
+        "Resource": "Timber",
+        "Amount": 10000
+      }
+    ]
+  },
+  {
+    "Coords": {
       "x": 0,
       "y": 0,
       "z": 0
     },
     "Name": "Alicia",
-    "Coastal": true,
-    "Lake": true,
+    "IsCoastal": true,
+    "HasLake": false,
     "Size": 1000000000000,
     "Land": 900000000000,
     "Water": 100000000000,
     "Plots": [
-      150000000000,
-      150000000000,
-      150000000000,
-      150000000000,
-      150000000000,
-      150000000000
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000
     ],
-    "Neighbors": [],
+    "Neighbors": [
+      {
+        "Territory": "Bobistan",
+        "Distance": 100,
+        "ConnectionType": "Sea"
+      }
+    ],
     "Nodes": [
       {
         "Resource": "Iron Ore",

@@ -118,5 +118,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToTerritories(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.SimpleTerritory.SimpleTerritoryList();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

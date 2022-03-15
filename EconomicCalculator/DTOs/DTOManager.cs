@@ -1224,7 +1224,7 @@ namespace EconomicCalculator
                 {
                     Converters =
                     {
-                        new AbstractConverter<NeighborConnection, INeighboringConnection>(),
+                        new AbstractConverter<NeighborConnection, INeighborConnection>(),
                         new AbstractConverter<ResourceNode, IResourceNode>(),
                         new AbstractConverter<TerritoryResource, ITerritoryResource>()
                     }
@@ -1246,7 +1246,12 @@ namespace EconomicCalculator
                     ((TerritoryResource)resource).ResourceId 
                         = GetProductByFullName(resource.Resource).Id;
                 }
+
+                // add to territory list.
+                SimpleTerritories.Add(terr);
             }
+
+
         }
 
         #endregion LoadFunctions

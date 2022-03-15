@@ -15,5 +15,10 @@ namespace EconomicCalculator.DTOs.Territory
         public string Resource { get; set; }
 
         public decimal Amount { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", Resource, Amount);
+        }
     }
 }

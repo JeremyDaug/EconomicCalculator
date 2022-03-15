@@ -199,6 +199,33 @@ namespace EconomicCalculator.DTOs.Hexmap
             return results;
         }
 
+        public static bool operator ==(HexCoord b1, HexCoord b2)
+        {
+            if (b1 == null)
+                return b2 == null;
+
+            return b1.Equals(b2);
+        }
+
+        public static bool operator !=(HexCoord b1, HexCoord b2)
+        {
+            return !(b1 == b2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            // ensure it's not null and of type Hexcoord
+            if (obj == null || obj.GetType() != typeof(HexCoord))
+                return false;
+
+            var check = (HexCoord)obj;
+            // check it's values are equal
+            if (x == check.x && y == check.y && z == check.z)
+                return true;
+            // if not it's not equal
+            return false;
+        }
+
         // TODO Ring Function
     }
 }
