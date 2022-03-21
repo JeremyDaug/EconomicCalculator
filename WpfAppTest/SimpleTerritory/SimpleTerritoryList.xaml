@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EditorInterface.SimpleTerritory"
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
-        Title="SimpleTerritoryList" Height="450" Width="1500">
+        Title="Simple Territories" Height="450" Width="1500">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

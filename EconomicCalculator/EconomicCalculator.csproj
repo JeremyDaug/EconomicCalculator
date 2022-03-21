@@ -65,6 +65,7 @@
     <None Include="Data\CommonTechFamilies.json" />
     <None Include="Data\CommonTechs.json" />
     <None Include="Data\CommonWants.json" />
+    <None Include="Data\Markets.json" />
     <None Include="Data\Pops.json" />
     <None Include="Data\Territories.json" />
     <None Include="packages.config" />
@@ -81,6 +82,8 @@
     <Compile Include="DTOs\Firms\OwnershipStructure.cs" />
     <Compile Include="DTOs\Firms\ProfitStructure.cs" />
     <Compile Include="DTOs\Firms\WageType.cs" />
+    <Compile Include="DTOs\Market\IMarketDTO.cs" />
+    <Compile Include="DTOs\Market\MarketDTO.cs" />
     <Compile Include="DTOs\Territory\ISimpleTerritoryDTO.cs" />
     <Compile Include="DTOs\Jobs\IJobDTO.cs" />
     <Compile Include="DTOs\Jobs\JobDTO.cs" />
@@ -347,7 +350,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DTOs\Market\" />
     <Folder Include="DTOs\Pops\Politics\" />
     <Folder Include="Objects\Pops\PopModifiers\" />
     <Folder Include="Runner\" />

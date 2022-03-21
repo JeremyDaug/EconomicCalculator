@@ -74,7 +74,7 @@ namespace EconomicCalculator.Objects.Market
         public IReadOnlyList<(IMarket, decimal)> Neighbors => _neighbors;
 
         /// <summary>
-        /// The resources that are loose in the market, unowned.
+        /// The resources that are found loose in the market, unowned.
         /// </summary>
         public IReadOnlyList<(IProduct, decimal)> Resources => _resources;
     }

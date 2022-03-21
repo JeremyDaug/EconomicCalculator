@@ -64,5 +64,10 @@
         <Button Content="To Territories" Height="25" Width="100"
                 Grid.Row="2" Grid.Column="2"
                 ClickMode="Release" Click="ToTerritories"/>
+
+        <Button Content="To Markets" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="3"
+                ClickMode="Release" Click="ToMarkets"/>
+        
     </Grid>
 </Window>

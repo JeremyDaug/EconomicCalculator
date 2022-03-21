@@ -116,5 +116,340 @@
         "Amount": 1000000000000
       }
     ]
+  },
+  {
+    "Coords": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "Name": "Calvinia",
+    "IsCoastal": true,
+    "HasLake": false,
+    "Size": 1000000000000,
+    "Land": 900000000000,
+    "Water": 100000000000,
+    "Plots": [
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000
+    ],
+    "Neighbors": [
+      {
+        "Territory": "Bobistan",
+        "Distance": 100,
+        "ConnectionType": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Iron Ore",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Coal(Anthracite)",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Gold Nugget",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      }
+    ],
+    "Resources": [
+      {
+        "Resource": "Timber",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Wheat Grain",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cotton",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cattle(Beef)",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Fish",
+        "Amount": 1000000000000
+      }
+    ]
+  },
+  {
+    "Coords": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "Name": "Danbourg",
+    "IsCoastal": true,
+    "HasLake": false,
+    "Size": 1000000000000,
+    "Land": 900000000000,
+    "Water": 100000000000,
+    "Plots": [
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000
+    ],
+    "Neighbors": [
+      {
+        "Territory": "Bobistan",
+        "Distance": 100,
+        "ConnectionType": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Iron Ore",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Coal(Anthracite)",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Gold Nugget",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      }
+    ],
+    "Resources": [
+      {
+        "Resource": "Timber",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Wheat Grain",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cotton",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cattle(Beef)",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Fish",
+        "Amount": 1000000000000
+      }
+    ]
+  },
+  {
+    "Coords": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "Name": "Einsted",
+    "IsCoastal": true,
+    "HasLake": false,
+    "Size": 1000000000000,
+    "Land": 900000000000,
+    "Water": 100000000000,
+    "Plots": [
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000
+    ],
+    "Neighbors": [
+      {
+        "Territory": "Bobistan",
+        "Distance": 100,
+        "ConnectionType": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Iron Ore",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Coal(Anthracite)",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Gold Nugget",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      }
+    ],
+    "Resources": [
+      {
+        "Resource": "Timber",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Wheat Grain",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cotton",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cattle(Beef)",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Fish",
+        "Amount": 1000000000000
+      }
+    ]
+  },
+  {
+    "Coords": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "Name": "Fertentag",
+    "IsCoastal": true,
+    "HasLake": false,
+    "Size": 1000000000000,
+    "Land": 900000000000,
+    "Water": 100000000000,
+    "Plots": [
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000
+    ],
+    "Neighbors": [
+      {
+        "Territory": "Bobistan",
+        "Distance": 100,
+        "ConnectionType": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Iron Ore",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Coal(Anthracite)",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Gold Nugget",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      }
+    ],
+    "Resources": [
+      {
+        "Resource": "Timber",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Wheat Grain",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cotton",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cattle(Beef)",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Fish",
+        "Amount": 1000000000000
+      }
+    ]
+  },
+  {
+    "Coords": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "Name": "Gurtenia",
+    "IsCoastal": true,
+    "HasLake": false,
+    "Size": 1000000000000,
+    "Land": 900000000000,
+    "Water": 100000000000,
+    "Plots": [
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000,
+      1200000000000
+    ],
+    "Neighbors": [
+      {
+        "Territory": "Bobistan",
+        "Distance": 100,
+        "ConnectionType": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Iron Ore",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Coal(Anthracite)",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      },
+      {
+        "Resource": "Gold Nugget",
+        "Stockpile": 1000000000000,
+        "Depth": 1
+      }
+    ],
+    "Resources": [
+      {
+        "Resource": "Timber",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Wheat Grain",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cotton",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Cattle(Beef)",
+        "Amount": 1000000000000
+      },
+      {
+        "Resource": "Fish",
+        "Amount": 1000000000000
+      }
+    ]
   }
 ]

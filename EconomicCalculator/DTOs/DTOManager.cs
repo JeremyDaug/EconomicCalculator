@@ -27,6 +27,7 @@ using EconomicCalculator.DTOs.Pops.Culture;
 using EconomicCalculator.DTOs.Pops;
 using EconomicCalculator.DTOs.Territory;
 using EconomicCalculator.DTOs.Hexmap;
+using EconomicCalculator.DTOs.Market;
 
 namespace EconomicCalculator
 {
@@ -62,6 +63,7 @@ namespace EconomicCalculator
             Cultures = new Dictionary<int, ICultureDTO>();
             Pops = new Dictionary<int, IPopDTO>();
             SimpleTerritories = new List<ISimpleTerritoryDTO>();
+            Markets = new Dictionary<int, IMarketDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -114,6 +116,8 @@ namespace EconomicCalculator
         public IDictionary<int, IPopDTO> Pops { get; set; }
 
         public IList<ISimpleTerritoryDTO> SimpleTerritories { get; set; }
+
+        public IDictionary<int, IMarketDTO> Markets { get; set; }
 
         #endregion DataStorage
 
@@ -642,6 +646,20 @@ namespace EconomicCalculator
             }
         }
 
+        private int _newMarketId;
+        /// <summary>
+        /// Helper to retrieve a new, unused, Market Id.
+        /// </summary>
+        public int NewMarketId
+        {
+            get
+            {
+                while (Markets.ContainsKey(_newMarketId))
+                    ++_newMarketId;
+                return _newMarketId;
+            }
+        }
+
         #endregion NewIds
 
         /// <summary>
@@ -653,6 +671,8 @@ namespace EconomicCalculator
         {
             // TODO, this thing. Build as feels needed.
             ProcessesValid();
+
+            TerritoriesValid();
         }
 
         private bool ProcessesValid()
@@ -710,6 +730,21 @@ namespace EconomicCalculator
                 // nodes must conatin real goods (not services)
             }
             return true;
+        }
+
+        /// <summary>
+        /// Given a list of Territories find those which are not
+        /// connected to the first in the list.
+        /// </summary>
+        /// <returns>A list of disconnected Territories. If no disconnects are found, the list will be empty.</returns>
+        public List<string> FindDisconnectedTerritories(List<SimpleTerritoryDTO> territories) 
+        {
+            var result = new List<string>();
+
+            // Breadth first search style
+            // TODO, do this later.
+
+            return result;
         }
 
         #region DeleteFunctions
@@ -1250,8 +1285,26 @@ namespace EconomicCalculator
                 // add to territory list.
                 SimpleTerritories.Add(terr);
             }
+        }
 
+        public void LoadMarkets(string filename)
+        {
+            var json = File.ReadAllText(filename);
 
+            List<MarketDTO> markets = JsonSerializer.Deserialize<List<MarketDTO>>(json);
+
+            // link stuff up.
+            // nothing needs linked currently.
+            // Pops connect to markets.
+            // Territories don't have Ids.
+            // Why bother getting IDS, these are just DTOs, not workable data.
+
+            foreach(var market in markets)
+            {
+                market.Id = NewMarketId;
+
+                Markets[market.Id] = market;
+            }
         }
 
         #endregion LoadFunctions
@@ -1419,6 +1472,16 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        public void SaveMarkets(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(Markets.Values, options);
+
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -1482,6 +1545,11 @@ namespace EconomicCalculator
 
             // Get All Territories
             LoadSimpleTerritories(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Territories.json");
+
+            // Get All Markets
+            LoadMarkets(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Markets.json");
+
+            // Connect Pops, Firms, and Markets
         }
 
         private Mapper InitMapper()

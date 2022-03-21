@@ -97,6 +97,8 @@
     <Compile Include="Cultures\CultureWantEditor\WantEditorViewModel.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DummyDecimalBinding.cs" />
+    <Compile Include="Helpers\DummyTuple.cs" />
+    <Compile Include="Helpers\DummyWrapper.cs" />
     <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
@@ -108,6 +110,14 @@
       <DependentUpon>JobsListWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Jobs\JobViewModel.cs" />
+    <Compile Include="Markets\MarketEditorModel.cs" />
+    <Compile Include="Markets\MarketEditorView.xaml.cs">
+      <DependentUpon>MarketEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Markets\MarketEditorViewModel.cs" />
+    <Compile Include="Markets\MarketsListView.xaml.cs">
+      <DependentUpon>MarketsListView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="OpeningWindows\NavigationMenu.xaml.cs">
       <DependentUpon>NavigationMenu.xaml</DependentUpon>
     </Compile>
@@ -223,6 +233,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Jobs\JobsListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Markets\MarketEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Markets\MarketsListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,0 +1,13 @@
+[
+  {
+    "Name": "Alicia",
+    "Territories": [
+      "Alicia"
+    ],
+    "Neighbors": {},
+    "Resources": {
+      "Fish": 100,
+      "Cotton": 100
+    }
+  }
+]

@@ -127,5 +127,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToMarkets(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.Markets.MarketsListView();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }
