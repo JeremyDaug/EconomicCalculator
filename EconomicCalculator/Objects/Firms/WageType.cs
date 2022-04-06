@@ -12,6 +12,13 @@ namespace EconomicCalculator.Objects.Firms
     public enum WageType
     {
         /// <summary>
+        /// The pop does not recieve a wage, instead their
+        /// life needs and some of their daily needs are
+        /// met by the firm directly as basically maintenance
+        /// goods.
+        /// </summary>
+        Slave,
+        /// <summary>
         /// Like <see cref="ProfitSharing"/>, but should
         /// the company have losses, they will also pay
         /// those losses out of pocket. Often used

@@ -21,31 +21,46 @@ namespace EconomicCalculator.DTOs.Market
         /// </summary>
         string Name { get; }
 
-        // firm placeholder
+        [JsonIgnore]
+        IList<int> FirmIds { get; set; }
+
+        IList<string> Firms { get; set; }
+
+        [JsonIgnore]
+        string FirmString { get; }
 
         // Because pops do not have meaningful names
         // they cannot be referenced by markets.
         // Pops reference Markets.
         [JsonIgnore]
-        List<int> PopIds { get; }
+        IList<int> PopIds { get; }
 
         [JsonIgnore]
         decimal PopTotal { get; set; }
 
         // governor placeholder.
 
-        List<string> Territories { get; }
+        IList<string> Territories { get; }
+
+        [JsonIgnore]
+        string TerritoriesString { get; }
 
         /// <summary>
         /// The markets which can be reached directly from
         /// this market.
         /// </summary>
-        Dictionary<string, decimal> Neighbors { get; }
+        IDictionary<string, decimal> Neighbors { get; }
+
+        [JsonIgnore]
+        string NeighborString { get; }
 
         /// <summary>
         /// The resources which anyone in the market can access
         /// without work (considered already extracted).
         /// </summary>
-        Dictionary<string, decimal> Resources { get; }
+        IDictionary<string, decimal> Resources { get; }
+
+        [JsonIgnore]
+        string ResourcesString { get; }
     }
 }

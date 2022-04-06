@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.Markets"
         mc:Ignorable="d"
+        Style="{StaticResource SharedMenu}"
         Title="Markets" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -16,10 +17,11 @@
                   MouseDoubleClick="EditMarket" IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}"  Width="100"/>
+                <DataGridTextColumn Header="Firms" Binding="{Binding FirmString}"  Width="100"/>
                 <DataGridTextColumn Header="Population" Binding="{Binding PopTotal}"  Width="100"/>
-                <DataGridTextColumn Header="Territories" Binding="{Binding Territories}"  Width="100"/>
-                <DataGridTextColumn Header="Neighbors" Binding="{Binding Neighbors}"  Width="100"/>
-                <DataGridTextColumn Header="Resources" Binding="{Binding Resources}"  Width="100"/>
+                <DataGridTextColumn Header="Territories" Binding="{Binding TerritoriesString}"  Width="100"/>
+                <DataGridTextColumn Header="Neighbors" Binding="{Binding NeighborString}"  Width="150"/>
+                <DataGridTextColumn Header="Resources" Binding="{Binding ResourcesString}"  Width="150"/>
             </DataGrid.Columns>
         </DataGrid>
 

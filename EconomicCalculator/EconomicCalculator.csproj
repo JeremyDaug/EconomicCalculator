@@ -65,6 +65,7 @@
     <None Include="Data\CommonTechFamilies.json" />
     <None Include="Data\CommonTechs.json" />
     <None Include="Data\CommonWants.json" />
+    <None Include="Data\Firms.json" />
     <None Include="Data\Markets.json" />
     <None Include="Data\Pops.json" />
     <None Include="Data\Territories.json" />
@@ -77,11 +78,10 @@
   <ItemGroup>
     <Compile Include="DTOs\AbstractConverter.cs" />
     <Compile Include="DTOs\Enums\ParameterType.cs" />
-    <Compile Include="DTOs\Firms\FirmRank.cs" />
+    <Compile Include="DTOs\Firms\FirmDTO.cs" />
     <Compile Include="DTOs\Firms\IFirmDTO.cs" />
-    <Compile Include="DTOs\Firms\OwnershipStructure.cs" />
-    <Compile Include="DTOs\Firms\ProfitStructure.cs" />
-    <Compile Include="DTOs\Firms\WageType.cs" />
+    <Compile Include="DTOs\Firms\IJobWageData.cs" />
+    <Compile Include="DTOs\Firms\JobWageData.cs" />
     <Compile Include="DTOs\Market\IMarketDTO.cs" />
     <Compile Include="DTOs\Market\MarketDTO.cs" />
     <Compile Include="DTOs\Territory\ISimpleTerritoryDTO.cs" />
@@ -181,6 +181,7 @@
     <Compile Include="Objects\Firms\Firm.cs" />
     <Compile Include="Objects\Firms\FirmRank.cs" />
     <Compile Include="Objects\Firms\IFirm.cs" />
+    <Compile Include="Objects\Firms\OrganizationalStructure.cs" />
     <Compile Include="Objects\Firms\OwnershipStructure.cs" />
     <Compile Include="Objects\Firms\ProfitStructure.cs" />
     <Compile Include="Objects\Firms\WageType.cs" />

@@ -28,6 +28,8 @@ using EconomicCalculator.DTOs.Pops;
 using EconomicCalculator.DTOs.Territory;
 using EconomicCalculator.DTOs.Hexmap;
 using EconomicCalculator.DTOs.Market;
+using EconomicCalculator.DTOs.Firms;
+using EconomicCalculator.Objects.Firms;
 
 namespace EconomicCalculator
 {
@@ -64,6 +66,7 @@ namespace EconomicCalculator
             Pops = new Dictionary<int, IPopDTO>();
             SimpleTerritories = new List<ISimpleTerritoryDTO>();
             Markets = new Dictionary<int, IMarketDTO>();
+            Firms = new Dictionary<int, IFirmDTO>();
             mapper = new EconCalcAutomapperProfile();
         }        
 
@@ -118,6 +121,8 @@ namespace EconomicCalculator
         public IList<ISimpleTerritoryDTO> SimpleTerritories { get; set; }
 
         public IDictionary<int, IMarketDTO> Markets { get; set; }
+
+        public IDictionary<int, IFirmDTO> Firms { get; set; }
 
         #endregion DataStorage
 
@@ -655,6 +660,20 @@ namespace EconomicCalculator
             get
             {
                 while (Markets.ContainsKey(_newMarketId))
+                    ++_newMarketId;
+                return _newMarketId;
+            }
+        }
+
+        private int _newFirmId;
+        /// <summary>
+        /// Helper to retrieve a new, unused, Firm Id.
+        /// </summary>
+        public int NewFirmId
+        {
+            get
+            {
+                while (Firms.ContainsKey(_newMarketId))
                     ++_newMarketId;
                 return _newMarketId;
             }
@@ -1307,6 +1326,154 @@ namespace EconomicCalculator
             }
         }
 
+        public void LoadFirms(string filename)
+        {
+            var json = File.ReadAllText(filename);
+
+            List<FirmDTO> firms = JsonSerializer.Deserialize<List<FirmDTO>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new AbstractConverter<JobWageData, IJobWageData>()
+                    }
+                });
+
+            List<string> Errors = new List<string>();
+
+            // go through each firm and make trivial connections.
+            foreach (var firm in firms)
+            {
+                firm.Id = NewFirmId;
+                Firms.Add(firm.Id, firm);
+
+                // Connect Jobs
+                foreach (var job in firm.JobData)
+                {
+                    // ensure job exists
+                    ((JobWageData)job).JobId = GetJobByName(job.JobName).Id;
+                }
+
+                foreach (var proc in firm.Processes)
+                {
+                    try
+                    {
+                        GetProcessByName(proc);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Errors.Add(string.Format("Process Not Found: {0}\n", proc));
+                    }
+                }
+
+                // connect products and resources
+                // JKLOL, just throw errors if we can't connect them up.
+                // Getting IDs is overrated.
+                foreach (var prod in firm.ProductPrices.Keys)
+                {
+                    try
+                    {
+                        GetProductByFullName(prod);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        Errors.Add(string.Format("Salable Product Not Found: {0}\n", prod));
+                    }
+                }
+
+                // resource check.
+                foreach (var prod in firm.Resources.Keys)
+                {
+                    try
+                    {
+                        GetProductByFullName(prod);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        Errors.Add(string.Format("Resource Product Not Found: {0}\n", prod));
+                    }
+                }
+            }
+
+            // if any errors throw
+            if (Errors.Count > 0)
+            {
+                throw new InvalidDataException("Data Missing: \n" + string.Concat(Errors));
+            }
+
+            // go back through and do any additional internal connections needed.
+        }
+
+        public void ConnectPopsFirmsAndMarkets()
+        {
+            // start with pops
+            foreach (var pop in Pops.Values)
+            {
+                // connect pops and market
+                var market = Markets.Values.Single(x => x.Name == pop.Market);
+                ((PopDTO)pop).MarketId = market.Id;
+                market.PopIds.Add(pop.Id);
+
+                // connect pops to firms
+                var firm = Firms.Values.Single(x => x.Name == pop.Firm);
+                ((PopDTO)pop).FirmId = firm.Id;
+                firm.Employees.Add(pop.Id);
+            }
+
+            var Errors = new List<string>();
+
+            // connect markets with firms
+            foreach (var firm in Firms.Values)
+            {
+                // check that the market references the firm back
+                var market = Markets.Values.SingleOrDefault(x => x.Name == firm.Market);
+
+                // if market not found, mark it and continue.
+                if (market == null)
+                {
+                    Errors.Add("Missing Market: " + firm.Market);
+                    continue;
+                }
+                // if market doesn't contain firm mark it and return.
+                if (!market.Firms.Contains(firm.Name))
+                {
+                    Errors.Add("Missing Firm: " + firm.Name);
+                    continue;
+                }
+
+                // both exist, connect them together
+                ((FirmDTO)firm).MarketId = market.Id;
+                market.FirmIds.Add(firm.Id);
+
+                // repeat with other regions
+                foreach (var region in firm.Regions)
+                {
+                    // check that the market references the firm back
+                    var otherMarket = Markets.Values.SingleOrDefault(x => x.Name == region);
+
+                    // if market not found, mark it and continue.
+                    if (otherMarket == null)
+                    {
+                        Errors.Add("Missing Market: " + firm.Market);
+                        continue;
+                    }
+                    // if market doesn't contain firm mark it and return.
+                    if (!otherMarket.Firms.Contains(firm.Name))
+                    {
+                        Errors.Add("Missing Firm: " + firm.Name);
+                        continue;
+                    }
+
+                    // both exist, so add them together.
+                    firm.RegionIds.Add(otherMarket.Id);
+                    otherMarket.FirmIds.Add(firm.Id);
+                }
+            }
+
+            if (Errors.Count > 0)
+                throw new InvalidDataException("Data Missing: \n" + string.Concat(Errors));
+        }
+
         #endregion LoadFunctions
 
         #region SaveFunctions
@@ -1482,6 +1649,16 @@ namespace EconomicCalculator
             File.WriteAllText(filename, json);
         }
 
+        public void SaveFirms(string filename)
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            string json = JsonSerializer.Serialize(Firms.Values, options);
+
+            File.WriteAllText(filename, json);
+        }
+
         #endregion SaveFunctions
 
         /// <summary>
@@ -1549,7 +1726,11 @@ namespace EconomicCalculator
             // Get All Markets
             LoadMarkets(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Markets.json");
 
+            // Get All Firms
+            LoadFirms(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Firms.json");
+
             // Connect Pops, Firms, and Markets
+            ConnectPopsFirmsAndMarkets();
         }
 
         private Mapper InitMapper()

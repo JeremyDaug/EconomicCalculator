@@ -68,6 +68,10 @@
         <Button Content="To Markets" Height="25" Width="100"
                 Grid.Row="2" Grid.Column="3"
                 ClickMode="Release" Click="ToMarkets"/>
-        
+
+        <Button Content="To Firms" Height="25" Width="100"
+                Grid.Row="3" Grid.Column="0"
+                ClickMode="Release" Click="ToFirms"/>
+
     </Grid>
 </Window>

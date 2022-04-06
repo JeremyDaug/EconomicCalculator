@@ -95,6 +95,9 @@
       <DependentUpon>WantEditorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Cultures\CultureWantEditor\WantEditorViewModel.cs" />
+    <Compile Include="Firms\FirmsListView.xaml.cs">
+      <DependentUpon>FirmsListView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DummyDecimalBinding.cs" />
     <Compile Include="Helpers\DummyTuple.cs" />
@@ -227,6 +230,10 @@
     <Page Include="Cultures\CultureWantEditor\WantEditorView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Firms\FirmsListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Jobs\JobEditorWindow.xaml">
       <SubType>Designer</SubType>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Objects.Firms;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,19 +33,49 @@ namespace EconomicCalculator.DTOs.Firms
         #region FirmStructure
 
         /// <summary>
+        /// The firm which owns this firm.
+        /// </summary>
+        string ParentFirm { get; }
+
+        /// <summary>
+        /// The Firms which this firm owns.
+        /// </summary>
+        IList<string> Children { get; }
+
+        [JsonIgnore]
+        string ChildrenString { get; }
+
+        /// <summary>
         /// The rank of the firm.
         /// </summary>
-        FirmRank FirmRank { get; }
+        string FirmRank { get; }
+
+        [JsonIgnore]
+        FirmRank FirmRankEnum { get; }
 
         /// <summary>
         /// How the ownership of the firm is split or structured.
         /// </summary>
-        OwnershipStructure OwnershipStructure { get; }
+        string OwnershipStructure { get; }
+
+        [JsonIgnore]
+        OwnershipStructure OwnershipStructureEnum { get; }
 
         /// <summary>
         /// How profits from the firm are distributed.
         /// </summary>
-        ProfitStructure ProfitStructure { get; }
+        string ProfitStructure { get; }
+        
+        [JsonIgnore] 
+        ProfitStructure ProfitStructureEnum { get; }
+
+        /// <summary>
+        /// How the Firm is organized internally.
+        /// </summary>
+        string OrganizationalStructure { get; }
+
+        [JsonIgnore]
+        OrganizationalStructure OrganizationalStructureEnum { get; }
 
         // population groups attached.
         // populations connect to firms for sanity reasons 
@@ -61,40 +92,56 @@ namespace EconomicCalculator.DTOs.Firms
         #region Production
 
         /// <summary>
-        /// What jobs are part of this firm.
-        /// <seealso cref="FirmRank.Firm"/> allows only 1 primary job.
-        /// <seealso cref="FirmRank.Company"/> or higher allows for multiple jobs.
+        /// What jobs are part of this firm,
+        /// and what they are payed and in what method.
         /// </summary>
-        IList<string> Jobs { get; }
+        IList<IJobWageData> JobData { get; }
 
-        /// <summary>
-        /// What wage type each job is under.
-        /// </summary>
-        IDictionary<string, WageType> JobWageType { get; }
-
-        /// <summary>
-        /// The wage of each job.
-        /// </summary>
-        IDictionary<string, decimal> JobWages { get; }
+        [JsonIgnore]
+        string JobsString { get; }
 
         /// <summary>
         /// What processes (stand alone or not) the Firm utilizes.
         /// </summary>
         IList<string> Processes { get; }
 
+        [JsonIgnore]
+        string ProcessesString { get; }
+
+        [JsonIgnore]
+        IList<int> Employees { get; }
+
         #endregion Production
 
         #region Market
 
         /// <summary>
-        /// The products the firm sells to the market.
+        /// The market the firm is in or headquartered in
+        /// Required.
         /// </summary>
-        IList<string> Products { get; }
+        string Market { get; }
+
+        [JsonIgnore]
+        int MarketId { get; }
+
+        /// <summary>
+        /// Where the firm does business directly.
+        /// </summary>
+        IList<string> Regions { get; }
+
+        [JsonIgnore]
+        IList<int> RegionIds { get; }
+
+        [JsonIgnore]
+        string RegionString { get; }
 
         /// <summary>
         /// The prices the firm sells it's product at.
         /// </summary>
         IDictionary<string, decimal> ProductPrices { get; }
+
+        [JsonIgnore]
+        string ProductPricesString { get; }
 
         /// <summary>
         /// What resources the company has at it's disposal.
@@ -102,6 +149,9 @@ namespace EconomicCalculator.DTOs.Firms
         /// Value is how much it has stored across all of it's properties.
         /// </summary>
         IDictionary<string, decimal> Resources { get; }
+
+        [JsonIgnore]
+        string ResourcesString { get; }
 
         #endregion Market
     }

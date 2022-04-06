@@ -136,5 +136,14 @@ namespace Editor.OpeningWindows
 
             this.Close();
         }
+
+        private void ToFirms(object sender, RoutedEventArgs e)
+        {
+            var win = new EditorInterface.Firms.FirmsListView();
+
+            win.Show();
+
+            this.Close();
+        }
     }
 }

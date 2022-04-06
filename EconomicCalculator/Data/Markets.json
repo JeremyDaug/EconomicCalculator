@@ -1,6 +1,9 @@
 [
   {
     "Name": "Alicia",
+    "Firms": [
+      "Wheatfields"
+    ],
     "Territories": [
       "Alicia"
     ],
