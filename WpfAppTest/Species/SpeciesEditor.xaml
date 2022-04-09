@@ -140,7 +140,8 @@
                   ItemsSource="{Binding Relations}" AlternatingRowBackground="LightGray"
                   AlternationCount="2" AutoGenerateColumns="False">
             <DataGrid.Columns>
-                <DataGridComboBoxColumn Header="Related Species" SelectedItemBinding="{Binding Selection}" 
+                <DataGridComboBoxColumn Header="Related Species"
+                                        SelectedItemBinding="{Binding Selection}" 
                                         x:Name="RelBox" MinWidth="150"/>
             </DataGrid.Columns>
         </DataGrid>

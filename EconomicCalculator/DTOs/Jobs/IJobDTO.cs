@@ -68,5 +68,7 @@ namespace EconomicCalculator.DTOs.Jobs
         /// </summary>
         [JsonIgnore]
         List<int> ProcessIds { get; }
+
+        string FullName();
     }
 }

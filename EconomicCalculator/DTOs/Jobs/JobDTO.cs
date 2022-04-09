@@ -98,5 +98,13 @@ namespace EconomicCalculator.DTOs.Jobs
             else
                 return (name, "");
         }
+
+        public string FullName()
+        {
+            var result = Name;
+            if (string.IsNullOrWhiteSpace(VariantName))
+                result += "(" + VariantName + ")";
+            return result;
+        }
     }
 }

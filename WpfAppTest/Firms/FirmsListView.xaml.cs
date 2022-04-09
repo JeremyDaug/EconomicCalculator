@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator;
+using EconomicCalculator.DTOs.Firms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,16 @@ namespace EditorInterface.Firms
 
         private void NewFirm(object sender, RoutedEventArgs e)
         {
+            var newFirm = new FirmDTO();
 
+            newFirm.Id = manager.NewFirmId;
+
+            var window = new FirmEditorView(newFirm);
+
+            window.ShowDialog();
+
+            FirmGrid.ItemsSource = manager.Firms.Values;
+            FirmGrid.Items.Refresh();
         }
 
         private void EditFirm(object sender, RoutedEventArgs e)
