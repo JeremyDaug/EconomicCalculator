@@ -1,5 +1,6 @@
+using EconomicCalculator.Refactor.Storage;
 using EconomicCalculator.Runner;
-using EconomicCalculator.Storage;
+using EconomicCalculator.DTOs;
 using NUnit.Framework;
 
 namespace Tests

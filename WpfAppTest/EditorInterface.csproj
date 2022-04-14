@@ -1,0 +1,435 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C68E2BAF-9543-4616-85B7-F5AA36A176EC}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>EditorInterface</RootNamespace>
+    <AssemblyName>EditorInterface</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Editor.App</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ExtendedLinguisticServices, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Sensors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.Sensors.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Converters\EnumListToStringConverter.cs" />
+    <Compile Include="Cultures\CultureEditorModel.cs" />
+    <Compile Include="Cultures\CultureEditorView.xaml.cs">
+      <DependentUpon>CultureEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureEditorViewModel.cs" />
+    <Compile Include="Cultures\CultureListView.xaml.cs">
+      <DependentUpon>CultureListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureNeedEditor\NeedEditorModel.cs" />
+    <Compile Include="Cultures\CultureNeedEditor\NeedEditorView.xaml.cs">
+      <DependentUpon>NeedEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureNeedEditor\NeedEditorViewModel.cs" />
+    <Compile Include="Cultures\CultureWantEditor\WantEditorModel.cs" />
+    <Compile Include="Cultures\CultureWantEditor\WantEditorView.xaml.cs">
+      <DependentUpon>WantEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Cultures\CultureWantEditor\WantEditorViewModel.cs" />
+    <Compile Include="Firms\FirmEditorModel.cs" />
+    <Compile Include="Firms\FirmEditorView.xaml.cs">
+      <DependentUpon>FirmEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Firms\FirmEditorViewModel.cs" />
+    <Compile Include="Firms\FirmsListView.xaml.cs">
+      <DependentUpon>FirmsListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Firms\SelectionView.xaml.cs">
+      <DependentUpon>SelectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Firms\JobWageDataStorage.cs" />
+    <Compile Include="Firms\ProductDecimalPair.cs" />
+    <Compile Include="Helpers\Converters.cs" />
+    <Compile Include="Helpers\DummyDecimalBinding.cs" />
+    <Compile Include="Helpers\DummyTuple.cs" />
+    <Compile Include="Helpers\DummyWrapper.cs" />
+    <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Jobs\JobEditorWindow.xaml.cs">
+      <DependentUpon>JobEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Jobs\JobModel.cs" />
+    <Compile Include="Jobs\JobsListWindow.xaml.cs">
+      <DependentUpon>JobsListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Jobs\JobViewModel.cs" />
+    <Compile Include="Markets\MarketEditorModel.cs" />
+    <Compile Include="Markets\MarketEditorView.xaml.cs">
+      <DependentUpon>MarketEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Markets\MarketEditorViewModel.cs" />
+    <Compile Include="Markets\MarketsListView.xaml.cs">
+      <DependentUpon>MarketsListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="OpeningWindows\NavigationMenu.xaml.cs">
+      <DependentUpon>NavigationMenu.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Populations\PopEditorModel.cs" />
+    <Compile Include="Populations\PopEditorView.xaml.cs">
+      <DependentUpon>PopEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Populations\PopEditorViewModel.cs" />
+    <Compile Include="Populations\PopsListView.xaml.cs">
+      <DependentUpon>PopsListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessWindows\ProcessListWindow.xaml.cs">
+      <DependentUpon>ProcessListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessWindows\ProcessMassGroup.cs" />
+    <Compile Include="ProcessWindows\ProcessModel.cs" />
+    <Compile Include="ProcessWindows\ProcessProductModel.cs" />
+    <Compile Include="ProcessWindows\ProcessProductViewModel.cs" />
+    <Compile Include="ProcessWindows\ProcessProductWindow.xaml.cs">
+      <DependentUpon>ProcessProductWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessWindows\ProcessViewModel.cs" />
+    <Compile Include="ProcessWindows\ProcessWantModel.cs" />
+    <Compile Include="ProcessWindows\ProcessWantViewModel.cs" />
+    <Compile Include="ProcessWindows\ProcessWantWindow.xaml.cs">
+      <DependentUpon>ProcessWantWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessWindows\ProcessWindow.xaml.cs">
+      <DependentUpon>ProcessWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Products\ProductTagSelector.xaml.cs">
+      <DependentUpon>ProductTagSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Products\TagData.cs" />
+    <Compile Include="Products\WantWeight.cs" />
+    <Compile Include="SimpleTerritory\PlotOptions.cs" />
+    <Compile Include="SimpleTerritory\SimpleTerritoryList.xaml.cs">
+      <DependentUpon>SimpleTerritoryList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SimpleTerritory\SimpleTerritoryModel.cs" />
+    <Compile Include="SimpleTerritory\SimpleTerritoryView.xaml.cs">
+      <DependentUpon>SimpleTerritoryView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SimpleTerritory\SimpleTerritoryViewModel.cs" />
+    <Compile Include="Skills\SkillEditorWindow.xaml.cs">
+      <DependentUpon>SkillEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Skills\SkillGroupEditor.xaml.cs">
+      <DependentUpon>SkillGroupEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Skills\SkillsListWindow.xaml.cs">
+      <DependentUpon>SkillsListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\SelectorClass.cs" />
+    <Compile Include="Species\SpeciesEditor.xaml.cs">
+      <DependentUpon>SpeciesEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Species\SpeciesEditorModel.cs" />
+    <Compile Include="Species\SpeciesEditorViewModel.cs" />
+    <Compile Include="Species\SpeciesListWindow.xaml.cs">
+      <DependentUpon>SpeciesListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Species\SpeciesNeedEditor\NeedEditorModel.cs" />
+    <Compile Include="Species\SpeciesNeedEditor\NeedEditorView.xaml.cs">
+      <DependentUpon>NeedEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Species\SpeciesNeedEditor\NeedEditorViewModel.cs" />
+    <Compile Include="Species\SpeciesWantEditor\WantEditorModel.cs" />
+    <Compile Include="Species\SpeciesWantEditor\WantEditorView.xaml.cs">
+      <DependentUpon>WantEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Species\SpeciesWantEditor\WantEditorViewModel.cs" />
+    <Compile Include="TechFamilies\TechFamiliesListWindow.xaml.cs">
+      <DependentUpon>TechFamiliesListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TechFamilies\TechFamilyModel.cs" />
+    <Compile Include="TechFamilies\TechFamilyViewModel.cs" />
+    <Compile Include="TechFamilies\TechFamilyWindow.xaml.cs">
+      <DependentUpon>TechFamilyWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Techs\TechListWindow.xaml.cs">
+      <DependentUpon>TechListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Techs\TechnologyEditorModel.cs" />
+    <Compile Include="Techs\TechnologyEditorViewModel.cs" />
+    <Compile Include="Techs\TechnologyEditorWindow.xaml.cs">
+      <DependentUpon>TechnologyEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Wants\WantsListWindow.xaml.cs">
+      <DependentUpon>WantsListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Wants\WantWindow.xaml.cs">
+      <DependentUpon>WantWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Cultures\CultureEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Cultures\CultureListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Cultures\CultureNeedEditor\NeedEditorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Cultures\CultureWantEditor\WantEditorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Firms\FirmEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Firms\FirmsListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Firms\SelectionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Jobs\JobEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Jobs\JobsListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Markets\MarketEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Markets\MarketsListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="OpeningWindows\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="OpeningWindows\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="OpeningWindows\NavigationMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Populations\PopEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Populations\PopsListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessProductWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessWantWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProcessWindows\ProcessWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Products\ProductListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Products\ProductTagSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Products\ProductWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SimpleTerritory\SimpleTerritoryList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SimpleTerritory\SimpleTerritoryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Skills\SkillEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Skills\SkillGroupEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Skills\SkillsListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Species\SpeciesEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Species\SpeciesListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Species\SpeciesNeedEditor\NeedEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Species\SpeciesWantEditor\WantEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TechFamilies\TechFamiliesListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TechFamilies\TechFamilyWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Techs\TechListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Techs\TechnologyEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Wants\WantsListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Wants\WantWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Products\ProductListWindow.xaml.cs">
+      <DependentUpon>ProductListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ValidationRules\ValidationRules.cs" />
+    <Compile Include="Products\ProductWindow.xaml.cs">
+      <DependentUpon>ProductWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Maps\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EconomicCalculator\EconomicCalculator.csproj">
+      <Project>{b912ac5b-4dfe-4d8c-83ab-de9a0f2a4b0e}</Project>
+      <Name>EconomicCalculator</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Windows Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="license.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

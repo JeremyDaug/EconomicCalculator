@@ -5,10 +5,10 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B912AC5B-4DFE-4D8C-83AB-DE9A0F2A4B0E}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>EconomicCalculator</RootNamespace>
     <AssemblyName>EconomicCalculator</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -27,6 +27,9 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -47,8 +50,25 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Data\CommonCultures.json" />
+    <None Include="Data\CommonJobs.json" />
+    <None Include="Data\CommonProcesses.json" />
+    <None Include="Data\CommonProducts.json" />
+    <None Include="Data\CommonSkillGroups.json" />
+    <None Include="Data\CommonSkills.json" />
+    <None Include="Data\CommonSpecies.json" />
+    <None Include="Data\CommonTechFamilies.json" />
+    <None Include="Data\CommonTechs.json" />
+    <None Include="Data\CommonWants.json" />
+    <None Include="Data\Firms.json" />
+    <None Include="Data\Markets.json" />
+    <None Include="Data\Pops.json" />
+    <None Include="Data\Territories.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -56,94 +76,267 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\CashType.cs" />
+    <Compile Include="DTOs\AbstractConverter.cs" />
+    <Compile Include="DTOs\Enums\ParameterType.cs" />
+    <Compile Include="DTOs\Firms\FirmDTO.cs" />
+    <Compile Include="DTOs\Firms\IFirmDTO.cs" />
+    <Compile Include="DTOs\Firms\IJobWageData.cs" />
+    <Compile Include="DTOs\Firms\JobWageData.cs" />
+    <Compile Include="DTOs\Market\IMarketDTO.cs" />
+    <Compile Include="DTOs\Market\MarketDTO.cs" />
+    <Compile Include="DTOs\Territory\ISimpleTerritoryDTO.cs" />
+    <Compile Include="DTOs\Jobs\IJobDTO.cs" />
+    <Compile Include="DTOs\Jobs\JobDTO.cs" />
+    <Compile Include="DTOs\DTOManager.cs" />
+    <Compile Include="DTOs\Pops\ConsumptionModifiers\ConsumptionModifiers.cs" />
+    <Compile Include="DTOs\Pops\Culture\AttachedTagData\AttachedCultureTag.cs" />
+    <Compile Include="DTOs\Pops\Culture\AttachedTagData\CultureTagInfo.cs" />
+    <Compile Include="DTOs\Pops\Culture\AttachedTagData\IAttachedCultureTag.cs" />
+    <Compile Include="DTOs\Pops\Culture\CultureDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\CultureNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\CultureWantDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\ICultureDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\ICultureNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Culture\ICultureWantDTO.cs" />
+    <Compile Include="DTOs\Pops\IPopCulturePortion.cs" />
+    <Compile Include="DTOs\Pops\IPopDTO.cs" />
+    <Compile Include="DTOs\Pops\IPopSpeciesPortion.cs" />
+    <Compile Include="DTOs\Pops\PopCulturePortion.cs" />
+    <Compile Include="DTOs\Pops\PopDTO.cs" />
+    <Compile Include="DTOs\Pops\PopModifiers\PopModifiers.cs" />
+    <Compile Include="DTOs\Pops\PopNeeds\IPopNeedsDTO.cs" />
+    <Compile Include="DTOs\Pops\PopSpeciesPortion.cs" />
+    <Compile Include="DTOs\Pops\PopWants\IPopWantDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\AttachedTagData\AttachedSpeciesTag.cs" />
+    <Compile Include="DTOs\Pops\Species\AttachedTagData\IAttachedSpeciesTag.cs" />
+    <Compile Include="DTOs\Pops\Species\AttachedTagData\SpeciesTagInfo.cs" />
+    <Compile Include="DTOs\Pops\Species\ISpeciesDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\ISpeciesNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\ISpeciesWantDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesNeedDTO.cs" />
+    <Compile Include="DTOs\Pops\Species\SpeciesWantDTO.cs" />
+    <Compile Include="DTOs\Processes\IDivisionEffects.cs" />
+    <Compile Include="DTOs\Processes\IProcessDTO.cs" />
+    <Compile Include="DTOs\Processes\IProcessProductDTO.cs" />
+    <Compile Include="DTOs\Processes\IProcessWantDTO.cs" />
+    <Compile Include="DTOs\Processes\ProcessDTO.cs" />
+    <Compile Include="DTOs\Processes\ProcessProductDTO.cs" />
+    <Compile Include="DTOs\Processes\ProcessSection.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\AttachedProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\IAttachedProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\ProcessTag.cs" />
+    <Compile Include="DTOs\Processes\ProcessTags\ProcessTagInfo.cs" />
+    <Compile Include="DTOs\Processes\ProcessWantDTO.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\AttachedProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\IAttachedProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\ProductionTag.cs" />
+    <Compile Include="DTOs\Processes\ProductionTags\ProductionTagInfo.cs" />
+    <Compile Include="DTOs\Products\IProductDTO.cs" />
+    <Compile Include="DTOs\Products\ProductDTO.cs" />
+    <Compile Include="DTOs\Products\ProductTags\AttachedProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\IAttachedProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\ProductTag.cs" />
+    <Compile Include="DTOs\Products\ProductTags\ProductTagInfo.cs" />
+    <Compile Include="DTOs\RegexHelper.cs" />
+    <Compile Include="DTOs\Skills\ISkillDTO.cs" />
+    <Compile Include="DTOs\Skills\ISkillGroupDTO.cs" />
+    <Compile Include="DTOs\Skills\SkillDTO.cs" />
+    <Compile Include="DTOs\Skills\SkillGroupDTO.cs" />
+    <Compile Include="DTOs\Skills\SkillsGraph.cs" />
+    <Compile Include="DTOs\Technology\ITechFamilyDTO.cs" />
+    <Compile Include="DTOs\Technology\ITechnologyDTO.cs" />
+    <Compile Include="DTOs\Technology\TechFamilyDTO.cs" />
+    <Compile Include="DTOs\Technology\TechnologyDTO.cs" />
+    <Compile Include="DTOs\Territory\INeighborConnection.cs" />
+    <Compile Include="DTOs\Territory\IResourceNode.cs" />
+    <Compile Include="DTOs\Territory\ITerritoryResource.cs" />
+    <Compile Include="DTOs\Territory\NeighborConnection.cs" />
+    <Compile Include="DTOs\Territory\ResourceNode.cs" />
+    <Compile Include="DTOs\Territory\SimpleTerritoryDTO.cs" />
+    <Compile Include="DTOs\Territory\TerritoryResource.cs" />
+    <Compile Include="DTOs\Wants\IWantDTO.cs" />
+    <Compile Include="DTOs\Wants\WantDTO.cs" />
+    <Compile Include="Enums\TempStorage\BuildingType.cs" />
+    <Compile Include="Enums\TempStorage\CashType.cs" />
+    <Compile Include="Enums\TempStorage\CropType.cs" />
+    <Compile Include="Enums\TempStorage\JobCategory.cs" />
+    <Compile Include="Enums\TempStorage\JobTypes.cs" />
+    <Compile Include="Enums\TempStorage\MineType.cs" />
+    <Compile Include="Enums\NeedType.cs" />
+    <Compile Include="Enums\TempStorage\PlanetTopology.cs" />
+    <Compile Include="Enums\TempStorage\PlanetType.cs" />
+    <Compile Include="Enums\ProcessGoodTag.cs" />
+    <Compile Include="Enums\TempStorage\ProductTypes.cs" />
+    <Compile Include="Enums\TempStorage\RockType.cs" />
+    <Compile Include="Enums\TechCategory.cs" />
+    <Compile Include="Enums\TempStorage\WaterFlag.cs" />
     <Compile Include="Enums\EnumExtensions\ColorExtensions.cs" />
     <Compile Include="Enums\EnumExtensions\WaterExtensions.cs" />
-    <Compile Include="Enums\JobCategory.cs" />
-    <Compile Include="Enums\JobTypes.cs" />
-    <Compile Include="Enums\NeedType.cs" />
-    <Compile Include="Enums\PlanetTopology.cs" />
-    <Compile Include="Enums\PlanetType.cs" />
-    <Compile Include="Enums\ProductTypes.cs" />
-    <Compile Include="Enums\ProcessGoodTag.cs" />
-    <Compile Include="Enums\WaterFlags.cs" />
+    <Compile Include="Enums\ParameterType.cs" />
+    <Compile Include="Enums\TerritoryConnectionType.cs" />
+    <Compile Include="Helpers\TagData.cs" />
+    <Compile Include="Objects\DataContext.cs" />
+    <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
+    <Compile Include="Objects\Firms\Firm.cs" />
+    <Compile Include="Objects\Firms\FirmRank.cs" />
+    <Compile Include="Objects\Firms\IFirm.cs" />
+    <Compile Include="Objects\Firms\OrganizationalStructure.cs" />
+    <Compile Include="Objects\Firms\OwnershipStructure.cs" />
+    <Compile Include="Objects\Firms\ProfitStructure.cs" />
+    <Compile Include="Objects\Firms\WageType.cs" />
+    <Compile Include="Objects\Government\IGovernor.cs" />
+    <Compile Include="Helpers\ITagData.cs" />
+    <Compile Include="Objects\Government\TaxTarget.cs" />
+    <Compile Include="Objects\IDataContext.cs" />
+    <Compile Include="Objects\Jobs\IJob.cs" />
+    <Compile Include="Objects\Jobs\Job.cs" />
+    <Compile Include="Objects\Market\IMarket.cs" />
+    <Compile Include="Objects\Market\Market.cs" />
+    <Compile Include="Objects\Pops\Culture\Culture.cs" />
+    <Compile Include="Objects\Pops\Culture\CultureTag.cs" />
+    <Compile Include="Objects\Pops\Culture\ICulture.cs" />
+    <Compile Include="Objects\Pops\DesireTier.cs" />
+    <Compile Include="Objects\Pops\IPopGroup.cs" />
+    <Compile Include="Objects\Pops\PopGroup.cs" />
+    <Compile Include="Objects\Pops\Species\ISpecies.cs" />
+    <Compile Include="Objects\Pops\Species\Species.cs" />
+    <Compile Include="Objects\Pops\Species\SpeciesTag.cs" />
+    <Compile Include="Objects\Processes\IProcess.cs" />
+    <Compile Include="Objects\Processes\IProcessProduct.cs" />
+    <Compile Include="Objects\Processes\IProcessWant.cs" />
+    <Compile Include="Objects\Processes\Process.cs" />
+    <Compile Include="Objects\Processes\ProcessPartTag.cs" />
+    <Compile Include="Objects\Processes\ProcessProduct.cs" />
+    <Compile Include="Objects\Processes\ProcessTags\ProcessTag.cs" />
+    <Compile Include="Objects\Processes\ProcessWant.cs" />
+    <Compile Include="Objects\Processes\ProductionTags\ProductionTags.cs" />
+    <Compile Include="Objects\Products\IProduct.cs" />
+    <Compile Include="Objects\Products\Product.cs" />
+    <Compile Include="Objects\Products\ProductTags\ProductTag.cs" />
+    <Compile Include="Objects\RequiredItems.cs" />
+    <Compile Include="Objects\Skills\ISkill.cs" />
+    <Compile Include="Objects\Skills\ISkillGroup.cs" />
+    <Compile Include="Objects\Skills\Skill.cs" />
+    <Compile Include="Objects\Skills\SkillGroup.cs" />
+    <Compile Include="Objects\Technology\ITechFamily.cs" />
+    <Compile Include="Objects\Technology\ITechnology.cs" />
+    <Compile Include="Objects\Technology\TechCategory.cs" />
+    <Compile Include="Objects\Technology\TechFamily.cs" />
+    <Compile Include="Objects\Technology\Technology.cs" />
+    <Compile Include="Objects\Territory\Coords\ICoordinate.cs" />
+    <Compile Include="Objects\Territory\ITerritory.cs" />
+    <Compile Include="Objects\Territory\Territory.cs" />
+    <Compile Include="Objects\Wants\IWant.cs" />
+    <Compile Include="Objects\Wants\Want.cs" />
     <Compile Include="Generators\EconModule.cs" />
-    <Compile Include="Randomizer\IRandomizer.cs" />
-    <Compile Include="Randomizer\Randomizer.cs" />
-    <Compile Include="Storage\Hexmap\HexColor.cs" />
-    <Compile Include="Storage\Hexmap\HexCoord.cs" />
-    <Compile Include="Storage\Hexmap\Hexgrid.cs" />
-    <Compile Include="Storage\IReadOnlyProductAmountCollection.cs" />
-    <Compile Include="Storage\Jobs\Job.cs" />
-    <Compile Include="Storage\Organizations\Company.cs" />
-    <Compile Include="Storage\Organizations\IGovernor.cs" />
-    <Compile Include="Storage\Organizations\ITerritory.cs" />
-    <Compile Include="Storage\Jobs\IFarmer.cs" />
-    <Compile Include="Storage\Jobs\IJob.cs" />
+    <Compile Include="Generators\Noise.cs" />
+    <Compile Include="Generators\Vector2.cs" />
+    <Compile Include="Generators\Vector3.cs" />
+    <Compile Include="Generators\Randomizer\IRandomizer.cs" />
+    <Compile Include="Generators\Randomizer\Randomizer.cs" />
+    <Compile Include="Refactor\Storage\Hexmap\HexColor.cs" />
+    <Compile Include="Refactor\Storage\Hexmap\HexCoord.cs" />
+    <Compile Include="Refactor\Storage\Hexmap\Hexgrid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Enums\MineType.cs" />
-    <Compile Include="Enums\RockType.cs" />
-    <Compile Include="Enums\CropType.cs" />
-    <Compile Include="Storage\ICrop.cs" />
-    <Compile Include="Storage\Organizations\IMarket.cs" />
-    <Compile Include="Storage\Jobs\ILaborer.cs" />
-    <Compile Include="Storage\Organizations\Territory.cs" />
-    <Compile Include="Storage\Planet\Planet.cs" />
-    <Compile Include="Storage\Population\Culture.cs" />
-    <Compile Include="Storage\Population\ICulture.cs" />
-    <Compile Include="Storage\Population\IPoliticalGroup.cs" />
-    <Compile Include="Storage\Population\IPopulationGroup.cs" />
-    <Compile Include="Storage\Population\IPopulations.cs" />
-    <Compile Include="Enums\BuildingType.cs" />
-    <Compile Include="Storage\Products\Building.cs" />
-    <Compile Include="Storage\Products\Currency.cs" />
-    <Compile Include="Storage\Products\IBuilding.cs" />
-    <Compile Include="Storage\Products\ICurrency.cs" />
-    <Compile Include="Storage\Products\IPlot.cs" />
-    <Compile Include="Storage\Process\IProcess.cs" />
-    <Compile Include="Storage\Products\IProduct.cs" />
-    <Compile Include="Storage\IProductAmountCollection.cs" />
-    <Compile Include="Storage\ISqlReader.cs" />
-    <Compile Include="Storage\Organizations\Market.cs" />
-    <Compile Include="Storage\Population\PopulationGroup.cs" />
-    <Compile Include="Storage\Population\Populations.cs" />
-    <Compile Include="Storage\Process\Process.cs" />
-    <Compile Include="Storage\Products\Plot.cs" />
-    <Compile Include="Storage\Products\Product.cs" />
+    <Compile Include="Refactor\Storage\Planet\Planet.cs" />
+    <Compile Include="Refactor\Storage\ISqlReader.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Refactor\World.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="Storage\ProductAmountCollection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper, Version=10.0.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.10.1.1\lib\net461\AutoMapper.dll</HintPath>
+    </Reference>
     <Reference Include="DotnetNoise, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DotnetNoise.1.0.0\lib\netstandard2.0\DotnetNoise.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ExtendedLinguisticServices, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Sensors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.Sensors.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.2\lib\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
     </Reference>
     <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encodings.Web.6.0.0\lib\net461\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=6.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Json.6.0.1\lib\net461\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Storage\Jobs\IntermarketTradeOverviewAndBrainstorms.txt" />
-    <Content Include="Storage\Jobs\JobOverview.txt" />
-    <Content Include="Storage\Organizations\MarketOverview.txt" />
-    <Content Include="Storage\Organizations\OrganizationOverview.txt" />
-    <Content Include="Storage\Organizations\TerritoryOverview.txt" />
-    <Content Include="Storage\Population\CultureBrainstormDoc.txt" />
-    <Content Include="Storage\Population\PoliticalGroupOverview.txt" />
-    <Content Include="Storage\Population\PopulationOverviewAndBrainstorming.txt" />
-    <Content Include="Storage\Process\ProcessOverviewAndBrainstorm.txt" />
-    <Content Include="Storage\Products\ProductOverview.txt" />
+    <Content Include="Data\Errors.txt" />
+    <Content Include="Data\ProductImages\bin.png" />
+    <Content Include="Data\ProductImages\DefaultIcon.png" />
+    <Content Include="Data\ProductImages\Attribution.txt" />
+    <Content Include="Data\ProductImages\bread.png" />
+    <Content Include="Data\ProductImages\flour.png" />
+    <Content Include="Data\ProductImages\IronIngot.png" />
+    <Content Include="Data\ProductImages\wheat.png" />
+    <Content Include="Data\ProductImages\wheatIcon.png" />
+    <Content Include="Data\ProductImages\windmill.png" />
+    <Content Include="Data\TestData\TestTerra\Climate.png" />
+    <Content Include="Data\TestData\TestTerra\ClimateEx.png" />
+    <Content Include="Data\TestData\TestTerra\SolarMap.png" />
+    <Content Include="Data\TestData\TestTerra\Terrain.png" />
+    <Content Include="Data\TestData\TestTerra\TerrainEx.png" />
+    <Content Include="Brainstorms\IntermarketTradeOverviewAndBrainstorms.txt" />
+    <Content Include="Brainstorms\JobOverview.txt" />
+    <Content Include="Brainstorms\MarketOverview.txt" />
+    <Content Include="Brainstorms\OrganizationOverview.txt" />
+    <Content Include="Brainstorms\TerritoryOverview.txt" />
+    <Content Include="Brainstorms\CultureBrainstormDoc.txt" />
+    <Content Include="Brainstorms\PoliticalGroupOverview.txt" />
+    <Content Include="Brainstorms\PopulationOverviewAndBrainstorming.txt" />
+    <Content Include="Brainstorms\ProcessOverviewAndBrainstorm.txt" />
+    <Content Include="Brainstorms\ProductOverview.txt" />
+    <Content Include="license.txt" />
+    <Content Include="Windows Logo.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
@@ -158,8 +351,16 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\" />
+    <Folder Include="DTOs\Pops\Politics\" />
+    <Folder Include="Objects\Pops\PopModifiers\" />
     <Folder Include="Runner\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets" Condition="Exists('..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Text.Json.6.0.1\build\System.Text.Json.targets'))" />
+  </Target>
 </Project>

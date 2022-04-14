@@ -1,0 +1,64 @@
+[
+  {
+    "Name": "Based",
+    "VariantName": "Totes",
+    "BirthModifier": 0.05,
+    "DeathModifier": 0.05,
+    "Description": null,
+    "Needs": [
+      {
+        "Product": "Land",
+        "Tier": "Luxury",
+        "Amount": 1
+      }
+    ],
+    "Wants": [
+      {
+        "Want": "Land",
+        "Tier": "Luxury",
+        "Amount": 1
+      }
+    ],
+    "TagsStrings": [],
+    "RelatedCultures": []
+  },
+  {
+    "Name": "Cringe",
+    "VariantName": "",
+    "BirthModifier": 0,
+    "DeathModifier": 0,
+    "Description": null,
+    "Needs": [],
+    "Wants": [],
+    "TagsStrings": [],
+    "RelatedCultures": []
+  },
+  {
+    "Name": "Based",
+    "VariantName": "Posers",
+    "BirthModifier": 0.05,
+    "DeathModifier": 0.05,
+    "Description": "Fake Based People.",
+    "Needs": [
+      {
+        "Product": "Land",
+        "Tier": "Luxury",
+        "Amount": 1
+      },
+      {
+        "Product": "Fish",
+        "Tier": "Daily",
+        "Amount": 4
+      }
+    ],
+    "Wants": [
+      {
+        "Want": "Land",
+        "Tier": "Luxury",
+        "Amount": 1
+      }
+    ],
+    "TagsStrings": [],
+    "RelatedCultures": []
+  }
+]

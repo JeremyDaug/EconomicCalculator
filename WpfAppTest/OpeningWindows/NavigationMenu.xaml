@@ -1,0 +1,77 @@
+﻿<Window x:Class="Editor.OpeningWindows.NavigationMenu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Editor.OpeningWindows"
+        mc:Ignorable="d"
+        Style="{StaticResource SharedMenu}"
+        Title="NavigationMenu" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Button Content="To Products" Height="25" Width="100"
+                Grid.Row="0" Grid.Column="0"
+                ClickMode="Release" Click="ToProducts"/>
+
+        <Button Content="To Wants" Height="25" Width="100"
+                Grid.Row="0" Grid.Column="1"
+                ClickMode="Release" Click="ToWants"/>
+
+        <Button Content="To Skills" Height="25" Width="100"
+                Grid.Row="0" Grid.Column="2"
+                ClickMode="Release" Click="ToSkills"/>
+
+        <Button Content="To Processes" Height="25" Width="100"
+                Grid.Row="0" Grid.Column="3"
+                ClickMode="Release" Click="ToProcesses"/>
+
+        <Button Content="To Jobs" Height="25" Width="100"
+                Grid.Row="1" Grid.Column="0"
+                ClickMode="Release" Click="ToJobs"/>
+
+        <Button Content="To Tech Families" Height="25" Width="100"
+                Grid.Row="1" Grid.Column="1"
+                ClickMode="Release" Click="ToTechFamilies"/>
+
+        <Button Content="To Technologies" Height="25" Width="100"
+                Grid.Row="1" Grid.Column="2"
+                ClickMode="Release" Click="ToTechs"/>
+
+        <Button Content="To Species" Height="25" Width="100"
+                Grid.Row="1" Grid.Column="3"
+                ClickMode="Release" Click="ToSpecies"/>
+
+        <Button Content="To Cultures" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="0"
+                ClickMode="Release" Click="ToCultures"/>
+
+        <Button Content="To Pops" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="1"
+                ClickMode="Release" Click="ToPops"/>
+
+        <Button Content="To Territories" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="2"
+                ClickMode="Release" Click="ToTerritories"/>
+
+        <Button Content="To Markets" Height="25" Width="100"
+                Grid.Row="2" Grid.Column="3"
+                ClickMode="Release" Click="ToMarkets"/>
+
+        <Button Content="To Firms" Height="25" Width="100"
+                Grid.Row="3" Grid.Column="0"
+                ClickMode="Release" Click="ToFirms"/>
+
+    </Grid>
+</Window>

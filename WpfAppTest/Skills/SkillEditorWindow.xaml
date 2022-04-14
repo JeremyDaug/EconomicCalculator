@@ -1,0 +1,105 @@
+﻿<Window x:Class="Editor.Skills.SkillEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Editor.Skills"
+        xmlns:valid="clr-namespace:Editor.ValidationRules"
+        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Skills;assembly=EconomicCalculator"
+        mc:Ignorable="d"
+        Title="SkillEditorWindow" Height="450" Width="800">
+    <Window.Resources>
+        <src:SkillDTO x:Key="skill"/>
+        <local:SkillRelation x:Key="skillRelation"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Id" Grid.Row="0" Grid.Column="1"
+               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+        <TextBox Name="SkillId" IsReadOnly="True" 
+                 Grid.Row="0" Grid.Column="2" Background="Gray"
+                 Height="25" Width="100" 
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+
+        <Label Content="Name" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
+               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+        <TextBox Name="SkillName" Grid.Column="2" Grid.Row="1"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                 Width="100" Height="25" Margin="5,0,0,5"
+                 Style="{StaticResource textboxInError}">
+            <TextBox.Text>
+                <Binding Path="Name" Source="{StaticResource skill}"
+                         UpdateSourceTrigger="PropertyChanged" Mode="OneWayToSource">
+                    <Binding.ValidationRules>
+                        <valid:NameStringValidation/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Groups" Grid.Row="2" Grid.Column="1" Margin="0,0,0,0"
+               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+        <DataGrid Name="SkillGroups" Grid.Row="2" Grid.Column="2"
+                  AutoGenerateColumns="False" CanUserAddRows="True" 
+                  ItemsSource="{Binding groups}"
+                  CanUserDeleteRows="True">
+            <DataGrid.Columns>
+                <DataGridComboBoxColumn Header="Group" Width="70"
+                                        x:Name="GroupName"
+                                        SelectedValueBinding="{Binding Group, Mode=TwoWay}"
+                                        DisplayMemberPath="{Binding GroupName}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Label Content="Relations" Grid.Row="1" Grid.Column="3" Margin="0,0,0,0"
+               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+        <DataGrid Name="SkillRelations" Grid.Row="1" Grid.Column="4"
+                  AutoGenerateColumns="False" ItemsSource="{Binding skillRelation}">
+            <DataGrid.Columns>
+                <DataGridComboBoxColumn Header="Skill" Width="70"
+                                        x:Name="RelatedName"
+                                        SelectedValueBinding="{Binding Name, Mode=TwoWay}"
+                                        DisplayMemberPath="{Binding RelatedName}"/>
+                <DataGridTextColumn Header="Strength" 
+                                    Binding="{Binding Strength}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Label Content="Description" Grid.Row="2" Grid.Column="3" Margin="0,0,0,5"
+               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+        <TextBox Name="SkillDesc" Grid.Column="4" Grid.Row="2"
+                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                 TextWrapping="Wrap"
+                 Margin="5,5,5,5" AcceptsReturn="True"/>
+
+        <Label Content="Relation Options" Grid.Row="1" Grid.Column="5"
+               HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <RadioButton Content="Equal" Grid.Row="1" Grid.Column="5"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                     Margin="0,0,0,40" GroupName="RelationOptions" Checked="EqualSelected"
+                     IsChecked="True"
+                     ToolTip="Related Skills are connected back with an equal value."/>
+        <RadioButton Content="One Way" Grid.Row="1" Grid.Column="5"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                     Margin="0,0,0,0" GroupName="RelationOptions" Checked="OneWaySelected"
+                     ToolTip="Related Skills are not connected back."/>
+
+        <Button Content="Commit" Grid.Row="2" Grid.Column="5"
+                Width="100" Height="25" 
+                ClickMode="Release" Click="CommitSkill"/>
+    </Grid>
+</Window>

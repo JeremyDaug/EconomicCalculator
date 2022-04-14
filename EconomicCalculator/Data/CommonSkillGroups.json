@@ -1,0 +1,67 @@
+[
+	{
+		"Name": "Physical",
+		"Default": 0.6,
+		"Description": "Skills based on physical prowess."
+	},
+	{
+		"Name": "Agriculture",
+		"Default": 0.4,
+		"Description": "Skills focused on growing plants, particularly food."
+	},
+	{
+		"Name": "Food Processing",
+		"Default": 0.7,
+		"Description": "Skills focused on processing food into various products."
+	},
+	{
+		"Name": "Cooking",
+		"Default": 0.8,
+		"Description": "Skills based on physical prowess."
+	},
+	{
+		"Name": "Geology",
+		"Default": 0.9,
+		"Description": "Skills centered on Geological Knowledge."
+	},
+	{
+		"Name": "Engineering",
+		"Default": 0.3,
+		"Description": "The General Group of skills related to the various kinds of Engineering."
+	},
+	{
+		"Name": "Metallurgy",
+		"Default": 0.6,
+		"Description": "Skills related to smelting, refining, and alloying Metals."
+	},
+	{
+		"Name": "Animal Husbandry",
+		"Default": 0.8,
+		"Description": "Skills related to Animals, raising, and breeding them."
+	},
+	{
+		"Name": "Textiles",
+		"Default": 0.6,
+		"Description": "Skills related to textiles."
+	},
+	{
+		"Name": "Metalworking",
+		"Default": 0.8,
+		"Description": "Skills related to working and shaping metals."
+	},
+	{
+		"Name": "Seafairing",
+		"Default": 0.6,
+		"Description": "Skills related to the sea and living on or near the sea."
+	},
+	{
+		"Name": "Woodworking",
+		"Default": 0.3,
+		"Description": "Skills related to working with wood."
+	},
+	{
+		"Name": "Chemistry",
+		"Default": 0.8,
+		"Description": "Skills related to Chemistry and working with Chemicals."
+	}
+]

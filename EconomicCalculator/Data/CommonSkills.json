@@ -1,0 +1,187 @@
+[
+	{
+		"Name": "Lugging",
+		"GroupStrings": [
+			"Physical"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "For moving stuff around by hand."
+	},
+	{
+		"Name": "Hard Labor",
+		"GroupStrings": [
+			"Physical"
+		],
+		"RelatedStrings": {
+			"Lugging" :  0.9
+		},
+		"Description": "The hard work that needs to be done."
+	},
+	{
+		"Name": "Wheat Farming",
+		"GroupStrings": [
+			"Agriculture"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The Specialized Skill for Farming Wheat"
+	},
+	{
+		"Name": "Grain Milling",
+		"GroupStrings": [
+			"Food Processing",
+			"Cooking"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill of managing the quality of milled grain."
+	},
+	{
+		"Name": "Cooking",
+		"GroupStrings": [
+			"Cooking"
+		],
+		"RelatedStrings": {
+			"Baking": 0.9
+		},
+		"Description": "The general cooking skill."
+	},
+	{
+		"Name": "Baking",
+		"GroupStrings": [
+			"Cooking"
+		],
+		"RelatedStrings": {
+			"Cooking": 0.9
+		},
+		"Description": "The specialized skill of cooking various breads."
+	},
+	{
+		"Name": "Mine Engineer",
+		"GroupStrings": [
+			"Geology",
+			"Engineering"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The Skill for managing and organizing Mining operations."
+	},
+	{
+		"Name": "Smelting",
+		"GroupStrings": [
+			"Metallurgy"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill for smelting raw metal ores into refined ingots."
+	},
+	{
+		"Name": "Herder",
+		"GroupStrings": [
+			"Animal Husbandry"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "Animal Herding and care for the sake of food."
+	},
+	{
+		"Name": "Cotton Farming",
+		"GroupStrings": [
+			"Agriculture"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill of caring for a Cotton Plantation."
+	},
+	{
+		"Name": "Weaving",
+		"GroupStrings": [
+			"Textiles"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill of weaving threads into cloth."
+	},
+	{
+		"Name": "Spinner",
+		"GroupStrings": [
+			"Textiles"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The Skill of spinning raw threads into useful spun threads."
+	},
+	{
+		"Name": "Tailoring",
+		"GroupStrings": [
+			"Textiles"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill of taking basic cloth and forming clothing from it."
+	},
+	{
+		"Name": "Panning",
+		"GroupStrings": [
+			"Geology"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The art of pulling gold out of bodies of water."
+	},
+	{
+		"Name": "Minting",
+		"GroupStrings": [
+			"Metalworking"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The craft of turning precious metals into coinage efficiently."
+	},
+	{
+		"Name": "Goldsmithing",
+		"GroupStrings": [
+			"Metalworking"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The art of crafting gold into various bits of jewelry."
+	},
+	{
+		"Name": "Fishing",
+		"GroupStrings": [
+			"Seafairing"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill of fishing."
+	},
+	{
+		"Name": "Blacksmithing",
+		"GroupStrings": [
+			"Metalworking"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill of forming steel into various forms."
+	},
+	{
+		"Name": "Lumberjacking",
+		"GroupStrings": [
+			"Woodworking"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "The skill of efficiently cutting down trees."
+	},
+	{
+		"Name": "Laborer",
+		"GroupStrings": [
+			"Physical"
+		],
+		"RelatedStrings": {
+		},
+		"Description": "A general Purpose Laborer."
+	}
+]

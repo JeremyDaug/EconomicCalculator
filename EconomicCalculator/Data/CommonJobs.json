@@ -1,0 +1,21 @@
+[
+  {
+    "Name": "Farming",
+    "VariantName": "",
+    "Labor": "Wheat Farming",
+    "Skill": "Wheat Farming",
+    "ProcessNames": [
+      "Wheat Farming",
+      "Baking"
+    ]
+  },
+  {
+    "Name": "Baker",
+    "VariantName": "",
+    "Labor": "Baking",
+    "Skill": "Baking",
+    "ProcessNames": [
+      "Baking"
+    ]
+  }
+]

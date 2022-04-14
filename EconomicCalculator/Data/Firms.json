@@ -1,0 +1,33 @@
+[
+  {
+    "Name": "Wheatfields",
+    "ParentFirm": null,
+    "Children": [],
+    "FirmRank": "Firm",
+    "OwnershipStructure": "SelfEmployed",
+    "ProfitStructure": "Distributed",
+    "OrganizationalStructure": "MomAndPop",
+    "Jobs": [
+      "Farming"
+    ],
+    "JobWageTypes": {
+      "Farming": "LossSharing"
+    },
+    "JobWages": {
+      "Farming": 1
+    },
+    "Processes": [
+      "Wheat Farming",
+      "Baking"
+    ],
+    "Market": "Alicia",
+    "Regions": [],
+    "ProductPrices": {
+      "Wheat Grain": 2,
+      "Bread": 6
+    },
+    "Resources": {
+      "Wheat Grain": 10000
+    }
+  }
+]

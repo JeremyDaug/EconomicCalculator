@@ -1,0 +1,52 @@
+[
+  {
+    "Count": 1000,
+    "Job": "Farming",
+    "Firm": "Wheatfields",
+    "Market": "Alicia",
+    "Skill": "Wheat Farming",
+    "SkillLevel": 2.5,
+    "SpeciesPortions": [
+      {
+        "Species": "Human(Baseline)",
+        "Amount": 100
+      },
+      {
+        "Species": "Human(Variant)",
+        "Amount": 200
+      },
+      {
+        "Species": "Vulcan",
+        "Amount": 200
+      },
+      {
+        "Species": "Romulan",
+        "Amount": 100
+      },
+      {
+        "Species": "Klingon",
+        "Amount": 200
+      },
+      {
+        "Species": "Imperial",
+        "Amount": 200
+      }
+    ],
+    "SpeciesString": "Imperial: 200;\n",
+    "CulturePortions": [
+      {
+        "Culture": "Cringe",
+        "Amount": 100
+      },
+      {
+        "Culture": "Based(Totes)",
+        "Amount": 300
+      },
+      {
+        "Culture": "Based(Posers)",
+        "Amount": 600
+      }
+    ],
+    "CultureString": "Based(Posers): 600;\n"
+  }
+]

@@ -1,0 +1,128 @@
+﻿<Window x:Class="Editor.Jobs.JobEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Editor.Jobs"
+        xmlns:valid="clr-namespace:Editor.ValidationRules"
+        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Jobs;assembly=EconomicCalculator"
+        mc:Ignorable="d"
+        Title="JobEditorWindow" Height="450" Width="800">
+    <Window.Resources>
+        <src:JobDTO x:Key="job"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label Content="Name" VerticalAlignment="Center"
+               Grid.Row="1" Grid.Column="0"
+               HorizontalAlignment="Right"/>
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 Height="25" Width="100"
+                 Style="{StaticResource textboxInError}"
+                 VerticalAlignment="Center" HorizontalAlignment="Left">
+            <TextBox.Text>
+                <Binding Path="Name" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <valid:NameStringValidation MinLength="3"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Label Content="Variant Name" VerticalAlignment="Center"
+               Grid.Row="2" Grid.Column="0"
+               HorizontalAlignment="Right"/>
+        <TextBox Grid.Row="2" Grid.Column="1"
+                 Height="25" Width="100"
+                 Text="{Binding VariantName}"
+                 VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+        <Label Content="Labor" VerticalAlignment="Center"
+               HorizontalAlignment="Right" 
+               Grid.Column="0" Grid.Row="3"/>
+        <ComboBox Grid.Row="3" Grid.Column="1"
+                  VerticalAlignment="Center" HorizontalAlignment="Left"
+                  SelectedItem="{Binding SelectedLabor}"
+                  ItemsSource="{Binding AvailableLabors}"
+                  Height="25" Width="100"/>
+
+        <Label Content="Skill" VerticalAlignment="Center"
+               HorizontalAlignment="Right" 
+               Grid.Row="4" Grid.Column="0"/>
+        <ComboBox Grid.Row="4" Grid.Column="1"
+                  VerticalAlignment="Center" HorizontalAlignment="Left"
+                  SelectedItem="{Binding SelectedSkill}"
+                  ItemsSource="{Binding AvailableSkills}"
+                  Height="25" Width="100"/>
+
+        <Label Content="Processes" VerticalAlignment="Bottom"
+               HorizontalAlignment="Center" 
+               Grid.Row="0" Grid.Column="3"/>
+        <Grid Grid.Row="1" Grid.Column="2" 
+              Grid.ColumnSpan="3" Grid.RowSpan="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Label Content="In the job" VerticalAlignment="Bottom"
+               HorizontalAlignment="Center"
+               Grid.Row="0" Grid.Column="0"/>
+            <Label Content="All Processes" VerticalAlignment="Bottom"
+               HorizontalAlignment="Center" 
+               Grid.Row="0" Grid.Column="2"/>
+
+            <ListBox Grid.Row="1" Grid.Column="0" 
+                     ItemsSource="{Binding InJob}"
+                     SelectedItem="{Binding SelectedProcInJob}"
+                     SelectionMode="Extended"
+                     MouseDoubleClick="RemoveFromJob"
+                     Grid.RowSpan="3"/>
+            <ListBox Grid.Row="1" Grid.Column="2"
+                     ItemsSource="{Binding AvailableProcesses}"
+                     SelectedItem="{Binding SelectedProc}"
+                     SelectionMode="Multiple"
+                     MouseDoubleClick="ShiftToJob"
+                     Grid.RowSpan="3"/>
+
+            <Button Grid.Row="1" Grid.Column="1"
+                    Content="&lt;" Height="25" Width="25"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding ShiftToJob}"
+                    ClickMode="Release"/>
+            <Button Grid.Row="3" Grid.Column="1"
+                    Content="&gt;" Height="25" Width="25"
+                    VerticalAlignment="Top"
+                    Command="{Binding RemoveFromJob}"
+                    ClickMode="Release"/>
+        </Grid>
+
+        <Button Content="Commit" Grid.Row="4" Grid.Column="5"
+                Height="25" Width="100" 
+                Command="{Binding CommitJob}"/>
+    </Grid>
+</Window>
