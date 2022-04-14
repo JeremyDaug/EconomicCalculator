@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator.DTOs.Firms;
+using EconomicCalculator.DTOs.Pops;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +44,16 @@ namespace EditorInterface.Firms
             ProcessOptions.ItemsSource = viewModel.ProcessOptions;
             ProductOptions.ItemsSource = viewModel.ProductOptions;
             ResourceOptions.ItemsSource = viewModel.ProductOptions;
+        }
+
+        private void RemovePop(object sender, RoutedEventArgs e)
+        {
+            var selection = (PopDTO)EmployeeGrid.SelectedItem;
+
+            if (selection == null)
+                return;
+
+            viewModel.RemovePop(selection);
         }
     }
 }

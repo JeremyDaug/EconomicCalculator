@@ -102,7 +102,7 @@ namespace EconomicCalculator.DTOs.Jobs
         public string FullName()
         {
             var result = Name;
-            if (string.IsNullOrWhiteSpace(VariantName))
+            if (!string.IsNullOrWhiteSpace(VariantName))
                 result += "(" + VariantName + ")";
             return result;
         }

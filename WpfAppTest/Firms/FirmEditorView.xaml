@@ -116,9 +116,11 @@
                   AutoGenerateColumns="False"
                   Height="120" Margin="5">
             <DataGrid.Columns>
-                <DataGridComboBoxColumn Header="Job" x:Name="JobOptions" SelectedValueBinding="{Binding JobName}"/>
-                <DataGridComboBoxColumn Header="Wage" x:Name="WageOptions" SelectedValueBinding="{Binding Wage}"/>
-                <DataGridComboBoxColumn Header="Wage Type" SelectedValueBinding="{Binding WageType}"/>
+                <DataGridComboBoxColumn Header="Job" x:Name="JobOptions" 
+                                        SelectedValueBinding="{Binding JobName}"
+                                        Width="100"/>
+                <DataGridTextColumn Header="Wage" Binding="{Binding Wage}"/>
+                <DataGridComboBoxColumn Header="Wage Type" x:Name="WageOptions" SelectedValueBinding="{Binding WageType}"/>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -140,6 +142,7 @@
         <DataGrid Grid.Row="5" Grid.Column="2"
                   ItemsSource="{Binding Employees}"
                   CanUserDeleteRows="True"
+                  Name="EmployeeGrid"
                   CanUserAddRows="False"
                   AutoGenerateColumns="False"
                   Margin="5">
@@ -151,12 +154,14 @@
         <Button Grid.Row="5" Grid.Column="3" 
                 Height="25" Width="90"
                 Content="Add Employees"
+                ClickMode="Release"
                 Margin="10" Command="{Binding AddPop}"
                 VerticalAlignment="Top"/>
         <Button Grid.Row="5" Grid.Column="3" 
                 Height="25" Width="90"
                 Content="Remove Employees"
-                Margin="10" Command="{Binding RemovePop}"
+                Margin="10" ClickMode="Release"
+                Click="RemovePop"
                 VerticalAlignment="Bottom"/>
 
         <Label Content="Products and Prices" Grid.Row="6" Grid.Column="0"/>

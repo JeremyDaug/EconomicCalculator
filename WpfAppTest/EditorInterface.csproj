@@ -103,6 +103,9 @@
     <Compile Include="Firms\FirmsListView.xaml.cs">
       <DependentUpon>FirmsListView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Firms\SelectionView.xaml.cs">
+      <DependentUpon>SelectionView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Firms\JobWageDataStorage.cs" />
     <Compile Include="Firms\ProductDecimalPair.cs" />
     <Compile Include="Helpers\Converters.cs" />
@@ -243,6 +246,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Firms\FirmsListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Firms\SelectionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
