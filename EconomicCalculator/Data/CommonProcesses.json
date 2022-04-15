@@ -335,45 +335,5 @@
 		"SkillMaximum": 5,
 		"Description": "Common Baking Process",
 		"Icon": "D:\\Projects\\EconomicCalculator\\EconomicCalculator\\Data\\ProductImages\\bread.png"
-	},
-	{
-		"Name": "Decay",
-		"VariantName": "Wheat Grain",
-		"MinimumTime": 0,
-		"InputProducts": [
-			{
-				"ProductName": "Wheat Grain",
-				"Amount": 1 ,
-				"TagStrings": []
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Bio Waste",
-				"Amount": 1,
-				"TagStrings": [
-					"Chance<a;1>"
-				]
-			},
-			{
-				"ProductName": "Wheat Grain",
-				"Amount": 1,
-				"TagStrings": [
-					"Chance<b;99>"
-				]
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [
-			"Chance"
-		],
-		"SkillName": "Hard Labor",
-		"SkillMinimum": 0,
-		"SkillMaximum": 5,
-		"Description": "",
-		"Icon": ""
 	}
 ]

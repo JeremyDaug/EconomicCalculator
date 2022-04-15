@@ -50,6 +50,10 @@ namespace EconomicCalculator
         // private Ctor, this is a singleton.
         private DTOManager()
         {
+            // get Data Folder
+            var folder = Directory.GetCurrentDirectory();
+            DataFolder = Path.GetFullPath(Path.Combine(folder, @"..\..\..\EconomicCalculator\Data\"));
+
             UniverseName = "";
             //Planets = new Dictionary<int, Planet>();
             //Technologies = new Dictionary<int, ITechnology>();
@@ -127,9 +131,14 @@ namespace EconomicCalculator
         #endregion DataStorage
 
         // TODO make this less shitty.
-        public string DataFolder => "D:\\Projects\\EconomicCalculator\\EconomicCalculator\\Data\\";
+        public string DataFolder { get; set; }
 
         public string DefaultIcon => @"ProductImages\DefaultIcon.png";
+
+        public string GetDataFilePath(string File)
+        {
+            return Path.Combine(DataFolder, File);
+        }
 
         #region ContainsXFunctions
 
@@ -1675,10 +1684,10 @@ namespace EconomicCalculator
                 Wants.Add(newWant.Id, newWant);
             }
             // Basic stuff loaded first
-            LoadWants(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonWants.json");
+            LoadWants(GetDataFilePath("CommonWants.json"));
 
             // Get All Tech Families
-            LoadTechFamilies(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonTechFamilies.json");
+            LoadTechFamilies(GetDataFilePath("CommonTechFamilies.json"));
 
             // Get Require Techs
             foreach (var item in RequiredItems.Technologies)
@@ -1687,7 +1696,7 @@ namespace EconomicCalculator
                 Technologies.Add(newTech.Id, newTech);
             }
             // Load Technologies
-            LoadTechs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonTechs.json");
+            LoadTechs(GetDataFilePath("CommonTechs.json"));
 
 
             // load required products.
@@ -1697,37 +1706,37 @@ namespace EconomicCalculator
                 Products.Add(newProd.Id, newProd);
             }
             // More advanced stuff next.
-            LoadProducts(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProducts.json");
+            LoadProducts(GetDataFilePath("CommonProducts.json"));
 
             // Get all skill groups
-            LoadSkillGroups(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkillGroups.json");
+            LoadSkillGroups(GetDataFilePath("CommonSkillGroups.json"));
 
             // Get All Skills
-            LoadSkills(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSkills.json");
+            LoadSkills(GetDataFilePath("CommonSkills.json"));
 
             // Get All Processes
-            LoadProcesses(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonProcesses.json");
+            LoadProcesses(GetDataFilePath("CommonProcesses.json"));
 
             // Get all Jobs.
-            LoadJobs(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonJobs.json");
+            LoadJobs(GetDataFilePath("CommonJobs.json"));
 
             // Get all Species
-            LoadSpecies(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonSpecies.json");
+            LoadSpecies(GetDataFilePath("CommonSpecies.json"));
 
             // Get All Cultures
-            LoadCultures(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\CommonCultures.json");
+            LoadCultures(GetDataFilePath("CommonCultures.json"));
 
             // Get All Pops
-            LoadPops(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Pops.json");
+            LoadPops(GetDataFilePath("Pops.json"));
 
             // Get All Territories
-            LoadSimpleTerritories(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Territories.json");
+            LoadSimpleTerritories(GetDataFilePath("Territories.json"));
 
             // Get All Markets
-            LoadMarkets(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Markets.json");
+            LoadMarkets(GetDataFilePath("Markets.json"));
 
             // Get All Firms
-            LoadFirms(@"D:\Projects\EconomicCalculator\EconomicCalculator\Data\Firms.json");
+            LoadFirms(GetDataFilePath("Firms.json"));
 
             // Connect Pops, Firms, and Markets
             ConnectPopsFirmsAndMarkets();
