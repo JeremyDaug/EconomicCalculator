@@ -52,5 +52,7 @@ namespace EconomicCalculator.Objects
         IReadOnlyList<ITerritory> Territories { get; }
 
         IReadOnlyList<IWant> Wants { get; }
+
+        void LoadData(IEnumerable<string> sets);
     }
 }

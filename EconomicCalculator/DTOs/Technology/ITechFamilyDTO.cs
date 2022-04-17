@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace EconomicCalculator.DTOs.Technology
 {
+    [Obsolete]
     public interface ITechFamilyDTO
     {
         /// <summary>

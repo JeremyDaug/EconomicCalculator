@@ -55,16 +55,16 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Data\CommonCultures.json" />
-    <None Include="Data\CommonJobs.json" />
-    <None Include="Data\CommonProcesses.json" />
-    <None Include="Data\CommonProducts.json" />
-    <None Include="Data\CommonSkillGroups.json" />
-    <None Include="Data\CommonSkills.json" />
-    <None Include="Data\CommonSpecies.json" />
-    <None Include="Data\CommonTechFamilies.json" />
-    <None Include="Data\CommonTechs.json" />
-    <None Include="Data\CommonWants.json" />
+    <None Include="Data\Common\Cultures\CommonCultures.json" />
+    <None Include="Data\Common\Jobs\CommonJobs.json" />
+    <None Include="Data\Common\Processes\CommonProcesses.json" />
+    <None Include="Data\Common\Products\CommonProducts.json" />
+    <None Include="Data\Common\SkillGroups\CommonSkillGroups.json" />
+    <None Include="Data\Common\Skills\CommonSkills.json" />
+    <None Include="Data\Common\Species\CommonSpecies.json" />
+    <None Include="Data\Common\TechFamilies\CommonTechFamilies.json" />
+    <None Include="Data\Common\Technology\CommonTechnology.json" />
+    <None Include="Data\Common\Wants\CommonWants.json" />
     <None Include="Data\Firms.json" />
     <None Include="Data\Markets.json" />
     <None Include="Data\Pops.json" />
@@ -76,6 +76,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\LoadSets.txt" />
     <Compile Include="DTOs\AbstractConverter.cs" />
     <Compile Include="DTOs\Enums\ParameterType.cs" />
     <Compile Include="DTOs\Firms\FirmDTO.cs" />
@@ -177,6 +178,7 @@
     <Compile Include="Enums\TerritoryConnectionType.cs" />
     <Compile Include="Helpers\TagData.cs" />
     <Compile Include="Objects\DataContext.cs" />
+    <Compile Include="Objects\DataContextFactory.cs" />
     <Compile Include="Objects\EconCalcAutomapperProfile.cs" />
     <Compile Include="Objects\Firms\Firm.cs" />
     <Compile Include="Objects\Firms\FirmRank.cs" />
@@ -223,6 +225,7 @@
     <Compile Include="Objects\Technology\ITechnology.cs" />
     <Compile Include="Objects\Technology\TechCategory.cs" />
     <Compile Include="Objects\Technology\TechFamily.cs" />
+    <Compile Include="Objects\Technology\TechFamilyJsonConverter.cs" />
     <Compile Include="Objects\Technology\Technology.cs" />
     <Compile Include="Objects\Territory\Coords\ICoordinate.cs" />
     <Compile Include="Objects\Territory\ITerritory.cs" />
@@ -351,6 +354,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\Saves\Default\Firms\" />
+    <Folder Include="Data\Saves\Default\Markets\" />
+    <Folder Include="Data\Saves\Default\Pops\" />
+    <Folder Include="Data\Saves\Default\Territories\" />
     <Folder Include="DTOs\Pops\Politics\" />
     <Folder Include="Objects\Pops\PopModifiers\" />
     <Folder Include="Runner\" />

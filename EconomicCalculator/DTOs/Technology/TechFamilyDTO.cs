@@ -10,6 +10,7 @@ namespace EconomicCalculator.DTOs.Technology
     /// <summary>
     /// Tech family Data Transfer object and Editor Interface Class.
     /// </summary>
+    [Obsolete]
     public class TechFamilyDTO : ITechFamilyDTO
     {
         public TechFamilyDTO()

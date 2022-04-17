@@ -11,6 +11,7 @@ namespace EconomicCalculator.DTOs.Wants
     /// <summary>
     /// The Wants available to the system.
     /// </summary>
+    [Obsolete]
     public class WantDTO : IWantDTO
     {
         /// <summary>

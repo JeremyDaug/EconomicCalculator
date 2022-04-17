@@ -1,24 +1,24 @@
 [
   {
     "Name": "Physics",
-    "RelatedFamilyStrings": [
+    "Relations": [
       "Mathematics"
     ],
-    "TechStrings": [],
+    "Techs": [],
     "Description": "The study of the natural world through mathematics."
   },
   {
     "Name": "Mathematics",
-    "RelatedFamilyStrings": [
+    "Relations": [
       "Physics"
     ],
-    "TechStrings": [],
+    "Techs": [],
     "Description": "The study of logical rules for the use of calculation."
   },
   {
     "Name": "Agriculture",
-    "RelatedFamilyStrings": [],
-    "TechStrings": [],
+    "Relations": [],
+    "Techs": [],
     "Description": "The study of sowing and harvesting plants."
   }
 ]

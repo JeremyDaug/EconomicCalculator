@@ -1,4 +1,5 @@
 ﻿using EconomicCalculator;
+using EconomicCalculator.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,10 @@ namespace Editor.OpeningWindows
         public NavigationMenu()
         {
             InitializeComponent();
+
+            var context = DataContextFactory.GetDataContext;
+
+            context.LoadData(new List<string> { "Common" });
 
             // if anything is loaded, don't reload
             if (!DTOManager.Instance.Products.Any())

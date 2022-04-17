@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicCalculator.Objects.Wants
@@ -12,8 +13,9 @@ namespace EconomicCalculator.Objects.Wants
     internal class Want : IWant
     {
         /// <summary>
-        /// THe Id of the want.
+        /// The Id of the want.
         /// </summary>
+        [JsonIgnore]
         public int Id { get; set; }
         int IWant.Id => Id;
 

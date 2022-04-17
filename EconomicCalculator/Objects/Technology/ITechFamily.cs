@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace EconomicCalculator.Objects.Technology
 {
@@ -10,6 +11,7 @@ namespace EconomicCalculator.Objects.Technology
         /// <summary>
         /// Tech Family's Id.
         /// </summary>
+        [JsonIgnore]
         int Id { get; }
 
         /// <summary>
