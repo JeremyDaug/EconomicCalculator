@@ -65,10 +65,10 @@
     <None Include="Data\Common\TechFamilies\CommonTechFamilies.json" />
     <None Include="Data\Common\Technology\CommonTechnology.json" />
     <None Include="Data\Common\Wants\CommonWants.json" />
-    <None Include="Data\Firms.json" />
-    <None Include="Data\Markets.json" />
-    <None Include="Data\Pops.json" />
-    <None Include="Data\Territories.json" />
+    <None Include="Data\Saves\Default\Firms\Firms.json" />
+    <None Include="Data\Saves\Default\Markets\Markets.json" />
+    <None Include="Data\Saves\Default\Pops\Pops.json" />
+    <None Include="Data\Saves\Default\Territories\Territories.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -227,6 +227,7 @@
     <Compile Include="Objects\Technology\TechFamily.cs" />
     <Compile Include="Objects\Technology\TechFamilyJsonConverter.cs" />
     <Compile Include="Objects\Technology\Technology.cs" />
+    <Compile Include="Objects\Technology\TechnologyJsonConverter.cs" />
     <Compile Include="Objects\Territory\Coords\ICoordinate.cs" />
     <Compile Include="Objects\Territory\ITerritory.cs" />
     <Compile Include="Objects\Territory\Territory.cs" />
@@ -354,10 +355,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\Saves\Default\Firms\" />
-    <Folder Include="Data\Saves\Default\Markets\" />
-    <Folder Include="Data\Saves\Default\Pops\" />
-    <Folder Include="Data\Saves\Default\Territories\" />
     <Folder Include="DTOs\Pops\Politics\" />
     <Folder Include="Objects\Pops\PopModifiers\" />
     <Folder Include="Runner\" />

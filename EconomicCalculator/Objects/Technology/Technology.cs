@@ -13,9 +13,9 @@ namespace EconomicCalculator.Objects.Technology
     {
         public Technology()
         {
-            Families = new List<ITechFamily>();
-            Parents = new List<ITechnology>();
-            Children = new List<ITechnology>();
+            Families = new List<TechFamily>();
+            Parents = new List<Technology>();
+            Children = new List<Technology>();
         }
 
         /// <summary>
@@ -41,19 +41,19 @@ namespace EconomicCalculator.Objects.Technology
         /// <summary>
         /// The families this tech belongs to.
         /// </summary>
-        public List<ITechFamily> Families { get; set; }
+        public List<TechFamily> Families { get; set; }
         IReadOnlyList<ITechFamily> ITechnology.Families => Families;
         
         /// <summary>
         /// The techs that can come from this one.
         /// </summary>
-        public List<ITechnology> Children { get; set; }
+        public List<Technology> Children { get; set; }
         IReadOnlyList<ITechnology> ITechnology.Children => Children;
 
         /// <summary>
         /// The techs this tech can come from.
         /// </summary>
-        public List<ITechnology> Parents { get; set; }
+        public List<Technology> Parents { get; set; }
         IReadOnlyList<ITechnology> ITechnology.Parents => Parents;
         
         /// <summary>
@@ -65,5 +65,10 @@ namespace EconomicCalculator.Objects.Technology
         /// A Description of the Technology.
         /// </summary>
         public string Description { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

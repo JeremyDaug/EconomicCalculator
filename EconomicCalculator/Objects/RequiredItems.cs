@@ -194,9 +194,9 @@ namespace EconomicCalculator.Objects
             Tier = 0,
             Description = "The simplist thing an intelligent creature can do. Think of things, find problems, find solutions, and learn from doing so.",
             Category = TechCategory.Primary,
-            Families = new List<ITechFamily>(),
-            Children = new List<ITechnology>(),
-            Parents = new List<ITechnology>()
+            Families = new List<TechFamily>(),
+            Children = new List<Technology.Technology>(),
+            Parents = new List<Technology.Technology>()
         };
 
         public static IReadOnlyDictionary<string, ITechnology> Technologies

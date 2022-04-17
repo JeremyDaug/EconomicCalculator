@@ -4,7 +4,6 @@
     "Relations": [
       "Mathematics"
     ],
-    "Techs": [],
     "Description": "The study of the natural world through mathematics."
   },
   {
@@ -12,13 +11,11 @@
     "Relations": [
       "Physics"
     ],
-    "Techs": [],
     "Description": "The study of logical rules for the use of calculation."
   },
   {
     "Name": "Agriculture",
     "Relations": [],
-    "Techs": [],
     "Description": "The study of sowing and harvesting plants."
   }
 ]

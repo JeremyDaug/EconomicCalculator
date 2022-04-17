@@ -27,6 +27,8 @@ namespace EconomicCalculator.Objects
     {
         #region SingletonInstance
 
+        private static bool hasEverLoaded = false;
+
         private static DataContext instance;
 
         // Retrieve the currently active instance of our data.
@@ -85,6 +87,25 @@ namespace EconomicCalculator.Objects
         {
             // Data/set/category/categoryset.json
             return Path.Combine(DataFolder, set, category, $"{set}{category}.json");
+        }
+
+        private void LoadRequiredItems()
+        {
+            if (hasEverLoaded)
+                return;
+            hasEverLoaded = true;
+
+            // load wants
+            foreach (var want in RequiredItems.Wants.Values)
+                Wants.Add((Want)want);
+
+            // load techs
+            foreach (var tech in RequiredItems.Technologies.Values)
+                Technologies.Add((Technology.Technology)tech);
+
+            // load products
+            foreach (var product in RequiredItems.Products.Values)
+                Products.Add((Product)product);
         }
 
         private void LoadWants(string set)
@@ -162,6 +183,75 @@ namespace EconomicCalculator.Objects
             // we're done.
         }
 
+        private void LoadTechs(string set)
+        {
+            var filename = GetDataFile(set, "Technology");
+            var json = File.ReadAllText(filename);
+
+            var newTechs = JsonSerializer.Deserialize<List<Technology.Technology>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new TechnologyJsonConverter()
+                    }
+                });
+
+            // check for dupes in set
+            var dupes = newTechs.Select(x => x.Name).Distinct();
+            if (dupes.Count() < newTechs.Count())
+            {
+                // dupes found, find it and throw
+                foreach (var dupe in dupes) if (newTechs.Count(x => x.Name == dupe) > 1)
+                        throw new InvalidDataException($"Duplicate Tech \"{dupe}\" found in set \"{set}\".");
+            }
+
+            // check for collision with previous sets
+            foreach (var tech in newTechs)
+            {
+                if (Technologies.Select(x => x.Name)
+                        .Contains(tech.Name))
+                    throw new InvalidDataException($"Duplicate Tech \"{tech.Name}\" in set \"{set}\" found.");
+                // add family connections
+                var families = new List<TechFamily>();
+
+                // tech must have at least one family
+                if (tech.Families.Count == 0)
+                    throw new InvalidDataException($"Tech \"{tech.Name}\" must belong to at least one family.");
+
+                foreach (var fam in tech.Families)
+                {
+                    // get family target
+                    var realfam = TechFamilies.Single(x => x.Name == fam.Name);
+                    // add to family list
+                    families.Add(TechFamilies.Single(x => x.Name == fam.Name));
+                    // add to family
+                    realfam.Techs.Add(tech);
+                }
+                tech.Families = families;
+                // add tech to list.
+                Technologies.Add(tech);
+            }
+
+            // connect to techs and families
+            foreach (var tech in newTechs)
+            {
+                var parents = new List<Technology.Technology>();
+                foreach (var parent in tech.Parents)
+                {
+                    parents.Add(Technologies.Single(x => x.Name == parent.Name));
+                }
+                tech.Parents = parents;
+
+                var children = new List<Technology.Technology>();
+                foreach (var child in tech.Children)
+                    parents.Add(Technologies.Single(x => x.Name == child.Name));
+                tech.Children = children;
+            }
+
+            // completed.
+        }
+
         /// <summary>
         /// Loads all of the data from the common folder from the sets given.
         /// </summary>
@@ -169,11 +259,15 @@ namespace EconomicCalculator.Objects
         /// <exception cref="ArgumentNullException">If sets is null.</exception>
         public void LoadData(IEnumerable<string> sets)
         {
+            LoadRequiredItems();
+            
             foreach (var set in sets)
             {
                 LoadWants(set);
 
                 LoadTechFamilies(set);
+
+                LoadTechs(set);
             }
         }
 

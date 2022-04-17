@@ -15,7 +15,7 @@ namespace EconomicCalculator.Objects.Technology
             JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
-                throw new JsonException("Invalid Start");
+                throw new JsonException();
 
             var result = new TechFamily();
 
@@ -33,7 +33,7 @@ namespace EconomicCalculator.Objects.Technology
 
                 // get value
                 reader.Read();
-                switch(propName)
+                switch (propName)
                 {
                     case "Name":
                         string value = reader.GetString();
@@ -43,11 +43,6 @@ namespace EconomicCalculator.Objects.Technology
                         List<string> rels = JsonSerializer.Deserialize<List<string>>(ref reader, options);
                         foreach (var rel in rels)
                             result.Relations.Add(new TechFamily { Name = rel });
-                        break;
-                    case "Techs":
-                        List<string> techs = JsonSerializer.Deserialize<List<string>>(ref reader, options);
-                        foreach (var tech in techs)
-                            result.Techs.Add(new Technology { Name = tech });
                         break;
                     case "Description":
                         string desc = reader.GetString();
@@ -72,9 +67,7 @@ namespace EconomicCalculator.Objects.Technology
             writer.WritePropertyName(nameof(value.Relations));
             JsonSerializer.Serialize(writer, value.Relations.Select(x => x.Name), options);
 
-            // write Techs
-            writer.WritePropertyName(nameof(value.Techs));
-            JsonSerializer.Serialize(writer, value.Techs.Select(x => x.Name), options);
+            // ignore techs
 
             // write Descriptions
             writer.WritePropertyName(nameof(value.Description));
