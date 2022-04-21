@@ -2,66 +2,96 @@
 	{
 		"Name": "Physical",
 		"Default": 0.6,
-		"Description": "Skills based on physical prowess."
+		"Description": "Skills based on physical prowess.",
+		"Skills": [
+			"Lugging",
+			"Hard Labor"
+		]
 	},
 	{
 		"Name": "Agriculture",
 		"Default": 0.4,
-		"Description": "Skills focused on growing plants, particularly food."
+		"Description": "Skills focused on growing plants, particularly food.",
+		"Skills": [
+			"Wheat Farming"
+		]
 	},
 	{
 		"Name": "Food Processing",
 		"Default": 0.7,
-		"Description": "Skills focused on processing food into various products."
+		"Description": "Skills focused on processing food into various products.",
+		"Skills": [
+			"Grain Milling"
+		]
 	},
 	{
 		"Name": "Cooking",
 		"Default": 0.8,
-		"Description": "Skills based on physical prowess."
+		"Description": "Skills based on physical prowess.",
+		"Skills": [
+			"Grain Milling",
+			"Cooking",
+			"Baking"
+		]
 	},
 	{
 		"Name": "Geology",
 		"Default": 0.9,
-		"Description": "Skills centered on Geological Knowledge."
+		"Description": "Skills centered on Geological Knowledge.",
+		"Skills": [
+			"Mine Engineer"
+		]
 	},
 	{
 		"Name": "Engineering",
 		"Default": 0.3,
-		"Description": "The General Group of skills related to the various kinds of Engineering."
+		"Description": "The General Group of skills related to the various kinds of Engineering.",
+		"Skills": [
+			"Mine Engineer"
+		]
 	},
 	{
 		"Name": "Metallurgy",
 		"Default": 0.6,
-		"Description": "Skills related to smelting, refining, and alloying Metals."
+		"Description": "Skills related to smelting, refining, and alloying Metals.",
+		"Skills": [
+			"Smelting"
+		]
 	},
 	{
 		"Name": "Animal Husbandry",
 		"Default": 0.8,
-		"Description": "Skills related to Animals, raising, and breeding them."
+		"Description": "Skills related to Animals, raising, and breeding them.",
+		"Skills": []
 	},
 	{
 		"Name": "Textiles",
 		"Default": 0.6,
-		"Description": "Skills related to textiles."
+		"Description": "Skills related to textiles.",
+		"Skills": []
 	},
 	{
 		"Name": "Metalworking",
 		"Default": 0.8,
-		"Description": "Skills related to working and shaping metals."
+		"Description": "Skills related to working and shaping metals.",
+		"Skills": []
 	},
 	{
 		"Name": "Seafairing",
 		"Default": 0.6,
-		"Description": "Skills related to the sea and living on or near the sea."
+		"Description": "Skills related to the sea and living on or near the sea.",
+		"Skills": []
 	},
 	{
 		"Name": "Woodworking",
 		"Default": 0.3,
-		"Description": "Skills related to working with wood."
+		"Description": "Skills related to working with wood.",
+		"Skills": []
 	},
 	{
 		"Name": "Chemistry",
 		"Default": 0.8,
-		"Description": "Skills related to Chemistry and working with Chemicals."
+		"Description": "Skills related to Chemistry and working with Chemicals.",
+		"Skills": []
 	}
 ]

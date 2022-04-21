@@ -215,6 +215,7 @@
     <Compile Include="Objects\Processes\ProductionTags\ProductionTags.cs" />
     <Compile Include="Objects\Products\IProduct.cs" />
     <Compile Include="Objects\Products\Product.cs" />
+    <Compile Include="Objects\Products\ProductJsonConverter.cs" />
     <Compile Include="Objects\Products\ProductTags\ProductTag.cs" />
     <Compile Include="Objects\RequiredItems.cs" />
     <Compile Include="Objects\Skills\ISkill.cs" />

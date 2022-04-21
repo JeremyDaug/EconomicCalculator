@@ -35,6 +35,6 @@ namespace EconomicCalculator.Objects.Skills
         /// The skills related to this one.
         /// Should have a connection back on the other side.
         /// </summary>
-        IReadOnlyList<Tuple<ISkill, decimal>> Relations { get; }
+        IReadOnlyList<(ISkill relation, decimal rate)> Relations { get; }
     }
 }

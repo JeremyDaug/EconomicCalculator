@@ -13,6 +13,7 @@ namespace EconomicCalculator.DTOs.Products
     /// <summary>
     /// Generic Product Class. Includes all data needed for products.
     /// </summary>
+    [Obsolete]
     public class ProductDTO : IProductDTO
     {
         /// <summary>

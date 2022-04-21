@@ -6,6 +6,7 @@ using EconomicCalculator.Objects.Pops.Culture;
 using EconomicCalculator.Objects.Pops.Species;
 using EconomicCalculator.Objects.Processes;
 using EconomicCalculator.Objects.Products;
+using EconomicCalculator.Objects.Products.ProductTags;
 using EconomicCalculator.Objects.Skills;
 using EconomicCalculator.Objects.Technology;
 using EconomicCalculator.Objects.Territory;
@@ -252,6 +253,43 @@ namespace EconomicCalculator.Objects
             // completed.
         }
 
+        private void LoadProducts(string set)
+        {
+            var filename = GetDataFile(set, "Products");
+            var json = File.ReadAllText(filename);
+
+            var newProducts = JsonSerializer.Deserialize<List<Product>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new ProductJsonConverter()
+                    }
+                });
+
+            // check for dupes in set
+            var dupes = newProducts.Select(x => x.Name).Distinct();
+            if (dupes.Count() < newProducts.Count())
+            {
+                foreach (var dupe in dupes) if (newProducts.Count(x => x.Name == dupe) > 1)
+                        throw new InvalidDataException($"Duplicate Product \"{dupe}\" found in set \"{set}\".");
+            }
+
+            // check for collisions with previous sets
+            foreach (var prod in newProducts)
+            {
+                if (Products.Select(x => x.Name)
+                    .Contains(prod.Name))
+                    throw new InvalidDataException($"Duplicate Tech \"{prod.Name}\" in set \"{set}\" found.");
+
+                Products.Add(prod);
+            }
+
+            // Processes connect to products.
+
+            // complete.
+        }
+
         /// <summary>
         /// Loads all of the data from the common folder from the sets given.
         /// </summary>
@@ -268,6 +306,8 @@ namespace EconomicCalculator.Objects
                 LoadTechFamilies(set);
 
                 LoadTechs(set);
+
+                LoadProducts(set);
             }
         }
 

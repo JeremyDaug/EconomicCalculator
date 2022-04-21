@@ -7,14 +7,12 @@ namespace EconomicCalculator.Objects.Skills
     /// </summary>
     internal class SkillGroup : ISkillGroup
     {
-        private List<ISkill> _skills;
-
         /// <summary>
         /// Default Constructor.
         /// </summary>
         public SkillGroup()
         {
-            _skills = new List<ISkill>();
+            Skills = new List<Skill>();
         }
 
         /// <summary>
@@ -40,6 +38,7 @@ namespace EconomicCalculator.Objects.Skills
         /// <summary>
         /// The Skills within the group.
         /// </summary>
-        public IReadOnlyList<ISkill> Skills { get => _skills; }
+        public List<Skill> Skills { get; set; }
+        IReadOnlyList<ISkill> ISkillGroup.Skills => Skills;
     }
 }

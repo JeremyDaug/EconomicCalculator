@@ -11,13 +11,10 @@ namespace EconomicCalculator.Objects.Skills
     /// </summary>
     internal class Skill : ISkill
     {
-        private List<Tuple<ISkill, decimal>> _relations;
-        private List<ISkillGroup> _groups;
-
         public Skill()
         {
-            _relations = new List<Tuple<ISkill, decimal>>();
-            _groups = new List<ISkillGroup>();
+            Relations = new List<(Skill, decimal)>();
+            Groups = new List<SkillGroup>();
         }
 
         /// <summary>
@@ -38,11 +35,14 @@ namespace EconomicCalculator.Objects.Skills
         /// <summary>
         /// The Groups this skill is in.
         /// </summary>
-        public IReadOnlyList<ISkillGroup> Groups { get => _groups; }
+        public List<SkillGroup> Groups { get; set; }
+        IReadOnlyList<ISkillGroup> ISkill.Groups => Groups;
 
         /// <summary>
         /// The other skills related to this skill.
         /// </summary>
-        public IReadOnlyList<Tuple<ISkill, decimal>> Relations { get => _relations; }
+        public List<(Skill relation, decimal rate)> Relations { get; set; }
+        IReadOnlyList<(ISkill relation, decimal rate)> ISkill.Relations => Relations
+            .Select(x => ((ISkill)x.relation, x.rate)).ToList();
     }
 }

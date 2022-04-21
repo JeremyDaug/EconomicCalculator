@@ -12,6 +12,7 @@ namespace EconomicCalculator.DTOs.Products
     /// <summary>
     /// Interface for the underlying product data.
     /// </summary>
+    [Obsolete]
     public interface IProductDTO
     {
         /// <summary>

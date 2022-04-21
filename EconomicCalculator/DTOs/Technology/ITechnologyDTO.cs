@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace EconomicCalculator.DTOs.Technology
 {
+    [Obsolete]
     public interface ITechnologyDTO
     {
         /// <summary>

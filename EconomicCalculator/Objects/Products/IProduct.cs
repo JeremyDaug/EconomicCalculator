@@ -71,7 +71,7 @@ namespace EconomicCalculator.Objects.Products
         /// <summary>
         /// The tags of the product.
         /// </summary>
-        IReadOnlyDictionary<ProductTag, List<object>> ProductTags { get; }
+        IReadOnlyDictionary<ProductTag, Dictionary<string, object>> ProductTags { get; }
 
         /// <summary>
         /// What wants the product satisfies by just owning.

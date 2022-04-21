@@ -62,7 +62,7 @@ namespace EconomicCalculator.Objects
             return result;
         }
 
-        private List<string> ProductTagToDTOString(IReadOnlyDictionary<ProductTag, List<object>> tags)
+        private List<string> ProductTagToDTOString(IReadOnlyDictionary<ProductTag, Dictionary<string, object>> tags)
         {
             var result = new List<string>();
 

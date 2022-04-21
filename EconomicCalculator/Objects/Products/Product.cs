@@ -17,14 +17,11 @@ namespace EconomicCalculator.Objects.Products
     /// </summary>
     internal class Product : IProduct
     {
-        public List<IProcess> _productProcesses;
-        public Dictionary<ProductTag, List<object>> _productTags;
-
         public Product()
         {
-            _productTags = new Dictionary<ProductTag, List<object>>();
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>();
             Wants = new List<(IWant want, decimal amount)>();
-            _productProcesses = new List<IProcess>();
+            ProductProcesses = new List<IProcess>();
         }
 
         /// <summary>
@@ -82,7 +79,8 @@ namespace EconomicCalculator.Objects.Products
         /// <summary>
         /// THe tags of the product.
         /// </summary>
-        public IReadOnlyDictionary<ProductTag, List<object>> ProductTags { get => _productTags; }
+        public Dictionary<ProductTag, Dictionary<string, object>> ProductTags { get; set; }
+        IReadOnlyDictionary<ProductTag, Dictionary<string, object>> IProduct.ProductTags => ProductTags;
 
         /// <summary>
         /// What wants the product satisfies by just owning.
@@ -100,7 +98,8 @@ namespace EconomicCalculator.Objects.Products
         /// IE, Failure, Use, Consumption, and Maintenance processes.
         /// product.
         /// </summary>
-        public IReadOnlyList<IProcess> ProductProcesses => _productProcesses;
+        public List<IProcess> ProductProcesses { get; set; }
+        IReadOnlyList<IProcess> IProduct.ProductProcesses => ProductProcesses;
 
         /// <summary>
         /// The failure Process of the product, may be empty.

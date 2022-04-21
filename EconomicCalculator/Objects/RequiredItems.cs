@@ -40,11 +40,16 @@ namespace EconomicCalculator.Objects
                     {
                         (Land, 1)
                     },
-            _productTags = new Dictionary<ProductTag, List<object>>
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
                     {
                         {ProductTag.Fixed, null},
                         {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new List<object>{"All", 1000, -1} },
+                        {ProductTag.Storage, new Dictionary<string, object>
+                        {
+                            { "Type", "All" },
+                            { "Volume", 1000 },
+                            { "Mass", -1 }
+                        } },
                         {ProductTag.Abstract, null},
                     },
             Icon = ""
@@ -64,11 +69,16 @@ namespace EconomicCalculator.Objects
                     {
                         (Land, 1)
                     },
-            _productTags = new Dictionary<ProductTag, List<object>>
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
                     {
                         {ProductTag.Fixed, null},
                         {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new List<object>{"All", 1000, -1} }
+                        {ProductTag.Storage, new Dictionary<string, object>
+                        {
+                            { "Type", "All" },
+                            { "Volume", 1000 },
+                            { "Mass", -1 }
+                        } }
                     },
             Icon = ""
         };
@@ -86,11 +96,16 @@ namespace EconomicCalculator.Objects
                     {
                         (Land, 1)
                     },
-            _productTags = new Dictionary<ProductTag, List<object>>
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
                     {
                         {ProductTag.Fixed, null},
                         {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new List<object>{"All", 1000, -1} }
+                        {ProductTag.Storage, new Dictionary<string, object>
+                        {
+                            { "Type", "All" },
+                            { "Volume", 1000 },
+                            { "Mass", -1 }
+                        } }
                     },
             Icon = ""
         };
@@ -108,11 +123,16 @@ namespace EconomicCalculator.Objects
                     {
                         (Land, 1)
                     },
-            _productTags = new Dictionary<ProductTag, List<object>>
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
                     {
                         {ProductTag.Fixed, null},
                         {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new List<object>{"All", 1000, -1} }
+                        {ProductTag.Storage, new Dictionary<string, object>
+                        {
+                            { "Type", "All" },
+                            { "Volume", 1000 },
+                            { "Mass", -1 }
+                        } }
                     },
             Icon = ""
         };
@@ -130,11 +150,16 @@ namespace EconomicCalculator.Objects
                     {
                         (Land, 1)
                     },
-            _productTags = new Dictionary<ProductTag, List<object>>
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
                     {
                         {ProductTag.Fixed, null},
                         {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new List<object>{"All", 1000, -1} }
+                        {ProductTag.Storage, new Dictionary<string, object>
+                        {
+                            { "Type", "All" },
+                            { "Volume", 1000 },
+                            { "Mass", -1 }
+                        } }
                     },
             Icon = ""
         };
@@ -152,11 +177,16 @@ namespace EconomicCalculator.Objects
                     {
                         (Land, 1)
                     },
-            _productTags = new Dictionary<ProductTag, List<object>>
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
                     {
                         {ProductTag.Fixed, null},
                         {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new List<object>{"All", 1000, -1} }
+                        {ProductTag.Storage, new Dictionary<string, object>
+                        {
+                            { "Type", "All" },
+                            { "Volume", 1000 },
+                            { "Mass", -1 }
+                        } }
                     },
             Icon = ""
         };
@@ -174,11 +204,16 @@ namespace EconomicCalculator.Objects
                     {
                         (Land, 1)
                     },
-            _productTags = new Dictionary<ProductTag, List<object>>
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
                     {
                         {ProductTag.Fixed, null},
                         {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new List<object>{"All", 1000, -1} }
+                        {ProductTag.Storage, new Dictionary<string, object>
+                        {
+                            { "Type", "All" },
+                            { "Volume", 1000 },
+                            { "Mass", -1 }
+                        } }
                     },
             Icon = ""
         };
