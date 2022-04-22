@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EconomicCalculator.Objects.Products;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,5 +37,10 @@ namespace EconomicCalculator.Objects.Skills
         /// Should have a connection back on the other side.
         /// </summary>
         IReadOnlyList<(ISkill relation, decimal rate)> Relations { get; }
+
+        /// <summary>
+        /// The Labor which represents application of the skill.
+        /// </summary>
+        IProduct Labor { get; }
     }
 }

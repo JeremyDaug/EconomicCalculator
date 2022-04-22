@@ -10,6 +10,7 @@ namespace EconomicCalculator.DTOs.Skills
     /// <summary>
     /// Skill interface.
     /// </summary>
+    [Obsolete]
     public interface ISkillDTO
     {
         /// <summary>

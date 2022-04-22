@@ -1,187 +1,145 @@
 [
 	{
 		"Name": "Lugging",
-		"GroupStrings": [
-			"Physical"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "For moving stuff around by hand."
+		"Description": "For moving stuff around by hand.",
+		"Labor": "Lugging"
 	},
 	{
 		"Name": "Hard Labor",
-		"GroupStrings": [
-			"Physical"
-		],
-		"RelatedStrings": {
-			"Lugging" :  0.9
+		"Relations": {
+			"Lugging": 0.9
 		},
-		"Description": "The hard work that needs to be done."
+		"Description": "The hard work that needs to be done.",
+		"Labor": "Hard Labor"
 	},
 	{
 		"Name": "Wheat Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The Specialized Skill for Farming Wheat"
+		"Description": "The Specialized Skill for Farming Wheat",
+		"Labor": "Wheat Farming"
 	},
 	{
 		"Name": "Grain Milling",
-		"GroupStrings": [
-			"Food Processing",
-			"Cooking"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill of managing the quality of milled grain."
+		"Description": "The skill of managing the quality of milled grain.",
+		"Labor": "Grain Milling"
 	},
 	{
 		"Name": "Cooking",
-		"GroupStrings": [
-			"Cooking"
-		],
-		"RelatedStrings": {
+		"Relations": {
 			"Baking": 0.9
 		},
-		"Description": "The general cooking skill."
+		"Description": "The general cooking skill.",
+		"Labor": "Cooking"
 	},
 	{
 		"Name": "Baking",
-		"GroupStrings": [
-			"Cooking"
-		],
-		"RelatedStrings": {
+		"Relations": {
 			"Cooking": 0.9
 		},
-		"Description": "The specialized skill of cooking various breads."
+		"Description": "The specialized skill of cooking various breads.",
+		"Labor": "Baking"
 	},
 	{
 		"Name": "Mine Engineer",
-		"GroupStrings": [
-			"Geology",
-			"Engineering"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The Skill for managing and organizing Mining operations."
+		"Description": "The Skill for managing and organizing Mining operations.",
+		"Labor": "Mine Engineer"
 	},
 	{
 		"Name": "Smelting",
-		"GroupStrings": [
-			"Metallurgy"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill for smelting raw metal ores into refined ingots."
+		"Description": "The skill for smelting raw metal ores into refined ingots.",
+		"Labor": "Smelting"
 	},
 	{
 		"Name": "Herder",
-		"GroupStrings": [
-			"Animal Husbandry"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "Animal Herding and care for the sake of food."
+		"Description": "Animal Herding and care for the sake of food.",
+		"Labor": "Herder"
 	},
 	{
 		"Name": "Cotton Farming",
-		"GroupStrings": [
-			"Agriculture"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill of caring for a Cotton Plantation."
+		"Description": "The skill of caring for a Cotton Plantation.",
+		"Labor": "Cotton Farming"
 	},
 	{
 		"Name": "Weaving",
-		"GroupStrings": [
-			"Textiles"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill of weaving threads into cloth."
+		"Description": "The skill of weaving threads into cloth.",
+		"Labor": "Weaver"
 	},
 	{
-		"Name": "Spinner",
-		"GroupStrings": [
-			"Textiles"
-		],
-		"RelatedStrings": {
+		"Name": "Spinning",
+		"Relations": {
 		},
-		"Description": "The Skill of spinning raw threads into useful spun threads."
+		"Description": "The Skill of spinning raw threads into useful spun threads.",
+		"Labor": "Spinner"
 	},
 	{
 		"Name": "Tailoring",
-		"GroupStrings": [
-			"Textiles"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill of taking basic cloth and forming clothing from it."
+		"Description": "The skill of taking basic cloth and forming clothing from it.",
+		"Labor": "Tailoring"
 	},
 	{
 		"Name": "Panning",
-		"GroupStrings": [
-			"Geology"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The art of pulling gold out of bodies of water."
+		"Description": "The art of pulling gold out of bodies of water.",
+		"Labor": "Panning"
 	},
 	{
 		"Name": "Minting",
-		"GroupStrings": [
-			"Metalworking"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The craft of turning precious metals into coinage efficiently."
+		"Description": "The craft of turning precious metals into coinage efficiently.",
+		"Labor": "Minting"
 	},
 	{
 		"Name": "Goldsmithing",
-		"GroupStrings": [
-			"Metalworking"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The art of crafting gold into various bits of jewelry."
+		"Description": "The art of crafting gold into various bits of jewelry.",
+		"Labor": "Goldsmithing"
 	},
 	{
 		"Name": "Fishing",
-		"GroupStrings": [
-			"Seafairing"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill of fishing."
+		"Description": "The skill of fishing.",
+		"Labor": "Fishing"
 	},
 	{
 		"Name": "Blacksmithing",
-		"GroupStrings": [
-			"Metalworking"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill of forming steel into various forms."
+		"Description": "The skill of forming steel into various forms.",
+		"Labor": "Blacksmithing"
 	},
 	{
 		"Name": "Lumberjacking",
-		"GroupStrings": [
-			"Woodworking"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "The skill of efficiently cutting down trees."
+		"Description": "The skill of efficiently cutting down trees.",
+		"Labor": "Lumberjacking"
 	},
 	{
 		"Name": "Laborer",
-		"GroupStrings": [
-			"Physical"
-		],
-		"RelatedStrings": {
+		"Relations": {
 		},
-		"Description": "A general Purpose Laborer."
+		"Description": "A general Purpose Laborer.",
+		"Labor": "Laborer"
 	}
 ]

@@ -280,14 +280,60 @@ namespace EconomicCalculator.Objects
             {
                 if (Products.Select(x => x.Name)
                     .Contains(prod.Name))
-                    throw new InvalidDataException($"Duplicate Tech \"{prod.Name}\" in set \"{set}\" found.");
+                    throw new InvalidDataException($"Duplicate Product \"{prod.Name}\" in set \"{set}\" found.");
 
                 Products.Add(prod);
             }
 
-            // Processes connect to products.
+            // Processes connect to products, so no connections here.
 
             // complete.
+        }
+
+        private void LoadSkills(string set)
+        {
+            var filename = GetDataFile(set, "Skills");
+            var json = File.ReadAllText(filename);
+
+            var newSkills = JsonSerializer.Deserialize<List<Skill>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new SkillJsonConverter()
+                    }
+                });
+
+            // check for duplicates
+            var dupes = newSkills.Select(x => x.Name).Distinct();
+            if (dupes.Count() < newSkills.Count())
+            {
+                foreach (var dupe in dupes) if (newSkills.Count(x => x.Name == dupe) > 1)
+                        throw new InvalidDataException($"Duplicate skill \"{dupe}\" found in set \"{set}\".");
+            }
+
+            // check for collisions with previous sets.
+            foreach (var skill in newSkills)
+            {
+                if (Skills.Select(x => x.Name)
+                    .Contains(skill.Name))
+                    throw new InvalidDataException($"Duplicate skill \"{skill}\" found in set \"{set}\".");
+
+                Skills.Add(skill);
+            }
+
+            // connect relations up.
+            foreach (var skill in newSkills)
+            {
+                var relations = new List<(Skill relation, decimal rate)>();
+                foreach (var rel in skill.Relations)
+                {
+                    relations.Add((Skills.Single(x => x.Name == rel.relation.Name), rel.rate));
+                }
+                skill.Relations = relations;
+            }
+            // skill groups connect to skills.
+            // finished
         }
 
         /// <summary>
@@ -308,6 +354,8 @@ namespace EconomicCalculator.Objects
                 LoadTechs(set);
 
                 LoadProducts(set);
+
+                LoadSkills(set);
             }
         }
 

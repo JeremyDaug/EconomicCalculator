@@ -167,7 +167,7 @@
 		"Wants": [
 			{ "Security": 10 },
 			{ "Warmth": 2 },
-			{ "Housing":  1 }
+			{ "Housing": 1 }
 		],
 		"ProductTags": {},
 		"Icon": ""
@@ -307,7 +307,18 @@
 		"Icon": ""
 	},
 
-
+	{
+		"Name": "Lugging",
+		"VariantName": null,
+		"UnitName": "man hour",
+		"Quality": 1,
+		"Mass": 0,
+		"Bulk": 0,
+		"Fractional": true,
+		"Wants": [],
+		"ProductTags": { "Service": null },
+		"Icon": null
+	},
 	{
 		"Name": "Hard Labor",
 		"VariantName": null,
@@ -417,7 +428,7 @@
 		"Icon": null
 	},
 	{
-		"Name": "Weaving",
+		"Name": "Weaver",
 		"VariantName": null,
 		"UnitName": "man hour",
 		"Quality": 1,

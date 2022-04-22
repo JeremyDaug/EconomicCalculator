@@ -11,6 +11,7 @@ namespace EconomicCalculator.DTOs.Skills
     /// <summary>
     /// Skill interface.
     /// </summary>
+    [Obsolete]
     public class SkillDTO : ISkillDTO
     {
         public SkillDTO()

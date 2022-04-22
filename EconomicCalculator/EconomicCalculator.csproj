@@ -222,6 +222,7 @@
     <Compile Include="Objects\Skills\ISkillGroup.cs" />
     <Compile Include="Objects\Skills\Skill.cs" />
     <Compile Include="Objects\Skills\SkillGroup.cs" />
+    <Compile Include="Objects\Skills\SkillJsonConverter.cs" />
     <Compile Include="Objects\Technology\ITechFamily.cs" />
     <Compile Include="Objects\Technology\ITechnology.cs" />
     <Compile Include="Objects\Technology\TechCategory.cs" />
