@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Technology;
-using EconomicCalculator.Enums;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Technology;
+using EconomicSim.Enums;
 using Editor.Helpers;
 using System;
 using System.Collections.Generic;

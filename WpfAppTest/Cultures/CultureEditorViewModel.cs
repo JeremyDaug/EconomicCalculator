@@ -1,5 +1,5 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops.Culture;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Pops.Culture;
 using Editor.Helpers;
 using EditorInterface.Cultures.CultureNeedEditor;
 using EditorInterface.Cultures.CultureWantEditor;

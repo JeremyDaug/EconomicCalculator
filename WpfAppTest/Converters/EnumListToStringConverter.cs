@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.DTOs.Enums;
+﻿using EconomicSim.DTOs.Enums;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

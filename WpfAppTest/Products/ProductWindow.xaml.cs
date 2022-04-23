@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Products;
-using EconomicCalculator.DTOs.Products.ProductTags;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Products;
+using EconomicSim.DTOs.Products.ProductTags;
 using System;
 using System.Collections.Generic;
 using System.IO;

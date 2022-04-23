@@ -7,8 +7,8 @@
         xmlns:valid="clr-namespace:Editor.ValidationRules"
         mc:Ignorable="d"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
-        xmlns:territory="clr-namespace:EconomicCalculator.DTOs.Territory;assembly=EconomicCalculator"
-        xmlns:conntype="clr-namespace:EconomicCalculator.DTOs.Enums;assembly=EconomicCalculator"
+        xmlns:territory="clr-namespace:EconomicSim.DTOs.Territory;assembly=EconomicCalculator"
+        xmlns:conntype="clr-namespace:EconomicSim.DTOs.Enums;assembly=EconomicCalculator"
         Style="{StaticResource SharedMenu}"
         Title="Simple Territory Editor" Height="450" Width="1100">
     <Grid Margin="5">

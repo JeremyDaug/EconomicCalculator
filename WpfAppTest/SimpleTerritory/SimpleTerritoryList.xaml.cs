@@ -1,5 +1,5 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Territory;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Territory;
 using System;
 using System.Collections.Generic;
 using System.Linq;

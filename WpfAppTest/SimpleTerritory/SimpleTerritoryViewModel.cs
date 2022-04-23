@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Territory;
-using EconomicCalculator.Enums;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Territory;
+using EconomicSim.Enums;
 using Editor.Helpers;
 using System;
 using System.Collections.Generic;
@@ -119,7 +119,7 @@ namespace EditorInterface.SimpleTerritory
             // All checks out, (it seems) 
             var newTerr = new SimpleTerritoryDTO
             {
-                Coords = new EconomicCalculator.DTOs.Hexmap.HexCoord(X, Y),
+                Coords = new EconomicSim.DTOs.Hexmap.HexCoord(X, Y),
                 HasLake = HasLake,
                 IsCoastal = IsCoastal,
                 Land = Land,

@@ -1,5 +1,5 @@
-﻿using EconomicCalculator.DTOs.Processes;
-using EconomicCalculator.DTOs.Processes.ProcessTags;
+﻿using EconomicSim.DTOs.Processes;
+using EconomicSim.DTOs.Processes.ProcessTags;
 using System;
 using System.Collections;
 using System.Collections.Generic;

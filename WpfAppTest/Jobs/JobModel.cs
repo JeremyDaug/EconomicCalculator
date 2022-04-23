@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.DTOs.Jobs;
+﻿using EconomicSim.DTOs.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

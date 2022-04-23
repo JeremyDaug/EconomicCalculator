@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.DTOs.Market;
+﻿using EconomicSim.DTOs.Market;
 using EditorInterface.Helpers;
 using System;
 using System.Collections.Generic;

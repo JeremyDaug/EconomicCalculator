@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.Objects.Firms;
+﻿using EconomicSim.Objects.Firms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

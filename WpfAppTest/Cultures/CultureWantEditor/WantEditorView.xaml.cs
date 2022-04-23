@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops.Culture;
-using EconomicCalculator.DTOs.Pops.Species;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Pops.Culture;
+using EconomicSim.DTOs.Pops.Species;
 using System;
 using System.Collections.Generic;
 using System.Linq;

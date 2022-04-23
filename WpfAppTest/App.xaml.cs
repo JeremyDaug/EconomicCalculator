@@ -8,7 +8,7 @@ using System.Windows;
 using Editor.Products;
 using Editor.Wants;
 using Editor.OpeningWindows;
-using EconomicCalculator;
+using EconomicSim;
 
 namespace Editor
 {

@@ -1,8 +1,8 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Firms;
-using EconomicCalculator.DTOs.Market;
-using EconomicCalculator.DTOs.Pops;
-using EconomicCalculator.Objects.Firms;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Firms;
+using EconomicSim.DTOs.Market;
+using EconomicSim.DTOs.Pops;
+using EconomicSim.Objects.Firms;
 using Editor.Helpers;
 using EditorInterface.Helpers;
 using System;

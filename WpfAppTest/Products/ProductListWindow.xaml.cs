@@ -11,9 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using EconomicCalculator;
-using EconomicCalculator.DTOs.Products;
-using EconomicCalculator.DTOs.Wants;
+using EconomicSim;
+using EconomicSim.DTOs.Products;
+using EconomicSim.DTOs.Wants;
 using Editor.Wants;
 
 namespace Editor.Products

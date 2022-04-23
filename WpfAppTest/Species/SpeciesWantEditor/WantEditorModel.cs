@@ -1,5 +1,5 @@
-﻿using EconomicCalculator.DTOs.Pops.Species;
-using EconomicCalculator.Objects.Pops;
+﻿using EconomicSim.DTOs.Pops.Species;
+using EconomicSim.Objects.Pops;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

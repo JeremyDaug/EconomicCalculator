@@ -1,5 +1,5 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops.Culture;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Pops.Culture;
 using System;
 using System.Collections.Generic;
 using System.Linq;

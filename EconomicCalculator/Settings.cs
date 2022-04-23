@@ -1,4 +1,4 @@
-﻿namespace EconomicCalculator.Properties {
+﻿namespace EconomicSim.Properties {
     
     
     // This class allows you to handle specific events on the settings class:

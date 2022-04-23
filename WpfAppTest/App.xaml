@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Editor"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
-             xmlns:enm="clr-namespace:EconomicCalculator.DTOs.Enums;assembly=EconomicCalculator"
+             xmlns:enm="clr-namespace:EconomicSim.DTOs.Enums;assembly=EconomicCalculator"
              StartupUri="OpeningWindows/NavigationMenu.xaml">
     <Application.Resources>
 

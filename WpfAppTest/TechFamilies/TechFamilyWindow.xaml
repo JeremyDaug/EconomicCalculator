@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorInterface.TechFamilies"
         xmlns:valid="clr-namespace:Editor.ValidationRules"
-        xmlns:src="clr-namespace:EconomicCalculator.DTOs.Technology;assembly=EconomicCalculator"
+        xmlns:src="clr-namespace:EconomicSim.DTOs.Technology;assembly=EconomicCalculator"
         mc:Ignorable="d"
         Style="{StaticResource SharedMenu}"
         Title="TechFamilyWindow" Height="450" Width="800">

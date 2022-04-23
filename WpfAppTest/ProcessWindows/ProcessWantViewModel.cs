@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Processes;
-using EconomicCalculator.DTOs.Processes.ProductionTags;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Processes;
+using EconomicSim.DTOs.Processes.ProductionTags;
 using Editor.Helpers;
 using System;
 using System.Collections.Generic;

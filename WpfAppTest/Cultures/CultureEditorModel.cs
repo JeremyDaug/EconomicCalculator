@@ -1,4 +1,4 @@
-﻿using EconomicCalculator.DTOs.Pops.Culture;
+﻿using EconomicSim.DTOs.Pops.Culture;
 using EditorInterface.Helpers;
 using System;
 using System.Collections.Generic;

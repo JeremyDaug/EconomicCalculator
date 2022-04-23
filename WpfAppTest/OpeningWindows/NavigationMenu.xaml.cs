@@ -1,5 +1,5 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.Objects;
+﻿using EconomicSim;
+using EconomicSim.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

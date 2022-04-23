@@ -1,5 +1,5 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Pops;
 using Editor.Helpers;
 using System;
 using System.Collections.Generic;

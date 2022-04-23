@@ -1,5 +1,5 @@
-﻿using EconomicCalculator.DTOs.Technology;
-using EconomicCalculator.Enums;
+﻿using EconomicSim.DTOs.Technology;
+using EconomicSim.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Firms;
-using EconomicCalculator.DTOs.Pops;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Firms;
+using EconomicSim.DTOs.Pops;
 using System;
 using System.Collections.Generic;
 using System.Linq;

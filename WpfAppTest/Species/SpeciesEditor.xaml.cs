@@ -1,5 +1,5 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops.Species;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Pops.Species;
 using EditorInterface.Species.SpeciesNeedEditor;
 using System;
 using System.Collections.Generic;

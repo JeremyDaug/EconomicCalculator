@@ -1,6 +1,6 @@
-﻿using EconomicCalculator;
-using EconomicCalculator.DTOs.Pops.Species;
-using EconomicCalculator.Objects.Pops;
+﻿using EconomicSim;
+using EconomicSim.DTOs.Pops.Species;
+using EconomicSim.Objects.Pops;
 using Editor.Helpers;
 using EditorInterface.Helpers;
 using EditorInterface.Species.SpeciesNeedEditor;
