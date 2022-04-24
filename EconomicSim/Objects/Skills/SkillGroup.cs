@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace EconomicSim.Objects.Skills
+﻿namespace EconomicSim.Objects.Skills
 {
     /// <summary>
     /// Skill Group Class

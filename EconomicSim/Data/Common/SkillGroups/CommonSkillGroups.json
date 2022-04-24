@@ -5,7 +5,8 @@
 		"Description": "Skills based on physical prowess.",
 		"Skills": [
 			"Lugging",
-			"Hard Labor"
+			"Hard Labor",
+			"Laborer"
 		]
 	},
 	{
@@ -13,7 +14,8 @@
 		"Default": 0.4,
 		"Description": "Skills focused on growing plants, particularly food.",
 		"Skills": [
-			"Wheat Farming"
+			"Wheat Farming",
+			"Cotton Farming"
 		]
 	},
 	{
@@ -62,36 +64,44 @@
 		"Name": "Animal Husbandry",
 		"Default": 0.8,
 		"Description": "Skills related to Animals, raising, and breeding them.",
-		"Skills": []
+		"Skills": [
+			"Herder"
+		]
 	},
 	{
 		"Name": "Textiles",
 		"Default": 0.6,
 		"Description": "Skills related to textiles.",
-		"Skills": []
+		"Skills": [
+			"Weaving",
+			"Spinning",
+			"Tailoring"
+		]
 	},
 	{
 		"Name": "Metalworking",
 		"Default": 0.8,
 		"Description": "Skills related to working and shaping metals.",
-		"Skills": []
+		"Skills": [
+			"Minting",
+			"Goldsmithing",
+			"Blacksmithing"
+		]
 	},
 	{
 		"Name": "Seafairing",
 		"Default": 0.6,
 		"Description": "Skills related to the sea and living on or near the sea.",
-		"Skills": []
+		"Skills": [
+			"Fishing"
+		]
 	},
 	{
 		"Name": "Woodworking",
 		"Default": 0.3,
 		"Description": "Skills related to working with wood.",
-		"Skills": []
-	},
-	{
-		"Name": "Chemistry",
-		"Default": 0.8,
-		"Description": "Skills related to Chemistry and working with Chemicals.",
-		"Skills": []
+		"Skills": [
+			"Lumberjacking"
+		]
 	}
 ]

@@ -103,6 +103,7 @@
 	{
 		"Name": "Minting",
 		"Relations": {
+			"Goldsmithing": 0.9
 		},
 		"Description": "The craft of turning precious metals into coinage efficiently.",
 		"Labor": "Minting"
@@ -110,6 +111,7 @@
 	{
 		"Name": "Goldsmithing",
 		"Relations": {
+			"Minting": 0.9
 		},
 		"Description": "The art of crafting gold into various bits of jewelry.",
 		"Labor": "Goldsmithing"

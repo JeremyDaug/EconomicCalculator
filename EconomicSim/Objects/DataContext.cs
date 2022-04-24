@@ -62,6 +62,24 @@ namespace EconomicSim.Objects
             Markets = new List<Market.Market>();
             Firms = new List<Firm>();
         }
+        
+        #region HelperFuncs
+
+        private List<string> FindDuplicates(IList<string> group)
+        {
+            var result = new List<string>();
+            var dupes = group.Distinct().ToList();
+            if (group.Count != dupes.Count)
+            {
+                foreach (var dupe in dupes)
+                    if (group.Count(x => x == dupe) > 1)
+                        result.Add(dupe);
+            }
+
+            return result;
+        }
+        
+        #endregion HelperFuncs
 
         #region Saving
 
@@ -107,7 +125,7 @@ namespace EconomicSim.Objects
 
             var newWants = JsonSerializer.Deserialize<List<Want>>(json);
             if (newWants == null)
-                throw new JsonException($"Wants file {filename} is empty.");
+                throw new JsonException($"Wants file \"{filename}\" is empty.");
 
             // quickly check that the new wants are all unique
             var dups = newWants.Select(x => x.Name).Distinct().ToList();
@@ -147,7 +165,7 @@ namespace EconomicSim.Objects
                 });
 
             if (newFamilies == null)
-                throw new DataException($"Tech Family file {filename} is empty.");
+                throw new DataException($"Tech Family file \"{filename}\" is empty.");
             
             // check for dupes in set
             var dupes = newFamilies.Select(x => x.Name).Distinct().ToList();
@@ -195,7 +213,7 @@ namespace EconomicSim.Objects
                 });
 
             // check for dupes in set
-            var dupes = (newTechs ?? throw new DataException($"Technology file {filename} is empty."))
+            var dupes = (newTechs ?? throw new DataException($"Technology file \"{filename}\" is empty."))
                 .Select(x => x.Name)
                 .Distinct().ToList();
             if (dupes.Count < newTechs.Count)
@@ -266,7 +284,7 @@ namespace EconomicSim.Objects
                 });
 
             // check for dupes in set
-            var dupes = (newProducts ?? throw new DataException($"Products file {filename} is empty."))
+            var dupes = (newProducts ?? throw new DataException($"Products file \"{filename}\" is empty."))
                 .Select(x => x.Name).Distinct().ToList();
             if (dupes.Count() < newProducts.Count())
             {
@@ -303,7 +321,7 @@ namespace EconomicSim.Objects
                     }
                 });
             if (newSkills == null)
-                throw new DataException($"Skill file {filename} is empty.");
+                throw new DataException($"Skill file \"{filename}\" is empty.");
 
             // check for duplicates
             var dupes = newSkills.Select(x => x.Name).Distinct().ToList();
@@ -337,6 +355,42 @@ namespace EconomicSim.Objects
             // finished
         }
 
+        private void LoadSkillGroups(string set)
+        {
+            var filename = GetDataFile(set, "SkillGroups");
+            var json = File.ReadAllText(filename);
+
+            var newGroups = JsonSerializer.Deserialize<List<SkillGroup>>(json,
+                new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new SkillGroupJsonConverter()
+                    }
+                });
+            if (newGroups == null)
+                throw new DataException($"Skill Group file \"{filename}\" is empty.");
+            
+            // check new set for duplicates
+            var dupes = FindDuplicates(newGroups.Select(x => x.Name).ToList());
+            if (dupes.Count > 0)
+            {
+                throw new DataException($"Skill Group(s) \"{string.Join(", ", dupes)}\" within set \"{set}\" of has been found.");
+            }
+            
+            // check for duplicates in old sets
+            foreach (var dupe in newGroups.Select(x => x.Name))
+            {
+                if (SkillGroups.Select(x => x.Name).Any(x => x == dupe))
+                    throw new DataException($"Duplicate Skill Group \"{dupe}\" found in set \"{set}\"");
+            }
+            
+            // add new skillGroups
+            foreach (var newGroup in newGroups)
+                SkillGroups.Add(newGroup);
+            // complete
+        }
+        
         /// <summary>
         /// Loads all of the data from the common folder from the sets given.
         /// </summary>
@@ -357,6 +411,8 @@ namespace EconomicSim.Objects
                 LoadProducts(set);
 
                 LoadSkills(set);
+                
+                LoadSkillGroups(set);
             }
         }
 
