@@ -9,6 +9,7 @@ namespace EconomicSim.DTOs.Processes.ProductionTags
     /// <summary>
     /// Tags for Process inputs, outputs, and capital.
     /// </summary>
+    [Obsolete]
     public enum ProductionTag
     {
         /// <summary>

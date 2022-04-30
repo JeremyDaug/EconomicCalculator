@@ -3,6 +3,7 @@ using EconomicSim.DTOs.Enums;
 
 namespace EconomicSim.DTOs.Processes.ProductionTags
 {
+    [Obsolete]
     public class AttachedProductionTag : IAttachedProductionTag
     {
         /// <summary>

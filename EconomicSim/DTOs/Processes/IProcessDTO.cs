@@ -12,6 +12,7 @@ namespace EconomicSim.DTOs.Processes
     /// Process Interface, the core of any action which creates or destroys
     /// products and resources.
     /// </summary>
+    [Obsolete]
     public interface IProcessDTO
     {
         /// <summary>

@@ -12,7 +12,7 @@ namespace EconomicSim.Objects.Processes.ProductionTags
     public enum ProductionTag
     {
         /// <summary>
-        /// Optional<#>
+        /// Optional(Bonus)
         /// For Inputs or capital only. This is optional, and it's inclusion
         /// increases throughput for the process. # is the amount it increases
         /// per unit of input. The amount requested is the maximum it can accept
@@ -34,7 +34,7 @@ namespace EconomicSim.Objects.Processes.ProductionTags
         /// </summary>
         Fixed,
         /// <summary>
-        /// Investment<days>. An input or capital which is claimed for the duration
+        /// Investment(days). An input or capital which is claimed for the duration
         /// of a long process that requires multiple days of the process.
         /// TOOD, come back to this later.
         /// </summary>
@@ -45,7 +45,7 @@ namespace EconomicSim.Objects.Processes.ProductionTags
         /// </summary>
         Pollutant,
         /// <summary>
-        /// Chance<Group;Weight>, Outputs only. This product is not guaranteed, 
+        /// Chance(Group,Weight), Outputs only. This product is not guaranteed, 
         /// but instead has a chance of being output by the process.
         /// Group is what output group it is part of. Weight is how likely it's group is
         /// to be output. Only one group can be output for any specific process.

@@ -11,6 +11,7 @@ namespace EconomicSim.DTOs.Processes
     /// <summary>
     /// Product desired or produced by a process.
     /// </summary>
+    [Obsolete]
     public interface IProcessProductDTO
     {
         /// <summary>

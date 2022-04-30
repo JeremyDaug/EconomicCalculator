@@ -8,6 +8,7 @@ using EconomicSim.DTOs.Enums;
 
 namespace EconomicSim.DTOs.Processes.ProductionTags
 {
+    [Obsolete]
     public static class ProductionTagInfo
     {
         /// <summary>

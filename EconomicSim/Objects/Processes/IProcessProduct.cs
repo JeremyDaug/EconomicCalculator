@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Processes.ProductionTags;
@@ -12,6 +13,7 @@ namespace EconomicSim.Objects.Processes
     /// <summary>
     /// A product used in or outputted from a process.
     /// </summary>
+    [JsonConverter(typeof(ProcessProductJsonConverter))]
     public interface IProcessProduct
     {
         /// <summary>
@@ -27,7 +29,7 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The Tags and related data needed for the product.
         /// </summary>
-        IReadOnlyList<ITagData<ProductionTag>> TagData { get; }
+        IReadOnlyList<(ProductionTag tag, Dictionary<string, object> properties)> TagData { get; }
 
         /// <summary>
         /// The Part of the process it belongs to.

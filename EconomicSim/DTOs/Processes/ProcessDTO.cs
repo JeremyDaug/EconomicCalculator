@@ -12,6 +12,7 @@ namespace EconomicSim.DTOs.Processes
     /// Process Class, the core of any which creates or destroys products and
     /// resources.
     /// </summary>
+    [Obsolete]
     public class ProcessDTO : IProcessDTO
     {
         public ProcessDTO()

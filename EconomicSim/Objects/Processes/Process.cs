@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Skills;
@@ -12,8 +13,16 @@ namespace EconomicSim.Objects.Processes
     /// <summary>
     /// Process Data Class
     /// </summary>
+    [JsonConverter(typeof(ProcessJsonConverter))]
     internal class Process : IProcess
     {
+        public Process()
+        {
+            ProcessTags = new List<ProcessTag>();
+            ProcessProducts = new List<ProcessProduct>();
+            ProcessWants = new List<ProcessWant>();
+        }
+        
         /// <summary>
         /// The Process Id.
         /// </summary>
@@ -39,61 +48,77 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// All the products that go into or come out of the process.
         /// </summary>
-        public IReadOnlyList<IProcessProduct> ProcessProducts { get; }
+        public List<ProcessProduct> ProcessProducts { get; set; }
+        IReadOnlyList<IProcessProduct> IProcess.ProcessProducts => ProcessProducts;
 
         /// <summary>
         /// All the wants that go into or come out of the process.
         /// </summary>
-        public IReadOnlyList<IProcessWant> ProcessWants { get; }
+        public List<ProcessWant> ProcessWants { get; set; }
+        IReadOnlyList<IProcessWant> IProcess.ProcessWants => ProcessWants;
 
         /// <summary>
         /// Input Products, consumed by the process.
         /// </summary>
-        public IReadOnlyList<IProcessProduct> InputProducts
+        public List<ProcessProduct> InputProducts
             => ProcessProducts.Where(x => x.Part == ProcessPartTag.Input)
-            .ToList();
+                .ToList();
+        IReadOnlyList<IProcessProduct> IProcess.InputProducts
+            => InputProducts;
 
         /// <summary>
         /// Capital Products, used, but not consumed by the process.
         /// </summary>
-        public IReadOnlyList<IProcessProduct> CapitalProducts
+        public List<ProcessProduct> CapitalProducts
             => ProcessProducts.Where(x => x.Part == ProcessPartTag.Capital)
-            .ToList();
+                .ToList();
+
+        IReadOnlyList<IProcessProduct> IProcess.CapitalProducts
+            => CapitalProducts;
 
         /// <summary>
         /// Output Products, resulting products from the process.
         /// </summary>
-        public IReadOnlyList<IProcessProduct> OutputProducts
+        public List<ProcessProduct> OutputProducts
             => ProcessProducts.Where(x => x.Part == ProcessPartTag.Output)
-            .ToList();
+                .ToList();
+
+        IReadOnlyList<IProcessProduct> IProcess.OutputProducts
+            => OutputProducts;
 
         /// <summary>
         /// Input Wants, consumed by the process.
         /// </summary>
-        public IReadOnlyList<IProcessWant> InputWants
+        public List<ProcessWant> InputWants
             => ProcessWants.Where(x => x.Part == ProcessPartTag.Input)
-            .ToList();
+                .ToList();
+
+        IReadOnlyList<IProcessWant> IProcess.InputWants
+            => InputWants;
 
         /// <summary>
         /// Capital Wants, used by the process.
         /// </summary>
-        public IReadOnlyList<IProcessWant> CapitalWants
+        public List<ProcessWant> CapitalWants
             => ProcessWants.Where(x => x.Part == ProcessPartTag.Capital)
-            .ToList();
+                .ToList();
+        IReadOnlyList<IProcessWant> IProcess.CapitalWants => CapitalWants;
 
         /// <summary>
         /// Output Wants, created by the process.
         /// </summary>
-        public IReadOnlyList<IProcessWant> OutputWants
+        public List<ProcessWant> OutputWants
             => ProcessWants.Where(x => x.Part == ProcessPartTag.Output)
             .ToList();
+        IReadOnlyList<IProcessWant> IProcess.OutputWants => OutputWants;
 
         #endregion InCapOut
 
         /// <summary>
         /// The Process's Tags.
         /// </summary>
-        public IReadOnlyList<ProcessTag> ProcessTags { get; set; }
+        public List<ProcessTag> ProcessTags { get; set; }
+        IReadOnlyList<ProcessTag> IProcess.ProcessTags => ProcessTags;
 
         /// <summary>
         /// The Skill the proces Uses.

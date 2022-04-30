@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Drawing.Printing;
 using System.Text.Json;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
@@ -7,6 +8,8 @@ using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Pops.Culture;
 using EconomicSim.Objects.Pops.Species;
 using EconomicSim.Objects.Processes;
+using EconomicSim.Objects.Processes.ProcessTags;
+using EconomicSim.Objects.Processes.ProductionTags;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
@@ -390,6 +393,20 @@ namespace EconomicSim.Objects
                 SkillGroups.Add(newGroup);
             // complete
         }
+
+        private void LoadProcesses(string set)
+        {
+            
+            var filename = GetDataFile(set, "Processes");
+            var json = File.ReadAllText(filename);
+
+            var newProcesses = JsonSerializer.Deserialize<List<Process>>(json);
+            foreach (var process in newProcesses)
+            {
+                Processes.Add(process);
+            }
+            // no connections need to be made. Let's GO!
+        }
         
         /// <summary>
         /// Loads all of the data from the common folder from the sets given.
@@ -413,6 +430,8 @@ namespace EconomicSim.Objects
                 LoadSkills(set);
                 
                 LoadSkillGroups(set);
+                
+                LoadProcesses(set);
             }
         }
 

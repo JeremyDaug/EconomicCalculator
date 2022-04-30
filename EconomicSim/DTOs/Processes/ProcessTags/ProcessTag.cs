@@ -9,6 +9,7 @@ namespace EconomicSim.DTOs.Processes.ProcessTags
     /// <summary>
     /// Available Tags for processes
     /// </summary>
+    [Obsolete]
     public enum ProcessTag
     {
         /// <summary>

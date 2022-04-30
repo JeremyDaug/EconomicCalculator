@@ -1,339 +1,134 @@
 [
-	{
-		"Name": "Wheat Farming",
-		"VariantName": "",
-		"MinimumTime": 120,
-		"InputProducts": [
-			{
-				"ProductName": "Wheat Grain",
-				"Amount": 7,
-				"TagStrings": [
-					"Fixed"
-				]
-			},
-			{
-				"ProductName": "Wheat Farming",
-				"Amount": 0.00625,
-				"TagStrings": []
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Wheat Grain",
-				"Amount": 28,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [
-			"Crop"
-		],
-		"SkillName": "Wheat Farming",
-		"SkillMinimum": 1,
-		"SkillMaximum": 5,
-		"Description": "Sow, Grow, and Harvest wheat.",
-		"Icon": ""
-	},
-	{
-		"Name": "Cotton Farming",
-		"VariantName": "",
-		"MinimumTime": 120,
-		"InputProducts": [
-			{
-				"ProductName": "Cotton",
-				"Amount": 1,
-				"TagStrings": [
-					"Fixed"
-				]
-			},
-			{
-				"ProductName": "Cotton Farming",
-				"Amount": 0.00625,
-				"TagStrings": []
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [
-			{
-				"ProductName": "Land",
-				"Amount": 1,
-				"TagStrings": []
-			}
-		],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Cotton",
-				"Amount": 145,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [
-			"Crop"
-		],
-		"SkillName": "Cotton Farming",
-		"SkillMinimum": 1,
-		"SkillMaximum": 5,
-		"Description": "Sow, Grow, and Harvest Cotton.",
-		"Icon": ""
-	},
-	{
-		"Name": "Fishing",
-		"VariantName": "Rod",
-		"MinimumTime": 0,
-		"InputProducts": [
-			{
-				"ProductName": "Fishing",
-				"Amount": 1,
-				"TagStrings": []
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Fish",
-				"Amount": 5,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [
-			"Extractor"
-		],
-		"SkillName": "Fishing",
-		"SkillMinimum": 0,
-		"SkillMaximum": 3,
-		"Description": "Fishing with a Rod.",
-		"Icon": ""
-	},
-	{
-		"Name": "Iron Mining",
-		"VariantName": "Pit",
-		"MinimumTime": 0,
-		"InputProducts": [
-			{
-				"ProductName": "Hard Labor",
-				"Amount": 1,
-				"TagStrings": []
-			},
-			{
-				"ProductName": "Mine Engineer",
-				"Amount": 0.1,
-				"TagStrings": [
-					"Optional<20>"
-				]
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [
-			{
-				"ProductName": "Land",
-				"Amount": 0.05,
-				"TagStrings": []
-			}
-		],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Iron Ore",
-				"Amount": 5,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [
-			"Tap"
-		],
-		"SkillName": "Mine Engineer",
-		"SkillMinimum": 1,
-		"SkillMaximum": 5,
-		"Description": "Mining Iron Ore from the ground.",
-		"Icon": ""
-	},
-	{
-		"Name": "Gold Mining",
-		"VariantName": "Pit",
-		"MinimumTime": 0,
-		"InputProducts": [
-			{
-				"ProductName": "Hard Labor",
-				"Amount": 1,
-				"TagStrings": []
-			},
-			{
-				"ProductName": "Mine Engineer",
-				"Amount": 0.1,
-				"TagStrings": [
-					"Optional<20>"
-				]
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [
-			{
-				"ProductName": "Land",
-				"Amount": 0.05,
-				"TagStrings": []
-			}
-		],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Gold Nugget",
-				"Amount": 5,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [
-			"Tap"
-		],
-		"SkillName": "Mine Engineer",
-		"SkillMinimum": 1,
-		"SkillMaximum": 5,
-		"Description": "Mining Iron Ore from the ground.",
-		"Icon": ""
-	},
-	{
-		"Name": "Gold Panning",
-		"VariantName": "",
-		"MinimumTime": 0,
-		"InputProducts": [
-			{
-				"ProductName": "Panning",
-				"Amount": 1,
-				"TagStrings": []
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Gold Nugget",
-				"Amount": 0.01,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [
-			"Extractor"
-		],
-		"SkillName": "Mine Engineer",
-		"SkillMinimum": 1,
-		"SkillMaximum": 5,
-		"Description": "Mining Iron Ore from the ground.",
-		"Icon": ""
-	},
-	{
-		"Name": "Lumber",
-		"VariantName": "",
-		"MinimumTime": 0,
-		"InputProducts": [
-			{
-				"ProductName": "Lumberjacking",
-				"Amount": 1,
-				"TagStrings": []
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [
-			{
-				"ProductName": "Land",
-				"Amount": 0.1,
-				"TagStrings": []
-			}
-		],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Timber",
-				"Amount": 10,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [],
-		"SkillName": "Lumberjacking",
-		"SkillMinimum": 1,
-		"SkillMaximum": 5,
-		"Description": "Cutting down trees for lumber.",
-		"Icon": ""
-	},
-	{
-		"Name": "Wheat Milling",
-		"VariantName": "",
-		"MinimumTime": 0,
-		"InputProducts": [
-			{
-				"ProductName": "Wheat Grain",
-				"Amount": 1,
-				"TagStrings": []
-			},
-			{
-				"ProductName": "Grain Milling",
-				"Amount": 0.01,
-				"TagStrings": [
-					"Fixed"
-				]
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Wheat Flour",
-				"Amount": 0.7,
-				"TagStrings": []
-			},
-			{
-				"ProductName": "Bio Waste",
-				"Amount": 0.3,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [],
-		"SkillName": "Grain Milling",
-		"SkillMinimum": 1,
-		"SkillMaximum": 3,
-		"Description": "Grind Wheat Grain into Flour",
-		"Icon": "ProductImages\\flour.png"
-	},
-	{
-		"Name": "Baking",
-		"VariantName": "",
-		"MinimumTime": 0.1,
-		"InputProducts": [
-			{
-				"ProductName": "Wheat Flour",
-				"Amount": 2,
-				"TagStrings": []
-			}
-		],
-		"InputWants": [],
-		"CapitalProducts": [],
-		"CapitalWants": [],
-		"OutputProducts": [
-			{
-				"ProductName": "Bread",
-				"Amount": 1,
-				"TagStrings": []
-			}
-		],
-		"OutputWants": [],
-		"TagStrings": [],
-		"SkillName": "Hard Labor",
-		"SkillMinimum": 0,
-		"SkillMaximum": 5,
-		"Description": "Common Baking Process",
-		"Icon": "D:\\Projects\\EconomicCalculator\\EconomicCalculator\\Data\\ProductImages\\bread.png"
-	}
+  {
+    "Name": "Wheat Farming",
+    "VariantName": "",
+    "MinimumTime": 120,
+    "Skill": "Wheat Farming",
+    "SkillMinimum": 1,
+    "SkillMaximum": 5,
+    "ProcessTags": [
+      "Crop"
+    ],
+    "Description": "Sow, Grow, and Harvest Wheat.",
+    "Icon": "",
+    "TechRequirement": "Counting",
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Wheat Grain",
+          "Amount": 7,
+          "Tags": {
+            "Fixed": {}
+          }
+        },
+        {
+          "Product": "Wheat Farming",
+          "Amount": 0.00625,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Wheat Grain",
+          "Amount": 28,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Test Dummy",
+    "VariantName": "Test Dummy",
+    "MinimumTime": 120,
+    "Skill": "Wheat Farming",
+    "SkillMinimum": 1,
+    "SkillMaximum": 5,
+    "ProcessTags": [
+      "Failure"
+    ],
+    "Description": "Sow, Grow, and Harvest Wheat.",
+    "Icon": "",
+    "TechRequirement": "Counting",
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Wheat Grain",
+          "Amount": 1,
+          "Tags": {
+            "Fixed": {},
+            "Chance": {
+              "Group": "a",
+              "Weight": "100"
+            }
+          }
+        }
+      ],
+      "Capital": [
+        {
+          "Product": "Farm Hoe(Iron and Wood)",
+          "Amount": 0.00625,
+          "Tags": {}
+        }
+      ],
+      "Outputs": [
+        {
+          "Product": "Wheat Grain",
+          "Amount": 1,
+          "Tags": {
+            "Chance": {
+              "Group": "a",
+              "Weight": "100"
+            }
+          }
+        },
+        {
+          "Product": "Wheat Grain",
+          "Amount": 2,
+          "Tags": {
+            "Chance": {
+              "Group": "b",
+              "Weight": "100"
+            }
+          }
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [
+        {
+          "Want": "Security",
+          "Amount": 1,
+          "Tags": {
+            "Consumed": {}
+          }
+        }
+      ],
+      "Capital": [
+        {
+          "Want": "Heat",
+          "Amount": 1,
+          "Tags": {
+            "Optional": {
+              "Bonus": "0.1"
+            }
+          }
+        }
+      ],
+      "Outputs": [
+        {
+          "Want": "Warmth",
+          "Amount": 1,
+          "Tags": {
+            "Fixed": {}
+          }
+        }
+      ]
+    }
+  }
 ]

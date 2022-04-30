@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Processes.ProductionTags;
@@ -12,6 +13,7 @@ namespace EconomicSim.Objects.Processes
     /// <summary>
     /// Process Product Data Class
     /// </summary>
+    [JsonConverter(typeof(ProcessProductJsonConverter))]
     internal class ProcessProduct : IProcessProduct
     {
         /// <summary>
@@ -19,7 +21,7 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         public ProcessProduct()
         {
-            tagData = new List<ITagData<ProductionTag>>();
+            TagData = new List<(ProductionTag tag, Dictionary<string, object> properties)>();
         }
 
         /// <summary>
@@ -35,13 +37,9 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The Tags and respective data they need.
         /// </summary>
-        public IReadOnlyList<ITagData<ProductionTag>> TagData => tagData;
+        public List<(ProductionTag tag, Dictionary<string, object> properties)> TagData { get; set; } 
+        IReadOnlyList<(ProductionTag tag, Dictionary<string, object> properties)> IProcessProduct.TagData => TagData;
         
-        /// <summary>
-        /// Editable data for tags.
-        /// </summary>
-        public List<ITagData<ProductionTag>> tagData { get; set; }
-
         /// <summary>
         /// The part it belongs to.
         /// </summary>

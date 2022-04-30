@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace EconomicSim.DTOs.Processes
 {
+    [Obsolete]
     public interface IDivisionEffects
     {
         /// <summary>

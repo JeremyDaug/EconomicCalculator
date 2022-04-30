@@ -7,6 +7,7 @@ using EconomicSim.DTOs.Enums;
 
 namespace EconomicSim.DTOs.Processes.ProcessTags
 {
+    [Obsolete]
     public class AttachedProcessTag : IAttachedProcessTag
     {
         public AttachedProcessTag()

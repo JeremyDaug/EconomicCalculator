@@ -159,7 +159,7 @@ namespace EconomicSim.Objects.Products
         {
             return Name + ":" + VariantName;
         }
-
+        
         public string GetName()
         {
             // if has variant name, add that to name.

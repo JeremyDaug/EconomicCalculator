@@ -9,6 +9,7 @@ namespace EconomicSim.DTOs.Processes.ProcessTags
     /// <summary>
     /// Information on available process Tags.
     /// </summary>
+    [Obsolete]
     public static class ProcessTagInfo
     {
         public static string GetRegex(ProcessTag tag)

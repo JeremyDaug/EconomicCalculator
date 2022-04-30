@@ -11,6 +11,7 @@ namespace EconomicSim.DTOs.Processes
     /// <summary>
     /// Wants desired or produced by a process
     /// </summary>
+    [Obsolete]
     public class ProcessWantDTO : IProcessWantDTO
     {
         public ProcessWantDTO()

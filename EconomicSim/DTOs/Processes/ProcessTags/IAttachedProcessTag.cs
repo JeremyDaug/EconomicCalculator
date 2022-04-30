@@ -10,6 +10,7 @@ namespace EconomicSim.DTOs.Processes.ProcessTags
     /// <summary>
     /// Interface for Attached Process Tags.
     /// </summary>
+    [Obsolete]
     public interface IAttachedProcessTag
     {
         /// <summary>

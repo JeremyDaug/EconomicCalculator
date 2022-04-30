@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Processes.ProductionTags;
@@ -12,6 +13,7 @@ namespace EconomicSim.Objects.Processes
     /// <summary>
     /// Process Want Data
     /// </summary>
+    [JsonConverter(typeof(ProcessWantJsonConverter))]
     internal class ProcessWant : IProcessWant
     {
         /// <summary>
@@ -19,7 +21,7 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         public ProcessWant()
         {
-            tagData = new List<ITagData<ProductionTag>>();
+            TagData = new List<(ProductionTag tag, Dictionary<string, object> properties)>();
         }
 
         /// <summary>
@@ -35,12 +37,8 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The Read Only Tag Data
         /// </summary>
-        public IReadOnlyList<ITagData<ProductionTag>> TagData => tagData;
-
-        /// <summary>
-        /// The editable tag data.
-        /// </summary>
-        public List<ITagData<ProductionTag>> tagData { get; set; }
+        public List<(ProductionTag tag, Dictionary<string, object> properties)> TagData { get; set; }
+        IReadOnlyList<(ProductionTag tag, Dictionary<string, object> properties)> IProcessWant.TagData => TagData;
 
         /// <summary>
         /// The part the want belongs to.
