@@ -58,7 +58,7 @@ namespace EconomicSim.Objects.Skills
                         result.Labor = DataContext.Instance.Products.Single(x => x.Name == prodName);
                         break;
                     default:
-                        throw new JsonException($"Property {propName} is not valid for a skill..");
+                        throw new JsonException($"Property {propName} is not valid for a skill.");
                 }
             }
 

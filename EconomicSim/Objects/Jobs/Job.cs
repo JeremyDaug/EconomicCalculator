@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Products;
@@ -12,13 +13,12 @@ namespace EconomicSim.Objects.Jobs
     /// <summary>
     /// Job Data Class
     /// </summary>
+    [JsonConverter(typeof(JobJsonConverter))]
     internal class Job : IJob
     {
-        public List<IProcess> _processes;
-
         public Job()
         {
-            _processes = new List<IProcess>();
+            Processes = new List<Process>();
         }
 
         /// <summary>
@@ -49,6 +49,7 @@ namespace EconomicSim.Objects.Jobs
         /// <summary>
         /// The PRocesses that are done by the job.
         /// </summary>
-        public IReadOnlyList<IProcess> Processes { get => _processes; }
+        public List<Process> Processes { get; set; }
+        IReadOnlyList<IProcess> IJob.Processes => Processes;
     }
 }

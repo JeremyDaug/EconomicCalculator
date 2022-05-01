@@ -4,18 +4,18 @@
     "VariantName": "",
     "Labor": "Wheat Farming",
     "Skill": "Wheat Farming",
-    "ProcessNames": [
+    "Processes": [
       "Wheat Farming",
-      "Baking"
+      "Test Dummy(Test Dummy)"
     ]
   },
   {
-    "Name": "Baker",
+    "Name": "Test Dummy",
     "VariantName": "",
     "Labor": "Baking",
     "Skill": "Baking",
-    "ProcessNames": [
-      "Baking"
+    "Processes": [
+      "Test Dummy(Test Dummy)"
     ]
   }
 ]

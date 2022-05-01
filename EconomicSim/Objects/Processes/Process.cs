@@ -170,6 +170,8 @@ namespace EconomicSim.Objects.Processes
         /// <returns></returns>
         public string GetName()
         {
+            if (string.IsNullOrWhiteSpace(VariantName))
+                return Name;
             return Name + "(" + VariantName + ")";
         }
     }

@@ -396,7 +396,6 @@ namespace EconomicSim.Objects
 
         private void LoadProcesses(string set)
         {
-            
             var filename = GetDataFile(set, "Processes");
             var json = File.ReadAllText(filename);
 
@@ -406,6 +405,17 @@ namespace EconomicSim.Objects
                 Processes.Add(process);
             }
             // no connections need to be made. Let's GO!
+        }
+
+        private void LoadJobs(string set)
+        {
+            var filename = GetDataFile(set, "Jobs");
+            var json = File.ReadAllText(filename);
+
+            var newJobs = JsonSerializer.Deserialize<List<Job>>(json);
+            foreach (var job in newJobs)
+                Jobs.Add(job);
+            // no additional work needed.
         }
         
         /// <summary>
@@ -432,6 +442,8 @@ namespace EconomicSim.Objects
                 LoadSkillGroups(set);
                 
                 LoadProcesses(set);
+                
+                LoadJobs(set);
             }
         }
 
