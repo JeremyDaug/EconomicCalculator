@@ -2,39 +2,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EconomicSim.Helpers
 {
     internal class TagData<T> : ITagData<T> where T : Enum
     {
-
-
         public TagData()
         {
-            data = new List<object>();
+            Parameters = new Dictionary<string, object>();
         }
 
-        public TagData(T tag,  params object[] data )
+        public TagData(T tag,  Dictionary<string, object> data = null)
         {
             if (data == null)
-                this.data = new List<object>();
+                this.Parameters = new Dictionary<string, object>();
             else
-                this.data = new List<object>(data);
+                this.Parameters = new Dictionary<string, object>(data);
             Tag = tag;
         }
 
-        private List<object> data;
+        public Dictionary<string, object> Parameters;
 
-        public object this[int i] 
+        public object this[string i] 
         {
             get
             {
-                return data[i];
+                return Parameters[i];
             }
             set
             {
-                data[i] = value;
+                Parameters[i] = value;
             } 
         }
 
@@ -42,9 +41,9 @@ namespace EconomicSim.Helpers
 
         public int Count()
         {
-            return data.Count;
+            return Parameters.Count;
         }
 
-        public void Add(object value) => data.Add(value);
+        public void Add(string key, object value) => Parameters.Add(key, value);
     }
 }

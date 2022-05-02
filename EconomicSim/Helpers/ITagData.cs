@@ -22,7 +22,7 @@ namespace EconomicSim.Helpers
         /// </summary>
         /// <param name="i">Index to retrieve.</param>
         /// <returns></returns>
-        object this[int i] { get; }
+        object this[string i] { get; }
 
         /// <summary>
         /// Count Function
