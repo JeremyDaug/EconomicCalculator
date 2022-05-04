@@ -1,6 +1,8 @@
 ﻿using System.Data;
 using System.Drawing.Printing;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using EconomicSim.Helpers;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
@@ -378,7 +380,7 @@ namespace EconomicSim.Objects
             var dupes = FindDuplicates(newGroups.Select(x => x.Name).ToList());
             if (dupes.Count > 0)
             {
-                throw new DataException($"Skill Group(s) \"{string.Join(", ", dupes)}\" within set \"{set}\" of has been found.");
+                throw new DataException($"Skill Group(s) \"{string.Join(", ", dupes)}\" within set \"{set}\" has been found.");
             }
             
             // check for duplicates in old sets
@@ -400,6 +402,21 @@ namespace EconomicSim.Objects
             var json = File.ReadAllText(filename);
 
             var newProcesses = JsonSerializer.Deserialize<List<Process>>(json);
+            
+            // check new set for duplicates
+            var dupes = FindDuplicates(newProcesses.Select(x => x.GetName()).ToList());
+            if (dupes.Count > 0)
+            {
+                throw new DataException($"Process(es) \"{string.Join(", ", dupes)}\" within set \"{set}\" has been found.");
+            }
+            
+            // check for duplicates in old sets
+            foreach (var dupe in newProcesses.Select(x => x.GetName()))
+            {
+                if (Processes.Select(x => x.GetName()).Any(x => x == dupe))
+                    throw new DataException($"Duplicate Process Group \"{dupe}\" found in set \"{set}\"");
+            }
+            
             foreach (var process in newProcesses)
             {
                 Processes.Add(process);
@@ -413,9 +430,58 @@ namespace EconomicSim.Objects
             var json = File.ReadAllText(filename);
 
             var newJobs = JsonSerializer.Deserialize<List<Job>>(json);
+            
+            // check for dupes in set
+            var dupes = FindDuplicates(newJobs.Select(x => x.GetName()).ToList());
+            if (dupes.Count > 0)
+                throw new DataException(
+                    $"Duplicate Job(s) \"{string.Join(", ", dupes)}\" within set \"{set}\" has been found.");
+
+            // check for dupes in old set
+            foreach (var dupe in newJobs.Select(x => x.GetName()))
+            {
+                if (Jobs.Select(x => x.GetName()).Any(x => x == dupe))
+                    throw new DataException($"Duplicate Job \"{dupe}\" found in set \"{set}\".");
+            }
+            
             foreach (var job in newJobs)
                 Jobs.Add(job);
             // no additional work needed.
+        }
+
+        private void LoadSpecies(string set)
+        {
+            var filename = GetDataFile(set, "Species");
+            var json = File.ReadAllText(filename);
+            var newSpecies = JsonSerializer.Deserialize<List<Species>>(json);
+
+            // check for duplicates
+            var dupes = FindDuplicates(newSpecies.Select(x => x.GetName()).ToList());
+            if (dupes.Count > 0)
+            {
+                throw new DataException(
+                    $"Species \"{string.Join(", ", dupes)}\" within set \"{set}\" have been found.");
+            }
+            
+            // check for duplicates in old sets
+            foreach (var dupe in newSpecies.Select(x => x.GetName()))
+            {
+                if (Species.Select(x => x.GetName()).Any(x => x == dupe))
+                    throw new DataException($"Duplicate Species \"{dupe}\" found in set \"{set}\".");
+            }
+            
+            // add species
+            foreach (var spec in newSpecies)
+                Species.Add(spec);
+
+            foreach (var species in newSpecies)
+            {
+                // connect species relations
+                var relations = new List<Species>();
+                foreach (var rel in species.Relations)
+                    relations.Add(Species.Single(x => x.GetName() == rel.GetName()));
+                species.Relations = relations;
+            }
         }
         
         /// <summary>
@@ -444,6 +510,8 @@ namespace EconomicSim.Objects
                 LoadProcesses(set);
                 
                 LoadJobs(set);
+
+                LoadSpecies(set);
             }
         }
 

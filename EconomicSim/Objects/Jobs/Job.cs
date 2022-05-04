@@ -51,5 +51,12 @@ namespace EconomicSim.Objects.Jobs
         /// </summary>
         public List<Process> Processes { get; set; }
         IReadOnlyList<IProcess> IJob.Processes => Processes;
+
+        public string GetName()
+        {
+            if (!string.IsNullOrWhiteSpace(VariantName))
+                return $"{Name}({VariantName})";
+            return Name;
+        }
     }
 }

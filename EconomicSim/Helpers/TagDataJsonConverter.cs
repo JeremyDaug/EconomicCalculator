@@ -14,7 +14,8 @@ internal class TagDataJsonConverter<T> : JsonConverter<TagData<T>> where T : Enu
         reader.Read();
 
         // get tag
-        result.Tag = (T) Enum.Parse(typeof(T), reader.GetString());
+        var tag = reader.GetString();
+        result.Tag = (T) Enum.Parse(typeof(T), tag);
 
         reader.Read();
         if (reader.TokenType != JsonTokenType.StartObject)

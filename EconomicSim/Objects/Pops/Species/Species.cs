@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Products;
@@ -12,14 +13,15 @@ namespace EconomicSim.Objects.Pops.Species
     /// <summary>
     /// Species Data Class
     /// </summary>
+    [JsonConverter(typeof(SpeciesJsonConverter))]
     internal class Species : ISpecies
     {
         public Species()
         {
-            Wants = new List<(IWant, DesireTier, decimal)>();
-            Tags = new List<ITagData<SpeciesTag>>();
-            RelatedSpecies = new List<ISpecies>();
-            Needs = new List<(IProduct, DesireTier, decimal)>();
+            Wants = new List<WantDesire>();
+            Tags = new List<TagData<SpeciesTag>>();
+            Relations = new List<Species>();
+            Needs = new List<NeedDesire>();
         }
 
         /// <summary>
@@ -39,41 +41,41 @@ namespace EconomicSim.Objects.Pops.Species
 
         /// <summary>
         /// The natural growth rate of the Species
-        /// Percent.
+        /// per year.
         /// </summary>
         public decimal GrowthRate { get; set; }
 
         /// <summary>
-        /// The Rate at which the population dies naturally.
-        /// Percent
+        /// The Rate at which the population dies naturally
+        /// per year.
         /// </summary>
         public decimal DeathRate { get; set; }
 
         /// <summary>
         /// The Products desired by the species.
         /// </summary>
-        public List<(IProduct product, DesireTier tier, decimal amount)> Needs { get; set; }
+        public List<NeedDesire> Needs { get; set; }
         
-        IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> ISpecies.Needs => Needs;
+        IReadOnlyList<INeedDesire> ISpecies.Needs => Needs;
 
         /// <summary>
         /// The wants desired by the species.
         /// </summary>
-        public List<(IWant want, DesireTier tier, decimal amount)> Wants { get; set; }
-        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> ISpecies.Wants => Wants;
+        public List<WantDesire> Wants { get; set; }
+        IReadOnlyList<IWantDesire> ISpecies.Wants => Wants;
 
         /// <summary>
         /// The Tags attached to the species and  their data.
         /// </summary>
-        public List<ITagData<SpeciesTag>> Tags { get; set; }
+        public List<TagData<SpeciesTag>> Tags { get; set; }
 
         IReadOnlyList<ITagData<SpeciesTag>> ISpecies.Tags => Tags;
 
         /// <summary>
         /// Related Species
         /// </summary>
-        public List<ISpecies> RelatedSpecies { get; set; }
-        IReadOnlyList<ISpecies> ISpecies.RelatedSpecies => RelatedSpecies;
+        public List<Species> Relations { get; set; }
+        IReadOnlyList<ISpecies> ISpecies.Relations => Relations;
 
         public override string ToString()
         {
@@ -82,6 +84,13 @@ namespace EconomicSim.Objects.Pops.Species
                 return Name;
             }
             return string.Format("{0}({1})", Name, VariantName);
+        }
+
+        public string GetName()
+        {
+            if (!string.IsNullOrWhiteSpace(VariantName))
+                return $"{Name}({VariantName})";
+            return Name;
         }
     }
 }

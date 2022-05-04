@@ -90,16 +90,16 @@ namespace EconomicSim.Objects.Pops
                     {
                         // if it's already in the list, add to that
                         var existing = result
-                            .SingleOrDefault(x => x.product.Id == need.product.Id &&
-                                                  x.tier == need.tier);
+                            .SingleOrDefault(x => x.product.Id == need.Product.Id &&
+                                                  x.tier == need.Tier);
 
                         if (!existing.Equals(default))
                         {
-                            existing.amount += spe.amount * need.amount;
+                            existing.amount += spe.amount * need.Amount;
                         }
                         else
                         { // else add it to the list.
-                            result.Add((need.product, need.tier, need.amount * spe.amount));
+                            result.Add((need.Product, tier: need.Tier, need.Amount * spe.amount));
                         }
                     }
                 }
@@ -145,16 +145,16 @@ namespace EconomicSim.Objects.Pops
                     {
                         // if it's already in the list, add to that
                         var existing = result
-                            .SingleOrDefault(x => x.want.Id == want.want.Id &&
-                                                  x.tier == want.tier);
+                            .SingleOrDefault(x => x.want.Id == want.Want.Id &&
+                                                  x.tier == want.Tier);
 
                         if (!existing.Equals(default))
                         {
-                            existing.amount += spe.amount * want.amount;
+                            existing.amount += spe.amount * want.Amount;
                         }
                         else
                         { // else add it to the list.
-                            result.Add((want.want, want.tier, want.amount * spe.amount));
+                            result.Add((want: want.Want, tier: want.Tier, want.Amount * spe.amount));
                         }
                     }
                 }

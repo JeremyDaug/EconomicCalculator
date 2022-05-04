@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Products;
@@ -12,6 +13,7 @@ namespace EconomicSim.Objects.Pops.Species
     /// <summary>
     /// Read only interface for species.
     /// </summary>
+    [JsonConverter(typeof(SpeciesJsonConverter))]
     public interface ISpecies
     {
         /// <summary>
@@ -42,12 +44,12 @@ namespace EconomicSim.Objects.Pops.Species
         /// <summary>
         /// The Product desires a species has by default.
         /// </summary>
-        IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs { get; }
+        IReadOnlyList<INeedDesire> Needs { get; }
 
         /// <summary>
         /// The Wants desired by the species.
         /// </summary>
-        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants { get; }
+        IReadOnlyList<IWantDesire> Wants { get; }
 
         /// <summary>
         /// The tags which modify how a species acts more broadly.
@@ -57,6 +59,6 @@ namespace EconomicSim.Objects.Pops.Species
         /// <summary>
         /// Related Species
         /// </summary>
-        IReadOnlyList<ISpecies> RelatedSpecies { get; }
+        IReadOnlyList<ISpecies> Relations { get; }
     }
 }
