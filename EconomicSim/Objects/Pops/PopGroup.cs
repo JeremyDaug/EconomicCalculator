@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -80,7 +81,7 @@ namespace EconomicSim.Objects.Pops
         {
             get
             {
-                var result = new List<(IProduct product, DesireTier tier, decimal amount)>();
+                /*var result = new List<(IProduct product, DesireTier tier, decimal amount)>();
 
                 // for each species
                 foreach (var spe in Species)
@@ -124,7 +125,8 @@ namespace EconomicSim.Objects.Pops
                     }
                 }
 
-                return result;
+                return result;*/
+                throw new NotImplementedException();
             }
         }
 
@@ -135,7 +137,7 @@ namespace EconomicSim.Objects.Pops
         {
             get
             {
-                var result = new List<(IWant want, DesireTier tier, decimal amount)>();
+                /* var result = new List<(IWant want, DesireTier tier, decimal amount)>();
 
                 // for each species
                 foreach (var spe in Species)
@@ -179,7 +181,8 @@ namespace EconomicSim.Objects.Pops
                     }
                 }
 
-                return result;
+                return result;*/
+                throw new NotImplementedException();
             }
         }
     }

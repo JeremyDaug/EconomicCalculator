@@ -483,6 +483,33 @@ namespace EconomicSim.Objects
                 species.Relations = relations;
             }
         }
+
+        private void LoadCultures(string set)
+        {
+            var filename = GetDataFile(set, "Cultures");
+            var json = File.ReadAllText(filename);
+            var newCultures = JsonSerializer.Deserialize<List<Culture>>(json);
+            
+            // check for dupes within the set.
+            var dupes = FindDuplicates(newCultures.Select(x => x.GetName()).ToList());
+            if (dupes.Count > 0)
+            {
+                throw new DataException(
+                    $"Cultures \"{string.Join(", ", dupes)}\" within set \"{set}\" have been found.");
+            }
+            
+            // check for dupes in old sets.
+            foreach (var dupe in newCultures.Select(x => x.GetName()))
+            {
+                if (Cultures.Select(x => x.GetName()).Any(x => x == dupe))
+                    throw new DataException($"Duplicate Culture \"{dupe}\" found in set \"{set}\".");
+            }
+            
+            foreach (var culture in newCultures)
+                Cultures.Add(culture);
+            
+            // no connections needed.
+        }
         
         /// <summary>
         /// Loads all of the data from the common folder from the sets given.
@@ -512,6 +539,8 @@ namespace EconomicSim.Objects
                 LoadJobs(set);
 
                 LoadSpecies(set);
+                
+                LoadCultures(set);
             }
         }
 

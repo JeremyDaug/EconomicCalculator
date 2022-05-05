@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Products;
@@ -12,6 +13,7 @@ namespace EconomicSim.Objects.Pops.Culture
     /// <summary>
     /// Read Only Culture Interface
     /// </summary>
+    [JsonConverter(typeof(CultureJsonConverter))]
     public interface ICulture
     {
         /// <summary>
@@ -42,12 +44,12 @@ namespace EconomicSim.Objects.Pops.Culture
         /// <summary>
         /// The products desired by this culture.
         /// </summary>
-        IReadOnlyList<(IProduct product, DesireTier tier, decimal amount)> Needs { get; }
+        IReadOnlyList<INeedDesire> Needs { get; }
 
         /// <summary>
         /// The wants desired by this culture.
         /// </summary>
-        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants { get; }
+        IReadOnlyList<IWantDesire> Wants { get; }
 
         /// <summary>
         /// The Culture's Tags.
