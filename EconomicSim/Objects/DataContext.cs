@@ -2,6 +2,7 @@
 using System.Drawing.Printing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EconomicSim.Enums;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
@@ -97,6 +98,8 @@ namespace EconomicSim.Objects
 
         #region Loading
 
+        #region Data
+        
         private string GetDataFile(string set, string category)
         {
             // Data/set/category/categoryset.json
@@ -544,6 +547,121 @@ namespace EconomicSim.Objects
             }
         }
 
+        #endregion Data
+        
+        #region Saves
+
+        public string GetSaveFolder(string save)
+        {
+            return Path.Combine(DataFolder, "Saves", save);
+        }
+
+        private string GetFileFromSave(string save, string section)
+        {
+            return Path.Combine(GetSaveFolder(save), $"{section}.json");
+        }
+
+        private void LoadTerritories(string save)
+        {
+            var filename = GetFileFromSave(save, "Territories");
+            var json = File.ReadAllText(filename);
+
+            var newTerritories = JsonSerializer.Deserialize<List<Territory.Territory>>(json);
+            
+            // check for dupes within territories
+            var dupes = FindDuplicates(newTerritories.Select(x => x.Name).ToList());
+            if (dupes.Count > 0)
+            {
+                throw new DataException("Territories Contain Duplicate Names.");
+            }
+
+            // Connect neighboring Territories
+            foreach (var terr in newTerritories)
+            {
+                var rep = new List<NeighborConnection>();
+                foreach (var neigh in terr.Neighbors)
+                {
+                    var neighbor = newTerritories.Single(x => x.Name == neigh.Neighbor.Name);
+                    rep.Add(new NeighborConnection
+                    {
+                        Neighbor = neighbor,
+                        Distance = neigh.Distance,
+                        Type = neigh.Type
+                    });
+                }
+
+                terr.Neighbors = rep;
+            }
+            
+            // add to list and complete.
+            foreach (var terr in newTerritories)
+                Territories.Add(terr);
+        }
+        
+        private void LoadPops(string save)
+        {
+            var filename = GetFileFromSave(save, "Pops");
+            //var json = File.ReadAllText(filename);
+
+            var newPop = new List<PopGroup>
+            {
+                new PopGroup
+                {
+                    Count = 1000,
+                    Job = Jobs.First(),
+                    Firm = new Firm
+                    {
+                        Name = "Wheat Farmers of Alicia"
+                    },
+                    Market = new Market.Market
+                    {
+                        Name = "Alicia"
+                    },
+                    SkillLevel = 3,
+                    Species = new List<(Species species, int amount)>
+                    {
+                        (Species.First(), 500),
+                        (Species.Last(), 500)
+                    },
+                    Cultures = new List<(Culture culture, int amount)>
+                    {
+                        (Cultures.First(), 1000)
+                    },
+                    Property = new List<(Product product, decimal amount)>
+                    {
+                        (Products[0], 20),
+                        (Products[1], 50)
+                    }
+                }
+            };
+
+            var json = JsonSerializer.Serialize(newPop,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+
+            var testPops = JsonSerializer.Deserialize<List<PopGroup>>(json);
+        }
+
+        public void LoadSave(string save)
+        {
+            // maybe load sets required by save here.
+            
+            // load territories
+            LoadTerritories(save);
+            
+            // load markets
+            
+            // load firms
+            
+            LoadPops(save);
+
+            // connect pops, markets, and firms here?
+        }
+        
+        #endregion Saves
+        
         #endregion Loading
 
         #region FileStorage

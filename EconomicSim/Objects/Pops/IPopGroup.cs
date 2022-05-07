@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using EconomicSim.Helpers;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
@@ -14,6 +16,7 @@ using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Pops
 {
+    [JsonConverter(typeof(PopJsonConverter))]
     public interface IPopGroup
     {
         /// <summary>
@@ -70,11 +73,11 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The products desired by this pop.
         /// </summary>
-        IReadOnlyList<(IProduct prod, DesireTier tier, decimal amount)> Needs { get; }
+        IReadOnlyList<INeedDesire> Needs { get; }
 
         /// <summary>
         /// The wants desired by this pop.
         /// </summary>
-        IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants { get; }
+        IReadOnlyList<IWantDesire> Wants { get; }
     }
 }

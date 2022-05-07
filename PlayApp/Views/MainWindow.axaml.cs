@@ -12,6 +12,7 @@ namespace PlayApp.Views
             
             IDataContext? dataContext = DataContextFactory.GetDataContext;
             dataContext.LoadData(new List<string>{"Common"});
+            dataContext.LoadSave("Default");
         }
     }
 }

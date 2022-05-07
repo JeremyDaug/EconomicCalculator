@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.DTOs.Hexmap;
 using EconomicSim.Enums;
@@ -13,20 +14,17 @@ namespace EconomicSim.Objects.Territory
     /// Super basic Territory Data Class. For environmental data available in a market.
     /// No special traits or connections. Everything is explicit. No map generation basis.
     /// </summary>
+    [JsonConverter(typeof(TerritoryJsonConverter))]
     internal class Territory : ITerritory
     {
         private ulong land;
-        public List<long> plots;
-        public List<(ITerritory neighbor, decimal distance, TerritoryConnectionType type)> neighbors;
-        public List<(IProduct resource, decimal stockpile, int depth)> nodes;
-        public List<(IProduct resource, decimal amount)> resources;
 
         public Territory()
         {
-            plots = new List<long>();
-            neighbors = new List<(ITerritory neighbor, decimal distance, TerritoryConnectionType type)>();
-            nodes = new List<(IProduct resource, decimal stockpile, int depth)>();
-            resources = new List<(IProduct resource, decimal amount)>();
+            Plots = new Dictionary<Product, long>();
+            Neighbors = new List<NeighborConnection>();
+            Nodes = new List<Node>();
+            Resources = new Dictionary<Product, decimal>();
         }
 
         /// <summary>
@@ -84,12 +82,25 @@ namespace EconomicSim.Objects.Territory
             }
         }
 
-        public IReadOnlyList<long> Plots { get => plots; }
+        /// <summary>
+        /// The plots in the territory.
+        /// The Key is the kind of land
+        /// Value is the number of plots of that land.
+        /// </summary>
+        public Dictionary<Product, long> Plots { get; set; }
+        IReadOnlyDictionary<IProduct, long> ITerritory.Plots => Plots.ToDictionary(pair => (IProduct)pair.Key, pair => pair.Value);
 
-        public IReadOnlyList<(ITerritory neighbor, decimal distance, TerritoryConnectionType type)> Neighbors { get => neighbors; }
+        public List<NeighborConnection> Neighbors { get; set; }
 
-        public IReadOnlyList<(IProduct resource, decimal stockpile, int depth)> Nodes { get => nodes; }
+        IReadOnlyList<INeighborConnection> ITerritory.Neighbors => Neighbors;
 
-        public IReadOnlyList<(IProduct resource, decimal amount)> Resources { get => resources; }
+        public List<Node> Nodes { get; set; }
+        IReadOnlyList<INode> ITerritory.Nodes => Nodes; 
+
+        public Dictionary<Product, decimal> Resources { get; set; }
+
+        IReadOnlyDictionary<IProduct, decimal> ITerritory.Resources
+            => Resources.ToDictionary(x => (IProduct) x.Key,
+                x => x.Value);
     }
 }

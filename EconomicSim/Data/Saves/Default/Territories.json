@@ -1,0 +1,66 @@
+[
+  {
+    "Name": "Alicia",
+    "Coastal": true,
+    "Lake": false,
+    "Size": 1000000,
+    "Land": 600000,
+    "Plots": {
+      "Land(Wasteland)": 100000,
+      "Land(Marginal Land)": 100000,
+      "Land(Scrubland)": 100000,
+      "Land(Quality Land)": 100000,
+      "Land(Fertile Land)": 100000,
+      "Land(Very Fertile Land)": 100000
+    },
+    "Neighbors": [
+      {
+        "Neighbor": "Bobistan",
+        "Distance": 1000,
+        "Type": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Wheat Grain",
+        "Stockpile": 1000000,
+        "Depth": 0
+      }
+    ],
+    "Resources": {
+      "Wheat Grain": 1000000
+    }
+  },
+  {
+    "Name": "Bobistan",
+    "Coastal": true,
+    "Lake": false,
+    "Size": 2000000,
+    "Land": 600000,
+    "Plots": {
+      "Land(Wasteland)": 100000,
+      "Land(Marginal Land)": 100000,
+      "Land(Scrubland)": 100000,
+      "Land(Quality Land)": 100000,
+      "Land(Fertile Land)": 100000,
+      "Land(Very Fertile Land)": 100000
+    },
+    "Neighbors": [
+      {
+        "Neighbor": "Alicia",
+        "Distance": 1000,
+        "Type": "Sea"
+      }
+    ],
+    "Nodes": [
+      {
+        "Resource": "Wheat Grain",
+        "Stockpile": 1000000,
+        "Depth": 0
+      }
+    ],
+    "Resources": {
+      "Wheat Grain": 1000000
+    }
+  }
+]

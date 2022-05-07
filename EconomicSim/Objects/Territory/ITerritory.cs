@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EconomicSim.DTOs.Hexmap;
 using EconomicSim.Enums;
@@ -12,6 +13,7 @@ namespace EconomicSim.Objects.Territory
     /// <summary>
     /// Territory Read Only Interface
     /// </summary>
+    [JsonConverter(typeof(TerritoryJsonConverter))]
     public interface ITerritory
     {
         /// <summary>
@@ -54,25 +56,25 @@ namespace EconomicSim.Objects.Territory
         /// (each is equal to 1/8 an acre) index.
         /// The index in <see cref="RequiredItems.LandOptions"/> is the same as here.
         /// </summary>
-        IReadOnlyList<long> Plots { get; }
+        IReadOnlyDictionary<IProduct, long> Plots { get; }
 
         /// <summary>
         /// Neighboring Territories to this one.
         /// Includes a reference to the neighbor, the distance to it.
         /// As well as how the neighbors are connected.
         /// </summary>
-        IReadOnlyList<(ITerritory neighbor, decimal distance, TerritoryConnectionType type)> Neighbors { get; }
+        IReadOnlyList<INeighborConnection> Neighbors { get; }
 
         /// <summary>
         /// The nodes within the territory which can be mined.
         /// -1 stockpile means the stockpile is infinite.
         /// </summary>
-        IReadOnlyList<(IProduct resource, decimal stockpile, int depth)> Nodes { get; }
+        IReadOnlyList<INode> Nodes { get; }
 
         /// <summary>
         /// The resources available at the surface of the territory.
         /// Amount of -1 means infinite.
         /// </summary>
-        IReadOnlyList<(IProduct resource, decimal amount)> Resources { get; }
+        IReadOnlyDictionary<IProduct, decimal> Resources { get; }
     }
 }

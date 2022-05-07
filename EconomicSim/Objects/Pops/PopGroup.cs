@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using EconomicSim.Helpers;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
@@ -18,11 +20,15 @@ namespace EconomicSim.Objects.Pops
     /// <summary>
     /// Pop group data class.
     /// </summary>
+    [JsonConverter(typeof(PopJsonConverter))]
     internal class PopGroup : IPopGroup
     {
-        private readonly IReadOnlyList<(IProduct, decimal)> property;
-        private readonly IReadOnlyList<(ISpecies species, int amount)> species;
-        private readonly IReadOnlyList<(ICulture culture, int amount)> cultures;
+        public PopGroup()
+        {
+            Property = new List<(Product product, decimal amount)>();
+            Species = new List<(Species.Species species, int amount)>();
+            Cultures = new List<(Culture.Culture culture, int amount)>();
+        }
 
         /// <summary>
         /// Pop Group Id
@@ -37,22 +43,26 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The job the pop group is attached to.
         /// </summary>
-        public IJob Job { get; set; }
+        public Job Job { get; set; }
+        IJob IPopGroup.Job => Job;
 
         /// <summary>
         /// The firm the pop group is attached to.
         /// </summary>
-        public IFirm Firm { get; set; }
+        public Firm Firm { get; set; }
+        IFirm IPopGroup.Firm => Firm;
 
         /// <summary>
         /// The market the pop resides in.
         /// </summary>
-        public IMarket Market { get; set; }
+        public Market.Market Market { get; set; }
+        IMarket IPopGroup.Market => Market;
 
         /// <summary>
         /// The skill the pop has.
         /// </summary>
-        public ISkill Skill => Job.Skill;
+        public Skill Skill { get; set; }
+        ISkill IPopGroup.Skill => Skill;
 
         /// <summary>
         /// The Skill Level of the Population Group.
@@ -62,22 +72,28 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The property the population Owns.
         /// </summary>
-        public IReadOnlyList<(IProduct product, decimal amount)> Property => property;
+        public List<(Product product, decimal amount)> Property { get; set; }
+        IReadOnlyList<(IProduct product, decimal amount)> IPopGroup.Property
+            => Property.Select(x => ((IProduct) x.product, x.amount)).ToList();
 
         /// <summary>
         /// The Species that makes up the pop.
         /// </summary>
-        public IReadOnlyList<(ISpecies species, int amount)> Species => species;
-        
+        public List<(Species.Species species, int amount)> Species { get; set; }
+        IReadOnlyList<(ISpecies species, int amount)> IPopGroup.Species
+            => Species.Select(x => ((ISpecies) x.species, x.amount)).ToList();
+
         /// <summary>
         /// The cultures which make up in the Pop.
         /// </summary>
-        public IReadOnlyList<(ICulture culture, int amount)> Cultures => cultures;
+        public List<(Culture.Culture culture, int amount)> Cultures { get; set; }
+        IReadOnlyList<(ICulture culture, int amount)> IPopGroup.Cultures 
+            => Cultures.Select(x => ((ICulture)x.culture, x.amount)).ToList();
         
         /// <summary>
         /// The products desired by the pop every day.
         /// </summary>
-        public IReadOnlyList<(IProduct prod, DesireTier tier, decimal amount)> Needs
+        public IReadOnlyList<INeedDesire> Needs
         {
             get
             {
@@ -133,7 +149,7 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The Wants desired by the pop every day.
         /// </summary>
-        public IReadOnlyList<(IWant want, DesireTier tier, decimal amount)> Wants
+        public IReadOnlyList<IWantDesire> Wants
         {
             get
             {

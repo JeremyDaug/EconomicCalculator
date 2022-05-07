@@ -167,5 +167,20 @@ namespace EconomicSim.Objects.Products
                 return Name + "(" + VariantName + ")";
             return Name;
         }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as Product);
+        }
+
+        public bool Equals(Product obj)
+        {
+            return string.Equals(GetName(), obj.GetName());
+        }
+
+        public override int GetHashCode()
+        {
+            return GetName().GetHashCode();
+        }
     }
 }

@@ -54,5 +54,7 @@ namespace EconomicSim.Objects
         IReadOnlyList<IWant> Wants { get; }
 
         void LoadData(IEnumerable<string> sets);
+
+        void LoadSave(string save);
     }
 }
