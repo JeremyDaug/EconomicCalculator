@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using EconomicSim.DTOs.Hexmap;
+using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Objects.Territory
@@ -75,6 +76,12 @@ namespace EconomicSim.Objects.Territory
                 land = Size - value;
             }
         }
+
+        /// <summary>
+        /// The market the territory is in.
+        /// </summary>
+        public Market.Market Market { get; set; }
+        IMarket ITerritory.Market => Market;
 
         /// <summary>
         /// The plots in the territory.

@@ -1,16 +1,20 @@
 [
   {
     "Name": "Alicia",
-    "Firms": [
-      "Wheatfields"
-    ],
     "Territories": [
       "Alicia"
     ],
-    "Neighbors": {},
     "Resources": {
-      "Fish": 100,
-      "Cotton": 100
+      "Land": 1000
+    }
+  },
+  {
+    "Name": "Bobistan",
+    "Territories": [
+      "Bobistan"
+    ],
+    "Resources": {
+      "Land": 1000
     }
   }
 ]

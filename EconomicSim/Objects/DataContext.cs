@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Text.Json;
+using EconomicSim.Enums;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
@@ -65,11 +66,11 @@ namespace EconomicSim.Objects
         
         #region HelperFuncs
 
-        private List<string> FindDuplicates(IList<string> group)
+        private List<string> FindDuplicates(IEnumerable<string> group)
         {
             var result = new List<string>();
             var dupes = group.Distinct().ToList();
-            if (group.Count != dupes.Count)
+            if (group.Count() != dupes.Count)
             {
                 foreach (var dupe in dupes)
                     if (group.Count(x => x == dupe) > 1)
@@ -591,6 +592,56 @@ namespace EconomicSim.Objects
             foreach (var terr in newTerritories)
                 Territories.Add(terr);
         }
+
+        private void LoadMarkets(string save)
+        {
+            var filename = GetFileFromSave(save, "Markets");
+            var json = File.ReadAllText(filename);
+
+            var newMarkets = JsonSerializer.Deserialize<List<Market.Market>>(json);
+            
+            // find duplicates in the save
+            var dupes = FindDuplicates(newMarkets.Select(x => x.Name));
+            if (dupes.Count > 0)
+            {
+                throw new DataException($"Duplicate Markets \"{string.Join(',', dupes)}\"");
+            }
+            
+            // go through connecting neighbors if possible.
+            // TODO improve Territories lots, connections need to be improved. 
+            foreach (var market in newMarkets)
+            {
+                // for each territory's
+                foreach (var terr in market.Territories)
+                {
+                    // connections
+                    foreach (var connection in terr.Neighbors)
+                    {
+                        // check if the connection is already in the market.
+                        if (!market.Territories.Select(x => x.Name)
+                                .Contains(connection.Neighbor.Name))
+                        { // if not in already
+                            // check that the connected territory has a market
+                            // and it can be walked to 
+                            if (connection.Neighbor.Market != null && 
+                                (connection.Type == TerritoryConnectionType.Land ||
+                                connection.Type == TerritoryConnectionType.Tunnel))
+                            { // if it can, add/update the connection
+                                if (market.Neighbors.ContainsKey(connection.Neighbor.Market) &&
+                                    market.Neighbors[connection.Neighbor.Market] < connection.Distance)
+                                    market.Neighbors[connection.Neighbor.Market] = connection.Distance;
+                                else // if not already connected just add it
+                                    market.Neighbors[connection.Neighbor.Market] = connection.Distance;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // complete, put to memory
+            foreach (var market in newMarkets)
+                Markets.Add(market);
+        }
         
         private void LoadPops(string save)
         {
@@ -646,9 +697,10 @@ namespace EconomicSim.Objects
             LoadTerritories(save);
             
             // load markets
-            
+            LoadMarkets(save);
+
             // load firms
-            
+
             //LoadPops(save);
 
             // connect pops, markets, and firms here?

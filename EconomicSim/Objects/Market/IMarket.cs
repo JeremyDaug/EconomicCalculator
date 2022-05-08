@@ -1,4 +1,5 @@
-﻿using EconomicSim.Objects.Firms;
+﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Territory;
@@ -8,6 +9,7 @@ namespace EconomicSim.Objects.Market
     /// <summary>
     /// Market Read Only Interface
     /// </summary>
+    [JsonConverter(typeof(MarketJsonConverter))]
     public interface IMarket
     {
         /// <summary>

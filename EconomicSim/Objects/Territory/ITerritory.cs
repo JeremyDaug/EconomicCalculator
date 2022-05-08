@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using EconomicSim.DTOs.Hexmap;
+using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Objects.Territory
@@ -44,6 +45,11 @@ namespace EconomicSim.Objects.Territory
         /// The Water in the territory measured in acres.
         /// </summary>
         ulong Water { get; }
+        
+        /// <summary>
+        /// The Market this territory Contains.
+        /// </summary>
+        IMarket Market { get; }
 
         /// <summary>
         /// The number of each plots available. 

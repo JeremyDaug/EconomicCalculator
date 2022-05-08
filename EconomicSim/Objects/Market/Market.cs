@@ -1,4 +1,5 @@
-﻿using EconomicSim.Objects.Firms;
+﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Territory;
@@ -8,6 +9,7 @@ namespace EconomicSim.Objects.Market
     /// <summary>
     /// Market Data Class
     /// </summary>
+    [JsonConverter(typeof(MarketJsonConverter))]
     internal class Market : IMarket
     {
         public Market()
@@ -26,8 +28,11 @@ namespace EconomicSim.Objects.Market
 
         /// <summary>
         /// The name of the market, usually the name the region or city
-        /// it covers.
+        /// it covers or which acts as it's core.
         /// </summary>
+        /// <remarks>
+        /// Name must be unique among all other markets.
+        /// </remarks>
         public string Name { get; set; }
 
         /// <summary>
@@ -62,7 +67,6 @@ namespace EconomicSim.Objects.Market
         /// rivers.
         /// </summary>
         public Dictionary<Market, decimal> Neighbors { get; set; }
-
         IReadOnlyDictionary<IMarket, decimal> IMarket.Neighbors
             => Neighbors.ToDictionary(x => (IMarket) x.Key,
                 x => x.Value);
@@ -73,10 +77,24 @@ namespace EconomicSim.Objects.Market
         /// in the market.
         /// </summary>
         public Dictionary<Product, decimal> Resources { get; set; }
-
         IReadOnlyDictionary<IProduct, decimal> IMarket.Resources
             => Resources.ToDictionary(
                 x => (IProduct) x.Key,
                 x => x.Value);
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as Market);
+        }
+
+        public bool Equals(Market obj)
+        {
+            return string.Equals(Name, obj.Name);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
     }
 }
