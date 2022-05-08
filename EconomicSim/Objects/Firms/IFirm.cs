@@ -1,10 +1,4 @@
-﻿using EconomicSim.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EconomicSim.Objects.Jobs;
+﻿using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Technology;

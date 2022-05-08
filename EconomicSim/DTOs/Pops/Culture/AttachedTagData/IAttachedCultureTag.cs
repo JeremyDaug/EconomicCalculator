@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using EconomicSim.Enums;
+﻿using EconomicSim.Enums;
 using EconomicSim.Objects.Pops.Culture;
 
 namespace EconomicSim.DTOs.Pops.Culture.AttachedTagData

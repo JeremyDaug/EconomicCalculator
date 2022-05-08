@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EconomicSim.Objects.Pops
+﻿namespace EconomicSim.Objects.Pops
 {
     /// <summary>
     /// The level that a desire is for a pop.

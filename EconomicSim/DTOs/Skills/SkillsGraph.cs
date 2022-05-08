@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EconomicSim.DTOs.Skills
+﻿namespace EconomicSim.DTOs.Skills
 {
     /// <summary>
     /// Storage Space for our skills, and allows for

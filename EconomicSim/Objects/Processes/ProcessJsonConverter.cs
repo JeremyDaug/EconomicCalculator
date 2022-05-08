@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia.Rendering;
 using EconomicSim.Objects.Processes.ProcessTags;
 
 namespace EconomicSim.Objects.Processes;

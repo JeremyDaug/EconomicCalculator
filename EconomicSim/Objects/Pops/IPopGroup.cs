@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
@@ -12,7 +7,6 @@ using EconomicSim.Objects.Pops.Culture;
 using EconomicSim.Objects.Pops.Species;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
-using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Pops
 {

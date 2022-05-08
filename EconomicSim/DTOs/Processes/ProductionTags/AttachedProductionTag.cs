@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using EconomicSim.DTOs.Enums;
+﻿using EconomicSim.DTOs.Enums;
 
 namespace EconomicSim.DTOs.Processes.ProductionTags
 {

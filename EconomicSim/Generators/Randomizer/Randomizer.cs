@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EconomicSim.Randomizer
+﻿namespace EconomicSim.Randomizer
 {
     /// <summary>
     /// Randomizer class, will not be tested as this class is just a wrapper for 

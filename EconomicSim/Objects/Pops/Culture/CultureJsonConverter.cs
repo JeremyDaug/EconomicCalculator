@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia.Remote.Protocol;
 using EconomicSim.Helpers;
 
 namespace EconomicSim.Objects.Pops.Culture;

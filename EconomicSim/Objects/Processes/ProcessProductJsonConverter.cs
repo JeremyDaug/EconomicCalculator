@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia.Media.TextFormatting.Unicode;
 using EconomicSim.Objects.Processes.ProductionTags;
 
 namespace EconomicSim.Objects.Processes;

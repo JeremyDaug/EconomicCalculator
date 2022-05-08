@@ -1,11 +1,4 @@
-﻿using EconomicSim.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EconomicSim.Objects.Firms;
-using EconomicSim.Objects.Government;
+﻿using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Territory;
@@ -17,19 +10,13 @@ namespace EconomicSim.Objects.Market
     /// </summary>
     internal class Market : IMarket
     {
-        public List<ITerritory> _territories;
-        public List<(IMarket, decimal)> _neighbors;
-        public List<(IProduct, decimal)> _resources;
-        public List<IPopGroup> _pops;
-        public List<IFirm> _firms;
-
         public Market()
         {
-            _territories = new List<ITerritory>();
-            _neighbors = new List<(IMarket, decimal)>();
-            _resources = new List<(IProduct, decimal)>();
-            _pops = new List<IPopGroup>();
-            _firms = new List<IFirm>();
+            Territories = new List<Territory.Territory>();
+            Neighbors = new Dictionary<Market, decimal>();
+            Resources = new Dictionary<Product, decimal>();
+            Pops = new List<PopGroup>();
+            Firms = new List<Firm>();
         }
 
         /// <summary>
@@ -46,22 +33,25 @@ namespace EconomicSim.Objects.Market
         /// <summary>
         /// The firms that are operating in this market.
         /// </summary>
-        public IReadOnlyList<IFirm> Firms => _firms;
+        public List<Firm> Firms { get; set; }
+        IReadOnlyList<IFirm> IMarket.Firms => Firms;
 
         /// <summary>
         /// The Population of the market.
         /// </summary>
-        public IReadOnlyList<IPopGroup> Pops => _pops;
-        
+        public List<PopGroup> Pops { get; set; }
+        IReadOnlyList<IPopGroup> IMarket.Pops => Pops;
+
         /// <summary>
         /// The governing body of the market.
         /// </summary>
-        public IGovernor Governor { get; set; }
+        //public IGovernor Governor { get; set; }
 
         /// <summary>
         /// The Territories the Market Contains.
         /// </summary>
-        public IReadOnlyList<ITerritory> Territories => _territories;
+        public List<Territory.Territory> Territories { get; set; }
+        IReadOnlyList<ITerritory> IMarket.Territories => Territories;
 
         /// <summary>
         /// The Markets which are considered adjacent to this one
@@ -71,11 +61,22 @@ namespace EconomicSim.Objects.Market
         /// These Neighbors should be reachable by foot assuming no
         /// rivers.
         /// </summary>
-        public IReadOnlyList<(IMarket, decimal)> Neighbors => _neighbors;
+        public Dictionary<Market, decimal> Neighbors { get; set; }
+
+        IReadOnlyDictionary<IMarket, decimal> IMarket.Neighbors
+            => Neighbors.ToDictionary(x => (IMarket) x.Key,
+                x => x.Value);
 
         /// <summary>
-        /// The resources that are found loose in the market, unowned.
+        /// The resources that are loose in the market, unowned.
+        /// These resources may be picked up and used at will by anyone
+        /// in the market.
         /// </summary>
-        public IReadOnlyList<(IProduct, decimal)> Resources => _resources;
+        public Dictionary<Product, decimal> Resources { get; set; }
+
+        IReadOnlyDictionary<IProduct, decimal> IMarket.Resources
+            => Resources.ToDictionary(
+                x => (IProduct) x.Key,
+                x => x.Value);
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using EconomicSim.Helpers;
+﻿using System.Text.Json.Serialization;
 using EconomicSim.Objects.Processes.ProductionTags;
 using EconomicSim.Objects.Products;
 

@@ -1,7 +1,4 @@
 using EconomicSim.Generators;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 
 public delegate double NoiseMethod(Vector3 point, double frequency);
 

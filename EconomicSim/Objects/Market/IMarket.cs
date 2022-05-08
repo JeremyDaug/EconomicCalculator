@@ -1,11 +1,4 @@
-﻿using EconomicSim.Helpers;
-using EconomicSim.Objects.Government;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EconomicSim.Objects.Firms;
+﻿using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Territory;
@@ -56,11 +49,13 @@ namespace EconomicSim.Objects.Market
         /// These Neighbors should be reachable by foot assuming no
         /// rivers.
         /// </summary>
-        IReadOnlyList<(IMarket, decimal)> Neighbors { get; }
+        IReadOnlyDictionary<IMarket, decimal> Neighbors { get; }
 
         /// <summary>
         /// The resources that are loose in the market, unowned.
+        /// These resources may be picked up and used at will by anyone
+        /// in the market.
         /// </summary>
-        IReadOnlyList<(IProduct, decimal)> Resources { get; }
+        IReadOnlyDictionary<IProduct, decimal> Resources { get; }
     }
 }

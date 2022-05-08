@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EconomicSim.Objects.Firms
+﻿namespace EconomicSim.Objects.Firms
 {
     /// <summary>
     /// How the company is organized, and is allowed to function.

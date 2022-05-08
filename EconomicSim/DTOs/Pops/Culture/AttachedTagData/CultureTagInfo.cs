@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EconomicSim.Objects.Pops.Culture;
+﻿using EconomicSim.Objects.Pops.Culture;
 
 namespace EconomicSim.DTOs.Pops.Culture.AttachedTagData
 {

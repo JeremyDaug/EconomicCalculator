@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EconomicSim.DTOs.Processes.ProductionTags
+﻿namespace EconomicSim.DTOs.Processes.ProductionTags
 {
     /// <summary>
     /// Tags for Process inputs, outputs, and capital.

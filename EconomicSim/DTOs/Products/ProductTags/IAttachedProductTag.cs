@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EconomicSim.DTOs.Enums;
+﻿using EconomicSim.DTOs.Enums;
 
 namespace EconomicSim.DTOs.Products.ProductTags
 {

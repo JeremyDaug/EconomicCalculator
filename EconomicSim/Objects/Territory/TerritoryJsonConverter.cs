@@ -1,8 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia.Utilities;
-using EconomicSim.Enums;
-using EconomicSim.Objects.Pops;
 
 namespace EconomicSim.Objects.Territory;
 

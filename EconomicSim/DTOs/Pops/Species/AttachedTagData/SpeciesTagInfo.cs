@@ -1,10 +1,4 @@
-﻿using EconomicSim.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EconomicSim.Objects.Pops.Species;
+﻿using EconomicSim.Objects.Pops.Species;
 
 namespace EconomicSim.DTOs.Pops.Species.AttachedTagData
 {

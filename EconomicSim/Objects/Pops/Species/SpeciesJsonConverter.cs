@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EconomicSim.Helpers;
-using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Pops.Species;
 

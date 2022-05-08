@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EconomicSim.Objects.Pops.Species
+﻿namespace EconomicSim.Objects.Pops.Species
 {
     /// <summary>
     /// Various modifiers and tags that can be placed on a species.

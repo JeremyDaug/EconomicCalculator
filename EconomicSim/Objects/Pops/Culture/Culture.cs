@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 using EconomicSim.Helpers;
-using EconomicSim.Objects.Products;
-using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Pops.Culture
 {

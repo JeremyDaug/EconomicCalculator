@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EconomicSim.Objects.Products.ProductTags
+﻿namespace EconomicSim.Objects.Products.ProductTags
 {
     /// <summary>
     /// The existant product tags in our system.

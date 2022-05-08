@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EconomicSim.Objects.Processes.ProcessTags;
+﻿using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
 

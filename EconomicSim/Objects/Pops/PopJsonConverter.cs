@@ -2,7 +2,6 @@ using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EconomicSim.Objects.Firms;
-using EconomicSim.Objects.Pops.Species;
 
 namespace EconomicSim.Objects.Pops;
 
