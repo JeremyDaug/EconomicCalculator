@@ -25,7 +25,7 @@ internal class NodeJsonConverter: JsonConverter<Node>
             {
                 case nameof(result.Resource):
                     var name = reader.GetString();
-                    result.Resource = DataContext.Instance.Products.Single(x => x.GetName() == name);
+                    result.Resource = DataContext.Instance.Products[name];
                     break;
                 case nameof(result.Stockpile):
                     result.Stockpile = reader.GetDecimal();

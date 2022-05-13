@@ -39,7 +39,7 @@ internal class SkillGroupJsonConverter: JsonConverter<SkillGroup>
                     // get the skills that have loaded and connect them back.
                     foreach (var skill in skills)
                     {
-                        var child = DataContext.Instance.Skills.Single(x => x.Name == skill);
+                        var child = DataContext.Instance.Skills[skill];
                         result.Skills.Add(child);
                         child.Groups.Add(result);
                     }

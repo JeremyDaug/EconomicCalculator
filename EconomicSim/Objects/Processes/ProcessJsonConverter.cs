@@ -38,7 +38,7 @@ internal class ProcessJsonConverter : JsonConverter<Process>
                     break;
                 case "Skill":
                     var skillName = reader.GetString();
-                    result.Skill = DataContext.Instance.Skills.Single(x => x.Name == skillName);
+                    result.Skill = DataContext.Instance.Skills[skillName];
                     break;
                 case "SkillMinimum":
                     result.SkillMinimum = reader.GetDecimal();
@@ -54,7 +54,7 @@ internal class ProcessJsonConverter : JsonConverter<Process>
                     break;
                 case "TechRequirement":
                     var techName = reader.GetString();
-                    result.TechRequirement = DataContext.Instance.Technologies.Single(x => x.Name == techName);
+                    result.TechRequirement = DataContext.Instance.Technologies[techName];
                     break;
                 case "Products":
                     if (reader.TokenType != JsonTokenType.StartObject)

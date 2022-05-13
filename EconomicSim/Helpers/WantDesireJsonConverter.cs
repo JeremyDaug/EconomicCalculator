@@ -28,7 +28,7 @@ internal class WantDesireJsonConverter : JsonConverter<WantDesire>
             {
                 case nameof(result.Want):
                     var wantName = reader.GetString();
-                    result.Want = DataContext.Instance.Wants.Single(x => x.Name == wantName);
+                    result.Want = DataContext.Instance.Wants[wantName];
                     break;
                 case nameof(result.Tier):
                     var tier = reader.GetString();

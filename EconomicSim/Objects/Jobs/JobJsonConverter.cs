@@ -33,19 +33,16 @@ internal class JobJsonConverter: JsonConverter<Job>
                     break;
                 case "Labor":
                     var laborName = reader.GetString();
-                    result.Labor = DataContext.Instance.Products.Single(x => x.GetName() == laborName);
+                    result.Labor = DataContext.Instance.Products[laborName];
                     break;
                 case "Skill":
                     var skillName = reader.GetString();
-                    result.Skill = DataContext.Instance.Skills.Single(x => x.Name == skillName);
+                    result.Skill = DataContext.Instance.Skills[skillName];
                     break;
                 case "Processes":
                     var procNames = JsonSerializer.Deserialize<List<string>>(ref reader, options);
                     foreach (var proc in procNames)
-                        result.Processes.Add(DataContext.Instance.Processes
-                            .Single(
-                                x => x.GetName() == proc)
-                        );
+                        result.Processes.Add(DataContext.Instance.Processes[proc]);
                     break;
                 default:
                     throw new JsonException($"Property \"{propName}\" is not valid for a Job.");

@@ -1,4 +1,5 @@
-﻿using EconomicSim.Objects.Jobs;
+﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Technology;
@@ -8,21 +9,17 @@ namespace EconomicSim.Objects.Firms
     /// <summary>
     /// Firm Data Class
     /// </summary>
+    [JsonConverter(typeof(FirmJsonConverter))]
     internal class Firm : IFirm
     {
-        public List<IMarket> _regions;
-        public List<(IProduct, decimal)> _resources;
-        public List<(IProduct, decimal)> _products;
-        public List<(IJob, WageType, decimal)> _jobs;
-        public List<IFirm> _children;
-
         public Firm()
         {
-            _regions = new List<IMarket>();
-            _resources = new List<(IProduct, decimal)>();
-            _products =  new List<(IProduct, decimal)>();
-            _jobs =      new List<(IJob, WageType, decimal)>();
-            _children = new List<IFirm>();
+            Regions = new List<Market.Market>();
+            Resources = new Dictionary<Product, decimal>();
+            Products = new Dictionary<Product, decimal>();
+            Jobs = new List<FirmJob>();
+            Children = new List<Firm>();
+            Techs = new List<Technology.Technology>();
         }
 
         /// <summary>
@@ -53,47 +50,57 @@ namespace EconomicSim.Objects.Firms
         /// <summary>
         /// The firms this firm owns.
         /// </summary>
-        public IReadOnlyList<IFirm> Children { get => _children; }
+        public List<Firm> Children { get; set; }
+        IReadOnlyList<IFirm> IFirm.Children => Children;
 
         /// <summary>
         /// The Firm that owns this firm.
         /// </summary>
-        public IFirm Parent { get; set; }
+        public Firm? Parent { get; set; }
+        IFirm? IFirm.Parent => Parent;
 
         /// <summary>
         /// The Jobs the Firm oversees, how it pays them, 
         /// and at what rate it pays.
         /// </summary>
-        public IReadOnlyList<(IJob, WageType, decimal)> Jobs { get => _jobs; }
-        // TODO, bring pops into here.
+        public List<FirmJob> Jobs { get; set; }
+        IReadOnlyList<IFirmJob> IFirm.Jobs => Jobs;
 
         /// <summary>
         /// The products that this firm tries to sell.
         /// </summary>
-        public IReadOnlyList<(IProduct, decimal)> Products { get => _products; }
+        public Dictionary<Product, decimal> Products { get; set; }
+        IReadOnlyDictionary<IProduct, decimal> IFirm.Products 
+            => Products.ToDictionary(x => (IProduct)x.Key,
+                x => x.Value);
 
         /// <summary>
         /// What resources the Firm owns. Bought goods go here,
         /// made goods go here and are sold from here.
         /// </summary>
-        public IReadOnlyList<(IProduct, decimal)> Resources { get => _resources; }
+        public Dictionary<Product, decimal> Resources { get; set; }
+        IReadOnlyDictionary<IProduct, decimal> IFirm.Resources 
+            => Resources.ToDictionary(x => (IProduct)x.Key,
+                x => x.Value); 
 
         /// <summary>
         /// The market which the Firm is centered out of.
         /// </summary>
-        public IMarket HeadQuarters { get; set; }
+        public Market.Market HeadQuarters { get; set; }
+        IMarket IFirm.HeadQuarters => HeadQuarters;
 
         /// <summary>
         /// The regions where the company operates, buying, selling,
         /// and working. Must have at least one piece of property in
         /// this market to do so.
         /// </summary>
-        public IReadOnlyList<IMarket> Regions { get => _regions; }
+        public List<Market.Market> Regions { get; set; }
+        IReadOnlyList<IMarket> IFirm.Regions => Regions;
 
         /// <summary>
         /// The techs available to the Firm.
         /// </summary>
-        public List<ITechnology> Techs { get; set; }
+        public List<Technology.Technology> Techs { get; set; }
         IReadOnlyList<ITechnology> IFirm.Techs => Techs;
     }
 }

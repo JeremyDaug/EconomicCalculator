@@ -50,7 +50,7 @@ namespace EconomicSim.Objects.Skills
                         break;
                     case "Labor":
                         var prodName = reader.GetString();
-                        result.Labor = DataContext.Instance.Products.Single(x => x.Name == prodName);
+                        result.Labor = DataContext.Instance.Products[prodName];
                         break;
                     default:
                         throw new JsonException($"Property {propName} is not valid for a skill.");

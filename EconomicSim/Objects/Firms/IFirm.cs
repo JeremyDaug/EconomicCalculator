@@ -1,4 +1,5 @@
-﻿using EconomicSim.Objects.Jobs;
+﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Technology;
@@ -8,6 +9,7 @@ namespace EconomicSim.Objects.Firms
     /// <summary>
     /// Read Only Firm Interface
     /// </summary>
+    [JsonConverter(typeof(FirmJsonConverter))]
     public interface IFirm
     {
         /// <summary>
@@ -43,25 +45,25 @@ namespace EconomicSim.Objects.Firms
         /// <summary>
         /// The Firm that owns this firm.
         /// </summary>
-        IFirm Parent { get; }
+        IFirm? Parent { get; }
 
         /// <summary>
         /// The Jobs the Firm oversees, how it pays them, 
         /// and at what rate it pays.
         /// </summary>
-        IReadOnlyList<(IJob, WageType, decimal)> Jobs { get; }
+        IReadOnlyList<IFirmJob> Jobs { get; }
         // TODO, bring pops into here.
 
         /// <summary>
         /// The products that this firm tries to sell.
         /// </summary>
-        IReadOnlyList<(IProduct, decimal)> Products { get; }
+        IReadOnlyDictionary<IProduct, decimal> Products { get; }
 
         /// <summary>
         /// What resources the Firm owns. Bought goods go here,
         /// made goods go here and are sold from here.
         /// </summary>
-        IReadOnlyList<(IProduct, decimal)> Resources { get; }
+        IReadOnlyDictionary<IProduct, decimal> Resources { get; }
 
         /// <summary>
         /// The market which the Firm is centered out of.

@@ -35,8 +35,7 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
             {
                 case nameof(result.Job):
                     var jobName = reader.GetString();
-                    result.Job = DataContext.Instance
-                        .Jobs.Single(x => x.GetName() == jobName);
+                    result.Job = DataContext.Instance.Jobs[jobName];
                     break;
                 case nameof(result.Firm):
                     result.Firm = new Firm
@@ -61,8 +60,7 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
                         if (reader.TokenType == JsonTokenType.EndObject)
                             break;
                         var speciesName = reader.GetString();
-                        var species = DataContext.Instance
-                            .Species.Single(x => x.GetName() == speciesName);
+                        var species = DataContext.Instance.Species[speciesName];
                         reader.Read();
                         var amount = reader.GetInt32();
                         result.Species.Add((species, amount));
@@ -76,8 +74,7 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
                         if (reader.TokenType == JsonTokenType.EndObject)
                             break;
                         var cultureName = reader.GetString();
-                        var culture = DataContext.Instance
-                            .Cultures.Single(x => x.GetName() == cultureName);
+                        var culture = DataContext.Instance.Cultures[cultureName];
                         reader.Read();
                         var amount = reader.GetInt32();
                         result.Cultures.Add((culture, amount));
@@ -91,8 +88,7 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
                         if (reader.TokenType == JsonTokenType.EndObject)
                             break;
                         var productName = reader.GetString();
-                        var product = DataContext.Instance
-                            .Products.Single(x => x.GetName() == productName);
+                        var product = DataContext.Instance.Products[productName];
                         reader.Read();
                         var amount = reader.GetDecimal();
                         result.Property.Add((product, amount));

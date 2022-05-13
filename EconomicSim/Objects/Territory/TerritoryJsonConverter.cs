@@ -41,7 +41,7 @@ internal class TerritoryJsonConverter: JsonConverter<Territory>
                 case nameof(result.Plots):
                     var plots = JsonSerializer.Deserialize<Dictionary<string, long>>(ref reader, options);
                     var itemedPlots = plots.ToDictionary(
-                        x => DataContext.Instance.Products.Single(y => y.GetName() == x.Key),
+                        x => DataContext.Instance.Products[x.Key],
                         x => x.Value);
                     result.Plots = itemedPlots;
                     break;
@@ -56,7 +56,7 @@ internal class TerritoryJsonConverter: JsonConverter<Territory>
                     var resources = JsonSerializer.Deserialize<Dictionary<string, decimal>>(ref reader, options);
                     result.Resources =
                         resources.ToDictionary(
-                            x => DataContext.Instance.Products.Single(y => y.GetName() == x.Key),
+                            x => DataContext.Instance.Products[x.Key],
                             x => x.Value);
                     break;
                 default:

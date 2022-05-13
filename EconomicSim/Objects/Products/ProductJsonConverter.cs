@@ -72,7 +72,7 @@ namespace EconomicSim.Objects.Products
                             var want = reader.GetString();
                             reader.Read();
                             var amount = reader.GetDecimal();
-                            result.Wants.Add((DataContext.Instance.Wants.Single(x => x.Name == want), amount));
+                            result.Wants.Add((DataContext.Instance.Wants[want], amount));
                             reader.Read();
 
                             if (reader.TokenType != JsonTokenType.EndObject)
@@ -82,7 +82,7 @@ namespace EconomicSim.Objects.Products
                     // do not load any processes.
                     case "TechRequirement":
                         var tech = reader.GetString();
-                        result.TechRequirement = DataContext.Instance.Technologies.Single(x => x.Name == tech);
+                        result.TechRequirement = DataContext.Instance.Technologies[tech];
                         break;
                     default:
                         throw new JsonException($"Property {propName} is not recognized as property of Product.");

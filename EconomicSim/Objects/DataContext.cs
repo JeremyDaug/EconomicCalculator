@@ -48,20 +48,20 @@ namespace EconomicSim.Objects
             // TODO remove this later.
             CurrentSaveFolder = "Default";
 
-            Wants = new List<Want>();
-            TechFamilies = new List<TechFamily>();
-            Technologies = new List<Technology.Technology>();
-            Products = new List<Product>();
-            SkillGroups = new List<SkillGroup>();
-            Skills = new List<Skill>();
-            Processes = new List<Process>();
-            Jobs = new List<Job>();
-            Species = new List<Species>();
-            Cultures = new List<Culture>();
-            Pops = new List<PopGroup>();
-            Territories = new List<Territory.Territory>();
-            Markets = new List<Market.Market>();
-            Firms = new List<Firm>();
+            Wants = new SortedList<string, Want>();
+            TechFamilies = new SortedList<string, TechFamily>();
+            Technologies = new SortedList<string, Technology.Technology>();
+            Products = new SortedList<string, Product>();
+            SkillGroups = new SortedList<string, SkillGroup>();
+            Skills = new SortedList<string, Skill>();
+            Processes = new SortedList<string, Process>();
+            Jobs = new SortedList<string, Job>();
+            Species = new SortedList<string, Species>();
+            Cultures = new SortedList<string, Culture>();
+            Pops = new SortedList<string, PopGroup>();
+            Territories = new SortedList<string, Territory.Territory>();
+            Markets = new SortedList<string, Market.Market>();
+            Firms = new SortedList<string, Firm>();
         }
         
         #region HelperFuncs
@@ -110,15 +110,15 @@ namespace EconomicSim.Objects
 
             // load wants
             foreach (var want in RequiredItems.Wants.Values)
-                Wants.Add((Want)want);
+                Wants.Add(want.Name, (Want)want);
 
             // load techs
             foreach (var tech in RequiredItems.Technologies.Values)
-                Technologies.Add((Technology.Technology)tech);
+                Technologies.Add(tech.Name, (Technology.Technology)tech);
 
             // load products
             foreach (var product in RequiredItems.Products.Values)
-                Products.Add((Product)product);
+                Products.Add(product.GetName(), (Product)product);
         }
 
         private void LoadWants(string set)
@@ -143,13 +143,12 @@ namespace EconomicSim.Objects
             {
                 // check that there are no duplicates with existing sets
                 // TODO when duplicates found, deal with it.
-                if (Wants.Select(x => x.Name)
-                        .Contains(want.Name))
+                if (Wants.ContainsKey(want.Name))
                 {
                     throw new InvalidDataException($"Duplicate Want of name \"{want.Name}\" from Set \"{set}\" found.");
                 }
                 // if no clash add to our list
-                Wants.Add(want);
+                Wants.Add(want.Name, want);
             }
         }
 
@@ -182,10 +181,9 @@ namespace EconomicSim.Objects
             // check for dupes in previously loaded sets and add to set
             foreach (var fam in newFamilies)
             {
-                if (TechFamilies.Select(x => x.Name)
-                        .Contains(fam.Name))
+                if (TechFamilies.ContainsKey(fam.Name))
                     throw new InvalidDataException($"Duplicate Tech Family \"{fam.Name}\" in set \"{set}\" found.");
-                TechFamilies.Add(fam);
+                TechFamilies.Add(fam.Name, fam);
             }
 
             // connect tech families to each other.
@@ -193,7 +191,7 @@ namespace EconomicSim.Objects
             {
                 List<TechFamily> relations = new List<TechFamily>();
                 foreach (var rel in fam.Relations.Select(x => x.Name))
-                    relations.Add(TechFamilies.Single(x => x.Name == rel));
+                    relations.Add(TechFamilies[rel]);
                 fam.Relations = relations;
             }
 
@@ -229,8 +227,7 @@ namespace EconomicSim.Objects
             // check for collision with previous sets
             foreach (var tech in newTechs)
             {
-                if (Technologies.Select(x => x.Name)
-                        .Contains(tech.Name))
+                if (Technologies.ContainsKey(tech.Name))
                     throw new InvalidDataException($"Duplicate Tech \"{tech.Name}\" in set \"{set}\" found.");
                 // add family connections
                 var families = new List<TechFamily>();
@@ -242,15 +239,15 @@ namespace EconomicSim.Objects
                 foreach (var fam in tech.Families)
                 {
                     // get family target
-                    var realfam = TechFamilies.Single(x => x.Name == fam.Name);
+                    var realfam = TechFamilies[fam.Name];
                     // add to family list
-                    families.Add(TechFamilies.Single(x => x.Name == fam.Name));
+                    families.Add(TechFamilies[fam.Name]);
                     // add to family
                     realfam.Techs.Add(tech);
                 }
                 tech.Families = families;
                 // add tech to list.
-                Technologies.Add(tech);
+                Technologies.Add(tech.Name, tech);
             }
 
             // connect to techs and families
@@ -259,13 +256,13 @@ namespace EconomicSim.Objects
                 var parents = new List<Technology.Technology>();
                 foreach (var parent in tech.Parents)
                 {
-                    parents.Add(Technologies.Single(x => x.Name == parent.Name));
+                    parents.Add(Technologies[parent.Name]);
                 }
                 tech.Parents = parents;
 
                 var children = new List<Technology.Technology>();
                 foreach (var child in tech.Children)
-                    parents.Add(Technologies.Single(x => x.Name == child.Name));
+                    parents.Add(Technologies[child.Name]);
                 tech.Children = children;
             }
 
@@ -298,11 +295,10 @@ namespace EconomicSim.Objects
             // check for collisions with previous sets
             foreach (var prod in newProducts)
             {
-                if (Products.Select(x => x.Name)
-                    .Contains(prod.Name))
+                if (Products.ContainsKey(prod.GetName()))
                     throw new InvalidDataException($"Duplicate Product \"{prod.Name}\" in set \"{set}\" found.");
 
-                Products.Add(prod);
+                Products.Add(prod.GetName(), prod);
             }
 
             // Processes connect to products, so no connections here.
@@ -337,11 +333,10 @@ namespace EconomicSim.Objects
             // check for collisions with previous sets.
             foreach (var skill in newSkills)
             {
-                if (Skills.Select(x => x.Name)
-                    .Contains(skill.Name))
+                if (Skills.ContainsKey(skill.Name))
                     throw new InvalidDataException($"Duplicate skill \"{skill}\" found in set \"{set}\".");
 
-                Skills.Add(skill);
+                Skills.Add(skill.Name, skill);
             }
 
             // connect relations up.
@@ -350,7 +345,7 @@ namespace EconomicSim.Objects
                 var relations = new List<(Skill relation, decimal rate)>();
                 foreach (var rel in skill.Relations)
                 {
-                    relations.Add((Skills.Single(x => x.Name == rel.relation.Name), rel.rate));
+                    relations.Add((Skills[rel.relation.Name], rel.rate));
                 }
                 skill.Relations = relations;
             }
@@ -384,13 +379,13 @@ namespace EconomicSim.Objects
             // check for duplicates in old sets
             foreach (var dupe in newGroups.Select(x => x.Name))
             {
-                if (SkillGroups.Select(x => x.Name).Any(x => x == dupe))
+                if (SkillGroups.ContainsKey(dupe))
                     throw new DataException($"Duplicate Skill Group \"{dupe}\" found in set \"{set}\"");
             }
             
             // add new skillGroups
             foreach (var newGroup in newGroups)
-                SkillGroups.Add(newGroup);
+                SkillGroups.Add(newGroup.Name, newGroup);
             // complete
         }
 
@@ -411,13 +406,13 @@ namespace EconomicSim.Objects
             // check for duplicates in old sets
             foreach (var dupe in newProcesses.Select(x => x.GetName()))
             {
-                if (Processes.Select(x => x.GetName()).Any(x => x == dupe))
+                if (Processes.ContainsKey(dupe))
                     throw new DataException($"Duplicate Process Group \"{dupe}\" found in set \"{set}\"");
             }
             
             foreach (var process in newProcesses)
             {
-                Processes.Add(process);
+                Processes.Add(process.GetName(), process);
             }
             // no connections need to be made. Let's GO!
         }
@@ -438,12 +433,12 @@ namespace EconomicSim.Objects
             // check for dupes in old set
             foreach (var dupe in newJobs.Select(x => x.GetName()))
             {
-                if (Jobs.Select(x => x.GetName()).Any(x => x == dupe))
+                if (Jobs.ContainsKey(dupe))
                     throw new DataException($"Duplicate Job \"{dupe}\" found in set \"{set}\".");
             }
             
             foreach (var job in newJobs)
-                Jobs.Add(job);
+                Jobs.Add(job.GetName(), job);
             // no additional work needed.
         }
 
@@ -464,20 +459,20 @@ namespace EconomicSim.Objects
             // check for duplicates in old sets
             foreach (var dupe in newSpecies.Select(x => x.GetName()))
             {
-                if (Species.Select(x => x.GetName()).Any(x => x == dupe))
+                if (Species.ContainsKey(dupe))
                     throw new DataException($"Duplicate Species \"{dupe}\" found in set \"{set}\".");
             }
             
             // add species
             foreach (var spec in newSpecies)
-                Species.Add(spec);
+                Species.Add(spec.GetName(), spec);
 
             foreach (var species in newSpecies)
             {
                 // connect species relations
                 var relations = new List<Species>();
                 foreach (var rel in species.Relations)
-                    relations.Add(Species.Single(x => x.GetName() == rel.GetName()));
+                    relations.Add(Species[rel.GetName()]);
                 species.Relations = relations;
             }
         }
@@ -499,12 +494,12 @@ namespace EconomicSim.Objects
             // check for dupes in old sets.
             foreach (var dupe in newCultures.Select(x => x.GetName()))
             {
-                if (Cultures.Select(x => x.GetName()).Any(x => x == dupe))
+                if (Cultures.ContainsKey(dupe))
                     throw new DataException($"Duplicate Culture \"{dupe}\" found in set \"{set}\".");
             }
             
             foreach (var culture in newCultures)
-                Cultures.Add(culture);
+                Cultures.Add(culture.GetName(), culture);
             
             // no connections needed.
         }
@@ -590,7 +585,7 @@ namespace EconomicSim.Objects
             
             // add to list and complete.
             foreach (var terr in newTerritories)
-                Territories.Add(terr);
+                Territories.Add(terr.Name, terr);
         }
 
         private void LoadMarkets(string save)
@@ -640,7 +635,47 @@ namespace EconomicSim.Objects
             
             // complete, put to memory
             foreach (var market in newMarkets)
-                Markets.Add(market);
+                Markets.Add(market.Name, market);
+        }
+
+        private void LoadFirms(string save)
+        {
+            var filename = GetFileFromSave(save, "Firms");
+            var json = File.ReadAllText(filename);
+            var newFirms = JsonSerializer.Deserialize<List<Firm>>(json);
+            
+            // connect firm parent and children
+            foreach (var firm in newFirms)
+            {
+                if (firm.Parent != null)
+                    firm.Parent = newFirms.Single(x => x.Name == firm.Parent.Name);
+
+                if (firm.Children.Any())
+                {
+                    var children = new List<Firm>();
+                    foreach (var child in firm.Children)
+                        children.Add(newFirms.Single(x => x.Name == child.Name));
+                    firm.Children = children;
+                }
+                
+                // connect markets back.
+                var hq = firm.HeadQuarters;
+                hq.Firms.Add(firm);
+
+                foreach (var region in firm.Regions)
+                {
+                    // add if it's not already there (regions shouldn
+                    if (!region.Firms.Contains(firm))
+                        region.Firms.Add(firm);
+                }
+            }
+            
+            // put into memory
+            foreach (var firm in newFirms)
+            {
+                Firms.Add(firm.Name, firm);
+            }
+            // finished.
         }
         
         private void LoadPops(string save)
@@ -653,7 +688,7 @@ namespace EconomicSim.Objects
                 new PopGroup
                 {
                     Count = 1000,
-                    Job = Jobs.First(),
+                    Job = Jobs.Values.First(),
                     Firm = new Firm
                     {
                         Name = "Wheat Farmers of Alicia"
@@ -665,17 +700,17 @@ namespace EconomicSim.Objects
                     SkillLevel = 3,
                     Species = new List<(Species species, int amount)>
                     {
-                        (Species.First(), 500),
-                        (Species.Last(), 500)
+                        (Species.Values.First(), 500),
+                        (Species.Values.Last(), 500)
                     },
                     Cultures = new List<(Culture culture, int amount)>
                     {
-                        (Cultures.First(), 1000)
+                        (Cultures.Values.First(), 1000)
                     },
                     Property = new List<(Product product, decimal amount)>
                     {
-                        (Products[0], 20),
-                        (Products[1], 50)
+                        (Products.ElementAt(0).Value, 20),
+                        (Products.ElementAt(1).Value, 50)
                     }
                 }
             };
@@ -700,7 +735,8 @@ namespace EconomicSim.Objects
             LoadMarkets(save);
 
             // load firms
-
+            LoadFirms(save);
+            
             //LoadPops(save);
 
             // connect pops, markets, and firms here?
@@ -737,47 +773,74 @@ namespace EconomicSim.Objects
 
         #region DataStorage
 
-        public List<Want> Wants { get; set; }
-        IReadOnlyList<IWant> IDataContext.Wants => Wants;
+        public SortedList<string, Want> Wants { get; set; }
+        IReadOnlyDictionary<string, IWant> IDataContext.Wants
+            => Wants.ToDictionary(x => x.Key,
+                x => (IWant)x.Value);
 
-        public List<TechFamily> TechFamilies { get; set; }
-        IReadOnlyList<ITechFamily> IDataContext.TechFamilies => TechFamilies;
+        public SortedList<string, TechFamily> TechFamilies { get; set; }
+        IReadOnlyDictionary<string, ITechFamily> IDataContext.TechFamilies 
+            => TechFamilies.ToDictionary(x => x.Key,
+                x => (ITechFamily)x.Value);
 
-        public List<Technology.Technology> Technologies { get; set; }
-        IReadOnlyList<ITechnology> IDataContext.Technologies => Technologies;
+        public SortedList<string, Technology.Technology> Technologies { get; set; }
+        IReadOnlyDictionary<string, ITechnology> IDataContext.Technologies
+            => Technologies.ToDictionary(x => x.Key,
+                x => (ITechnology)x.Value);
 
-        public List<Product> Products { get; set; }
-        IReadOnlyList<IProduct> IDataContext.Products => Products;
+        public SortedList<string, Product> Products { get; set; }
+        IReadOnlyDictionary<string, IProduct> IDataContext.Products 
+            => Products.ToDictionary(x => x.Key,
+                x => (IProduct)x.Value);
 
-        public List<SkillGroup> SkillGroups { get; set; }
-        IReadOnlyList<ISkillGroup> IDataContext.SkillGroups => SkillGroups;
+        public SortedList<string, SkillGroup> SkillGroups { get; set; }
+        IReadOnlyDictionary<string, ISkillGroup> IDataContext.SkillGroups
+            => SkillGroups.ToDictionary(x => x.Key,
+                x => (ISkillGroup)x.Value);
 
-        public List<Skill> Skills { get; set; }
-        IReadOnlyList<ISkill> IDataContext.Skills => Skills;
+        public SortedList<string, Skill> Skills { get; set; }
+        IReadOnlyDictionary<string, ISkill> IDataContext.Skills
+            => Skills.ToDictionary(x => x.Key,
+                x => (ISkill)x.Value);
 
-        public List<Process> Processes { get; set; }
-        IReadOnlyList<IProcess> IDataContext.Processes => Processes;
+        public SortedList<string, Process> Processes { get; set; }
+        IReadOnlyDictionary<string, IProcess> IDataContext.Processes 
+            => Processes.ToDictionary(x => x.Key,
+                x => (IProcess)x.Value);
 
-        public List<Job> Jobs { get; set; }
-        IReadOnlyList<IJob> IDataContext.Jobs => Jobs;
+        public SortedList<string, Job> Jobs { get; set; }
+        IReadOnlyDictionary<string, IJob> IDataContext.Jobs 
+            => Jobs.ToDictionary(x => x.Key,
+                x => (IJob)x.Value);
 
-        public List<Species> Species { get; set; }
-        IReadOnlyList<ISpecies> IDataContext.Species => Species;
+        public SortedList<string, Species> Species { get; set; }
+        IReadOnlyDictionary<string, ISpecies> IDataContext.Species 
+            => Species.ToDictionary(x => x.Key,
+                x => (ISpecies)x.Value);
 
-        public List<Culture> Cultures { get; set; }
-        IReadOnlyList<ICulture> IDataContext.Cultures => Cultures;
+        public SortedList<string, Culture> Cultures { get; set; }
+        IReadOnlyDictionary<string, ICulture> IDataContext.Cultures 
+            => Cultures.ToDictionary(x => x.Key,
+                x => (ICulture)x.Value);
 
-        public List<PopGroup> Pops { get; set; }
-        IReadOnlyList<IPopGroup> IDataContext.Pops => Pops;
+        public SortedList<string, PopGroup> Pops { get; set; }
+        IReadOnlyDictionary<string, IPopGroup> IDataContext.Pops
+            => Pops.ToDictionary(x => x.Key,
+                x => (IPopGroup)x.Value);
 
-        public List<Territory.Territory> Territories { get; set; }
-        IReadOnlyList<ITerritory> IDataContext.Territories => Territories;
+        public SortedList<string, Territory.Territory> Territories { get; set; }
+        IReadOnlyDictionary<string, ITerritory> IDataContext.Territories 
+            => Territories.ToDictionary(x => x.Key,
+                x => (ITerritory)x.Value);
 
-        public List<Market.Market> Markets { get; set; }
-        IReadOnlyList<IMarket> IDataContext.Markets => Markets;
+        public SortedList<string, Market.Market> Markets { get; set; }
+        IReadOnlyDictionary<string, IMarket> IDataContext.Markets 
+            => Markets.ToDictionary(x => x.Key, x => (IMarket)x.Value);
 
-        public List<Firm> Firms { get; set; }
-        IReadOnlyList<IFirm> IDataContext.Firms => Firms;
+        public SortedList<string, Firm> Firms { get; set; }
+        IReadOnlyDictionary<string, IFirm> IDataContext.Firms 
+            => Firms.ToDictionary(x => x.Key,
+                x => (IFirm)x.Value);
 
         #endregion DataStorage
     }

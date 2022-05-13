@@ -18,35 +18,35 @@ namespace EconomicSim.Objects
     /// </summary>
     public interface IDataContext
     {
-        IReadOnlyList<IFirm> Firms { get; }
+        IReadOnlyDictionary<string, IFirm> Firms { get; }
         
         // Governors
 
-        IReadOnlyList<IJob> Jobs { get; }
+        IReadOnlyDictionary<string, IJob> Jobs { get; }
 
-        IReadOnlyList<IMarket> Markets { get; }
+        IReadOnlyDictionary<string, IMarket> Markets { get; }
 
-        IReadOnlyList<IPopGroup> Pops { get; }
+        IReadOnlyDictionary<string, IPopGroup> Pops { get; }
 
-        IReadOnlyList<ICulture> Cultures { get; }
+        IReadOnlyDictionary<string, ICulture> Cultures { get; }
         
-        IReadOnlyList<ISpecies> Species { get; }
+        IReadOnlyDictionary<string, ISpecies> Species { get; }
         
-        IReadOnlyList<IProcess> Processes { get; }
+        IReadOnlyDictionary<string, IProcess> Processes { get; }
 
-        IReadOnlyList<IProduct> Products { get; }
+        IReadOnlyDictionary<string, IProduct> Products { get; }
 
-        IReadOnlyList<ISkill> Skills { get; }
+        IReadOnlyDictionary<string, ISkill> Skills { get; }
 
-        IReadOnlyList<ISkillGroup> SkillGroups { get; }
+        IReadOnlyDictionary<string, ISkillGroup> SkillGroups { get; }
 
-        IReadOnlyList<ITechFamily> TechFamilies { get; }
+        IReadOnlyDictionary<string, ITechFamily> TechFamilies { get; }
 
-        IReadOnlyList<ITechnology> Technologies { get; }
+        IReadOnlyDictionary<string, ITechnology> Technologies { get; }
 
-        IReadOnlyList<ITerritory> Territories { get; }
+        IReadOnlyDictionary<string, ITerritory> Territories { get; }
 
-        IReadOnlyList<IWant> Wants { get; }
+        IReadOnlyDictionary<string, IWant> Wants { get; }
 
         void LoadData(IEnumerable<string> sets);
 

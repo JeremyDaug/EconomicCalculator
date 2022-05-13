@@ -29,7 +29,7 @@ internal class ProcessWantJsonConverter : JsonConverter<ProcessWant>
             {
                 case "Want":
                     var name = reader.GetString();
-                    result.Want = DataContext.Instance.Wants.Single(x => x.Name == name);
+                    result.Want = DataContext.Instance.Wants[name];
                     break;
                 case "Amount":
                     result.Amount = reader.GetDecimal();

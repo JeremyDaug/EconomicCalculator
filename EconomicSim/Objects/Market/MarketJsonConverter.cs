@@ -31,7 +31,7 @@ internal class MarketJsonConverter : JsonConverter<Market>
                 case nameof(result.Territories):
                     var territories = JsonSerializer.Deserialize<List<string>>(ref reader, options);
                     result.Territories = territories
-                        .Select(x => DataContext.Instance.Territories.Single(y => y.Name == x)).ToList();
+                        .Select(x => DataContext.Instance.Territories[x]).ToList();
                     foreach (var terr in result.Territories)
                     {
                         if (terr.Market != null)
@@ -42,7 +42,7 @@ internal class MarketJsonConverter : JsonConverter<Market>
                 case nameof(result.Resources):
                     var resources = JsonSerializer.Deserialize<Dictionary<string, decimal>>(ref reader, options);
                     result.Resources = resources
-                        .ToDictionary(x => DataContext.Instance.Products.Single(y => y.GetName() == x.Key),
+                        .ToDictionary(x => DataContext.Instance.Products[x.Key],
                             x => x.Value);
                     break;
                 default:

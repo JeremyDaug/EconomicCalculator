@@ -21,7 +21,9 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The product in question.
         /// </summary>
-        public IProduct Product { get; set; }
+        public Product Product { get; set; }
+
+        IProduct IProcessProduct.Product => Product;
 
         /// <summary>
         /// The amount of it expected.

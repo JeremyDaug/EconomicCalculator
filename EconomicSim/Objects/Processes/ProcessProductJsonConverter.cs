@@ -29,7 +29,7 @@ internal class ProcessProductJsonConverter : JsonConverter<ProcessProduct>
             {
                 case "Product":
                     var name = reader.GetString();
-                    result.Product = DataContext.Instance.Products.Single(x => x.GetName() == name);
+                    result.Product = DataContext.Instance.Products[name];
                     break;
                 case "Amount":
                     result.Amount = reader.GetDecimal();

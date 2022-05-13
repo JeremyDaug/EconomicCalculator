@@ -1,33 +1,46 @@
 [
   {
-    "Name": "Wheatfields",
-    "ParentFirm": null,
-    "Children": [],
+    "Name": "Alician Farmers",
     "FirmRank": "Firm",
     "OwnershipStructure": "SelfEmployed",
     "ProfitStructure": "Distributed",
-    "OrganizationalStructure": "MomAndPop",
     "Jobs": [
-      "Farming"
+      {
+        "Job": "Farming",
+        "WageType": "LossSharing",
+        "Wage": 5
+      }
     ],
-    "JobWageTypes": {
-      "Farming": "LossSharing"
+    "Products": {
+      "Wheat Grain": 1
     },
-    "JobWages": {
-      "Farming": 1
-    },
-    "Processes": [
-      "Wheat Farming",
-      "Baking"
-    ],
-    "Market": "Alicia",
+    "Resources": {},
+    "HeadQuarters": "Alicia",
     "Regions": [],
-    "ProductPrices": {
-      "Wheat Grain": 2,
-      "Bread": 6
+    "Techs": [
+      "Brainstorming"
+    ]
+  },
+  {
+    "Name": "Bobistan Farmers",
+    "FirmRank": "Firm",
+    "OwnershipStructure": "SelfEmployed",
+    "ProfitStructure": "Distributed",
+    "Jobs": [
+      {
+        "Job": "Farming",
+        "WageType": "LossSharing",
+        "Wage": 5
+      }
+    ],
+    "Products": {
+      "Wheat Grain": 1
     },
-    "Resources": {
-      "Wheat Grain": 10000
-    }
+    "Resources": {},
+    "HeadQuarters": "Bobistan",
+    "Regions": [],
+    "Techs": [
+      "Brainstorming"
+    ]
   }
 ]
