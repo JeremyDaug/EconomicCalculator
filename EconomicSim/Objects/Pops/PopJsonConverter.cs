@@ -33,24 +33,26 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
             reader.Read();
             switch (propName)
             {
+                case nameof(result.Count):
+                    result.Count = reader.GetInt32();
+                    break;
                 case nameof(result.Job):
                     var jobName = reader.GetString();
                     result.Job = DataContext.Instance.Jobs[jobName];
                     break;
                 case nameof(result.Firm):
-                    result.Firm = new Firm
-                    {
-                        Name = reader.GetString()
-                    };
+                    result.Firm = DataContext.Instance
+                        .Firms[reader.GetString()];
                     break;
                 case nameof(result.Market):
-                    result.Market = new Market.Market
-                    {
-                        Name = reader.GetString()
-                    };
+                    result.Market = DataContext.Instance
+                        .Markets[reader.GetString()];
                     break;
-                case nameof(result.SkillLevel):
-                    result.SkillLevel = reader.GetDecimal();
+                case nameof(result.LowerSkillLevel):
+                    result.LowerSkillLevel = reader.GetDecimal();
+                    break;
+                case nameof(result.HigherSkillLevel):
+                    result.HigherSkillLevel = reader.GetDecimal();
                     break;
                 case nameof(result.Species):
                     if (reader.TokenType != JsonTokenType.StartObject)
@@ -105,6 +107,8 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
     {
         writer.WriteStartObject();
         
+        // Pop Count
+        writer.WriteNumber(nameof(value.Count), value.Count);
         // Pop's Job
         writer.WriteString(nameof(value.Job), value.Job.GetName());
         // pop's Firm
@@ -112,8 +116,10 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
         // pop's Market
         writer.WriteString(nameof(value.Market), value.Market.Name);
         // don't need skill to be selected
-        // Pop Skill Level
-        writer.WriteNumber(nameof(value.SkillLevel), value.SkillLevel);
+        // Pop Lower Skill Level
+        writer.WriteNumber(nameof(value.LowerSkillLevel), value.LowerSkillLevel);
+        // Pop Higher Skill Level
+        writer.WriteNumber(nameof(value.HigherSkillLevel), value.HigherSkillLevel);
         // Species
         writer.WritePropertyName(nameof(value.Species));
         writer.WriteStartObject();

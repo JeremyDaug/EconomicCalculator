@@ -29,6 +29,12 @@ namespace EconomicSim.Objects.Pops
         public int Id { get; set; }
 
         /// <summary>
+        /// A Generated name for a Pop Group, should be synthesized from
+        /// Market, Firm, and Job.
+        /// </summary>
+        public string Name => $"{Job.Name} of {Firm.Name} in {Market.Name}";
+
+        /// <summary>
         /// The total number of people in the pop group.
         /// </summary>
         public int Count { get; set; }
@@ -58,9 +64,14 @@ namespace EconomicSim.Objects.Pops
         ISkill IPopGroup.Skill => Skill;
 
         /// <summary>
-        /// The Skill Level of the Population Group.
+        /// The lower Skill Level of the Population Group.
         /// </summary>
-        public decimal SkillLevel { get; set; }
+        public decimal LowerSkillLevel { get; set; }
+        
+        /// <summary>
+        /// The Highest Skill Level of the Population Group.
+        /// </summary>
+        public decimal HigherSkillLevel { get; set; }
 
         /// <summary>
         /// The property the population Owns.

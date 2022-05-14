@@ -681,47 +681,14 @@ namespace EconomicSim.Objects
         private void LoadPops(string save)
         {
             var filename = GetFileFromSave(save, "Pops");
-            //var json = File.ReadAllText(filename);
+            var json = File.ReadAllText(filename);
 
-            var newPop = new List<PopGroup>
-            {
-                new PopGroup
-                {
-                    Count = 1000,
-                    Job = Jobs.Values.First(),
-                    Firm = new Firm
-                    {
-                        Name = "Wheat Farmers of Alicia"
-                    },
-                    Market = new Market.Market
-                    {
-                        Name = "Alicia"
-                    },
-                    SkillLevel = 3,
-                    Species = new List<(Species species, int amount)>
-                    {
-                        (Species.Values.First(), 500),
-                        (Species.Values.Last(), 500)
-                    },
-                    Cultures = new List<(Culture culture, int amount)>
-                    {
-                        (Cultures.Values.First(), 1000)
-                    },
-                    Property = new List<(Product product, decimal amount)>
-                    {
-                        (Products.ElementAt(0).Value, 20),
-                        (Products.ElementAt(1).Value, 50)
-                    }
-                }
-            };
-
-            var json = JsonSerializer.Serialize(newPop,
-                new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-
-            var testPops = JsonSerializer.Deserialize<List<PopGroup>>(json);
+            var newPops =  JsonSerializer.Deserialize<List<PopGroup>>(json);
+            
+            // No additional Connections needed.
+            // add and throw if any duplicates
+            foreach (var pop in newPops)
+                Pops.Add(pop.Name, pop);
         }
 
         public void LoadSave(string save)
@@ -737,9 +704,8 @@ namespace EconomicSim.Objects
             // load firms
             LoadFirms(save);
             
-            //LoadPops(save);
-
-            // connect pops, markets, and firms here?
+            // Load Pops
+            LoadPops(save);
         }
         
         #endregion Saves

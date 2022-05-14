@@ -19,7 +19,7 @@ namespace EconomicSim.Objects
     public interface IDataContext
     {
         IReadOnlyDictionary<string, IFirm> Firms { get; }
-        
+
         // Governors
 
         IReadOnlyDictionary<string, IJob> Jobs { get; }
