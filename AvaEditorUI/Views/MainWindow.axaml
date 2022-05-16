@@ -1,0 +1,71 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="300"
+        Width="500" Height="300" CanResize="False"
+        x:Class="AvaEditorUI.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="AvaEditorUI">
+    <Design.DataContext>
+        <viewModels:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding Greeting}" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Grid.Row="0" Grid.ColumnSpan="4"/>
+        <TextBlock 
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Grid.Row="1" Grid.ColumnSpan="4">
+                Data
+        </TextBlock>
+        <Button Grid.Row="2" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"
+                Click="GotoWants"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Wants</Button>
+        <Button Grid.Row="2" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Skills</Button>
+        <Button Grid.Row="2" Grid.Column="2" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Techs</Button>
+        <Button Grid.Row="2" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Products</Button>
+        
+        <Button Grid.Row="3" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Processes</Button>
+        <Button Grid.Row="3" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Jobs</Button>
+        <Button Grid.Row="3" Grid.Column="2" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Species</Button>
+        <Button Grid.Row="3" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Culture</Button>
+        
+        <TextBlock Grid.Row="4" Grid.ColumnSpan="4"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center">Save Data</TextBlock>
+        
+        <Button Grid.Row="5" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Firms</Button>
+        <Button Grid.Row="5" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Markets</Button>
+        <Button Grid.Row="5" Grid.Column="2" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Pops</Button>
+        <Button Grid.Row="5" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Territory</Button>
+        
+    </Grid>
+</Window>

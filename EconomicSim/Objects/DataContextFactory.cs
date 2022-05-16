@@ -2,6 +2,6 @@
 {
     public class DataContextFactory
     {
-        public static IDataContext? GetDataContext => DataContext.Instance;
+        public static IDataContext GetDataContext => DataContext.Instance;
     }
 }

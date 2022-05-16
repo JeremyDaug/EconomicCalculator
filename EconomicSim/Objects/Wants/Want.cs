@@ -17,13 +17,13 @@ namespace EconomicSim.Objects.Wants
         /// <summary>
         /// Want's name.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = "NULL";
         string IWant.Name => Name;
 
         /// <summary>
         /// A short explanation of what the want is for.
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = "NULL";
         string IWant.Description => Description;
 
         public override string ToString()
