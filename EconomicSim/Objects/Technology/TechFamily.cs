@@ -5,6 +5,7 @@ namespace EconomicSim.Objects.Technology
     /// <summary>
     /// Tech Family Data Class
     /// </summary>
+    [JsonConverter(typeof(TechFamilyJsonConverter))]
     public class TechFamily : ITechFamily
     {
 

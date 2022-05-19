@@ -1,10 +1,12 @@
-﻿using EconomicSim.Objects.Products;
+﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Objects.Skills
 {
     /// <summary>
     /// Read Only Interface for skills
     /// </summary>
+    [JsonConverter(typeof(SkillJsonConverter))]
     public interface ISkill
     {
         /// <summary>

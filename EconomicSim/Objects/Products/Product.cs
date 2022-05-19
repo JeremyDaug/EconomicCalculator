@@ -1,4 +1,5 @@
-﻿using EconomicSim.Objects.Processes;
+﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Products.ProductTags;
 using EconomicSim.Objects.Technology;
@@ -9,6 +10,7 @@ namespace EconomicSim.Objects.Products
     /// <summary>
     /// Product Data Class
     /// </summary>
+    [JsonConverter(typeof(ProductJsonConverter))]
     public class Product : IProduct
     {
         public Product()

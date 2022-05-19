@@ -5,6 +5,7 @@ namespace EconomicSim.Objects.Technology
     /// <summary>
     /// Read Only Tech Family Interface.
     /// </summary>
+    [JsonConverter(typeof(TechFamilyJsonConverter))]
     public interface ITechFamily
     {
         /// <summary>

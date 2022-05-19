@@ -1,14 +1,19 @@
-﻿using EconomicSim.Objects.Products;
+﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Objects.Skills
 {
     /// <summary>
     /// Skill Data Class
     /// </summary>
+    [JsonConverter(typeof(SkillJsonConverter))]
     public class Skill : ISkill
     {
         public Skill()
         {
+            Id = 0;
+            Name = "";
+            Description = Name;
             Relations = new List<(Skill, decimal)>();
             Groups = new List<SkillGroup>();
         }

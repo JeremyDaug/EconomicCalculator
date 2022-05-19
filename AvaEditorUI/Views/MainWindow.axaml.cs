@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using System.ComponentModel;
 using AvaEditorUI.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using DynamicData.Binding;
 using EconomicSim.Objects;
 
 namespace AvaEditorUI.Views

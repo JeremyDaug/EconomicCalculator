@@ -239,71 +239,52 @@ namespace EconomicSim.Objects
                 Products.Add(product.GetName(), (Product)product);
         }
 
+        /// <summary>
+        /// Loads wants from the set selected.
+        /// </summary>
+        /// <param name="set">The set group to load from.</param>
+        /// <returns>A list of duplicate wants found.</returns>
         private void LoadWants(string set)
         {
-            var filename = GetDataFile(set, "Wants");
-            var json = File.ReadAllText(filename);
+            var errors = new List<string>();
 
+            var filename = GetDataFile(set, "Wants");
+            if (!File.Exists(filename))
+                return;
+            var json = File.ReadAllText(filename);
             var newWants = JsonSerializer.Deserialize<List<Want>>(json);
             if (newWants == null)
-                throw new JsonException($"Wants file \"{filename}\" is empty.");
-
-            // quickly check that the new wants are all unique
-            var dups = newWants.Select(x => x.Name).Distinct().ToList();
-            if (newWants.Count > dups.Count)
-            {
-                // We have a dupe. find it and throw it.
-                foreach (var dup in dups) if (newWants.Count(x => x.Name == dup) > 1)
-                    throw new InvalidDataException($"Duplicate want named \"{dup}\" found in set \"{set}\".");
-            }
+                return;
 
             foreach (var want in newWants)
             {
-                // TODO when duplicates found, deal with it.
-                try
-                { // try to add
-                    Wants.Add(want.Name, want);
-                }
-                catch (ArgumentException e)
-                { // if clash, rethrow with more data.
-                    throw new InvalidDataException($"Duplicate Want of name \"{want.Name}\" from Set \"{set}\" found.");
-                }
+                if (!Wants.TryAdd(want.Name, want))
+                    errors.Add($"Duplicate Want of name \"{want.Name}\" from Set \"{set}\" found.");
             }
+
+            if (errors.Any())
+                throw new DataException($"Duplicates found:\n" + string.Join('\n', errors));
         }
 
         private void LoadTechFamilies(string set)
         {
+            var errors = new List<string>();
             var filename = GetDataFile(set, "TechFamilies");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
-
-            var newFamilies = JsonSerializer.Deserialize<List<TechFamily>>(json, 
-                new JsonSerializerOptions
-                {
-                    Converters =
-                    {
-                        new TechFamilyJsonConverter()
-                    }
-                });
-
+            var newFamilies = JsonSerializer.Deserialize<List<TechFamily>>(json);
             if (newFamilies == null)
-                throw new DataException($"Tech Family file \"{filename}\" is empty.");
+                return;
             
-            // check for dupes in set
-            var dupes = newFamilies.Select(x => x.Name).Distinct().ToList();
-            if (dupes.Count < newFamilies.Count)
-            {
-                // dupes found, find and throw it
-                foreach (string dupe in dupes) if (newFamilies.Count(x => x.Name == dupe) > 1)
-                        throw new InvalidDataException($"Duplicate Tech Family \"{dupe}\" found in set \"{set}\".");
-            }
-
-            // check for dupes in previously loaded sets and add to set
             foreach (var fam in newFamilies)
             {
-                if (TechFamilies.ContainsKey(fam.Name))
-                    throw new InvalidDataException($"Duplicate Tech Family \"{fam.Name}\" in set \"{set}\" found.");
-                TechFamilies.Add(fam.Name, fam);
+                if (!TechFamilies.TryAdd(fam.Name, fam))
+                    errors.Add($"Duplicate Tech Family \"{fam.Name}\" in set \"{set}\" found.");
             }
+
+            if (errors.Any())
+                throw new DataException($"Duplicates found:\n" + string.Join('\n', errors));
 
             // connect tech families to each other.
             foreach (var fam in newFamilies)
@@ -320,56 +301,26 @@ namespace EconomicSim.Objects
 
         private void LoadTechs(string set)
         {
+            var errors = new List<string>();
             var filename = GetDataFile(set, "Technology");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
+            var newTechs = JsonSerializer.Deserialize<List<Technology.Technology>>(json);
+            if (newTechs == null)
+                return;
 
-            var newTechs = JsonSerializer.Deserialize<List<Technology.Technology>>(json,
-                new JsonSerializerOptions
-                {
-                    Converters =
-                    {
-                        new TechnologyJsonConverter()
-                    }
-                });
-
-            // check for dupes in set
-            var dupes = (newTechs ?? throw new DataException($"Technology file \"{filename}\" is empty."))
-                .Select(x => x.Name)
-                .Distinct().ToList();
-            if (dupes.Count < newTechs.Count)
-            {
-                // dupes found, find it and throw
-                foreach (var dupe in dupes) if (newTechs.Count(x => x.Name == dupe) > 1)
-                        throw new InvalidDataException($"Duplicate Tech \"{dupe}\" found in set \"{set}\".");
-            }
-
-            // check for collision with previous sets
             foreach (var tech in newTechs)
             {
-                if (Technologies.ContainsKey(tech.Name))
-                    throw new InvalidDataException($"Duplicate Tech \"{tech.Name}\" in set \"{set}\" found.");
-                // add family connections
-                var families = new List<TechFamily>();
-
-                // tech must have at least one family
-                if (tech.Families.Count == 0)
-                    throw new InvalidDataException($"Tech \"{tech.Name}\" must belong to at least one family.");
-
-                foreach (var fam in tech.Families)
-                {
-                    // get family target
-                    var realfam = TechFamilies[fam.Name];
-                    // add to family list
-                    families.Add(TechFamilies[fam.Name]);
-                    // add to family
-                    realfam.Techs.Add(tech);
-                }
-                tech.Families = families;
                 // add tech to list.
-                Technologies.Add(tech.Name, tech);
+                if (!Technologies.TryAdd(tech.Name, tech))
+                    errors.Add($"Duplicate tech \"{tech.Name}\" in Set \"{set}\".");
             }
 
-            // connect to techs and families
+            if (errors.Any())
+                throw new DataException($"Duplicates found:\n" + string.Join('\n', errors));
+
+            // connect to techs
             foreach (var tech in newTechs)
             {
                 var parents = new List<Technology.Technology>();
@@ -391,34 +342,22 @@ namespace EconomicSim.Objects
         private void LoadProducts(string set)
         {
             var filename = GetDataFile(set, "Products");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
+            var newProducts = JsonSerializer.Deserialize<List<Product>>(json);
+            if (newProducts == null)
+                return;
 
-            var newProducts = JsonSerializer.Deserialize<List<Product>>(json,
-                new JsonSerializerOptions
-                {
-                    Converters =
-                    {
-                        new ProductJsonConverter()
-                    }
-                });
-
-            // check for dupes in set
-            var dupes = (newProducts ?? throw new DataException($"Products file \"{filename}\" is empty."))
-                .Select(x => x.Name).Distinct().ToList();
-            if (dupes.Count() < newProducts.Count())
-            {
-                foreach (var dupe in dupes) if (newProducts.Count(x => x.Name == dupe) > 1)
-                        throw new InvalidDataException($"Duplicate Product \"{dupe}\" found in set \"{set}\".");
-            }
-
-            // check for collisions with previous sets
+            var errors = new List<string>();
             foreach (var prod in newProducts)
             {
-                if (Products.ContainsKey(prod.GetName()))
-                    throw new InvalidDataException($"Duplicate Product \"{prod.Name}\" in set \"{set}\" found.");
-
-                Products.Add(prod.GetName(), prod);
+                if (!Products.TryAdd(prod.GetName(), prod))
+                    errors.Add($"Duplicate Product \"{prod.Name}\" in set \"{set}\" found.");
             }
+
+            if (errors.Any())
+                throw new DataException("Product Duplicates Found:\n" + string.Join('\n', errors));
 
             // Processes connect to products, so no connections here.
 
@@ -428,35 +367,25 @@ namespace EconomicSim.Objects
         private void LoadSkills(string set)
         {
             var filename = GetDataFile(set, "Skills");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
 
-            var newSkills = JsonSerializer.Deserialize<List<Skill>>(json,
-                new JsonSerializerOptions
-                {
-                    Converters =
-                    {
-                        new SkillJsonConverter()
-                    }
-                });
+            var newSkills = JsonSerializer.Deserialize<List<Skill>>(json);
             if (newSkills == null)
-                throw new DataException($"Skill file \"{filename}\" is empty.");
+                return;
 
-            // check for duplicates
-            var dupes = newSkills.Select(x => x.Name).Distinct().ToList();
-            if (dupes.Count() < newSkills.Count())
-            {
-                foreach (var dupe in dupes) if (newSkills.Count(x => x.Name == dupe) > 1)
-                        throw new InvalidDataException($"Duplicate skill \"{dupe}\" found in set \"{set}\".");
-            }
-
-            // check for collisions with previous sets.
+            var errors = new List<string>();
             foreach (var skill in newSkills)
             {
-                if (Skills.ContainsKey(skill.Name))
-                    throw new InvalidDataException($"Duplicate skill \"{skill}\" found in set \"{set}\".");
+                if (!Skills.TryAdd(skill.Name, skill))
+                    errors.Add($"Duplicate Skill \"{skill.Name}\" in set \"{set}\"");
 
                 Skills.Add(skill.Name, skill);
             }
+
+            if (errors.Any())
+                throw new DataException("Duplicate Skills:\n" + string.Join('\n', errors));
 
             // connect relations up.
             foreach (var skill in newSkills)
@@ -475,36 +404,24 @@ namespace EconomicSim.Objects
         private void LoadSkillGroups(string set)
         {
             var filename = GetDataFile(set, "SkillGroups");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
-
-            var newGroups = JsonSerializer.Deserialize<List<SkillGroup>>(json,
-                new JsonSerializerOptions
-                {
-                    Converters =
-                    {
-                        new SkillGroupJsonConverter()
-                    }
-                });
+            var newGroups = JsonSerializer.Deserialize<List<SkillGroup>>(json);
             if (newGroups == null)
-                throw new DataException($"Skill Group file \"{filename}\" is empty.");
-            
-            // check new set for duplicates
-            var dupes = FindDuplicates(newGroups.Select(x => x.Name).ToList());
-            if (dupes.Count > 0)
-            {
-                throw new DataException($"Skill Group(s) \"{string.Join(", ", dupes)}\" within set \"{set}\" has been found.");
-            }
-            
-            // check for duplicates in old sets
-            foreach (var dupe in newGroups.Select(x => x.Name))
-            {
-                if (SkillGroups.ContainsKey(dupe))
-                    throw new DataException($"Duplicate Skill Group \"{dupe}\" found in set \"{set}\"");
-            }
-            
+                return;
+
+            var errors = new List<string>();
             // add new skillGroups
             foreach (var newGroup in newGroups)
-                SkillGroups.Add(newGroup.Name, newGroup);
+            {
+                if (!SkillGroups.TryAdd(newGroup.Name, newGroup))
+                    errors.Add($"Duplicate Skill Group \"{newGroup.Name}\" in set \"{set}\".");
+            }
+
+            if (errors.Any())
+                throw new DataException("Duplicate Skill Groups Found:\n" + string.Join('\n', errors));
+
             // complete
         }
 
@@ -516,78 +433,59 @@ namespace EconomicSim.Objects
             var json = File.ReadAllText(filename);
             var newProcesses = JsonSerializer.Deserialize<List<Process>>(json);
             if (newProcesses == null)
-                return; // if file is empty, that's fine.
-            
-            // check new set for duplicates
-            var dupes = FindDuplicates(newProcesses.Select(x => x.GetName()).ToList());
-            if (dupes.Count > 0)
-            {
-                throw new DataException($"Process(es) \"{string.Join(", ", dupes)}\" within set \"{set}\" has been found.");
-            }
-            
-            // check for duplicates in old sets
-            foreach (var dupe in newProcesses.Select(x => x.GetName()))
-            {
-                if (Processes.ContainsKey(dupe))
-                    throw new DataException($"Duplicate Process Group \"{dupe}\" found in set \"{set}\"");
-            }
-            
+                return;
+
+            var errors = new List<string>();
             foreach (var process in newProcesses)
             {
-                Processes.Add(process.GetName(), process);
+                if (!Processes.TryAdd(process.GetName(), process))
+                    errors.Add($"Duplicate Process \"{process.Name}\" in set \"{set}\".");
             }
             // no connections need to be made. Let's GO!
+            if (errors.Any())
+                throw new DataException("Duplicate Processes Found:\n" + string.Join('\n', errors));
         }
 
         private void LoadJobs(string set)
         {
             var filename = GetDataFile(set, "Jobs");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
-
             var newJobs = JsonSerializer.Deserialize<List<Job>>(json);
-            
-            // check for dupes in set
-            var dupes = FindDuplicates(newJobs.Select(x => x.GetName()).ToList());
-            if (dupes.Count > 0)
-                throw new DataException(
-                    $"Duplicate Job(s) \"{string.Join(", ", dupes)}\" within set \"{set}\" has been found.");
+            if (newJobs == null)
+                return;
 
-            // check for dupes in old set
-            foreach (var dupe in newJobs.Select(x => x.GetName()))
-            {
-                if (Jobs.ContainsKey(dupe))
-                    throw new DataException($"Duplicate Job \"{dupe}\" found in set \"{set}\".");
-            }
-            
+            var errors = new List<string>();
             foreach (var job in newJobs)
-                Jobs.Add(job.GetName(), job);
+            {
+                if (!Jobs.TryAdd(job.GetName(), job))
+                    errors.Add($"Duplicate Job \"{job.Name}\" in set \"{set}\".");
+            }
             // no additional work needed.
+            if (errors.Any())
+                throw new DataException("Duplicate Jobs Found:\n" + string.Join('\n', errors));
         }
 
         private void LoadSpecies(string set)
         {
             var filename = GetDataFile(set, "Species");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
             var newSpecies = JsonSerializer.Deserialize<List<Species>>(json);
+            if (newSpecies == null)
+                return;
 
-            // check for duplicates
-            var dupes = FindDuplicates(newSpecies.Select(x => x.GetName()).ToList());
-            if (dupes.Count > 0)
-            {
-                throw new DataException(
-                    $"Species \"{string.Join(", ", dupes)}\" within set \"{set}\" have been found.");
-            }
-            
-            // check for duplicates in old sets
-            foreach (var dupe in newSpecies.Select(x => x.GetName()))
-            {
-                if (Species.ContainsKey(dupe))
-                    throw new DataException($"Duplicate Species \"{dupe}\" found in set \"{set}\".");
-            }
-            
+            var errors = new List<string>();
             // add species
             foreach (var spec in newSpecies)
-                Species.Add(spec.GetName(), spec);
+            {
+                if (!Species.TryAdd(spec.GetName(), spec))
+                    errors.Add($"Duplicate Species \"{spec.Name}\" in set \"{set}\".");
+            }
+            if (errors.Any())
+                throw new DataException("Duplicate Species Found:\n" + string.Join('\n', errors));
 
             foreach (var species in newSpecies)
             {
@@ -602,26 +500,21 @@ namespace EconomicSim.Objects
         private void LoadCultures(string set)
         {
             var filename = GetDataFile(set, "Cultures");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
             var newCultures = JsonSerializer.Deserialize<List<Culture>>(json);
-            
-            // check for dupes within the set.
-            var dupes = FindDuplicates(newCultures.Select(x => x.GetName()).ToList());
-            if (dupes.Count > 0)
-            {
-                throw new DataException(
-                    $"Cultures \"{string.Join(", ", dupes)}\" within set \"{set}\" have been found.");
-            }
-            
-            // check for dupes in old sets.
-            foreach (var dupe in newCultures.Select(x => x.GetName()))
-            {
-                if (Cultures.ContainsKey(dupe))
-                    throw new DataException($"Duplicate Culture \"{dupe}\" found in set \"{set}\".");
-            }
-            
+            if (newCultures == null)
+                return;
+
+            var errors = new List<string>();
             foreach (var culture in newCultures)
-                Cultures.Add(culture.GetName(), culture);
+            {
+                if (!Cultures.TryAdd(culture.GetName(), culture))
+                    errors.Add($"Duplicate Culture \"{culture.GetName()}\" found in set \"{set}\".");
+            }
+            if (errors.Any())
+                throw new DataException("Duplicate Cultures Found:\n" + string.Join('\n', errors));
             
             // no connections needed.
         }
@@ -676,11 +569,14 @@ namespace EconomicSim.Objects
         private void LoadTerritories(string save)
         {
             var filename = GetFileFromSave(save, "Territories");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
-
             var newTerritories = JsonSerializer.Deserialize<List<Territory.Territory>>(json);
-            
-            // check for dupes within territories
+            if (newTerritories == null)
+                throw new DataException("Territories do not exist.");
+                
+                // check for dupes within territories
             var dupes = FindDuplicates(newTerritories.Select(x => x.Name).ToList());
             if (dupes.Count > 0)
             {
@@ -713,9 +609,12 @@ namespace EconomicSim.Objects
         private void LoadMarkets(string save)
         {
             var filename = GetFileFromSave(save, "Markets");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
-
             var newMarkets = JsonSerializer.Deserialize<List<Market.Market>>(json);
+            if (newMarkets == null)
+                throw new DataException("Markets file is empty.");
             
             // find duplicates in the save
             var dupes = FindDuplicates(newMarkets.Select(x => x.Name));
@@ -763,8 +662,12 @@ namespace EconomicSim.Objects
         private void LoadFirms(string save)
         {
             var filename = GetFileFromSave(save, "Firms");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
             var newFirms = JsonSerializer.Deserialize<List<Firm>>(json);
+            if (newFirms == null)
+                throw new DataException("Firms file is empty.");
             
             // connect firm parent and children
             foreach (var firm in newFirms)
@@ -803,9 +706,12 @@ namespace EconomicSim.Objects
         private void LoadPops(string save)
         {
             var filename = GetFileFromSave(save, "Pops");
+            if (!File.Exists(filename))
+                return;
             var json = File.ReadAllText(filename);
-
             var newPops =  JsonSerializer.Deserialize<List<PopGroup>>(json);
+            if (newPops == null)
+                throw new DataException("Pops file is empty.");
             
             // No additional Connections needed.
             // add and throw if any duplicates

@@ -53,7 +53,11 @@ namespace EconomicSim.Objects.Technology
                     case "Families":
                         var families = JsonSerializer.Deserialize<List<string>>(ref reader, options);
                         foreach (var fam in families)
-                            result.Families.Add(new TechFamily { Name = fam });
+                        {
+                            var family = DataContext.Instance.TechFamilies[fam];
+                            result.Families.Add(family);
+                            family.Techs.Add(result);
+                        }
                         break;
                     case "Children":
                         var children = JsonSerializer.Deserialize<List<string>>(ref reader, options);

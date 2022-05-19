@@ -1,8 +1,11 @@
-﻿namespace EconomicSim.Objects.Skills
+﻿using System.Text.Json.Serialization;
+
+namespace EconomicSim.Objects.Skills
 {
     /// <summary>
     /// Read Only Skill Group Interface
     /// </summary>
+    [JsonConverter(typeof(SkillGroupJsonConverter))]
     public interface ISkillGroup
     {
         /// <summary>

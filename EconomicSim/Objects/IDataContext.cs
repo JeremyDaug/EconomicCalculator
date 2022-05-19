@@ -1,6 +1,5 @@
 ﻿using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
-using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Pops.Culture;
 using EconomicSim.Objects.Pops.Species;
@@ -8,7 +7,6 @@ using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
-using EconomicSim.Objects.Territory;
 using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects

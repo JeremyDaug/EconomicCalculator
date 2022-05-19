@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Technology;

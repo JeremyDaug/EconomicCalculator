@@ -1,8 +1,11 @@
-﻿namespace EconomicSim.Objects.Skills
+﻿using System.Text.Json.Serialization;
+
+namespace EconomicSim.Objects.Skills
 {
     /// <summary>
     /// Skill Group Class
     /// </summary>
+    [JsonConverter(typeof(SkillGroupJsonConverter))]
     public class SkillGroup : ISkillGroup
     {
         /// <summary>
@@ -10,6 +13,9 @@
         /// </summary>
         public SkillGroup()
         {
+            Id = 0;
+            Name = "";
+            Description = "";
             Skills = new List<Skill>();
         }
 

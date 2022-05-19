@@ -1,8 +1,11 @@
-﻿namespace EconomicSim.Objects.Technology
+﻿using System.Text.Json.Serialization;
+
+namespace EconomicSim.Objects.Technology
 {
     /// <summary>
     /// Readonly Technology Interface
     /// </summary>
+    [JsonConverter(typeof(TechnologyJsonConverter))]
     public interface ITechnology
     {
         /// <summary>

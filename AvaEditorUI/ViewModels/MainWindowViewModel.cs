@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Mime;
-using System.Text;
-using AvaEditorUI.Views;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using EconomicSim.Objects;
-using ReactiveUI;
+﻿using EconomicSim.Objects;
 
 namespace AvaEditorUI.ViewModels
 {

@@ -1,8 +1,11 @@
-﻿namespace EconomicSim.Objects.Technology
+﻿using System.Text.Json.Serialization;
+
+namespace EconomicSim.Objects.Technology
 {
     /// <summary>
     /// Technology Data Class
     /// </summary>
+    [JsonConverter(typeof(TechnologyJsonConverter))]
     public class Technology : ITechnology
     {
         public Technology()
