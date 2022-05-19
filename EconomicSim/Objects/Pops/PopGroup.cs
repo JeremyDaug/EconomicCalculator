@@ -14,7 +14,7 @@ namespace EconomicSim.Objects.Pops
     /// Pop group data class.
     /// </summary>
     [JsonConverter(typeof(PopJsonConverter))]
-    internal class PopGroup : IPopGroup
+    public class PopGroup : IPopGroup
     {
         public PopGroup()
         {

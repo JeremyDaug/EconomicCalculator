@@ -7,7 +7,7 @@ namespace EconomicSim.Objects.Pops.Species
     /// Species Data Class
     /// </summary>
     [JsonConverter(typeof(SpeciesJsonConverter))]
-    internal class Species : ISpecies
+    public class Species : ISpecies
     {
         public Species()
         {

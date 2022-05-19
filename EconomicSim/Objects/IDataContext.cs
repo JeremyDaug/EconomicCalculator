@@ -18,38 +18,51 @@ namespace EconomicSim.Objects
     /// </summary>
     public interface IDataContext
     {
-        IReadOnlyDictionary<string, IFirm> Firms { get; }
+        SortedList<string, Firm> Firms { get; }
 
         // Governors
 
-        IReadOnlyDictionary<string, IJob> Jobs { get; }
+        SortedList<string, Job> Jobs { get; }
 
-        IReadOnlyDictionary<string, IMarket> Markets { get; }
+        SortedList<string, Market.Market> Markets { get; }
 
-        IReadOnlyDictionary<string, IPopGroup> Pops { get; }
+        SortedList<string, PopGroup> Pops { get; }
 
-        IReadOnlyDictionary<string, ICulture> Cultures { get; }
+        SortedList<string, Culture> Cultures { get; }
         
-        IReadOnlyDictionary<string, ISpecies> Species { get; }
+        SortedList<string, Species> Species { get; }
         
-        IReadOnlyDictionary<string, IProcess> Processes { get; }
+        SortedList<string, Process> Processes { get; }
 
-        IReadOnlyDictionary<string, IProduct> Products { get; }
+        SortedList<string, Product> Products { get; }
 
-        IReadOnlyDictionary<string, ISkill> Skills { get; }
+        SortedList<string, Skill> Skills { get; }
 
-        IReadOnlyDictionary<string, ISkillGroup> SkillGroups { get; }
+        SortedList<string, SkillGroup> SkillGroups { get; }
 
-        IReadOnlyDictionary<string, ITechFamily> TechFamilies { get; }
+        SortedList<string, TechFamily> TechFamilies { get; }
 
-        IReadOnlyDictionary<string, ITechnology> Technologies { get; }
+        SortedList<string, Technology.Technology> Technologies { get; }
 
-        IReadOnlyDictionary<string, ITerritory> Territories { get; }
+        SortedList<string, Territory.Territory> Territories { get; }
 
-        IReadOnlyDictionary<string, IWant> Wants { get; }
+        SortedList<string, Want> Wants { get; }
 
         void LoadData(IEnumerable<string> sets);
 
         void LoadSave(string save);
+        
+        // TODO update these for sets later
+        void SaveWants();
+        void SaveTechnologies();
+        void SaveTechFamilies();
+        void SaveSkills();
+        void SaveSkillGroups();
+        void SaveProducts();
+        void SaveProcesses();
+        void SaveSpecies();
+        void SaveCultures();
+        void SaveJobs();
+        void SaveGame();
     }
 }

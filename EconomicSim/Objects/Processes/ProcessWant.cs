@@ -8,7 +8,7 @@ namespace EconomicSim.Objects.Processes
     /// Process Want Data
     /// </summary>
     [JsonConverter(typeof(ProcessWantJsonConverter))]
-    internal class ProcessWant : IProcessWant
+    public class ProcessWant : IProcessWant
     {
         /// <summary>
         /// Default Constructor

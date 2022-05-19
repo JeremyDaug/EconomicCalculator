@@ -3,7 +3,7 @@
     /// <summary>
     /// Skill Group Class
     /// </summary>
-    internal class SkillGroup : ISkillGroup
+    public class SkillGroup : ISkillGroup
     {
         /// <summary>
         /// Default Constructor.

@@ -1,6 +1,6 @@
 ﻿namespace EconomicSim.Helpers
 {
-    internal class TagData<T> : ITagData<T> where T : Enum
+    public class TagData<T> : ITagData<T> where T : Enum
     {
         public TagData()
         {

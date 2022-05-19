@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Technology;
@@ -10,7 +9,7 @@ namespace EconomicSim.Objects.Firms
     /// Firm Data Class
     /// </summary>
     [JsonConverter(typeof(FirmJsonConverter))]
-    internal class Firm : IFirm
+    public class Firm : IFirm
     {
         public Firm()
         {

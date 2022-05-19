@@ -9,7 +9,7 @@ namespace EconomicSim.Objects.Jobs
     /// Job Data Class
     /// </summary>
     [JsonConverter(typeof(JobJsonConverter))]
-    internal class Job : IJob
+    public class Job : IJob
     {
         public Job()
         {

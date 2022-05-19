@@ -5,7 +5,7 @@ namespace EconomicSim.Objects.Wants
     /// <summary>
     /// A generic want, that can be satisfied by various things.
     /// </summary>
-    internal class Want : IWant
+    public class Want : IWant
     {
         /// <summary>
         /// The Id of the want.

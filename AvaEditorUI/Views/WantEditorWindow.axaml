@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="200"
+        Width="200" Height="200"
+        x:Class="AvaEditorUI.Views.WantEditorWindow"
+        Title="WantEditorWindow">
+    <Design.DataContext>
+        <vm:WantEditorViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Label Target="NameBox" Content="Name" Grid.Row="0"
+               VerticalAlignment="Bottom"/>
+        <TextBox Grid.Row="1" 
+            Name="NameBox" Text="{Binding Name}"/>
+        
+        <Label Target="DescriptionBox" Content="Description"
+               Grid.Row="2" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Row="3" TextWrapping="Wrap"
+                 Name="DescriptionBox" Text="{Binding Description}"/>
+        
+        <Button Content="Save" Grid.Row="4" HorizontalAlignment="Center"
+                Command="{Binding Commit}"/>
+    </Grid>
+</Window>

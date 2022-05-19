@@ -4,7 +4,7 @@ using EconomicSim.Objects.Jobs;
 namespace EconomicSim.Objects.Firms;
 
 [JsonConverter(typeof(FirmJobJsonConverter))]
-internal class FirmJob : IFirmJob
+public class FirmJob : IFirmJob
 {
     public FirmJob() {}
     

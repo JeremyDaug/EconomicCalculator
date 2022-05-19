@@ -3,7 +3,7 @@
     /// <summary>
     /// Technology Data Class
     /// </summary>
-    internal class Technology : ITechnology
+    public class Technology : ITechnology
     {
         public Technology()
         {

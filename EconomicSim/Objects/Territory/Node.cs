@@ -4,7 +4,7 @@ using EconomicSim.Objects.Products;
 namespace EconomicSim.Objects.Territory;
 
 [JsonConverter(typeof(NodeJsonConverter))]
-internal class Node : INode
+public class Node : INode
 {
     public Product Resource { get; set; }
     IProduct INode.Resource => Resource;

@@ -10,7 +10,7 @@ namespace EconomicSim.Objects.Territory
     /// No special traits or connections. Everything is explicit. No map generation basis.
     /// </summary>
     [JsonConverter(typeof(TerritoryJsonConverter))]
-    internal class Territory : ITerritory
+    public class Territory : ITerritory
     {
         private ulong land;
 

@@ -5,7 +5,7 @@ namespace EconomicSim.Objects.Skills
     /// <summary>
     /// Skill Data Class
     /// </summary>
-    internal class Skill : ISkill
+    public class Skill : ISkill
     {
         public Skill()
         {

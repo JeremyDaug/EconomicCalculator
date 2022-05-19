@@ -9,7 +9,7 @@ namespace EconomicSim.Objects.Products
     /// <summary>
     /// Product Data Class
     /// </summary>
-    internal class Product : IProduct
+    public class Product : IProduct
     {
         public Product()
         {

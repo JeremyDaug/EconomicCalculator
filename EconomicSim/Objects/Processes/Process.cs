@@ -9,7 +9,7 @@ namespace EconomicSim.Objects.Processes
     /// Process Data Class
     /// </summary>
     [JsonConverter(typeof(ProcessJsonConverter))]
-    internal class Process : IProcess
+    public class Process : IProcess
     {
         public Process()
         {

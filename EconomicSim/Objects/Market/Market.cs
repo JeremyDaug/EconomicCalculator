@@ -10,7 +10,7 @@ namespace EconomicSim.Objects.Market
     /// Market Data Class
     /// </summary>
     [JsonConverter(typeof(MarketJsonConverter))]
-    internal class Market : IMarket
+    public class Market : IMarket
     {
         public Market()
         {

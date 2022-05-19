@@ -3,7 +3,6 @@ using System.Text.Json;
 using EconomicSim.Enums;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
-using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Pops.Culture;
 using EconomicSim.Objects.Pops.Species;
@@ -62,6 +61,7 @@ namespace EconomicSim.Objects
             Territories = new SortedList<string, Territory.Territory>();
             Markets = new SortedList<string, Market.Market>();
             Firms = new SortedList<string, Firm>();
+            Sets = new List<string>();
         }
         
         #region HelperFuncs
@@ -69,11 +69,12 @@ namespace EconomicSim.Objects
         private List<string> FindDuplicates(IEnumerable<string> group)
         {
             var result = new List<string>();
-            var dupes = group.Distinct().ToList();
-            if (group.Count() != dupes.Count)
+            var enumerable = group.ToList();
+            var dupes = enumerable.Distinct().ToList();
+            if (enumerable.Count() != dupes.Count)
             {
                 foreach (var dupe in dupes)
-                    if (group.Count(x => x == dupe) > 1)
+                    if (enumerable.Count(x => x == dupe) > 1)
                         result.Add(dupe);
             }
 
@@ -84,11 +85,128 @@ namespace EconomicSim.Objects
 
         #region Saving
 
-        public void Save()
+        public void SaveAllData()
         {
-
+            
         }
 
+        public void SaveGame()
+        {
+            
+        }
+
+        
+        // TODO, update these for set mechanics.
+        public void SaveWants()
+        {
+            var filename = GetDataFile("Common", "Wants");
+            var json = JsonSerializer.Serialize(Wants.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+
+        public void SaveTechnologies()
+        {
+            var filename = GetDataFile("Common", "Technology");
+            var json = JsonSerializer.Serialize(Technologies.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+
+        public void SaveTechFamilies()
+        {
+            var filename = GetDataFile("Common", "TechFamilies");
+            var json = JsonSerializer.Serialize(TechFamilies.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveSkills()
+        {
+            var filename = GetDataFile("Common", "Skills");
+            var json = JsonSerializer.Serialize(Skills.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+
+        public void SaveSkillGroups()
+        {
+            var filename = GetDataFile("Common", "SkillGroups");
+            var json = JsonSerializer.Serialize(SkillGroups.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveProducts()
+        {
+            var filename = GetDataFile("Common", "Products");
+            var json = JsonSerializer.Serialize(Products.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveProcesses()
+        {
+            var filename = GetDataFile("Common", "Processes");
+            var json = JsonSerializer.Serialize(Processes.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveSpecies()
+        {
+            var filename = GetDataFile("Common", "Species");
+            var json = JsonSerializer.Serialize(Species.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveCultures()
+        {
+            var filename = GetDataFile("Common", "Cultures");
+            var json = JsonSerializer.Serialize(Cultures.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveJobs()
+        {
+            var filename = GetDataFile("Common", "Jobs");
+            var json = JsonSerializer.Serialize(Jobs.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
         #endregion Saving
 
         #region Loading
@@ -99,7 +217,7 @@ namespace EconomicSim.Objects
         {
             // Data/set/category/categoryset.json
             //return Path.Combine("EconomicSim/Data", set, category, $"{set}{category}.json");
-            return Path.Combine(DataFolder, set, category, $"{set}{category}.json");
+            return Path.Combine(DataFolder, "Common", category, $"{set}{category}.json");
         }
 
         private void LoadRequiredItems()
@@ -109,8 +227,8 @@ namespace EconomicSim.Objects
             _hasEverLoaded = true;
 
             // load wants
-            foreach (var want in RequiredItems.Wants.Values)
-                Wants.Add(want.Name, (Want)want);
+            // foreach (var want in RequiredItems.Wants.Values)
+            //    Wants.Add(want.Name, (Want)want); 
 
             // load techs
             foreach (var tech in RequiredItems.Technologies.Values)
@@ -141,14 +259,15 @@ namespace EconomicSim.Objects
 
             foreach (var want in newWants)
             {
-                // check that there are no duplicates with existing sets
                 // TODO when duplicates found, deal with it.
-                if (Wants.ContainsKey(want.Name))
-                {
+                try
+                { // try to add
+                    Wants.Add(want.Name, want);
+                }
+                catch (ArgumentException e)
+                { // if clash, rethrow with more data.
                     throw new InvalidDataException($"Duplicate Want of name \"{want.Name}\" from Set \"{set}\" found.");
                 }
-                // if no clash add to our list
-                Wants.Add(want.Name, want);
             }
         }
 
@@ -392,9 +511,12 @@ namespace EconomicSim.Objects
         private void LoadProcesses(string set)
         {
             var filename = GetDataFile(set, "Processes");
+            if (!File.Exists(filename)) // ensure file exists.
+                return;
             var json = File.ReadAllText(filename);
-
             var newProcesses = JsonSerializer.Deserialize<List<Process>>(json);
+            if (newProcesses == null)
+                return; // if file is empty, that's fine.
             
             // check new set for duplicates
             var dupes = FindDuplicates(newProcesses.Select(x => x.GetName()).ToList());
@@ -707,7 +829,7 @@ namespace EconomicSim.Objects
             // Load Pops
             LoadPops(save);
         }
-        
+
         #endregion Saves
         
         #endregion Loading
@@ -740,73 +862,34 @@ namespace EconomicSim.Objects
         #region DataStorage
 
         public SortedList<string, Want> Wants { get; set; }
-        IReadOnlyDictionary<string, IWant> IDataContext.Wants
-            => Wants.ToDictionary(x => x.Key,
-                x => (IWant)x.Value);
 
         public SortedList<string, TechFamily> TechFamilies { get; set; }
-        IReadOnlyDictionary<string, ITechFamily> IDataContext.TechFamilies 
-            => TechFamilies.ToDictionary(x => x.Key,
-                x => (ITechFamily)x.Value);
 
         public SortedList<string, Technology.Technology> Technologies { get; set; }
-        IReadOnlyDictionary<string, ITechnology> IDataContext.Technologies
-            => Technologies.ToDictionary(x => x.Key,
-                x => (ITechnology)x.Value);
 
         public SortedList<string, Product> Products { get; set; }
-        IReadOnlyDictionary<string, IProduct> IDataContext.Products 
-            => Products.ToDictionary(x => x.Key,
-                x => (IProduct)x.Value);
 
         public SortedList<string, SkillGroup> SkillGroups { get; set; }
-        IReadOnlyDictionary<string, ISkillGroup> IDataContext.SkillGroups
-            => SkillGroups.ToDictionary(x => x.Key,
-                x => (ISkillGroup)x.Value);
 
         public SortedList<string, Skill> Skills { get; set; }
-        IReadOnlyDictionary<string, ISkill> IDataContext.Skills
-            => Skills.ToDictionary(x => x.Key,
-                x => (ISkill)x.Value);
 
         public SortedList<string, Process> Processes { get; set; }
-        IReadOnlyDictionary<string, IProcess> IDataContext.Processes 
-            => Processes.ToDictionary(x => x.Key,
-                x => (IProcess)x.Value);
 
         public SortedList<string, Job> Jobs { get; set; }
-        IReadOnlyDictionary<string, IJob> IDataContext.Jobs 
-            => Jobs.ToDictionary(x => x.Key,
-                x => (IJob)x.Value);
 
         public SortedList<string, Species> Species { get; set; }
-        IReadOnlyDictionary<string, ISpecies> IDataContext.Species 
-            => Species.ToDictionary(x => x.Key,
-                x => (ISpecies)x.Value);
 
+        public SortedList<string, PopGroup> Pops { get; }
+        
         public SortedList<string, Culture> Cultures { get; set; }
-        IReadOnlyDictionary<string, ICulture> IDataContext.Cultures 
-            => Cultures.ToDictionary(x => x.Key,
-                x => (ICulture)x.Value);
-
-        public SortedList<string, PopGroup> Pops { get; set; }
-        IReadOnlyDictionary<string, IPopGroup> IDataContext.Pops
-            => Pops.ToDictionary(x => x.Key,
-                x => (IPopGroup)x.Value);
-
+        
         public SortedList<string, Territory.Territory> Territories { get; set; }
-        IReadOnlyDictionary<string, ITerritory> IDataContext.Territories 
-            => Territories.ToDictionary(x => x.Key,
-                x => (ITerritory)x.Value);
-
+        
         public SortedList<string, Market.Market> Markets { get; set; }
-        IReadOnlyDictionary<string, IMarket> IDataContext.Markets 
-            => Markets.ToDictionary(x => x.Key, x => (IMarket)x.Value);
-
+        
         public SortedList<string, Firm> Firms { get; set; }
-        IReadOnlyDictionary<string, IFirm> IDataContext.Firms 
-            => Firms.ToDictionary(x => x.Key,
-                x => (IFirm)x.Value);
+        
+        public List<string> Sets { get; set; }
 
         #endregion DataStorage
     }

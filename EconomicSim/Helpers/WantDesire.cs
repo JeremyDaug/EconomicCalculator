@@ -5,7 +5,7 @@ using EconomicSim.Objects.Wants;
 namespace EconomicSim.Helpers;
 
 [JsonConverter(typeof(WantDesireJsonConverter))]
-internal class WantDesire : IWantDesire
+public class WantDesire : IWantDesire
 {
     public IWant Want { get; set; }
     public DesireTier Tier { get; set; }

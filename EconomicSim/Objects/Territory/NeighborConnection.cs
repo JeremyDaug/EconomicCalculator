@@ -4,7 +4,7 @@ using EconomicSim.Enums;
 namespace EconomicSim.Objects.Territory;
 
 [JsonConverter(typeof(NeighborConnectionJsonConverter))]
-internal class NeighborConnection : INeighborConnection
+public class NeighborConnection : INeighborConnection
 {
     public Territory Neighbor { get; set; }
     ITerritory INeighborConnection.Neighbor => Neighbor;

@@ -7,7 +7,7 @@ namespace EconomicSim.Objects.Pops.Culture
     /// Culture Data Class
     /// </summary>
     [JsonConverter(typeof(CultureJsonConverter))]
-    internal class Culture : ICulture
+    public class Culture : ICulture
     {
         /// <summary>
         /// The Culture's Id.

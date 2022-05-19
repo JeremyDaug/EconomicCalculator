@@ -5,7 +5,7 @@ namespace EconomicSim.Objects.Technology
     /// <summary>
     /// Tech Family Data Class
     /// </summary>
-    internal class TechFamily : ITechFamily
+    public class TechFamily : ITechFamily
     {
 
         public TechFamily()

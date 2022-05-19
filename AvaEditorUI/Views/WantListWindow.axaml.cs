@@ -17,6 +17,9 @@ public partial class WantListWindow : Window
         InitializeComponent();
 
         vm = new WantListViewModel();
+
+        vm.Window = this;
+        
         DataContext = vm;
         
 #if DEBUG
