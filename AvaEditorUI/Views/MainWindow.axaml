@@ -3,11 +3,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:AvaEditorUI.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="300"
-        Width="500" Height="300" CanResize="False"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        Width="500" Height="400" CanResize="False"
         x:Class="AvaEditorUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="AvaEditorUI">
+        Title="Main Menu">
     <Design.DataContext>
         <viewModels:MainWindowViewModel/>
     </Design.DataContext>
@@ -16,6 +16,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
@@ -32,13 +34,14 @@
                    Grid.Row="0" Grid.ColumnSpan="4"/>
         <TextBlock 
                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                   Grid.Row="1" Grid.ColumnSpan="4">
+                   Grid.Row="1" Grid.ColumnSpan="4" Grid.Column="0">
                 Data
         </TextBlock>
         <Button Grid.Row="2" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"
                 Click="GotoWants"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Wants</Button>
         <Button Grid.Row="2" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
+                Click="GotoSkills"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Skills</Button>
         <Button Grid.Row="2" Grid.Column="2" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Techs</Button>
@@ -53,19 +56,24 @@
                 HorizontalAlignment="Center" VerticalAlignment="Center">Species</Button>
         <Button Grid.Row="3" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Culture</Button>
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Width="150" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Save Data Set</Button>
         
-        <TextBlock Grid.Row="4" Grid.ColumnSpan="4"
+        <TextBlock Grid.Row="5" Grid.ColumnSpan="4" Grid.Column="0"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Center">Save Data</TextBlock>
         
-        <Button Grid.Row="5" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"
+        <Button Grid.Row="6" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Firms</Button>
-        <Button Grid.Row="5" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
+        <Button Grid.Row="6" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Markets</Button>
-        <Button Grid.Row="5" Grid.Column="2" Width="100" HorizontalContentAlignment="Center"
+        <Button Grid.Row="6" Grid.Column="2" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Pops</Button>
-        <Button Grid.Row="5" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
+        <Button Grid.Row="6" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Territory</Button>
+        
+        <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="4" Width="150" HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center" VerticalAlignment="Center">Save Game File</Button>
         
     </Grid>
 </Window>

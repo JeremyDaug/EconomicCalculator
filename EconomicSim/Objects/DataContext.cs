@@ -380,8 +380,6 @@ namespace EconomicSim.Objects
             {
                 if (!Skills.TryAdd(skill.Name, skill))
                     errors.Add($"Duplicate Skill \"{skill.Name}\" in set \"{set}\"");
-
-                Skills.Add(skill.Name, skill);
             }
 
             if (errors.Any())

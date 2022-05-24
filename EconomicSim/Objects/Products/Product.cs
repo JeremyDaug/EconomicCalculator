@@ -178,5 +178,23 @@ namespace EconomicSim.Objects.Products
         {
             return GetName().GetHashCode();
         }
+
+        public static Product ServiceExample()
+        {
+            return new Product
+            {
+                Name = "Service",
+                VariantName = "Variant",
+                UnitName = "Man Hour",
+                Bulk = 0,
+                Mass = 0,
+                Quality = 1,
+                ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
+                {
+                    { ProductTag.Service, null }
+                }, 
+                Fractional = true
+            };
+        }
     }
 }

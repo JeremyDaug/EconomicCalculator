@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        Width="600" Height="450"
+        x:Class="AvaEditorUI.Views.SkillEditorWindow"
+        Title="Skill Editor">
+    <Design.DataContext>
+        <vm:SkillEditorViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label Content="Name"
+               Grid.Row="0" Grid.Column="0"/>
+        <TextBox Grid.Row="1" Grid.Column="0"
+                 Height="40"
+                 VerticalAlignment="Top"
+                 Text="{Binding Name}"/>
+        
+        <Label Content="Description"
+               Grid.Row="0" Grid.Column="1"/>
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 Height="40"
+                 VerticalAlignment="Top"
+                 Text="{Binding Description}"/>
+        
+        <Label Content="Labor"
+               Grid.Row="0" Grid.Column="2"/>
+        <ComboBox Grid.Row="1" Grid.Column="2"
+                  Width="150"
+                  Items="{Binding LaborOptions, Mode=TwoWay}"
+                  SelectedItem="{Binding Labor}"/>
+        
+        <Label Content="Relations"
+               Grid.Row="2" Grid.Column="0"/>
+        <DataGrid Grid.Column="0" Grid.Row="3" Height="250"
+                  BorderBrush="Black" BorderThickness="2"
+                  AlternatingRowBackground="Gray" 
+                  Margin="5"
+                  SelectedItem="{Binding SelectedRelation}"
+                  Items="{Binding Relations}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Primary}"
+                                    IsReadOnly="True" Header="Skill"/>
+                <DataGridTextColumn Binding="{Binding Secondary}"
+                                    Header="Rate"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="4" Grid.Column="0"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal">
+            <Label Content="New Relation"/>
+            <ComboBox SelectedItem="{Binding SkillToAdd}"
+                      Items="{Binding SkillOptions}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal">
+            <Button Command="{Binding AddSkill}"
+                    IsEnabled="{Binding CanAddSkill}">Add Skill</Button>
+            <Button Command="{Binding RemoveSkill}"
+                    IsEnabled="{Binding CanRemoveSkill}">Remove Skill</Button>
+        </StackPanel>
+        
+        <Label Content="Groups" Grid.Row="2" Grid.Column="1"/>
+        <DataGrid Grid.Row="3" Grid.Column="1" BorderBrush="Black" BorderThickness="2"
+                  Height="250" Margin="5"
+                  IsReadOnly="True"
+                  SelectedItem="{Binding SelectedGroup}"
+                  Items="{Binding Groups}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Skill Group" Binding="{Binding Wrapped}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal"
+                    VerticalAlignment="Bottom">
+            <Label> New Skill Group</Label>
+            <ComboBox Items="{Binding GroupOptions}"
+                      SelectedItem="{Binding GroupToAdd}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal">
+            <Button Command="{Binding AddGroup}"
+                    IsEnabled="{Binding CanAddGroup}">Add Group</Button>
+            <Button Command="{Binding RemoveGroup}"
+                    IsEnabled="{Binding CanRemoveGroup}">Remove Group</Button>
+        </StackPanel>
+        
+        <Button Grid.Row="3" Grid.Column="2"
+                Command="{Binding CommitSkill}"
+                HorizontalAlignment="Center">Commit</Button>
+        
+    </Grid>
+</Window>

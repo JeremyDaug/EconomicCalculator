@@ -7,18 +7,23 @@ namespace AvaEditorUI.Views
 {
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel vm;
-        private IDataContext dc = DataContextFactory.GetDataContext;
         public MainWindow()
         {
             InitializeComponent();
-            vm = new MainWindowViewModel();
+            var vm = new MainWindowViewModel();
             DataContext = vm;
         }
 
         private void GotoWants(object? sender, RoutedEventArgs e)
         {
             var win = new WantListWindow();
+            win.Show();
+            this.Close();
+        }
+
+        private void GotoSkills(object? sender, RoutedEventArgs e)
+        {
+            var win = new SkillListsWindow();
             win.Show();
             this.Close();
         }
