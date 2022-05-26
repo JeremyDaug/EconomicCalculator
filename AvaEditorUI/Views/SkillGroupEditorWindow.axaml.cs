@@ -8,12 +8,11 @@ namespace AvaEditorUI.Views;
 
 public partial class SkillGroupEditorWindow : Window
 {
-    private SkillGroupEditorViewModel vm;
     public SkillGroupEditorWindow()
     {
         InitializeComponent();
 
-        vm = new SkillGroupEditorViewModel(this);
+        var vm = new SkillGroupEditorViewModel(this);
 
         DataContext = vm;
 #if DEBUG
@@ -25,7 +24,7 @@ public partial class SkillGroupEditorWindow : Window
     {
         InitializeComponent();
 
-        vm = new SkillGroupEditorViewModel(this, group);
+        var vm = new SkillGroupEditorViewModel(this, group);
 
         DataContext = vm;
 #if DEBUG

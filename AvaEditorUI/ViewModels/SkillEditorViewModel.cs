@@ -59,7 +59,7 @@ public class SkillEditorViewModel : ViewModelBase
     {
         this.Window = win; 
         _original = new SkillEditorModel();
-
+        
         Relations = new ObservableCollection<Pair<string, decimal>>();
         Groups = new ObservableCollection<Dummy<string>>();
 
@@ -191,6 +191,25 @@ public class SkillEditorViewModel : ViewModelBase
         if (dc.Skills.ContainsKey(_original.Name))
             dc.Skills.Remove(_original.Name);
         dc.Skills[newSkill.Name] = newSkill;
+        // update any groups to connect back to the new skill
+        foreach (var group in Groups.Select(x => x.Wrapped))
+        {
+            var realGroup = dc.SkillGroups[group];
+            var item = realGroup.Skills.SingleOrDefault(x => x.Name == _original.Name);
+            if (item != null) // if original is in group, remove it
+                realGroup.Skills.Remove(item);
+            realGroup.Skills.Add(newSkill);
+        }
+        // update related skills
+        foreach (var rel in Relations)
+        {
+            // TODO: ISSUE #63 Allow for a skill to define it's return rate from a skill. 
+            var realSkill = dc.Skills[rel.Primary];
+            var item = realSkill.Relations.SingleOrDefault(x => x.relation.Name == _original.Name);
+            if (item.relation != null)
+                realSkill.Relations.Remove(item);
+            realSkill.Relations.Add((newSkill, rel.Secondary));
+        }
         
         // update origin to update this
         _original = model;
@@ -222,7 +241,10 @@ public class SkillEditorViewModel : ViewModelBase
     private void AddSkillGroup()
     {
         if (!string.IsNullOrEmpty(_groupToAdd))
+        {
             Groups.Add(new Dummy<string>(_groupToAdd));
+            SkillOptions.Remove(_groupToAdd);
+        }
     }
 
     private void RemoveSkillGroup()

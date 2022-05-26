@@ -194,7 +194,12 @@ public class SkillListsViewModel : ViewModelBase
                     group.Skills.Select(x => x.Name))
             });
     }
-    private async Task SaveSkillData() {}
+
+    private async Task SaveSkillData()
+    {
+        _dataContext.SaveSkills();
+        _dataContext.SaveSkillGroups();
+    }
     
     public SkillEditorModel? SelectedSkill { get; set; }
     public SkillGroupEditorModel? SelectedSkillGroup { get; set; }

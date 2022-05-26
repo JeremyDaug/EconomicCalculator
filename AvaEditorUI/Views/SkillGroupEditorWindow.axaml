@@ -2,8 +2,68 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        Width="500" Height="400"
         x:Class="AvaEditorUI.Views.SkillGroupEditorWindow"
-        Title="SkillGroupEditorWindow">
-    Welcome to Avalonia!
+        Title="Group Editor">
+    <Design.DataContext>
+        <vm:SkillGroupEditorViewModel/>
+    </Design.DataContext>
+    
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label Grid.Row="0" Grid.Column="0">Group Name</Label>
+        <TextBox Grid.Row="1" Grid.Column="0"
+                 Height="30" Width="150" 
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Text="{Binding Name}"/>
+        
+        <Label Grid.Row="0" Grid.Column="1">Group Description</Label>
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 Height="30" Width="200" 
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Text="{Binding Description}"/>
+        
+        <Label Grid.Row="2" Grid.Column="0">Group Skills</Label>
+        <ListBox Grid.Column="0" Grid.Row="3" Grid.RowSpan="2"
+                 Items="{Binding Skills}"
+                 SelectedItem="{Binding SelectedSkill}"/>
+        
+        <Label Grid.Row="2" Grid.Column="1">Default Rate</Label>
+        <TextBox Grid.Row="3" Grid.Column="1" 
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Margin="5" Text="{Binding Default}"></TextBox>
+        
+        <Button Grid.Row="4" Grid.Column="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Command="{Binding Commit}">Commit</Button>
+        
+        <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Vertical" Margin="5">
+            <StackPanel Orientation="Horizontal">
+                <Label>Add Skill</Label>
+                <ComboBox Items="{Binding SkillOptions}"
+                          SelectedItem="{Binding SkillToAdd}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddSkill}"
+                        IsEnabled="{Binding CanAdd}">Add Skill</Button>
+                <Button Command="{Binding RemoveSkill}"
+                        IsEnabled="{Binding CanRemove}">Remove Skill</Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
 </Window>
