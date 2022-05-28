@@ -8,7 +8,6 @@ namespace EconomicSim.Objects.Technology
     [JsonConverter(typeof(TechFamilyJsonConverter))]
     public class TechFamily : ITechFamily
     {
-
         public TechFamily()
         {
             Relations = new List<TechFamily>();

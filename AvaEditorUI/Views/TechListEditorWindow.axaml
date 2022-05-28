@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="450"
+        x:Class="AvaEditorUI.Views.TechListEditorWindow"
+        Title="TechListEditorWindow">
+    <Design.DataContext>
+        <vm:TechListEditorViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label Grid.Row="0" Grid.Column="0"
+               Grid.ColumnSpan="3" 
+               HorizontalAlignment="Center">
+             Technologies
+        </Label>
+        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                  Items="{Binding Techs}"
+                  Margin="5" CanUserReorderColumns="True"
+                  CanUserResizeColumns="True"
+                  SelectedItem="{Binding SelectedTech}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"
+                                    Width="150"/>
+                <DataGridTextColumn Header="Tier" Binding="{Binding Tier}"/>
+                <DataGridTextColumn Header="Base Cost" Binding="{Binding TechBaseCost}"/>
+                <DataGridTextColumn Header="Families" Binding="{Binding FamilyString}"/>
+                <DataGridTextColumn Header="Parents" Binding="{Binding ParentString}"/>
+                <DataGridTextColumn Header="Children" Binding="{Binding ChildrenString}"/>
+                <DataGridTextColumn Header="Category" Binding="{Binding Category}"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}"
+                                    Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <Label Grid.Row="0" Grid.Column="3"
+               Grid.ColumnSpan="2" 
+               HorizontalAlignment="Center">
+             Technology Families
+        </Label>
+        <DataGrid Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2"
+                  Items="{Binding TechFamilies}"
+                  Margin="5" CanUserResizeColumns="True"
+                  CanUserReorderColumns="True"
+                  SelectedItem="{Binding SelectedFamily}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"
+                                    Width="100"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}"
+                                    Width="100"/>
+                <DataGridTextColumn Header="Relations" Binding="{Binding RelationsString}"
+                                    Width="100"/>
+                <DataGridTextColumn Header="Techs" Binding="{Binding TechString}"
+                                    Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <Button Grid.Row="2" Grid.Column="0">New Tech</Button>
+        <Button Grid.Row="2" Grid.Column="1">Edit Tech</Button>
+        <Button Grid.Row="2" Grid.Column="2">New Tech Family</Button>
+        <Button Grid.Row="2" Grid.Column="3">Edit Tech Family</Button>
+        <Button Grid.Row="2" Grid.Column="4">Save</Button>
+        
+    </Grid>
+</Window>

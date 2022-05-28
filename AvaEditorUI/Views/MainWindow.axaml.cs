@@ -27,5 +27,12 @@ namespace AvaEditorUI.Views
             win.Show();
             this.Close();
         }
+
+        public void GotoTechs(object? sender, RoutedEventArgs e)
+        {
+            var win = new TechListEditorWindow();
+            win.Show();
+            this.Close();
+        }
     }
 }

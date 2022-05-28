@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AvaEditorUI.Models;
 using AvaEditorUI.Views;
 using EconomicSim.Objects;
+using MessageBox.Avalonia;
 using ReactiveUI;
 
 namespace AvaEditorUI.ViewModels;
@@ -199,6 +200,11 @@ public class SkillListsViewModel : ViewModelBase
     {
         _dataContext.SaveSkills();
         _dataContext.SaveSkillGroups();
+        
+        var failure = MessageBox.Avalonia.MessageBoxManager
+            .GetMessageBoxStandardWindow("Save Successful!", 
+                "Skills and Skill Groups Saved!");
+        await failure.ShowDialog(Window);
     }
     
     public SkillEditorModel? SelectedSkill { get; set; }
