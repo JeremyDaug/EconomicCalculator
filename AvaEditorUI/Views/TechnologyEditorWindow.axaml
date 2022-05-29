@@ -1,0 +1,115 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="410"
+        Width="650" Height="410"
+        x:Class="AvaEditorUI.Views.TechnologyEditorWindow"
+        Title="Tech Editor">
+    <Design.DataContext>
+        <vm:TechnologyEditorViewModel/>
+    </Design.DataContext>
+    
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0" Grid.Column="0">
+            <Label>Tech Name</Label>
+            <TextBox HorizontalAlignment="Left" VerticalAlignment="Center"
+                     Width="150"
+                     Text="{Binding Name}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1">
+            <Label >Description</Label>
+            <TextBox HorizontalAlignment="Left" VerticalAlignment="Center"
+                     Width="150"
+                     Text="{Binding Description}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="2">
+            <Label>Category</Label>
+            <ComboBox HorizontalAlignment="Left" VerticalAlignment="Center"
+                      Width="150" 
+                      Items="{Binding CategoryOptions}"
+                      SelectedItem="{Binding Category}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0">
+            <Label>Tier</Label>
+            <TextBox HorizontalAlignment="Left" VerticalAlignment="Center"
+                     Width="150"
+                     Text="{Binding Tier}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1">
+            <Label>Tech Base Cost</Label>
+            <TextBox HorizontalAlignment="Left" VerticalAlignment="Center"
+                     Width="150"
+                     Text="{Binding TechCostBase}"/>
+        </StackPanel>
+        
+        <Button Grid.Row="1" Grid.Column="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Command="{Binding Commit}">Commit</Button>
+        
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+            <Label>Parents</Label>
+            <ListBox Items="{Binding Parents}"
+                     SelectedItem="{Binding ParentToRemove}"
+                     Height="200"/>
+            <StackPanel Orientation="Horizontal">
+                <Label>New Parent</Label>
+                <ComboBox Items="{Binding PossibleParents}"
+                          SelectedItem="{Binding ParentToAdd}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddParent}">Add Parent</Button>
+                <Button Command="{Binding RemoveParent}">Remove Parent</Button>
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+            <Label>Children</Label>
+            <ListBox Items="{Binding Children}"
+                     SelectedItem="{Binding ChildToRemove}"
+                     Height="200"/>
+            <StackPanel Orientation="Horizontal">
+                <Label>New Child</Label>
+                <ComboBox Items="{Binding PossibleChildren}"
+                          SelectedItem="{Binding ChildToAdd}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddChild}">Add Child</Button>
+                <Button Command="{Binding RemoveChild}">Remove Child</Button>
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="5">
+            <Label>Families</Label>
+            <ListBox Items="{Binding Families}"
+                     SelectedItem="{Binding FamilyToRemove}"
+                     Height="200"/>
+            <StackPanel Orientation="Horizontal">
+                <Label>New Family</Label>
+                <ComboBox Items="{Binding AvailableFamilies}"
+                          SelectedItem="{Binding FamilyToAdd}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddFamily}">Add Family</Button>
+                <Button Command="{Binding RemoveFamily}">Remove Family</Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

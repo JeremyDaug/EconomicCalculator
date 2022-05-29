@@ -15,8 +15,7 @@ public class TechListEditorViewModel : ViewModelBase
     private IDataContext dc = DataContextFactory.GetDataContext;
     private TechnologyEditorModel? _selectedTech;
     private TechFamilyEditorModel? _selectedFamily;
-    private Window _window;
-
+    private Window? _window;
     
     public TechListEditorViewModel()
     {
@@ -48,11 +47,11 @@ public class TechListEditorViewModel : ViewModelBase
             });
         }
         
-        AddTech = ReactiveCommand.Create(addTech);
-        AddFamily = ReactiveCommand.Create(addFamily);
-        EditTech = ReactiveCommand.Create(editTech);
-        EditFamily = ReactiveCommand.Create(editFamily);
-        Save = ReactiveCommand.Create(save);
+        NewTech = ReactiveCommand.Create(AddTech);
+        NewFamily = ReactiveCommand.Create(AddFamily);
+        EditTechnology = ReactiveCommand.Create(EditTech);
+        EditTechFamily = ReactiveCommand.Create(EditFamily);
+        SaveTechs = ReactiveCommand.Create(save);
     }
     
     public TechListEditorViewModel(TechListEditorWindow window)
@@ -62,60 +61,75 @@ public class TechListEditorViewModel : ViewModelBase
         TechFamilies = new ObservableCollection<TechFamilyEditorModel>();
         foreach (var tech in dc.Technologies.Values)
         {
-            Techs.Add(new TechnologyEditorModel
-            {
-                Category = tech.Category.ToString(),
-                Children = new ObservableCollection<string>(tech.Children.Select(x => x.Name)),
-                Parents = new ObservableCollection<string>(tech.Parents.Select(x => x.Name)),
-                Description = tech.Description,
-                Families = new ObservableCollection<string>(tech.Families.Select(x => x.Name)),
-                Name = tech.Name,
-                TechBaseCost = tech.TechCostBase
-            });
+            Techs.Add(new TechnologyEditorModel(tech));
         }
 
         foreach (var fam in dc.TechFamilies.Values)
         {
-            TechFamilies.Add(new TechFamilyEditorModel
-            {
-                Name = fam.Name,
-                Description = fam.Description,
-                Relations = new ObservableCollection<string>(fam.Relations.Select(x => x.Name)),
-                Techs = new ObservableCollection<string>(fam.Techs.Select(x => x.Name))
-            });
+            TechFamilies.Add(new TechFamilyEditorModel(fam));
         }
 
-        AddTech = ReactiveCommand.Create(addTech);
-        AddFamily = ReactiveCommand.Create(addFamily);
-        EditTech = ReactiveCommand.Create(editTech);
-        EditFamily = ReactiveCommand.Create(editFamily);
-        Save = ReactiveCommand.Create(save);
+        NewTech = ReactiveCommand.Create(AddTech);
+        NewFamily = ReactiveCommand.Create(AddFamily);
+        EditTechnology = ReactiveCommand.Create(EditTech);
+        EditTechFamily = ReactiveCommand.Create(EditFamily);
+        SaveTechs = ReactiveCommand.Create(save);
     }
     
-    public ReactiveCommand<Unit, Task> AddTech { get; set; }
-    public ReactiveCommand<Unit, Task> AddFamily { get; set; }
-    public ReactiveCommand<Unit, Task> EditTech { get; set; }
-    public ReactiveCommand<Unit, Task> EditFamily { get; set; }
-    public ReactiveCommand<Unit, Task> Save { get; set; }
+    public ReactiveCommand<Unit, Task> NewTech { get; set; }
+    public ReactiveCommand<Unit, Task> NewFamily { get; set; }
+    public ReactiveCommand<Unit, Task> EditTechnology { get; set; }
+    public ReactiveCommand<Unit, Task> EditTechFamily { get; set; }
+    public ReactiveCommand<Unit, Task> SaveTechs { get; set; }
 
-    private async Task addTech()
+    private async Task AddTech()
     {
+        var win = new TechnologyEditorWindow();
+        await win.ShowDialog(_window);
+        Techs.Clear();
+        TechFamilies.Clear();
+        foreach (var tech in dc.Technologies.Values)
+            Techs.Add(new TechnologyEditorModel(tech));
         
+        foreach (var fam in dc.TechFamilies.Values)
+            TechFamilies.Add(new TechFamilyEditorModel(fam));
     }
 
-    private async Task addFamily()
+    private async Task AddFamily()
     {
+        Techs.Clear();
+        TechFamilies.Clear();
+        foreach (var tech in dc.Technologies.Values)
+            Techs.Add(new TechnologyEditorModel(tech));
         
+        foreach (var fam in dc.TechFamilies.Values)
+            TechFamilies.Add(new TechFamilyEditorModel(fam));
     }
 
-    private async Task editTech()
+    private async Task EditTech()
     {
+        if (SelectedTech == null)
+            return;
+        var win = new TechnologyEditorWindow(SelectedTech);
+        await win.ShowDialog(_window);
+        Techs.Clear();
+        TechFamilies.Clear();
+        foreach (var tech in dc.Technologies.Values)
+            Techs.Add(new TechnologyEditorModel(tech));
         
+        foreach (var fam in dc.TechFamilies.Values)
+            TechFamilies.Add(new TechFamilyEditorModel(fam));
     }
 
-    private async Task editFamily()
+    private async Task EditFamily()
     {
+        Techs.Clear();
+        TechFamilies.Clear();
+        foreach (var tech in dc.Technologies.Values)
+            Techs.Add(new TechnologyEditorModel(tech));
         
+        foreach (var fam in dc.TechFamilies.Values)
+            TechFamilies.Add(new TechFamilyEditorModel(fam));
     }
 
     private async Task save()

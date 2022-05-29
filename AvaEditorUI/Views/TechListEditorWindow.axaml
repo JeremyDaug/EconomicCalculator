@@ -69,11 +69,16 @@
             </DataGrid.Columns>
         </DataGrid>
         
-        <Button Grid.Row="2" Grid.Column="0">New Tech</Button>
-        <Button Grid.Row="2" Grid.Column="1">Edit Tech</Button>
-        <Button Grid.Row="2" Grid.Column="2">New Tech Family</Button>
-        <Button Grid.Row="2" Grid.Column="3">Edit Tech Family</Button>
-        <Button Grid.Row="2" Grid.Column="4">Save</Button>
+        <Button Grid.Row="2" Grid.Column="0"
+                Command="{Binding NewTech}">New Tech</Button>
+        <Button Grid.Row="2" Grid.Column="1"
+                Command="{Binding EditTechnology}">Edit Tech</Button>
+        <Button Grid.Row="2" Grid.Column="2"
+                Command="{Binding NewFamily}">New Tech Family</Button>
+        <Button Grid.Row="2" Grid.Column="3"
+                Command="{Binding EditTechFamily}">Edit Tech Family</Button>
+        <Button Grid.Row="2" Grid.Column="4"
+                Command="{Binding SaveTechs}">Save</Button>
         
     </Grid>
 </Window>

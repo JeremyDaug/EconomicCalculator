@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive.Linq;
+using EconomicSim.Objects.Technology;
 
 namespace AvaEditorUI.Models;
 
@@ -11,6 +13,18 @@ public class TechnologyEditorModel
         Families = new ObservableCollection<string>();
         Parents = new ObservableCollection<string>();
         Children = new ObservableCollection<string>();
+    }
+
+    public TechnologyEditorModel(Technology tech)
+    {
+        Name = tech.Name;
+        Description = tech.Description;
+        Category = tech.Category.ToString();
+        Tier = tech.Tier;
+        TechBaseCost = tech.TechCostBase;
+        Families = new ObservableCollection<string>(tech.Families.Select(x => x.Name));
+        Parents = new ObservableCollection<string>(tech.Parents.Select(x => x.Name));
+        Children = new ObservableCollection<string>(tech.Children.Select(x => x.Name));
     }
 
     public string Name { get; set; } = "";
