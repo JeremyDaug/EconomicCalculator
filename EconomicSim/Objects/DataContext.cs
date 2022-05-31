@@ -332,7 +332,7 @@ namespace EconomicSim.Objects
 
                 var children = new List<Technology.Technology>();
                 foreach (var child in tech.Children)
-                    parents.Add(Technologies[child.Name]);
+                    children.Add(Technologies[child.Name]);
                 tech.Children = children;
             }
 

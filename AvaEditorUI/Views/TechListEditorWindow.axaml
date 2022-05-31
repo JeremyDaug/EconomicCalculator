@@ -74,11 +74,11 @@
         <Button Grid.Row="2" Grid.Column="1"
                 Command="{Binding EditTechnology}">Edit Tech</Button>
         <Button Grid.Row="2" Grid.Column="2"
-                Command="{Binding NewFamily}">New Tech Family</Button>
-        <Button Grid.Row="2" Grid.Column="3"
-                Command="{Binding EditTechFamily}">Edit Tech Family</Button>
-        <Button Grid.Row="2" Grid.Column="4"
                 Command="{Binding SaveTechs}">Save</Button>
+        <Button Grid.Row="2" Grid.Column="3"
+                Command="{Binding NewFamily}">New Tech Family</Button>
+        <Button Grid.Row="2" Grid.Column="4"
+                Command="{Binding EditTechFamily}">Edit Tech Family</Button>
         
     </Grid>
 </Window>

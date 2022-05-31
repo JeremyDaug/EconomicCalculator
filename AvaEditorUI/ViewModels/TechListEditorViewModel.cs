@@ -6,6 +6,7 @@ using AvaEditorUI.Models;
 using AvaEditorUI.Views;
 using Avalonia.Controls;
 using EconomicSim.Objects;
+using MessageBox.Avalonia;
 using ReactiveUI;
 
 namespace AvaEditorUI.ViewModels;
@@ -51,7 +52,7 @@ public class TechListEditorViewModel : ViewModelBase
         NewFamily = ReactiveCommand.Create(AddFamily);
         EditTechnology = ReactiveCommand.Create(EditTech);
         EditTechFamily = ReactiveCommand.Create(EditFamily);
-        SaveTechs = ReactiveCommand.Create(save);
+        SaveTechs = ReactiveCommand.Create(Save);
     }
     
     public TechListEditorViewModel(TechListEditorWindow window)
@@ -73,7 +74,7 @@ public class TechListEditorViewModel : ViewModelBase
         NewFamily = ReactiveCommand.Create(AddFamily);
         EditTechnology = ReactiveCommand.Create(EditTech);
         EditTechFamily = ReactiveCommand.Create(EditFamily);
-        SaveTechs = ReactiveCommand.Create(save);
+        SaveTechs = ReactiveCommand.Create(Save);
     }
     
     public ReactiveCommand<Unit, Task> NewTech { get; set; }
@@ -97,6 +98,8 @@ public class TechListEditorViewModel : ViewModelBase
 
     private async Task AddFamily()
     {
+        var win = new TechFamilyEditorWindow();
+        await win.ShowDialog(_window);
         Techs.Clear();
         TechFamilies.Clear();
         foreach (var tech in dc.Technologies.Values)
@@ -123,6 +126,10 @@ public class TechListEditorViewModel : ViewModelBase
 
     private async Task EditFamily()
     {
+        if (SelectedFamily == null)
+            return;
+        var win = new TechFamilyEditorWindow(SelectedFamily);
+        await win.ShowDialog(_window);
         Techs.Clear();
         TechFamilies.Clear();
         foreach (var tech in dc.Technologies.Values)
@@ -132,9 +139,14 @@ public class TechListEditorViewModel : ViewModelBase
             TechFamilies.Add(new TechFamilyEditorModel(fam));
     }
 
-    private async Task save()
+    private async Task Save()
     {
-        
+        dc.SaveTechnologies();
+        dc.SaveTechFamilies();
+        var success = MessageBoxManager
+            .GetMessageBoxStandardWindow("Saved!",
+                "Technology and Tech Families Saved!");
+        await success.ShowDialog(_window);
     }
     
     public TechnologyEditorModel? SelectedTech

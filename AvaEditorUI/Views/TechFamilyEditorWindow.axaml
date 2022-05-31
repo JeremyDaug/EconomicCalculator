@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="525" d:DesignHeight="325"
+        Width="525" Height="325"
+        x:Class="AvaEditorUI.Views.TechFamilyEditorWindow"
+        Title="Tech Family Editor">
+    <Design.DataContext>
+        <vm:TechFamilyEditorViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="5">
+            <Label>Name</Label>
+            <TextBox Text="{Binding Name}" 
+                     Width="100" HorizontalAlignment="Left"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
+            <Label>Description</Label>
+            <TextBox Text="{Binding Description}"
+                     Width="150" HorizontalAlignment="Left"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+            <Label>Related Families</Label>
+            <ListBox Items="{Binding Relations}"
+                     Height="150" Width="200"
+                     SelectedItem="{Binding FamilyToRemove}"/>
+            <StackPanel Orientation="Horizontal">
+                <Label>Family To Add</Label>
+                <ComboBox Items="{Binding FamilyOptions}"
+                          SelectedItem="{Binding FamilyToAdd}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddFamily}">Add Family</Button>
+                <Button Command="{Binding RemoveFamily}">Remove Family</Button>
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+            <Label>Technologies</Label>
+            <ListBox Items="{Binding Techs}"
+                     Height="150" Width="200"
+                     SelectedItem="{Binding TechToRemove}"/>
+            <StackPanel Orientation="Horizontal">
+                <Label>Tech To Add</Label>
+                <ComboBox Items="{Binding TechOptions}"
+                          SelectedItem="{Binding TechToAdd}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddTech}">Add Tech</Button>
+                <Button Command="{Binding RemoveTech}">Remove Tech</Button>
+            </StackPanel>
+        </StackPanel>
+        
+        <Button Grid.Row="0" Grid.Column="2"
+                Command="{Binding Commit}">Commit</Button>
+    </Grid>
+</Window>

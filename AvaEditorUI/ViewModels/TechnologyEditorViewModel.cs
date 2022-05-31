@@ -50,7 +50,7 @@ public class TechnologyEditorViewModel : ViewModelBase
         RemoveChild = ReactiveCommand.Create(RemoveChildFromTech);
         AddFamily = ReactiveCommand.Create(AddFamilyToTech);
         RemoveFamily = ReactiveCommand.Create(RemoveFamilyFromTech);
-        Commit = ReactiveCommand.Create(commitTech);
+        Commit = ReactiveCommand.Create(CommitTech);
     }
 
     public TechnologyEditorViewModel(TechnologyEditorWindow window) : this()
@@ -82,7 +82,7 @@ public class TechnologyEditorViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RemoveFamily { get; set; }
     public ReactiveCommand<Unit, Task> Commit { get; set; }
 
-    private async Task commitTech()
+    private async Task CommitTech()
     {
         // ensure no errors
         var errors = new List<string>();
@@ -118,6 +118,21 @@ public class TechnologyEditorViewModel : ViewModelBase
             TechCostBase = TechCostBase
         };
         
+        // remove the old version
+        if (dc.Technologies.ContainsKey(original.Name))
+        {
+            // get the old one
+            var old = dc.Technologies[original.Name];
+            // remove the original from list.
+            dc.Technologies.Remove(original.Name);
+            // Remove  old connections
+            foreach (var parent in old.Parents)
+                parent.Children.Remove(old);
+            foreach (var child in old.Children)
+                child.Parents.Remove(old);
+            foreach (var family in old.Families)
+                family.Techs.Remove(old);
+        }
         // connect parents
         foreach (var parent in Parents)
         {
@@ -139,26 +154,14 @@ public class TechnologyEditorViewModel : ViewModelBase
             newTech.Families.Add(family);
             family.Techs.Add(newTech);
         }
-        // update or add to our data
-        if (dc.Technologies.ContainsKey(original.Name))
-            dc.Technologies.Remove(original.Name);
         dc.Technologies.Add(newTech.Name, newTech);
+        
         // update original for potential followup changes.
-        original = new TechnologyEditorModel
-        {
-            Name = Name,
-            Description = Description,
-            Category = Category,
-            TechBaseCost = TechCostBase,
-            Tier = Tier,
-            Children = new ObservableCollection<string>(Children),
-            Families = new ObservableCollection<string>(Families),
-            Parents = new ObservableCollection<string>(Parents)
-        };
+        original = new TechnologyEditorModel(newTech);
         
         var success = MessageBoxManager
             .GetMessageBoxStandardWindow("Tech Committed",
-                "Errors Found:\n" + string.Join('\n', errors));
+                "Tech has been Committed, remember to save it.");
         await success.ShowDialog(_window);
     }
 
