@@ -1,0 +1,56 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="450"
+        x:Class="AvaEditorUI.Views.ProductListWindow"
+        Title="ProductListWindow">
+    <Design.DataContext>
+        <vm:ProductListViewModel/>
+    </Design.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <DataGrid Grid.Row="0" Grid.Column="0"
+                  Grid.ColumnSpan="3" Margin="5"
+                  CanUserReorderColumns="True" CanUserSortColumns="True" CanUserResizeColumns="True"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                  Items="{Binding Products}"
+                  SelectedItem="{Binding SelectedProduct}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding FullName}"/>
+                <DataGridTextColumn Header="Unit Name" Binding="{Binding UnitName}"/>
+                <DataGridTextColumn Header="Quality" Binding="{Binding Quality}"/>
+                <DataGridTextColumn Header="Mass" Binding="{Binding Mass}"/>
+                <DataGridTextColumn Header="Bulk" Binding="{Binding Bulk}"/>
+                <DataGridCheckBoxColumn Header="Fractional" Binding="{Binding Fractional}"/>
+                <DataGridTextColumn Header="Technology" Binding="{Binding Technology}"/>
+                <DataGridTextColumn Header="Tags" Binding="{Binding ProductTagString}"/>
+                <DataGridTextColumn Header="Wants" Binding="{Binding WantString}"/>
+                <DataGridTextColumn Header="Failure" Binding="{Binding FailureProcess}"/>
+                <DataGridTextColumn Header="Use(s)" Binding="{Binding UseProcessesString}"/>
+                <DataGridTextColumn Header="Consumption" Binding="{Binding ConsumptionProcessesString}"/>
+                <DataGridTextColumn Header="Maintenance" Binding="{Binding MaintenanceProcessesString}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <Button Grid.Row="1" Grid.Column="0"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Command="{Binding NewProduct}">New Product</Button>
+        <Button Grid.Row="1" Grid.Column="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Command="{Binding EditProduct}">Edit Product</Button>
+        <Button Grid.Row="1" Grid.Column="2"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Command="{Binding Save}">Save Products</Button>
+    </Grid>
+</Window>

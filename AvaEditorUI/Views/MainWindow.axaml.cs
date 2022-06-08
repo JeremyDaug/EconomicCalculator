@@ -34,5 +34,12 @@ namespace AvaEditorUI.Views
             win.Show();
             this.Close();
         }
+
+        private void GotoProducts(object? sender, RoutedEventArgs e)
+        {
+            var win = new ProductListWindow();
+            win.Show();
+            this.Close();
+        }
     }
 }

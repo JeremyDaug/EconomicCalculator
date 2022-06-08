@@ -6,7 +6,7 @@ namespace EconomicSim.Objects.Products
 {
     internal class ProductJsonConverter : JsonConverter<Product>
     {
-        public override Product Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Product Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions? options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
                 throw new JsonException();
@@ -51,10 +51,16 @@ namespace EconomicSim.Objects.Products
                         result.Icon = reader.GetString();
                         break;
                     case "ProductTags":
-                        var productTags = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object>>>(ref reader, options);
+                        Dictionary<string, Dictionary<string, string>?>? productTags = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(ref reader, options);
+                        if (productTags == null)
+                            break;
                         foreach (var tag in productTags)
+                        {
+                            var productTag = (ProductTag) Enum.Parse(typeof(ProductTag), tag.Key);
+                            var parameters = productTag.ProcessParameters(tag.Value);
                             result.ProductTags
-                                .Add((ProductTag)Enum.Parse(typeof(ProductTag), tag.Key), tag.Value);
+                                .Add(productTag, parameters);
+                        }
                         break;
                     case "Wants":
                         if (reader.TokenType != JsonTokenType.StartArray)
@@ -92,7 +98,7 @@ namespace EconomicSim.Objects.Products
             throw new JsonException();
         }
 
-        public override void Write(Utf8JsonWriter writer, Product value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, Product value, JsonSerializerOptions? options)
         {
             writer.WriteStartObject();
 

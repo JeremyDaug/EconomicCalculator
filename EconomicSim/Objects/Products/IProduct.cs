@@ -67,7 +67,7 @@ namespace EconomicSim.Objects.Products
         /// <summary>
         /// The tags of the product.
         /// </summary>
-        IReadOnlyDictionary<ProductTag, Dictionary<string, object>> ProductTags { get; }
+        IReadOnlyDictionary<ProductTag, Dictionary<string, object>?> ProductTags { get; }
 
         /// <summary>
         /// What wants the product satisfies by just owning.
@@ -86,7 +86,7 @@ namespace EconomicSim.Objects.Products
         /// <summary>
         /// The failure Process of the product, may be empty.
         /// </summary>
-        IProcess FailureProcess { get; }
+        IProcess? FailureProcess { get; }
 
         /// <summary>
         /// The Use Processes of the Product
@@ -107,7 +107,7 @@ namespace EconomicSim.Objects.Products
         /// The tech required to know/build this product.
         /// May be null.
         /// </summary>
-        ITechnology TechRequirement { get; }
+        ITechnology? TechRequirement { get; }
 
         /// <summary>
         /// Get's the proper Name(variant) name of the Product.

@@ -15,7 +15,7 @@ namespace EconomicSim.Objects.Products
     {
         public Product()
         {
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>();
+            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>?>();
             Wants = new List<(IWant want, decimal amount)>();
             ProductProcesses = new List<IProcess>();
         }
@@ -31,7 +31,7 @@ namespace EconomicSim.Objects.Products
         /// <remarks>
         /// Name and Variant Name should be a unique combo.
         /// </remarks>
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         /// <summary>
         /// The Variant Name of the product, may be empty.
@@ -39,12 +39,12 @@ namespace EconomicSim.Objects.Products
         /// <remarks>
         /// Name and VariantName should be a unique combo.
         /// </remarks>
-        public string VariantName { get; set; }
+        public string VariantName { get; set; } = "";
 
         /// <summary>
         /// The name of the unit the product is measured in.
         /// </summary>
-        public string UnitName { get; set; }
+        public string UnitName { get; set; } = "";
 
         /// <summary>
         /// The quality of the product. Related to how luxurious or
@@ -70,13 +70,13 @@ namespace EconomicSim.Objects.Products
         /// <summary>
         /// The location of the Product's Icon.
         /// </summary>
-        public string Icon { get; set; }
+        public string Icon { get; set; } = "";
 
         /// <summary>
         /// THe tags of the product.
         /// </summary>
-        public Dictionary<ProductTag, Dictionary<string, object>> ProductTags { get; set; }
-        IReadOnlyDictionary<ProductTag, Dictionary<string, object>> IProduct.ProductTags => ProductTags;
+        public Dictionary<ProductTag, Dictionary<string, object>?> ProductTags { get; set; }
+        IReadOnlyDictionary<ProductTag, Dictionary<string, object>?> IProduct.ProductTags => ProductTags;
 
         /// <summary>
         /// What wants the product satisfies by just owning.
@@ -94,13 +94,13 @@ namespace EconomicSim.Objects.Products
         /// IE, Failure, Use, Consumption, and Maintenance processes.
         /// product.
         /// </summary>
-        public List<IProcess> ProductProcesses { get; set; }
+        public List<IProcess> ProductProcesses { get; }
         IReadOnlyList<IProcess> IProduct.ProductProcesses => ProductProcesses;
 
         /// <summary>
         /// The failure Process of the product, may be empty.
         /// </summary>
-        public IProcess FailureProcess
+        public IProcess? FailureProcess
         {
             get
             {
@@ -147,9 +147,9 @@ namespace EconomicSim.Objects.Products
         /// The Technology required for this product to be know about or build
         /// may be null.
         /// </summary>
-        public ITechnology TechRequirement { get; set; }
+        public ITechnology? TechRequirement { get; set; }
 
-        ITechnology IProduct.TechRequirement => TechRequirement;
+        ITechnology? IProduct.TechRequirement => TechRequirement;
 
         public override string ToString()
         {
@@ -169,8 +169,10 @@ namespace EconomicSim.Objects.Products
             return Equals(obj as Product);
         }
 
-        public bool Equals(Product obj)
+        public bool Equals(Product? obj)
         {
+            if (obj == null)
+                return false;
             return string.Equals(GetName(), obj.GetName());
         }
 
@@ -189,7 +191,7 @@ namespace EconomicSim.Objects.Products
                 Bulk = 0,
                 Mass = 0,
                 Quality = 1,
-                ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
+                ProductTags = new Dictionary<ProductTag, Dictionary<string, object>?>
                 {
                     { ProductTag.Service, null }
                 }, 

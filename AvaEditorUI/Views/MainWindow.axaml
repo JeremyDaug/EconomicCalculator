@@ -47,6 +47,7 @@
                 Click="GotoTechs"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Techs</Button>
         <Button Grid.Row="2" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
+                Click="GotoProducts"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Products</Button>
         
         <Button Grid.Row="3" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"

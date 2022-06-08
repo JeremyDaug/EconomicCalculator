@@ -40,7 +40,7 @@ namespace EconomicSim.Objects
                         {ProductTag.Nondegrading, null},
                         {ProductTag.Storage, new Dictionary<string, object>
                         {
-                            { "Type", "All" },
+                            { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
                         } },
@@ -69,7 +69,7 @@ namespace EconomicSim.Objects
                         {ProductTag.Nondegrading, null},
                         {ProductTag.Storage, new Dictionary<string, object>
                         {
-                            { "Type", "All" },
+                            { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
                         } }
@@ -96,7 +96,7 @@ namespace EconomicSim.Objects
                         {ProductTag.Nondegrading, null},
                         {ProductTag.Storage, new Dictionary<string, object>
                         {
-                            { "Type", "All" },
+                            { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
                         } }
@@ -123,7 +123,7 @@ namespace EconomicSim.Objects
                         {ProductTag.Nondegrading, null},
                         {ProductTag.Storage, new Dictionary<string, object>
                         {
-                            { "Type", "All" },
+                            { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
                         } }
@@ -150,7 +150,7 @@ namespace EconomicSim.Objects
                         {ProductTag.Nondegrading, null},
                         {ProductTag.Storage, new Dictionary<string, object>
                         {
-                            { "Type", "All" },
+                            { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
                         } }
@@ -177,7 +177,7 @@ namespace EconomicSim.Objects
                         {ProductTag.Nondegrading, null},
                         {ProductTag.Storage, new Dictionary<string, object>
                         {
-                            { "Type", "All" },
+                            { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
                         } }
@@ -204,7 +204,7 @@ namespace EconomicSim.Objects
                         {ProductTag.Nondegrading, null},
                         {ProductTag.Storage, new Dictionary<string, object>
                         {
-                            { "Type", "All" },
+                            { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
                         } }

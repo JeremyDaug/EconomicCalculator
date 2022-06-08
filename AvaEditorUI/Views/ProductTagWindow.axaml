@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="300"
+        Width="650" Height="300"
+        x:Class="AvaEditorUI.Views.ProductTagWindow"
+        Title="ProductTagWindow">
+    <Design.DataContext>
+        <vm:ProductTagViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Column="0" Margin="5">
+            <Label>Tag</Label>
+            <ComboBox Width="150" Margin="5"
+                      Items="{Binding AvailableTags}" 
+                      SelectedItem="{Binding SelectedTag}"></ComboBox>
+            <Button Margin="5" Command="{Binding Commit}">Commit</Button>
+            <Label Content="{Binding CommittedLabel}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Column="1" Margin="5">
+            <Label>Parameters</Label>
+            <DataGrid Width="250" Height="200"
+                      Items="{Binding Parameters}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Parameter" 
+                                        Binding="{Binding Primary}"/>
+                    <DataGridTextColumn Header="Input"
+                                        Binding="{Binding Secondary}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+        
+        <StackPanel Grid.Column="2">
+            <Label IsVisible="{Binding ProductsVisible}">Available Products</Label>
+            <ListBox IsVisible="{Binding ProductsVisible}" 
+                     Items="{Binding AvailableProducts}"
+                     Height="200"/>
+            <Label IsVisible="{Binding WantsVisible}">Available Wants</Label>
+            <ListBox IsVisible="{Binding WantsVisible}" 
+                     Items="{Binding AvailableWants}"
+                     Height="200"/>
+            <Label IsVisible="{Binding FirmsVisible}">Available Firms</Label>
+            <ListBox IsVisible="{Binding FirmsVisible}" 
+                     Items="{Binding AvailableFirms}"
+                     Height="200"/>
+            <Label IsVisible="{Binding StorageVisible}">Available Types</Label>
+            <ListBox IsVisible="{Binding StorageVisible}"
+                     Items="{Binding AvailableStorageTypes}"
+                     Height="200"/>
+        </StackPanel>
+    </Grid>
+</Window>

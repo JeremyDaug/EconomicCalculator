@@ -1,0 +1,138 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1050" d:DesignHeight="450"
+        Width="1050" Height="450"
+        x:Class="AvaEditorUI.Views.ProductEditorWindow"
+        Title="Product Editor Window">
+    <Design.DataContext>
+        <vm:ProductEditorViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="190"/>
+            <ColumnDefinition Width="190"/>
+            <ColumnDefinition Width="170"/>
+            <ColumnDefinition Width="230"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="5">
+            <Label>Product Name</Label>
+            <TextBox Text="{Binding Name}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
+            <Label>Variant Name</Label>
+            <TextBox Text="{Binding VariantName}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="2" Margin="5">
+            <Label>Unit Name</Label>
+            <TextBox Text="{Binding UnitName}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="3" Margin="5">
+            <Label>Technology</Label>
+            <ComboBox SelectedItem="{Binding Technology}"
+                      HorizontalAlignment="Stretch"
+                      Items="{Binding AvailableTechnologies}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+            <Label>Mass</Label>
+            <TextBox Text="{Binding Mass}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+            <Label>Bulk</Label>
+            <TextBox Text="{Binding Bulk}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="2" Margin="5">
+            <Label>Fractional</Label>
+            <CheckBox IsChecked="{Binding Fractional}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="3" Margin="5">
+            <Label>Failure</Label>
+            <TextBox Text="{Binding Failure}"
+                     IsReadOnly="True"/>
+        </StackPanel>
+        
+        <Button Grid.Row="0" Grid.Column="4"
+                Grid.RowSpan="2"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Command="{Binding Commit}">Commit</Button>
+        
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+            <Label>Wants</Label>
+            <DataGrid Items="{Binding Wants}"
+                      SelectedItem="{Binding WantToRemove}"
+                      Height="210">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Want" IsReadOnly="True"
+                                        Binding="{Binding Primary}"/>
+                    <DataGridTextColumn Header="Amount" 
+                                        Binding="{Binding Secondary}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal">
+                <Label>New Want</Label>
+                <ComboBox Items="{Binding AvailableWants}" Width="100"
+                          SelectedItem="{Binding WantToAdd}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddWant}">Add Want</Button>
+                <Button Command="{Binding RemoveWant}">Remove Want</Button>
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+            <Label>Uses</Label>
+            <ListBox Items="{Binding UseProcesses}"
+                     Height="210"
+                     BorderBrush="Black" BorderThickness="2"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="5">
+            <Label>Consumptions</Label>
+            <ListBox Items="{Binding ConsumptionProcesses}"
+                     Height="210"
+                     BorderBrush="Black" BorderThickness="2"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="3" Margin="5">
+            <Label>Maintenance</Label>
+            <ListBox Items="{Binding MaintenanceProcesses}"
+                     Height="210"
+                     BorderBrush="Black" BorderThickness="2"/>
+        </StackPanel>
+        
+        <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
+               VerticalAlignment="Bottom" HorizontalAlignment="Center"
+               Margin="0,0,0,10">
+            Connect From Processes, not here.
+        </Label>
+        
+        <StackPanel Grid.Row="2" Grid.Column="4" Margin="5">
+            <Label>Product Tags</Label>
+            <ListBox Items="{Binding TagStrings}"
+                     Height="210" Width="250"
+                     SelectedItem="{Binding SelectedTag}"
+                     BorderBrush="Black" BorderThickness="2"/>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddTag}">Add Tag</Button>
+                <Button Command="{Binding EditTag}">Edit Tag</Button>
+                <Button Command="{Binding RemoveTag}">Remove Tag</Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
