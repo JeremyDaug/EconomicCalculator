@@ -7,6 +7,18 @@ namespace EconomicSim.Objects.Wants
     /// </summary>
     public class Want : IWant
     {
+        public Want()
+        {
+            Name = "";
+            Description = "";
+        }
+
+        public Want(IWant copy)
+        {
+            Name = copy.Name;
+            Description = copy.Description;
+        }
+        
         /// <summary>
         /// The Id of the want.
         /// </summary>

@@ -24,7 +24,7 @@ public class WantEditorViewModel : ViewModelBase, IReactiveObject
     
     public WantEditorViewModel(IWant want)
     {
-        original = want;
+        original = new Want(want);
         _name = want.Name;
         _description = want.Description;
         Commit = ReactiveCommand.Create(CommitWant);
@@ -51,24 +51,34 @@ public class WantEditorViewModel : ViewModelBase, IReactiveObject
             return;
         }
         
-        // everything's fine, add or update
-        var newWant = new Want
-        {
-            Name = Name,
-            Description = Description
-        };
-        
+        // if update
         if (dc.Wants.ContainsKey(original.Name))
-        { // if update
-            if (dc.Wants.Remove(original.Name))
+        {
+            var oldWant = dc.Wants[original.Name];
+
+            oldWant.Name = Name;
+            oldWant.Description = Description;
+            // if name changed, update
+            if (original.Name != Name)
             {
-                dc.Wants.Add(newWant.Name, newWant);
+                dc.Wants.Remove(original.Name);
+                dc.Wants[oldWant.Name] = oldWant;
             }
         }
-        else
+        else // if new want
         {
+            var newWant = new Want
+            {
+                Name = Name,
+                Description = Description
+            };
+            
+            // add to data
             dc.Wants.Add(newWant.Name, newWant);
         }
+        
+        // update original to new value
+        original = dc.Wants[Name]; 
         
         MessageBox.Avalonia.MessageBoxManager
             .GetMessageBoxStandardWindow("Saved!", "Want has been saved.",
