@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:AvaEditorUI.ViewModels"
+        xmlns:unicode="clr-namespace:Avalonia.Media.TextFormatting.Unicode;assembly=Avalonia.Visuals"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
         Width="600" Height="450"
         x:Class="AvaEditorUI.Views.SkillEditorWindow"
@@ -45,6 +46,7 @@
                   Width="150"
                   Items="{Binding LaborOptions, Mode=TwoWay}"
                   SelectedItem="{Binding Labor}"/>
+        <TextBlock Grid.Row="2" Grid.Column="2">If no labor selected, &#10; a new Labor will be made.</TextBlock>
         
         <Label Content="Relations"
                Grid.Row="2" Grid.Column="0"/>

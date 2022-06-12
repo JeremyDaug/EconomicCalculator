@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AvaEditorUI.Models;
 using AvaEditorUI.Views;
 using EconomicSim.Objects;
-using MessageBox.Avalonia;
 using ReactiveUI;
 
 namespace AvaEditorUI.ViewModels;

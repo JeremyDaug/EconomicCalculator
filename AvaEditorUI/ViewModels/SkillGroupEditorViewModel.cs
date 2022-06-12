@@ -54,7 +54,8 @@ public class SkillGroupEditorViewModel : ViewModelBase
         Description = group.Description;
         Default = group.Default;
         Skills = new ObservableCollection<string>(group.Skills);
-        SkillOptions = new ObservableCollection<string>(dc.Skills.Keys);
+        SkillOptions = new ObservableCollection<string>(dc.Skills.Keys
+            .Where(x => !group.Skills.Contains(x)));
         AddSkill = ReactiveCommand.Create(AddSkillToGroup);
         RemoveSkill = ReactiveCommand.Create(RemoveSkillFromGroup);
         Commit = ReactiveCommand.Create(CommitGroup);
@@ -84,35 +85,65 @@ public class SkillGroupEditorViewModel : ViewModelBase
             return;
         }
         
-        // update original
-        var newModel = new SkillGroupEditorModel
-        {
-            Name = Name,
-            Description = Description,
-            Default = Default, 
-            Skills = new ObservableCollection<string>(Skills)
-        };
-
-        var newGroup = new SkillGroup
-        {
-            Name = Name,
-            Default = Default,
-            Description = Description
-        };
-
-        foreach (var skill in Skills)
-        {// add skills to group.
-            var connection = dc.Skills[skill];
-            newGroup.Skills.Add(connection);
-            // add group to skills
-            connection.Groups.Add(newGroup);
-        }
-
-        // if the original already exists, remove to replace
+        // if we are updating
         if (dc.SkillGroups.ContainsKey(orignial.Name))
-            dc.SkillGroups.Remove(orignial.Name);
-        dc.SkillGroups.Add(newGroup.Name, newGroup);
-        orignial = newModel;
+        {
+            var oldGroup = dc.SkillGroups[orignial.Name];
+            // update most stuff
+            oldGroup.Name = Name;
+            oldGroup.Description = Description;
+            oldGroup.Default = Default;
+            // if name changed update name
+            if (Name != orignial.Name)
+            {
+                dc.SkillGroups.Remove(orignial.Name);
+                dc.SkillGroups.Add(Name, oldGroup);
+            }
+            
+            // update skills
+            var oldSkills = oldGroup.Skills.ToList();
+            foreach (var skill in oldSkills)
+            {
+                // if it's not in, remove the connection
+                if (!Skills.Contains(skill.Name))
+                {
+                    skill.Groups.Remove(oldGroup);
+                    oldGroup.Skills.Remove(skill);
+                }
+            }
+            // add new skills
+            foreach (var skill in Skills)
+            {
+                // if already contained, skip
+                if (oldGroup.Skills.Any(x => x.Name == skill))
+                    continue;
+                var otherSkill = dc.Skills[skill];
+                oldGroup.Skills.Add(otherSkill);
+                otherSkill.Groups.Add(oldGroup);
+            }
+        }
+        else // if group is new
+        {
+            var newGroup = new SkillGroup
+            {
+                Name = Name,
+                Default = Default,
+                Description = Description
+            };
+            
+            // add skills
+            foreach (var skill in Skills)
+            {
+                var otherSkill = dc.Skills[skill];
+                newGroup.Skills.Add(otherSkill);
+                otherSkill.Groups.Add(newGroup);
+            }
+
+            dc.SkillGroups[newGroup.Name] = newGroup;
+        }
+        
+        // update original
+        orignial = new SkillGroupEditorModel(dc.SkillGroups[Name]);
         
         // finished.
         var success = MessageBox.Avalonia.MessageBoxManager

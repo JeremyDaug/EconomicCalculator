@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Linq;
+using EconomicSim.Objects.Skills;
 
 namespace AvaEditorUI.Models;
 
@@ -10,6 +12,14 @@ public class SkillGroupEditorModel
         Description = "";
         Default = 0;
         Skills = new ObservableCollection<string>();
+    }
+
+    public SkillGroupEditorModel(SkillGroup group)
+    {
+        Name = group.Name;
+        Description = group.Description;
+        Default = 0;
+        Skills = new ObservableCollection<string>(group.Skills.Select(x => x.Name));
     }
 
     public string Name { get; set; }
