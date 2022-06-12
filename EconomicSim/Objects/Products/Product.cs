@@ -15,7 +15,7 @@ namespace EconomicSim.Objects.Products
     {
         public Product()
         {
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>?>();
+            ProductTags = new List<(ProductTag tag, Dictionary<string, object>? parameters)>();
             Wants = new List<(IWant want, decimal amount)>();
             ProductProcesses = new List<IProcess>();
         }
@@ -75,8 +75,8 @@ namespace EconomicSim.Objects.Products
         /// <summary>
         /// THe tags of the product.
         /// </summary>
-        public Dictionary<ProductTag, Dictionary<string, object>?> ProductTags { get; set; }
-        IReadOnlyDictionary<ProductTag, Dictionary<string, object>?> IProduct.ProductTags => ProductTags;
+        public List<(ProductTag tag, Dictionary<string, object>? parameters)> ProductTags { get; set; }
+        IReadOnlyList<(ProductTag tag, Dictionary<string, object>? parameters)> IProduct.ProductTags => ProductTags;
 
         /// <summary>
         /// What wants the product satisfies by just owning.
@@ -191,9 +191,9 @@ namespace EconomicSim.Objects.Products
                 Bulk = 0,
                 Mass = 0,
                 Quality = 1,
-                ProductTags = new Dictionary<ProductTag, Dictionary<string, object>?>
+                ProductTags = new List<(ProductTag tag, Dictionary<string, object>? parameters)>
                 {
-                    { ProductTag.Service, null }
+                    ( ProductTag.Service, null )
                 }, 
                 Fractional = true
             };

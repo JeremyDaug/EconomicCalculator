@@ -34,17 +34,17 @@ namespace EconomicSim.Objects
                     {
                         (Land, 1)
                     },
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
+            ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
                     {
-                        {ProductTag.Fixed, null},
-                        {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new Dictionary<string, object>
+                        (ProductTag.Fixed, null),
+                        (ProductTag.Nondegrading, null),
+                        (ProductTag.Storage, new Dictionary<string, object>
                         {
                             { "Type", StorageType.Perfect },
                             { "Volume", 1000 },
                             { "Mass", -1 }
-                        } },
-                        {ProductTag.Abstract, null},
+                        } ),
+                        (ProductTag.Abstract, null),
                     },
             Icon = ""
         };
@@ -63,17 +63,18 @@ namespace EconomicSim.Objects
                     {
                         (Land, 1)
                     },
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
-                    {
-                        {ProductTag.Fixed, null},
-                        {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new Dictionary<string, object>
-                        {
-                            { "Type", StorageType.Perfect },
-                            { "Volume", 1000 },
-                            { "Mass", -1 }
-                        } }
-                    },
+            ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Fixed, null),
+                (ProductTag.Nondegrading, null),
+                (ProductTag.Storage, new Dictionary<string, object>
+                {
+                    { "Type", StorageType.Perfect },
+                    { "Volume", 1000 },
+                    { "Mass", -1 }
+                } ),
+                (ProductTag.Abstract, null),
+            },
             Icon = ""
         };
         public readonly static IProduct MarginalLand = new Product
@@ -90,17 +91,18 @@ namespace EconomicSim.Objects
                     {
                         (Land, 1)
                     },
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
-                    {
-                        {ProductTag.Fixed, null},
-                        {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new Dictionary<string, object>
-                        {
-                            { "Type", StorageType.Perfect },
-                            { "Volume", 1000 },
-                            { "Mass", -1 }
-                        } }
-                    },
+            ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Fixed, null),
+                (ProductTag.Nondegrading, null),
+                (ProductTag.Storage, new Dictionary<string, object>
+                {
+                    { "Type", StorageType.Perfect },
+                    { "Volume", 1000 },
+                    { "Mass", -1 }
+                } ),
+                (ProductTag.Abstract, null),
+            },
             Icon = ""
         };
         public readonly static IProduct Scrubland = new Product
@@ -117,17 +119,18 @@ namespace EconomicSim.Objects
                     {
                         (Land, 1)
                     },
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
-                    {
-                        {ProductTag.Fixed, null},
-                        {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new Dictionary<string, object>
-                        {
-                            { "Type", StorageType.Perfect },
-                            { "Volume", 1000 },
-                            { "Mass", -1 }
-                        } }
-                    },
+            ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Fixed, null),
+                (ProductTag.Nondegrading, null),
+                (ProductTag.Storage, new Dictionary<string, object>
+                {
+                    { "Type", StorageType.Perfect },
+                    { "Volume", 1000 },
+                    { "Mass", -1 }
+                } ),
+                (ProductTag.Abstract, null),
+            },
             Icon = ""
         };
         public readonly static IProduct QualityLand = new Product
@@ -144,17 +147,18 @@ namespace EconomicSim.Objects
                     {
                         (Land, 1)
                     },
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
-                    {
-                        {ProductTag.Fixed, null},
-                        {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new Dictionary<string, object>
-                        {
-                            { "Type", StorageType.Perfect },
-                            { "Volume", 1000 },
-                            { "Mass", -1 }
-                        } }
-                    },
+            ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Fixed, null),
+                (ProductTag.Nondegrading, null),
+                (ProductTag.Storage, new Dictionary<string, object>
+                {
+                    { "Type", StorageType.Perfect },
+                    { "Volume", 1000 },
+                    { "Mass", -1 }
+                } ),
+                (ProductTag.Abstract, null),
+            },
             Icon = ""
         };
         public readonly static IProduct FertileLand = new Product
@@ -171,17 +175,18 @@ namespace EconomicSim.Objects
                     {
                         (Land, 1)
                     },
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
-                    {
-                        {ProductTag.Fixed, null},
-                        {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new Dictionary<string, object>
-                        {
-                            { "Type", StorageType.Perfect },
-                            { "Volume", 1000 },
-                            { "Mass", -1 }
-                        } }
-                    },
+            ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Fixed, null),
+                (ProductTag.Nondegrading, null),
+                (ProductTag.Storage, new Dictionary<string, object>
+                {
+                    { "Type", StorageType.Perfect },
+                    { "Volume", 1000 },
+                    { "Mass", -1 }
+                } ),
+                (ProductTag.Abstract, null),
+            },
             Icon = ""
         };
         public readonly static IProduct VeryFertileLand = new Product
@@ -198,17 +203,18 @@ namespace EconomicSim.Objects
                     {
                         (Land, 1)
                     },
-            ProductTags = new Dictionary<ProductTag, Dictionary<string, object>>
-                    {
-                        {ProductTag.Fixed, null},
-                        {ProductTag.Nondegrading, null},
-                        {ProductTag.Storage, new Dictionary<string, object>
-                        {
-                            { "Type", StorageType.Perfect },
-                            { "Volume", 1000 },
-                            { "Mass", -1 }
-                        } }
-                    },
+            ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Fixed, null),
+                (ProductTag.Nondegrading, null),
+                (ProductTag.Storage, new Dictionary<string, object>
+                {
+                    { "Type", StorageType.Perfect },
+                    { "Volume", 1000 },
+                    { "Mass", -1 }
+                } ),
+                (ProductTag.Abstract, null),
+            },
             Icon = ""
         };
 

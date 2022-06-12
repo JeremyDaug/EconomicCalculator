@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AvaEditorUI.Helpers;
 using EconomicSim.Objects.Products;
-using EconomicSim.Objects.Products.ProductTags;
 
 namespace AvaEditorUI.Models;
 
@@ -10,7 +9,7 @@ public class ProductEditorModel
 {
     public ProductEditorModel()
     {
-        ProductTags = new Dictionary<string, Dictionary<string, object>?>();
+        ProductTags = new List<(string tag, Dictionary<string, object>? parameters)>();
         Wants = new List<Pair<string, decimal>>();
         UseProcesses = new List<string>();
         ConsumptionProcesses = new List<string>();
@@ -29,11 +28,11 @@ public class ProductEditorModel
         Icon = product.Icon;
         if (product.TechRequirement != null)
             Technology = product.TechRequirement.Name;
-        ProductTags = new Dictionary<string, Dictionary<string, object>?>();
+        ProductTags = new List<(string tag, Dictionary<string, object>? parameters)>();
         foreach (var tag in product.ProductTags)
         {
-            ProductTags.Add(tag.Key.ToString(),
-                tag.Value == null ? null : new Dictionary<string, object>(tag.Value));
+            ProductTags.Add((tag.tag.ToString(),
+                tag.parameters == null ? null : new Dictionary<string, object>(tag.parameters)));
         }
         Wants = new List<Pair<string, decimal>>();
         foreach (var want in product.Wants)
@@ -80,7 +79,7 @@ public class ProductEditorModel
     public string Icon { get; set; } = "";
     public string Technology { get; set; } = "";
     
-    public Dictionary<string, Dictionary<string, object>?> ProductTags { get; set; }
+    public List<(string tag, Dictionary<string, object>? parameters)> ProductTags { get; set; }
 
     public string ProductTagString
     {
@@ -89,7 +88,7 @@ public class ProductEditorModel
             var result = "";
             foreach (var tag in ProductTags)
             {
-                result += TagToString(tag.Key, tag.Value);
+                result += TagToString(tag.tag, tag.parameters);
                 result += "\n";
             }
             return result;

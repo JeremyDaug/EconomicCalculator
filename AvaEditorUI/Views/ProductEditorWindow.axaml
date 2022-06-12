@@ -126,7 +126,7 @@
             <Label>Product Tags</Label>
             <ListBox Items="{Binding TagStrings}"
                      Height="210" Width="250"
-                     SelectedItem="{Binding SelectedTag}"
+                     SelectedIndex="{Binding SelectedTag}"
                      BorderBrush="Black" BorderThickness="2"/>
             <StackPanel Orientation="Horizontal">
                 <Button Command="{Binding AddTag}">Add Tag</Button>

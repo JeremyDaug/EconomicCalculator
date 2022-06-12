@@ -1,7 +1,6 @@
 using AvaEditorUI.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using EconomicSim.Objects;
 
 namespace AvaEditorUI.Views
 {

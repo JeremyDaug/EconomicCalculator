@@ -9,7 +9,6 @@ using AvaEditorUI.Models;
 using AvaEditorUI.Views;
 using Avalonia.Controls;
 using EconomicSim.Objects;
-using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Products.ProductTags;
 using MessageBox.Avalonia;
@@ -34,7 +33,7 @@ public class ProductEditorViewModel : ViewModelBase
     private string _failure = "";
     private string? _wantToAdd = "";
     private Pair<string, decimal>? _wantToRemove;
-    private string? _selectedTag;
+    private int? _selectedTag;
 
     public ProductEditorViewModel()
     {
@@ -45,7 +44,7 @@ public class ProductEditorViewModel : ViewModelBase
         MaintenanceProcesses = new ObservableCollection<string>();
         AvailableTechnologies = new ObservableCollection<string>(dc.Technologies.Keys);
         AvailableWants = new ObservableCollection<string>(dc.Wants.Keys);
-        ProductTags = new Dictionary<string, Dictionary<string, object>?>();
+        ProductTags = new List<(string tag, Dictionary<string, object>? parameters)>();
         TagStrings = new ObservableCollection<string>();
 
         AddWant = ReactiveCommand.Create(AddSelectedWant);
@@ -67,7 +66,7 @@ public class ProductEditorViewModel : ViewModelBase
         _window = win;
         _original = model;
         Name = model.Name;
-        VariantName = model.Name;
+        VariantName = model.VariantName;
         UnitName = model.UnitName;
         Mass = model.Mass;
         Bulk = model.Bulk;
@@ -88,16 +87,17 @@ public class ProductEditorViewModel : ViewModelBase
             UseProcesses.Add(proc);
         foreach (var tag in model.ProductTags)
         {
-            if (tag.Value == null)
+            if (tag.parameters == null)
             {
-                ProductTags.Add(tag.Key, null);
-                TagStrings.Add(tag.Key + "()");
+                ProductTags.Add((tag.tag, null));
+                TagStrings.Add(tag.tag + "()");
             }
             else
             {
-                ProductTags.Add(tag.Key, new Dictionary<string, object>(tag.Value));
-                var result = tag.Key + "(\n";
-                foreach (var pair in tag.Value)
+                
+                ProductTags.Add((tag.tag, new Dictionary<string, object>(tag.parameters)));
+                var result = tag.tag + "(\n";
+                foreach (var pair in tag.parameters)
                     result += $"    {pair.Key}:{pair.Value.ToString()},\n";
                 result += ")";
                 TagStrings.Add(result);
@@ -132,8 +132,8 @@ public class ProductEditorViewModel : ViewModelBase
         await tagWin.ShowDialog(_window);
         if (!tagWin.vm.IsSaved)
             return;
-        ProductTags.Add(tagWin.vm.SelectedTag, tagWin.vm.ExportParameters);
-        var newTag = TagToString(tagWin.vm.SelectedTag, ProductTags[tagWin.vm.SelectedTag]);
+        ProductTags.Add((tagWin.vm.SelectedTag, tagWin.vm.ExportParameters));
+        var newTag = TagToString(tagWin.vm.SelectedTag, tagWin.vm.ExportParameters);
         
         TagStrings.Add(newTag);
     }
@@ -142,20 +142,19 @@ public class ProductEditorViewModel : ViewModelBase
     {
         if (SelectedTag == null)
             return;
-        var selectedTag = SelectedTag.Split('(')[0];
-        var tagToChange = (ProductTag)Enum.Parse(typeof(ProductTag), selectedTag);
-        var tagDataToChange = ProductTags[selectedTag];
-        var tagWin = new ProductTagWindow(tagToChange, tagDataToChange);
+        var tagDataToChange = ProductTags[SelectedTag.Value];
+        var tag = (ProductTag) Enum.Parse(typeof(ProductTag), tagDataToChange.tag);
+        var tagWin = new ProductTagWindow(tag, tagDataToChange.parameters);
         await tagWin.ShowDialog(_window);
         if (!tagWin.vm.IsSaved) return;
 
         // remove old tag
-        TagStrings.Remove(SelectedTag);
-        ProductTags.Remove(selectedTag);
+        ProductTags.RemoveAt(SelectedTag.Value);
+        TagStrings.RemoveAt(SelectedTag.Value);
         
         // add new tag back in.
-        ProductTags.Add(tagWin.vm.SelectedTag, tagWin.vm.ExportParameters);
-        var newTag = TagToString(tagWin.vm.SelectedTag, ProductTags[tagWin.vm.SelectedTag]);
+        ProductTags.Add((tagWin.vm.SelectedTag, tagWin.vm.ExportParameters));
+        var newTag = TagToString(ProductTags.Last().tag, ProductTags.Last().parameters);
 
         TagStrings.Add(newTag);
     }
@@ -164,9 +163,8 @@ public class ProductEditorViewModel : ViewModelBase
     {
         if (SelectedTag == null)
             return;
-        var selectedTag = SelectedTag.Split('(')[0];
-        TagStrings.Remove(SelectedTag);
-        ProductTags.Remove(selectedTag);
+        TagStrings.RemoveAt(SelectedTag.Value);
+        ProductTags.RemoveAt(SelectedTag.Value);
     }
 
     private string TagToString(string tag, Dictionary<string, object>? parameters)
@@ -196,11 +194,16 @@ public class ProductEditorViewModel : ViewModelBase
             errors.Add("Product must have a unit name.");
         if (Wants.Any(x => x.Secondary == 0))
             errors.Add("Wants cannot be 0.");
-        var nameCombo = $"{Name}({VariantName})";
-        var oldCombo = $"{_original.Name}({_original.VariantName})";
+        var nameCombo = "";
+        nameCombo = string.IsNullOrWhiteSpace(VariantName) ? Name : $"{Name}({VariantName})";
+
+        var oldCombo = "";
+        oldCombo = string.IsNullOrWhiteSpace(_original.VariantName) ? _original.Name : $"{_original.Name}({_original.VariantName})";
+        
         if (dc.Products.ContainsKey(nameCombo) && nameCombo != oldCombo)
             errors.Add("Product is a duplicate of an existing product.");
 
+        // throw any errors
         if (errors.Any())
         {
             var failure = MessageBoxManager.GetMessageBoxStandardWindow("Errors Found.",
@@ -217,7 +220,7 @@ public class ProductEditorViewModel : ViewModelBase
         
         // Duplicate sanity check
         // TODO improve this to enforce actual duplicate rules, not just trust the user.
-        var uniqueProducts = ProductTags.Keys.Distinct();
+        var uniqueProducts = ProductTags.Select(x => x.tag).Distinct();
         if (uniqueProducts.Count() != ProductTags.Count())
         {
             var dupFound = MessageBoxManager.GetMessageBoxStandardWindow("Duplicate Tag Found!",
@@ -253,8 +256,8 @@ public class ProductEditorViewModel : ViewModelBase
             oldProd.ProductTags.Clear();
             foreach (var tag in ProductTags)
             {
-                var tagEnum = (ProductTag) Enum.Parse(typeof(ProductTag), tag.Key);
-                oldProd.ProductTags.Add(tagEnum, tag.Value == null ? null : new Dictionary<string, object>(tag.Value));
+                var tagEnum = (ProductTag) Enum.Parse(typeof(ProductTag), tag.tag);
+                oldProd.ProductTags.Add((tagEnum, tag.parameters == null ? null : new Dictionary<string, object>(tag.parameters)));
             }
             _original = new ProductEditorModel(oldProd);
         }
@@ -279,10 +282,10 @@ public class ProductEditorViewModel : ViewModelBase
             // Tags
             foreach (var tag in ProductTags)
             {
-                var tagEnum = (ProductTag) Enum.Parse(typeof(ProductTag), tag.Key);
-                newProd.ProductTags.Add(tagEnum, tag.Value == null ? null : new Dictionary<string, object>(tag.Value));
+                var tagEnum = (ProductTag) Enum.Parse(typeof(ProductTag), tag.tag);
+                newProd.ProductTags.Add((tagEnum, tag.parameters == null ? null : new Dictionary<string, object>(tag.parameters)));
             }
-            dc.Products[newProd.GetName()] = newProd;
+            dc.Products.Add(newProd.GetName(), newProd);
             _original = new ProductEditorModel(newProd);
         }
         
@@ -364,7 +367,7 @@ public class ProductEditorViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _failure, value);
     }
 
-    public string? SelectedTag
+    public int? SelectedTag
     {
         get => _selectedTag;
         set => this.RaiseAndSetIfChanged(ref _selectedTag, value);
@@ -378,7 +381,7 @@ public class ProductEditorViewModel : ViewModelBase
 
     public ObservableCollection<string> AvailableTechnologies { get; set; }
     
-    public Dictionary<string, Dictionary<string, object>?> ProductTags { get; set; }
+    public List<(string tag, Dictionary<string, object>? parameters)> ProductTags { get; set; }
     public ObservableCollection<string> TagStrings { get; set; }
     
     public ObservableCollection<string> AvailableWants { get; set; }

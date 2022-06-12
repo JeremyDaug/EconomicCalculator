@@ -10,9 +10,9 @@
 		"Wants": [
 			{ "Food": 0.3 }
 		],
-		"ProductTags": {
-			"Consumable": null
-		},
+		"ProductTags": [
+			{ "Consumable": null }
+		],
 		"Icon": "ProductImages\\wheat.png"
 	},
 	{
@@ -26,9 +26,9 @@
 		"Wants": [
 			{ "Luxury": 1.75 }
 		],
-		"ProductTags": {
-			"ConsumerGood": null
-		},
+		"ProductTags": [
+			{ "ConsumerGood": null }
+		],
 		"Icon": "ProductImages\\flour.png"
 	},
 	{
@@ -42,10 +42,10 @@
 		"Wants": [
 			{ "Food": 2 }
 		],
-		"ProductTags": {
-			"Consumable": null,
-			"ConsumerGood": null
-		},
+		"ProductTags": [
+			{ "Consumable": null },
+			{ "ConsumerGood": null }
+		],
 		"Icon": "ProductImages\\bread.png"
 	},
 	{
@@ -57,7 +57,7 @@
 		"Bulk": 0.0006,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -71,9 +71,9 @@
 		"Wants": [
 			{ "Life": 1 }
 		],
-		"ProductTags": {
-			"Livestock": null
-		},
+		"ProductTags": [
+			{ "Livestock": null }
+		],
 		"Icon": ""
 	},
 	{
@@ -88,10 +88,10 @@
 			{ "Food": 1 },
 			{ "Life": 1 }
 		],
-		"ProductTags": {
-			"Animal": null,
-			"Livestock": null
-		},
+		"ProductTags": [
+			{ "Animal": null },
+			{ "Livestock": null }
+		],
 		"Icon": ""
 	},
 	{
@@ -103,7 +103,7 @@
 		"Bulk": 0.00025,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -115,7 +115,7 @@
 		"Bulk": 0.0006,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -129,7 +129,7 @@
 		"Wants": [
 			{ "Luxury": 0.25 }
 		],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -141,7 +141,7 @@
 		"Bulk": 0.9,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -153,7 +153,7 @@
 		"Bulk": 0.0042,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -169,7 +169,7 @@
 			{ "Warmth": 2 },
 			{ "Housing": 1 }
 		],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -183,7 +183,7 @@
 		"Wants": [
 			{ "Waste": 1 }
 		],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": "ProductImages\\bin.png"
 	},
 	{
@@ -195,7 +195,7 @@
 		"Bulk": 0.0000576,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -207,7 +207,7 @@
 		"Bulk": 0.00012706,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -219,7 +219,7 @@
 		"Bulk": 0.00012706,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -231,7 +231,7 @@
 		"Bulk": 0.00012706,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -243,7 +243,7 @@
 		"Bulk": 0.001,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -255,7 +255,7 @@
 		"Bulk": 0.00042,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -267,7 +267,7 @@
 		"Bulk": 0.00001,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -279,7 +279,7 @@
 		"Bulk": 0.001,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -291,7 +291,7 @@
 		"Bulk": 0.00000015,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 	{
@@ -303,7 +303,7 @@
 		"Bulk": 0.000025,
 		"Fractional": false,
 		"Wants": [],
-		"ProductTags": {},
+		"ProductTags": [],
 		"Icon": ""
 	},
 
@@ -316,7 +316,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -328,7 +328,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -340,7 +340,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -352,7 +352,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -364,7 +364,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -376,7 +376,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -388,7 +388,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -400,7 +400,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -412,7 +412,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -424,7 +424,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -436,7 +436,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -448,7 +448,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -460,7 +460,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -472,7 +472,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -484,7 +484,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -496,7 +496,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -508,7 +508,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -520,7 +520,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -532,7 +532,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -544,7 +544,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	},
 	{
@@ -556,7 +556,7 @@
 		"Bulk": 0,
 		"Fractional": true,
 		"Wants": [],
-		"ProductTags": { "Service": null },
+		"ProductTags": [{ "Service": null }],
 		"Icon": null
 	}
 ]

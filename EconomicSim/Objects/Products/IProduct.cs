@@ -67,7 +67,7 @@ namespace EconomicSim.Objects.Products
         /// <summary>
         /// The tags of the product.
         /// </summary>
-        IReadOnlyDictionary<ProductTag, Dictionary<string, object>?> ProductTags { get; }
+        IReadOnlyList<(ProductTag tag, Dictionary<string, object>? parameters)> ProductTags { get; }
 
         /// <summary>
         /// What wants the product satisfies by just owning.

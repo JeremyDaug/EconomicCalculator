@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Avalonia.Rendering;
 using EconomicSim.Objects.Products.ProductTags;
 
 namespace EconomicSim.Objects.Products
@@ -51,15 +52,25 @@ namespace EconomicSim.Objects.Products
                         result.Icon = reader.GetString();
                         break;
                     case "ProductTags":
-                        Dictionary<string, Dictionary<string, string>?>? productTags = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(ref reader, options);
-                        if (productTags == null)
-                            break;
-                        foreach (var tag in productTags)
+                        if (reader.TokenType != JsonTokenType.StartArray)
+                            throw new JsonException();
+
+                        while (reader.Read())
                         {
-                            var productTag = (ProductTag) Enum.Parse(typeof(ProductTag), tag.Key);
-                            var parameters = productTag.ProcessParameters(tag.Value);
-                            result.ProductTags
-                                .Add(productTag, parameters);
+                            if (reader.TokenType == JsonTokenType.EndArray)
+                                break;
+                            if (reader.TokenType != JsonTokenType.StartObject)
+                                throw new JsonException();
+                            reader.Read();
+                            var tag = (ProductTag) Enum.Parse(typeof(ProductTag), reader.GetString());
+                            reader.Read();
+                            var parameters = JsonSerializer.Deserialize<Dictionary<string, string>>(ref reader);
+                            // process parameters
+                            var realParams = tag.ProcessParameters(parameters);
+                            result.ProductTags.Add((tag, realParams));
+                            reader.Read();
+                            if (reader.TokenType != JsonTokenType.EndObject)
+                                throw new JsonException();
                         }
                         break;
                     case "Wants":
@@ -136,6 +147,15 @@ namespace EconomicSim.Objects.Products
 
             // ProductTags
             writer.WritePropertyName(nameof(value.ProductTags));
+            writer.WriteStartArray();
+            foreach (var tag in value.ProductTags)
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName(tag.tag.ToString());
+                JsonSerializer.Serialize(writer, tag.parameters, options);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
             JsonSerializer.Serialize(writer, value.ProductTags, options);
 
             // Wants
