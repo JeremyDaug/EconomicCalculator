@@ -10,6 +10,7 @@ using Avalonia.Controls;
 using EconomicSim.Objects;
 using EconomicSim.Objects.Technology;
 using MessageBox.Avalonia;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI;
 
 namespace AvaEditorUI.ViewModels;
@@ -38,10 +39,6 @@ public class TechnologyEditorViewModel : ViewModelBase
         Families = new ObservableCollection<string>();
         Parents = new ObservableCollection<string>();
         Children = new ObservableCollection<string>();
-        PossibleParents = new ObservableCollection<string>(dc.Technologies.Values
-            .Where(x => x.Tier <= Tier).Select(x => x.Name));
-        PossibleChildren = new ObservableCollection<string>(dc.Technologies.Values
-            .Where(x => x.Tier >= Tier).Select(x => x.Name));
         AvailableFamilies = new ObservableCollection<string>(dc.TechFamilies.Keys);
         CategoryOptions = new ObservableCollection<string>(Enum.GetNames(typeof(TechCategory)));
         AddParent = ReactiveCommand.Create(AddParentToTech);
@@ -56,6 +53,11 @@ public class TechnologyEditorViewModel : ViewModelBase
     public TechnologyEditorViewModel(TechnologyEditorWindow window) : this()
     {
         _window = window;
+        
+        PossibleParents = new ObservableCollection<string>(dc.Technologies.Values
+            .Where(x => x.Tier <= Tier).Select(x => x.Name));
+        PossibleChildren = new ObservableCollection<string>(dc.Technologies.Values
+            .Where(x => x.Tier >= Tier).Select(x => x.Name));
     }
     
     public TechnologyEditorViewModel(TechnologyEditorModel original, TechnologyEditorWindow window) : this()
@@ -69,8 +71,15 @@ public class TechnologyEditorViewModel : ViewModelBase
         Families = new ObservableCollection<string>(original.Families);
         Parents = new ObservableCollection<string>(original.Parents);
         Children = new ObservableCollection<string>(original.Children);
-        PossibleParents = new ObservableCollection<string>();
-        PossibleChildren = new ObservableCollection<string>();
+        
+        PossibleParents = new ObservableCollection<string>(dc.Technologies.Values
+            .Where(x => x.Tier <= Tier)
+            .Where(x => x.Name != Name)
+            .Select(x => x.Name));
+        PossibleChildren = new ObservableCollection<string>(dc.Technologies.Values
+            .Where(x => x.Tier >= Tier)
+            .Where(x => x.Name != Name)
+            .Select(x => x.Name));
         Tier = original.Tier;
     }
     
@@ -107,57 +116,118 @@ public class TechnologyEditorViewModel : ViewModelBase
             await errorWindow.ShowDialog(_window);
             return;
         }
-        
-        // make new Tech
-        var newTech = new Technology
-        {
-            Name = Name,
-            Description = Description,
-            Category = category,
-            Tier = Tier,
-            TechCostBase = TechCostBase
-        };
-        
-        // remove the old version
+
+        // if updating old tech
         if (dc.Technologies.ContainsKey(original.Name))
         {
-            // get the old one
-            var old = dc.Technologies[original.Name];
-            // remove the original from list.
-            dc.Technologies.Remove(original.Name);
-            // Remove  old connections
-            foreach (var parent in old.Parents)
-                parent.Children.Remove(old);
-            foreach (var child in old.Children)
-                child.Parents.Remove(old);
-            foreach (var family in old.Families)
-                family.Techs.Remove(old);
+            var oldTech = dc.Technologies[original.Name];
+            // update easy data
+            oldTech.Name = Name;
+            oldTech.Description = Description;
+            oldTech.Category = category;
+            oldTech.Tier = Tier;
+            oldTech.TechCostBase = TechCostBase;
+            // check if name was updated, if so, update
+            if (original.Name != oldTech.Name)
+            {
+                dc.Technologies.Remove(original.Name);
+                dc.Technologies[oldTech.Name] = oldTech;
+            }
+            // remove stale families
+            var oldFams = oldTech.Families.ToList();
+            foreach (var fam in oldFams)
+            {
+                if (!Families.Contains(fam.Name))
+                {
+                    fam.Techs.Remove(oldTech);
+                    oldTech.Families.Remove(fam);
+                }
+            }
+            // add new families
+            foreach (var newFam in Families)
+            {
+                var fam = dc.TechFamilies[newFam];
+                oldTech.Families.Add(fam);
+                fam.Techs.Add(oldTech);
+            }
+            // remove old parents
+            var oldParents = oldTech.Parents.ToList();
+            foreach (var parent in oldParents)
+            {
+                if (!Parents.Contains(parent.Name))
+                {
+                    parent.Children.Remove(oldTech);
+                    oldTech.Parents.Remove(parent);
+                }
+            }
+            // add new parents
+            foreach (var parent in Parents)
+            {
+                if (oldTech.Parents.Any(x => x.Name == parent))
+                    continue;
+                var realParent = dc.Technologies[parent];
+                realParent.Children.Add(oldTech);
+                oldTech.Parents.Add(realParent);
+            }
+            // remove old children
+            var oldChildren = oldTech.Children.ToList();
+            foreach (var child in oldChildren)
+            {
+                if (!Parents.Contains(child.Name))
+                {
+                    child.Children.Remove(oldTech);
+                    oldTech.Parents.Remove(child);
+                }
+            }
+            // add new parents
+            foreach (var child in Children)
+            {
+                if (oldTech.Children.Any(x => x.Name == child))
+                    continue;
+                var realChild = dc.Technologies[child];
+                realChild.Parents.Add(oldTech);
+                oldTech.Children.Add(realChild);
+            }
         }
-        // connect parents
-        foreach (var parent in Parents)
+        else // new Tech
         {
-            var par = dc.Technologies[parent];
-            newTech.Parents.Add(par);
-            par.Children.Add(newTech);
+            var newTech = new Technology
+            {
+                Name = Name,
+                Category = category,
+                Description = Description,
+                TechCostBase = TechCostBase,
+                Tier = Tier
+            };
+            
+            // add families
+            foreach (var fam in Families)
+            {
+                var family = dc.TechFamilies[fam];
+                newTech.Families.Add(family);
+                family.Techs.Add(newTech);
+            }
+            // add parents
+            foreach (var parent in Parents)
+            {
+                var realparent = dc.Technologies[parent];
+                newTech.Parents.Add(realparent);
+                realparent.Children.Add(newTech);
+            }
+            // add children
+            foreach (var child in Children)
+            {
+                var realChild = dc.Technologies[child];
+                newTech.Children.Add(realChild);
+                realChild.Parents.Add(newTech);
+            }
+            
+            // add new tech
+            dc.Technologies[newTech.Name] = newTech;
         }
-        // connect children
-        foreach (var child in Children)
-        {
-            var chi = dc.Technologies[child];
-            newTech.Children.Add(chi);
-            chi.Parents.Add(newTech);
-        }
-        // connect families
-        foreach (var fam in Families)
-        {
-            var family = dc.TechFamilies[fam];
-            newTech.Families.Add(family);
-            family.Techs.Add(newTech);
-        }
-        dc.Technologies.Add(newTech.Name, newTech);
         
         // update original for potential followup changes.
-        original = new TechnologyEditorModel(newTech);
+        original = new TechnologyEditorModel(dc.Technologies[Name]);
         
         var success = MessageBoxManager
             .GetMessageBoxStandardWindow("Tech Committed",
@@ -307,12 +377,14 @@ public class TechnologyEditorViewModel : ViewModelBase
         foreach (var child in dc.Technologies.Values
                      .Where(x => x.Tier >= _tier)
                      .Select(x => x.Name)
-                     .Where(x => !Children.Contains(x)))
+                     .Where(x => !Children.Contains(x))
+                     .Where(x => x != Name))
             PossibleChildren.Add(child);
         foreach (var parent in dc.Technologies.Values
                      .Where(x => x.Tier <= _tier)
                      .Select(x => x.Name)
-                     .Where(x => !Parents.Contains(x)))
+                     .Where(x => !Parents.Contains(x))
+                     .Where(x => x != Name))
             PossibleParents.Add(parent);
     }
 }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reactive;
 using System.Threading.Tasks;
 using AvaEditorUI.Models;
@@ -16,7 +15,7 @@ namespace AvaEditorUI.ViewModels;
 public class TechFamilyEditorViewModel : ViewModelBase
 {
     private IDataContext dc = DataContextFactory.GetDataContext;
-    private TechFamilyEditorModel original;
+    private TechFamilyEditorModel _original;
     private Window? _window;
     private string _name = "";
     private string _description = "";
@@ -27,12 +26,11 @@ public class TechFamilyEditorViewModel : ViewModelBase
 
     public TechFamilyEditorViewModel()
     {
-        original = new TechFamilyEditorModel();
-        TechOptions = new ObservableCollection<string>(dc.Technologies.Keys);
-        FamilyOptions = new ObservableCollection<string>(dc.TechFamilies.Keys);
+        _original = new TechFamilyEditorModel();
         Relations = new ObservableCollection<string>();
         Techs = new ObservableCollection<string>();
-
+        TechOptions = new ObservableCollection<string>();
+        FamilyOptions = new ObservableCollection<string>();
         AddFamily = ReactiveCommand.Create(AddFamilyToFam);
         RemoveFamily = ReactiveCommand.Create(RemoveFamilyFromFam);
         AddTech = ReactiveCommand.Create(AddTechToFam);
@@ -43,18 +41,25 @@ public class TechFamilyEditorViewModel : ViewModelBase
     public TechFamilyEditorViewModel(Window win) : this()
     {
         _window = win;
+        TechOptions = new ObservableCollection<string>(dc.Technologies.Keys);
+        FamilyOptions = new ObservableCollection<string>(dc.TechFamilies.Keys);
     }
 
     public TechFamilyEditorViewModel(TechFamilyEditorModel model, Window win) : this()
     {
         _window = win;
-        original = model;
+        _original = model;
         Name = model.Name;
         Description = model.Description;
         foreach (var rel in model.Relations)
             Relations.Add(rel);
         foreach (var tech in model.Techs)
             Techs.Add(tech);
+        TechOptions = new ObservableCollection<string>(dc.Technologies.Keys
+            .Where(x => !Techs.Contains(x)));
+        FamilyOptions = new ObservableCollection<string>(dc.TechFamilies.Keys
+            .Where(x => x != Name)
+            .Where(x => !Relations.Contains(x)));
     }
     
     public ReactiveCommand<Unit,Unit> AddFamily { get; set; }
@@ -108,39 +113,86 @@ public class TechFamilyEditorViewModel : ViewModelBase
             return;
         }
 
-        var newFamily = new TechFamily
+        // if updating
+        if (dc.TechFamilies.ContainsKey(_original.Name))
         {
-            Name = Name,
-            Description = Description
-        };
+            var oldFam = dc.TechFamilies[_original.Name];
+            // update easy data
+            oldFam.Name = Name;
+            oldFam.Description = Description;
+            // if name changed, update
+            if (_original.Name != Name)
+            {
+                dc.TechFamilies.Remove(_original.Name);
+                dc.TechFamilies.Add(Name, oldFam);
+            }
+            
+            // remove disconnected families
+            var oldRelations = oldFam.Relations.ToList();
+            foreach (var fam in oldRelations)
+            {
+                if (!Relations.Contains(fam.Name))
+                {
+                    oldFam.Relations.Remove(fam);
+                    fam.Relations.Remove(oldFam);
+                }
+            }
+            // add new family relations
+            foreach (var newFam in Relations)
+            {
+                if (oldFam.Relations.Any(x => x.Name == newFam))
+                    continue;
+                var otherFam = dc.TechFamilies[newFam];
+                oldFam.Relations.Add(otherFam);
+                otherFam.Relations.Add(oldFam);
+            }
+            //remove old techs
+            var oldTechs = oldFam.Techs.ToList();
+            foreach (var tech in oldTechs)
+            {
+                if (!Techs.Contains(tech.Name))
+                {
+                    oldFam.Techs.Remove(tech);
+                    tech.Families.Remove(oldFam);
+                }
+            }
+            // add new techs
+            foreach (var newTech in Techs)
+            {
+                if (oldFam.Techs.Any(x => x.Name == newTech))
+                    continue;
+                var otherTech = dc.Technologies[newTech];
+                oldFam.Techs.Add(otherTech);
+                otherTech.Families.Add(oldFam);
+            }
+        }
+        else // if new family
+        {
+            var newFamily = new TechFamily
+            {
+                Name = Name,
+                Description = Description
+            };
 
-        // if it already exists, remove and disconnect.
-        if (dc.TechFamilies.ContainsKey(original.Name))
-        {
-            var old = dc.TechFamilies[original.Name];
-            dc.TechFamilies.Remove(original.Name);
-            foreach (var tech in old.Techs)
-                tech.Families.Remove(old);
-            foreach (var family in old.Relations)
-                family.Relations.Remove(old);
-        }
-        dc.TechFamilies.Add(newFamily.Name, newFamily);
-        
-        // Add relations
-        foreach (var fam in Relations)
-        {
-            newFamily.Relations.Add(dc.TechFamilies[fam]);
-            dc.TechFamilies[fam].Relations.Add(newFamily);
-        }
-        // Add Techs
-        foreach (var tech in Techs)
-        {
-            newFamily.Techs.Add(dc.Technologies[tech]);
-            dc.Technologies[tech].Families.Add(newFamily);
+            foreach (var tech in Techs)
+            {
+                // add tech
+                var otherTech = dc.Technologies[tech];
+                newFamily.Techs.Add(otherTech);
+                otherTech.Families.Add(newFamily);
+            }
+
+            foreach (var rel in Relations)
+            {// add families
+                var otherFam = dc.TechFamilies[rel];
+                newFamily.Relations.Add(otherFam);
+                otherFam.Relations.Add(newFamily);
+            }
+
+            dc.TechFamilies[Name] = newFamily;
         }
 
-        var newOriginal = new TechFamilyEditorModel(newFamily);
-        original = newOriginal;
+        _original = new TechFamilyEditorModel(dc.TechFamilies[Name]);
 
         var success = MessageBoxManager
             .GetMessageBoxStandardWindow("Tech Family Committed!",
