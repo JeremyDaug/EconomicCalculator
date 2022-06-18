@@ -15,7 +15,7 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         public ProcessProduct()
         {
-            TagData = new List<(ProductionTag tag, Dictionary<string, object> properties)>();
+            TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>();
         }
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The Tags and respective data they need.
         /// </summary>
-        public List<(ProductionTag tag, Dictionary<string, object> properties)> TagData { get; set; } 
-        IReadOnlyList<(ProductionTag tag, Dictionary<string, object> properties)> IProcessProduct.TagData => TagData;
+        public List<(ProductionTag tag, Dictionary<string, object> parameters)> TagData { get; set; } 
+        IReadOnlyList<(ProductionTag tag, Dictionary<string, object> parameters)> IProcessProduct.TagData => TagData;
         
         /// <summary>
         /// The part it belongs to.

@@ -194,11 +194,9 @@ public class ProductEditorViewModel : ViewModelBase
             errors.Add("Product must have a unit name.");
         if (Wants.Any(x => x.Secondary == 0))
             errors.Add("Wants cannot be 0.");
-        var nameCombo = "";
-        nameCombo = string.IsNullOrWhiteSpace(VariantName) ? Name : $"{Name}({VariantName})";
+        var nameCombo = string.IsNullOrWhiteSpace(VariantName) ? Name : $"{Name}({VariantName})";
 
-        var oldCombo = "";
-        oldCombo = string.IsNullOrWhiteSpace(_original.VariantName) ? _original.Name : $"{_original.Name}({_original.VariantName})";
+        var oldCombo = string.IsNullOrWhiteSpace(_original.VariantName) ? _original.Name : $"{_original.Name}({_original.VariantName})";
         
         if (dc.Products.ContainsKey(nameCombo) && nameCombo != oldCombo)
             errors.Add("Product is a duplicate of an existing product.");
@@ -212,11 +210,7 @@ public class ProductEditorViewModel : ViewModelBase
             return;
         }
 
-        Product? oldProd;
-        if (_original.Name.Any())
-            oldProd = dc.Products[oldCombo];
-        else
-            oldProd = null;
+        var oldProd = _original.Name.Any() ? dc.Products[oldCombo] : null;
         
         // Duplicate sanity check
         // TODO improve this to enforce actual duplicate rules, not just trust the user.

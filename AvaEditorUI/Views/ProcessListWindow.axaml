@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="450"
+        Width="1200" Height="450"
+        x:Class="AvaEditorUI.Views.ProcessListWindow"
+        Title="Processes">
+    <Design.DataContext>
+        <vm:ProcessListViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                  Items="{Binding Processes}"
+                  SelectedItem="{Binding SelectedProcess}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding FullName}"/>
+                <DataGridTextColumn Header="Minimum Time" Binding="{Binding MinimumTime}"/>
+                <DataGridTextColumn Header="Skill" Binding="{Binding Skill}"/>
+                <DataGridTextColumn Header="Skill Min" Binding="{Binding SkillMin}"/>
+                <DataGridTextColumn Header="Skill Max" Binding="{Binding SkillMax}"/>
+                <DataGridTextColumn Header="Tech Requirement" Binding="{Binding TechRequirement}"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button Grid.Row="1" Grid.Column="0" Margin="5"
+                Command="{Binding NewProcess}"
+                HorizontalAlignment="Center">
+            New Process
+        </Button>
+        <Button Grid.Row="1" Grid.Column="1" Margin="5"
+                Command="{Binding EditProcess}"
+                HorizontalAlignment="Center">
+            Edit Process
+        </Button>
+        <Button Grid.Row="1" Grid.Column="2" Margin="5"
+                Command="{Binding SaveProcesses}"
+                HorizontalAlignment="Center">
+            Save Processes
+        </Button>
+    </Grid>
+</Window>

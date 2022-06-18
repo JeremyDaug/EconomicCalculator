@@ -51,6 +51,7 @@
                 HorizontalAlignment="Center" VerticalAlignment="Center">Products</Button>
         
         <Button Grid.Row="3" Grid.Column="0" Width="100" HorizontalContentAlignment="Center"
+                Click="GoToProcesses"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Processes</Button>
         <Button Grid.Row="3" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Jobs</Button>

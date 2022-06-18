@@ -94,9 +94,9 @@ internal class ProcessProductJsonConverter : JsonConverter<ProcessProduct>
             {
                 writer.WritePropertyName(tag.tag.ToString());
                 writer.WriteStartObject();
-                if (tag.properties != null)
+                if (tag.parameters != null)
                 { // TODO get this to print values appropriately if possible.
-                    foreach (var prop in tag.properties)
+                    foreach (var prop in tag.parameters)
                         writer.WriteString(prop.Key, prop.Value.ToString());
                 }
                 writer.WriteEndObject();

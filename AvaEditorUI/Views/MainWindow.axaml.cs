@@ -40,5 +40,12 @@ namespace AvaEditorUI.Views
             win.Show();
             this.Close();
         }
+
+        private void GoToProcesses(object? sender, RoutedEventArgs e)
+        {
+            var win = new ProcessListWindow();
+            win.Show();
+            this.Close();
+        }
     }
 }

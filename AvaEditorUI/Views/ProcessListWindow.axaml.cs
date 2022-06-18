@@ -6,13 +6,12 @@ using Avalonia.Markup.Xaml;
 
 namespace AvaEditorUI.Views;
 
-public partial class ProductListWindow : Window
+public partial class ProcessListWindow : Window
 {
-    public ProductListWindow()
+    public ProcessListWindow()
     {
+        DataContext = new ProcessListViewModel(this);
         InitializeComponent();
-
-        DataContext = new ProductListViewModel(this);
 #if DEBUG
         this.AttachDevTools();
 #endif

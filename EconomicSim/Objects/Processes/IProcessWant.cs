@@ -23,7 +23,7 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The Tag Data of the want.
         /// </summary>
-        IReadOnlyList<(ProductionTag tag, Dictionary<string, object> properties)> TagData { get; }
+        IReadOnlyList<(ProductionTag tag, Dictionary<string, object> parameters)> TagData { get; }
 
         /// <summary>
         /// The Part of the process it belongs to.
