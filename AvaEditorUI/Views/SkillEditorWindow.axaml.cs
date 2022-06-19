@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AvaEditorUI.Models;
 using AvaEditorUI.ViewModels;
 using Avalonia;
@@ -35,5 +36,15 @@ public partial class SkillEditorWindow : Window
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
+    }
+    
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        var win = new MainWindow
+        {
+            DataContext = new MainWindowViewModel()
+        };
+        win.Show();
+        base.OnClosing(e);
     }
 }

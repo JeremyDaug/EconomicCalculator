@@ -23,7 +23,6 @@ public partial class ProductListWindow : Window
         AvaloniaXamlLoader.Load(this);
     }
     
-    
     protected override void OnClosing(CancelEventArgs e)
     {
         var win = new MainWindow

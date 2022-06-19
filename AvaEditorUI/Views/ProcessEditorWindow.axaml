@@ -168,21 +168,24 @@
             <Label>Output</Label>
             <DataGrid SelectedItem="{Binding SelectedOutputProduct}"
                       Items="{Binding OutputProducts}"
+                      IsEnabled="{Binding InputsEnabled}"
                       Height="150" Width="250">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Product" 
+                    <DataGridTextColumn Header="Product" IsReadOnly="True" 
                                         Binding="{Binding Product}"/>
-                    <DataGridTextColumn Header="Amount" 
+                    <DataGridTextColumn Header="Amount"
                                         Binding="{Binding Amount}"/>
-                    <DataGridTextColumn Header="Tags" 
+                    <DataGridTextColumn Header="Tags" IsReadOnly="True"
                                         Binding="{Binding TagString}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Command="{Binding AddOutputProduct}">
+                <Button Command="{Binding AddOutputProduct}"
+                        IsEnabled="{Binding InputsEnabled}">
                     New Product
                 </Button>
-                <Button Command="{Binding RemoveOutputProduct}">
+                <Button Command="{Binding RemoveOutputProduct}"
+                        IsEnabled="{Binding InputsEnabled}">
                     Delete Product
                 </Button>
             </StackPanel>
@@ -251,6 +254,7 @@
                     <CheckBox Content="Scrubber"
                               IsChecked="{Binding Scrapping}"
                               IsEnabled="{Binding ScrappingEnabled}"/>
+                    <Label>Set Tags before items.</Label>
                 </StackPanel>
                 <ComboBox Items="{Binding ProductOptions}"
                           SelectedItem="{Binding SelectedProduct}"

@@ -22,7 +22,8 @@
         </Grid.ColumnDefinitions>
         <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
                   Items="{Binding Processes}"
-                  SelectedItem="{Binding SelectedProcess}">
+                  SelectedItem="{Binding SelectedProcess}"
+                  IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding FullName}"/>
                 <DataGridTextColumn Header="Minimum Time" Binding="{Binding MinimumTime}"/>

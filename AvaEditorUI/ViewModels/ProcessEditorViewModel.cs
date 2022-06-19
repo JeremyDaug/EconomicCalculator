@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AvaEditorUI.Models;
 using Avalonia.Controls;
 using EconomicSim.Objects;
+using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Processes.ProcessTags;
 using ReactiveUI;
 
@@ -208,7 +209,7 @@ public class ProcessEditorViewModel : ViewModelBase
             ConsumptionEnabled = !(Failure || Use || Maintenance);
             MaintenanceEnabled = !(Failure || Consumption || Use);
             UseEnabled = !(Failure || Consumption || Maintenance);
-            //Chance
+            ChanceEnabled = true; // chance should always be available. 
             CropEnabled = !(Mine || Extractor || Tap || Refiner || Sorter || Scrapping || Scrubber);
             MineEnabled = !(Crop || Extractor || Tap || Refiner || Sorter || Scrapping || Scrubber);
             ExtractorEnabled = !(Mine || Crop || Tap || Refiner || Sorter || Scrapping || Scrubber);
@@ -232,10 +233,39 @@ public class ProcessEditorViewModel : ViewModelBase
             InputWants.Clear();
             CapitalProducts.Clear();
             CapitalWants.Clear();
+            OutputProducts.Clear();
+            OutputWants.Clear();
 
-            if (string.IsNullOrEmpty(SelectedProduct))
+            if (!string.IsNullOrEmpty(SelectedProduct))
             { // if a product is already selected, update it.
-                UpdateSelectedProduct();
+                if (Failure || Consumption || Maintenance)
+                { // if not a use, it should be an input
+                    InputProducts.Add(new ProcessProductModel
+                    {
+                        Product = SelectedProduct,
+                        Amount = 1,
+                        Part = ProcessPartTag.Input
+                    });
+                    
+                    if (Maintenance)
+                    {// if it's a maintenance also add it to the output.
+                        OutputProducts.Add(new ProcessProductModel
+                        {
+                            Product = SelectedProduct,
+                            Amount = 1,
+                            Part = ProcessPartTag.Output
+                        });
+                    }
+                }
+                else if (Use) // if a use
+                {
+                    CapitalProducts.Add(new ProcessProductModel
+                    {
+                        Product = SelectedProduct,
+                        Amount = 1,
+                        Part = ProcessPartTag.Capital
+                    });
+                }
             }
         }
     }
