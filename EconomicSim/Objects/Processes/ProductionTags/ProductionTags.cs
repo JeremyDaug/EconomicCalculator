@@ -19,20 +19,14 @@
         /// <summary>
         /// An input that is consumed. It's consumption process should be
         /// combine with this one implicitly, rather than be destroyed and 
-        /// the process take care of it's output.
+        /// the process take care of it's output. Should not 
         /// </summary>
         Consumed,
         /// <summary>
         /// A fixed want or product. No matter how much a process increases,
-        /// only this amount will be requested for a 
+        /// only this amount will be requested for a process. May be an Input, Capital, or Output.
         /// </summary>
         Fixed,
-        /// <summary>
-        /// Investment(days). An input or capital which is claimed for the duration
-        /// of a long process that requires multiple days of the process.
-        /// TOOD, come back to this later.
-        /// </summary>
-        Investment,
         /// <summary>
         /// For output products only. This product is not put into storage, but rather
         /// automatically released into the environment.
@@ -51,6 +45,12 @@
         /// process it removes this product from the outputs.
         /// </summary>
         Offset,
+        /// <summary>
+        /// Investment(days). An input or capital which is claimed for the duration
+        /// of a long process that requires multiple days of the process.
+        /// TOOD, come back to this later.
+        /// </summary>
+        Investment,
         /// <summary>
         /// DivisionCapital<Level>, this is capital required by the process when division of labor
         /// is being applied. Level is the reduction level at which the capital is required.

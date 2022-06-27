@@ -1,0 +1,91 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="350"
+        Width="600" Height="350"
+        x:Class="AvaEditorUI.Views.ProcessWantEditorWindow"
+        Title="Process Want Editor">
+    <Design.DataContext>
+        <vm:ProcessWantEditorViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Margin="5"
+                    Grid.Row="0" Grid.Column="0">
+            <Label>Want</Label>
+            <ComboBox Items="{Binding WantOptions}"
+                      SelectedItem="{Binding Want}"
+                      Width="150"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
+            <Label>Amount</Label>
+            <TextBox Text="{Binding Amount}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="2" Margin="5">
+            <Label>Part of Process</Label>
+            <TextBox Text="{Binding Part}"
+                     IsReadOnly="True" Background="LightGray"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="5">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox Margin="5" 
+                          IsEnabled="{Binding OptionalEnabled}"
+                          IsChecked="{Binding Optional}">Optional</CheckBox>
+                <Label Margin="5">Bonus</Label>
+                <TextBox Text="{Binding OptionalBonus}" Margin="5"
+                         IsEnabled="{Binding OptionalEnabled}"/>
+            </StackPanel>
+            <CheckBox Margin="5" 
+                      IsEnabled="{Binding ConsumedEnabled}"
+                      IsChecked="{Binding Consumed}">Consumed</CheckBox>
+            <CheckBox Margin="5" 
+                      IsEnabled="{Binding FixedEnabled}"
+                      IsChecked="{Binding Fixed}">Fixed</CheckBox>
+            <CheckBox Margin="5" 
+                      IsEnabled="{Binding PollutantEnabled}"
+                      IsChecked="{Binding Pollutant}">Pollutant</CheckBox>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox Margin="5" 
+                          IsEnabled="{Binding ChanceEnabled}"
+                          IsChecked="{Binding Chance}">Chance</CheckBox>
+                <Label Margin="5">Group</Label>
+                <TextBox IsEnabled="{Binding ChanceEnabled}"
+                         Text="{Binding ChanceGroup}"
+                         Margin="5"/>
+                <Label Margin="5">Weight</Label>
+                <TextBox IsEnabled="{Binding ChanceEnabled}"
+                         Text="{Binding ChanceWeight}"
+                         Margin="5"/>
+            </StackPanel>
+            <CheckBox Margin="5" 
+                      IsEnabled="{Binding OffsetEnabled}"
+                      IsChecked="{Binding Pollutant}">Offset</CheckBox>
+        </StackPanel>
+        
+        <Button Grid.Row="1" Grid.Column="2"
+                Margin="5"
+                Command="{Binding CommitPart}"
+                VerticalAlignment="Top">
+            Commit
+        </Button>
+        
+        <Label Grid.Row="1" Grid.Column="2"
+               VerticalAlignment="Center"
+               IsVisible="{Binding IsCommitted}"
+               Foreground="Green">! Committed Successfully !</Label>
+    </Grid>
+</Window>

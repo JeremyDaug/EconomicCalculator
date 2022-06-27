@@ -56,13 +56,13 @@
         </StackPanel>
         
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
-            <Label>Minimum Time</Label>
+            <Label>Minimum Skill Level</Label>
             <TextBox Text="{Binding SkillMin}"
                      Width="200"/>
         </StackPanel>
         
         <StackPanel Grid.Row="1" Grid.Column="2" Margin="5">
-            <Label>Maximum Time</Label>
+            <Label>Maximum Skill Level</Label>
             <TextBox Text="{Binding SkillMax}"
                      Width="200"/>
         </StackPanel>
@@ -80,40 +80,53 @@
                       Items="{Binding InputProducts}"
                       Height="150" Width="250">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Product" 
+                    <DataGridTextColumn Header="Product" IsReadOnly="True" 
                                         Binding="{Binding Product}"/>
                     <DataGridTextColumn Header="Amount" 
                                         Binding="{Binding Amount}"/>
-                    <DataGridTextColumn Header="Tags" 
+                    <DataGridTextColumn Header="Tags" IsReadOnly="True"
                                         Binding="{Binding TagString}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Command="{Binding AddInputProduct}">
-                    New Product
+                <Button Command="{Binding AddInputProduct}"
+                        IsEnabled="{Binding InputsEnabled}">
+                    New
                 </Button>
-                <Button Command="{Binding RemoveInputProduct}">
-                    Delete Product
+                <Button Command="{Binding EditInputProduct}"
+                        IsEnabled="{Binding InputsEnabled}">
+                    Edit
+                </Button>
+                <Button Command="{Binding RemoveInputProduct}"
+                        IsEnabled="{Binding InputsEnabled}">
+                    Delete
                 </Button>
             </StackPanel>
             <DataGrid SelectedItem="{Binding SelectedInputWant}"
                       Items="{Binding InputWants}"
+                      IsEnabled="{Binding InputsEnabled}"
                       Height="150" Width="250">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Want" 
+                    <DataGridTextColumn Header="Want" IsReadOnly="true"
                                         Binding="{Binding Want}"/>
-                    <DataGridTextColumn Header="Amount" 
+                    <DataGridTextColumn Header="Amount"
                                         Binding="{Binding Amount}"/>
-                    <DataGridTextColumn Header="Tags" 
+                    <DataGridTextColumn Header="Tags" IsReadOnly="True"
                                         Binding="{Binding TagString}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Command="{Binding AddInputWant}">
-                    New Want
+                <Button Command="{Binding AddInputWant}"
+                        IsEnabled="{Binding InputsEnabled}">
+                    New
                 </Button>
-                <Button Command="{Binding RemoveInputWant}">
-                    Delete Want
+                <Button Command="{Binding EditInputWant}"
+                        IsEnabled="{Binding InputsEnabled}">
+                    Edit
+                </Button>
+                <Button Command="{Binding RemoveInputWant}"
+                        IsEnabled="{Binding InputsEnabled}">
+                    Delete
                 </Button>
             </StackPanel>
         </StackPanel>
@@ -122,44 +135,58 @@
             <Label>Capital</Label>
             <DataGrid SelectedItem="{Binding SelectedCapitalProduct}"
                       Items="{Binding CapitalProducts}"
+                      IsEnabled="{Binding CapitalsEnabled}"
                       Height="150" Width="250">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Product" 
+                    <DataGridTextColumn Header="Product" IsReadOnly="True" 
                                         Binding="{Binding Product}"/>
                     <DataGridTextColumn Header="Amount" 
                                         Binding="{Binding Amount}"/>
-                    <DataGridTextColumn Header="Tags" 
+                    <DataGridTextColumn Header="Tags" IsReadOnly="True"
                                         Binding="{Binding TagString}"/>
                 </DataGrid.Columns>
             </DataGrid>
             
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Command="{Binding AddCapitalProduct}">
-                    New Product
+                <Button Command="{Binding AddCapitalProduct}"
+                        IsEnabled="{Binding CapitalsEnabled}">
+                    New
                 </Button>
-                <Button Command="{Binding RemoveCapitalProduct}">
-                    Delete Product
+                <Button Command="{Binding EditCapitalProduct}"
+                        IsEnabled="{Binding CapitalsEnabled}">
+                    Edit
+                </Button>
+                <Button Command="{Binding RemoveCapitalProduct}"
+                        IsEnabled="{Binding CapitalsEnabled}">
+                    Delete
                 </Button>
             </StackPanel>
             
             <DataGrid SelectedItem="{Binding SelectedCapitalWant}"
                       Items="{Binding CapitalWants}"
+                      IsEnabled="{Binding CapitalsEnabled}"
                       Height="150" Width="250">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Want" 
+                    <DataGridTextColumn Header="Want" IsReadOnly="True"
                                         Binding="{Binding Want}"/>
                     <DataGridTextColumn Header="Amount" 
                                         Binding="{Binding Amount}"/>
-                    <DataGridTextColumn Header="Tags" 
+                    <DataGridTextColumn Header="Tags" IsReadOnly="True"
                                         Binding="{Binding TagString}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Command="{Binding AddCapitalWant}">
-                    New Want
+                <Button Command="{Binding AddCapitalWant}"
+                        IsEnabled="{Binding CapitalsEnabled}">
+                    New
                 </Button>
-                <Button Command="{Binding RemoveCapitalWant}">
-                    Delete Want
+                <Button Command="{Binding EditCapitalWant}"
+                        IsEnabled="{Binding CapitalsEnabled}">
+                    Edit
+                </Button>
+                <Button Command="{Binding RemoveCapitalWant}"
+                        IsEnabled="{Binding CapitalsEnabled}">
+                    Delete
                 </Button>
             </StackPanel>
         </StackPanel>
@@ -168,7 +195,6 @@
             <Label>Output</Label>
             <DataGrid SelectedItem="{Binding SelectedOutputProduct}"
                       Items="{Binding OutputProducts}"
-                      IsEnabled="{Binding InputsEnabled}"
                       Height="150" Width="250">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Product" IsReadOnly="True" 
@@ -180,33 +206,37 @@
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Command="{Binding AddOutputProduct}"
-                        IsEnabled="{Binding InputsEnabled}">
-                    New Product
+                <Button Command="{Binding AddOutputProduct}">
+                    New 
                 </Button>
-                <Button Command="{Binding RemoveOutputProduct}"
-                        IsEnabled="{Binding InputsEnabled}">
-                    Delete Product
+                <Button Command="{Binding EditOutputProduct}">
+                    Edit
+                </Button>
+                <Button Command="{Binding RemoveOutputProduct}">
+                    Delete
                 </Button>
             </StackPanel>
             <DataGrid SelectedItem="{Binding SelectedOutputWant}"
                       Items="{Binding OutputWants}"
                       Height="150" Width="250">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Want" 
+                    <DataGridTextColumn Header="Want" IsReadOnly="True"
                                         Binding="{Binding Want}"/>
                     <DataGridTextColumn Header="Amount" 
                                         Binding="{Binding Amount}"/>
-                    <DataGridTextColumn Header="Tags" 
+                    <DataGridTextColumn Header="Tags" IsReadOnly="True"
                                         Binding="{Binding TagString}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="5">
                 <Button Command="{Binding AddOutputWant}">
-                    New Want
+                    New
+                </Button>
+                <Button Command="{Binding EditOutputWant}">
+                    Edit
                 </Button>
                 <Button Command="{Binding RemoveOutputWant}">
-                    Delete Want
+                    Delete
                 </Button>
             </StackPanel>
         </StackPanel>
@@ -251,7 +281,7 @@
                     <CheckBox Content="Scrubber"
                               IsChecked="{Binding Scrubber}"
                               IsEnabled="{Binding ScrubberEnabled}"/>
-                    <CheckBox Content="Scrubber"
+                    <CheckBox Content="Scrapping"
                               IsChecked="{Binding Scrapping}"
                               IsEnabled="{Binding ScrappingEnabled}"/>
                     <Label>Set Tags before items.</Label>
@@ -261,5 +291,8 @@
                           Width="150" />
             </StackPanel>
         </StackPanel>
+        
+        <Button Grid.Row="3" Grid.Column="3"
+                Command="{Binding CommitProcess}">Commit</Button>
     </Grid>
 </Window>

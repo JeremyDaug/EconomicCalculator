@@ -156,8 +156,8 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The tech required see/do this process.
         /// </summary>
-        public ITechnology TechRequirement { get; set; }
-        ITechnology IProcess.TechRequirement => TechRequirement;
+        public ITechnology? TechRequirement { get; set; }
+        ITechnology? IProcess.TechRequirement => TechRequirement;
 
         /// <summary>
         /// Retrieve the name of the process.

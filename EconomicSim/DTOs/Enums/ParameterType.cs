@@ -4,6 +4,7 @@ namespace EconomicSim.DTOs.Enums
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     [Flags]
+    [Obsolete]
     public enum ParameterType
     {
         /// <summary>

@@ -2,6 +2,7 @@
 
 namespace EconomicSim.DTOs.Pops.Species.AttachedTagData
 {
+    [Obsolete]
     public static class SpeciesTagInfo
     {
         public static string GetRegex(SpeciesTag tag)

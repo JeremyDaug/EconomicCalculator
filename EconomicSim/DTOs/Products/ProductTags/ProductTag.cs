@@ -3,6 +3,7 @@
     /// <summary>
     /// The existant product tags in our system.
     /// </summary>
+    [Obsolete]
     public enum ProductTag
     {
         /// <summary>

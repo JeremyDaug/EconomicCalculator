@@ -2,6 +2,7 @@
 
 namespace EconomicSim.DTOs.Pops.Culture.AttachedTagData
 {
+    [Obsolete]
     public static class CultureTagInfo
     {
         public static string GetRegex(CultureTag tag)

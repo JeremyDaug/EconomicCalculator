@@ -3,6 +3,7 @@ using EconomicSim.Objects.Pops.Species;
 
 namespace EconomicSim.DTOs.Pops.Species.AttachedTagData
 {
+    [Obsolete]
     public class AttachedSpeciesTag : IAttachedSpeciesTag
     {
         public AttachedSpeciesTag()

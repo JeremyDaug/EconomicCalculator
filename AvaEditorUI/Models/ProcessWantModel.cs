@@ -30,6 +30,22 @@ public class ProcessWantModel
     public ProcessPartTag Part { get; set; }
     public List<(ProductionTag tag, Dictionary<string, object> parameters)> Tags { get; set; }
 
+    public string TagString
+    {
+        get
+        {
+            var result = "";
+            foreach (var tag in Tags)
+            {
+                result += $"{tag.tag}\n";
+                foreach (var param in tag.parameters)
+                    result += $"\t{param.Key}:{param.Value}\n";
+            }
+
+            return result;
+        }
+    }
+    
     public override string ToString()
     {
         return $"{Want} : {Amount}";

@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace EconomicSim.DTOs
 {
+    [Obsolete]
     public class AbstractConverter<TReal, TAbstract>
         : JsonConverter<TAbstract> where TReal : TAbstract
     {

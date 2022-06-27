@@ -5,6 +5,7 @@ namespace EconomicSim.DTOs.Products.ProductTags
     /// <summary>
     /// Interface for Product Tag that's attached to a product.
     /// </summary>
+    [Obsolete]
     public interface IAttachedProductTag
     {
         /// <summary>

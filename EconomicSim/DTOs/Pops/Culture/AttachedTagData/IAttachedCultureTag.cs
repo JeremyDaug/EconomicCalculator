@@ -3,6 +3,7 @@ using EconomicSim.Objects.Pops.Culture;
 
 namespace EconomicSim.DTOs.Pops.Culture.AttachedTagData
 {
+    [Obsolete]
     public interface IAttachedCultureTag
     {
 

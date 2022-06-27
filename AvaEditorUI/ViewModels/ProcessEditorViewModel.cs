@@ -1,22 +1,29 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using AvaEditorUI.Models;
+using AvaEditorUI.Views;
 using Avalonia.Controls;
 using EconomicSim.Objects;
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Processes.ProcessTags;
+using EconomicSim.Objects.Processes.ProductionTags;
+using MessageBox.Avalonia;
+using MessageBox.Avalonia.Enums;
 using ReactiveUI;
 
 namespace AvaEditorUI.ViewModels;
 
 public class ProcessEditorViewModel : ViewModelBase
 {
+    #region privateProps
     private IDataContext dc = DataContextFactory.GetDataContext;
-    private Window _window;
+    private Window? _window;
     private ProcessModel _original;
+    private bool _updatingEnabledTags;
     private string _name = "";
     private string _variantName = "";
     private string _description = "";
@@ -63,6 +70,7 @@ public class ProcessEditorViewModel : ViewModelBase
     private string _selectedProduct = "";
     private bool _inputsEnabled;
     private bool _capitalsEnabled;
+    #endregion
 
     public ProcessEditorViewModel()
     {
@@ -75,15 +83,16 @@ public class ProcessEditorViewModel : ViewModelBase
         CapitalWants = new ObservableCollection<ProcessWantModel>();
         OutputWants = new ObservableCollection<ProcessWantModel>();
         
-        ProcessTags = new ObservableCollection<string>();
         SkillOptions = new ObservableCollection<string>();
         TechOptions = new ObservableCollection<string>();
-        ProcessTagOptions = new ObservableCollection<string>();
         ProductOptions = new ObservableCollection<string>(dc.Products.Keys);
 
         AddInputProduct = ReactiveCommand.Create(_addInputProduct);
         AddCapitalProduct = ReactiveCommand.Create(_addCapitalProduct);
         AddOutputProduct = ReactiveCommand.Create(_addOutputProduct);
+        EditInputProduct = ReactiveCommand.Create(_editInputProduct);
+        EditCapitalProduct = ReactiveCommand.Create(_editCapitalProduct);
+        EditOutputProduct = ReactiveCommand.Create(_editOutputProduct);
         RemoveInputProduct = ReactiveCommand.Create(_removeInputProduct);
         RemoveCapitalProduct = ReactiveCommand.Create(_removeCapitalProduct);
         RemoveOutputProduct = ReactiveCommand.Create(_removeOutputProduct);
@@ -91,9 +100,13 @@ public class ProcessEditorViewModel : ViewModelBase
         AddInputWant = ReactiveCommand.Create(_addInputWant);
         AddCapitalWant = ReactiveCommand.Create(_addCapitalWant);
         AddOutputWant = ReactiveCommand.Create(_addOutputWant);
+        EditInputWant = ReactiveCommand.Create(_editInputWant);
+        EditCapitalWant = ReactiveCommand.Create(_editCapitalWant);
+        EditOutputWant = ReactiveCommand.Create(_editOutputWant);
         RemoveInputWant = ReactiveCommand.Create(_removeInputWant);
         RemoveCapitalWant = ReactiveCommand.Create(_removeCapitalWant);
         RemoveOutputWant = ReactiveCommand.Create(_removeOutputWant);
+        CommitProcess = ReactiveCommand.Create(_commitProcess);
     }
 
     public ProcessEditorViewModel(Window win) : this()
@@ -105,8 +118,6 @@ public class ProcessEditorViewModel : ViewModelBase
             SkillOptions.Add(skill);
         foreach (var tech in dc.Technologies.Keys)
             TechOptions.Add(tech);
-        foreach (var tag in Enum.GetNames(typeof(ProcessTag)))
-            ProcessTagOptions.Add(tag);
         UpdateEnabledTags();
     }
     
@@ -132,8 +143,6 @@ public class ProcessEditorViewModel : ViewModelBase
         CapitalWants = new ObservableCollection<ProcessWantModel>(model.CapitalWants);
         OutputWants = new ObservableCollection<ProcessWantModel>(model.OutputWants);
 
-        ProcessTags = new ObservableCollection<string>(model.ProcessTags.Select(x => x.ToString()));
-        
         // get all options for a new process
         foreach (var skill in dc.Skills.Keys
                      .Where(x => model.Skill != x))
@@ -141,9 +150,6 @@ public class ProcessEditorViewModel : ViewModelBase
         foreach (var tech in dc.Technologies.Keys
                      .Where(x => x != model.TechRequirement))
             TechOptions.Add(tech);
-        foreach (var tag in Enum.GetNames(typeof(ProcessTag))
-                     .Where(x => !model.ProcessTags.Select(y => y.ToString()).Contains(x)))
-            ProcessTagOptions.Add(tag);
 
         Failure = model.ProcessTags.Contains(ProcessTag.Failure);
         Consumption = model.ProcessTags.Contains(ProcessTag.Consumption);
@@ -168,42 +174,521 @@ public class ProcessEditorViewModel : ViewModelBase
         if (Maintenance)
             SelectedProduct = model.InputProducts.First().Product;
     }
-    
+
+    #region PartFunctions
+
     public ReactiveCommand<Unit, Task> AddInputProduct { get; set; }
     public ReactiveCommand<Unit, Task> AddCapitalProduct { get; set; }
     public ReactiveCommand<Unit, Task> AddOutputProduct { get; set; }
-    public ReactiveCommand<Unit, Task> RemoveInputProduct { get; set; }
-    public ReactiveCommand<Unit, Task> RemoveCapitalProduct { get; set; }
-    public ReactiveCommand<Unit, Task> RemoveOutputProduct { get; set; }
+    public ReactiveCommand<Unit, Task> EditInputProduct { get; set; }
+    public ReactiveCommand<Unit, Task> EditCapitalProduct { get; set; }
+    public ReactiveCommand<Unit, Task> EditOutputProduct { get; set; }
+    public ReactiveCommand<Unit, Unit> RemoveInputProduct { get; set; }
+    public ReactiveCommand<Unit, Unit> RemoveCapitalProduct { get; set; }
+    public ReactiveCommand<Unit, Unit> RemoveOutputProduct { get; set; }
     
     public ReactiveCommand<Unit, Task> AddInputWant { get; set; }
     public ReactiveCommand<Unit, Task> AddCapitalWant { get; set; }
     public ReactiveCommand<Unit, Task> AddOutputWant { get; set; }
-    public ReactiveCommand<Unit, Task> RemoveInputWant { get; set; }
-    public ReactiveCommand<Unit, Task> RemoveCapitalWant { get; set; }
-    public ReactiveCommand<Unit, Task> RemoveOutputWant { get; set; }
-
-    private async Task _addInputProduct(){}
-    private async Task _addCapitalProduct(){}
-    private async Task _addOutputProduct(){}
-    private async Task _removeInputProduct(){}
-    private async Task _removeCapitalProduct(){}
-    private async Task _removeOutputProduct(){}
+    public ReactiveCommand<Unit, Task> EditInputWant { get; set; }
+    public ReactiveCommand<Unit, Task> EditCapitalWant { get; set; }
+    public ReactiveCommand<Unit, Task> EditOutputWant { get; set; }
+    public ReactiveCommand<Unit, Unit> RemoveInputWant { get; set; }
+    public ReactiveCommand<Unit, Unit> RemoveCapitalWant { get; set; }
+    public ReactiveCommand<Unit, Unit> RemoveOutputWant { get; set; }
     
-    private async Task _addInputWant(){}
-    private async Task _addCapitalWant(){}
-    private async Task _addOutputWant(){}
-    private async Task _removeInputWant(){}
-    private async Task _removeCapitalWant(){}
-    private async Task _removeOutputWant(){}
+    private async Task _addInputProduct() => await _addProduct(ProcessPartTag.Input);
+    private async Task _addCapitalProduct() => await _addProduct(ProcessPartTag.Capital);
+    private async Task _addOutputProduct() => await _addProduct(ProcessPartTag.Output);
+    private async Task _editInputProduct() => await _editProduct(SelectedInputProduct, ProcessPartTag.Input);
+    private async Task _editCapitalProduct() => await _editProduct(SelectedCapitalProduct, ProcessPartTag.Capital);
+    private async Task _editOutputProduct() => await _editProduct(SelectedOutputProduct, ProcessPartTag.Output);
+    private void _removeInputProduct() => _removeProduct(SelectedInputProduct, ProcessPartTag.Input);
+    private void _removeCapitalProduct() => _removeProduct(SelectedCapitalProduct, ProcessPartTag.Capital);
+    private void _removeOutputProduct() => _removeProduct(SelectedOutputProduct, ProcessPartTag.Output);
+
+    private async Task _addInputWant() => await _addWant(ProcessPartTag.Input);
+    private async Task _addCapitalWant() => await _addWant(ProcessPartTag.Capital);
+    private async Task _addOutputWant() => await _addWant(ProcessPartTag.Output);
+    private async Task _editInputWant() => await _editWant(SelectedInputWant, ProcessPartTag.Input);
+    private async Task _editCapitalWant() => await _editWant(SelectedCapitalWant, ProcessPartTag.Capital);
+    private async Task _editOutputWant() => await _editWant(SelectedOutputWant, ProcessPartTag.Output);
+    private void _removeInputWant() => _removeWant(SelectedInputWant, ProcessPartTag.Input);
+    private void _removeCapitalWant() => _removeWant(SelectedCapitalWant, ProcessPartTag.Capital);
+    private void _removeOutputWant() => _removeWant(SelectedOutputWant, ProcessPartTag.Output);
+
+    private async Task _addProduct(ProcessPartTag part)
+    {
+        var win = new ProcessProductEditorWindow(part);
+        await win.ShowDialog(_window);
+
+        if (win.vm.CompleteModel == null) return;
+
+        var newPart = win.vm.CompleteModel;
+        switch (part)
+        {
+            case ProcessPartTag.Input:
+                InputProducts.Add(newPart);
+                break;
+            case ProcessPartTag.Capital:
+                CapitalProducts.Add(newPart);
+                break;
+            case ProcessPartTag.Output:
+                OutputProducts.Add(newPart);
+                break;
+        }
+    }
+    
+    private async Task _editProduct(ProcessProductModel? selection, ProcessPartTag part)
+    {
+        if (selection == null) return;
+        
+        var win = new ProcessProductEditorWindow(selection);
+        await win.ShowDialog(_window);
+
+        if (win.vm.CompleteModel == null) return;
+
+        var newPart = win.vm.CompleteModel;
+        switch (part)
+        {
+            case ProcessPartTag.Input:
+                InputProducts.Remove(selection);
+                InputProducts.Add(newPart);
+                break;
+            case ProcessPartTag.Capital:
+                CapitalProducts.Remove(selection);
+                CapitalProducts.Add(newPart);
+                break;
+            case ProcessPartTag.Output:
+                OutputProducts.Remove(selection);
+                OutputProducts.Add(newPart);
+                break;
+        }
+    }
+
+    private void _removeProduct(ProcessProductModel? selection, ProcessPartTag part)
+    {
+        if (selection == null) return;
+
+        switch (part)
+        {
+            case ProcessPartTag.Input:
+                InputProducts.Remove(selection);
+                break;
+            case ProcessPartTag.Capital:
+                CapitalProducts.Remove(selection);
+                break;
+            case ProcessPartTag.Output:
+                OutputProducts.Remove(selection);
+                break;
+        }
+    }
+
+    private async Task _addWant(ProcessPartTag part)
+    {
+        var win = new ProcessWantEditorWindow(part);
+        await win.ShowDialog(_window);
+
+        if (win.vm.CompleteModel == null) return;
+
+        var newPart = win.vm.CompleteModel;
+        switch (part)
+        {
+            case ProcessPartTag.Input:
+                InputWants.Add(newPart);
+                break;
+            case ProcessPartTag.Capital:
+                CapitalWants.Add(newPart);
+                break;
+            case ProcessPartTag.Output:
+                OutputWants.Add(newPart);
+                break;
+        }
+    }
+
+    private async Task _editWant(ProcessWantModel? selection, ProcessPartTag part)
+    {
+        if (selection == null) return;
+        
+        var win = new ProcessWantEditorWindow(selection);
+        await win.ShowDialog(_window);
+
+        if (win.vm.CompleteModel == null) return;
+
+        var newPart = win.vm.CompleteModel;
+        switch (part)
+        {
+            case ProcessPartTag.Input:
+                InputWants.Remove(selection);
+                InputWants.Add(newPart);
+                break;
+            case ProcessPartTag.Capital:
+                CapitalWants.Remove(selection);
+                CapitalWants.Add(newPart);
+                break;
+            case ProcessPartTag.Output:
+                OutputWants.Remove(selection);
+                OutputWants.Add(newPart);
+                break;
+        }
+    }
+
+    private void _removeWant(ProcessWantModel? selection, ProcessPartTag part)
+    {
+        if (selection == null) return;
+
+        switch (part)
+        {
+            case ProcessPartTag.Input:
+                InputWants.Remove(selection);
+                break;
+            case ProcessPartTag.Capital:
+                CapitalWants.Remove(selection);
+                break;
+            case ProcessPartTag.Output:
+                OutputWants.Remove(selection);
+                break;
+        }
+    }
+    
+    #endregion
+
+    public ReactiveCommand<Unit, Task> CommitProcess { get; set; }
+
+    private async Task _commitProcess()
+    {
+        var errors = new List<string>();
+        if (string.IsNullOrWhiteSpace(Name))
+            errors.Add("Must have a name.");
+        if (MinimumTime < 0)
+            errors.Add("Minimum Time cannot be Negative Value.");
+        if (SkillMin < 0 || SkillMax < 0)
+            errors.Add("Skill Limits must be greater than 0.");
+        if (SkillMin >= SkillMax)
+            errors.Add("Skill Minimum must be less than skill max.");
+        if (string.IsNullOrWhiteSpace(Skill))
+            errors.Add("No Skill Selected");
+        // check for duplicate processes
+        var newCombo = string.IsNullOrWhiteSpace(VariantName) ? Name : $"{Name}({VariantName})";
+        var oldCombo = string.IsNullOrWhiteSpace(_original.VariantName) ? _original.Name : $"{_original.Name}({_original.VariantName})";
+
+        if (dc.Processes.ContainsKey(newCombo) && newCombo != oldCombo)
+            errors.Add("Process is a duplicate of an existing product.");
+        
+        if (errors.Any())
+        {
+            await MessageBoxManager
+                .GetMessageBoxStandardWindow("Error!", "Errors Found:\n" + String.Join('\n', errors))
+                .ShowDialog(_window);
+            return;
+        }
+        // check for duplicates and ask if they wish to continue.
+        if (InputProducts.Select(x => x.Product).Distinct().Count() != InputProducts.Count())
+            errors.Add("Duplicate Input Products.");
+        if (InputWants.Select(x => x.Want).Distinct().Count() != InputWants.Count())
+            errors.Add("Duplicate Input Wants.");
+        if (CapitalProducts.Select(x => x.Product).Distinct().Count() != CapitalProducts.Count())
+            errors.Add("Duplicate Capital Products.");
+        if (CapitalWants.Select(x => x.Want).Distinct().Count() != CapitalWants.Count())
+            errors.Add("Duplicate Capital Wants.");
+        if (OutputProducts.Select(x => x.Product).Distinct().Count() != OutputProducts.Count())
+            errors.Add("Duplicate Output Products.");
+        if (OutputWants.Select(x => x.Want).Distinct().Count() != OutputWants.Count())
+            errors.Add("Duplicate Output Wants.");
+
+        if (errors.Any())
+        {
+            var result = await MessageBoxManager
+                .GetMessageBoxStandardWindow("Duplicates found!", "Duplicate Parts found. Accept anyway?", ButtonEnum.YesNo)
+                .ShowDialog(_window);
+            if (result == ButtonResult.No)
+                return;
+        }
+        // TODO Add more checks on Parts here. The worst possible errors are handled by the part windows
+
+        var oldProc = _original.Name.Any() ? dc.Processes[oldCombo] : null;
+        
+        // update
+        if (oldProc != null)
+        {
+            oldProc.Name = Name;
+            oldProc.VariantName = VariantName;
+            oldProc.Description = Description;
+            oldProc.MinimumTime = MinimumTime;
+            oldProc.Skill = dc.Skills[Skill];
+            oldProc.SkillMinimum = SkillMin;
+            oldProc.SkillMaximum = SkillMax;
+            if (!string.IsNullOrWhiteSpace(TechRequirements))
+                oldProc.TechRequirement = dc.Technologies[TechRequirements];
+            else
+                oldProc.TechRequirement = null;
+            
+            // check find old product connections and remove
+            foreach (var product in oldProc.InputProducts)
+            {
+                product.Product.ProductProcesses.Remove(oldProc);
+            }
+            foreach (var product in oldProc.CapitalProducts)
+            {
+                product.Product.ProductProcesses.Remove(oldProc);
+            }
+            foreach (var product in oldProc.OutputProducts)
+            {
+                product.Product.ProductProcesses.Remove(oldProc);
+            }
+            // tags
+            oldProc.ProcessTags.Clear();
+            if (Failure)
+                oldProc.ProcessTags.Add(ProcessTag.Failure);
+            if (Consumption)
+                oldProc.ProcessTags.Add(ProcessTag.Consumption);
+            if (Maintenance)
+                oldProc.ProcessTags.Add(ProcessTag.Maintenance);
+            if (Use)
+                oldProc.ProcessTags.Add(ProcessTag.Use);
+            if (Chance)
+                oldProc.ProcessTags.Add(ProcessTag.Chance);
+            if (Crop)
+                oldProc.ProcessTags.Add(ProcessTag.Crop);
+            if (Mine)
+                oldProc.ProcessTags.Add(ProcessTag.Mine);
+            if (Extractor)
+                oldProc.ProcessTags.Add(ProcessTag.Extractor);
+            if (Tap)
+                oldProc.ProcessTags.Add(ProcessTag.Tap);
+            if (Refiner)
+                oldProc.ProcessTags.Add(ProcessTag.Refiner);
+            if (Sorter)
+                oldProc.ProcessTags.Add(ProcessTag.Sorter);
+            if (Scrubber)
+                oldProc.ProcessTags.Add(ProcessTag.Scrubber);
+            if (Scrapping)
+                oldProc.ProcessTags.Add(ProcessTag.Scrapping);
+            
+            // parts
+            oldProc.InputProducts.Clear();
+            oldProc.InputWants.Clear();
+            oldProc.CapitalProducts.Clear();
+            oldProc.CapitalWants.Clear();
+            oldProc.OutputProducts.Clear();
+            oldProc.OutputWants.Clear();
+            foreach (var input in InputProducts)
+            {
+                oldProc.InputProducts.Add(new ProcessProduct
+                {
+                    Product = dc.Products[input.Product],
+                    Amount = input.Amount,
+                    Part = input.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        input.Tags)
+                });
+                dc.Products[input.Product].ProductProcesses.Add(oldProc);
+            }
+            foreach (var input in InputWants)
+            {
+                oldProc.InputWants.Add(new ProcessWant
+                {
+                    Want = dc.Wants[input.Want],
+                    Amount = input.Amount,
+                    Part = input.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        input.Tags)
+                });
+            }
+            foreach (var capital in CapitalProducts)
+            {
+                oldProc.CapitalProducts.Add(new ProcessProduct
+                {
+                    Product = dc.Products[capital.Product],
+                    Amount = capital.Amount,
+                    Part = capital.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        capital.Tags)
+                });
+                if (!dc.Products[capital.Product].ProductProcesses.Contains(oldProc))
+                    dc.Products[capital.Product].ProductProcesses.Add(oldProc);
+            }
+            foreach (var capital in CapitalWants)
+            {
+                oldProc.CapitalWants.Add(new ProcessWant
+                {
+                    Want = dc.Wants[capital.Want],
+                    Amount = capital.Amount,
+                    Part = capital.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        capital.Tags)
+                });
+            }
+            foreach (var output in OutputProducts)
+            {
+                oldProc.OutputProducts.Add(new ProcessProduct
+                {
+                    Product = dc.Products[output.Product],
+                    Amount = output.Amount,
+                    Part = output.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        output.Tags)
+                });
+                if (!dc.Products[output.Product].ProductProcesses.Contains(oldProc))
+                    dc.Products[output.Product].ProductProcesses.Add(oldProc);
+            }
+            foreach (var output in OutputWants)
+            {
+                oldProc.OutputWants.Add(new ProcessWant
+                {
+                    Want = dc.Wants[output.Want],
+                    Amount = output.Amount,
+                    Part = output.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        output.Tags)
+                });
+            }
+            
+            // update original if name is different
+            if (oldCombo != oldProc.GetName())
+            {
+                dc.Processes.Remove(oldCombo);
+                dc.Processes[oldProc.GetName()] = oldProc;
+            }
+
+            _original = new ProcessModel(oldProc);
+        }
+        else
+        {
+            var newProcess = new Process
+            {
+                Name = Name,
+                VariantName = VariantName,
+                Description = Description,
+                MinimumTime = MinimumTime,
+                Skill = dc.Skills[Skill],
+                SkillMinimum = SkillMin,
+                SkillMaximum = SkillMax
+            };
+
+            // tech requirement
+            if (!string.IsNullOrWhiteSpace(TechRequirements))
+                newProcess.TechRequirement = dc.Technologies[TechRequirements];
+            
+            // parts
+            foreach (var input in InputProducts)
+            {
+                newProcess.InputProducts.Add(new ProcessProduct
+                {
+                    Product = dc.Products[input.Product],
+                    Amount = input.Amount,
+                    Part = input.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        input.Tags)
+                });
+                dc.Products[input.Product].ProductProcesses.Add(newProcess);
+            }
+            foreach (var input in InputWants)
+            {
+                newProcess.InputWants.Add(new ProcessWant
+                {
+                    Want = dc.Wants[input.Want],
+                    Amount = input.Amount,
+                    Part = input.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        input.Tags)
+                });
+            }
+            foreach (var capital in CapitalProducts)
+            {
+                newProcess.CapitalProducts.Add(new ProcessProduct
+                {
+                    Product = dc.Products[capital.Product],
+                    Amount = capital.Amount,
+                    Part = capital.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        capital.Tags)
+                });
+                if (!dc.Products[capital.Product].ProductProcesses.Contains(newProcess))
+                    dc.Products[capital.Product].ProductProcesses.Add(newProcess);
+            }
+            foreach (var capital in CapitalWants)
+            {
+                newProcess.CapitalWants.Add(new ProcessWant
+                {
+                    Want = dc.Wants[capital.Want],
+                    Amount = capital.Amount,
+                    Part = capital.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        capital.Tags)
+                });
+            }
+            foreach (var output in OutputProducts)
+            {
+                newProcess.OutputProducts.Add(new ProcessProduct
+                {
+                    Product = dc.Products[output.Product],
+                    Amount = output.Amount,
+                    Part = output.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        output.Tags)
+                });
+                if (!dc.Products[output.Product].ProductProcesses.Contains(newProcess))
+                    dc.Products[output.Product].ProductProcesses.Add(newProcess);
+            }
+            foreach (var output in OutputWants)
+            {
+                newProcess.OutputWants.Add(new ProcessWant
+                {
+                    Want = dc.Wants[output.Want],
+                    Amount = output.Amount,
+                    Part = output.Part,
+                    TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
+                        output.Tags)
+                });
+            }
+            
+            // tags
+            if (Failure)
+                newProcess.ProcessTags.Add(ProcessTag.Failure);
+            if (Consumption)
+                newProcess.ProcessTags.Add(ProcessTag.Consumption);
+            if (Maintenance)
+                newProcess.ProcessTags.Add(ProcessTag.Maintenance);
+            if (Use)
+                newProcess.ProcessTags.Add(ProcessTag.Use);
+            if (Chance)
+                newProcess.ProcessTags.Add(ProcessTag.Chance);
+            if (Crop)
+                newProcess.ProcessTags.Add(ProcessTag.Crop);
+            if (Mine)
+                newProcess.ProcessTags.Add(ProcessTag.Mine);
+            if (Extractor)
+                newProcess.ProcessTags.Add(ProcessTag.Extractor);
+            if (Tap)
+                newProcess.ProcessTags.Add(ProcessTag.Tap);
+            if (Refiner)
+                newProcess.ProcessTags.Add(ProcessTag.Refiner);
+            if (Sorter)
+                newProcess.ProcessTags.Add(ProcessTag.Sorter);
+            if (Scrubber)
+                newProcess.ProcessTags.Add(ProcessTag.Scrubber);
+            if (Scrapping)
+                newProcess.ProcessTags.Add(ProcessTag.Scrapping);
+
+            dc.Processes.Add(newProcess.GetName(), newProcess);
+            
+            _original = new ProcessModel(newProcess);
+        }
+        
+        // completed
+        var success = MessageBoxManager.GetMessageBoxStandardWindow("Process Committed!",
+            "Process has been committed, be sure to save the data to file!");
+        await success.ShowDialog(_window);
+    }
 
     private void UpdateEnabledTags()
     {
-        if (!UpdatingEnabledTags)
+        if (!_updatingEnabledTags)
         {
-            UpdatingEnabledTags = true;
-            InputsEnabled = Failure || Consumption || Maintenance || Use;
-            CapitalsEnabled = Failure || Consumption || Maintenance || Use;
+            _updatingEnabledTags = true;
+            InputsEnabled = !(Failure || Consumption || Maintenance || Use);
+            CapitalsEnabled = !(Failure || Consumption || Maintenance || Use);
 
             FailureEnabled = !(Maintenance || Use || Consumption);
             ConsumptionEnabled = !(Failure || Use || Maintenance);
@@ -218,11 +703,9 @@ public class ProcessEditorViewModel : ViewModelBase
             SorterEnabled = !(Mine || Extractor || Tap || Refiner || Crop || Scrapping || Scrubber);
             ScrappingEnabled = !(Mine || Extractor || Tap || Refiner || Sorter || Crop || Scrubber);
             ScrubberEnabled = !(Mine || Extractor || Tap || Refiner || Sorter || Scrapping || Crop);
-            UpdatingEnabledTags = false;
+            _updatingEnabledTags = false;
         }
     }
-
-    private bool UpdatingEnabledTags { get; set; }
 
     private void UpdateSelectedProduct()
     {
@@ -548,37 +1031,37 @@ public class ProcessEditorViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _techRequirements, value);
     }
 
-    public ProcessProductModel SelectedInputProduct
+    public ProcessProductModel? SelectedInputProduct
     {
         get => _selectedInputProduct;
         set => this.RaiseAndSetIfChanged(ref _selectedInputProduct, value);
     }
     
-    public ProcessProductModel SelectedCapitalProduct
+    public ProcessProductModel? SelectedCapitalProduct
     {
         get => _selectedCapitalProduct;
         set => this.RaiseAndSetIfChanged(ref _selectedCapitalProduct, value);
     }
     
-    public ProcessProductModel SelectedOutputProduct
+    public ProcessProductModel? SelectedOutputProduct
     {
         get => _selectedOutputProduct;
         set => this.RaiseAndSetIfChanged(ref _selectedOutputProduct, value);
     }
 
-    public ProcessWantModel SelectedInputWant
+    public ProcessWantModel? SelectedInputWant
     {
         get => _selectedInputWant;
         set => this.RaiseAndSetIfChanged(ref _selectedInputWant, value);
     }
 
-    public ProcessWantModel SelectedCapitalWant
+    public ProcessWantModel? SelectedCapitalWant
     {
         get => _selectedCapitalWant;
         set => this.RaiseAndSetIfChanged(ref _selectedCapitalWant, value);
     }
 
-    public ProcessWantModel SelectedOutputWant
+    public ProcessWantModel? SelectedOutputWant
     {
         get => _selectedOutputWant;
         set => this.RaiseAndSetIfChanged(ref _selectedOutputWant, value);
@@ -621,10 +1104,7 @@ public class ProcessEditorViewModel : ViewModelBase
     public ObservableCollection<ProcessWantModel> InputWants { get; set; }
     public ObservableCollection<ProcessWantModel> CapitalWants { get; set; }
     public ObservableCollection<ProcessWantModel> OutputWants { get; set; }
-    
-    public ObservableCollection<string> ProcessTags { get; set; }
 
-    public ObservableCollection<string> ProcessTagOptions { get; set; }
     public ObservableCollection<string> SkillOptions { get; set; }
     public ObservableCollection<string> TechOptions { get; set; }
     

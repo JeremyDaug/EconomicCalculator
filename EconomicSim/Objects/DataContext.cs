@@ -439,7 +439,36 @@ namespace EconomicSim.Objects
                 if (!Processes.TryAdd(process.GetName(), process))
                     errors.Add($"Duplicate Process \"{process.Name}\" in set \"{set}\".");
             }
-            // no connections need to be made. Let's GO!
+            
+            // connect processes to Products
+            foreach (var process in newProcesses)
+            {
+                // if it has that product, add it to their processes
+                foreach (var product in process.InputProducts)
+                    product.Product.ProductProcesses.Add(process);
+                foreach (var product in process.CapitalProducts)
+                    if (!product.Product.ProductProcesses.Contains(process))
+                        product.Product.ProductProcesses.Add(process);
+                foreach (var product in process.OutputProducts)
+                    if (!product.Product.ProductProcesses.Contains(process))
+                        product.Product.ProductProcesses.Add(process);
+            }
+
+            foreach (var product in Products.Values)
+            {
+                try
+                {
+                    var test = product.FailureProcess;
+                    var test1 = product.ConsumptionProcesses;
+                    var test2 = product.UseProcesses;
+                    var test3 = product.MaintenanceProcesses;
+                }
+                catch
+                {
+                    errors.Add($"Product {product.GetName()}, had a duplicate Failure, Consumption, Use, or Maintenance process.");
+                }
+            }
+            
             if (errors.Any())
                 throw new DataException("Duplicate Processes Found:\n" + string.Join('\n', errors));
         }

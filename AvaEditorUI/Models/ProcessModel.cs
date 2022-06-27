@@ -28,8 +28,9 @@ public class ProcessModel
         Skill = process.Skill.Name;
         SkillMin = process.SkillMinimum;
         SkillMax = process.SkillMaximum;
-        TechRequirement = process.TechRequirement.Name;
-        
+        if (process.TechRequirement != null)
+            TechRequirement = process.TechRequirement.Name;
+
         InputProducts = new List<ProcessProductModel>();
         CapitalProducts = new List<ProcessProductModel>();
         OutputProducts = new List<ProcessProductModel>();
