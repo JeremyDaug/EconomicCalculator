@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AvaEditorUI.Views.JobListWindow"
+        Title="JobListWindow">
+    <Design.DataContext>
+        <vm:JobListViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                  Items="{Binding Jobs}"
+                  SelectedItem="{Binding SelectedJob}"
+                  IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="Variant Name" Binding="{Binding VariantName}"/>
+                <DataGridTextColumn Header="Labor" Binding="{Binding Labor}"/>
+                <DataGridTextColumn Header="Skill" Binding="{Binding Skill}"/>
+                <DataGridTextColumn Header="Processes" Binding="{Binding ProcessesString}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <Button Grid.Row="1" Grid.Column="0" 
+                HorizontalAlignment="Center" Command="{Binding AddJob}">Add Job</Button>
+        <Button Grid.Row="1" Grid.Column="1"
+                HorizontalAlignment="Center" Command="{Binding EditJob}">Edit Job</Button>
+        <Button Grid.Row="1" Grid.Column="2"
+                HorizontalAlignment="Center" Command="{Binding SaveJobs}">Save Jobs</Button>
+    </Grid>
+</Window>

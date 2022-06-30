@@ -47,5 +47,12 @@ namespace AvaEditorUI.Views
             win.Show();
             this.Close();
         }
+
+        private void GoToJobs(object? sender, RoutedEventArgs e)
+        {
+            var win = new JobListWindow();
+            win.Show();
+            this.Close();
+        }
     }
 }

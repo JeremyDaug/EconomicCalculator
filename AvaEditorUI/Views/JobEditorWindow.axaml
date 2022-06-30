@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AvaEditorUI.Views.JobEditorWindow"
+        Title="JobEditorWindow">
+    <Design.DataContext>
+        <vm:JobEditorViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="5">
+            <Label>Name</Label>
+            <TextBox Text="{Binding Name}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
+            <Label>Variant Name</Label>
+            <TextBox Text="{Binding VariantName}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+            <Label>Labor</Label>
+            <StackPanel Orientation="Horizontal">
+                <ComboBox Items="{Binding LaborOptions}"
+                          SelectedItem="{Binding Labor}"
+                          IsEnabled="{Binding LaborEnabled}"
+                          Width="150"/>
+                <CheckBox IsChecked="{Binding LockLaborAndSkill}"
+                          Margin="5,0,5,0">Lock to Skill</CheckBox>
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+            <Label>Skill</Label>
+            <ComboBox Items="{Binding SkillOptions}"
+                      SelectedItem="{Binding Skill}"
+                      Width="150"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+            <Label>Processes</Label>
+            <ListBox Items="{Binding Processes}"
+                     SelectedItem="{Binding ProcessToRemove}"
+                     Height="150"/>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddProcess}">Add Process</Button>
+                <Button Command="{Binding RemoveProcess}"
+                        IsEnabled="{Binding CanRemoveProcess}">Remove Process</Button>
+            </StackPanel>
+            <ComboBox Items="{Binding ProcessOptions}"
+                      SelectedItem="{Binding ProcessToAdd}"
+                      Width="150"/>
+        </StackPanel>
+        
+        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Command="{Binding Commit}">
+            Commit
+        </Button>
+    </Grid>
+</Window>

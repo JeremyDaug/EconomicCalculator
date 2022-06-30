@@ -54,6 +54,7 @@
                 Click="GoToProcesses"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Processes</Button>
         <Button Grid.Row="3" Grid.Column="1" Width="100" HorizontalContentAlignment="Center"
+                Click="GoToJobs"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Jobs</Button>
         <Button Grid.Row="3" Grid.Column="2" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Species</Button>

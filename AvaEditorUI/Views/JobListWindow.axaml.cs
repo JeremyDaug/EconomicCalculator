@@ -3,14 +3,15 @@ using AvaEditorUI.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using EconomicSim.Objects;
 
 namespace AvaEditorUI.Views;
 
-public partial class ProcessListWindow : Window
+public partial class JobListWindow : Window
 {
-    public ProcessListWindow()
+    public JobListWindow()
     {
-        DataContext = new ProcessListViewModel(this);
+        DataContext = new JobListViewModel(this);
         InitializeComponent();
 #if DEBUG
         this.AttachDevTools();
