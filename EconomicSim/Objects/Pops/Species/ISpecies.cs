@@ -27,7 +27,7 @@ namespace EconomicSim.Objects.Pops.Species
         /// <summary>
         /// The natural growth rate of the Species.
         /// </summary>
-        decimal GrowthRate { get; }
+        decimal BirthRate { get; }
 
         /// <summary>
         /// The natural rate of death of the species.

@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AvaEditorUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AvaEditorUI.Views.SpeciesListWindow"
+        Title="SpeciesListWindow">
+    <Design.DataContext>
+        <vm:SpeciesListViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                  Items="{Binding Species}"
+                  SelectedItem="{Binding SelectedSpecies}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="Variant Name" Binding="{Binding VariantName}"/>
+                <DataGridTextColumn Header="Birth Rate" Binding="{Binding GrowthRate}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center">New Species</Button>
+        <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">Edit Species</Button>
+        <Button Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center">Save Species</Button>
+    </Grid>
+</Window>

@@ -32,7 +32,7 @@ internal class SpeciesJsonConverter : JsonConverter<Species>
                     result.VariantName = reader.GetString();
                     break;
                 case "GrowthRate":
-                    result.GrowthRate = reader.GetDecimal();
+                    result.BirthRate = reader.GetDecimal();
                     break;
                 case "DeathRate":
                     result.DeathRate = reader.GetDecimal();
@@ -77,7 +77,7 @@ internal class SpeciesJsonConverter : JsonConverter<Species>
         if (!string.IsNullOrWhiteSpace(value.VariantName))
             writer.WriteString(nameof(value.VariantName), value.VariantName);
         // growth rate
-        writer.WriteNumber(nameof(value.GrowthRate), value.GrowthRate);
+        writer.WriteNumber(nameof(value.BirthRate), value.BirthRate);
         // death rate
         writer.WriteNumber(nameof(value.DeathRate), value.DeathRate);
         // Needs

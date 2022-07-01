@@ -54,5 +54,12 @@ namespace AvaEditorUI.Views
             win.Show();
             this.Close();
         }
+        
+        private void GoToSpecies(object? sender, RoutedEventArgs e)
+        {
+            var win = new SpeciesListWindow();
+            win.Show();
+            this.Close();
+        }
     }
 }
