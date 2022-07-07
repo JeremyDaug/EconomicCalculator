@@ -1,5 +1,77 @@
 [
   {
+    "Name": "Ambrosia Hunting",
+    "VariantName": "",
+    "MinimumTime": 1,
+    "Skill": "Fruit Gathering",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": [],
+    "Description": "Ambrosia is easy enough to find.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Fruit Gathering",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Ambrosia Fruit",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Ambrosia Meal",
+    "VariantName": "",
+    "MinimumTime": 0.1,
+    "SkillMinimum": 0,
+    "SkillMaximum": 0,
+    "ProcessTags": [
+      "Consumption"
+    ],
+    "Description": "Even one Ambrosia is a meal.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Ambrosia Fruit",
+          "Amount": 1,
+          "Tags": {}
+        },
+        {
+          "Product": "Time",
+          "Amount": 0.1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": []
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Want": "Food",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    }
+  },
+  {
     "Name": "Wheat Farming",
     "VariantName": "",
     "MinimumTime": 120,
@@ -40,95 +112,6 @@
       "Inputs": [],
       "Capital": [],
       "Outputs": []
-    }
-  },
-  {
-    "Name": "Test Dummy",
-    "VariantName": "Test Dummy",
-    "MinimumTime": 120,
-    "Skill": "Wheat Farming",
-    "SkillMinimum": 1,
-    "SkillMaximum": 5,
-    "ProcessTags": [
-      "Failure"
-    ],
-    "Description": "Sow, Grow, and Harvest Wheat.",
-    "Icon": "",
-    "TechRequirement": "Counting",
-    "Products": {
-      "Inputs": [
-        {
-          "Product": "Wheat Grain",
-          "Amount": 1,
-          "Tags": {
-            "Fixed": {},
-            "Chance": {
-              "Group": "a",
-              "Weight": "100"
-            }
-          }
-        }
-      ],
-      "Capital": [
-        {
-          "Product": "Farm Hoe(Iron and Wood)",
-          "Amount": 0.00625,
-          "Tags": {}
-        }
-      ],
-      "Outputs": [
-        {
-          "Product": "Wheat Grain",
-          "Amount": 1,
-          "Tags": {
-            "Chance": {
-              "Group": "a",
-              "Weight": "100"
-            }
-          }
-        },
-        {
-          "Product": "Wheat Grain",
-          "Amount": 2,
-          "Tags": {
-            "Chance": {
-              "Group": "b",
-              "Weight": "100"
-            }
-          }
-        }
-      ]
-    },
-    "Wants": {
-      "Inputs": [
-        {
-          "Want": "Security",
-          "Amount": 1,
-          "Tags": {
-            "Consumed": {}
-          }
-        }
-      ],
-      "Capital": [
-        {
-          "Want": "Heat",
-          "Amount": 1,
-          "Tags": {
-            "Optional": {
-              "Bonus": "0.1"
-            }
-          }
-        }
-      ],
-      "Outputs": [
-        {
-          "Want": "Warmth",
-          "Amount": 1,
-          "Tags": {
-            "Fixed": {}
-          }
-        }
-      ]
     }
   }
 ]

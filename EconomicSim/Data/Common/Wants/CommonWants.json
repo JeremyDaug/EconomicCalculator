@@ -4,32 +4,12 @@
     "Description": "The product can act as clothing, protecting the owner from the environment."
   },
   {
-    "Name": "Fertility",
-    "Description": "How Fertile a land is"
-  },
-  {
     "Name": "Food",
     "Description": "A product which can stand in for roughly one meal 1 meal (1000 calories)."
   },
   {
-    "Name": "Heat",
-    "Description": "A rough measure of about 1 kw of energy released by the product."
-  },
-  {
     "Name": "Housing",
     "Description": "A product which offers an owner a space to call their own."
-  },
-  {
-    "Name": "Inferior",
-    "Description": "A product which is cheap, and poorly made, but may be attractive to the frugal."
-  },
-  {
-    "Name": "Land",
-    "Description": "A space of land, roughly 1/8 of an acre in size."
-  },
-  {
-    "Name": "Life",
-    "Description": "The product is alive. Should only ever have 1."
   },
   {
     "Name": "Luxury",
@@ -42,10 +22,6 @@
   {
     "Name": "Security",
     "Description": "A product which gives a sense of physical security."
-  },
-  {
-    "Name": "Warmth",
-    "Description": "The product helps retain heat."
   },
   {
     "Name": "Waste",

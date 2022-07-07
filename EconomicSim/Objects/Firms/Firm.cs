@@ -18,7 +18,7 @@ namespace EconomicSim.Objects.Firms
             Products = new Dictionary<Product, decimal>();
             Jobs = new List<FirmJob>();
             Children = new List<Firm>();
-            Techs = new List<Technology.Technology>();
+            Techs = new List<(Technology.Technology tech, int research)>();
         }
 
         /// <summary>
@@ -99,7 +99,8 @@ namespace EconomicSim.Objects.Firms
         /// <summary>
         /// The techs available to the Firm.
         /// </summary>
-        public List<Technology.Technology> Techs { get; set; }
-        IReadOnlyList<ITechnology> IFirm.Techs => Techs;
+        public List<(Technology.Technology tech, int research)> Techs { get; set; }
+        IReadOnlyList<(ITechnology tech, int research)> IFirm.Techs => Techs
+            .Select(x => ((ITechnology)x.tech, x.research)).ToList();
     }
 }

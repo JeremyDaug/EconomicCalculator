@@ -42,11 +42,6 @@ namespace EconomicSim.Objects
             // TODO: Make this Crossplatform
             DataFolder = Path.GetFullPath(Path.Combine(folder, @"../../../../EconomicSim/Data/"));
 
-            SaveFolder = Path.Combine(DataFolder, "Saves");
-
-            // TODO remove this later.
-            CurrentSaveFolder = "Default";
-
             Wants = new SortedList<string, Want>();
             TechFamilies = new SortedList<string, TechFamily>();
             Technologies = new SortedList<string, Technology.Technology>();
@@ -92,12 +87,16 @@ namespace EconomicSim.Objects
 
         public void SaveGame()
         {
+            // go through each and save anything which isn't in a set
+            // TODO complete this when Sets are introduced and midgame generation is available.
             
+            // save game specific data.
+            SaveFirms(CurrentSave);
         }
 
         
         // TODO, update these for set mechanics.
-        public void SaveWants()
+        public void SaveWants(string set = "")
         {
             var filename = GetDataFile("Common", "Wants");
             var json = JsonSerializer.Serialize(Wants.Values,
@@ -108,7 +107,7 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
 
-        public void SaveTechnologies()
+        public void SaveTechnologies(string set = "")
         {
             var filename = GetDataFile("Common", "Technology");
             var json = JsonSerializer.Serialize(Technologies.Values,
@@ -119,7 +118,7 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
 
-        public void SaveTechFamilies()
+        public void SaveTechFamilies(string set = "")
         {
             var filename = GetDataFile("Common", "TechFamilies");
             var json = JsonSerializer.Serialize(TechFamilies.Values,
@@ -130,7 +129,7 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
         
-        public void SaveSkills()
+        public void SaveSkills(string set = "")
         {
             var filename = GetDataFile("Common", "Skills");
             var json = JsonSerializer.Serialize(Skills.Values,
@@ -141,7 +140,7 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
 
-        public void SaveSkillGroups()
+        public void SaveSkillGroups(string set = "")
         {
             var filename = GetDataFile("Common", "SkillGroups");
             var json = JsonSerializer.Serialize(SkillGroups.Values,
@@ -152,10 +151,12 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
         
-        public void SaveProducts()
+        public void SaveProducts(string set = "")
         {
             var filename = GetDataFile("Common", "Products");
-            var json = JsonSerializer.Serialize(Products.Values,
+            var json = JsonSerializer.Serialize(Products
+                    .Where(x => !RequiredItems.Products.ContainsKey(x.Key))
+                    .Select(x => x.Value),
                 new JsonSerializerOptions
                 {
                     WriteIndented = true
@@ -163,7 +164,7 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
         
-        public void SaveProcesses()
+        public void SaveProcesses(string set = "")
         {
             var filename = GetDataFile("Common", "Processes");
             var json = JsonSerializer.Serialize(Processes.Values,
@@ -174,7 +175,7 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
         
-        public void SaveSpecies()
+        public void SaveSpecies(string set = "")
         {
             var filename = GetDataFile("Common", "Species");
             var json = JsonSerializer.Serialize(Species.Values,
@@ -185,7 +186,7 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
         
-        public void SaveCultures()
+        public void SaveCultures(string set = "")
         {
             var filename = GetDataFile("Common", "Cultures");
             var json = JsonSerializer.Serialize(Cultures.Values,
@@ -196,10 +197,54 @@ namespace EconomicSim.Objects
             File.WriteAllText(filename, json);
         }
         
-        public void SaveJobs()
+        public void SaveJobs(string set = "")
         {
             var filename = GetDataFile("Common", "Jobs");
             var json = JsonSerializer.Serialize(Jobs.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+
+        public void SaveFirms(string save)
+        {
+            var filename = GetFileFromSave(save, "Firms");
+            var json = JsonSerializer.Serialize(Firms.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveMarkets(string save)
+        {
+            var filename = GetFileFromSave(save, "Markets");
+            var json = JsonSerializer.Serialize(Markets.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SavePops(string save)
+        {
+            var filename = GetFileFromSave(save, "Pops");
+            var json = JsonSerializer.Serialize(Pops.Values,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+            File.WriteAllText(filename, json);
+        }
+        
+        public void SaveTerritories(string save)
+        {
+            var filename = GetFileFromSave(save, "Territories");
+            var json = JsonSerializer.Serialize(Territories.Values,
                 new JsonSerializerOptions
                 {
                     WriteIndented = true
@@ -227,8 +272,8 @@ namespace EconomicSim.Objects
             _hasEverLoaded = true;
 
             // load wants
-            // foreach (var want in RequiredItems.Wants.Values)
-            //    Wants.Add(want.Name, (Want)want); 
+            foreach (var want in RequiredItems.Wants.Values)
+                Wants.Add(want.Name, (Want)want); 
 
             // load techs
             foreach (var tech in RequiredItems.Technologies.Values)
@@ -244,7 +289,7 @@ namespace EconomicSim.Objects
         /// </summary>
         /// <param name="set">The set group to load from.</param>
         /// <returns>A list of duplicate wants found.</returns>
-        private void LoadWants(string set)
+        private void LoadWants(string set = "")
         {
             var errors = new List<string>();
 
@@ -266,7 +311,7 @@ namespace EconomicSim.Objects
                 throw new DataException($"Duplicates found:\n" + string.Join('\n', errors));
         }
 
-        private void LoadTechFamilies(string set)
+        private void LoadTechFamilies(string set = "")
         {
             var errors = new List<string>();
             var filename = GetDataFile(set, "TechFamilies");
@@ -299,7 +344,7 @@ namespace EconomicSim.Objects
             // we're done.
         }
 
-        private void LoadTechs(string set)
+        private void LoadTechs(string set = "")
         {
             var errors = new List<string>();
             var filename = GetDataFile(set, "Technology");
@@ -339,7 +384,7 @@ namespace EconomicSim.Objects
             // completed.
         }
 
-        private void LoadProducts(string set)
+        private void LoadProducts(string set = "")
         {
             var filename = GetDataFile(set, "Products");
             if (!File.Exists(filename))
@@ -353,7 +398,7 @@ namespace EconomicSim.Objects
             foreach (var prod in newProducts)
             {
                 if (!Products.TryAdd(prod.GetName(), prod))
-                    errors.Add($"Duplicate Product \"{prod.Name}\" in set \"{set}\" found.");
+                    errors.Add($"Duplicate Product \"{prod.GetName()}\" in set \"{set}\" found.");
             }
 
             if (errors.Any())
@@ -364,7 +409,7 @@ namespace EconomicSim.Objects
             // complete.
         }
 
-        private void LoadSkills(string set)
+        private void LoadSkills(string set = "")
         {
             var filename = GetDataFile(set, "Skills");
             if (!File.Exists(filename))
@@ -399,7 +444,7 @@ namespace EconomicSim.Objects
             // finished
         }
 
-        private void LoadSkillGroups(string set)
+        private void LoadSkillGroups(string set = "")
         {
             var filename = GetDataFile(set, "SkillGroups");
             if (!File.Exists(filename))
@@ -423,7 +468,7 @@ namespace EconomicSim.Objects
             // complete
         }
 
-        private void LoadProcesses(string set)
+        private void LoadProcesses(string set = "")
         {
             var filename = GetDataFile(set, "Processes");
             if (!File.Exists(filename)) // ensure file exists.
@@ -473,7 +518,7 @@ namespace EconomicSim.Objects
                 throw new DataException("Duplicate Processes Found:\n" + string.Join('\n', errors));
         }
 
-        private void LoadJobs(string set)
+        private void LoadJobs(string set = "")
         {
             var filename = GetDataFile(set, "Jobs");
             if (!File.Exists(filename))
@@ -494,7 +539,7 @@ namespace EconomicSim.Objects
                 throw new DataException("Duplicate Jobs Found:\n" + string.Join('\n', errors));
         }
 
-        private void LoadSpecies(string set)
+        private void LoadSpecies(string set = "")
         {
             var filename = GetDataFile(set, "Species");
             if (!File.Exists(filename))
@@ -524,7 +569,7 @@ namespace EconomicSim.Objects
             }
         }
 
-        private void LoadCultures(string set)
+        private void LoadCultures(string set = "")
         {
             var filename = GetDataFile(set, "Cultures");
             if (!File.Exists(filename))
@@ -781,14 +826,15 @@ namespace EconomicSim.Objects
         public string CulturesFolder => "Cultures";
         public string SpeciesFolder => "Species";
 
-        public string SaveFolder { get; }
-        public string CurrentSaveFolder { get; }
+        public string SaveFolder => "Saves";
+        // TODO un-default this later, when we have the ability to save/load games more properly.
+        public string CurrentSave { get; } = "Default";
         public string CurrentFirmFolder => "Firms";
         public string CurrentMarketFolder => "Markets";
         public string CurrentPopsFolder => "Pops";
         public string CurrentTerritoriesFolder => "Territories";
-
         public string DefaultIcon => @"ProductImages\DefaultIcon.png";
+        
 
         #endregion FileStorage
 

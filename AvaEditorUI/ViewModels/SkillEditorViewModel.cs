@@ -154,8 +154,9 @@ public class SkillEditorViewModel : ViewModelBase
         if (!dc.Products.ContainsKey(Labor))
         {
             actualLabor = Product.ServiceExample();
-            actualLabor.Name = Labor;
-            dc.Products[Labor] = actualLabor;
+            actualLabor.Name = Name;
+            actualLabor.VariantName = "";
+            dc.Products[actualLabor.GetName()] = actualLabor;
         }
         else
         {

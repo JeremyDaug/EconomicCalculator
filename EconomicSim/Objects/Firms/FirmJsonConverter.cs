@@ -72,9 +72,21 @@ internal class FirmJsonConverter : JsonConverter<Firm>
                         result.Regions.Add(DataContext.Instance.Markets[region]);
                     break;
                 case nameof(result.Techs):
-                    var techs = JsonSerializer.Deserialize<List<string>>(ref reader, options);
-                    foreach (var tech in techs)
-                        result.Techs.Add(DataContext.Instance.Technologies[tech]);
+                    if (reader.TokenType != JsonTokenType.StartObject)
+                        throw new JsonException();
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == JsonTokenType.EndObject)
+                            break;
+                        if (reader.TokenType != JsonTokenType.PropertyName)
+                            throw new JsonException();
+                        var tech = reader.GetString();
+                        reader.Read();
+                        var research = reader.GetInt32();
+                        if (result.Techs.Any(x => x.tech.Name == tech))
+                            throw new JsonException("Duplicate Technology recorded in Firm.");
+                        result.Techs.Add((DataContext.Instance.Technologies[tech], research));
+                    }
                     break;
                 default:
                     throw new JsonException();
@@ -124,7 +136,13 @@ internal class FirmJsonConverter : JsonConverter<Firm>
         JsonSerializer.Serialize(writer, value.Regions.Select(x => x.Name));
         // Technology
         writer.WritePropertyName(nameof(value.Techs));
-        JsonSerializer.Serialize(writer, value.Techs.Select(x => x.Name));
+        writer.WriteStartObject();
+        foreach (var tech in value.Techs)
+        {
+            writer.WritePropertyName(tech.tech.Name);
+            writer.WriteNumberValue(tech.research);
+        }
+        writer.WriteEndObject();
         
         writer.WriteEndObject();
     }

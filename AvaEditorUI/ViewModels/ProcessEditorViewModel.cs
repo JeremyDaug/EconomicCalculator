@@ -134,18 +134,9 @@ public class ProcessEditorViewModel : ViewModelBase
         SkillMin = model.SkillMin;
         SkillMax = model.SkillMax;
         TechRequirements = model.TechRequirement;
-        
-        // add products and wants
-        InputProducts = new ObservableCollection<ProcessProductModel>(model.InputProducts);
-        CapitalProducts = new ObservableCollection<ProcessProductModel>(model.CapitalProducts);
-        OutputProducts = new ObservableCollection<ProcessProductModel>(model.OutputProducts);
-        InputWants = new ObservableCollection<ProcessWantModel>(model.InputWants);
-        CapitalWants = new ObservableCollection<ProcessWantModel>(model.CapitalWants);
-        OutputWants = new ObservableCollection<ProcessWantModel>(model.OutputWants);
 
         // get all options for a new process
-        foreach (var skill in dc.Skills.Keys
-                     .Where(x => model.Skill != x))
+        foreach (var skill in dc.Skills.Keys)
             SkillOptions.Add(skill);
         foreach (var tech in dc.Technologies.Keys
                      .Where(x => x != model.TechRequirement))
@@ -164,7 +155,7 @@ public class ProcessEditorViewModel : ViewModelBase
         Sorter = model.ProcessTags.Contains(ProcessTag.Sorter);
         Scrubber = model.ProcessTags.Contains(ProcessTag.Scrubber);
         Scrapping = model.ProcessTags.Contains(ProcessTag.Scrapping);
-        
+
         // if it has a selected product, select it appropriately.
         if (Failure || Maintenance || Consumption)
         {
@@ -173,6 +164,14 @@ public class ProcessEditorViewModel : ViewModelBase
 
         if (Maintenance)
             SelectedProduct = model.InputProducts.First().Product;
+        
+        // add products and wants
+        InputProducts = new ObservableCollection<ProcessProductModel>(model.InputProducts);
+        CapitalProducts = new ObservableCollection<ProcessProductModel>(model.CapitalProducts);
+        OutputProducts = new ObservableCollection<ProcessProductModel>(model.OutputProducts);
+        InputWants = new ObservableCollection<ProcessWantModel>(model.InputWants);
+        CapitalWants = new ObservableCollection<ProcessWantModel>(model.CapitalWants);
+        OutputWants = new ObservableCollection<ProcessWantModel>(model.OutputWants);
     }
 
     #region PartFunctions
@@ -364,9 +363,11 @@ public class ProcessEditorViewModel : ViewModelBase
             errors.Add("Minimum Time cannot be Negative Value.");
         if (SkillMin < 0 || SkillMax < 0)
             errors.Add("Skill Limits must be greater than 0.");
-        if (SkillMin >= SkillMax)
+        // Skill min must be below max, unless there is no skill selected.
+        if (SkillMin >= SkillMax && !string.IsNullOrWhiteSpace(Skill))
             errors.Add("Skill Minimum must be less than skill max.");
-        if (string.IsNullOrWhiteSpace(Skill))
+        // Skills aren't needed if the Process is Failure, Maintenance, Consumption, or Use
+        if (string.IsNullOrWhiteSpace(Skill) && !(Failure || Maintenance || Consumption || Use))
             errors.Add("No Skill Selected");
         // check for duplicate processes
         var newCombo = string.IsNullOrWhiteSpace(VariantName) ? Name : $"{Name}({VariantName})";
@@ -374,6 +375,25 @@ public class ProcessEditorViewModel : ViewModelBase
 
         if (dc.Processes.ContainsKey(newCombo) && newCombo != oldCombo)
             errors.Add("Process is a duplicate of an existing product.");
+        // ensure that if it's a FMUC process, ensure it has it's product in it.
+        if (Failure || Maintenance || Consumption || Use)
+        {
+            // if FM or C, require it in input
+            if ((Failure || Maintenance || Consumption) && InputProducts.All(x => x.Product != SelectedProduct))
+            {
+                errors.Add($"Process requires the product '{SelectedProduct}' as an input.");
+            }
+            // if U require in Capital.
+            if (Use && CapitalProducts.All(x => x.Product != SelectedProduct))
+            {
+                errors.Add($"Use process requires product '{SelectedProduct}' as a Capital.");
+            }
+            // if M require it in the output
+            if (Maintenance && OutputProducts.All(x => x.Product != SelectedProduct))
+            {
+                errors.Add($"Process requires the product '{SelectedProduct}' as an input.");
+            }
+        }
         
         if (errors.Any())
         {
@@ -405,7 +425,6 @@ public class ProcessEditorViewModel : ViewModelBase
                 return;
         }
         // TODO Add more checks on Parts here. The worst possible errors are handled by the part windows
-
         var oldProc = _original.Name.Any() ? dc.Processes[oldCombo] : null;
         
         // update
@@ -415,9 +434,13 @@ public class ProcessEditorViewModel : ViewModelBase
             oldProc.VariantName = VariantName;
             oldProc.Description = Description;
             oldProc.MinimumTime = MinimumTime;
-            oldProc.Skill = dc.Skills[Skill];
-            oldProc.SkillMinimum = SkillMin;
-            oldProc.SkillMaximum = SkillMax;
+            if (!string.IsNullOrWhiteSpace(Skill))
+            {
+                oldProc.Skill = dc.Skills[Skill];
+                oldProc.SkillMinimum = SkillMin;
+                oldProc.SkillMaximum = SkillMax;
+            }
+
             if (!string.IsNullOrWhiteSpace(TechRequirements))
                 oldProc.TechRequirement = dc.Technologies[TechRequirements];
             else
@@ -466,27 +489,24 @@ public class ProcessEditorViewModel : ViewModelBase
                 oldProc.ProcessTags.Add(ProcessTag.Scrapping);
             
             // parts
-            oldProc.InputProducts.Clear();
-            oldProc.InputWants.Clear();
-            oldProc.CapitalProducts.Clear();
-            oldProc.CapitalWants.Clear();
-            oldProc.OutputProducts.Clear();
-            oldProc.OutputWants.Clear();
+            oldProc.ProcessProducts.Clear();
+            oldProc.ProcessWants.Clear();
             foreach (var input in InputProducts)
             {
-                oldProc.InputProducts.Add(new ProcessProduct
+                var newPart = new ProcessProduct
                 {
                     Product = dc.Products[input.Product],
                     Amount = input.Amount,
                     Part = input.Part,
                     TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
                         input.Tags)
-                });
+                };
+                oldProc.ProcessProducts.Add(newPart);
                 dc.Products[input.Product].ProductProcesses.Add(oldProc);
             }
             foreach (var input in InputWants)
             {
-                oldProc.InputWants.Add(new ProcessWant
+                oldProc.ProcessWants.Add(new ProcessWant
                 {
                     Want = dc.Wants[input.Want],
                     Amount = input.Amount,
@@ -497,7 +517,7 @@ public class ProcessEditorViewModel : ViewModelBase
             }
             foreach (var capital in CapitalProducts)
             {
-                oldProc.CapitalProducts.Add(new ProcessProduct
+                oldProc.ProcessProducts.Add(new ProcessProduct
                 {
                     Product = dc.Products[capital.Product],
                     Amount = capital.Amount,
@@ -510,7 +530,7 @@ public class ProcessEditorViewModel : ViewModelBase
             }
             foreach (var capital in CapitalWants)
             {
-                oldProc.CapitalWants.Add(new ProcessWant
+                oldProc.ProcessWants.Add(new ProcessWant
                 {
                     Want = dc.Wants[capital.Want],
                     Amount = capital.Amount,
@@ -521,7 +541,7 @@ public class ProcessEditorViewModel : ViewModelBase
             }
             foreach (var output in OutputProducts)
             {
-                oldProc.OutputProducts.Add(new ProcessProduct
+                oldProc.ProcessProducts.Add(new ProcessProduct
                 {
                     Product = dc.Products[output.Product],
                     Amount = output.Amount,
@@ -534,7 +554,7 @@ public class ProcessEditorViewModel : ViewModelBase
             }
             foreach (var output in OutputWants)
             {
-                oldProc.OutputWants.Add(new ProcessWant
+                oldProc.ProcessWants.Add(new ProcessWant
                 {
                     Want = dc.Wants[output.Want],
                     Amount = output.Amount,
@@ -561,10 +581,13 @@ public class ProcessEditorViewModel : ViewModelBase
                 VariantName = VariantName,
                 Description = Description,
                 MinimumTime = MinimumTime,
-                Skill = dc.Skills[Skill],
-                SkillMinimum = SkillMin,
-                SkillMaximum = SkillMax
             };
+            if (!string.IsNullOrWhiteSpace(Skill))
+            {
+                newProcess.Skill = dc.Skills[Skill];
+                newProcess.SkillMinimum = SkillMin;
+                newProcess.SkillMaximum = SkillMax;
+            }
 
             // tech requirement
             if (!string.IsNullOrWhiteSpace(TechRequirements))
@@ -573,7 +596,7 @@ public class ProcessEditorViewModel : ViewModelBase
             // parts
             foreach (var input in InputProducts)
             {
-                newProcess.InputProducts.Add(new ProcessProduct
+                newProcess.ProcessProducts.Add(new ProcessProduct
                 {
                     Product = dc.Products[input.Product],
                     Amount = input.Amount,
@@ -581,11 +604,12 @@ public class ProcessEditorViewModel : ViewModelBase
                     TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
                         input.Tags)
                 });
+                // connect to any products which it uses.
                 dc.Products[input.Product].ProductProcesses.Add(newProcess);
             }
             foreach (var input in InputWants)
             {
-                newProcess.InputWants.Add(new ProcessWant
+                newProcess.ProcessWants.Add(new ProcessWant
                 {
                     Want = dc.Wants[input.Want],
                     Amount = input.Amount,
@@ -596,7 +620,7 @@ public class ProcessEditorViewModel : ViewModelBase
             }
             foreach (var capital in CapitalProducts)
             {
-                newProcess.CapitalProducts.Add(new ProcessProduct
+                newProcess.ProcessProducts.Add(new ProcessProduct
                 {
                     Product = dc.Products[capital.Product],
                     Amount = capital.Amount,
@@ -604,12 +628,13 @@ public class ProcessEditorViewModel : ViewModelBase
                     TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
                         capital.Tags)
                 });
+                // connect to any products which it uses.
                 if (!dc.Products[capital.Product].ProductProcesses.Contains(newProcess))
                     dc.Products[capital.Product].ProductProcesses.Add(newProcess);
             }
             foreach (var capital in CapitalWants)
             {
-                newProcess.CapitalWants.Add(new ProcessWant
+                newProcess.ProcessWants.Add(new ProcessWant
                 {
                     Want = dc.Wants[capital.Want],
                     Amount = capital.Amount,
@@ -620,7 +645,7 @@ public class ProcessEditorViewModel : ViewModelBase
             }
             foreach (var output in OutputProducts)
             {
-                newProcess.OutputProducts.Add(new ProcessProduct
+                newProcess.ProcessProducts.Add(new ProcessProduct
                 {
                     Product = dc.Products[output.Product],
                     Amount = output.Amount,
@@ -628,12 +653,13 @@ public class ProcessEditorViewModel : ViewModelBase
                     TagData = new List<(ProductionTag tag, Dictionary<string, object> parameters)>(
                         output.Tags)
                 });
+                // connect to any products which it uses.
                 if (!dc.Products[output.Product].ProductProcesses.Contains(newProcess))
                     dc.Products[output.Product].ProductProcesses.Add(newProcess);
             }
             foreach (var output in OutputWants)
             {
-                newProcess.OutputWants.Add(new ProcessWant
+                newProcess.ProcessWants.Add(new ProcessWant
                 {
                     Want = dc.Wants[output.Want],
                     Amount = output.Amount,
@@ -687,8 +713,8 @@ public class ProcessEditorViewModel : ViewModelBase
         if (!_updatingEnabledTags)
         {
             _updatingEnabledTags = true;
-            InputsEnabled = !(Failure || Consumption || Maintenance || Use);
-            CapitalsEnabled = !(Failure || Consumption || Maintenance || Use);
+            InputsEnabled = !Failure;
+            CapitalsEnabled = !Failure;
 
             FailureEnabled = !(Maintenance || Use || Consumption);
             ConsumptionEnabled = !(Failure || Use || Maintenance);

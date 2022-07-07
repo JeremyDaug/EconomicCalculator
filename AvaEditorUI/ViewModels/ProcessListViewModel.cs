@@ -5,6 +5,7 @@ using AvaEditorUI.Models;
 using AvaEditorUI.Views;
 using Avalonia.Controls;
 using EconomicSim.Objects;
+using MessageBox.Avalonia;
 using ReactiveUI;
 
 namespace AvaEditorUI.ViewModels;
@@ -53,11 +54,15 @@ public class ProcessListViewModel : ViewModelBase
         Processes.Clear();
         foreach (var proc in dc.Processes.Values)
             Processes.Add(new ProcessModel(proc));
+        SelectedProcess = null;
     }
 
     private async Task SaveAllProcesses()
     {
         dc.SaveProcesses();
+
+        var success = MessageBoxManager.GetMessageBoxStandardWindow("Processes Saved!", "Processes Saved!");
+        await success.ShowDialog(_window);
     }
     
     public List<ProcessModel> Processes { get; set; }

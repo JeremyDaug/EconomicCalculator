@@ -45,22 +45,27 @@ namespace EconomicSim.Objects
         SortedList<string, Territory.Territory> Territories { get; }
 
         SortedList<string, Want> Wants { get; }
+        string CurrentSave { get; }
 
         void LoadData(IEnumerable<string> sets);
 
         void LoadSave(string save);
         
         // TODO update these for sets later
-        void SaveWants();
-        void SaveTechnologies();
-        void SaveTechFamilies();
-        void SaveSkills();
-        void SaveSkillGroups();
-        void SaveProducts();
-        void SaveProcesses();
-        void SaveSpecies();
-        void SaveCultures();
-        void SaveJobs();
+        void SaveWants(string save = "");
+        void SaveTechnologies(string save = "");
+        void SaveTechFamilies(string save = "");
+        void SaveSkills(string save = "");
+        void SaveSkillGroups(string save = "");
+        void SaveProducts(string save = "");
+        void SaveProcesses(string save = "");
+        void SaveSpecies(string save = "");
+        void SaveCultures(string save = "");
+        void SaveJobs(string save = "");
+        void SaveFirms(string save);
+        void SaveMarkets(string save);
+        void SavePops(string save);
+        void SaveTerritories(string save);
         void SaveGame();
     }
 }

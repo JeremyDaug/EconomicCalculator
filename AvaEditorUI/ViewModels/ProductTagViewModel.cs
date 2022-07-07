@@ -110,7 +110,7 @@ public class ProductTagViewModel : ViewModelBase
     {
         IsSaved = false;
         // check parameters are valid
-        var stringParams = new Dictionary<string, string>();
+        var stringParams = new Dictionary<string, object>();
         foreach (var param in Parameters)
         {
             stringParams.Add(param.Primary, param.Secondary);

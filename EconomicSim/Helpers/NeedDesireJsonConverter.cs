@@ -31,8 +31,7 @@ internal class NeedDesireJsonConverter : JsonConverter<NeedDesire>
                     result.Product = DataContext.Instance.Products[productName];
                     break;
                 case nameof(result.Tier):
-                    var tier = reader.GetString();
-                    result.Tier = (DesireTier) Enum.Parse(typeof(DesireTier), tier);
+                    result.Tier = reader.GetInt32();
                     break;
                 case nameof(result.Amount):
                     result.Amount = reader.GetDecimal();

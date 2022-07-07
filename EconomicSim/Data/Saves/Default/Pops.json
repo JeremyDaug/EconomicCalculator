@@ -7,34 +7,11 @@
     "LowerSkillLevel": 3,
     "HigherSkillLevel": 0,
     "Species": {
-      "Humie(Based)": 500,
-      "Humie(Normie)": 500
+      "Humie": 1000
     },
     "Cultures": {
-      "Nattie": 1000
+      "Simple": 1000
     },
-    "Property": {
-      "Baking": 20,
-      "Bio Waste": 50
-    }
-  },
-  {
-    "Count": 1000,
-    "Job": "Farming",
-    "Firm": "Bobistan Farmers",
-    "Market": "Bobistan",
-    "LowerSkillLevel": 3,
-    "HigherSkillLevel": 0,
-    "Species": {
-      "Humie(Based)": 500,
-      "Humie(Normie)": 500
-    },
-    "Cultures": {
-      "Nattie": 1000
-    },
-    "Property": {
-      "Baking": 20,
-      "Bio Waste": 50
-    }
+    "Property": {}
   }
 ]

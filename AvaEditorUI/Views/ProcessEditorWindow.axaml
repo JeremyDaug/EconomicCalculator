@@ -43,7 +43,7 @@
         </StackPanel>
         
         <StackPanel Grid.Row="0" Grid.Column="3" Margin="5">
-            <Label>Minimum Time</Label>
+            <Label>Minimum Time (Hours)</Label>
             <TextBox Text="{Binding MinimumTime}"
                      Width="200"/>
         </StackPanel>

@@ -1,54 +1,17 @@
 [
   {
     "Name": "Humie",
-    "VariantName": "Normie",
-    "GrowthRate": 0.05,
-    "DeathRate": 0.01,
-    "Needs": [
+    "VariantName": null,
+    "GrowthRate": 0.02,
+    "DeathRate": 0,
+    "Wants": [
       {
-        "Product": "Land",
-        "Tier": "Daily",
+        "Want": "Food",
+        "Tier": 0,
         "Amount": 1
       }
     ],
-    "Wants": [
-      {
-        "Want": "Land",
-        "Tier": "Life",
-        "Amount": 2
-      }
-    ],
-    "Tags": [
-      {
-        "Deathless": {}
-      }
-    ],
-    "Relations": []
-  },
-  {
-    "Name": "Humie",
-    "VariantName": "Based",
-    "GrowthRate": 0.06,
-    "DeathRate": 0.01,
-    "Needs": [
-      {
-        "Product": "Land",
-        "Tier": "Daily",
-        "Amount": 1
-      }
-    ],
-    "Wants": [
-      {
-        "Want": "Land",
-        "Tier": "Life",
-        "Amount": 2
-      }
-    ],
-    "Tags": [
-      {
-        "Deathless": {}
-      }
-    ],
+    "Tags": [],
     "Relations": []
   }
 ]

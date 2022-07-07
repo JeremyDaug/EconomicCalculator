@@ -63,6 +63,11 @@ namespace EconomicSim.Objects.Technology
         /// </summary>
         public string Description { get; set; }
 
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+
         public override string ToString()
         {
             return Name;

@@ -79,7 +79,7 @@ namespace EconomicSim.Objects.Firms
         /// <summary>
         /// The techs available to the Firm.
         /// </summary>
-        IReadOnlyList<ITechnology> Techs { get; }
+        IReadOnlyList<(ITechnology tech, int research)> Techs { get; }
 
         // Research stuff here.
     }

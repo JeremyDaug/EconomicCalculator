@@ -16,6 +16,13 @@ namespace EconomicSim.Objects
             Name = "Land",
             Description = "A space of land, roughly 1/8 of an acre in size."
         };
+        
+        public readonly static IWant Rest = new Want
+        {
+            Id = 1,
+            Name = "Rest",
+            Description = "A time to rest and recuperate from the hardships of life."
+        };
 
         /// <summary>
         /// Abstract land which all other lands are variations of .
@@ -218,6 +225,21 @@ namespace EconomicSim.Objects
             Icon = ""
         };
 
+        public readonly static IProduct Time = new Product
+        {
+            Name = "Time",
+            UnitName = "Hour",
+            Quality = 0,
+            Bulk = 0,
+            Mass = 0,
+            Fractional = true,
+            ProductTags = new List<(ProductTag tag, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Invariant, null),
+                (ProductTag.Service, null)
+            }
+        };
+
         /// <summary>
         /// The first technology, the ability to solve problems and learn from the solution.
         /// </summary>
@@ -258,12 +280,13 @@ namespace EconomicSim.Objects
                     // Standard Lands Set
                     // Lands (Wasteland, Marginal, Scrub, Quality, Fertile, Very Fertile)
                     _products[AbstractLand.Name] = AbstractLand;
-                    _products[Wasteland.VariantName] = Wasteland;
-                    _products[MarginalLand.VariantName] = MarginalLand;
-                    _products[Scrubland.VariantName] = Scrubland;
-                    _products[QualityLand.VariantName] = QualityLand;
-                    _products[FertileLand.VariantName] = FertileLand;
-                    _products[VeryFertileLand.VariantName] = VeryFertileLand;
+                    _products[Wasteland.GetName()] = Wasteland;
+                    _products[MarginalLand.GetName()] = MarginalLand;
+                    _products[Scrubland.GetName()] = Scrubland;
+                    _products[QualityLand.GetName()] = QualityLand;
+                    _products[FertileLand.GetName()] = FertileLand;
+                    _products[VeryFertileLand.GetName()] = VeryFertileLand;
+                    _products[Time.GetName()] = Time;
                 }
 
                 return _products;
@@ -290,6 +313,7 @@ namespace EconomicSim.Objects
                 if (_wants.Count == 0)
                 {
                     _wants[Land.Name] = Land;
+                    _wants[Rest.Name] = Rest;
                 }
 
                 return _wants;

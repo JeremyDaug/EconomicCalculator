@@ -25,7 +25,8 @@ public class ProcessModel
         VariantName = process.VariantName;
         Description = process.Description;
         MinimumTime = process.MinimumTime;
-        Skill = process.Skill.Name;
+        if (process.Skill != null)
+            Skill = process.Skill.Name;
         SkillMin = process.SkillMinimum;
         SkillMax = process.SkillMaximum;
         if (process.TechRequirement != null)

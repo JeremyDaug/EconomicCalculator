@@ -1,33 +1,27 @@
-using System.ComponentModel;
 using AvaEditorUI.Models;
 using AvaEditorUI.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using EconomicSim.Objects;
 
 namespace AvaEditorUI.Views;
 
-public partial class SkillEditorWindow : Window
+public partial class FirmEditorWindow : Window
 {
-    public SkillEditorWindow()
+    public FirmEditorWindow()
     {
+        DataContext = new FirmEditorViewModel(this);
         InitializeComponent();
-
-        var vm = new SkillEditorViewModel(this);
-
-        DataContext = vm;
 #if DEBUG
         this.AttachDevTools();
 #endif
     }
     
-    public SkillEditorWindow(SkillEditorModel skill)
+    public FirmEditorWindow(FirmModel original)
     {
+        DataContext = new FirmEditorViewModel(original, this);
         InitializeComponent();
-
-        var vm = new SkillEditorViewModel(this, skill);
-
-        DataContext = vm;
 #if DEBUG
         this.AttachDevTools();
 #endif

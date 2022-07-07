@@ -176,7 +176,8 @@ internal class ProcessJsonConverter : JsonConverter<Process>
         // minimum time
         writer.WriteNumber(nameof(value.MinimumTime), value.MinimumTime);
         // skill
-        writer.WriteString(nameof(value.Skill), value.Skill.Name);
+        if (value.Skill != null)
+            writer.WriteString(nameof(value.Skill), value.Skill.Name);
         // skill minimum
         writer.WriteNumber(nameof(value.SkillMinimum), value.SkillMinimum);
         // skill maximum
@@ -190,7 +191,8 @@ internal class ProcessJsonConverter : JsonConverter<Process>
         // icon
         writer.WriteString(nameof(value.Icon), value.Icon);
         // tech requirement
-        writer.WriteString(nameof(value.TechRequirement), value.TechRequirement.Name);
+        if (value.TechRequirement != null)
+            writer.WriteString(nameof(value.TechRequirement), value.TechRequirement.Name);
         
         // products
         writer.WritePropertyName("Products");

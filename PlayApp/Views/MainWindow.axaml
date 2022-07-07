@@ -3,15 +3,27 @@
         xmlns:vm="using:PlayApp.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
+        
         x:Class="PlayApp.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="PlayApp">
-
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Text}"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ProgressBar Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Width="100" Height="25"
+                     Value="{Binding ProgressValue}"/>
+    </Grid>
 </Window>

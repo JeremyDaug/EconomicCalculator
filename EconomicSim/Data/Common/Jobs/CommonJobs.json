@@ -5,17 +5,7 @@
     "Labor": "Wheat Farming",
     "Skill": "Wheat Farming",
     "Processes": [
-      "Wheat Farming",
-      "Test Dummy(Test Dummy)"
-    ]
-  },
-  {
-    "Name": "Test Dummy",
-    "VariantName": "",
-    "Labor": "Baking",
-    "Skill": "Baking",
-    "Processes": [
-      "Test Dummy(Test Dummy)"
+      "Wheat Farming"
     ]
   }
 ]

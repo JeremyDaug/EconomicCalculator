@@ -116,9 +116,9 @@ namespace EconomicSim.Objects.Processes
         IReadOnlyList<ProcessTag> IProcess.ProcessTags => ProcessTags;
 
         /// <summary>
-        /// The Skill the proces Uses.
+        /// The Skill the process Uses.
         /// </summary>
-        public ISkill Skill { get; set; }
+        public ISkill? Skill { get; set; }
 
         /// <summary>
         /// The minimum level of the skill.

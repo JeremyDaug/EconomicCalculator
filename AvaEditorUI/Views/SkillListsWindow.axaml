@@ -78,7 +78,7 @@
             
             <Button Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
-                    Command="{Binding EditSkillGroup}">Save</Button>
+                    Command="{Binding SaveData}">Save</Button>
         </Grid>
     </Grid>
 </Window>

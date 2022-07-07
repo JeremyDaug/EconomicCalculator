@@ -1,29 +1,8 @@
 [
   {
-    "Name": "Nattie",
+    "Name": "Simple",
     "VariantName": null,
-    "GrowthModifier": 0.01,
-    "DeathModifier": 0.005,
-    "Needs": [
-      {
-        "Product": "Land",
-        "Tier": "Daily",
-        "Amount": 1
-      }
-    ],
-    "Wants": [
-      {
-        "Want": "Land",
-        "Tier": "Daily",
-        "Amount": 1
-      }
-    ],
-    "Needs": [
-      {
-        "Product": "Land",
-        "Tier": "Daily",
-        "Amount": 1
-      }
-    ]
+    "GrowthModifier": 0,
+    "DeathModifier": 0
   }
 ]

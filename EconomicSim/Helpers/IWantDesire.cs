@@ -15,7 +15,7 @@ public interface IWantDesire
     /// <summary>
     /// The tier of the desire.
     /// </summary>
-    DesireTier Tier { get; }
+    int Tier { get; }
     
     /// <summary>
     /// The amount requested

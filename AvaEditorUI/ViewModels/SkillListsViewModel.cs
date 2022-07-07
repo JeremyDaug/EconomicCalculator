@@ -199,6 +199,8 @@ public class SkillListsViewModel : ViewModelBase
     {
         _dataContext.SaveSkills();
         _dataContext.SaveSkillGroups();
+        // also save products to ensure that 
+        _dataContext.SaveProducts();
         
         var failure = MessageBox.Avalonia.MessageBoxManager
             .GetMessageBoxStandardWindow("Save Successful!", 

@@ -8,6 +8,6 @@ namespace EconomicSim.Helpers;
 public class NeedDesire : INeedDesire
 {
     public IProduct Product { get; set; }
-    public DesireTier Tier { get; set; }
+    public int Tier { get; set; }
     public decimal Amount { get; set; }
 }

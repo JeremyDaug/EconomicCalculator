@@ -183,7 +183,7 @@
         }
 
         public static Dictionary<string, object>? ProcessParameters(this ProductTag tag,
-            Dictionary<string, string>? parameters)
+            Dictionary<string, object>? parameters)
         {
             // if parameters list is null, just drop back.
             var result = new Dictionary<string, object>();
@@ -217,8 +217,8 @@
                         throw new ArgumentException("Atomic should have 2 parameters.");
                     try
                     {
-                        result.Add("Protons", int.Parse(parameters["Protons"]));
-                        result.Add("Neutrons", int.Parse(parameters["Neutrons"]));
+                        result.Add("Protons", int.Parse(parameters["Protons"].ToString()));
+                        result.Add("Neutrons", int.Parse(parameters["Neutrons"].ToString()));
                         if ((int) result["Protons"] < 1 || (int) result["Neutrons"] < 1)
                             throw new ArgumentException("Protons and Neutrons must be Integer Numbers greater than 0.");
                     }
@@ -234,7 +234,7 @@
                         throw new ArgumentException("Invalid Parameters in Tag.");
                     try
                     {
-                        result.Add("Joules", decimal.Parse(parameters["Joules"]));
+                        result.Add("Joules", decimal.Parse(parameters["Joules"].ToString()));
                         if ((decimal)result["Joules"] <= 0)
                             throw new ArgumentException("Joules must be a decimal greater than 0.");
                     }
@@ -250,9 +250,9 @@
                         throw new ArgumentException("Invalid Parameters in Tag.");
                     try
                     {
-                        result.Add("Type", (StorageType) Enum.Parse(typeof(StorageType), parameters["Type"]));
-                        result.Add("Volume", decimal.Parse(parameters["Volume"]));
-                        result.Add("Mass", decimal.Parse(parameters["Mass"]));
+                        result.Add("Type", (StorageType) Enum.Parse(typeof(StorageType), parameters["Type"].ToString()));
+                        result.Add("Volume", decimal.Parse(parameters["Volume"].ToString()));
+                        result.Add("Mass", decimal.Parse(parameters["Mass"].ToString()));
                         if (((decimal)result["Volume"] < 0 && (decimal)result["Volume"] != -1) ||
                             ((decimal)result["Mass"] < 0 && (decimal)result["Mass"] != -1))
                             throw new ArgumentException("Volume and Mass must be either greater than 0 or equal to -1");
@@ -269,8 +269,8 @@
                         throw new ArgumentException("Invalid Parameters in Tag.");
                     try
                     {
-                        result.Add("Multiplier", decimal.Parse(parameters["Multiplier"]));
-                        result.Add("Want", DataContext.Instance.Wants[parameters["Want"]]);
+                        result.Add("Multiplier", decimal.Parse(parameters["Multiplier"].ToString()));
+                        result.Add("Want", DataContext.Instance.Wants[parameters["Want"].ToString()]);
                         if ((decimal) result["Multiplier"] <= 0)
                             throw new ArgumentException("Multiplier must be greater than 0.");
                     }
@@ -286,8 +286,8 @@
                         throw new ArgumentException("Invalid Parameters in Tag.");
                     try
                     {
-                        result.Add("Multiplier", decimal.Parse(parameters["Multiplier"]));
-                        result.Add("Want", DataContext.Instance.Wants[parameters["Want"]]);
+                        result.Add("Multiplier", decimal.Parse(parameters["Multiplier"].ToString()));
+                        result.Add("Want", DataContext.Instance.Wants[parameters["Want"].ToString()]);
                         if ((decimal) result["Multiplier"] <= 0)
                             throw new ArgumentException("Multiplier must be greater than 0.");
                     }
@@ -301,14 +301,14 @@
                         throw new ArgumentException($"Parameters for {tag} cannot be null.");
                     if (parameters.Count() != 1)
                         throw new ArgumentException("Invalid Parameters in Tag.");
-                    result.Add("Product", DataContext.Instance.Products[parameters["Product"]]);
+                    result.Add("Product", DataContext.Instance.Products[parameters["Product"].ToString()]);
                     break;
                 case ProductTag.Share:
                     if (parameters == null)
                         throw new ArgumentException($"Parameters for {tag} cannot be null.");
                     if (parameters.Count() != 1)
                         throw new ArgumentException("Invalid Parameters in Tag.");
-                    result.Add("Firm", DataContext.Instance.Firms[parameters["Firm"]]);
+                    result.Add("Firm", DataContext.Instance.Firms[parameters["Firm"].ToString()]);
                     break;
             }
 

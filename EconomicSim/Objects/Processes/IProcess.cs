@@ -87,7 +87,7 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The Skill the Process Uses.
         /// </summary>
-        ISkill Skill { get; }
+        ISkill? Skill { get; }
 
         /// <summary>
         /// The minimum level of the skill.

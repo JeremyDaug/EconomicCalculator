@@ -1,147 +1,144 @@
 [
-	{
-		"Name": "Lugging",
-		"Relations": {
-		},
-		"Description": "For moving stuff around by hand.",
-		"Labor": "Lugging"
-	},
-	{
-		"Name": "Hard Labor",
-		"Relations": {
-			"Lugging": 0.9
-		},
-		"Description": "The hard work that needs to be done.",
-		"Labor": "Hard Labor"
-	},
-	{
-		"Name": "Wheat Farming",
-		"Relations": {
-		},
-		"Description": "The Specialized Skill for Farming Wheat",
-		"Labor": "Wheat Farming"
-	},
-	{
-		"Name": "Grain Milling",
-		"Relations": {
-		},
-		"Description": "The skill of managing the quality of milled grain.",
-		"Labor": "Grain Milling"
-	},
-	{
-		"Name": "Cooking",
-		"Relations": {
-			"Baking": 0.9
-		},
-		"Description": "The general cooking skill.",
-		"Labor": "Cooking"
-	},
-	{
-		"Name": "Baking",
-		"Relations": {
-			"Cooking": 0.9
-		},
-		"Description": "The specialized skill of cooking various breads.",
-		"Labor": "Baking"
-	},
-	{
-		"Name": "Mine Engineer",
-		"Relations": {
-		},
-		"Description": "The Skill for managing and organizing Mining operations.",
-		"Labor": "Mine Engineer"
-	},
-	{
-		"Name": "Smelting",
-		"Relations": {
-		},
-		"Description": "The skill for smelting raw metal ores into refined ingots.",
-		"Labor": "Smelting"
-	},
-	{
-		"Name": "Herder",
-		"Relations": {
-		},
-		"Description": "Animal Herding and care for the sake of food.",
-		"Labor": "Herder"
-	},
-	{
-		"Name": "Cotton Farming",
-		"Relations": {
-		},
-		"Description": "The skill of caring for a Cotton Plantation.",
-		"Labor": "Cotton Farming"
-	},
-	{
-		"Name": "Weaving",
-		"Relations": {
-		},
-		"Description": "The skill of weaving threads into cloth.",
-		"Labor": "Weaver"
-	},
-	{
-		"Name": "Spinning",
-		"Relations": {
-		},
-		"Description": "The Skill of spinning raw threads into useful spun threads.",
-		"Labor": "Spinner"
-	},
-	{
-		"Name": "Tailoring",
-		"Relations": {
-		},
-		"Description": "The skill of taking basic cloth and forming clothing from it.",
-		"Labor": "Tailoring"
-	},
-	{
-		"Name": "Panning",
-		"Relations": {
-		},
-		"Description": "The art of pulling gold out of bodies of water.",
-		"Labor": "Panning"
-	},
-	{
-		"Name": "Minting",
-		"Relations": {
-			"Goldsmithing": 0.9
-		},
-		"Description": "The craft of turning precious metals into coinage efficiently.",
-		"Labor": "Minting"
-	},
-	{
-		"Name": "Goldsmithing",
-		"Relations": {
-			"Minting": 0.9
-		},
-		"Description": "The art of crafting gold into various bits of jewelry.",
-		"Labor": "Goldsmithing"
-	},
-	{
-		"Name": "Fishing",
-		"Relations": {
-		},
-		"Description": "The skill of fishing.",
-		"Labor": "Fishing"
-	},
-	{
-		"Name": "Blacksmithing",
-		"Relations": {
-		},
-		"Description": "The skill of forming steel into various forms.",
-		"Labor": "Blacksmithing"
-	},
-	{
-		"Name": "Lumberjacking",
-		"Relations": {
-		},
-		"Description": "The skill of efficiently cutting down trees.",
-		"Labor": "Lumberjacking"
-	},
-	{
-		"Name": "Laborer",
-		"Relations": {
-		},
-		"Description": "A general Purpose Laborer.",
-		"Labor": "Laborer"
-	}
+  {
+    "Name": "Baking",
+    "Description": "The specialized skill of cooking various breads.",
+    "Relations": {
+      "Cooking": 0.9
+    },
+    "Labor": "Baking"
+  },
+  {
+    "Name": "Blacksmithing",
+    "Description": "The skill of forming steel into various forms.",
+    "Relations": {},
+    "Labor": "Blacksmithing"
+  },
+  {
+    "Name": "Cooking",
+    "Description": "The general cooking skill.",
+    "Relations": {
+      "Baking": 0.9
+    },
+    "Labor": "Cooking"
+  },
+  {
+    "Name": "Cotton Farming",
+    "Description": "The skill of caring for a Cotton Plantation.",
+    "Relations": {},
+    "Labor": "Cotton Farming"
+  },
+  {
+    "Name": "Fishing",
+    "Description": "The skill of fishing.",
+    "Relations": {},
+    "Labor": "Fishing"
+  },
+  {
+    "Name": "Fruit Gathering",
+    "Description": "Gathering Fruit is not hard, but requires a keen eye.",
+    "Relations": {},
+    "Labor": "Fruit Gathering"
+  },
+  {
+    "Name": "Goldsmithing",
+    "Description": "The art of crafting gold into various bits of jewelry.",
+    "Relations": {
+      "Minting": 0.9
+    },
+    "Labor": "Goldsmithing"
+  },
+  {
+    "Name": "Grain Milling",
+    "Description": "The skill of managing the quality of milled grain.",
+    "Relations": {},
+    "Labor": "Grain Milling"
+  },
+  {
+    "Name": "Hard Labor",
+    "Description": "The hard work that needs to be done.",
+    "Relations": {
+      "Lugging": 0.9
+    },
+    "Labor": "Hard Labor"
+  },
+  {
+    "Name": "Herder",
+    "Description": "Animal Herding and care for the sake of food.",
+    "Relations": {},
+    "Labor": "Herder"
+  },
+  {
+    "Name": "Laborer",
+    "Description": "A general Purpose Laborer.",
+    "Relations": {},
+    "Labor": "Laborer"
+  },
+  {
+    "Name": "Lugging",
+    "Description": "For moving stuff around by hand.",
+    "Relations": {},
+    "Labor": "Lugging"
+  },
+  {
+    "Name": "Lumberjacking",
+    "Description": "The skill of efficiently cutting down trees.",
+    "Relations": {},
+    "Labor": "Lumberjacking"
+  },
+  {
+    "Name": "Mine Engineer",
+    "Description": "The Skill for managing and organizing Mining operations.",
+    "Relations": {},
+    "Labor": "Mine Engineer"
+  },
+  {
+    "Name": "Minting",
+    "Description": "The craft of turning precious metals into coinage efficiently.",
+    "Relations": {
+      "Goldsmithing": 0.9
+    },
+    "Labor": "Minting"
+  },
+  {
+    "Name": "Panning",
+    "Description": "The art of pulling gold out of bodies of water.",
+    "Relations": {},
+    "Labor": "Panning"
+  },
+  {
+    "Name": "Smelting",
+    "Description": "The skill for smelting raw metal ores into refined ingots.",
+    "Relations": {},
+    "Labor": "Smelting"
+  },
+  {
+    "Name": "Spinning",
+    "Description": "The Skill of spinning raw threads into useful spun threads.",
+    "Relations": {},
+    "Labor": "Spinner"
+  },
+  {
+    "Name": "Tailoring",
+    "Description": "The skill of taking basic cloth and forming clothing from it.",
+    "Relations": {},
+    "Labor": "Tailoring"
+  },
+  {
+    "Name": "Test",
+    "Description": "Testing",
+    "Relations": {},
+    "Labor": "Test"
+  },
+  {
+    "Name": "Weaving",
+    "Description": "The skill of weaving threads into cloth.",
+    "Relations": {},
+    "Labor": "Weaver"
+  },
+  {
+    "Name": "Wheat Farming",
+    "Description": "The Specialized Skill for Farming Wheat",
+    "Relations": {},
+    "Labor": "Wheat Farming"
+  }
 ]

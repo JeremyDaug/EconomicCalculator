@@ -64,7 +64,7 @@ namespace EconomicSim.Objects.Products
                             reader.Read();
                             var tag = (ProductTag) Enum.Parse(typeof(ProductTag), reader.GetString());
                             reader.Read();
-                            var parameters = JsonSerializer.Deserialize<Dictionary<string, string>>(ref reader);
+                            var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(ref reader);
                             // process parameters
                             var realParams = tag.ProcessParameters(parameters);
                             result.ProductTags.Add((tag, realParams));
@@ -152,11 +152,15 @@ namespace EconomicSim.Objects.Products
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName(tag.tag.ToString());
-                JsonSerializer.Serialize(writer, tag.parameters, options);
+                if (tag.parameters != null)
+                    JsonSerializer.Serialize(writer, tag.parameters
+                        .ToDictionary(x => x.Key,
+                            x => x.Value.ToString()), options);
+                else 
+                    writer.WriteNullValue();
                 writer.WriteEndObject();
             }
             writer.WriteEndArray();
-            JsonSerializer.Serialize(writer, value.ProductTags, options);
 
             // Wants
             writer.WritePropertyName(nameof(value.Wants));
