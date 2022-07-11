@@ -38,9 +38,25 @@ namespace EconomicSim.Objects
         /// </summary>
         private DataContext()
         {
+            AvailableSaves = new List<string>();
+            AvailableSets = new List<string>();
             var folder = Directory.GetCurrentDirectory();
             // TODO: Make this Crossplatform
             DataFolder = Path.GetFullPath(Path.Combine(folder, @"../../../../EconomicSim/Data/"));
+            SaveFolder = Path.GetFullPath(Path.Combine(folder, @"../../../../EconomicSim/Saves/"));
+            
+            // get possible sets
+            foreach (var set in Directory.GetDirectories(DataFolder))
+            {
+                if (File.Exists(Path.Combine(set, "SetInfo.txt")))
+                    AvailableSets.Add(set);
+            }
+            // get possible saves
+            foreach (var save in Directory.GetDirectories(SaveFolder))
+            {
+                if (File.Exists(Path.Combine(save, "SaveData.json")))
+                    AvailableSaves.Add(Path.GetFileName(save));
+            }
 
             Wants = new SortedList<string, Want>();
             TechFamilies = new SortedList<string, TechFamily>();
@@ -94,7 +110,7 @@ namespace EconomicSim.Objects
             SaveFirms(CurrentSave);
         }
 
-        
+
         // TODO, update these for set mechanics.
         public void SaveWants(string set = "")
         {
@@ -592,36 +608,98 @@ namespace EconomicSim.Objects
         }
         
         /// <summary>
+        /// Clear All data to reload everything.
+        /// </summary>
+        public void ClearData()
+        {
+            _hasEverLoaded = false;
+            
+            Firms.Clear();
+            Jobs.Clear();
+            Markets.Clear();
+            Cultures.Clear();
+            Species.Clear();
+            Processes.Clear();
+            Products.Clear();
+            Skills.Clear();
+            SkillGroups.Clear();
+            TechFamilies.Clear();
+            Technologies.Clear();
+            Territories.Clear();
+            Wants.Clear();
+        }
+        
+        /// <summary>
         /// Loads all of the data from the common folder from the sets given.
         /// </summary>
         /// <param name="sets">Which Sets to load from files.</param>
         /// <exception cref="ArgumentNullException">If sets is null.</exception>
-        public void LoadData(IEnumerable<string> sets)
+        public async Task LoadData(IEnumerable<string> sets, IProgress<(decimal, string)> progress)
         {
+            // predict needed steps
+            decimal totalSteps = sets.Count() * 10;
+            decimal stepsize = 100 / totalSteps;
+            decimal currentStep = 0;
+            
             LoadRequiredItems();
             
             foreach (var set in sets)
             {
+                progress.Report((currentStep, "Loading Wants"));
+
                 LoadWants(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Tech Families"));
+                //await Task.Delay(500);
 
                 LoadTechFamilies(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Techs"));
+                //await Task.Delay(500);
 
                 LoadTechs(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Products"));
+                //await Task.Delay(500);
 
                 LoadProducts(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Skills"));
+                //await Task.Delay(500);
 
                 LoadSkills(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Skill Groups"));
+                //await Task.Delay(500);
                 
                 LoadSkillGroups(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Processes"));
+                //await Task.Delay(500);
                 
                 LoadProcesses(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Jobs"));
+                //await Task.Delay(500);
                 
                 LoadJobs(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Species"));
+                //await Task.Delay(500);
 
                 LoadSpecies(set);
+                currentStep += stepsize;
+                progress.Report((currentStep, $"{set}: Loading Cultures"));
+                //await Task.Delay(500);
                 
                 LoadCultures(set);
+                
+                currentStep += stepsize;
+                Sets.Add(set);
             }
+
+            var setsLoaded = string.Join('\n', sets);
+            progress.Report((100, "Sets Loaded.\n" + setsLoaded));
         }
 
         #endregion Data
@@ -815,6 +893,7 @@ namespace EconomicSim.Objects
         #region FileStorage
 
         public string DataFolder { get; }
+        public List<string> AvailableSets { get; }
         public string JobsFolder => "Jobs";
         public string ProcessesFolder => "Processes";
         public string ProductsFolder => "Products";
@@ -826,7 +905,8 @@ namespace EconomicSim.Objects
         public string CulturesFolder => "Cultures";
         public string SpeciesFolder => "Species";
 
-        public string SaveFolder => "Saves";
+        public string SaveFolder { get; }
+        public List<string> AvailableSaves { get; }
         // TODO un-default this later, when we have the ability to save/load games more properly.
         public string CurrentSave { get; } = "Default";
         public string CurrentFirmFolder => "Firms";
@@ -868,7 +948,7 @@ namespace EconomicSim.Objects
         
         public SortedList<string, Firm> Firms { get; set; }
         
-        public List<string> Sets { get; set; }
+        public List<string> Sets { get; }
 
         #endregion DataStorage
     }

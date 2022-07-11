@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
-using EconomicSim.Objects;
+using Avalonia.Markup.Xaml;
+using PlayApp.ViewModels;
 
 namespace PlayApp.Views
 {
@@ -9,10 +11,13 @@ namespace PlayApp.Views
         public MainWindow()
         {
             InitializeComponent();
-            
-            IDataContext? dataContext = DataContextFactory.GetDataContext;
-            dataContext.LoadData(new List<string>{"Common"});
-            dataContext.LoadSave("Default");
+
+            DataContext = new MainWindowViewModel(this);
+        }
+        
+        private void InitializeComponent()
+        {
+            AvaloniaXamlLoader.Load(this);
         }
     }
 }

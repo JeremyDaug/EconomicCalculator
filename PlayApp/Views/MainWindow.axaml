@@ -3,8 +3,8 @@
         xmlns:vm="using:PlayApp.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
-        
+        xmlns:userControls="clr-namespace:PlayApp.UserControls"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="250"
         x:Class="PlayApp.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="PlayApp">
@@ -19,11 +19,43 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Text}"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <ProgressBar Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Width="100" Height="25"
-                     Value="{Binding ProgressValue}"/>
+        <ListBox Grid.Row="0" Grid.Column="0"
+                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                 Items="{Binding Sets}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                        <TextBlock Text="{Binding Path=Primary}" 
+                                   VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5"/>
+                        <CheckBox IsChecked="{Binding Path=Secondary}" 
+                                  VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Grid.Row="1" Grid.Column="0" Command="{Binding LoadData}"
+                IsEnabled="{Binding IsNotLoading}">
+            Load Selected Sets
+        </Button>
+        
+        <!-- loading Progress Bar -->
+        <StackPanel Grid.Row="0" Grid.Column="1">
+            <ProgressBar Value="{Binding LoadProgress}"
+                         Height="30"
+                         IsVisible="{Binding IsLoading}"/>
+            <Label Content="{Binding LoadingText}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="1">
+        <ComboBox Width="200" Margin="5"
+                  Items="{Binding AvailableSaves}"
+                  SelectedItem="{Binding SelectedSave}"/>
+        <Button Margin="5"
+                Command="{Binding SelectSave}"
+                IsEnabled="{Binding CanLoadSave}">
+            Load Save
+        </Button>
+        </StackPanel>
     </Grid>
 </Window>

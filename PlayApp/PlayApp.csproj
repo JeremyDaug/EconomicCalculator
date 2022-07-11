@@ -30,4 +30,10 @@
     <ItemGroup>
       <ProjectReference Include="..\EconomicSim\EconomicSim.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <Compile Update="UserControls\ProgressBarControl.axaml.cs">
+        <DependentUpon>ProgressBarControl.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
 </Project>

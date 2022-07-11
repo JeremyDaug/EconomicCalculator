@@ -1,0 +1,7 @@
+{
+  "Name": "Default",
+  "MP": false,
+  "RequiredSets": [
+    "Common"
+  ]
+}

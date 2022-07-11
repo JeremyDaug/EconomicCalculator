@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -15,7 +16,7 @@ namespace AvaEditorUI
             AvaloniaXamlLoader.Load(this);
 
             var dc = DataContextFactory.GetDataContext;
-            dc.LoadData(new List<string>{ "Common" });
+            dc.LoadData(new List<string>{ "Common" }, new Progress<(decimal, string)>());
             dc.LoadSave("Default");
         }
 

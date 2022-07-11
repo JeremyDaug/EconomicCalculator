@@ -47,10 +47,12 @@ namespace EconomicSim.Objects
         SortedList<string, Want> Wants { get; }
         string CurrentSave { get; }
 
-        void LoadData(IEnumerable<string> sets);
+        Task LoadData(IEnumerable<string> sets, IProgress<(decimal, string)> progress);
 
         void LoadSave(string save);
-        
+        public List<string> AvailableSets { get; }
+        public List<string> Sets { get; }
+        public List<string> AvailableSaves { get; }
         // TODO update these for sets later
         void SaveWants(string save = "");
         void SaveTechnologies(string save = "");
@@ -67,5 +69,6 @@ namespace EconomicSim.Objects
         void SavePops(string save);
         void SaveTerritories(string save);
         void SaveGame();
+        void ClearData();
     }
 }

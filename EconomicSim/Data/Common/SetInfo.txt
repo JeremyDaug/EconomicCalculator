@@ -1,0 +1,6 @@
+Name: Common
+Author: Jeremy Daugherty
+Description: The core set of information for the simulator.
+Versions: 0.1+
+Requirements: N/A
+Incompatibilities: N/A
