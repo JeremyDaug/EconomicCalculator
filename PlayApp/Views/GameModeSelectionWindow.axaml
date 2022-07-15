@@ -2,8 +2,109 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:PlayApp.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="180"
+        Width="650" Height="180"
         x:Class="PlayApp.Views.GameModeSelectionWindow"
         Title="GameModeSelectionWindow">
-    Welcome to Avalonia!
+    <Design.DataContext>
+        <vm:GameModeSelectionViewModel/>
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Row="0" Grid.Column="0"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding ObserverMode}">
+            Observer Mode
+        </Button>
+        <Button Grid.Row="1" Grid.Column="0"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding EntrepreneurMode}">
+            Entrepreneur Mode
+        </Button>
+        <Button Grid.Row="2" Grid.Column="0"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding StateMode}">
+            State Mode
+        </Button>
+        <Button Grid.Row="3" Grid.Column="0"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding CultureMode}">
+            Culture Mode
+        </Button>
+        <Label Grid.Row="1" Grid.Column="2" Width="150"
+               HorizontalAlignment="Center" VerticalAlignment="Center">
+            &lt;- Available Modes
+        </Label>
+        <Label Grid.Row="2" Grid.Column="2" Width="150"
+               HorizontalAlignment="Center" VerticalAlignment="Center">
+            Unavailable Modes ->
+        </Label>
+        <Border Grid.Row="0" Grid.Column="3"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                Grid.RowSpan="4" Grid.ColumnSpan="2"
+                BorderBrush="Red" BorderThickness="4"/>
+        <Button Grid.Row="0" Grid.Column="3"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding IdeoformMode}">
+            Ideoform Mode
+        </Button>
+        <Button Grid.Row="1" Grid.Column="3"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding InstitutionMode}">
+            Institution Mode
+        </Button>
+        <Button Grid.Row="2" Grid.Column="3"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding MachineMode}">
+            Machine Mode
+        </Button>
+        <Button Grid.Row="3" Grid.Column="3"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding EcologyMode}">
+            Ecology Mode
+        </Button>
+        <Button Grid.Row="0" Grid.Column="4"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding HivemindMode}">
+            Hivemind Mode
+        </Button>
+        <Button Grid.Row="1" Grid.Column="4"
+                HorizontalContentAlignment="Center"
+                Margin="5" Width="150"
+                HorizontalAlignment="Center"
+                Command="{Binding UndeadMode}">
+            Undead Mode
+        </Button>
+    </Grid>
 </Window>

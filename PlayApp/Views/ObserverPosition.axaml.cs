@@ -5,13 +5,13 @@ using PlayApp.ViewModels;
 
 namespace PlayApp.Views;
 
-public partial class GameModeSelectionWindow : Window
+public partial class ObserverPosition : Window
 {
-    public GameModeSelectionWindow()
+    public ObserverPosition()
     {
         InitializeComponent();
 
-        DataContext = new GameModeSelectionViewModel(this);
+        DataContext = new ObserverModeEntryViewModel(this);
 #if DEBUG
         this.AttachDevTools();
 #endif

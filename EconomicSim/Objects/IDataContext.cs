@@ -1,4 +1,5 @@
-﻿using EconomicSim.Objects.Firms;
+﻿using EconomicSim.Helpers;
+using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Pops.Culture;
@@ -53,6 +54,10 @@ namespace EconomicSim.Objects
         public List<string> AvailableSets { get; }
         public List<string> Sets { get; }
         public List<string> AvailableSaves { get; }
+        public GameMode Mode { get; }
+        public bool DebugMode { get; }
+        bool ChangeGameMode(GameMode mode);
+        
         // TODO update these for sets later
         void SaveWants(string save = "");
         void SaveTechnologies(string save = "");

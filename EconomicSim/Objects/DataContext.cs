@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Text.Json;
 using EconomicSim.Enums;
+using EconomicSim.Helpers;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Pops;
@@ -708,7 +709,7 @@ namespace EconomicSim.Objects
 
         public string GetSaveFolder(string save)
         {
-            return Path.Combine(DataFolder, "Saves", save);
+            return Path.Combine(SaveFolder, save);
         }
 
         private string GetFileFromSave(string save, string section)
@@ -914,7 +915,21 @@ namespace EconomicSim.Objects
         public string CurrentPopsFolder => "Pops";
         public string CurrentTerritoriesFolder => "Territories";
         public string DefaultIcon => @"ProductImages\DefaultIcon.png";
-        
+
+        public GameMode Mode { get; set; }
+        public bool DebugMode { get; set; }
+
+        public bool ChangeGameMode(GameMode mode)
+        {
+            // debug mode always allows for changing.
+            if (DebugMode)
+            {
+                Mode = mode;
+                return true;
+            }
+            // alternatives and checks go hear
+            return false;
+        }
 
         #endregion FileStorage
 
