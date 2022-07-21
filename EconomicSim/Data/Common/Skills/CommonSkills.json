@@ -106,6 +106,12 @@
     "Labor": "Panning"
   },
   {
+    "Name": "Simple Construction",
+    "Description": "Basic Construction skills, simplistic, but effective.",
+    "Relations": {},
+    "Labor": "Simple Construction"
+  },
+  {
     "Name": "Smelting",
     "Description": "The skill for smelting raw metal ores into refined ingots.",
     "Relations": {},

@@ -1,11 +1,16 @@
 [
   {
+    "Name": "Ambrosia Subsistence Farmer",
+    "VariantName": "",
+    "Labor": "Simple Construction",
+    "Skill": "Simple Construction",
+    "Processes": 
+  },
+  {
     "Name": "Farming",
     "VariantName": "",
     "Labor": "Wheat Farming",
     "Skill": "Wheat Farming",
-    "Processes": [
-      "Wheat Farming"
-    ]
+    "Processes": 
   }
 ]

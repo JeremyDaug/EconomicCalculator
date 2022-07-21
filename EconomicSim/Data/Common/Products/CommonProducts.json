@@ -330,6 +330,23 @@
     ]
   },
   {
+    "Name": "Hut",
+    "VariantName": "",
+    "UnitName": "Hut",
+    "Quality": 0,
+    "Mass": 100,
+    "Bulk": 50,
+    "Fractional": false,
+    "Icon": "",
+    "ProductTags": [],
+    "Wants": [
+      {
+        "Housing": 1
+      }
+    ],
+    "TechRequirement": "Survivalism"
+  },
+  {
     "Name": "Iron Ingots",
     "VariantName": "",
     "UnitName": "Ingot",
@@ -518,6 +535,22 @@
     "Bulk": 0,
     "Fractional": true,
     "Icon": null,
+    "ProductTags": [
+      {
+        "Service": null
+      }
+    ],
+    "Wants": []
+  },
+  {
+    "Name": "Simple Construction",
+    "VariantName": "",
+    "UnitName": "Man Hour",
+    "Quality": 1,
+    "Mass": 0,
+    "Bulk": 0,
+    "Fractional": true,
+    "Icon": "",
     "ProductTags": [
       {
         "Service": null

@@ -1,6 +1,7 @@
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using EconomicSim.Objects;
 using PlayApp.Views;
 using ReactiveUI;
 
@@ -9,6 +10,8 @@ namespace PlayApp.ViewModels;
 public class GameModeSelectionViewModel : ViewModelBase
 {
     private Window? _window;
+    private bool _debugModeEnabled;
+    private IDataContext dc = DataContextFactory.GetDataContext;
     
     public GameModeSelectionViewModel()
     {
@@ -40,6 +43,17 @@ public class GameModeSelectionViewModel : ViewModelBase
     public ReactiveCommand<Unit, Task> HivemindMode { get; set; }
     public ReactiveCommand<Unit, Task> UndeadMode { get; set; }
 
+    
+    public bool DebugModeEnabled
+    {
+        get => _debugModeEnabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _debugModeEnabled, value);
+            dc.DebugMode = _debugModeEnabled;
+        }
+    }
+    
     private async Task _observerMode()
     {
         var win = new ObserverPosition();

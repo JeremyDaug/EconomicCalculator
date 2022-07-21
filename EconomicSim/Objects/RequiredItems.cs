@@ -239,6 +239,21 @@ namespace EconomicSim.Objects
                 (ProductTag.Service, null)
             }
         };
+        
+        public static readonly IProduct Nothing = new Product
+        {
+            Name = "Nothing",
+            UnitName = "Nothings",
+            Quality = 0,
+            Bulk = 0,
+            Mass = 0,
+            Fractional = true,
+            ProductTags = new List<(ProductTag tag, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Invariant, null),
+                (ProductTag.Service, null)
+            }
+        };
 
         /// <summary>
         /// The first technology, the ability to solve problems and learn from the solution.
@@ -287,6 +302,7 @@ namespace EconomicSim.Objects
                     _products[FertileLand.GetName()] = FertileLand;
                     _products[VeryFertileLand.GetName()] = VeryFertileLand;
                     _products[Time.GetName()] = Time;
+                    _products[Nothing.GetName()] = Nothing;
                 }
 
                 return _products;

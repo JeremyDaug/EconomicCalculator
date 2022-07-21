@@ -89,7 +89,7 @@ namespace EconomicSim.Objects.Technology
 
             // category
             writer.WritePropertyName(nameof(value.Category));
-            JsonSerializer.Serialize(writer, value.Category, options);
+            JsonSerializer.Serialize(writer, value.Category.ToString(), options);
 
             // tier
             writer.WritePropertyName(nameof(value.Tier));

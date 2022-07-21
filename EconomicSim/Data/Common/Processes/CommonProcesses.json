@@ -72,6 +72,179 @@
     }
   },
   {
+    "Name": "Ambrosia Rot",
+    "VariantName": "",
+    "MinimumTime": 0,
+    "SkillMinimum": 0,
+    "SkillMaximum": 0,
+    "ProcessTags": [
+      "Failure"
+    ],
+    "Description": "Ambrosia, for all of it\u0027s positives, does not store well.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Ambrosia Fruit",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Ambrosia Fruit",
+          "Amount": 1,
+          "Tags": {
+            "Chance": {
+              "Group": "a",
+              "Weight": "9"
+            }
+          }
+        },
+        {
+          "Product": "Nothing",
+          "Amount": 0,
+          "Tags": {
+            "Chance": {
+              "Group": "b",
+              "Weight": "1"
+            }
+          }
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Hut Construction",
+    "VariantName": "",
+    "MinimumTime": 0,
+    "Skill": "Simple Construction",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": [],
+    "Description": "Making a Hut is pretty simple really.",
+    "Icon": null,
+    "TechRequirement": "Survivalism",
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Simple Construction",
+          "Amount": 80,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Hut",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Hut Degredation",
+    "VariantName": "",
+    "MinimumTime": 0,
+    "SkillMinimum": 0,
+    "SkillMaximum": 0,
+    "ProcessTags": [
+      "Failure"
+    ],
+    "Description": "",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Hut",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Hut",
+          "Amount": 1,
+          "Tags": {
+            "Chance": {
+              "Group": "a",
+              "Weight": "1"
+            }
+          }
+        },
+        {
+          "Product": "Nothing",
+          "Amount": 1,
+          "Tags": {
+            "Chance": {
+              "Group": "b",
+              "Weight": "1"
+            }
+          }
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Hut Repairs",
+    "VariantName": "",
+    "MinimumTime": 0,
+    "Skill": "Simple Construction",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": [
+      "Maintenance"
+    ],
+    "Description": "Repairing a hut isn\u0027t hard, just time consuming.",
+    "Icon": null,
+    "TechRequirement": "Survivalism",
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Hut",
+          "Amount": 1,
+          "Tags": {}
+        },
+        {
+          "Product": "Simple Construction",
+          "Amount": 8,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Hut",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
     "Name": "Wheat Farming",
     "VariantName": "",
     "MinimumTime": 120,

@@ -26,15 +26,39 @@
             <ComboBox Items="{Binding TypeOptions}"
                       Margin="5" Width="150"
                       SelectedItem="{Binding SelectedType}"/>
+            <Label Margin="5"></Label>
+            <StackPanel IsVisible="{Binding IsDebugModeActive}">
+                <CheckBox IsChecked="{Binding PopGrowthDisabled}"
+                          Margin="5">
+                    Disable Pop Growth
+                </CheckBox>
+                <CheckBox IsChecked="{Binding PopMobilityDisabled}"
+                          Margin="5">
+                    Disable Pop Mobility
+                </CheckBox>
+                <CheckBox IsChecked="{Binding PriceChangesDisabled}"
+                          Margin="5">
+                    Disable Price Changes
+                </CheckBox>
+                <Button Margin="5">Run 1 Day</Button>
+                <Label Margin="5">Run More than one Day</Label>
+                <TextBox Text="{Binding DaysToRun}"
+                         Width="150"
+                         Margin="5"/>
+                <Button Margin="5">Run Multiple days</Button>
+            </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="1">
-            <Label Margin="5">What Observe</Label>
+            <Label Margin="5">What To Observe</Label>
             <ListBox Items="{Binding SelectionOptions}"
                      Margin="5"
                      Height="250" Width="200"
                      SelectedItem="{Binding SelectedOption}"/>
             <Button Margin="5"
-                    Command="{Binding }">View</Button>
+                    Command="{Binding View}">View</Button>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1">
+            <Label Content="{Binding Information}"/>
         </StackPanel>
     </Grid>
 </Window>

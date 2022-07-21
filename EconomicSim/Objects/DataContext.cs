@@ -75,6 +75,51 @@ namespace EconomicSim.Objects
             Firms = new SortedList<string, Firm>();
             Sets = new List<string>();
         }
+
+        #region ActionFunctions
+
+        /// <summary>
+        /// Runs one day of our current system.
+        /// TODO Improve and make possible to distribute work across multiple systems.
+        /// </summary>
+        public async Task RunDay()
+        {
+            // Labor phase, pops receive the time they can use.
+            
+            // Production Phase, firms go about their business
+            // producing what they planned for, and consuming their inputs.
+            
+            // Sell Phase, a phase where all productive firms put up their
+            // wares for purchase.
+            
+            // Merchant Phase, merchants get first dibs to purchase, if they
+            // didn't already have a contract setup.
+
+            // Pop Buy Phase, where all pops and firms buy what they desire.
+            
+            // Pop Consumption phase, where pops get to consume and enjoy
+            // the fruits of their labors.
+            
+            // Population Recalculation, pops calculate their satisfaction,
+            // adjust their moods, grow or shrink, and  and so on. No movement
+            // here.
+            
+            // Firm Recalculation Phase, Firms take into account all of their 
+            // business for the day, compare it to long term metrics,  
+            // adjust their production targets, shift workers around, and if
+            // growth or contraction is targeted, set those desires as well.
+            
+            // Migration, Pops who are want or are able to begin moving about.
+            // Those who are able are added to the migration pool, then will
+            // seek out better options. First locally, then abroad.
+            
+            // Travelling Merchant Phase, Merchants, who bought and sold in
+            // previous phases, move to their target location to repeat the
+            // reciprocal of their action.
+            
+        }
+
+        #endregion
         
         #region HelperFuncs
 
@@ -127,7 +172,9 @@ namespace EconomicSim.Objects
         public void SaveTechnologies(string set = "")
         {
             var filename = GetDataFile("Common", "Technology");
-            var json = JsonSerializer.Serialize(Technologies.Values,
+            var json = JsonSerializer.Serialize(Technologies
+                    .Where(x => !RequiredItems.Technologies.ContainsKey(x.Key))
+                    .Select(x => x.Value),
                 new JsonSerializerOptions
                 {
                     WriteIndented = true
@@ -629,7 +676,9 @@ namespace EconomicSim.Objects
             Territories.Clear();
             Wants.Clear();
         }
-        
+
+        public event EventHandler? InformationChanged;
+
         /// <summary>
         /// Loads all of the data from the common folder from the sets given.
         /// </summary>

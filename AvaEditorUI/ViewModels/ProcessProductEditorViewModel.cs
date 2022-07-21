@@ -96,7 +96,7 @@ public class ProcessProductEditorViewModel : ViewModelBase
 
         if (Chance)
         {
-            ChanceGroup = (char) old.Tags.Single(x => x.tag == ProductionTag.Chance)
+            ChanceGroup = (char)old.Tags.Single(x => x.tag == ProductionTag.Chance)
                 .parameters["Group"];
             ChanceWeight = (uint) old.Tags.Single(x => x.tag == ProductionTag.Chance)
                 .parameters["Weight"];

@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using EconomicSim.Objects.Processes.ProcessTags;
+using EconomicSim.Objects.Processes.ProductionTags;
+using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
 
@@ -158,7 +160,7 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         public ITechnology? TechRequirement { get; set; }
         ITechnology? IProcess.TechRequirement => TechRequirement;
-
+        
         /// <summary>
         /// Retrieve the name of the process.
         /// </summary>

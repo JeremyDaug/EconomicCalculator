@@ -52,6 +52,11 @@
                 Command="{Binding CultureMode}">
             Culture Mode
         </Button>
+        <CheckBox Grid.Row="0" Grid.Column="2"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  IsChecked="{Binding DebugModeEnabled}">
+            Debug Mode?
+        </CheckBox>
         <Label Grid.Row="1" Grid.Column="2" Width="150"
                HorizontalAlignment="Center" VerticalAlignment="Center">
             &lt;- Available Modes

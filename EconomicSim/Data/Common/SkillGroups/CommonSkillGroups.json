@@ -18,6 +18,14 @@
     ]
   },
   {
+    "Name": "Architecture",
+    "Description": "Skills related to building.",
+    "Default": 0.6,
+    "Skills": [
+      "Simple Construction"
+    ]
+  },
+  {
     "Name": "Cooking",
     "Description": "Skills based on physical prowess.",
     "Default": 0.8,
@@ -32,7 +40,8 @@
     "Description": "The General Group of skills related to the various kinds of Engineering.",
     "Default": 0.3,
     "Skills": [
-      "Mine Engineer"
+      "Mine Engineer",
+      "Simple Construction"
     ]
   },
   {

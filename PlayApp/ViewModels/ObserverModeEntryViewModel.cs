@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using EconomicSim.Objects;
@@ -16,6 +18,7 @@ using EconomicSim.Objects.Technology;
 using EconomicSim.Objects.Territory;
 using EconomicSim.Objects.Wants;
 using MessageBox.Avalonia;
+using PlayApp.Views;
 using ReactiveUI;
 
 namespace PlayApp.ViewModels;
@@ -46,7 +49,18 @@ public class ObserverModeEntryViewModel : ViewModelBase
             nameof(Species),
             nameof(Culture)
         };
+
+        Children = new List<Window>();
+
+        Viewing = new Dictionary<string, List<string>>();
+        foreach (var kind in TypeOptions)
+            Viewing.Add(kind, new List<string>());
+        
         SelectionOptions = new ObservableCollection<string>();
+        View = ReactiveCommand.Create(_view);
+
+        // TODO set this back to dc.DebugMode later.
+        // IsDebugModeActive = dc.DebugMode;
     }
 
     public ObserverModeEntryViewModel(Window window) : this()
@@ -55,6 +69,37 @@ public class ObserverModeEntryViewModel : ViewModelBase
     }
     
     public ReactiveCommand<Unit, Task> View { get; set; }
+    
+    public ReactiveCommand<Unit, Task> RunDay { get; set; }
+    
+    public ReactiveCommand<Unit, Task> RunDays { get; set; }
+
+    private async Task _runDay()
+    {
+        await dc.RunDay();
+    }
+
+    private async Task _runDays()
+    {
+        var original = DaysToRun;
+        var count = 1;
+        while (DaysToRun > 0)
+        {
+            count += 1;
+            var task = _runDay();
+            Information = $"Running day {count} of {original}";
+            await task;
+            DaysToRun -= 1;
+        }
+
+        Information = "Time Passed.";
+    }
+
+    public string Information
+    {
+        get => _information;
+        set => this.RaiseAndSetIfChanged(ref _information, value);
+    }
 
     private async Task NotImplementedWindow()
     {
@@ -98,7 +143,12 @@ public class ObserverModeEntryViewModel : ViewModelBase
                 await NotImplementedWindow();
                 break;
             case nameof(Process):
-                await NotImplementedWindow();
+                if (Viewing[nameof(Process)].Contains(SelectedOption))
+                    return;
+                Viewing[nameof(Process)].Add(SelectedOption);
+                var window = new ProcessesViewWindow(dc.Processes[SelectedOption]);
+                window.Show();
+                Children.Add(window);
                 break;
             case nameof(Job):
                 await NotImplementedWindow();
@@ -111,7 +161,13 @@ public class ObserverModeEntryViewModel : ViewModelBase
                 break;
         }
     }
-    
+
+    private Dictionary<string, List<string>> Viewing;
+
+    private List<Window> Children;
+    private int _daysToRun;
+    private string _information;
+
     public string SelectedType
     {
         get => _selectedType;
@@ -121,7 +177,6 @@ public class ObserverModeEntryViewModel : ViewModelBase
             ChangeOptions();
         }
     }
-
     public ObservableCollection<string> TypeOptions { get; set; }
 
     public string SelectedOption
@@ -129,9 +184,25 @@ public class ObserverModeEntryViewModel : ViewModelBase
         get => _selectedOption;
         set => this.RaiseAndSetIfChanged(ref _selectedOption, value);
     }
-
     public ObservableCollection<string> SelectionOptions { get; set; }
 
+    public int DaysToRun
+    {
+        get => _daysToRun;
+        set
+        {
+            if (value < 0)
+                value = 0;
+            this.RaiseAndSetIfChanged(ref _daysToRun, value);
+        }
+    }
+
+    public bool IsDebugModeActive { get; set; } = true;
+
+    public bool PopGrowthDisabled { get; set; } = false;
+    public bool PopMobilityDisabled { get; set; } = false;
+    public bool PriceChangesDisabled { get; set; } = false;
+    
     private void ChangeOptions()
     {
         SelectionOptions.Clear();

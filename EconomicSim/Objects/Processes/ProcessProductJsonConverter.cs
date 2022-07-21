@@ -51,7 +51,7 @@ internal class ProcessProductJsonConverter : JsonConverter<ProcessProduct>
                         // tag properties
                         if (reader.TokenType != JsonTokenType.StartObject)
                             throw new JsonException();
-                        Dictionary<string, object> props = new Dictionary<string, object>();
+                        Dictionary<string, string> props = new Dictionary<string, string>();
                         while (reader.Read())
                         {
                             if (reader.TokenType == JsonTokenType.EndObject)
@@ -64,7 +64,7 @@ internal class ProcessProductJsonConverter : JsonConverter<ProcessProduct>
                             props.Add(prop, value);
                         }
                         // add data to object.
-                        result.TagData.Add((tag, props));
+                        result.TagData.Add((tag, ProductionTagHelper.ProcessTagData(tag, props)));
                     }
                     break;
                 default:

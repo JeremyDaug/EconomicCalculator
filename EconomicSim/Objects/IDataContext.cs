@@ -55,7 +55,7 @@ namespace EconomicSim.Objects
         public List<string> Sets { get; }
         public List<string> AvailableSaves { get; }
         public GameMode Mode { get; }
-        public bool DebugMode { get; }
+        public bool DebugMode { get; set; }
         bool ChangeGameMode(GameMode mode);
         
         // TODO update these for sets later
@@ -75,5 +75,15 @@ namespace EconomicSim.Objects
         void SaveTerritories(string save);
         void SaveGame();
         void ClearData();
+        
+        // Events 
+
+        #region Events
+
+        public event EventHandler InformationChanged;
+
+        #endregion
+
+        Task RunDay();
     }
 }
