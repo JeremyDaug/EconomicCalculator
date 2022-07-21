@@ -82,7 +82,7 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The process Tags of the Process
         /// </summary>
-        IReadOnlyList<ProcessTag> ProcessTags { get; }
+        Dictionary<ProcessTag, Dictionary<string, object>?> ProcessTags { get; }
 
         /// <summary>
         /// The Skill the Process Uses.

@@ -104,7 +104,9 @@ namespace EconomicSim.Objects.Products
         {
             get
             {
-                return ProductProcesses.SingleOrDefault(x => x.ProcessTags.Contains(ProcessTag.Failure));
+                return ProductProcesses
+                    .Where(x => x.ProcessTags.ContainsKey(ProcessTag.Failure))
+                    .SingleOrDefault(x => ((Product) x.ProcessTags[ProcessTag.Failure]["Product"]).GetName() == GetName());
             }
         }
 
@@ -115,7 +117,10 @@ namespace EconomicSim.Objects.Products
         {
             get
             {
-                return ProductProcesses.Where(x => x.ProcessTags.Contains(ProcessTag.Use)).ToList();
+                return ProductProcesses
+                    .Where(x => x.ProcessTags.ContainsKey(ProcessTag.Use))
+                    .Where(x => ((Product) x.ProcessTags[ProcessTag.Use]["Product"]).GetName() == GetName())
+                    .ToList();
             }
         }
 
@@ -126,7 +131,10 @@ namespace EconomicSim.Objects.Products
         {
             get
             {
-                return ProductProcesses.Where(x => x.ProcessTags.Contains(ProcessTag.Consumption)).ToList();
+                return ProductProcesses
+                    .Where(x => x.ProcessTags.ContainsKey(ProcessTag.Consumption))
+                    .Where(x => ((Product) x.ProcessTags[ProcessTag.Consumption]["Product"]).GetName() == GetName())
+                    .ToList();
             }
         }
 
@@ -137,7 +145,10 @@ namespace EconomicSim.Objects.Products
         {
             get
             {
-                return ProductProcesses.Where(x => x.ProcessTags.Contains(ProcessTag.Maintenance)).ToList();
+                return ProductProcesses
+                    .Where(x => x.ProcessTags.ContainsKey(ProcessTag.Maintenance))
+                    .Where(x => ((Product) x.ProcessTags[ProcessTag.Maintenance]["Product"]).GetName() == GetName())
+                    .ToList();
             }
         }
 
@@ -153,7 +164,7 @@ namespace EconomicSim.Objects.Products
 
         public override string ToString()
         {
-            return Name + ":" + VariantName;
+            return GetName();
         }
         
         public string GetName()

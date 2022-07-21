@@ -40,6 +40,10 @@
                           Margin="5">
                     Disable Price Changes
                 </CheckBox>
+                <CheckBox IsChecked="{Binding SkillChangeDisabled}"
+                          Margin="5">
+                    Disable Skill Change
+                </CheckBox>
                 <Button Margin="5">Run 1 Day</Button>
                 <Label Margin="5">Run More than one Day</Label>
                 <TextBox Text="{Binding DaysToRun}"

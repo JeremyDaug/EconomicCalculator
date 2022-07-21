@@ -6,18 +6,21 @@
     public enum ProcessTag
     {
         /// <summary>
+        /// Failure(Product)
         /// This process is a failure process for a product.
         /// It has Exactly one input (a unit of the product), and no
         /// capital period. It may or may not have an output.
         /// </summary>
         Failure,
         /// <summary>
+        /// Consumption(Product)
         /// This process is a consumption process for a product.
         /// It has exactly one input (a unit of the product), and
         /// No Captial. It may or may not have an output.
         /// </summary>
         Consumption,
         /// <summary>
+        /// Maintenance(Product)
         /// This process is a maintenance process for a product.
         /// It should contain a unit of the product as input and 
         /// the product must also appear as an output. Imperfect
@@ -25,6 +28,7 @@
         /// </summary>
         Maintenance,
         /// <summary>
+        /// Use(Product)
         /// This process is a use process for a product. It is 
         /// primarily for products that are not conusmed in their
         /// use. This requires one unit of the product as capital.

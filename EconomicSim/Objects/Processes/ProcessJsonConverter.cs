@@ -152,10 +152,36 @@ internal class ProcessJsonConverter : JsonConverter<Process>
                     reader.Read();
                     break;
                 case "ProcessTags":
-                    var tags = JsonSerializer
-                        .Deserialize<List<string>>(ref reader, options);
-                    foreach (var tag in tags)
-                        result.ProcessTags.Add((ProcessTag)Enum.Parse(typeof(ProcessTag), tag));
+                    // assert it's an object
+                    if (reader.TokenType != JsonTokenType.StartObject)
+                        throw new JsonException();
+                    
+                    // get into the properties
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == JsonTokenType.EndObject)
+                            break; // end list
+                        var tag = (ProcessTag) Enum.Parse(typeof(ProcessTag), reader.GetString());
+
+                        reader.Read();
+                        // tag properties
+                        if (reader.TokenType != JsonTokenType.StartObject)
+                            throw new JsonException();
+                        Dictionary<string, string> props = new Dictionary<string, string>();
+                        while (reader.Read())
+                        {
+                            if (reader.TokenType == JsonTokenType.EndObject)
+                                break;
+                            // property
+                            var prop = reader.GetString();
+                            reader.Read();
+                            // get value
+                            var value = reader.GetString();
+                            props.Add(prop, value);
+                        }
+                        // add data to object
+                        result.ProcessTags.Add(tag, ProcessTagHelper.ProcessTags(tag, props));
+                    }
                     break;
                 default:
                     throw new JsonException($"Property \"{propName}\", does not exist in Process.");
@@ -184,8 +210,20 @@ internal class ProcessJsonConverter : JsonConverter<Process>
         writer.WriteNumber(nameof(value.SkillMaximum), value.SkillMaximum);
         // Tags
         writer.WritePropertyName(nameof(ProcessTags));
-        JsonSerializer.Serialize(writer, 
-            value.ProcessTags.Select(x => x.ToString()));
+        writer.WriteStartObject();
+        if (value.ProcessTags.Any())
+        {
+            foreach (var tag in value.ProcessTags)
+            {
+                writer.WritePropertyName(tag.Key.ToString());
+                writer.WriteStartObject();
+                if (tag.Value != null)
+                {
+                    foreach (var prop in tag.Value)
+                        writer.WriteString(prop.Key, prop.Value.ToString());
+                }
+            }
+        }
         // description
         writer.WriteString(nameof(value.Description), value.Description);
         // icon

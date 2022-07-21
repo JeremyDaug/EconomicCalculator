@@ -59,7 +59,7 @@ internal class ProcessProductJsonConverter : JsonConverter<ProcessProduct>
                             // property
                             var prop = reader.GetString();
                             reader.Read();
-                            // get value TODO make this read values into the correct types.
+                            // get value
                             var value = reader.GetString();
                             props.Add(prop, value);
                         }

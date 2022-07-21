@@ -159,11 +159,11 @@ public class ProcessEditorViewModel : ViewModelBase
         // if it has a selected product, select it appropriately.
         if (Failure || Maintenance || Consumption)
         {
-            SelectedProduct = model.InputProducts.First().Product;
+            SelectedProduct = model.SelectedProduct;
         }
 
         if (Maintenance)
-            SelectedProduct = model.InputProducts.First().Product;
+            SelectedProduct = model.SelectedProduct;
         
         // add products and wants
         InputProducts = new ObservableCollection<ProcessProductModel>(model.InputProducts);
@@ -462,31 +462,43 @@ public class ProcessEditorViewModel : ViewModelBase
             // tags
             oldProc.ProcessTags.Clear();
             if (Failure)
-                oldProc.ProcessTags.Add(ProcessTag.Failure);
+                oldProc.ProcessTags.Add(ProcessTag.Failure, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Consumption)
-                oldProc.ProcessTags.Add(ProcessTag.Consumption);
+                oldProc.ProcessTags.Add(ProcessTag.Consumption, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Maintenance)
-                oldProc.ProcessTags.Add(ProcessTag.Maintenance);
+                oldProc.ProcessTags.Add(ProcessTag.Maintenance, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Use)
-                oldProc.ProcessTags.Add(ProcessTag.Use);
+                oldProc.ProcessTags.Add(ProcessTag.Use, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Chance)
-                oldProc.ProcessTags.Add(ProcessTag.Chance);
+                oldProc.ProcessTags.Add(ProcessTag.Chance, null);
             if (Crop)
-                oldProc.ProcessTags.Add(ProcessTag.Crop);
+                oldProc.ProcessTags.Add(ProcessTag.Crop, null);
             if (Mine)
-                oldProc.ProcessTags.Add(ProcessTag.Mine);
+                oldProc.ProcessTags.Add(ProcessTag.Mine, null);
             if (Extractor)
-                oldProc.ProcessTags.Add(ProcessTag.Extractor);
+                oldProc.ProcessTags.Add(ProcessTag.Extractor, null);
             if (Tap)
-                oldProc.ProcessTags.Add(ProcessTag.Tap);
+                oldProc.ProcessTags.Add(ProcessTag.Tap, null);
             if (Refiner)
-                oldProc.ProcessTags.Add(ProcessTag.Refiner);
+                oldProc.ProcessTags.Add(ProcessTag.Refiner, null);
             if (Sorter)
-                oldProc.ProcessTags.Add(ProcessTag.Sorter);
+                oldProc.ProcessTags.Add(ProcessTag.Sorter, null);
             if (Scrubber)
-                oldProc.ProcessTags.Add(ProcessTag.Scrubber);
+                oldProc.ProcessTags.Add(ProcessTag.Scrubber, null);
             if (Scrapping)
-                oldProc.ProcessTags.Add(ProcessTag.Scrapping);
+                oldProc.ProcessTags.Add(ProcessTag.Scrapping, null);
             
             // parts
             oldProc.ProcessProducts.Clear();
@@ -671,31 +683,43 @@ public class ProcessEditorViewModel : ViewModelBase
             
             // tags
             if (Failure)
-                newProcess.ProcessTags.Add(ProcessTag.Failure);
+                newProcess.ProcessTags.Add(ProcessTag.Failure, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Consumption)
-                newProcess.ProcessTags.Add(ProcessTag.Consumption);
+                newProcess.ProcessTags.Add(ProcessTag.Consumption, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Maintenance)
-                newProcess.ProcessTags.Add(ProcessTag.Maintenance);
+                newProcess.ProcessTags.Add(ProcessTag.Maintenance, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Use)
-                newProcess.ProcessTags.Add(ProcessTag.Use);
+                newProcess.ProcessTags.Add(ProcessTag.Use, new Dictionary<string, object>
+                {
+                    { "Product", dc.Products[SelectedProduct] }
+                });
             if (Chance)
-                newProcess.ProcessTags.Add(ProcessTag.Chance);
+                newProcess.ProcessTags.Add(ProcessTag.Chance, null);
             if (Crop)
-                newProcess.ProcessTags.Add(ProcessTag.Crop);
+                newProcess.ProcessTags.Add(ProcessTag.Crop, null);
             if (Mine)
-                newProcess.ProcessTags.Add(ProcessTag.Mine);
+                newProcess.ProcessTags.Add(ProcessTag.Mine, null);
             if (Extractor)
-                newProcess.ProcessTags.Add(ProcessTag.Extractor);
+                newProcess.ProcessTags.Add(ProcessTag.Extractor, null);
             if (Tap)
-                newProcess.ProcessTags.Add(ProcessTag.Tap);
+                newProcess.ProcessTags.Add(ProcessTag.Tap, null);
             if (Refiner)
-                newProcess.ProcessTags.Add(ProcessTag.Refiner);
+                newProcess.ProcessTags.Add(ProcessTag.Refiner, null);
             if (Sorter)
-                newProcess.ProcessTags.Add(ProcessTag.Sorter);
+                newProcess.ProcessTags.Add(ProcessTag.Sorter, null);
             if (Scrubber)
-                newProcess.ProcessTags.Add(ProcessTag.Scrubber);
+                newProcess.ProcessTags.Add(ProcessTag.Scrubber, null);
             if (Scrapping)
-                newProcess.ProcessTags.Add(ProcessTag.Scrapping);
+                newProcess.ProcessTags.Add(ProcessTag.Scrapping, null);
 
             dc.Processes.Add(newProcess.GetName(), newProcess);
             

@@ -52,8 +52,18 @@ public class ProcessModel
             OutputProducts.Add(new ProcessProductModel(output));
         foreach (var output in process.OutputWants)
             OutputWants.Add(new ProcessWantModel(output));
-        foreach (var tag in process.ProcessTags)
+        foreach (var tag in process.ProcessTags.Keys)
             ProcessTags.Add(tag);
+
+        // Get Selected Product if its a FUMC
+        if (process.ProcessTags.ContainsKey(ProcessTag.Failure))
+            SelectedProduct = process.ProcessTags[ProcessTag.Failure]["Product"].ToString();
+        if (process.ProcessTags.ContainsKey(ProcessTag.Use) )
+            SelectedProduct = process.ProcessTags[ProcessTag.Use]["Product"].ToString();
+        if (process.ProcessTags.ContainsKey(ProcessTag.Maintenance) )
+            SelectedProduct = process.ProcessTags[ProcessTag.Maintenance]["Product"].ToString();
+        if (process.ProcessTags.ContainsKey(ProcessTag.Consumption))
+            SelectedProduct = process.ProcessTags[ProcessTag.Consumption]["Product"].ToString();
     }
 
     public string FullName { get; set; } = "";
@@ -72,8 +82,10 @@ public class ProcessModel
     public List<ProcessWantModel> CapitalWants { get; set; }
     public List<ProcessWantModel> OutputWants { get; set; }
     
+    // TODO Come back and replace with a more robust system if needed. 
     public List<ProcessTag> ProcessTags { get; set; }
-
+    public string SelectedProduct { get; set; }
+    
     public string Skill { get; set; } = "";
     public decimal SkillMin { get; set; }
     public decimal SkillMax { get; set; }

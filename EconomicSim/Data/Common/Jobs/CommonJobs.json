@@ -4,13 +4,13 @@
     "VariantName": "",
     "Labor": "Simple Construction",
     "Skill": "Simple Construction",
-    "Processes": 
+    "Processes": []
   },
   {
     "Name": "Farming",
     "VariantName": "",
     "Labor": "Wheat Farming",
     "Skill": "Wheat Farming",
-    "Processes": 
+    "Processes": []
   }
 ]

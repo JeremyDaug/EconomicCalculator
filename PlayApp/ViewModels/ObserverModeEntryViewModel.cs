@@ -202,6 +202,7 @@ public class ObserverModeEntryViewModel : ViewModelBase
     public bool PopGrowthDisabled { get; set; } = false;
     public bool PopMobilityDisabled { get; set; } = false;
     public bool PriceChangesDisabled { get; set; } = false;
+    public bool SkillChangeDisabled { get; set; } = false;
     
     private void ChangeOptions()
     {

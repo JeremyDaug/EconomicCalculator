@@ -6,7 +6,7 @@
     "Skill": "Fruit Gathering",
     "SkillMinimum": 0,
     "SkillMaximum": 5,
-    "ProcessTags": [],
+    "ProcessTags": {},
     "Description": "Ambrosia is easy enough to find.",
     "Icon": null,
     "Products": {
@@ -38,9 +38,11 @@
     "MinimumTime": 0.1,
     "SkillMinimum": 0,
     "SkillMaximum": 0,
-    "ProcessTags": [
-      "Consumption"
-    ],
+    "ProcessTags": {
+      "Consumption": {
+        "Product": "Ambrosia Fruit"
+      }
+    },
     "Description": "Even one Ambrosia is a meal.",
     "Icon": null,
     "Products": {
@@ -77,9 +79,11 @@
     "MinimumTime": 0,
     "SkillMinimum": 0,
     "SkillMaximum": 0,
-    "ProcessTags": [
-      "Failure"
-    ],
+    "ProcessTags": {
+      "Failure": {
+        "Product": "Ambrosia Fruit"
+      }
+    },
     "Description": "Ambrosia, for all of it\u0027s positives, does not store well.",
     "Icon": null,
     "Products": {
@@ -127,7 +131,7 @@
     "Skill": "Simple Construction",
     "SkillMinimum": 0,
     "SkillMaximum": 5,
-    "ProcessTags": [],
+    "ProcessTags": {},
     "Description": "Making a Hut is pretty simple really.",
     "Icon": null,
     "TechRequirement": "Survivalism",
@@ -160,9 +164,11 @@
     "MinimumTime": 0,
     "SkillMinimum": 0,
     "SkillMaximum": 0,
-    "ProcessTags": [
-      "Failure"
-    ],
+    "ProcessTags": {
+      "Failure": {
+        "Product": "Hut"
+      }
+    },
     "Description": "",
     "Icon": null,
     "Products": {
@@ -210,9 +216,11 @@
     "Skill": "Simple Construction",
     "SkillMinimum": 0,
     "SkillMaximum": 5,
-    "ProcessTags": [
-      "Maintenance"
-    ],
+    "ProcessTags": {
+      "Maintenance": {
+        "Product": "Hut"
+      }
+    },
     "Description": "Repairing a hut isn\u0027t hard, just time consuming.",
     "Icon": null,
     "TechRequirement": "Survivalism",
@@ -251,9 +259,9 @@
     "Skill": "Wheat Farming",
     "SkillMinimum": 1,
     "SkillMaximum": 5,
-    "ProcessTags": [
-      "Crop"
-    ],
+    "ProcessTags": {
+      "Crop" : {}
+    },
     "Description": "Sow, Grow, and Harvest Wheat.",
     "Icon": "",
     "TechRequirement": "Counting",

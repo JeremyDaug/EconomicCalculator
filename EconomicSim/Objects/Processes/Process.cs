@@ -1,7 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using EconomicSim.Objects.Processes.ProcessTags;
-using EconomicSim.Objects.Processes.ProductionTags;
-using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
 
@@ -15,7 +13,7 @@ namespace EconomicSim.Objects.Processes
     {
         public Process()
         {
-            ProcessTags = new List<ProcessTag>();
+            ProcessTags = new Dictionary<ProcessTag, Dictionary<string, object>?>();
             ProcessProducts = new List<ProcessProduct>();
             ProcessWants = new List<ProcessWant>();
         }
@@ -114,8 +112,8 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The Process's Tags.
         /// </summary>
-        public List<ProcessTag> ProcessTags { get; set; }
-        IReadOnlyList<ProcessTag> IProcess.ProcessTags => ProcessTags;
+        public Dictionary<ProcessTag, Dictionary<string, object>?> ProcessTags { get; set; }
+        Dictionary<ProcessTag, Dictionary<string, object>?> IProcess.ProcessTags => ProcessTags;
 
         /// <summary>
         /// The Skill the process Uses.
