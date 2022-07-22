@@ -967,6 +967,7 @@ namespace EconomicSim.Objects
 
         public GameMode Mode { get; set; }
         public bool DebugMode { get; set; }
+        public DebugFlags DebugFlags { get; set; }
 
         public bool ChangeGameMode(GameMode mode)
         {

@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -20,7 +21,7 @@ public partial class ProcessesViewWindow : Window
     {
         InitializeComponent();
 
-        Name = process.GetName();
+        Title = process.GetName();
         DataContext = new ProcessViewModel(process, this);
 #if DEBUG
         this.AttachDevTools();

@@ -51,11 +51,12 @@ namespace EconomicSim.Objects
         Task LoadData(IEnumerable<string> sets, IProgress<(decimal, string)> progress);
 
         void LoadSave(string save);
-        public List<string> AvailableSets { get; }
-        public List<string> Sets { get; }
-        public List<string> AvailableSaves { get; }
-        public GameMode Mode { get; }
-        public bool DebugMode { get; set; }
+        List<string> AvailableSets { get; }
+        List<string> Sets { get; }
+        List<string> AvailableSaves { get; }
+        GameMode Mode { get; }
+        bool DebugMode { get; set; }
+        DebugFlags DebugFlags { get; set; }
         bool ChangeGameMode(GameMode mode);
         
         // TODO update these for sets later

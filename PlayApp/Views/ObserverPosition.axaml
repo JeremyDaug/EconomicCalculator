@@ -3,8 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:PlayApp.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
-        Width="400" Height="400"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
+        Width="400" Height="500"
         x:Class="PlayApp.Views.ObserverPosition"
         Title="ObserverModeEntry">
     <Design.DataContext>
@@ -36,6 +36,10 @@
                           Margin="5">
                     Disable Pop Mobility
                 </CheckBox>
+                <CheckBox IsChecked="{Binding RandomMovementDisabled}"
+                          Margin="5">
+                    Disable Random Pop Movement
+                </CheckBox>
                 <CheckBox IsChecked="{Binding PriceChangesDisabled}"
                           Margin="5">
                     Disable Price Changes
@@ -44,6 +48,7 @@
                           Margin="5">
                     Disable Skill Change
                 </CheckBox>
+                <!-- Random Seed Box here -->
                 <Button Margin="5">Run 1 Day</Button>
                 <Label Margin="5">Run More than one Day</Label>
                 <TextBox Text="{Binding DaysToRun}"

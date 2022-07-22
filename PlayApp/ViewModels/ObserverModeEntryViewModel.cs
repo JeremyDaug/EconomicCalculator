@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using EconomicSim.Helpers;
 using EconomicSim.Objects;
 using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Jobs;
@@ -30,6 +33,16 @@ public class ObserverModeEntryViewModel : ViewModelBase
     private string _selectedType;
     private string _selectedOption;
 
+    private List<Window> Children;
+    private int _daysToRun;
+    private string _information;
+    private bool _popGrowthDisabled = false;
+    private bool _popMobilityDisabled = false;
+    private bool _randomMovementDisabled = false;
+    private bool _priceChangesDisabled = false;
+    private bool _skillChangeDisabled = false;
+    private bool _isDebugModeActive = true;
+
     public ObserverModeEntryViewModel()
     {
         TypeOptions = new ObservableCollection<string>
@@ -52,10 +65,6 @@ public class ObserverModeEntryViewModel : ViewModelBase
 
         Children = new List<Window>();
 
-        Viewing = new Dictionary<string, List<string>>();
-        foreach (var kind in TypeOptions)
-            Viewing.Add(kind, new List<string>());
-        
         SelectionOptions = new ObservableCollection<string>();
         View = ReactiveCommand.Create(_view);
 
@@ -143,11 +152,12 @@ public class ObserverModeEntryViewModel : ViewModelBase
                 await NotImplementedWindow();
                 break;
             case nameof(Process):
-                if (Viewing[nameof(Process)].Contains(SelectedOption))
+                if (Children.Select(x => x.Title)
+                    .Contains(SelectedOption))
                     return;
-                Viewing[nameof(Process)].Add(SelectedOption);
                 var window = new ProcessesViewWindow(dc.Processes[SelectedOption]);
                 window.Show();
+                window.Closed += ChildClosed;
                 Children.Add(window);
                 break;
             case nameof(Job):
@@ -161,12 +171,6 @@ public class ObserverModeEntryViewModel : ViewModelBase
                 break;
         }
     }
-
-    private Dictionary<string, List<string>> Viewing;
-
-    private List<Window> Children;
-    private int _daysToRun;
-    private string _information;
 
     public string SelectedType
     {
@@ -197,13 +201,92 @@ public class ObserverModeEntryViewModel : ViewModelBase
         }
     }
 
-    public bool IsDebugModeActive { get; set; } = true;
-
-    public bool PopGrowthDisabled { get; set; } = false;
-    public bool PopMobilityDisabled { get; set; } = false;
-    public bool PriceChangesDisabled { get; set; } = false;
-    public bool SkillChangeDisabled { get; set; } = false;
+    #region DebugFlags
     
+    public bool IsDebugModeActive
+    {
+        get => _isDebugModeActive;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isDebugModeActive, value);
+            dc.DebugMode = value;
+        }
+    }
+
+    public bool PopGrowthDisabled
+    {
+        get => _popGrowthDisabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _popGrowthDisabled, value);
+            if (_popGrowthDisabled)
+                dc.DebugFlags |= DebugFlags.PopGrowthDisabled;
+            else
+                dc.DebugFlags &= ~DebugFlags.PopGrowthDisabled;
+        }
+    }
+
+    public bool PopMobilityDisabled
+    {
+        get => _popMobilityDisabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _popMobilityDisabled, value);
+            if (_popMobilityDisabled)
+                dc.DebugFlags |= DebugFlags.PopMobilityDisabled;
+            else
+                dc.DebugFlags &= ~DebugFlags.PopMobilityDisabled;
+        }
+    }
+
+    public bool RandomMovementDisabled
+    {
+        get => _randomMovementDisabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _randomMovementDisabled, value);
+            if (_randomMovementDisabled)
+                dc.DebugFlags |= DebugFlags.RandomMovementDisabled;
+            else
+                dc.DebugFlags &= ~DebugFlags.RandomMovementDisabled;
+        }
+    }
+
+    public bool PriceChangesDisabled
+    {
+        get => _priceChangesDisabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _priceChangesDisabled, value);
+            if (_priceChangesDisabled)
+                dc.DebugFlags |= DebugFlags.PriceChangedDisabled;
+            else
+                dc.DebugFlags &= ~DebugFlags.PriceChangedDisabled;
+        }
+    }
+
+    public bool SkillChangeDisabled
+    {
+        get => _skillChangeDisabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _skillChangeDisabled, value);
+            if (_skillChangeDisabled)
+                dc.DebugFlags |= DebugFlags.SkillChangeDisabled;
+            else
+                dc.DebugFlags &= ~DebugFlags.SkillChangeDisabled;
+        }
+    }
+
+    #endregion
+
+    private void ChildClosed(object sender, EventArgs e)
+    {
+        Window child = (Window) sender;
+        child.Closed -= ChildClosed;
+        Children.Remove(child);
+    }
+
     private void ChangeOptions()
     {
         SelectionOptions.Clear();
