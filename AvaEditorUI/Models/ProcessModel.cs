@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Avalonia.Input.TextInput;
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Processes.ProcessTags;
 

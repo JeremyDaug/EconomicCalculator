@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Layout;
 using ReactiveUI;
 

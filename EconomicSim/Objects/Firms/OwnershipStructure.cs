@@ -34,7 +34,7 @@
         Cooperative,
         /// <summary>
         /// The company is publicly traded, with stocks available to buy
-        /// on the market.
+        /// on the market. Should be of <seealso cref="FirmRank.Company"/> or higher.
         /// </summary>
         PubliclyTraded,
         /// <summary>

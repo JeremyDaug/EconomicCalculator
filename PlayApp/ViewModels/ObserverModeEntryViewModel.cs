@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using EconomicSim.Helpers;
@@ -119,6 +118,7 @@ public class ObserverModeEntryViewModel : ViewModelBase
     
     private async Task _view()
     {
+        Window window;
         switch (SelectedType)
         {
             case nameof(Territory):
@@ -128,7 +128,13 @@ public class ObserverModeEntryViewModel : ViewModelBase
                 await NotImplementedWindow();
                 break;
             case nameof(Firm):
-                await NotImplementedWindow();
+                if (Children.Select(x => x.Title)
+                    .Contains(SelectedOption))
+                    return;
+                window = new FirmViewWindow(dc.Firms[SelectedOption]);
+                window.Show();
+                window.Closed += ChildClosed;
+                Children.Add(window);
                 break;
             case nameof(PopGroup):
                 await NotImplementedWindow();
@@ -155,7 +161,7 @@ public class ObserverModeEntryViewModel : ViewModelBase
                 if (Children.Select(x => x.Title)
                     .Contains(SelectedOption))
                     return;
-                var window = new ProcessesViewWindow(dc.Processes[SelectedOption]);
+                window = new ProcessesViewWindow(dc.Processes[SelectedOption]);
                 window.Show();
                 window.Closed += ChildClosed;
                 Children.Add(window);

@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Helpers;

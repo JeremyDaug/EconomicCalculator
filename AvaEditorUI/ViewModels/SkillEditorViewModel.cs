@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AvaEditorUI.Helpers;
 using AvaEditorUI.Models;

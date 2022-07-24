@@ -1,8 +1,59 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
+
 namespace AvaEditorUI.Models;
 
-public class FirmJobModel
+public class FirmJobModel : INotifyPropertyChanged
 {
-    public string Job { get; set; }
-    public string WageType { get; set; }
-    public decimal Wage { get; set; }
+    private string _job;
+    private decimal _wage;
+    private string _wageType;
+
+    public string Job
+    {
+        get => _job;
+        set
+        {
+            if (value != _job)
+            {
+                _job = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WageType
+    {
+        get => _wageType;
+        set
+        {
+            if (value != _wageType)
+            {
+                _wageType = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public decimal Wage
+    {
+        get => _wage;
+        set
+        {
+            if (value != _wage)
+            {
+                _wage = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    [NotifyPropertyChangedInvocator]
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

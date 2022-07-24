@@ -10,7 +10,6 @@ using Avalonia.Controls;
 using EconomicSim.Objects;
 using EconomicSim.Objects.Technology;
 using MessageBox.Avalonia;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI;
 
 namespace AvaEditorUI.ViewModels;

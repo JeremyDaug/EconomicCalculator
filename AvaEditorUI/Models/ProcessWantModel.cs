@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Processes.ProductionTags;
-using ReactiveUI;
 
 namespace AvaEditorUI.Models;
 

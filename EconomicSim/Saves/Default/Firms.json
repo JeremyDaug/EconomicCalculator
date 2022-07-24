@@ -6,16 +6,18 @@
     "ProfitStructure": "Distributed",
     "Jobs": [
       {
-        "Job": "Farming",
+        "Job": "Ambrosia Subsistence Farmer",
         "WageType": "LossSharing",
         "Wage": 5
       }
     ],
     "Products": {
-      "Wheat Grain": 1
+      "Ambrosia Fruit": 1
     },
-    "Resources": {},
-    "HeadQuarters": "Alicia",
+    "Resources": {
+      "Ambrosia Fruit": 1
+    },
+    "HeadQuarters": "Bobistan",
     "Regions": [],
     "Techs": {
       "Brainstorming": -1

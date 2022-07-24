@@ -38,10 +38,15 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
                 case nameof(result.Job):
                     var jobName = reader.GetString();
                     result.Job = DataContext.Instance.Jobs[jobName];
+                    if (result.Firm != null)
+                        ConnectPopToFirm(result);
                     break;
                 case nameof(result.Firm):
                     result.Firm = DataContext.Instance
                         .Firms[reader.GetString()];
+                    // connect the firm back to us if job has already been selected
+                    if (result.Job != null)
+                        ConnectPopToFirm(result);
                     break;
                 case nameof(result.Market):
                     result.Market = DataContext.Instance
@@ -139,5 +144,12 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
         writer.WriteEndObject();
         
         writer.WriteEndObject();
+    }
+
+    private void ConnectPopToFirm(PopGroup result)
+    {
+        result.Firm.Jobs
+            .Single(x => x.Job.GetName() == result.Job.GetName())
+            .Pop = result;
     }
 }

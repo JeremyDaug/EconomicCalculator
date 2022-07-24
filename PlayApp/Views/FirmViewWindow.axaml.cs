@@ -1,27 +1,25 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using EconomicSim.Objects.Processes;
+using EconomicSim.Objects.Firms;
 using PlayApp.ViewModels;
 
 namespace PlayApp.Views;
 
-public partial class ProcessesViewWindow : Window
+public partial class FirmViewWindow : Window
 {
-    public ProcessesViewWindow()
+    public FirmViewWindow()
     {
         InitializeComponent();
 #if DEBUG
         this.AttachDevTools();
 #endif
     }
-
-    public ProcessesViewWindow(IProcess process)
+    
+    public FirmViewWindow(Firm firm)
     {
+        DataContext = new FirmViewModel(firm, this);
         InitializeComponent();
-
-        Title = process.GetName();
-        DataContext = new ProcessViewModel(process, this);
 #if DEBUG
         this.AttachDevTools();
 #endif

@@ -1,0 +1,182 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PlayApp.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1300" d:DesignHeight="600"
+        Width="1300" Height="600"
+        x:Class="PlayApp.Views.FirmViewWindow"
+        Title="FirmViewWindow">
+    <Design.DataContext>
+        <vm:FirmViewModel/>
+    </Design.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0">
+            <Label Margin="5">Name</Label>
+            <TextBox Margin="5" Text="{Binding Name}"
+                     Width="150" IsEnabled="False"/>
+            <Label Margin="5">Firm Rank</Label>
+            <TextBox Margin="5" Text="{Binding FirmRank}"
+                     Width="150" IsEnabled="False"/>
+            <Label Margin="5">Ownership</Label>
+            <TextBox Margin="5" Text="{Binding OwnershipStructure}"
+                     Width="150" IsEnabled="False"/>
+            <Label Margin="5">Profit Structure</Label>
+            <TextBox Margin="5" Text="{Binding ProfitStructure}"
+                     Width="150" IsEnabled="False"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1">
+            <Label Margin="5">Parent</Label>
+            <TextBox Margin="5" Text="{Binding Parent}"
+                     IsVisible="True"
+                     Width="150" IsEnabled="False"/>
+            <Label Margin="5">Subfirms</Label>
+            <ListBox Margin="5" Height="200"
+                     Items="{Binding Children}"
+                     SelectedIndex="{Binding SelectedChild}"/>
+            <Label Margin="5">Headquarters</Label>
+            <TextBox Margin="5" Text="{Binding Headquarters}"
+                     Width="150" IsEnabled="False"/>
+            <Label Margin="5">Operating Regions</Label>
+            <ListBox Margin="5" Items="{Binding OperatingRegions}"
+                     SelectedItem="{Binding SelectedRegion}"
+                     IsEnabled="False"
+                     Height="150" Width="150"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="2">
+            <Label Margin="5">Products</Label>
+            <StackPanel Orientation="Horizontal">
+                <Label Margin="5">Prices in</Label>
+                <ComboBox Items="{Binding PricingOptions}"
+                          SelectedItem="{Binding PricingUnit}"
+                          Margin="5"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <DataGrid Items="{Binding Products, Mode=TwoWay}"
+                          SelectedItem="{Binding SelectedProduct}"
+                          BorderBrush="LightGray" BorderThickness="2"
+                          Height="200" Width="200" Margin="5">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Product" 
+                                            Binding="{Binding Primary}"
+                                            IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Price" 
+                                            Binding="{Binding Secondary, Mode=TwoWay}"
+                                            IsReadOnly="True"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel VerticalAlignment="Center" 
+                            IsVisible="True">
+                    <Label Margin="5">Increment Price</Label>
+                    <Button Command="{Binding IncreasePrice}"
+                            Margin="5,0,5,0">
+                        <Path Fill="Black" Data="M 0 6 L 12 6 L 6 0 Z"/>
+                    </Button>
+                    <Button Command="{Binding ReducePrice}"
+                            Margin="5,0,5,0">
+                        <Path Fill="Black" Data="M 0 0 L 6 6 L 12 0 Z"/>
+                    </Button>
+                    <ComboBox Items="{Binding IncrementOptions}"
+                              SelectedItem="{Binding PriceIncrement}"
+                              Margin="5"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel>
+                <StackPanel>
+                    <Label Margin="5">Resources</Label>
+                    <StackPanel Orientation="Horizontal">
+                        <DataGrid Items="{Binding Resources}"
+                                  SelectedItem="{Binding SelectedResource}"
+                                  BorderBrush="LightGray" BorderThickness="2"
+                                  Height="200" Width="200" Margin="5">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Resource" Binding="{Binding Primary}"
+                                                    IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Price" IsReadOnly="True"
+                                                    Binding="{Binding Secondary}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <StackPanel VerticalAlignment="Center"
+                                    IsVisible="True">
+                            <Label Margin="5">Increment Resource</Label>
+                            <Button Command="{Binding IncreaseResource}"
+                                    Margin="5,0,5,0">
+                                <Path Fill="Black" Data="M 0 6 L 12 6 L 6 0 Z"/>
+                            </Button>
+                            <Button Command="{Binding ReduceResource}"
+                                    Margin="5,0,5,0">
+                                <Path Fill="Black" Data="M 0 0 L 6 6 L 12 0 Z"/>
+                            </Button>
+                            <ComboBox Items="{Binding IncrementOptions}"
+                                      SelectedItem="{Binding ResourceIncrement}"
+                                      Margin="5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="3">
+            <Label Margin="5">Jobs</Label>
+            <DataGrid Items="{Binding Jobs}"
+                      SelectedItem="{Binding SelectedJob}"
+                      BorderBrush="LightGray" BorderThickness="2"
+                      Height="200" Width="300" Margin="5"
+                      IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Job"
+                                        Binding="{Binding Job}"/>
+                    <DataGridTextColumn Header="Wage"
+                                        Binding="{Binding Wage}"/>
+                    <DataGridTextColumn Header="Wage Type"
+                                        Binding="{Binding WageType}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal">
+                <Label Margin="5" VerticalAlignment="Center">
+                    Increment Wage
+                </Label>
+                <StackPanel Margin="5,0,5,0">
+                    <Button Command="{Binding IncreaseResource}">
+                        <Path Fill="Black" Data="M 0 6 L 12 6 L 6 0 Z"/>
+                    </Button>
+                    <Button Command="{Binding ReduceResource}">
+                        <Path Fill="Black" Data="M 0 0 L 6 6 L 12 0 Z"/>
+                    </Button>
+                </StackPanel>
+                <ComboBox Items="{Binding IncrementOptions}"
+                          SelectedItem="{Binding ResourceIncrement}"
+                          VerticalAlignment="Center"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal"
+                        IsVisible="True">
+            </StackPanel>
+            
+            <Button Margin="5"
+                    Command="{Binding ViewOperations}"
+                    IsVisible="{Binding CanViewBudget}">
+                Open Operations Window
+            </Button>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="4"
+                    IsVisible="False">
+            <Label Margin="5">Technologies</Label>
+        </StackPanel>
+    </Grid>
+</Window>

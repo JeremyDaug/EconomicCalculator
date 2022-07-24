@@ -1,5 +1,4 @@
 using AvaEditorUI.Models;
-using AvaEditorUI.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;

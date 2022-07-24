@@ -123,8 +123,8 @@ public class ProcessViewModel : ViewModelBase
 
     private async Task _editProcess()
     {
-        //var editor = new ProcessEditorWindow(_model);
-        //await editor.ShowDialog(_window);
+        var editor = new ProcessEditorWindow(_model);
+        await editor.ShowDialog(_window);
         //RefreshProcess();
     }
 }
