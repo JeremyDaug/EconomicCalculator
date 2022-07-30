@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
@@ -9,6 +10,7 @@ public class FirmJobModel : INotifyPropertyChanged
     private string _job;
     private decimal _wage;
     private string _wageType;
+    private string _assignments;
 
     public string Job
     {
@@ -44,6 +46,19 @@ public class FirmJobModel : INotifyPropertyChanged
             if (value != _wage)
             {
                 _wage = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string Assignments
+    {
+        get => _assignments;
+        set
+        {
+            if (value != _assignments)
+            {
+                _assignments = value;
                 OnPropertyChanged();
             }
         }

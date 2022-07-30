@@ -169,5 +169,35 @@ namespace EconomicSim.Objects.Processes
                 return Name;
             return Name + "(" + VariantName + ")";
         }
+        
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as Process);
+        }
+
+        public bool Equals(Process? obj)
+        {
+            if (obj == null)
+                return false;
+            return string.Equals(GetName(), obj.GetName());
+        }
+
+        public override int GetHashCode()
+        {
+            return GetName().GetHashCode();
+        }
+
+        public IReadOnlyList<IProcessProduct> GetProductsByName(string name)
+        {
+            return ProcessProducts.Where(x => x.Product.GetName() == name).ToList();
+        }
+
+        public IReadOnlyList<IProcessProduct> GetProductsByName(string name, ProcessPartTag part)
+        {
+            return ProcessProducts
+                .Where(x => x.Part == part)
+                .Where(x => x.Product.GetName() == name)
+                .ToList();
+        }
     }
 }

@@ -19,6 +19,9 @@ namespace EconomicSim.Objects.Market
             Resources = new Dictionary<Product, decimal>();
             Pops = new List<PopGroup>();
             Firms = new List<Firm>();
+            MarketPrices = new Dictionary<Product, decimal>();
+            ProductSold = new Dictionary<Product, decimal>();
+            ProductOutput = new Dictionary<Product, decimal>();
         }
 
         /// <summary>
@@ -81,6 +84,50 @@ namespace EconomicSim.Objects.Market
             => Resources.ToDictionary(
                 x => (IProduct) x.Key,
                 x => x.Value);
+
+        // Assistant Props are properties which are not saved, but are used
+        // in calculations during running.
+        #region AssistantProperties
+
+        /// <summary>
+        /// The average price of goods on the market, based on
+        /// the price of firms within the market and their relative
+        /// market share.
+        /// Recalculated on the run each day to allow for more accurate
+        /// values rolling forward (values at startup are approximations).
+        /// </summary>
+        public Dictionary<Product, decimal> MarketPrices { get; set; }
+        IReadOnlyDictionary<IProduct, decimal> IMarket.MarketPrices
+            => MarketPrices.ToDictionary(
+                x => (IProduct)x.Key,
+                x => x.Value);
+        
+        /// <summary>
+        /// The amount of the product that has been successfully sold on
+        /// the market so far. Updated to match daily.
+        /// </summary>
+        public Dictionary<Product, decimal> ProductSold { get; set; }
+        IReadOnlyDictionary<IProduct, decimal> IMarket.ProductSold
+            => ProductSold.ToDictionary(
+                x => (IProduct)x.Key,
+                x => x.Value);
+        
+        /// <summary>
+        /// The amount of product that has been produced, but not
+        /// necessarily sold, in the market.
+        /// </summary>
+        private Dictionary<Product, decimal> ProductOutput { get; set; }
+        IReadOnlyDictionary<IProduct, decimal> IMarket.ProductOutput 
+            => ProductOutput.ToDictionary(
+                x => (IProduct)x.Key,
+                x => x.Value);
+
+        #endregion
+
+        public override string ToString()
+        {
+            return Name;
+        }
 
         public override bool Equals(object? obj)
         {

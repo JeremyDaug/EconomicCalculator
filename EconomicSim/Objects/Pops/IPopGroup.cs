@@ -83,5 +83,12 @@ namespace EconomicSim.Objects.Pops
         /// The wants desired by this pop.
         /// </summary>
         IReadOnlyList<IWantDesire> Wants { get; }
+
+        /// <summary>
+        /// Gets the hours of the population group
+        /// Currently this is just 16 hours per day, but should be updated to change the
+        /// rate based on species/culture/etc
+        /// </summary>
+        decimal GetTotalHours();
     }
 }

@@ -205,5 +205,16 @@ namespace EconomicSim.Objects.Pops
                 throw new NotImplementedException();
             }
         }
+
+        /// <summary>
+        /// Gets the hours of the population group
+        /// Currently this is just 16 hours per day, but should be updated to change the
+        /// rate based on species/culture/etc
+        /// </summary>
+        public decimal GetTotalHours()
+        {
+            // TODO make this more flexible and use available productivity based on the population's details (species, culture, etc).
+            return Count * 16;
+        }
     }
 }

@@ -893,6 +893,39 @@ namespace EconomicSim.Objects
                     if (!region.Firms.Contains(firm))
                         region.Firms.Add(firm);
                 }
+                
+                // Set unassigned assignments to a basic set.
+                foreach (var jobs in firm.Jobs)
+                {
+                    foreach (var proc in jobs.Job.Processes)
+                    {
+                        jobs.Assignments.Add(proc, 0);
+                    }
+                }
+            }
+            
+            // with firms and markets loaded, calculate initial 
+            // average market price.
+            foreach (var market in Markets.Values)
+            {
+                foreach (var biz in market.Firms)
+                {
+                    foreach (var prod in biz.Products)
+                    {
+                        if (!market.MarketPrices.ContainsKey(prod.Key))
+                        {
+                            market.MarketPrices[prod.Key] = 0;
+                            market.ProductSold[prod.Key] = 0;
+                        }
+                        // average (old price * previous weight + new price )
+                        // / (weights)
+                        var oldWeight = market.ProductSold[prod.Key];
+                        market.MarketPrices[prod.Key]
+                            = (market.MarketPrices[prod.Key] * oldWeight
+                               + prod.Value) / (oldWeight + 1);
+                        market.ProductSold[prod.Key] += 1;
+                    }
+                }
             }
             
             // put into memory

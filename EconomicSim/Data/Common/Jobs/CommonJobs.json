@@ -4,7 +4,13 @@
     "VariantName": "",
     "Labor": "Simple Construction",
     "Skill": "Simple Construction",
-    "Processes": []
+    "Processes": [
+      "Ambrosia Hunting",
+      "Hut Construction",
+      "Hut Repairs",
+      "Fruit Gathering",
+      "Simple Construction"
+    ]
   },
   {
     "Name": "Farming",

@@ -67,7 +67,7 @@ internal class JobJsonConverter: JsonConverter<Job>
         // processes
         var procNames = value.Processes.Select(x => x.GetName());
         writer.WritePropertyName(nameof(value.Processes));
-        JsonSerializer.Serialize(procNames, options);
+        JsonSerializer.Serialize(writer, procNames, options);
         
         writer.WriteEndObject();
     }

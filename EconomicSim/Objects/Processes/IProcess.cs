@@ -1,4 +1,5 @@
 ﻿using EconomicSim.Objects.Processes.ProcessTags;
+using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
 
@@ -135,5 +136,8 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         /// <returns></returns>
         string GetName();
+
+        IReadOnlyList<IProcessProduct> GetProductsByName(string name);
+        IReadOnlyList<IProcessProduct> GetProductsByName(string name, ProcessPartTag part);
     }
 }

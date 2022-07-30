@@ -222,8 +222,10 @@ internal class ProcessJsonConverter : JsonConverter<Process>
                     foreach (var prop in tag.Value)
                         writer.WriteString(prop.Key, prop.Value.ToString());
                 }
+                writer.WriteEndObject();
             }
         }
+        writer.WriteEndObject();
         // description
         writer.WriteString(nameof(value.Description), value.Description);
         // icon

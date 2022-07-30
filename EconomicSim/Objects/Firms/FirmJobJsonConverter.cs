@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EconomicSim.Objects.Processes;
 
 namespace EconomicSim.Objects.Firms;
 
@@ -34,6 +35,12 @@ internal class FirmJobJsonConverter : JsonConverter<FirmJob>
                 case nameof(result.Wage):
                     result.Wage = reader.GetDecimal();
                     break;
+                case nameof(result.Assignments):
+                    var assignments = JsonSerializer.Deserialize<Dictionary<string, decimal>>(ref reader, options);
+                    result.Assignments = assignments.ToDictionary(
+                        x => (IProcess)DataContext.Instance.Processes[x.Key],
+                        x => x.Value);
+                    break;
                 default:
                     throw new JsonException();
             }
@@ -48,6 +55,15 @@ internal class FirmJobJsonConverter : JsonConverter<FirmJob>
         writer.WriteString(nameof(value.Job), value.Job.GetName());
         writer.WriteString(nameof(value.WageType), value.WageType.ToString());
         writer.WriteNumber(nameof(value.Wage), value.Wage);
+
+        if (value.Assignments.Any())
+        {
+            // if assignment exists, add it
+            writer.WritePropertyName(nameof(value.Assignments));
+            var assignments = value.Assignments
+                .ToDictionary(x => x.Key.GetName(), x => x.Value);
+            JsonSerializer.Serialize(writer, assignments, options);
+        }
         
         writer.WriteEndObject();
     }

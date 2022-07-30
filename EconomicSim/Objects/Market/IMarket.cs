@@ -59,5 +59,39 @@ namespace EconomicSim.Objects.Market
         /// in the market.
         /// </summary>
         IReadOnlyDictionary<IProduct, decimal> Resources { get; }
+        
+        // Assistant Props are properties which are not saved, but are used
+        // in calculations during running.
+        #region AssistantProperties
+
+        /// <summary>
+        /// The average price of goods on the market, based on
+        /// the price of firms within the market and their relative
+        /// market share.
+        /// Recalculated on the run each day to allow for more accurate
+        /// values rolling forward (values at startup are approximations).
+        /// </summary>
+        IReadOnlyDictionary<IProduct, decimal> MarketPrices { get; }
+        
+        /// <summary>
+        /// The amount of the product that has been successfully sold on
+        /// the market so far. Updated to match daily.
+        /// </summary>
+        IReadOnlyDictionary<IProduct, decimal> ProductSold { get; }
+        
+        /// <summary>
+        /// The amount of product that has been produced, but not
+        /// necessarily sold, in the market.
+        /// </summary>
+        IReadOnlyDictionary<IProduct, decimal> ProductOutput { get; }
+
+        #endregion
+
+        #region DebugAndInfoLogging
+
+        // Something something logging prices in a nice way.
+        // Probably appending to a file or list somewhere. 
+
+        #endregion
     }
 }

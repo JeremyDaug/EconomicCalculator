@@ -50,6 +50,7 @@ public class FirmViewModel : ViewModelBase
     {
         model = new FirmModel(original);
         _window = window;
+        this.original = original;
         // TODO include other playmode checks and check for player ownership.
         CanChangePrice = dc.DebugMode;
         CanViewBudget = dc.DebugMode;
@@ -66,10 +67,13 @@ public class FirmViewModel : ViewModelBase
         Children = new ObservableCollection<string>();
         AddChildren(original);
 
+        Headquarters = original.HeadQuarters.Name;
+
         IncreasePrice = ReactiveCommand.Create(_increasePrice);
         ReducePrice = ReactiveCommand.Create(_reducePrice);
         IncreaseResource = ReactiveCommand.Create(_increaseResource);
         ReduceResource = ReactiveCommand.Create(_reduceResource);
+        ViewOperations = ReactiveCommand.Create(_viewOperations);
 
         PricingOptions = new ObservableCollection<string>();
         // select products being used as currencies
@@ -79,12 +83,12 @@ public class FirmViewModel : ViewModelBase
             PricingOptions.Add(option.GetName());
         }
         foreach (var option in dc.Products.Values
-                     .Where(x => x.ProductTags.All(y => y.tag != ProductTag.Currency)))
+                     .Where(x => x.ProductTags.All(y => y.tag != ProductTag.Currency))
+                     .Where(x => original.HeadQuarters.MarketPrices.ContainsKey(x)))
         {
             PricingOptions.Add(option.GetName());
         }
         // Select Unit at the start based on market/government's currency
-        PricingUnit = PricingOptions.First();
         
         Products = new ObservableCollection<Pair<string, decimal>>();
         foreach (var product in original.Products)
@@ -115,6 +119,8 @@ public class FirmViewModel : ViewModelBase
         IncrementOptions.Add(10m);
         IncrementOptions.Add(100m);
         IncrementOptions.Add(1000m);
+        
+        PricingUnit = PricingOptions.First();
     }
     
     public ReactiveCommand<Unit, Unit> IncreasePrice { get; set; }
@@ -128,9 +134,15 @@ public class FirmViewModel : ViewModelBase
         if (BudgetWindow != null)
             return;
 
-        BudgetWindow = new FirmOperationsWindow();
+        BudgetWindow = new FirmOperationsWindow(original);
         // connect events
         BudgetWindow.Show(_window);
+        BudgetWindow.Closed += budgetClosed;
+    }
+
+    private void budgetClosed(object sender, EventArgs e)
+    {
+        BudgetWindow = null;
     }
     
     private void AddChildren(Firm original)
@@ -258,7 +270,26 @@ public class FirmViewModel : ViewModelBase
     public string PricingUnit
     {
         get => _pricingUnit;
-        set => this.RaiseAndSetIfChanged(ref _pricingUnit, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _pricingUnit, value);
+            updatePrices();
+        }
+    }
+
+    private void updatePrices()
+    {
+        // get average market prices
+        var MarketPrices = original.HeadQuarters.MarketPrices;
+        var unitProduct = dc.Products[PricingUnit];
+        if (!MarketPrices.ContainsKey(unitProduct))
+            return; // if it doesn't have a price don't calculate.
+        Products.Clear();
+        foreach (var price in original.Products)
+        {
+            Products.Add(new Pair<string, decimal>(price.Key.GetName(),
+                price.Value / MarketPrices[unitProduct]));
+        }
     }
 
     public ObservableCollection<string> PricingOptions { get; set; }

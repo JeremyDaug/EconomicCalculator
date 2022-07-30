@@ -43,7 +43,7 @@
         "Product": "Ambrosia Fruit"
       }
     },
-    "Description": "Even one Ambrosia is a meal. It's Fantastic really, how little is needed to sustain a family. Better, it's sweet with a nice, crunchy texture and full of juice that tastes like liquid euphoria.",
+    "Description": "Even one Ambrosia is a meal. It\u0027s Fantastic really, how little is needed to sustain a family. Better, it\u0027s sweet with a nice, crunchy texture and full of juice that tastes like liquid euphoria.",
     "Icon": null,
     "Products": {
       "Inputs": [
@@ -115,6 +115,39 @@
               "Weight": "1"
             }
           }
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Fruit Gathering",
+    "VariantName": "",
+    "MinimumTime": 1,
+    "Skill": "Fruit Gathering",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Gathering Fruit takes time.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Time",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Fruit Gathering",
+          "Amount": 1,
+          "Tags": {}
         }
       ]
     },
@@ -253,6 +286,39 @@
     }
   },
   {
+    "Name": "Simple Construction",
+    "VariantName": "",
+    "MinimumTime": 1,
+    "Skill": "Simple Construction",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Simple Construction has many uses.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Time",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Simple Construction",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
     "Name": "Wheat Farming",
     "VariantName": "",
     "MinimumTime": 120,
@@ -260,7 +326,7 @@
     "SkillMinimum": 1,
     "SkillMaximum": 5,
     "ProcessTags": {
-      "Crop" : {}
+      "Crop": {}
     },
     "Description": "Sow, Grow, and Harvest Wheat.",
     "Icon": "",

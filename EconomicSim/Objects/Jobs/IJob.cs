@@ -2,6 +2,7 @@
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
+using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Jobs
 {
@@ -41,5 +42,19 @@ namespace EconomicSim.Objects.Jobs
         /// The Processes that are part of this job.
         /// </summary>
         IReadOnlyList<IProcess> Processes { get; }
+
+        IReadOnlyDictionary<Product, decimal> InputProducts { get; }
+        IReadOnlyDictionary<Product, decimal> OptionalInputProducts { get; }
+        IReadOnlyDictionary<Product, decimal> CapitalProducts { get; }
+        IReadOnlyDictionary<Product, decimal> OptionalCapitalProducts { get; }
+        IReadOnlyDictionary<Product, decimal> OutputProducts { get; }
+        
+        IReadOnlyDictionary<Want, decimal> InputWants { get; }
+        IReadOnlyDictionary<Want, decimal> OptionalInputWants { get; }
+        IReadOnlyDictionary<Want, decimal> CapitalWants { get; }
+        IReadOnlyDictionary<Want, decimal> OptionalCapitalWants { get; }
+        IReadOnlyDictionary<Want, decimal> OutputWants { get; }
+
+        void Refresh();
     }
 }

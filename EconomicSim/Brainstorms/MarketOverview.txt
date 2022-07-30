@@ -29,6 +29,24 @@ Consolidation, Integration, and Disintegration
 	  shift immediately to adjacent merchants to cover this, but costs will still increase
 	  and efficiency will be lost.
 
+Firm Selection
+    Firms each sell their products at an individual price on the market. The price of the 
+    product relative to the market average acts as an initial weight measurement. Cheaper
+    firms get a weight bonus while more expensive firms get a penalty. These might be
+    modified further through firm capital like Marketing, Reputation, or Political
+    Influence.
+    When a pop buys they select at random from the list, weights adding or reducing the
+    chance of getting one or another. From there they attempt to buy and then rate their
+    interaction. By default there are 5 ratings, Cheap, Thrifty, Reasonable, Expensive, 
+    and Unavailable (may be renamed). Depending on the price and availability of the
+    products, they will be rated appropriately. More factors may also go into it, such
+    as customer service quality, and the like. The better the service the more weight
+    the firm is given, the worse the lower. When a firm runs out, it's weight is
+    greatly reduced as every attempt to purchase goods costs some time for a pop.
+    Additionally, when someone shows up at a firm and it's out, the firm gets to record
+    the demand they couldn't satisfy, helping them to justify changing prices or
+    production.
+    
 
 The Market Day
 	Each 'day', which could be a literal day or another arbitrarily defined unit of time,
