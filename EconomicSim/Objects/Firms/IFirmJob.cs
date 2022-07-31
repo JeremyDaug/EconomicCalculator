@@ -12,8 +12,12 @@ public interface IFirmJob
     WageType WageType { get; }
     decimal Wage { get; }
     /// <summary>
-    /// The last recorded process target to reach.
+    /// Stores progress for the processes in assignments.
+    /// Investments and optional goods are consumed at the start.
+    /// If a process is cancelled, it should refund the non-service inputs.
+    /// Currently not saved in Json.
     /// </summary>
-    Dictionary<IProcess, decimal> Assignments { get; set; }
+    Dictionary<IProcess, IAssignmentInfo> Assignments { get; set; }
+    
     IPopGroup Pop { get; set; }
 }

@@ -28,6 +28,7 @@
             </Label>
             <DataGrid BorderBrush="lightGray" BorderThickness="2"
                       Items="{Binding CapitalAndStock}"
+                      IsReadOnly="True"
                       AutoGenerateColumns="True"
                       Margin="5" MinHeight="320">
             </DataGrid>
@@ -80,8 +81,8 @@
             <Button Margin="5" Command="{Binding UpdateAssignments}">
                 Update Assignments
             </Button>
-            <Button Margin="5">
-                Show Projection Details
+            <Button Margin="5" Command="{Binding RefreshExpected}">
+                Refresh Expected Outputs
             </Button>
         </StackPanel>
         

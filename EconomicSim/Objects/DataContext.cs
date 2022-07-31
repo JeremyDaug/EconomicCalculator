@@ -899,7 +899,7 @@ namespace EconomicSim.Objects
                 {
                     foreach (var proc in jobs.Job.Processes)
                     {
-                        jobs.Assignments.Add(proc, 0);
+                        jobs.Assignments.Add(proc, new AssignmentInfo(0,0));
                     }
                 }
             }

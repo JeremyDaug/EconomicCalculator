@@ -7,6 +7,7 @@ using Avalonia.OpenGL;
 using EconomicSim.Enums;
 using EconomicSim.Objects;
 using EconomicSim.Objects.Firms;
+using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Processes;
 using PlayApp.Helpers;
 using ReactiveUI;
@@ -22,6 +23,7 @@ public class FirmOperationsViewModel : ViewModelBase
     private FirmJobModel _selectedWorker;
     private decimal _availableHours;
     private Pair<string, decimal>? _selectedAssignment;
+    private string _pricingUnit;
 
     public FirmOperationsViewModel()
     {
@@ -57,10 +59,13 @@ public class FirmOperationsViewModel : ViewModelBase
         AssignmentGrid = new ObservableCollection<Pair<string, decimal>>();
 
         UpdateAssignments = ReactiveCommand.Create(_updateAssignments);
+        RefreshExpected = ReactiveCommand.Create(_updateExpectedTables);
         _updateProjections();
     }
     
     public ReactiveCommand<Unit, Unit> UpdateAssignments { get; set; }
+    
+    public ReactiveCommand<Unit, Unit> RefreshExpected { get; set; }
 
     public decimal AvailableHours
     {
@@ -83,8 +88,16 @@ public class FirmOperationsViewModel : ViewModelBase
     public ObservableCollection<CapStockAndSum> CapitalAndStock { get; set; }
 
     public ObservableCollection<string> PricingUnitOptions { get; set; }
-    
-    public string PricingUnit { get; set; }
+
+    public string PricingUnit
+    {
+        get => _pricingUnit;
+        set
+        {
+            _pricingUnit = value;
+            _updatePrices();
+        }
+    }
 
     public string SelectedWorkerName
     {
@@ -108,6 +121,22 @@ public class FirmOperationsViewModel : ViewModelBase
     public ObservableCollection<Pair<string, decimal>> ExpectedCapitals { get; set; }
     public ObservableCollection<Pair<string, decimal>> ExpectedOutputs { get; set; }
 
+    private void _updatePrices()
+    {
+        var pricer = dc.Products[PricingUnit];
+        foreach (var row in CapitalAndStock)
+        { // go through each row.
+            if (dc.Products.ContainsKey(row.Item))
+            { // if the item in the row is a product.
+                var prod = dc.Products[row.Item];
+                if (parent.HeadQuarters.MarketPrices.ContainsKey(prod))
+                { // and the product has a price, then update the price to the market price.
+                    row.Price = parent.HeadQuarters.MarketPrices[prod] / parent.HeadQuarters.MarketPrices[pricer];
+                }
+            }
+        }
+    }
+    
     private void _updateAssignments()
     {
         if (SelectedWorker == null)
@@ -117,7 +146,7 @@ public class FirmOperationsViewModel : ViewModelBase
         foreach (var assignment in AssignmentGrid)
         {
             // update the job in the parent
-            jobSelection.Assignments[dc.Processes[assignment.Primary]] = assignment.Secondary;
+            jobSelection.Assignments[dc.Processes[assignment.Primary]].Iterations = assignment.Secondary;
         }
         // update Projections
         _updateProjections();
@@ -173,7 +202,7 @@ public class FirmOperationsViewModel : ViewModelBase
         foreach (var assignment in AssignmentGrid)
         {
             parent.Jobs.Single(x => x.Job.GetName() == SelectedWorker.Job)
-                .Assignments[dc.Processes[assignment.Primary]] = assignment.Secondary;
+                .Assignments[dc.Processes[assignment.Primary]].Iterations = assignment.Secondary;
         }
 
         // Update Workers and Jobs
@@ -190,10 +219,10 @@ public class FirmOperationsViewModel : ViewModelBase
 
             foreach (var assigment in selJob.Assignments)
             {
-                if (assigment.Value > 0 &&
+                if (assigment.Value.Iterations > 0 &&
                     assigment.Key.InputProducts.Any(x => x.Product.GetName() == "Time"))
                 {
-                    hours -= assigment.Value * assigment.Key.GetProductsByName("Time", ProcessPartTag.Input)
+                    hours -= assigment.Value.Iterations * assigment.Key.GetProductsByName("Time", ProcessPartTag.Input)
                         .Sum(x => x.Amount);
                 }
             }
@@ -220,7 +249,7 @@ public class FirmOperationsViewModel : ViewModelBase
             foreach (var assn in job.Assignments)
             {
                 // if the process has no weight, skip it
-                if (assn.Value == 0)
+                if (assn.Value.Iterations == 0)
                     continue;
                 // foreach product in the process
                 foreach (var prod in assn.Key.ProcessProducts)
@@ -230,22 +259,22 @@ public class FirmOperationsViewModel : ViewModelBase
                     {
                         var stock = CapitalAndStock.Single(x => x.Item == prod.Product.GetName());
                         if (prod.Part == ProcessPartTag.Input) // inputs to expenditures
-                            stock.Expenditures += prod.Amount * assn.Value;
+                            stock.Expenditures += prod.Amount * assn.Value.Iterations;
                         else if (prod.Part == ProcessPartTag.Capital) // capital to used
-                            stock.Used += prod.Amount * assn.Value;
+                            stock.Used += prod.Amount * assn.Value.Iterations;
                         else if (prod.Part == ProcessPartTag.Output) // outputs are gained
-                            stock.Gains += prod.Amount * assn.Value;
+                            stock.Gains += prod.Amount * assn.Value.Iterations;
                         // optional taken somewhere?
                     }
                     else
                     {
                         var stock = new CapStockAndSum(prod.Product.GetName());
                         if (prod.Part == ProcessPartTag.Input) // inputs to expenditures
-                            stock.Expenditures += prod.Amount * assn.Value;
+                            stock.Expenditures += prod.Amount * assn.Value.Iterations;
                         else if (prod.Part == ProcessPartTag.Capital) // capital to used
-                            stock.Used += prod.Amount * assn.Value;
+                            stock.Used += prod.Amount * assn.Value.Iterations;
                         else if (prod.Part == ProcessPartTag.Output) // outputs are gained
-                            stock.Gains += prod.Amount * assn.Value;
+                            stock.Gains += prod.Amount * assn.Value.Iterations;
                         CapitalAndStock.Add(stock);
                     }
                 }
@@ -258,22 +287,22 @@ public class FirmOperationsViewModel : ViewModelBase
                     {
                         var stock = CapitalAndStock.Single(x => x.Item == want.Want.Name);
                         if (want.Part == ProcessPartTag.Input) // inputs to expenditures
-                            stock.Expenditures += want.Amount * assn.Value;
+                            stock.Expenditures += want.Amount * assn.Value.Iterations;
                         else if (want.Part == ProcessPartTag.Capital) // capital to used
-                            stock.Used += want.Amount * assn.Value;
+                            stock.Used += want.Amount * assn.Value.Iterations;
                         else if (want.Part == ProcessPartTag.Output) // outputs are gained
-                            stock.Gains += want.Amount * assn.Value;
+                            stock.Gains += want.Amount * assn.Value.Iterations;
                         // optional taken somewhere?
                     }
                     else
                     {
                         var stock = new CapStockAndSum(want.Want.Name);
                         if (want.Part == ProcessPartTag.Input) // inputs to expenditures
-                            stock.Expenditures += want.Amount * assn.Value;
+                            stock.Expenditures += want.Amount * assn.Value.Iterations;
                         else if (want.Part == ProcessPartTag.Capital) // capital to used
-                            stock.Used += want.Amount * assn.Value;
+                            stock.Used += want.Amount * assn.Value.Iterations;
                         else if (want.Part == ProcessPartTag.Output) // outputs are gained
-                            stock.Gains += want.Amount * assn.Value;
+                            stock.Gains += want.Amount * assn.Value.Iterations;
                         CapitalAndStock.Add(stock);
                     }
                 }
@@ -292,17 +321,17 @@ public class FirmOperationsViewModel : ViewModelBase
             string assignments = "";
             foreach (var assignment in job.Assignments)
             {
-                assignments += $"{assignment.Key.GetName()} : {assignment.Value}\n";
+                assignments += $"{assignment.Key.GetName()} : {assignment.Value.Iterations}\n";
             }
             // sum up the time of the worker and their assignments
             var hours = job.Pop.GetTotalHours();
 
             foreach (var assigment in job.Assignments)
             {
-                if (assigment.Value > 0 &&
+                if (assigment.Value.Iterations > 0 &&
                     assigment.Key.InputProducts.Any(x => x.Product.GetName() == "Time"))
                 {
-                    hours -= assigment.Value * assigment.Key.GetProductsByName("Time", ProcessPartTag.Input)
+                    hours -= assigment.Value.Iterations * assigment.Key.GetProductsByName("Time", ProcessPartTag.Input)
                         .Sum(x => x.Amount);
                 }
             }
@@ -328,7 +357,7 @@ public class FirmOperationsViewModel : ViewModelBase
         // update to the new selected worker.
         foreach (var process in jobSelection.Assignments)
         {
-            AssignmentGrid.Add(new Pair<string, decimal>(process.Key.GetName(), process.Value));
+            AssignmentGrid.Add(new Pair<string, decimal>(process.Key.GetName(), process.Value.Iterations));
         }
     }
 }

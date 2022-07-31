@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Processes;
 
 namespace EconomicSim.Objects.Firms;
@@ -37,9 +38,10 @@ internal class FirmJobJsonConverter : JsonConverter<FirmJob>
                     break;
                 case nameof(result.Assignments):
                     var assignments = JsonSerializer.Deserialize<Dictionary<string, decimal>>(ref reader, options);
-                    result.Assignments = assignments.ToDictionary(
-                        x => (IProcess)DataContext.Instance.Processes[x.Key],
-                        x => x.Value);
+                    Dictionary<IProcess, IAssignmentInfo> dictionary = new Dictionary<IProcess, IAssignmentInfo>();
+                    foreach (var assignment in assignments)
+                        dictionary.Add((IProcess) DataContext.Instance.Processes[assignment.Key], new AssignmentInfo(assignment.Value, 0));
+                    result.Assignments = dictionary;
                     break;
                 default:
                     throw new JsonException();
@@ -61,7 +63,9 @@ internal class FirmJobJsonConverter : JsonConverter<FirmJob>
             // if assignment exists, add it
             writer.WritePropertyName(nameof(value.Assignments));
             var assignments = value.Assignments
-                .ToDictionary(x => x.Key.GetName(), x => x.Value);
+                .ToDictionary(x => x.Key.GetName(),
+                    x => x.Value.Iterations);
+            // we do not store progress currently.
             JsonSerializer.Serialize(writer, assignments, options);
         }
         

@@ -10,7 +10,7 @@ public class FirmJob : IFirmJob
 {
     public FirmJob()
     {
-        Assignments = new Dictionary<IProcess, decimal>();
+        Assignments = new Dictionary<IProcess, IAssignmentInfo>();
     }
     
     public Job Job { get; set; }
@@ -19,9 +19,12 @@ public class FirmJob : IFirmJob
     public decimal Wage { get; set; }
     
     /// <summary>
-    /// The last recorded process target to reach.
+    /// Stores progress for the processes in assignments.
+    /// Investments and optional goods are consumed at the start.
+    /// If a process is cancelled, it should refund the non-service inputs.
+    /// Currently not saved in Json.
     /// </summary>
-    public Dictionary<IProcess, decimal> Assignments { get; set; }
+    public Dictionary<IProcess, IAssignmentInfo> Assignments { get; set; }
 
     // Don't convert this, let pops connect to here.
     public PopGroup Pop { get; set; }
