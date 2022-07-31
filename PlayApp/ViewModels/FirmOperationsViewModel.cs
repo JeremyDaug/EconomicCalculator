@@ -212,7 +212,7 @@ public class FirmOperationsViewModel : ViewModelBase
             string assignments = "";
             foreach (var assignment in selJob.Assignments)
             {
-                assignments += $"{assignment.Key.GetName()} : {assignment.Value}\n";
+                assignments += $"{assignment.Key.GetName()} : {assignment.Value.Iterations}\n";
             }
             // sum up the time of the worker and their assignments
             var hours = selJob.Pop.GetTotalHours();

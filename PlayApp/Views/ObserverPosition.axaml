@@ -65,9 +65,9 @@
                      SelectedItem="{Binding SelectedOption}"/>
             <Button Margin="5"
                     Command="{Binding View}">View</Button>
-        </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="1">
-            <Label Content="{Binding Information}"/>
+            <Button Margin="5" Command="{Binding Save}">
+                Save Game
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

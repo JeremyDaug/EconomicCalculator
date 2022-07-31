@@ -154,6 +154,9 @@ namespace EconomicSim.Objects
             
             // save game specific data.
             SaveFirms(CurrentSave);
+            SaveMarkets(CurrentSave);
+            SavePops(CurrentSave);
+            SaveTerritories(CurrentSave);
         }
 
 

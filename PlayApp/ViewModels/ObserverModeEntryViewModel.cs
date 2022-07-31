@@ -66,6 +66,7 @@ public class ObserverModeEntryViewModel : ViewModelBase
 
         SelectionOptions = new ObservableCollection<string>();
         View = ReactiveCommand.Create(_view);
+        Save = ReactiveCommand.Create(_saveGame);
 
         // TODO set this back to dc.DebugMode later.
         // IsDebugModeActive = dc.DebugMode;
@@ -77,6 +78,8 @@ public class ObserverModeEntryViewModel : ViewModelBase
     }
     
     public ReactiveCommand<Unit, Task> View { get; set; }
+    
+    public ReactiveCommand<Unit, Task> Save { get; set; }
     
     public ReactiveCommand<Unit, Task> RunDay { get; set; }
     
@@ -107,6 +110,18 @@ public class ObserverModeEntryViewModel : ViewModelBase
     {
         get => _information;
         set => this.RaiseAndSetIfChanged(ref _information, value);
+    }
+
+    private async Task _saveGame()
+    {
+        
+        dc.SaveGame();
+
+        var message = MessageBoxManager
+            .GetMessageBoxStandardWindow("Saved", "Game Saved!");
+        await message.ShowDialog(_window);
+        
+        return;
     }
 
     private async Task NotImplementedWindow()
