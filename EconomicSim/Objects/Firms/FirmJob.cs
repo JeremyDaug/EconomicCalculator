@@ -33,4 +33,9 @@ public class FirmJob : IFirmJob
         get => this.Pop;
         set => this.Pop = (PopGroup) value;
     }
+
+    public override string ToString()
+    {
+        return $"{Job.GetName()}";
+    }
 }

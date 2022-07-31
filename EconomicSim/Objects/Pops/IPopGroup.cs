@@ -62,7 +62,7 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The Property of the group.
         /// </summary>
-        IReadOnlyList<(IProduct product, decimal amount)> Property { get; }
+        IReadOnlyDictionary<IProduct, decimal> Property { get; }
 
         /// <summary>
         /// The species that make up this pop.

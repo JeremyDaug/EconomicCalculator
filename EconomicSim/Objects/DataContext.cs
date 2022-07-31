@@ -85,6 +85,10 @@ namespace EconomicSim.Objects
         public async Task RunDay()
         {
             // Labor phase, pops receive the time they can use.
+            foreach (var pop in Pops.Values)
+            {
+                pop.Property.Add((Product)Time, pop.GetTotalHours());
+            }
             
             // Production Phase, firms go about their business
             // producing what they planned for, and consuming their inputs.
@@ -349,6 +353,8 @@ namespace EconomicSim.Objects
             // load products
             foreach (var product in RequiredItems.Products.Values)
                 Products.Add(product.GetName(), (Product)product);
+
+            Time = Products["Time"];
         }
 
         /// <summary>
@@ -898,11 +904,14 @@ namespace EconomicSim.Objects
                 }
                 
                 // Set unassigned assignments to a basic set.
-                foreach (var jobs in firm.Jobs)
+                foreach (var job in firm.Jobs)
                 {
-                    foreach (var proc in jobs.Job.Processes)
+                    if (!job.Assignments.Any())
                     {
-                        jobs.Assignments.Add(proc, new AssignmentInfo(0,0));
+                        foreach (var proc in job.Job.Processes)
+                        {
+                            job.Assignments.Add(proc, new AssignmentInfo(0,0));
+                        }
                     }
                 }
             }
@@ -1050,6 +1059,12 @@ namespace EconomicSim.Objects
         public SortedList<string, Firm> Firms { get; set; }
         
         public List<string> Sets { get; }
+
+        #region KeyItems
+
+        public IProduct Time { get; set; }
+
+        #endregion
 
         #endregion DataStorage
     }

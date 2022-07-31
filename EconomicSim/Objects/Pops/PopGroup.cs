@@ -18,7 +18,7 @@ namespace EconomicSim.Objects.Pops
     {
         public PopGroup()
         {
-            Property = new List<(Product product, decimal amount)>();
+            Property = new Dictionary<Product, decimal>();
             Species = new List<(Species.Species species, int amount)>();
             Cultures = new List<(Culture.Culture culture, int amount)>();
         }
@@ -76,9 +76,11 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The property the population Owns.
         /// </summary>
-        public List<(Product product, decimal amount)> Property { get; set; }
-        IReadOnlyList<(IProduct product, decimal amount)> IPopGroup.Property
-            => Property.Select(x => ((IProduct) x.product, x.amount)).ToList();
+        public Dictionary<Product, decimal> Property { get; set; }
+
+        IReadOnlyDictionary<IProduct, decimal> IPopGroup.Property
+            => Property.ToDictionary(x => (IProduct)x.Key,
+                x => x.Value);
 
         /// <summary>
         /// The Species that makes up the pop.

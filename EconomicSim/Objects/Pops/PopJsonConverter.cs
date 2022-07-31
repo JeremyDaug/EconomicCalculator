@@ -1,4 +1,5 @@
 using System.Data;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -87,18 +88,9 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
                     }
                     break;
                 case nameof(result.Property):
-                    if (reader.TokenType != JsonTokenType.StartObject)
-                        throw new JsonException();
-                    while (reader.Read())
-                    {
-                        if (reader.TokenType == JsonTokenType.EndObject)
-                            break;
-                        var productName = reader.GetString();
-                        var product = DataContext.Instance.Products[productName];
-                        reader.Read();
-                        var amount = reader.GetDecimal();
-                        result.Property.Add((product, amount));
-                    }
+                    var property = JsonSerializer.Deserialize<Dictionary<string, decimal>>(ref reader, options);
+                    foreach (var prop in property)
+                        result.Property[DataContext.Instance.Products[prop.Key]] = prop.Value;
                     break;
                 default:
                     throw new JsonException($"Property \"{propName}\" in not a valid property for PopGroups.");
@@ -138,11 +130,11 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
         writer.WriteEndObject();
         // Property
         writer.WritePropertyName(nameof(value.Property));
-        writer.WriteStartObject();
-        foreach (var spec in value.Property)
-            writer.WriteNumber(spec.product.GetName(), spec.amount);
-        writer.WriteEndObject();
+        var property = value.Property.ToDictionary(x => x.Key.GetName(),
+            x => x.Value);
+        JsonSerializer.Serialize(property, options);
         
+        // close object.
         writer.WriteEndObject();
     }
 
