@@ -14,7 +14,7 @@ namespace EconomicSim.Objects.Firms
         public Firm()
         {
             Regions = new List<Market.Market>();
-            Resources = new Dictionary<Product, decimal>();
+            Resources = new Dictionary<IProduct, decimal>();
             Products = new Dictionary<Product, decimal>();
             Jobs = new List<FirmJob>();
             Children = new List<Firm>();
@@ -77,7 +77,7 @@ namespace EconomicSim.Objects.Firms
         /// What resources the Firm owns. Bought goods go here,
         /// made goods go here and are sold from here.
         /// </summary>
-        public Dictionary<Product, decimal> Resources { get; set; }
+        public Dictionary<IProduct, decimal> Resources { get; set; }
         IReadOnlyDictionary<IProduct, decimal> IFirm.Resources 
             => Resources.ToDictionary(x => (IProduct)x.Key,
                 x => x.Value); 
@@ -108,5 +108,67 @@ namespace EconomicSim.Objects.Firms
         
 
         #endregion
+
+        public async Task ProductionPhase()
+        {
+            var dc = DataContext.Instance;
+            // 'purchase' the labor from pops
+            foreach (var job in Jobs)
+            {
+                // get the total time desired to buy and attempt to get it. 
+                var targetTime = job.ConsumedTime();
+                var timeReceived = new Dictionary<IProduct, decimal>();
+                
+                if (job.WageType == WageType.LossSharing ||
+                    job.WageType == WageType.ProfitSharing ||
+                    job.WageType == WageType.Slave ||
+                    job.WageType == WageType.Productivity)
+                { 
+                    // Profit/Loss sharing get paid out of profits after everything
+                    // is done
+                    // Productivity is paid later based on total production.
+                    // Slaves are not paid at all, merely given stuff as though they were
+                    // expenditures.
+                    // just get the time from them first, ask nicely (for now)
+                    timeReceived
+                        = job.Pop.GetRequestedProduct(dc.Time, targetTime);
+                }
+                else if (job.WageType == WageType.Salary)
+                { // Salary workers are paid the same amount regardless of time bought.
+                    // get time from them
+                    timeReceived
+                        = job.Pop.GetRequestedProduct(dc.Time, targetTime);
+                    // from the amount expected to pay them, get what you'll send them
+                    var payment = GetAmount(job.Wage);
+                    // then pay them for their time, regardless of how much is received.
+
+                }
+                else
+                {// Daily, Contract have their time purchased.
+                    // buy time from them by the unit.
+                }
+            }
+        }
+
+        public Dictionary<IProduct, decimal> GetAmount(decimal value)
+        {
+            var result = new Dictionary<IProduct, decimal>();
+            
+            
+            
+            // get payment methods which the firm has access to
+            // order them by preference * market value
+            var payPreference = HeadQuarters.PaymentPreference
+                .Where(x => Resources.ContainsKey(x.Key))
+                .OrderByDescending(x =>
+                    x.Value * HeadQuarters.GetMarketPrice(x.Key));
+
+            foreach (var pref in payPreference)
+            { // for each payment preference, collect the value to the best of your ability
+                
+            }
+
+            return result;
+        }
     }
 }

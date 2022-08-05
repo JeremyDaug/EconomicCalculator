@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using EconomicSim.Objects.Jobs;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Processes;
+using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Objects.Firms;
 
@@ -32,6 +33,26 @@ public class FirmJob : IFirmJob
     {
         get => this.Pop;
         set => this.Pop = (PopGroup) value;
+    }
+
+    public decimal ConsumedTime()
+    {
+        decimal result = 0;
+        foreach (var pair in Assignments)
+        {
+            // if a product takes in time
+            if (pair.Key.InputProducts
+                .Any(x => x.Product == DataContext.Instance.Time))
+            {
+                // take it and multiply by the target iterations
+                result +=
+                    pair.Key.InputProducts
+                        .Single(x => x.Product == DataContext.Instance.Time).Amount 
+                    * pair.Value.Iterations;
+            }
+        }
+
+        return result;
     }
 
     public override string ToString()

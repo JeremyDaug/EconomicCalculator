@@ -48,5 +48,7 @@ namespace EconomicSim.Objects.Pops.Culture
         /// The Culture's Tags.
         /// </summary>
         IReadOnlyList<ITagData<CultureTag>> Tags { get; }
+
+        string GetName();
     }
 }

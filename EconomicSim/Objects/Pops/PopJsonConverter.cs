@@ -2,6 +2,8 @@ using System.Data;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EconomicSim.Objects.Pops.Culture;
+using EconomicSim.Objects.Pops.Species;
 
 namespace EconomicSim.Objects.Pops;
 
@@ -19,8 +21,8 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
             if (reader.TokenType == JsonTokenType.EndObject)
             {
                 // assert that species, cultures, and count are equal
-                var specCount = result.Species.Sum(x => x.amount);
-                var cultCount = result.Cultures.Sum(x => x.amount);
+                var specCount = result.Species.Sum(x => x.Count);
+                var cultCount = result.Cultures.Sum(x => x.Count);
                 if (specCount != result.Count ||
                     cultCount != result.Count)
                     throw new DataException($"Pop Group with Job \"{result.Job.GetName()}\" at Firm \"{result.Firm.Name}\" has a population mismatch.");
@@ -70,7 +72,11 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
                         var species = DataContext.Instance.Species[speciesName];
                         reader.Read();
                         var amount = reader.GetInt32();
-                        result.Species.Add((species, amount));
+                        result.Species.Add(new SpeciesCount
+                        {
+                            Species = species,
+                            Count = amount
+                        });
                     }
                     break;
                 case nameof(result.Cultures):
@@ -84,7 +90,11 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
                         var culture = DataContext.Instance.Cultures[cultureName];
                         reader.Read();
                         var amount = reader.GetInt32();
-                        result.Cultures.Add((culture, amount));
+                        result.Cultures.Add(new CultureCount
+                        {
+                            Culture = culture,
+                            Count = amount
+                        });
                     }
                     break;
                 case nameof(result.Property):
@@ -120,13 +130,13 @@ internal class PopJsonConverter : JsonConverter<PopGroup>
         writer.WritePropertyName(nameof(value.Species));
         writer.WriteStartObject();
         foreach (var spec in value.Species)
-            writer.WriteNumber(spec.species.GetName(), spec.amount);
+            writer.WriteNumber(spec.Species.GetName(), spec.Count);
         writer.WriteEndObject();
         // Culture
         writer.WritePropertyName(nameof(value.Cultures));
         writer.WriteStartObject();
         foreach (var spec in value.Cultures)
-            writer.WriteNumber(spec.culture.GetName(), spec.amount);
+            writer.WriteNumber(spec.Culture.GetName(), spec.Count);
         writer.WriteEndObject();
         // Property
         writer.WritePropertyName(nameof(value.Property));

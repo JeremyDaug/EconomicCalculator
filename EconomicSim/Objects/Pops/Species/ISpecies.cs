@@ -53,5 +53,7 @@ namespace EconomicSim.Objects.Pops.Species
         /// Related Species
         /// </summary>
         IReadOnlyList<ISpecies> Relations { get; }
+
+        string GetName();
     }
 }

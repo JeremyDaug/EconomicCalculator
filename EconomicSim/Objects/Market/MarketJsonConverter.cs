@@ -44,6 +44,14 @@ internal class MarketJsonConverter : JsonConverter<Market>
                         .ToDictionary(x => DataContext.Instance.Products[x.Key],
                             x => x.Value);
                     break;
+                case nameof(result.PaymentPreference):
+                    var preferences = JsonSerializer
+                        .Deserialize<Dictionary<string, decimal>>(ref reader, options);
+                    foreach (var preference in preferences)
+                        result.PaymentPreference
+                            .Add(DataContext.Instance.Products[preference.Key],
+                                preference.Value);
+                    break;
                 default:
                     throw new JsonException($"");
             }
@@ -71,6 +79,16 @@ internal class MarketJsonConverter : JsonConverter<Market>
         foreach (var resource in value.Resources)
             writer.WriteNumber(resource.Key.GetName(), resource.Value);
         writer.WriteEndObject();
+        // Payment Preferences
+        if (value.PaymentPreference.Any())
+        {
+            writer.WritePropertyName(nameof(value.PaymentPreference));
+            var temp = value.PaymentPreference
+                .ToDictionary(
+                    x => x.Key.GetName(),
+                    x => x.Value);
+            JsonSerializer.Serialize(writer, temp);
+        }
         
         writer.WriteEndObject();
     }

@@ -8,5 +8,10 @@ public enum DebugFlags
     PopMobilityDisabled = 2,
     RandomMovementDisabled = 4,
     PriceChangedDisabled = 8,
-    SkillChangeDisabled = 16
+    SkillChangeDisabled = 16,
+    NoBarter = 32,
+    NoCash = 64,
+    
+    
+    ExchangeLocked = NoBarter | NoCash,
 }

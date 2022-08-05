@@ -12,6 +12,8 @@ namespace EconomicSim.Objects.Market
     [JsonConverter(typeof(MarketJsonConverter))]
     public class Market : IMarket
     {
+        private IDictionary<IProduct, decimal> _paymentPreference;
+
         public Market()
         {
             Territories = new List<Territory.Territory>();
@@ -19,9 +21,10 @@ namespace EconomicSim.Objects.Market
             Resources = new Dictionary<Product, decimal>();
             Pops = new List<PopGroup>();
             Firms = new List<Firm>();
-            MarketPrices = new Dictionary<Product, decimal>();
-            ProductSold = new Dictionary<Product, decimal>();
+            MarketPrices = new Dictionary<IProduct, decimal>();
+            ProductSold = new Dictionary<IProduct, decimal>();
             ProductOutput = new Dictionary<Product, decimal>();
+            _paymentPreference = new Dictionary<IProduct, decimal>();
         }
 
         /// <summary>
@@ -96,9 +99,9 @@ namespace EconomicSim.Objects.Market
         /// Recalculated on the run each day to allow for more accurate
         /// values rolling forward (values at startup are approximations).
         /// </summary>
-        public Dictionary<Product, decimal> MarketPrices { get; set; }
+        public Dictionary<IProduct, decimal> MarketPrices { get; set; }
         IReadOnlyDictionary<IProduct, decimal> IMarket.MarketPrices
-            => MarketPrices.ToDictionary(
+            => ProductSold.ToDictionary(
                 x => (IProduct)x.Key,
                 x => x.Value);
         
@@ -106,7 +109,7 @@ namespace EconomicSim.Objects.Market
         /// The amount of the product that has been successfully sold on
         /// the market so far. Updated to match daily.
         /// </summary>
-        public Dictionary<Product, decimal> ProductSold { get; set; }
+        public Dictionary<IProduct, decimal> ProductSold { get; set; }
         IReadOnlyDictionary<IProduct, decimal> IMarket.ProductSold
             => ProductSold.ToDictionary(
                 x => (IProduct)x.Key,
@@ -123,6 +126,36 @@ namespace EconomicSim.Objects.Market
                 x => x.Value);
 
         #endregion
+
+        #region SafeAccessors
+
+        public decimal GetMarketPrice(IProduct product)
+        {
+            decimal result = 0;
+            MarketPrices.TryGetValue(product, out result);
+            return result;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Returns the list of products in payment preference order.
+        /// The value is the preference for said product in payment,
+        /// the higher the value the more it is preferred.
+        /// </summary>
+        public IDictionary<IProduct, decimal> PaymentPreference
+        {
+            get {
+                DataContext.Instance.DebugFlags
+                return _paymentPreference;
+            }
+            private set => _paymentPreference = value;
+        }
+
+        /// <summary>
+        /// The list of products which have reached currency status.
+        /// </summary>
+        public IList<IProduct> Currencies { get; set; }
 
         public override string ToString()
         {

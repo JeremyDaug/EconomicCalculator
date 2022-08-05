@@ -67,12 +67,12 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The species that make up this pop.
         /// </summary>
-        IReadOnlyList<(ISpecies species, int amount)> Species { get; }
+        IReadOnlyList<SpeciesCount> Species { get; }
 
         /// <summary>
         /// The cultures that make up this pop.
         /// </summary>
-        IReadOnlyList<(ICulture culture, int amount)> Cultures { get; }
+        IReadOnlyList<CultureCount> Cultures { get; }
 
         /// <summary>
         /// The products desired by this pop.
@@ -83,6 +83,8 @@ namespace EconomicSim.Objects.Pops
         /// The wants desired by this pop.
         /// </summary>
         IReadOnlyList<IWantDesire> Wants { get; }
+        
+        IReadOnlyDictionary<IProduct, decimal> ForSale { get; }
 
         /// <summary>
         /// Gets the hours of the population group

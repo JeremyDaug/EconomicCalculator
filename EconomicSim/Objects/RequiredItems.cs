@@ -1,4 +1,7 @@
-﻿using EconomicSim.Objects.Products;
+﻿using EconomicSim.Objects.Processes;
+using EconomicSim.Objects.Processes.ProcessTags;
+using EconomicSim.Objects.Processes.ProductionTags;
+using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Products.ProductTags;
 using EconomicSim.Objects.Technology;
 using EconomicSim.Objects.Wants;
@@ -9,6 +12,7 @@ namespace EconomicSim.Objects
     {
         private static Dictionary<string, IProduct> _products = new Dictionary<string, IProduct>();
         private static Dictionary<string, IWant> _wants = new Dictionary<string, IWant>();
+        private static Dictionary<string, IProcess> _processes = new Dictionary<string, IProcess>();
 
         public readonly static IWant Land = new Want
         {
@@ -240,6 +244,20 @@ namespace EconomicSim.Objects
             }
         };
         
+        public readonly static IProduct Shopping = new Product
+        {
+            Name = "Shopping",
+            UnitName = "Block",
+            Quality = 0,
+            Bulk = 0,
+            Mass = 0,
+            Fractional = false,
+            ProductTags = new List<(ProductTag tag, Dictionary<string, object>? parameters)>
+            {
+                (ProductTag.Service, null)
+            }
+        };
+
         public static readonly IProduct Nothing = new Product
         {
             Name = "Nothing",
@@ -252,6 +270,70 @@ namespace EconomicSim.Objects
             {
                 (ProductTag.Invariant, null),
                 (ProductTag.Service, null)
+            }
+        };
+
+        public readonly static IProcess ShoppingTime = new Process
+        {
+            Name = "Shopping",
+            VariantName = "Manual",
+            Description = "Shopping is a common habit for those in a market. It allows one to find things they cannot produce.",
+            ProcessProducts = new List<ProcessProduct>
+            {
+                new ProcessProduct
+                {
+                    Product = (Product)Time,
+                    Amount = 1, 
+                    Part = ProcessPartTag.Input
+                },
+                new ProcessProduct
+                {
+                    Product = (Product)Shopping,
+                    Amount = 10, 
+                    Part = ProcessPartTag.Output
+                }
+            },
+            MinimumTime = 0, 
+            Skill = null,
+            ProcessTags = new Dictionary<ProcessTag, Dictionary<string, object>?>
+            {
+                {ProcessTag.Consumption, new Dictionary<string, object>
+                {
+                    {"Product", Time}
+                }}
+            }
+        };
+        
+        public readonly static IProcess RestTime = new Process
+        {
+            Name = "Rest",
+            Description = "Rest is important, but it still takes time.",
+            ProcessProducts = new List<ProcessProduct>
+            {
+                new ProcessProduct
+                {
+                    Product = (Product)Time,
+                    Amount = 1, 
+                    Part = ProcessPartTag.Input
+                }
+            },
+            ProcessWants = new List<ProcessWant>
+            {
+                new ProcessWant
+                {
+                    Want = (Want)Rest,
+                    Amount = 1, 
+                    Part = ProcessPartTag.Output
+                }
+            },
+            MinimumTime = 0, 
+            Skill = null,
+            ProcessTags = new Dictionary<ProcessTag, Dictionary<string, object>?>
+            {
+                {ProcessTag.Consumption, new Dictionary<string, object>
+                {
+                    {"Product", Time}
+                }}
             }
         };
 
@@ -289,9 +371,6 @@ namespace EconomicSim.Objects
                 // if nothing in products populate here.
                 if (_products.Count == 0)
                 {
-                    // Timeblock maybe? Not used,
-                    // as it's a calculation management/limiter, hard coded, not a product to buy/sell (can't be bought/sold)
-
                     // Standard Lands Set
                     // Lands (Wasteland, Marginal, Scrub, Quality, Fertile, Very Fertile)
                     _products[AbstractLand.Name] = AbstractLand;
@@ -303,6 +382,7 @@ namespace EconomicSim.Objects
                     _products[VeryFertileLand.GetName()] = VeryFertileLand;
                     _products[Time.GetName()] = Time;
                     _products[Nothing.GetName()] = Nothing;
+                    _products[Shopping.GetName()] = Shopping;
                 }
 
                 return _products;
@@ -333,6 +413,20 @@ namespace EconomicSim.Objects
                 }
 
                 return _wants;
+            }
+        }
+
+        public static IReadOnlyDictionary<string, IProcess> Processes
+        {
+            get
+            {
+                if (!_processes.Any())
+                {
+                    _processes[ShoppingTime.GetName()] = ShoppingTime;
+                    _processes[RestTime.GetName()] = RestTime;
+                }
+
+                return _processes;
             }
         }
     }

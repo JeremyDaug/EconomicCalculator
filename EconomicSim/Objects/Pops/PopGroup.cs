@@ -18,9 +18,10 @@ namespace EconomicSim.Objects.Pops
     {
         public PopGroup()
         {
-            Property = new Dictionary<Product, decimal>();
-            Species = new List<(Species.Species species, int amount)>();
-            Cultures = new List<(Culture.Culture culture, int amount)>();
+            Property = new Dictionary<IProduct, decimal>();
+            Species = new List<SpeciesCount>();
+            Cultures = new List<CultureCount>();
+            ForSale = new Dictionary<IProduct, decimal>();
         }
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The property the population Owns.
         /// </summary>
-        public Dictionary<Product, decimal> Property { get; set; }
+        public Dictionary<IProduct, decimal> Property { get; set; }
 
         IReadOnlyDictionary<IProduct, decimal> IPopGroup.Property
             => Property.ToDictionary(x => (IProduct)x.Key,
@@ -85,16 +86,18 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The Species that makes up the pop.
         /// </summary>
-        public List<(Species.Species species, int amount)> Species { get; set; }
-        IReadOnlyList<(ISpecies species, int amount)> IPopGroup.Species
-            => Species.Select(x => ((ISpecies) x.species, x.amount)).ToList();
+        public List<SpeciesCount> Species { get; set; }
+
+        IReadOnlyList<SpeciesCount> IPopGroup.Species
+            => Species;
 
         /// <summary>
         /// The cultures which make up in the Pop.
         /// </summary>
-        public List<(Culture.Culture culture, int amount)> Cultures { get; set; }
-        IReadOnlyList<(ICulture culture, int amount)> IPopGroup.Cultures 
-            => Cultures.Select(x => ((ICulture)x.culture, x.amount)).ToList();
+        public List<CultureCount> Cultures { get; set; }
+
+        IReadOnlyList<CultureCount> IPopGroup.Cultures
+            => Cultures;
         
         /// <summary>
         /// The products desired by the pop every day.
@@ -102,53 +105,54 @@ namespace EconomicSim.Objects.Pops
         public IReadOnlyList<INeedDesire> Needs
         {
             get
-            {
-                /*var result = new List<(IProduct product, DesireTier tier, decimal amount)>();
+            { // TODO make this more flexible, less sucky, and not rebuild it every time it's called.
+                var result = new List<INeedDesire>();
 
-                // for each species
-                foreach (var spe in Species)
+                foreach (var species in Species)
                 {
-                    // go through their needs
-                    foreach (var need in spe.species.Needs)
+                    foreach (var desire in species.Species.Needs)
                     {
-                        // if it's already in the list, add to that
-                        var existing = result
-                            .SingleOrDefault(x => x.product.Id == need.Product.Id &&
-                                                  x.tier == need.Tier);
-
-                        if (!existing.Equals(default))
-                        {
-                            existing.amount += spe.amount * need.Amount;
+                        // check if the desire has already been added.
+                        var extant = result.SingleOrDefault(x => x.Product == desire.Product && 
+                                                                 x.Tier == desire.Tier);
+                        if (extant == null)
+                        { // if is hasn't, add it and set extant.
+                            extant = new NeedDesire
+                            {
+                                Product = desire.Product,
+                                Amount = 0,
+                                Tier = desire.Tier
+                            };
+                            result.Add(extant);
                         }
-                        else
-                        { // else add it to the list.
-                            result.Add((need.Product, tier: need.Tier, need.Amount * spe.amount));
-                        }
+                        // then update the amount
+                        extant.Amount += desire.Amount;
                     }
                 }
-
-                // for each culture
-                foreach (var culture in cultures)
+                // do the same with Culture desires
+                foreach (var culture in Cultures)
                 {
-                    // go through their needs
-                    foreach (var need in culture.culture.Needs)
+                    foreach (var desire in culture.Culture.Needs)
                     {
-                        var existing = result
-                            .SingleOrDefault(x => x.product.Id == need.product.Id &&
-                                                  x.tier == need.tier);
-                        if (!existing.Equals(default))
-                        {
-                            existing.amount += culture.amount * need.amount;
+                        // check if the desire has already been added.
+                        var extant = result.SingleOrDefault(x => x.Product == desire.Product && 
+                                                                 x.Tier == desire.Tier);
+                        if (extant == null)
+                        { // if is hasn't, add it and set extant.
+                            extant = new NeedDesire
+                            {
+                                Product = desire.Product,
+                                Amount = 0,
+                                Tier = desire.Tier
+                            };
+                            result.Add(extant);
                         }
-                        else
-                        {
-                            result.Add((need.product, need.tier, need.amount * culture.amount));
-                        }
+                        // then update the amount
+                        extant.Amount += desire.Amount;
                     }
                 }
-
-                return result;*/
-                throw new NotImplementedException();
+                
+                return result;
             }
         }
 
@@ -159,52 +163,54 @@ namespace EconomicSim.Objects.Pops
         {
             get
             {
-                /* var result = new List<(IWant want, DesireTier tier, decimal amount)>();
+                // TODO make this more flexible, less sucky, and not rebuild it every time it's called.
+                var result = new List<IWantDesire>();
 
-                // for each species
-                foreach (var spe in Species)
+                foreach (var species in Species)
                 {
-                    // go through their needs
-                    foreach (var want in spe.species.Wants)
+                    foreach (var desire in species.Species.Wants)
                     {
-                        // if it's already in the list, add to that
-                        var existing = result
-                            .SingleOrDefault(x => x.want.Id == want.Want.Id &&
-                                                  x.tier == want.Tier);
-
-                        if (!existing.Equals(default))
-                        {
-                            existing.amount += spe.amount * want.Amount;
+                        // check if the desire has already been added.
+                        var extant = result.SingleOrDefault(x => x.Want == desire.Want && 
+                                                                 x.Tier == desire.Tier);
+                        if (extant == null)
+                        { // if is hasn't, add it and set extant.
+                            extant = new WantDesire
+                            {
+                                Want = desire.Want,
+                                Amount = 0,
+                                Tier = desire.Tier
+                            };
+                            result.Add(extant);
                         }
-                        else
-                        { // else add it to the list.
-                            result.Add((want: want.Want, tier: want.Tier, want.Amount * spe.amount));
-                        }
+                        // then update the amount
+                        extant.Amount += desire.Amount;
                     }
                 }
-
-                // for each culture
-                foreach (var culture in cultures)
+                // do the same with Culture desires
+                foreach (var culture in Cultures)
                 {
-                    // go through their needs
-                    foreach (var wants in culture.culture.Wants)
+                    foreach (var desire in culture.Culture.Wants)
                     {
-                        var existing = result
-                            .SingleOrDefault(x => x.want.Id == wants.want.Id &&
-                                                  x.tier == wants.tier);
-                        if (!existing.Equals(default))
-                        {
-                            existing.amount += culture.amount * wants.amount;
+                        // check if the desire has already been added.
+                        var extant = result.SingleOrDefault(x => x.Want == desire.Want && 
+                                                                 x.Tier == desire.Tier);
+                        if (extant == null)
+                        { // if is hasn't, add it and set extant.
+                            extant = new WantDesire
+                            {
+                                Want = desire.Want,
+                                Amount = 0,
+                                Tier = desire.Tier
+                            };
+                            result.Add(extant);
                         }
-                        else
-                        {
-                            result.Add((wants.want, wants.tier, wants.amount * culture.amount));
-                        }
+                        // then update the amount
+                        extant.Amount += desire.Amount;
                     }
                 }
-
-                return result;*/
-                throw new NotImplementedException();
+                
+                return result;
             }
         }
 
@@ -218,5 +224,186 @@ namespace EconomicSim.Objects.Pops
             // TODO make this more flexible and use available productivity based on the population's details (species, culture, etc).
             return Count * 16;
         }
+
+        private Dictionary<IProduct, decimal> ForSale { get; set; }
+        IReadOnlyDictionary<IProduct, decimal> IPopGroup.ForSale => ForSale;
+
+        #region SafeProductExchange
+
+        /// <summary>
+        /// Gives all of an available product that a pop is willing to give.
+        /// </summary>
+        /// <param name="product">The product to give</param>
+        /// <returns>the product and how much to give.</returns>
+        public Dictionary<IProduct, decimal> GetAvailableProduct(Product product)
+        {
+            var result = new Dictionary<IProduct, decimal>();
+            
+            if (Property.ContainsKey(product) && ForSale.ContainsKey(product))
+            { // if the pop owns the product requested and it's for sale
+                // get whatever is for sale
+                result.Add(product, ForSale[product]);
+                // and remove what was lost from both sale and property
+                Property[product] -= ForSale[product];
+                ForSale.Remove(product);
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// Requests a product from the pop and gives either the requested amount, or the
+        /// amount available, whichever is higher.
+        /// </summary>
+        /// <param name="product">The product requested</param>
+        /// <param name="amount">The amount requisted.</param>
+        /// <returns></returns>
+        public Dictionary<IProduct, decimal> GetRequestedProduct(IProduct product, decimal amount)
+        {
+            var result = new Dictionary<IProduct, decimal>();
+            
+            if (Property.ContainsKey(product) && ForSale.ContainsKey(product))
+            { // if the pop owns the product requested and it's for sale
+                // get the minimum between amount requested and amount for sale
+                var val = Math.Min(amount, ForSale[product]);
+                // get whatever is for sale
+                result.Add(product, val);
+                // and remove what was lost from both sale and property
+                Property[product] -= val;
+                ForSale[product] -= val;
+                if (ForSale[product] == 0)
+                    ForSale.Remove(product);
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// Takes product from the pop up to the maximum they have.
+        /// </summary>
+        /// <param name="product">The product being taken.</param>
+        /// <param name="amount">The amount being taken</param>
+        /// <returns></returns>
+        public Dictionary<IProduct, decimal> TakeProduct(Product product, decimal amount)
+        {
+            var result = new Dictionary<IProduct, decimal>();
+            
+            if (Property.ContainsKey(product))
+            { // if the pop owns the product requested
+                // get the minimum between amount requested and amount available
+                var val = Math.Min(amount, Property[product]);
+                // get whatever is available
+                result.Add(product, val);
+                // and remove what was lost from both sale and property
+                Property[product] -= val;
+                if (ForSale.ContainsKey(product))
+                { // also remove it from sale
+                    ForSale[product] -= amount;
+                    if (ForSale[product] <= 0) // if no sale is left, remove it entirely.
+                        ForSale.Remove(product);
+                }
+            }
+            
+            return result;
+        }
+
+        // these functions may lead to 
+        #region UnsafeExchange
+
+        /// <summary>
+        /// Gives the pop a specified amount of product.
+        /// </summary>
+        /// <param name="product"></param>
+        /// <param name="amount"></param>
+        /// <remarks>May lead to spontaneous product generation.</remarks>
+        public void AcquireProduct(Product product, decimal amount)
+        {
+            if (Property.ContainsKey(product))
+                Property[product] += amount;
+            else
+                Property[product] = amount;
+        }
+
+        #endregion
+
+        #endregion
+        
+        #region ReserveItems
+
+        /// <summary>
+        /// Reserves items before anything happens during the day.
+        /// Prioritization logic is TBD, so currently it reserves 2 hours of time.
+        /// </summary>
+        public async Task ReserveItems()
+        {
+            var dc = DataContext.Instance;
+            // preemptively, if Shopping target is set to 0, then 
+            if (ShoppingTarget == 0)
+                ShoppingTarget = Needs.Count + Wants.Count;
+            
+            // get wants and need locally just to be sure that it's not getting them
+            // over and over again 
+            var wants = Wants;
+            // var needs = Needs; Not needed here, but may be in future iteration.
+
+            // if rest is included as a level 0 value, set the target value.
+            if (wants.Any(x => x.Want == dc.Rest && x.Tier == 0))
+                RestTarget = wants.Single(x => x.Want == dc.Rest).Amount;
+            
+            // calculate estimated time for shopping.
+            // if shopping time is too low, add some relative to total desires
+            if (ShoppingTarget <= 0)
+                ShoppingTarget = Wants.Count + Needs.Count;
+            else
+            { // if a time has been set, do a rough calculation on how much time
+                var used = ShoppingResults / ShoppingTarget;
+
+                if (used >= 1) // if maxed, more time is likely needed. Be generous for now.
+                    ShoppingResults += 5;
+                // If between 0.9 and 1, don't change anything.
+                else if (used < 0.9m) // for every 10 points below 0.9 reduce by 1.
+                {
+                    var downCorrection = Math.Floor((1 - used) * 10);
+                    ShoppingResults -= downCorrection;
+                }
+            }
+            
+            // rest time and shopping time has been reserved,
+            // add it to the 'for sale' block so firms can 'buy' it.
+            var timeReserved = ShoppingTarget / 10 + RestTarget / 2;
+            ForSale.Add(dc.Time, GetTotalHours() - timeReserved);
+        }
+
+        /// <summary>
+        /// An estimate of how much time the population is giving to
+        /// shopping. (defaults to the number of desires the pop has).
+        /// </summary>
+        private decimal ShoppingTarget;
+
+        /// <summary>
+        /// How much of the prior shopping target was used the previous day.
+        /// If all of it was used, then the target should be increased, if
+        /// it's within a margin of error, don't change, if it's below
+        /// the margin of error, reduce the target. (allow for 10% error for now)
+        /// </summary>
+        private decimal ShoppingResults;
+
+        /// <summary>
+        /// The estimate of how much value the pop gives to rest per unit.
+        /// </summary>
+        private decimal RestValue;
+
+        /// <summary>
+        /// The target amount of rest the pop is hoping to get.
+        /// They will not accept less than half of this value,
+        /// they will use their rest value to try and 'buy' more.
+        /// they will accept up to 1.5s more than this, but will
+        /// find alternatives beyond that point.
+        /// If -1 then it will ignore this value entirely,
+        /// treating it like any other product with value.
+        /// </summary>
+        private decimal RestTarget;
+
+        #endregion
     }
 }

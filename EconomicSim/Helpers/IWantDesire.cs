@@ -19,5 +19,11 @@ public interface IWantDesire
     /// <summary>
     /// The amount requested
     /// </summary>
-    decimal Amount { get; }
+    decimal Amount { get; set; }
+    
+    /// <summary>
+    /// How much of the Desire has been satisfied so far. Resets before daily consumption
+    /// for record purposes. Not Stored in JSon.
+    /// </summary>
+    decimal Satisfaction { get; set; }
 }

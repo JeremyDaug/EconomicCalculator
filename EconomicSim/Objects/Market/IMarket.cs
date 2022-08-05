@@ -86,6 +86,12 @@ namespace EconomicSim.Objects.Market
         IReadOnlyDictionary<IProduct, decimal> ProductOutput { get; }
 
         #endregion
+        
+        #region SafeAccessors
+
+        decimal GetMarketPrice(IProduct product);
+
+        #endregion
 
         #region DebugAndInfoLogging
 
