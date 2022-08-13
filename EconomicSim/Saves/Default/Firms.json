@@ -8,7 +8,7 @@
       {
         "Job": "Ambrosia Subsistence Farmer",
         "WageType": "LossSharing",
-        "Wage": 5,
+        "Wage": 0,
         "Assignments": {
           "Ambrosia Hunting": 0,
           "Hut Construction": 0,
@@ -20,7 +20,8 @@
     ],
     "Products": {
       "Ambrosia Fruit": 1,
-      "Baking": 5
+      "Hut": 20,
+      "Simple Construction" : 5
     },
     "Resources": {
       "Ambrosia Fruit": 1

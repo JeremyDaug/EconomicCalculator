@@ -2,6 +2,7 @@
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Technology;
+using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Firms
 {
@@ -13,6 +14,7 @@ namespace EconomicSim.Objects.Firms
     {
         public Firm()
         {
+            _remnantWants = new Dictionary<IWant, decimal>();
             Regions = new List<Market.Market>();
             Resources = new Dictionary<IProduct, decimal>();
             Products = new Dictionary<Product, decimal>();
@@ -105,7 +107,16 @@ namespace EconomicSim.Objects.Firms
 
         #region AssistantData
 
-        
+        /// <summary>
+        /// Wants left over by processes. Cleared at the end of each day.
+        /// </summary>
+        private readonly Dictionary<IWant, decimal> _remnantWants;
+
+        /// <summary>
+        /// The products used as capital and unable to be used elsewhere again today.
+        /// drawn from for maintenance phase. 
+        /// </summary>
+        private readonly Dictionary<IProduct, decimal> _expendedProducts = new();
 
         #endregion
 
@@ -119,54 +130,148 @@ namespace EconomicSim.Objects.Firms
                 var targetTime = job.ConsumedTime();
                 var timeReceived = new Dictionary<IProduct, decimal>();
                 
-                if (job.WageType == WageType.LossSharing ||
-                    job.WageType == WageType.ProfitSharing ||
-                    job.WageType == WageType.Slave ||
-                    job.WageType == WageType.Productivity)
+                if (OwnershipStructure == OwnershipStructure.SelfEmployed)
+                { // if self-employed, the wage type doesn't actually matter.
+                    if (dc.DebugMode && Jobs.Count != 1) // TODO replace this with preprocessor if?
+                    { // sanity check in debug that the self-employed firm has only one job.
+                        if (Jobs.Count != 1)
+                            throw new InvalidDataException("Self-Employed Firms can only have 1 job.");
+                        if (FirmRank != FirmRank.Firm)
+                            throw new InvalidDataException("Self-Employed Firms can only be of rank 'Firm'.");
+                    }
+                    while (job.Pop.Property.Any())
+                    { // move all property from the pop to the firm.
+                        var pair = job.Pop.Property.First();
+                        if (Resources.ContainsKey(pair.Key))
+                            Resources[pair.Key] += pair.Value;
+                        else
+                            Resources[pair.Key] = pair.Value;
+                        job.Pop.Property.Remove(pair.Key);
+                    } // Wants do not get stored between days, so do not need to be moved.
+                }
+                else if (job.WageType == WageType.LossSharing)
+                { // loss sharing transfers any losses from the firm to the pop, so give the firm everything.
+                    while (job.Pop.Property.Any())
+                    { // move all property from the pop to the firm.
+                        var pair = job.Pop.Property.First();
+                        if (Resources.ContainsKey(pair.Key))
+                            Resources[pair.Key] += pair.Value;
+                        else
+                            Resources[pair.Key] = pair.Value;
+                        job.Pop.Property.Remove(pair.Key);
+                    } // Wants do not get stored between days, so do not need to be moved.
+                }
+                else if (job.WageType == WageType.ProfitSharing ||
+                         job.WageType == WageType.Slave ||
+                         job.WageType == WageType.Productivity)
                 { 
-                    // Profit/Loss sharing get paid out of profits after everything
+                    // Profit sharing get paid out of profits after everything
                     // is done
                     // Productivity is paid later based on total production.
                     // Slaves are not paid at all, merely given stuff as though they were
                     // expenditures.
                     // just get the time from them first, ask nicely (for now)
-                    timeReceived
-                        = job.Pop.GetRequestedProduct(dc.Time, targetTime);
+                    Resources[dc.Time] = job.Pop.GetRequestedProduct(dc.Time, targetTime)[dc.Time];
                 }
                 else if (job.WageType == WageType.Salary)
                 { // Salary workers are paid the same amount regardless of time bought.
-                    // get time from them
-                    timeReceived
-                        = job.Pop.GetRequestedProduct(dc.Time, targetTime);
-                    // from the amount expected to pay them, get what you'll send them
-                    var payment = GetAmount(job.Wage);
-                    // then pay them for their time, regardless of how much is received.
-
+                    // The pay is flat regardless of time received.
                 }
                 else
                 {// Daily, Contract have their time purchased.
                     // buy time from them by the unit.
                 }
-            }
-        }
 
-        public Dictionary<IProduct, decimal> GetAmount(decimal value)
+                // get the processes in the most useful order
+                var assignmentOrder = job.AssignmentsInOrder();
+                
+                // go through the assignments in order so that the lower
+                // levels feed into higher levels
+                foreach (var step in assignmentOrder)
+                {
+                    foreach (var proc in step)
+                    { // attempt to do each process to the maximum capabilities.
+                        if (job.Assignments[proc].Iterations == 0)
+                            continue; // if no iterations are required for the process, skip.
+                        (int successes,
+                            decimal progress,
+                            Dictionary<IProduct, decimal> productChange,
+                            Dictionary<IProduct, decimal> productUsed,
+                            Dictionary<IWant, decimal> wantsChange) 
+                            outcome
+                                = proc.DoProcess(job.Assignments[proc].Iterations,
+                                    job.Assignments[proc].Progress, Resources, _remnantWants);
+                        // if nothing was done, skip over the remainder.
+                        if (outcome.successes == 0 && outcome.progress == 0)
+                            continue;
+                        // update the progress
+                        job.Assignments[proc].Progress = outcome.progress;
+                        // update the change in products
+                        foreach (var (key, val) in outcome.productChange)
+                        {
+                            if (Resources.ContainsKey(key))
+                                Resources[key] += val;
+                            else
+                                Resources[key] = val;
+                        }
+                        // move used products to expended items
+                        foreach (var (key, val) in outcome.productUsed)
+                        {
+                            // since capital must exist to be used, we can guarantee it
+                            // is in resources
+                            Resources[key] -= val;
+                            if (_expendedProducts.ContainsKey(key))
+                                _expendedProducts[key] += val;
+                            else
+                                _expendedProducts[key] = val;
+                        }
+                        // change wants appropriately.
+                        foreach (var (key, val) in outcome.wantsChange)
+                        {
+                            if (_remnantWants.ContainsKey(key))
+                                _remnantWants[key] += val;
+                            else
+                                _remnantWants[key] = val;
+                        }
+                    } // move on to next process
+                } // go to the next set of processes to do in this job.
+            } // move on to the next job
+            
+            // we have gone through each job, ran through each process, and done what 
+            // needed to be done for each 
+        }
+        
+        /// <summary>
+        /// Gets change for a targeted abstract value.
+        /// Assumes standard market value and priority.
+        /// Does not remove from the firm.
+        /// </summary>
+        /// <param name="value">The abstract value to target.</param>
+        /// <returns></returns>
+        public Dictionary<IProduct, decimal> GetProductEquivalent(IProduct product, decimal value)
         {
             var result = new Dictionary<IProduct, decimal>();
-            
-            
-            
-            // get payment methods which the firm has access to
-            // order them by preference * market value
-            var payPreference = HeadQuarters.PaymentPreference
-                .Where(x => Resources.ContainsKey(x.Key))
-                .OrderByDescending(x =>
-                    x.Value * HeadQuarters.GetMarketPrice(x.Key));
+            // TODO this function.
+            // get market prices for the product in question
+            // get product equivalent to the abstract value given.
 
-            foreach (var pref in payPreference)
-            { // for each payment preference, collect the value to the best of your ability
-                
-            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets change for a targeted abstract value.
+        /// Assumes standard market value and priority.
+        /// Does not remove from the firm's stocks.
+        /// </summary>
+        /// <param name="value">The abstract value to target.</param>
+        /// <returns></returns>
+        public Dictionary<IProduct, decimal> GetChange(decimal value)
+        {
+            var result = new Dictionary<IProduct, decimal>();
+            // TODO this function.
+            // get market prices for the firm's available resources
+            // prioritize those items which are seen as more desirable as currency
+            // then do a standard change function to approximate the returns 
 
             return result;
         }

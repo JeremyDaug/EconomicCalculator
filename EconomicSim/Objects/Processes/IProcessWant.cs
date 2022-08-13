@@ -29,5 +29,12 @@ namespace EconomicSim.Objects.Processes
         /// The Part of the process it belongs to.
         /// </summary>
         ProcessPartTag Part { get; }
+
+        /// <summary>
+        /// Checks if the Process Want contains the selected tag.
+        /// </summary>
+        /// <param name="tag">The tag to search for.</param>
+        /// <returns>True if found, false otherwise.</returns>
+        bool ContainsTag(ProductionTag tag);
     }
 }

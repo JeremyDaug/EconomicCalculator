@@ -43,6 +43,10 @@ internal class FirmJobJsonConverter : JsonConverter<FirmJob>
                         dictionary.Add((IProcess) DataContext.Instance.Processes[assignment.Key], new AssignmentInfo(assignment.Value, 0));
                     result.Assignments = dictionary;
                     break;
+                case nameof(result.WageUnit):
+                    var product = reader.GetString();
+                    result.WageUnit = DataContext.Instance.Products[product];
+                    break;
                 default:
                     throw new JsonException();
             }
@@ -57,6 +61,8 @@ internal class FirmJobJsonConverter : JsonConverter<FirmJob>
         writer.WriteString(nameof(value.Job), value.Job.GetName());
         writer.WriteString(nameof(value.WageType), value.WageType.ToString());
         writer.WriteNumber(nameof(value.Wage), value.Wage);
+        if (value.WageUnit != null)
+            writer.WriteString(nameof(value.WageUnit), value.WageUnit.GetName());
 
         if (value.Assignments.Any())
         {

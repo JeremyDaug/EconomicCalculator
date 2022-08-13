@@ -8,8 +8,10 @@
         /// <summary>
         /// Optional(Bonus)
         /// For Inputs or capital only. This is optional, and it's inclusion
-        /// increases throughput for the process. # is the amount it increases
-        /// per unit of input. The amount requested is the maximum it can accept
+        /// increases throughput for the process.
+        /// # is the throughput increase multiplier per unit of input.
+        /// Values should be Positive, values less than 1 preferred, but not required.
+        /// The amount requested is the maximum it can accept
         /// at normal throughput.
         /// The amount requested does scale with other throughput increases.
         /// Optional goods use their own consumption process and do not need

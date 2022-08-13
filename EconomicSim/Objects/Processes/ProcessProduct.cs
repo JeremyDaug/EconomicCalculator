@@ -30,6 +30,7 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         public decimal Amount { get; set; }
 
+        // TODO update this to use a class instead of a list for more ease.
         /// <summary>
         /// The Tags and respective data they need.
         /// </summary>
@@ -40,5 +41,15 @@ namespace EconomicSim.Objects.Processes
         /// The part it belongs to.
         /// </summary>
         public ProcessPartTag Part { get; set; }
+
+        /// <summary>
+        /// Checks if the Process Product contains the selected tag.
+        /// </summary>
+        /// <param name="tag">The tag to search for.</param>
+        /// <returns>True if found, false otherwise.</returns>
+        public bool ContainsTag(ProductionTag tag)
+        {
+            return TagData.Any(x => x.tag == tag);
+        }
     }
 }

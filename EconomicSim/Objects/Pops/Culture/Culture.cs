@@ -9,6 +9,13 @@ namespace EconomicSim.Objects.Pops.Culture
     [JsonConverter(typeof(CultureJsonConverter))]
     public class Culture : ICulture
     {
+        public Culture()
+        {
+            Needs = new List<NeedDesire>();
+            Wants = new List<WantDesire>();
+            Tags = new List<TagData<CultureTag>>();
+        }
+        
         /// <summary>
         /// The Culture's Id.
         /// </summary>

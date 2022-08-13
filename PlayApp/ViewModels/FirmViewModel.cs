@@ -84,7 +84,7 @@ public class FirmViewModel : ViewModelBase
         }
         foreach (var option in dc.Products.Values
                      .Where(x => x.ProductTags.All(y => y.tag != ProductTag.Currency))
-                     .Where(x => original.HeadQuarters.GetMarketPrice.ContainsKey(x)))
+                     .Where(x => original.HeadQuarters.MarketPrices.ContainsKey(x)))
         {
             PricingOptions.Add(option.GetName());
         }
@@ -280,7 +280,7 @@ public class FirmViewModel : ViewModelBase
     private void updatePrices()
     {
         // get average market prices
-        var MarketPrices = original.HeadQuarters.GetMarketPrice;
+        var MarketPrices = original.HeadQuarters.MarketPrices;
         var unitProduct = dc.Products[PricingUnit];
         if (!MarketPrices.ContainsKey(unitProduct))
             return; // if it doesn't have a price don't calculate.

@@ -482,7 +482,26 @@ public class ProcessEditorViewModel : ViewModelBase
                     { "Product", dc.Products[SelectedProduct] }
                 });
             if (Chance)
-                oldProc.ProcessTags.Add(ProcessTag.Chance, null);
+            { // TODO check this out later
+                var parameters = new Dictionary<string, object>
+                {
+                    {"Total", 0},
+                    {"Outcomes", 0}
+                };
+                var outcomes = new HashSet<char>();
+                foreach (var part in OutputProducts
+                             .Where(x => 
+                                 x.Tags.Any(y => y.tag == ProductionTag.Chance)))
+                {
+                    var tag = part.Tags.Single(x => x.tag == ProductionTag.Chance);
+                    parameters["Total"] = (uint) tag.parameters["Weight"] + (uint) parameters["Total"];
+                    outcomes.Add((char) tag.parameters["Group"]);
+                }
+
+                parameters["Outcomes"] = outcomes.Count;
+                
+                oldProc.ProcessTags.Add(ProcessTag.Chance, parameters);
+            }
             if (Crop)
                 oldProc.ProcessTags.Add(ProcessTag.Crop, null);
             if (Mine)
@@ -703,7 +722,25 @@ public class ProcessEditorViewModel : ViewModelBase
                     { "Product", dc.Products[SelectedProduct] }
                 });
             if (Chance)
-                newProcess.ProcessTags.Add(ProcessTag.Chance, null);
+            { // TODO check this out later
+                var parameters = new Dictionary<string, object>
+                {
+                    {"Total", 0},
+                    {"Outcomes", 0}
+                };
+                var outcomes = new HashSet<char>();
+                foreach (var part in OutputProducts
+                             .Where(x => 
+                                 x.Tags.Any(y => y.tag == ProductionTag.Chance)))
+                {
+                    var tag = part.Tags.Single(x => x.tag == ProductionTag.Chance);
+                    parameters["Total"] = (uint) tag.parameters["Weight"] + (uint) parameters["Total"];
+                    outcomes.Add((char) tag.parameters["Group"]);
+                }
+                parameters["Outcomes"] = outcomes.Count;
+                
+                newProcess.ProcessTags.Add(ProcessTag.Chance, parameters);
+            }
             if (Crop)
                 newProcess.ProcessTags.Add(ProcessTag.Crop, null);
             if (Mine)

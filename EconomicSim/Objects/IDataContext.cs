@@ -32,6 +32,8 @@ namespace EconomicSim.Objects
         SortedList<string, Species> Species { get; }
         
         SortedList<string, Process> Processes { get; }
+        
+        SortedList<string, IProcessNode> ProcessNodes { get; }
 
         SortedList<string, Product> Products { get; }
 

@@ -67,6 +67,7 @@ public class ObserverModeEntryViewModel : ViewModelBase
         SelectionOptions = new ObservableCollection<string>();
         View = ReactiveCommand.Create(_view);
         Save = ReactiveCommand.Create(_saveGame);
+        RunDay = ReactiveCommand.Create(_runDay);
 
         // TODO set this back to dc.DebugMode later.
         // IsDebugModeActive = dc.DebugMode;

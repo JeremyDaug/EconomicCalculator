@@ -89,6 +89,12 @@ namespace EconomicSim.Objects.Market
         
         #region SafeAccessors
 
+        /// <summary>
+        /// Gets the market prices of a product.
+        /// If it currently doesn't exist, then it defaults to 1.
+        /// </summary>
+        /// <param name="product">The product to get</param>
+        /// <returns></returns>
         decimal GetMarketPrice(IProduct product);
 
         #endregion

@@ -66,6 +66,7 @@ namespace EconomicSim.Objects
             SkillGroups = new SortedList<string, SkillGroup>();
             Skills = new SortedList<string, Skill>();
             Processes = new SortedList<string, Process>();
+            ProcessNodes = new SortedList<string, IProcessNode>();
             Jobs = new SortedList<string, Job>();
             Species = new SortedList<string, Species>();
             Cultures = new SortedList<string, Culture>();
@@ -614,6 +615,14 @@ namespace EconomicSim.Objects
                 }
             }
             
+            // connect up all of the processes in the process node network.
+            // or is it a tree?
+            foreach (var process in Processes.Values)
+            {
+                var node = new ProcessNode(process);
+                ProcessNodes.Add(node.ToString(), node);
+            }
+            
             if (errors.Any())
                 throw new DataException("Duplicate Processes Found:\n" + string.Join('\n', errors));
         }
@@ -1070,6 +1079,8 @@ namespace EconomicSim.Objects
         public SortedList<string, Skill> Skills { get; set; }
 
         public SortedList<string, Process> Processes { get; set; }
+        
+        public SortedList<string, IProcessNode> ProcessNodes { get; set; }
 
         public SortedList<string, Job> Jobs { get; set; }
 

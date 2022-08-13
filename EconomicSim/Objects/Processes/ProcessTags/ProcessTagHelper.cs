@@ -22,6 +22,10 @@ public static class ProcessTagHelper
             case ProcessTag.Maintenance:
                 result["Product"] = DataContext.Instance.Products[data["Product"]];
                 break;
+            case ProcessTag.Chance:
+                result["Total"] = int.Parse(data["Total"]);
+                result["Outcomes"] = int.Parse(data["Outcomes"]);
+                break;
         }
         
         return result;

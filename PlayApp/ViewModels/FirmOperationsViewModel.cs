@@ -47,7 +47,7 @@ public class FirmOperationsViewModel : ViewModelBase
         // everything else last  TODO make this toggleable somewhere, like a config.
         foreach (var product in dc.Products.Values
                      .Where(x => !PricingUnitOptions.Contains(x.GetName()))
-                     .Where(x => parent.HeadQuarters.GetMarketPrice.ContainsKey(x))
+                     .Where(x => parent.HeadQuarters.MarketPrices.ContainsKey(x))
                      .Select(x => x.GetName()))
         {
             PricingUnitOptions.Add(product);
@@ -129,9 +129,9 @@ public class FirmOperationsViewModel : ViewModelBase
             if (dc.Products.ContainsKey(row.Item))
             { // if the item in the row is a product.
                 var prod = dc.Products[row.Item];
-                if (parent.HeadQuarters.GetMarketPrice.ContainsKey(prod))
+                if (parent.HeadQuarters.MarketPrices.ContainsKey(prod))
                 { // and the product has a price, then update the price to the market price.
-                    row.Price = parent.HeadQuarters.GetMarketPrice[prod] / parent.HeadQuarters.GetMarketPrice[pricer];
+                    row.Price = parent.HeadQuarters.MarketPrices[prod] / parent.HeadQuarters.MarketPrices[pricer];
                 }
             }
         }
@@ -237,8 +237,8 @@ public class FirmOperationsViewModel : ViewModelBase
         {
             // go through all existing resources, add them, and project the changes expected.
             var item = new CapStockAndSum(stock.Key.GetName(), stock: stock.Value);
-            if (parent.HeadQuarters.GetMarketPrice.ContainsKey(stock.Key))
-                item.Price = parent.HeadQuarters.GetMarketPrice[stock.Key];
+            if (parent.HeadQuarters.MarketPrices.ContainsKey(stock.Key))
+                item.Price = parent.HeadQuarters.MarketPrices[stock.Key];
             CapitalAndStock.Add(item);
         }
 

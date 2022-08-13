@@ -129,9 +129,15 @@ namespace EconomicSim.Objects.Market
 
         #region SafeAccessors
 
+        /// <summary>
+        /// Gets the market prices of a product.
+        /// If it currently doesn't exist, then it defaults to 1.
+        /// </summary>
+        /// <param name="product">The product to get</param>
+        /// <returns></returns>
         public decimal GetMarketPrice(IProduct product)
         {
-            decimal result = 0;
+            decimal result = 1;
             MarketPrices.TryGetValue(product, out result);
             return result;
         }
@@ -145,10 +151,7 @@ namespace EconomicSim.Objects.Market
         /// </summary>
         public IDictionary<IProduct, decimal> PaymentPreference
         {
-            get {
-                DataContext.Instance.DebugFlags
-                return _paymentPreference;
-            }
+            get => _paymentPreference;
             private set => _paymentPreference = value;
         }
 
