@@ -144,6 +144,19 @@ namespace EconomicSim.Objects.Market
 
         #endregion
 
+        #region SellerPhase
+
+        public void AddSeller(ICanSell seller)
+        {
+            // check that we actually need to add the seller in the first place.
+            if (!seller.IsSelling)
+                return;
+            
+            // go through what they sell and add them to the appropriate lists for those items.
+        }
+
+        #endregion
+
         /// <summary>
         /// Returns the list of products in payment preference order.
         /// The value is the preference for said product in payment,

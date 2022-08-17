@@ -11,7 +11,7 @@ using EconomicSim.Objects.Skills;
 namespace EconomicSim.Objects.Pops
 {
     [JsonConverter(typeof(PopJsonConverter))]
-    public interface IPopGroup
+    public interface IPopGroup : ICanSell
     {
         /// <summary>
         /// Pop Id

@@ -56,5 +56,7 @@ namespace EconomicSim.Objects.Jobs
         IReadOnlyDictionary<Want, decimal> OutputWants { get; }
 
         void Refresh();
+
+        string GetName();
     }
 }

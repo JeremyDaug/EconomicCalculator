@@ -12,13 +12,12 @@ namespace EconomicSim.Objects.Firms;
 public class FirmJob : IFirmJob
 {
     private List<List<IProcess>>? _assignmentsInOrder;
-
     public FirmJob()
     {
         Assignments = new Dictionary<IProcess, IAssignmentInfo>();
     }
     
-    public Job Job { get; set; }
+    public IJob Job { get; set; }
     IJob IFirmJob.Job => Job;
     public WageType WageType { get; set; }
     
@@ -148,6 +147,52 @@ public class FirmJob : IFirmJob
 
         _assignmentsInOrder = result;
         
+        return result;
+    }
+    
+    /// <summary>
+    /// Gets the (current) input requirements of the job.
+    /// </summary>
+    /// <returns>All products desired as inputs and their amount.</returns>
+    /// <remarks>If called many times before changing, saving the info may be useful.</remarks>
+    public IDictionary<IProduct, decimal> InputProductRequirements()
+    {
+        var result = new Dictionary<IProduct, decimal>();
+
+        foreach (var (process, info) in Assignments)
+        {
+            foreach (var input in process.InputProducts)
+            {
+                if (result.ContainsKey(input.Product))
+                    result[input.Product] += info.Iterations * input.Amount;
+                else
+                    result.Add(input.Product, info.Iterations * input.Amount);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Gets the (current) capital requirements of the job.
+    /// </summary>
+    /// <returns>All products desired as capital and their amount.</returns>
+    /// <remarks>If called many times before changing, saving the info may be useful.</remarks>
+    public IDictionary<IProduct, decimal> CapitalProductRequirements()
+    {
+        var result = new Dictionary<IProduct, decimal>();
+
+        foreach (var (process, info) in Assignments)
+        {
+            foreach (var capital in process.CapitalProducts)
+            {
+                if (result.ContainsKey(capital.Product))
+                    result[capital.Product] += info.Iterations * capital.Amount;
+                else
+                    result.Add(capital.Product, info.Iterations * capital.Amount);
+            }
+        }
+
         return result;
     }
 }

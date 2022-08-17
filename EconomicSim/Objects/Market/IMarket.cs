@@ -105,5 +105,7 @@ namespace EconomicSim.Objects.Market
         // Probably appending to a file or list somewhere. 
 
         #endregion
+
+        void AddSeller(ICanSell seller);
     }
 }

@@ -108,8 +108,28 @@ namespace EconomicSim.Objects
             }
             await Task.WhenAll(ProductionPhase);
 
-            // Sell Phase, a phase where all productive firms put up their
-            // wares for purchase.
+            // Sell Phase, a phase where all firms and pops put up wares for
+            // sale on the market.
+            // Firms, Pops, Governments, and Institutions can all put stuff up
+            // for sale.
+            var sellPhase = new List<Task<ICanSell>>();
+            foreach (var firm in Firms.Values)
+            {
+                sellPhase.Add(firm.SellPhase());
+            }
+            foreach (var pop in Pops.Values)
+            {
+                sellPhase.Add(pop.SellPhase());
+            }
+            // go through Gov'ts
+            // go through Institutions.
+            await Task.WhenAll(sellPhase);
+            
+            // Add all sellers to their markets.
+            foreach (var seller in sellPhase.Select(x => x.Result))
+            {
+                seller.Market.AddSeller(seller);
+            }
 
             // Merchant Phase, merchants get first dibs to purchase, if they
             // didn't already have a contract setup.
@@ -929,7 +949,7 @@ namespace EconomicSim.Objects
                 }
                 
                 // connect markets back.
-                var hq = firm.HeadQuarters;
+                var hq = (Market.Market) firm.HeadQuarters;
                 hq.Firms.Add(firm);
 
                 foreach (var region in firm.Regions)

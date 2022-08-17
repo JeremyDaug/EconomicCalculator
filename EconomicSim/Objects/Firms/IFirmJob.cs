@@ -41,4 +41,18 @@ public interface IFirmJob
     IReadOnlyDictionary<IProcess, decimal> ProcessesByOutputValue(IMarket market);
 
     IPopGroup Pop { get; set; }
+
+    /// <summary>
+    /// Gets the (current) input requirements of the job.
+    /// </summary>
+    /// <returns>All products desired as inputs and their amount.</returns>
+    /// <remarks>If called many times before changing, saving the info may be useful.</remarks>
+    IDictionary<IProduct, decimal> InputProductRequirements();
+
+    /// <summary>
+    /// Gets the (current) capital requirements of the job.
+    /// </summary>
+    /// <returns>All products desired as capital and their amount.</returns>
+    /// <remarks>If called many times before changing, saving the info may be useful.</remarks>
+    IDictionary<IProduct, decimal> CapitalProductRequirements();
 }

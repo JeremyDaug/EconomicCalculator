@@ -9,7 +9,7 @@ namespace EconomicSim.Objects.Firms
     /// Read Only Firm Interface
     /// </summary>
     [JsonConverter(typeof(FirmJsonConverter))]
-    public interface IFirm
+    public interface IFirm : ICanSell
     {
         /// <summary>
         /// Id of the firm
@@ -51,7 +51,11 @@ namespace EconomicSim.Objects.Firms
         /// and at what rate it pays.
         /// </summary>
         IReadOnlyList<IFirmJob> Jobs { get; }
-        // TODO, bring pops into here.
+        
+        /// <summary>
+        /// The products that the firm produces with intent to sell.
+        /// </summary>
+        IReadOnlyList<IProduct> FirmOutputs { get; }
 
         /// <summary>
         /// The products that this firm tries to sell.

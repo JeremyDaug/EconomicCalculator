@@ -55,8 +55,7 @@ namespace EconomicSim.Objects.Pops
         /// <summary>
         /// The market the pop resides in.
         /// </summary>
-        public Market.Market Market { get; set; }
-        IMarket IPopGroup.Market => Market;
+        public IMarket Market { get; set; }
 
         /// <summary>
         /// The skill the pop has.
@@ -225,8 +224,44 @@ namespace EconomicSim.Objects.Pops
             return Count * 16;
         }
 
+        #region ICanSellRegion
+
+        public decimal SellWeight { get; set; }
+        public bool IsSelling { get; set; }
+
         private Dictionary<IProduct, decimal> ForSale { get; set; }
+        public decimal SalePrice(IProduct product)
+        { // not needed until Sell Phase is completed.
+            throw new NotImplementedException();
+        }
+
+        public async Task<ICanSell> SellPhase()
+        {
+            // check we need to sell at all
+            if (Firm.OwnershipStructure == OwnershipStructure.SelfEmployed)
+            { // if firm is self-employed, the firm sells for them.
+                // This may need to be altered/reversed to function properly
+                // Pops need to buy their needs
+                // firms need to buy their inputs
+                // but self-employed pops and firms are the same, until they aren't.
+                // Self-employed pops and similar firms are going to need to include their
+                // workers desires to function properly. 
+                // TODO make Self-Employed Workers be included under firms.
+                IsSelling = false;
+                return this; // set selling to false and return.
+            }
+            // TODO check the pop's storage to ensure they won't overflow.
+            // TODO create this logic later.
+            // For now, we assume that a pop cannot sell their products.
+            // Forced barter 'should' limit how much they can accumulate.
+            
+            IsSelling = false;
+            return this;
+        }
+
         IReadOnlyDictionary<IProduct, decimal> IPopGroup.ForSale => ForSale;
+
+        #endregion
 
         #region SafeProductExchange
 
@@ -405,5 +440,7 @@ namespace EconomicSim.Objects.Pops
         private decimal RestTarget;
 
         #endregion
+
+        IDictionary<IProduct, decimal> ICanSell.ForSale { get; }
     }
 }
