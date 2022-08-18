@@ -73,26 +73,11 @@ namespace EconomicSim.Objects.Products
                         }
                         break;
                     case "Wants":
-                        if (reader.TokenType != JsonTokenType.StartArray)
-                            throw new JsonException();
-                        
-                        while (reader.Read())
+                        var wants = JsonSerializer
+                            .Deserialize<Dictionary<string, decimal>>(ref reader, options);
+                        foreach (var (want, amount) in wants)
                         {
-                            if (reader.TokenType == JsonTokenType.EndArray)
-                                break;
-
-                            if (reader.TokenType != JsonTokenType.StartObject)
-                                throw new JsonException();
-                            reader.Read();
-
-                            var want = reader.GetString();
-                            reader.Read();
-                            var amount = reader.GetDecimal();
-                            result.Wants.Add((DataContext.Instance.Wants[want], amount));
-                            reader.Read();
-
-                            if (reader.TokenType != JsonTokenType.EndObject)
-                                throw new JsonException();
+                            result.Wants.Add(DataContext.Instance.Wants[want], amount);
                         }
                         break;
                     // do not load any processes.
@@ -163,15 +148,7 @@ namespace EconomicSim.Objects.Products
 
             // Wants
             writer.WritePropertyName(nameof(value.Wants));
-            writer.WriteStartArray();
-            foreach (var item in value.Wants)
-            {
-                writer.WriteStartObject();
-                writer.WritePropertyName(item.want.Name);
-                JsonSerializer.Serialize(writer, item.amount, options);
-                writer.WriteEndObject();
-            }
-            writer.WriteEndArray();
+            JsonSerializer.Serialize(writer, value.Wants.ToDictionary(x => x.Key.Name, x => x.Value));
 
             // TechRequirements
             if (value.TechRequirement != null)

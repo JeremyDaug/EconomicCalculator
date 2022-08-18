@@ -16,7 +16,7 @@ namespace EconomicSim.Objects.Products
         public Product()
         {
             ProductTags = new List<(ProductTag tag, Dictionary<string, object>? parameters)>();
-            Wants = new List<(IWant want, decimal amount)>();
+            Wants = new Dictionary<IWant, decimal>();
             ProductProcesses = new List<IProcess>();
         }
 
@@ -83,9 +83,9 @@ namespace EconomicSim.Objects.Products
         /// Item1 is the want it applies to
         /// Item2 is how much it gives (or takes)
         /// </summary>
-        public List<(IWant want, decimal amount)> Wants { get; set; }
+        public Dictionary<IWant, decimal> Wants { get; set; }
 
-        IReadOnlyList<(IWant want, decimal amount)> IProduct.Wants => Wants;
+        IReadOnlyDictionary<IWant, decimal> IProduct.Wants => Wants;
 
         #region RelatedProcesses
 

@@ -8,6 +8,7 @@ using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Pops.Culture;
 using EconomicSim.Objects.Pops.Species;
 using EconomicSim.Objects.Processes;
+using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
@@ -524,6 +525,18 @@ namespace EconomicSim.Objects
 
             if (errors.Any())
                 throw new DataException("Product Duplicates Found:\n" + string.Join('\n', errors));
+            
+            // connect wants to products which have a particular ownership want.
+            foreach (var product in newProducts)
+            {
+                if (product.Wants.Any())
+                {
+                    foreach (var (want, amount) in product.Wants)
+                    {
+                        want.OwnershipSources.Add(product);
+                    }
+                }
+            }
 
             // Processes connect to products, so no connections here.
 
@@ -632,6 +645,30 @@ namespace EconomicSim.Objects
                 catch
                 {
                     errors.Add($"Product {product.GetName()}, had a duplicate Failure, Consumption, Use, or Maintenance process.");
+                }
+            }
+            
+            // connect processes to wants which they produce
+            foreach (var process in Processes.Values)
+            {
+                if (process.OutputWants.Any())
+                { // if the process outputs any wants, add it to those wants
+                    foreach (var want in process.OutputWants.Select(x => x.Want))
+                    {
+                        want.ProcessSources.Add(process);
+                        // check that the process is a use or consumption process
+                        // if it is, add the product it's using or consuming.
+                        if (process.ProcessTags.ContainsKey(ProcessTag.Consumption))
+                        { // if consumption process, add
+                            var product = (Product)process.ProcessTags[ProcessTag.Consumption]["Product"];
+                            want.ConsumptionSources.Add(product);
+                        }
+                        else if (process.ProcessTags.ContainsKey(ProcessTag.Use))
+                        { // if use process, add (can't be both consumption and use)
+                            var product = (Product)process.ProcessTags[ProcessTag.Use]["Product"];
+                            want.ConsumptionSources.Add(product);
+                        }
+                    }
                 }
             }
             

@@ -1,4 +1,6 @@
 ﻿using System.Text.Json.Serialization;
+using EconomicSim.Objects.Processes;
+using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Objects.Wants
 {
@@ -22,5 +24,29 @@ namespace EconomicSim.Objects.Wants
         /// A short explanation of the want and how it should be used.
         /// </summary>
         string Description { get; }
+        
+        /// <summary>
+        /// Products which this want can be gotten from if used.
+        /// </summary>
+        [JsonIgnore]
+        IList<IProduct> UseSources { get; }
+        
+        /// <summary>
+        /// Products which this want can be gotten from if consumed.
+        /// </summary>
+        [JsonIgnore]
+        IList<IProduct> ConsumptionSources { get; }
+        
+        /// <summary>
+        /// Products which this want can be gotten from if Owned.
+        /// </summary>
+        [JsonIgnore]
+        IList<IProduct> OwnershipSources { get; }
+        
+        /// <summary>
+        /// The processes which produce this Wont (includes Use and Consumption Processes).
+        /// </summary>
+        [JsonIgnore]
+        IList<IProcess> ProcessSources { get; }
     }
 }

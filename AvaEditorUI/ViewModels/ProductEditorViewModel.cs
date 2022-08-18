@@ -245,7 +245,7 @@ public class ProductEditorViewModel : ViewModelBase
                 oldProd.TechRequirement = dc.Technologies[Technology];
             oldProd.Wants.Clear();
             foreach (var want in Wants)
-                oldProd.Wants.Add((dc.Wants[want.Primary], want.Secondary));
+                oldProd.Wants.Add(dc.Wants[want.Primary], want.Secondary);
             // Tags
             oldProd.ProductTags.Clear();
             foreach (var tag in ProductTags)
@@ -272,7 +272,7 @@ public class ProductEditorViewModel : ViewModelBase
                 newProd.TechRequirement = dc.Technologies[Technology];
             // Add wants
             foreach (var want in Wants)
-                newProd.Wants.Add((dc.Wants[want.Primary], want.Secondary));
+                newProd.Wants.Add(dc.Wants[want.Primary], want.Secondary);
             // Tags
             foreach (var tag in ProductTags)
             {

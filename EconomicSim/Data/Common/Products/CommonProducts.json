@@ -9,7 +9,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Baking",
@@ -25,7 +25,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Bio Waste",
@@ -37,11 +37,9 @@
     "Fractional": true,
     "Icon": "ProductImages\\bin.png",
     "ProductTags": [],
-    "Wants": [
-      {
-        "Waste": 1
-      }
-    ]
+    "Wants": {
+      "Waste": 1
+    }
   },
   {
     "Name": "Blacksmithing",
@@ -57,7 +55,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Bread",
@@ -76,11 +74,9 @@
         "ConsumerGood": null
       }
     ],
-    "Wants": [
-      {
+    "Wants": {
         "Food": 2
-      }
-    ]
+    }
   },
   {
     "Name": "Clothes",
@@ -92,7 +88,7 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Coal",
@@ -104,7 +100,7 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Cooking",
@@ -120,7 +116,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Cotton",
@@ -132,7 +128,7 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Cotton Farming",
@@ -148,7 +144,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Fabric",
@@ -160,7 +156,7 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Farm Hoe",
@@ -172,7 +168,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Fishing",
@@ -188,7 +184,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Fruit Gathering",
@@ -204,7 +200,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Gold Bar",
@@ -216,7 +212,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Gold Coin",
@@ -228,7 +224,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Gold Nugget",
@@ -240,11 +236,9 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": [
-      {
+    "Wants": {
         "Luxury": 0.25
-      }
-    ]
+    }
   },
   {
     "Name": "Goldsmithing",
@@ -260,7 +254,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Grain Milling",
@@ -276,7 +270,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Hard Labor",
@@ -292,7 +286,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Herder",
@@ -308,7 +302,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Home",
@@ -320,14 +314,10 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": [
-      {
-        "Security": 10
-      },
-      {
+    "Wants": {
+        "Security": 10,
         "Housing": 1
-      }
-    ]
+    }
   },
   {
     "Name": "Hut",
@@ -339,11 +329,9 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": [
-      {
+    "Wants": {
         "Housing": 1
-      }
-    ],
+    },
     "TechRequirement": "Survivalism"
   },
   {
@@ -356,7 +344,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Iron Ore",
@@ -368,7 +356,7 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Iron Scraps",
@@ -380,7 +368,7 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Iron Sword",
@@ -392,7 +380,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Iron",
@@ -404,7 +392,7 @@
     "Fractional": true,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Ironworking",
@@ -420,7 +408,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Jewelry",
@@ -432,7 +420,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Laborer",
@@ -448,7 +436,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Lugging",
@@ -464,7 +452,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Lumber",
@@ -476,7 +464,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Lumberjacking",
@@ -492,7 +480,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Mine Engineer",
@@ -508,7 +496,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Minting",
@@ -524,7 +512,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Panning",
@@ -540,7 +528,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Simple Construction",
@@ -556,7 +544,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Smelting",
@@ -572,7 +560,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Spinner",
@@ -588,7 +576,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Tailoring",
@@ -604,7 +592,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Test",
@@ -620,7 +608,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Timber",
@@ -632,7 +620,7 @@
     "Fractional": false,
     "Icon": "",
     "ProductTags": [],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Weaver",
@@ -648,7 +636,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Wheat Farming",
@@ -664,7 +652,7 @@
         "Service": null
       }
     ],
-    "Wants": []
+    "Wants": {}
   },
   {
     "Name": "Wheat Flour",
@@ -680,11 +668,9 @@
         "ConsumerGood": null
       }
     ],
-    "Wants": [
-      {
+    "Wants": {
         "Luxury": 1.75
-      }
-    ]
+    }
   },
   {
     "Name": "Wheat Grain",
@@ -700,10 +686,8 @@
         "Consumable": null
       }
     ],
-    "Wants": [
-      {
+    "Wants": {
         "Food": 0.3
-      }
-    ]
+    }
   }
 ]

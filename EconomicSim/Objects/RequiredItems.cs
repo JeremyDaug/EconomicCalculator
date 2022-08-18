@@ -41,9 +41,9 @@ namespace EconomicSim.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            Wants = new List<(IWant want, decimal amount)>
-                    {
-                        (Land, 1)
+            Wants = new Dictionary<IWant, decimal>
+            {
+                {Land, 1}
                     },
             ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
                     {
@@ -70,9 +70,9 @@ namespace EconomicSim.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            Wants = new List<(IWant want, decimal amount)>
-                    {
-                        (Land, 1)
+            Wants = new Dictionary<IWant, decimal>
+            {
+                {Land, 1}
                     },
             ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
             {
@@ -98,9 +98,9 @@ namespace EconomicSim.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            Wants = new List<(IWant want, decimal amount)>
-                    {
-                        (Land, 1)
+            Wants = new Dictionary<IWant, decimal>
+            {
+                {Land, 1}
                     },
             ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
             {
@@ -126,9 +126,9 @@ namespace EconomicSim.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            Wants = new List<(IWant want, decimal amount)>
-                    {
-                        (Land, 1)
+            Wants = new Dictionary<IWant, decimal>
+            {
+                {Land, 1}
                     },
             ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
             {
@@ -154,9 +154,9 @@ namespace EconomicSim.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            Wants = new List<(IWant want, decimal amount)>
-                    {
-                        (Land, 1)
+            Wants = new Dictionary<IWant, decimal>
+            {
+                {Land, 1}
                     },
             ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
             {
@@ -182,9 +182,9 @@ namespace EconomicSim.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            Wants = new List<(IWant want, decimal amount)>
-                    {
-                        (Land, 1)
+            Wants = new Dictionary<IWant, decimal>
+            {
+                        {Land, 1}
                     },
             ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
             {
@@ -210,10 +210,10 @@ namespace EconomicSim.Objects
             Mass = 0,
             Bulk = 0,
             Fractional = false,
-            Wants = new List<(IWant want, decimal amount)>
-                    {
-                        (Land, 1)
-                    },
+            Wants = new Dictionary<IWant, decimal>
+            {
+                {Land, 1}
+            },
             ProductTags = new List<(ProductTag tags, Dictionary<string, object>? parameters)>
             {
                 (ProductTag.Fixed, null),
