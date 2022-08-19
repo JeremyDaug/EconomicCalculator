@@ -3,6 +3,7 @@ using EconomicSim.Objects.Firms;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Territory;
+using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Market
 {
@@ -25,6 +26,11 @@ namespace EconomicSim.Objects.Market
             ProductSold = new Dictionary<IProduct, decimal>();
             ProductOutput = new Dictionary<Product, decimal>();
             _paymentPreference = new Dictionary<IProduct, decimal>();
+
+            ProductSellers = new Dictionary<IProduct, IList<ICanSell>>();
+            ProductSellerWeight = new Dictionary<IProduct, decimal>();
+            wantSellers = new Dictionary<IWant, IList<ICanSell>>();
+            WantSellerWeight = new Dictionary<IWant, decimal>();
         }
 
         /// <summary>
@@ -146,6 +152,59 @@ namespace EconomicSim.Objects.Market
 
         #region SellerPhase
 
+        /// <summary>
+        /// A list of products and all those who sell them.
+        /// </summary>
+        public Dictionary<IProduct, IList<ICanSell>> ProductSellers { get; }
+        
+        /// <summary>
+        /// The total weight of sellers for each product.
+        /// </summary>
+        public Dictionary<IProduct, decimal> ProductSellerWeight { get; }
+        
+        private Dictionary<IWant, IList<ICanSell>> wantSellers { get; }
+        private Dictionary<IWant, decimal> WantSellerWeight { get; }
+
+        /// <summary>
+        /// Get a list of all sellers who sell an item of a particular want.
+        /// Total weight will need to be summed from the list.
+        /// </summary>
+        /// <returns>The list of sellers and the total weight of all those sellers.</returns>
+        public (IList<ICanSell> sellers, decimal weight) GetWantSellers(IWant want)
+        {
+            if (wantSellers.ContainsKey(want))
+                return (wantSellers[want], WantSellerWeight[want]);
+            
+            List<ICanSell> result = new List<ICanSell>();
+            decimal weight = 0;
+
+            foreach (var source in want.UseSources)
+            { // products which when used produce the want.
+                if (!ProductSellers.ContainsKey(source)) continue;
+                result.AddRange(ProductSellers[source]);
+                weight += ProductSellerWeight[source];
+            }
+
+            foreach (var source in want.ConsumptionSources)
+            { // products which when consumed produce the want.
+                if (!ProductSellers.ContainsKey(source)) continue;
+                result.AddRange(ProductSellers[source]);
+                weight += ProductSellerWeight[source];
+            }
+
+            foreach (var source in want.OwnershipSources)
+            { // products which when owned produce the want.
+                if (!ProductSellers.ContainsKey(source)) continue;
+                result.AddRange(ProductSellers[source]);
+                weight += ProductSellerWeight[source];
+            }
+
+            WantSellerWeight[want] = weight;
+            wantSellers[want] = result;
+            
+            return (result, weight);
+        }
+
         public void AddSeller(ICanSell seller)
         {
             // check that we actually need to add the seller in the first place.
@@ -153,6 +212,24 @@ namespace EconomicSim.Objects.Market
                 return;
             
             // go through what they sell and add them to the appropriate lists for those items.
+            foreach (var (product, amount) in seller.ForSale)
+            {
+                // check that product is there
+                if (!ProductSellers.ContainsKey(product)) ProductSellers[product] = new List<ICanSell>();
+                // add seller to the sellers list.
+                ProductSellers[product].Add(seller);
+                // calculate the sellers weight for that product
+                var price = seller.SalePrice(product);
+                // TODO maybe cap and improve this, it should be able to take into account negative price values as well as values much higher than market price.
+                // 'normal' weight is 100, the difference in abs price * 5 changes the rate.
+                var weight = 100 + (GetMarketPrice(product) - price) * 5; 
+                seller.SellWeight[product] = weight;
+                if (ProductSellerWeight.ContainsKey(product))
+                    ProductSellerWeight[product] += weight;
+                else
+                    ProductSellerWeight[product] = weight;
+            } 
+            // the seller had been added and their products recorded, so everything is good to go.
         }
 
         #endregion

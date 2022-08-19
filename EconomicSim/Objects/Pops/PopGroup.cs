@@ -226,7 +226,7 @@ namespace EconomicSim.Objects.Pops
 
         #region ICanSellRegion
 
-        public decimal SellWeight { get; set; }
+        public Dictionary<IProduct, decimal> SellWeight { get; set; }
         public bool IsSelling { get; set; }
 
         private Dictionary<IProduct, decimal> ForSale { get; set; }

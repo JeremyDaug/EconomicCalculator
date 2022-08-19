@@ -28,6 +28,9 @@ namespace EconomicSim.Objects.Firms
             Jobs = new List<FirmJob>();
             Children = new List<Firm>();
             Techs = new List<(Technology.Technology tech, int research)>();
+            Reserves = new Dictionary<IProduct, decimal>();
+            ForSale = new Dictionary<IProduct, decimal>();
+            SellWeight = new Dictionary<IProduct, decimal>();
         }
 
         /// <summary>
@@ -444,7 +447,7 @@ namespace EconomicSim.Objects.Firms
         
         private IDictionary<IProduct, decimal> Reserves { get; set; }
 
-        public decimal SellWeight { get; set; }
+        public Dictionary<IProduct, decimal> SellWeight { get; set; }
         public bool IsSelling { get; set; }
         public IDictionary<IProduct, decimal> ForSale { get; }
         public decimal SalePrice(IProduct product)

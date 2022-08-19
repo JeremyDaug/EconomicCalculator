@@ -11,7 +11,7 @@ public interface ICanSell
     /// <summary>
     /// The total weight (chances) of the seller being selected.
     /// </summary>
-    decimal SellWeight { get; set; }
+    Dictionary<IProduct, decimal> SellWeight { get; set; }
     
     /// <summary>
     /// Whether the Seller is actually selling or not.

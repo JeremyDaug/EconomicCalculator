@@ -132,22 +132,43 @@ namespace EconomicSim.Objects
                 seller.Market.AddSeller(seller);
             }
 
-            // Merchant Phase, merchants get first dibs to purchase, if they
+            // (local) Merchant Phase, merchants get first dibs to purchase, if they
             // didn't already have a contract setup.
+            // This allows them to get in early as a middle man and advantage everyone
+            // else in the market by consolidating where products are bought in the
+            // market to fewer stores with a greater volume and variety of goods.
+            // TODO, do this later.
+            // Merchants buy, then they resell immediately
+            // (they do this in lockstep, merchants don't buy from merchants.)
+
+            // Government and Institution Buy Phase. They get second and third as
+            // they have political connections.
+            // TODO, do this later, when governments exist.
 
             // Pop Buy Phase, where all pops and firms buy what they desire.
+            // TODO, do this later, when pops actually buy shit.
+
+            // Firm Recalculation and Buy Phase.
+            // Firm Recalculation follows the order of the most successful to
+            // the least. If a firm has run out of goods to sell in the market
+            // it is allowed to recalculate first as it can (guaranteed) gain no
+            // more info from the market, if it has less remaining than
+            // everyone else, it goes second, down the list.
+            // They recalculate, then buy before another firm recalculates.
+            // This should make successful firms more likely to be run consistently
+            // as those who can't be bought from buy from those with goods to sell
+            // making them more likely to stock out, and thus have all the info they
+            // need to recalculate accurately.
 
             // Pop Consumption phase, where pops get to consume and enjoy
             // the fruits of their labors.
+            
+            // Maintenance phase, where all goods that can be or will be maintained
+            // are maintained.
 
             // Population Recalculation, pops calculate their satisfaction,
             // adjust their moods, grow or shrink, and  and so on. No movement
             // here.
-
-            // Firm Recalculation Phase, Firms take into account all of their 
-            // business for the day, compare it to long term metrics,  
-            // adjust their production targets, shift workers around, and if
-            // growth or contraction is targeted, set those desires as well.
 
             // Migration, Pops who are want or are able to begin moving about.
             // Those who are able are added to the migration pool, then will
