@@ -51,4 +51,24 @@
     - Increase/Reduce Quota, this is also available without strategic thought, but again, only 1 product can be changed.
     - Market Research, this action allows a firm to look at the results of the market broadly, and take that into
       account when they change their prices or quota. (excess demand/low supply, raise price/production)
-    - Expand 
+    - Competition Research, the firm looks to a competitor to see how their doing and try to use that info to predict the market,
+      or beat their competition.
+    - Growth Planning, the firm sets a target for growth and/or expansion. If the firm has a sizeable pool of resources, they may
+      seek to expand.
+      - Adding/removing jobs.
+      - Making new jobs. (adding/removing processes to a job)
+    - Restructuring, the firm alters how it is structured to try and improve it's efficiency.
+      - Adding/removing a subfirm
+      - Expanding into a new market
+    - Target Research, the firm creates a target for research to flow into. They can select if they have none or redirect if they
+      already have one. This makes any random research flow into their prefered selection more likely, and if they have an R&D wing
+      they can directly research it through that.
+
+### Institutions
+    Institutions have their abilities decided by what level they primarily act on and what they represent.
+
+### Governments
+    Governments are much more general in what they can do, but strategic thought would be used to define where they are looking.
+
+### Hiveminds
+    Hiveminds are the same as governments for the most part, but have additional features.
