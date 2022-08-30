@@ -142,6 +142,110 @@ namespace EconomicSim.Objects.Processes
         /// <returns></returns>
         string GetName();
 
+        /// <summary>
+        /// Adds another process to this process and outputs the resulting fusion.
+        /// Outputs of one cancel the inputs of the other both ways.
+        /// </summary>
+        /// <param name="other">The process we are adding to this one</param>
+        /// <returns>The resulting sum between the two.</returns>
+        IProcess AddProcess(IProcess other);
+
+        /// <summary>
+        /// Feeds the other process into this process. Any outputs of other which are
+        /// inputs for this cancel, otherwise inputs, capital, and outputs are added
+        /// together.
+        /// </summary>
+        /// <param name="other">The process to bring in as an input to this one.</param>
+        /// <returns>The combined process resulting from the combination.</returns>
+        IProcess InputProcess(IProcess other);
+        
+        /// <summary>
+        /// Feeds the other process into this process. Any outputs of other which are
+        /// inputs for this cancel, otherwise inputs, capital, and outputs are added
+        /// together.
+        /// </summary>
+        /// <param name="other">The process to bring in as an input to this one.</param>
+        /// <param name="target">
+        /// What product we are trying to satisfy.
+        /// The other process will be multiplied to satisfy this.
+        /// </param>
+        /// <returns>The combined process resulting from the combination.</returns>
+        IProcess InputProcess(IProcess other, IProduct target);
+        
+        /// <summary>
+        /// Feeds the other process into this process. Any outputs of other which are
+        /// inputs for this cancel, otherwise inputs, capital, and outputs are added
+        /// together.
+        /// </summary>
+        /// <param name="other">The process to bring in as an input to this one.</param>
+        /// <param name="target">
+        /// What want we are trying to satisfy.
+        /// The other process will be multiplied to satisfy this.
+        /// </param>
+        /// <returns>The combined process resulting from the combination.</returns>
+        IProcess InputProcess(IProcess other, IWant target);
+
+        /// <summary>
+        /// Feeds this process's outputs into the <see cref="other"/> process as
+        /// inputs. If this process's outputs are inputs to other, they cancel out,
+        /// otherwise they add together.
+        /// </summary>
+        /// <param name="other">The process we are moving our outputs to.</param>
+        /// <returns>The resulting combined process.</returns>
+        IProcess OutputToProcess(IProcess other);
+        
+        /// <summary>
+        /// Feeds this process's outputs into the <see cref="other"/> process as
+        /// inputs. If this process's outputs are inputs to other, they cancel out,
+        /// otherwise they add together.
+        /// </summary>
+        /// <param name="other">The process we are moving our outputs to.</param>
+        /// <param name="target">
+        /// What product we are trying to satisfy.
+        /// The other process will be multiplied to satisfy this.
+        /// </param>
+        /// <returns>The resulting combined process.</returns>
+        IProcess OutputToProcess(IProcess other, IProduct target);
+        
+        /// <summary>
+        /// Feeds this process's outputs into the <see cref="other"/> process as
+        /// inputs. If this process's outputs are inputs to other, they cancel out,
+        /// otherwise they add together.
+        /// </summary>
+        /// <param name="other">The process we are moving our outputs to.</param>
+        /// <param name="target">
+        /// What want we are trying to satisfy.
+        /// The other process will be multiplied to satisfy this.
+        /// </param>
+        /// <returns>The resulting combined process.</returns>
+        IProcess OutputToProcess(IProcess other, IWant target);
+
+        /// <summary>
+        /// Feeds the <see cref="other"/> process into this process as a source
+        /// for capital wants.
+        /// </summary>
+        /// <remarks>
+        /// This does not remove capital good product requirements.
+        /// </remarks>
+        /// <param name="other">The process we are taking in for capital goods.</param>
+        /// <returns></returns>
+        IProcess TakeAsCapital(IProcess other);
+        
+        /// <summary>
+        /// Feeds the <see cref="other"/> process into this process as a source
+        /// for capital wants.
+        /// </summary>
+        /// <remarks>
+        /// This does not remove capital good product requirements.
+        /// </remarks>
+        /// <param name="other">The process we are taking in for capital goods.</param>
+        /// <param name="target">
+        /// What want we are trying to satisfy.
+        /// The other process will be multiplied to satisfy this.
+        /// </param>
+        /// <returns></returns>
+        IProcess TakeAsCapital(IProcess other, IWant target);
+
         IReadOnlyList<IProcessProduct> GetProductsByName(string name);
         IReadOnlyList<IProcessProduct> GetProductsByName(string name, ProcessPartTag part);
 

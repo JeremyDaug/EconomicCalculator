@@ -131,6 +131,18 @@
     "Wants": {}
   },
   {
+    "Name": "Cotton",
+    "VariantName": "Spool",
+    "UnitName": "Kg",
+    "Quality": 2,
+    "Mass": 1,
+    "Bulk": 0.0003,
+    "Fractional": true,
+    "Icon": "",
+    "ProductTags": [],
+    "Wants": {}
+  },
+  {
     "Name": "Cotton Farming",
     "VariantName": "",
     "UnitName": "man hour",

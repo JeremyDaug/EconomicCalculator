@@ -13,6 +13,42 @@
     ]
   },
   {
+    "Name": "Ambrosia Farmer",
+    "VariantName": "",
+    "Labor": "Fruit Gathering",
+    "Skill": "Fruit Gathering",
+    "Processes": [
+      "Ambrosia Hunting",
+      "Fruit Gathering"
+    ]
+  },
+  {
+    "Name": "Hut Builder",
+    "VariantName": "",
+    "Labor": "Simple Construction",
+    "Skill": "Simple Construction",
+    "Processes": [
+      "Ambrosia Hunting",
+      "Hut Construction",
+      "Hut Repairs",
+      "Fruit Gathering",
+      "Simple Construction"
+    ]
+  },
+  {
+    "Name": "Clothes Maker",
+    "VariantName": "",
+    "Labor": "Simple Construction",
+    "Skill": "Simple Construction",
+    "Processes": [
+      "Ambrosia Hunting",
+      "Hut Construction",
+      "Hut Repairs",
+      "Fruit Gathering",
+      "Simple Construction"
+    ]
+  },
+  {
     "Name": "Farming",
     "VariantName": "",
     "Labor": "Wheat Farming",
