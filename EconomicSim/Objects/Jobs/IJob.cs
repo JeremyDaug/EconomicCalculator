@@ -43,17 +43,17 @@ namespace EconomicSim.Objects.Jobs
         /// </summary>
         IReadOnlyList<IProcess> Processes { get; }
 
-        IReadOnlyDictionary<Product, decimal> InputProducts { get; }
-        IReadOnlyDictionary<Product, decimal> OptionalInputProducts { get; }
-        IReadOnlyDictionary<Product, decimal> CapitalProducts { get; }
-        IReadOnlyDictionary<Product, decimal> OptionalCapitalProducts { get; }
-        IReadOnlyDictionary<Product, decimal> OutputProducts { get; }
+        IReadOnlyDictionary<IProduct, decimal> InputProducts { get; }
+        IReadOnlyDictionary<IProduct, decimal> OptionalInputProducts { get; }
+        IReadOnlyDictionary<IProduct, decimal> CapitalProducts { get; }
+        IReadOnlyDictionary<IProduct, decimal> OptionalCapitalProducts { get; }
+        IReadOnlyDictionary<IProduct, decimal> OutputProducts { get; }
         
-        IReadOnlyDictionary<Want, decimal> InputWants { get; }
-        IReadOnlyDictionary<Want, decimal> OptionalInputWants { get; }
-        IReadOnlyDictionary<Want, decimal> CapitalWants { get; }
-        IReadOnlyDictionary<Want, decimal> OptionalCapitalWants { get; }
-        IReadOnlyDictionary<Want, decimal> OutputWants { get; }
+        IReadOnlyDictionary<IWant, decimal> InputWants { get; }
+        IReadOnlyDictionary<IWant, decimal> OptionalInputWants { get; }
+        IReadOnlyDictionary<IWant, decimal> CapitalWants { get; }
+        IReadOnlyDictionary<IWant, decimal> OptionalCapitalWants { get; }
+        IReadOnlyDictionary<IWant, decimal> OutputWants { get; }
 
         void Refresh();
 

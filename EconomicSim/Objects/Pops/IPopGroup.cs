@@ -11,7 +11,7 @@ using EconomicSim.Objects.Skills;
 namespace EconomicSim.Objects.Pops
 {
     [JsonConverter(typeof(PopJsonConverter))]
-    public interface IPopGroup : ICanSell
+    public interface IPopGroup : ICanSell, ICanBuy
     {
         /// <summary>
         /// Pop Id
@@ -92,5 +92,13 @@ namespace EconomicSim.Objects.Pops
         /// rate based on species/culture/etc
         /// </summary>
         decimal GetTotalHours();
+
+        /// <summary>
+        /// Gives a pop a number of products.
+        /// </summary>
+        /// <param name="product">A product.</param>
+        /// <param name="amount">A positive amount of that product to add.</param>
+        /// <exception cref="ArgumentException">If <see cref="amount"/> is not positive.</exception>
+        void ReceiveGoods(IProduct product, decimal amount);
     }
 }

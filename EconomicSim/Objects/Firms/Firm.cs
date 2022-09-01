@@ -11,7 +11,7 @@ namespace EconomicSim.Objects.Firms
     /// Firm Data Class
     /// </summary>
     [JsonConverter(typeof(FirmJsonConverter))]
-    public class Firm : IFirm, ICanSell
+    public class Firm : IFirm
     {
         #region PrivateDataStorage
         
@@ -21,7 +21,6 @@ namespace EconomicSim.Objects.Firms
         
         public Firm()
         {
-            _remnantWants = new Dictionary<IWant, decimal>();
             Regions = new List<Market.Market>();
             Resources = new Dictionary<IProduct, decimal>();
             Products = new Dictionary<IProduct, decimal>();
@@ -29,7 +28,6 @@ namespace EconomicSim.Objects.Firms
             Children = new List<Firm>();
             Techs = new List<(Technology.Technology tech, int research)>();
             Reserves = new Dictionary<IProduct, decimal>();
-            ForSale = new Dictionary<IProduct, decimal>();
             SellWeight = new Dictionary<IProduct, decimal>();
         }
 
@@ -42,6 +40,8 @@ namespace EconomicSim.Objects.Firms
         /// Name of the firm.
         /// </summary>
         public string Name { get; set; }
+        
+        public FirmKind FirmKind { get; set; }
 
         /// <summary>
         /// The rank of the firm.
@@ -130,11 +130,6 @@ namespace EconomicSim.Objects.Firms
         /// </summary>
         public IMarket HeadQuarters { get; set; }
 
-        IMarket ICanSell.Market
-        {
-            get => HeadQuarters;
-        }
-
         /// <summary>
         /// The regions where the company operates, buying, selling,
         /// and working. Must have at least one piece of property in
@@ -155,13 +150,17 @@ namespace EconomicSim.Objects.Firms
         /// <summary>
         /// Wants left over by processes. Cleared at the end of each day.
         /// </summary>
-        private readonly Dictionary<IWant, decimal> _remnantWants;
+        private readonly Dictionary<IWant, decimal> _remnantWants = new();
 
         /// <summary>
         /// The products used as capital and unable to be used elsewhere again today.
         /// drawn from for maintenance phase. 
         /// </summary>
         private readonly Dictionary<IProduct, decimal> _expendedProducts = new();
+        private readonly Dictionary<IProduct, decimal> _forSale = new();
+        private readonly Dictionary<IProduct, decimal> _originalStock = new();
+        private readonly Dictionary<IProduct, decimal> _goodsSold = new();
+        private readonly Dictionary<IProduct, decimal> _shoppingList = new();
 
         #endregion
 
@@ -289,11 +288,64 @@ namespace EconomicSim.Objects.Firms
         }
 
         #region SellPhase
+
+        private IDictionary<IProduct, decimal> Reserves { get; set; }
+
+        public IDictionary<IProduct, decimal> SellWeight { get; set; }
         
+        public bool IsSelling { get; set; }
+        
+        public decimal Revenue { get; set; }
+        
+        IMarket ICanSell.Market
+        {
+            get => HeadQuarters;
+        }
+
+        public IReadOnlyDictionary<IProduct, decimal> ForSale => _forSale;
+
+        /// <summary>
+        /// The total put up for sale at the end of the sell phase.
+        /// </summary>
+        public IReadOnlyDictionary<IProduct, decimal> OriginalStock => _originalStock;
+
+        public IReadOnlyDictionary<IProduct, decimal> GoodsSold => _goodsSold;
+
+        public decimal SalePrice(IProduct product)
+        {
+            if (Products.ContainsKey(product))
+                return Products[product];
+            else
+            {// if it (for whatever reason) doesn't have a price, base it on the market 
+                // and add it to our products while we're at it.
+                return Products[product] = HeadQuarters.GetMarketPrice(product);
+            }
+        }
+
         public async Task<ICanSell> SellPhase()
         {
+            // if we are a subsistence job, we don't sell, just reserve everything and
+            // move on.
+            /*if (FirmKind == FirmKind.Subsistence || FirmKind == FirmKind.SubsistenceNomad)
+            { // if we are a subsistence firm, we don't want to sell. 
+                // TODO if taxes exist, reserve for sale/taxation.
+                foreach (var (product, amount) in Resources)
+                { // move
+                    if (Reserves.ContainsKey(product))
+                        Reserves[product] += amount;
+                    else
+                        Reserves[product] = amount;
+                }
+                // With everything reserved, move on.
+                // This will need to be updated when taxes come into the equation.
+                IsSelling = false;
+                return this;
+            }*/
+            
             // Reserve what we already have and need for tomorrow's (inaccurate) projection.
             // reserve inputs first
+            // TODO maybe rework this to just 'buy' from themselves first instead of reserving ahead of time.
+            // Doing that would risk others buyng from them first, which if they intend to use it, is silly.
             foreach (var job in Jobs)
             {
                 var inputReqs = job.InputProductRequirements();
@@ -415,6 +467,9 @@ namespace EconomicSim.Objects.Firms
             
             // if the firm has any slaves, add their desires to the reserve.
             // TODO slave desire reserve.
+            
+            // lastly, if a product is a currency, money, or other exchange good
+            // reserve that as we'll use that for buying first.
 
             // Move all remaining, unneeded, resources to the sell pile.
             // If a product has no price, quickly set one based on market price
@@ -428,9 +483,9 @@ namespace EconomicSim.Objects.Firms
                 }
                 // if there is some left, add it to the ForSale list.
                 if (ForSale.ContainsKey(product))
-                    ForSale[product] += amount;
+                    _forSale[product] += amount;
                 else
-                    ForSale[product] = amount;
+                    _forSale[product] = amount;
                 // and remove it from resources
                 Resources.Remove(product);
                 // check that there's a price for it already
@@ -441,24 +496,18 @@ namespace EconomicSim.Objects.Firms
             } 
             // once all resources have been either reserved, used, or liquidated
             // we are done with our sell phase.
+            
+            // record what we put up for sale today for later calculations.
+            foreach (var (product, amount) in ForSale)
+                _originalStock[product] = amount;
+            
             IsSelling = true;
             return this;
         }
         
-        private IDictionary<IProduct, decimal> Reserves { get; set; }
-
-        public Dictionary<IProduct, decimal> SellWeight { get; set; }
-        public bool IsSelling { get; set; }
-        public IDictionary<IProduct, decimal> ForSale { get; }
-        public decimal SalePrice(IProduct product)
+        public async Task StartExchange(ICanBuy buyer)
         {
-            if (Products.ContainsKey(product))
-                return Products[product];
-            else
-            {// if it (for whatever reason) doesn't have a price, base it on the market 
-                // and add it to our products while we're at it.
-                return Products[product] = HeadQuarters.GetMarketPrice(product);
-            }
+            
         }
         
         #endregion
@@ -497,5 +546,236 @@ namespace EconomicSim.Objects.Firms
 
             return result;
         }
+
+        #region ICanBuy
+        
+        /// <summary>
+        /// Whether we are buying or not.
+        /// </summary>
+        public bool IsBuying { get; set; }
+        
+        public decimal Budget { get; set; }
+
+        public decimal Expenditures { get; set; }
+
+        public IReadOnlyDictionary<IProduct, decimal> ShoppingList => _shoppingList;
+
+        /// <summary>
+        /// The items we are willing to exchange for goods.
+        /// </summary>
+        public IReadOnlyDictionary<IProduct, decimal> ForExchange => ForSale;
+
+        /// <summary>
+        /// We go to our market to try and buy goods that we desire.
+        /// </summary>
+        public void BuyGoods()
+        {
+            // If a good is for sale than it is for exchange.
+            // for now, assume market price for the good and force exchanges.
+            // TODO, come back here later.
+        }
+
+        /// <summary>
+        /// Makes the firm recalculate it's position, alter job weights, and the
+        /// like to try and get a better position in the future.
+        /// </summary>
+        public void RecalculatePlans()
+        {
+            if (FirmKind == FirmKind.Subsistence)
+            { // if the firm is a subsistence firm
+                SubsistenceRecalculation();
+                return;
+            }
+            else // if not a subsistence firm.
+            {
+                CommonFirmRecalculation();
+                return;
+            }
+        }
+
+        private void CommonFirmRecalculation()
+        {
+            // check how much we have sold today.
+            var percentSold = new Dictionary<IProduct, decimal>();
+            foreach (var (product, amount) in OriginalStock)
+            {
+                if (GoodsSold.ContainsKey(product))
+                    percentSold[product] = GoodsSold[product] / OriginalStock[product];
+                else // if we don't find any of those goods sold,
+                    percentSold[product] = 0;
+            }
+
+            var estIncreaseOutput = new Dictionary<IProduct, decimal>();
+            foreach (var (product, percent) in percentSold)
+            {
+                // The supply of the product in the market
+                HeadQuarters.ProductsForSale.TryGetValue(product, out var supply);
+                // the supply of that product which has been sold so far.
+                HeadQuarters.ProductSold.TryGetValue(product, out var supplySold);
+                // how close the market is to it's total supply at this point.
+                // May be inaccurate.
+                var supplyUsed = supplySold / supply;
+                // get our price relative to the market.
+                var marketRate = SalePrice(product) / HeadQuarters.GetMarketPrice(product);
+                // depending on how much of the supply was used, how much of we sold,
+                // and where are price is (roughly), decide how to alter production and price.
+                // TODO bring in additional logic for strategic choices (like pricing choices).
+                if (marketRate < 0.5m && percent > 0.8m )
+                { // if price is very low, but the export rate is high
+                    
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Subsistence firms do not care about profitability, only how
+        /// secure they are in their production of goods to satisfy
+        /// their needs. 
+        /// </summary>
+        private void SubsistenceRecalculation()
+        {
+            // subsistence firms don't worry about satisfying the market,
+            // they only worry about satisfying themselves and keeping the
+            // taxman away.
+            
+            // from our reserve, move what the pop desires back to resources.
+            // specifically, move their life needs to ensure they don't starve.
+            if (Jobs.Count > 1 || !Jobs.Any())
+                throw new InvalidDataException($"Firm '{Name}' ");
+            var pop = Jobs.First().Pop;
+            var needSats = new Dictionary<IProduct, decimal>();
+            foreach (var need in pop.Needs
+                         .Where(x => x.Tier == 0))
+            {
+                needSats[need.Product] = 0;
+                decimal available; // get the available 
+                if (!Reserves.TryGetValue(need.Product, out available))
+                    continue;
+                var min = Math.Min(available, need.Amount * pop.Count);
+                // With what we want known, add it to the pop now.
+                pop.ReceiveGoods(need.Product, min);
+                // and remove it from our reserves.
+                Reserves[need.Product] -= min;
+                if (Reserves[need.Product] == 0) // if the reserve is empty, remove it.
+                    Reserves.Remove(need.Product);
+                needSats[need.Product] = min;
+            }
+            // do the same for wants
+            var wantSats = new Dictionary<IWant, decimal>();
+            foreach (var want in pop.Wants
+                         .Where(x => x.Tier == 0))
+            {
+                decimal satisfaction = 0;
+                var target = want.Amount * pop.Count;
+                // try to satisfy through ownership goods first.
+                foreach (var own in want.Want.OwnershipSources)
+                {
+                    decimal available;
+                    if (!Reserves.TryGetValue(own, out available))
+                        continue; // if it doesn't contain any, move on.
+                    var efficiency = own.Wants[want.Want];
+                    var unitsNeeded = target / efficiency;
+                    var min = Math.Min(available, unitsNeeded);
+                    // with what we want known, add it to the pop now.
+                    pop.ReceiveGoods(own, min);
+                    // and remove from reserves
+                    Reserves[own] -= min;
+                    if (Reserves[own] == 0)
+                        Reserves.Remove(own);
+                    satisfaction += min * efficiency;
+                    if (satisfaction >= target)
+                        break; // if target is met, break out of this loop.
+                }
+                // update our satisfactions
+                wantSats[want.Want] = satisfaction;
+                if (satisfaction >= target)
+                    continue; // if the current sat meets the target, move to next want.
+                
+                // try to satisfy with use processes next.
+                foreach (var use in want.Want.UseSources)
+                {
+                    decimal available;
+                    if (!Reserves.TryGetValue(use, out available))
+                        continue; // if it doesn't contain any, move on.
+                    // get the efficiency from the use processes,
+                    // select the minimum for conservative calculation.
+                    var efficiency = use.UseProcesses
+                        .SelectMany(x => x.OutputWants)
+                        .Where(x => x.Want == want.Want)
+                        .Select(x => x.Amount)
+                        .Min();
+                    var unitsNeeded = target / efficiency;
+                    var min = Math.Min(available, unitsNeeded);
+                    // with what we want known, add it to the pop now.
+                    pop.ReceiveGoods(use, min);
+                    // and remove from reserves
+                    Reserves[use] -= min;
+                    if (Reserves[use] == 0)
+                        Reserves.Remove(use);
+                    satisfaction += min * efficiency;
+                    if (satisfaction >= target)
+                        break; // if target is met, break out of this loop.
+                }
+                // update our satisfactions
+                wantSats[want.Want] = satisfaction;
+                if (satisfaction >= target)
+                    continue; // if the current sat meets the target, move to next want.
+                
+                // Lastly, try to satisfy with consumption processes.
+                foreach (var consumption in want.Want.UseSources)
+                {
+                    decimal available;
+                    if (!Reserves.TryGetValue(consumption, out available))
+                        continue; // if it doesn't contain any, move on.
+                    // get the efficiency from the use processes,
+                    // select the minimum for conservative calculation.
+                    var efficiency = consumption.ConsumptionProcesses
+                        .SelectMany(x => x.OutputWants)
+                        .Where(x => x.Want == want.Want)
+                        .Select(x => x.Amount)
+                        .Min();
+                    var unitsNeeded = target / efficiency;
+                    var min = Math.Min(available, unitsNeeded);
+                    // with what we want known, add it to the pop now.
+                    pop.ReceiveGoods(consumption, min);
+                    // and remove from reserves
+                    Reserves[consumption] -= min;
+                    if (Reserves[consumption] == 0)
+                        Reserves.Remove(consumption);
+                    satisfaction += min * efficiency;
+                    if (satisfaction >= target)
+                        break; // if target is met, break out of this loop.
+                }
+                // update our satisfactions
+                wantSats[want.Want] = satisfaction;
+                // no need to check, we've gone as far as we can in finding these things.
+            }
+            
+            // with the pops given their life needs, check
+            // how well they are satisfied
+            // TODO, mayhaps improve to take into account more about the desires.
+            var weight = needSats.Count + wantSats.Count;
+            var averageSat = (needSats.Sum(x => x.Value)
+                              + wantSats.Sum(x => x.Value)) / weight;
+            
+            if (averageSat is > 0.5m and < 0.9m)
+            { // if not starving, but not satisfied, try to improve results.
+                // find which products and wants are lacking (below 0.9 sat)
+                var lackingProducts = needSats
+                    .Where(x => x.Value < 0.9m)
+                    .OrderBy(x => x.Value);
+            }
+            else if (averageSat <= 0.5m)
+            { // else if starving, panic,
+                // shift work hours into key processes and increase emigration.
+                
+            }
+            else
+            { // if at or near total satisfaction, try get less important stuff.
+                // TODO, do this later. Nothing needs to be done.
+            }
+        }
+
+        #endregion
     }
 }

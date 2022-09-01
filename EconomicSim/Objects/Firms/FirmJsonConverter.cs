@@ -26,6 +26,9 @@ internal class FirmJsonConverter : JsonConverter<Firm>
                 case nameof(result.Name):
                     result.Name = reader.GetString();
                     break;
+                case nameof(result.FirmKind):
+                    result.FirmKind = (FirmKind) Enum.Parse(typeof(FirmKind), reader.GetString());
+                    break;
                 case nameof(result.FirmRank):
                     result.FirmRank = (FirmRank) Enum.Parse(typeof(FirmRank), reader.GetString());
                     break;
@@ -101,6 +104,8 @@ internal class FirmJsonConverter : JsonConverter<Firm>
         
         // Name
         writer.WriteString(nameof(value.Name), value.Name);
+        // Kind
+        writer.WriteString(nameof(value.FirmKind), value.FirmKind.ToString());
         // Rank
         writer.WriteString(nameof(value.FirmRank), value.FirmRank.ToString());
         // Ownership

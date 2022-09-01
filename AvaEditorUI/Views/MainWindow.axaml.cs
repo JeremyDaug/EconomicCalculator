@@ -1,6 +1,8 @@
 using AvaEditorUI.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using EconomicSim.Objects;
+using MessageBox.Avalonia;
 
 namespace AvaEditorUI.Views
 {
@@ -60,6 +62,15 @@ namespace AvaEditorUI.Views
             var win = new SpeciesListWindow();
             win.Show();
             this.Close();
+        }
+
+        private void SaveAllData(object? sender, RoutedEventArgs e)
+        {
+            var dataContext = DataContextFactory.GetDataContext;
+            dataContext.SaveAllData();
+            var message
+                = MessageBoxManager.GetMessageBoxStandardWindow("All Data Saved.",
+                    "All Data has been saved.");
         }
     }
 }

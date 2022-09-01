@@ -13,17 +13,17 @@ namespace EconomicSim.Objects.Jobs
     [JsonConverter(typeof(JobJsonConverter))]
     public class Job : IJob
     {
-        private Dictionary<Product, decimal>? _inputProducts;
-        private Dictionary<Product, decimal>? _optionalInputProducts;
-        private Dictionary<Product, decimal>? _capitalProducts;
-        private Dictionary<Product, decimal>? _optionalCapitalProducts;
-        private Dictionary<Product, decimal>? _outputProducts;
+        private Dictionary<IProduct, decimal>? _inputProducts;
+        private Dictionary<IProduct, decimal>? _optionalInputProducts;
+        private Dictionary<IProduct, decimal>? _capitalProducts;
+        private Dictionary<IProduct, decimal>? _optionalCapitalProducts;
+        private Dictionary<IProduct, decimal>? _outputProducts;
         
-        private Dictionary<Want, decimal>? _inputWants;
-        private Dictionary<Want, decimal>? _optionalInputWants;
-        private Dictionary<Want, decimal>? _capitalWants;
-        private Dictionary<Want, decimal>? _optionalCapitalWants;
-        private Dictionary<Want, decimal>? _outputWants;
+        private Dictionary<IWant, decimal>? _inputWants;
+        private Dictionary<IWant, decimal>? _optionalInputWants;
+        private Dictionary<IWant, decimal>? _capitalWants;
+        private Dictionary<IWant, decimal>? _optionalCapitalWants;
+        private Dictionary<IWant, decimal>? _outputWants;
 
         public Job()
         {
@@ -63,13 +63,13 @@ namespace EconomicSim.Objects.Jobs
 
         #region ProcessProducts
 
-        public IReadOnlyDictionary<Product, decimal> InputProducts
+        public IReadOnlyDictionary<IProduct, decimal> InputProducts
         {
             get
             {
                 if (_inputProducts == null)
                 {
-                    _inputProducts = new Dictionary<Product, decimal>();
+                    _inputProducts = new Dictionary<IProduct, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.InputProducts)
@@ -83,13 +83,13 @@ namespace EconomicSim.Objects.Jobs
                 return _inputProducts;
             }
         }
-        public IReadOnlyDictionary<Product, decimal> OptionalInputProducts
+        public IReadOnlyDictionary<IProduct, decimal> OptionalInputProducts
         {
             get
             {
                 if (_optionalInputProducts == null)
                 {
-                    _optionalInputProducts = new Dictionary<Product, decimal>();
+                    _optionalInputProducts = new Dictionary<IProduct, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.InputProducts)
@@ -103,13 +103,13 @@ namespace EconomicSim.Objects.Jobs
                 return _optionalInputProducts;
             }
         }
-        public IReadOnlyDictionary<Product, decimal> CapitalProducts
+        public IReadOnlyDictionary<IProduct, decimal> CapitalProducts
         {
             get
             {
                 if (_capitalProducts == null)
                 {
-                    _capitalProducts = new Dictionary<Product, decimal>();
+                    _capitalProducts = new Dictionary<IProduct, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.CapitalProducts)
@@ -123,13 +123,13 @@ namespace EconomicSim.Objects.Jobs
                 return _capitalProducts;
             }
         }
-        public IReadOnlyDictionary<Product, decimal> OptionalCapitalProducts
+        public IReadOnlyDictionary<IProduct, decimal> OptionalCapitalProducts
         {
             get
             {
                 if (_optionalCapitalProducts == null)
                 {
-                    _optionalCapitalProducts = new Dictionary<Product, decimal>();
+                    _optionalCapitalProducts = new Dictionary<IProduct, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.CapitalProducts)
@@ -143,13 +143,13 @@ namespace EconomicSim.Objects.Jobs
                 return _optionalCapitalProducts;
             }
         }
-        public IReadOnlyDictionary<Product, decimal> OutputProducts
+        public IReadOnlyDictionary<IProduct, decimal> OutputProducts
         {
             get
             {
                 if (_outputProducts == null)
                 {
-                    _outputProducts = new Dictionary<Product, decimal>();
+                    _outputProducts = new Dictionary<IProduct, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.OutputProducts)
@@ -167,13 +167,13 @@ namespace EconomicSim.Objects.Jobs
 
         #region ProcessWants
 
-        public IReadOnlyDictionary<Want, decimal> InputWants
+        public IReadOnlyDictionary<IWant, decimal> InputWants
         {
             get
             {
                 if (_inputWants == null)
                 {
-                    _inputWants = new Dictionary<Want, decimal>();
+                    _inputWants = new Dictionary<IWant, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.InputWants)
@@ -188,13 +188,13 @@ namespace EconomicSim.Objects.Jobs
             }
         }
 
-        public IReadOnlyDictionary<Want, decimal> OptionalInputWants
+        public IReadOnlyDictionary<IWant, decimal> OptionalInputWants
         {
             get
             {
                 if (_optionalInputWants == null)
                 {
-                    _optionalInputWants = new Dictionary<Want, decimal>();
+                    _optionalInputWants = new Dictionary<IWant, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.InputWants)
@@ -209,13 +209,13 @@ namespace EconomicSim.Objects.Jobs
             }
         }
 
-        public IReadOnlyDictionary<Want, decimal> CapitalWants
+        public IReadOnlyDictionary<IWant, decimal> CapitalWants
         {
             get
             {
                 if (_capitalWants == null)
                 {
-                    _capitalWants = new Dictionary<Want, decimal>();
+                    _capitalWants = new Dictionary<IWant, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.InputWants)
@@ -230,13 +230,13 @@ namespace EconomicSim.Objects.Jobs
             }
         }
 
-        public IReadOnlyDictionary<Want, decimal> OptionalCapitalWants
+        public IReadOnlyDictionary<IWant, decimal> OptionalCapitalWants
         {
             get
             {
                 if (_optionalCapitalWants == null)
                 {
-                    _optionalCapitalWants = new Dictionary<Want, decimal>();
+                    _optionalCapitalWants = new Dictionary<IWant, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.InputWants)
@@ -251,13 +251,13 @@ namespace EconomicSim.Objects.Jobs
             }
         }
 
-        public IReadOnlyDictionary<Want, decimal> OutputWants
+        public IReadOnlyDictionary<IWant, decimal> OutputWants
         {
             get
             {
                 if (_outputWants == null)
                 {
-                    _outputWants = new Dictionary<Want, decimal>();
+                    _outputWants = new Dictionary<IWant, decimal>();
                     foreach (var proc in Processes)
                     {
                         foreach (var product in proc.InputWants)

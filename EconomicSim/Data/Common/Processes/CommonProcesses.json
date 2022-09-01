@@ -125,6 +125,161 @@
     }
   },
   {
+    "Name": "Cotton Farming",
+    "VariantName": "",
+    "MinimumTime": 0,
+    "Skill": "Cotton Farming",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "The work of a cotton farmer",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Time",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Cotton Farming",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Cotton Picking",
+    "VariantName": "",
+    "MinimumTime": 0,
+    "Skill": "Cotton Farming",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Finding Cotton in the wild is not easy.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Cotton Farming",
+          "Amount": 12,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Cotton",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Cotton Spinning",
+    "VariantName": "",
+    "MinimumTime": 0,
+    "Skill": "Spinning",
+    "SkillMinimum": 0,
+    "SkillMaximum": 1,
+    "ProcessTags": {},
+    "Description": "The process of turning Bolls of Cotton, removing the unusable material, and spinning the fibers into thread.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Spinner",
+          "Amount": 1,
+          "Tags": {}
+        },
+        {
+          "Product": "Cotton",
+          "Amount": 4,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Cotton(Spool)",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Degredation",
+    "VariantName": "Clothes(Cotton)",
+    "MinimumTime": 0,
+    "SkillMinimum": 0,
+    "SkillMaximum": 0,
+    "ProcessTags": {
+      "Failure": {
+        "Product": "Clothes(Cotton)"
+      }
+    },
+    "Description": "",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Clothes(Cotton)",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Nothing",
+          "Amount": 1,
+          "Tags": {
+            "Chance": {
+              "Group": "a",
+              "Weight": "1"
+            }
+          }
+        },
+        {
+          "Product": "Clothes(Cotton)",
+          "Amount": 1,
+          "Tags": {
+            "Chance": {
+              "Group": "b",
+              "Weight": "29"
+            }
+          }
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
     "Name": "Fruit Gathering",
     "VariantName": "",
     "MinimumTime": 1,
@@ -307,6 +462,181 @@
       "Outputs": [
         {
           "Product": "Simple Construction",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Spinning",
+    "VariantName": "",
+    "MinimumTime": 1,
+    "Skill": "Spinning",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Spinning raw fibers into thread.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Time",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Spinner",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Tailoring",
+    "VariantName": "",
+    "MinimumTime": 1,
+    "Skill": "Tailoring",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Tailoring produces more useful and wearable items for clothing.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Time",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Tailoring",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Tailoring",
+    "VariantName": "Cotton",
+    "MinimumTime": 0,
+    "Skill": "Tailoring",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Turning Cotton fabric into clothing",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Fabric(Cotton)",
+          "Amount": 2,
+          "Tags": {}
+        },
+        {
+          "Product": "Tailoring",
+          "Amount": 16,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Clothes(Cotton)",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Weaving",
+    "VariantName": "",
+    "MinimumTime": 1,
+    "Skill": "Weaving",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Weaving Threads into fabric is quite the process",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Time",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Weaving",
+          "Amount": 1,
+          "Tags": {}
+        }
+      ]
+    },
+    "Wants": {
+      "Inputs": [],
+      "Capital": [],
+      "Outputs": []
+    }
+  },
+  {
+    "Name": "Weaving",
+    "VariantName": "Cotton",
+    "MinimumTime": 0,
+    "Skill": "Weaving",
+    "SkillMinimum": 0,
+    "SkillMaximum": 5,
+    "ProcessTags": {},
+    "Description": "Weaving is a slow and time consuming process, but the results are worth it.",
+    "Icon": null,
+    "Products": {
+      "Inputs": [
+        {
+          "Product": "Cotton(Spool)",
+          "Amount": 1,
+          "Tags": {}
+        },
+        {
+          "Product": "Weaving",
+          "Amount": 16,
+          "Tags": {}
+        }
+      ],
+      "Capital": [],
+      "Outputs": [
+        {
+          "Product": "Fabric(Cotton)",
           "Amount": 1,
           "Tags": {}
         }

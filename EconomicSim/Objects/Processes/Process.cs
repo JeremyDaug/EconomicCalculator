@@ -219,6 +219,141 @@ namespace EconomicSim.Objects.Processes
             result.Icon = Icon;
             result.TechRequirement = TechRequirement;
             // do the addition of the components.
+            foreach (var input in InputProducts)
+            {
+                result.InputProducts.Add(
+                    new ProcessProduct
+                    {
+                        Product = input.Product,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in InputWants)
+            {
+                result.InputWants.Add(
+                    new ProcessWant
+                    {
+                        Want = input.Want,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in CapitalProducts)
+            {
+                result.CapitalProducts.Add(
+                    new ProcessProduct
+                    {
+                        Product = input.Product,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in CapitalWants)
+            {
+                result.CapitalWants.Add(
+                    new ProcessWant
+                    {
+                        Want = input.Want,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in OutputProducts)
+            {
+                result.OutputProducts.Add(
+                    new ProcessProduct
+                    {
+                        Product = input.Product,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in OutputWants)
+            {
+                result.OutputWants.Add(
+                    new ProcessWant
+                    {
+                        Want = input.Want,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            // add the other process parts,
+            // TODO, I'm a lazy fuck, so these are just tacked onto the end,
+            // not properly added to existing ones. Should be 
+            foreach (var input in other.InputProducts)
+            {
+                result.InputProducts.Add(
+                    new ProcessProduct
+                    {
+                        Product = input.Product,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in other.InputWants)
+            {
+                result.InputWants.Add(
+                    new ProcessWant
+                    {
+                        Want = input.Want,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in other.CapitalProducts)
+            {
+                result.CapitalProducts.Add(
+                    new ProcessProduct
+                    {
+                        Product = input.Product,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in other.CapitalWants)
+            {
+                result.CapitalWants.Add(
+                    new ProcessWant
+                    {
+                        Want = input.Want,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in OutputProducts)
+            {
+                result.OutputProducts.Add(
+                    new ProcessProduct
+                    {
+                        Product = input.Product,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
+            foreach (var input in OutputWants)
+            {
+                result.OutputWants.Add(
+                    new ProcessWant
+                    {
+                        Want = input.Want,
+                        Amount = input.Amount,
+                        Part = ProcessPartTag.Input,
+                        TagData = input.TagData.ToList()
+                    });
+            }
 
             return result;
         }
@@ -230,8 +365,11 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         /// <param name="other">The process to bring in as an input to this one.</param>
         /// <returns>The combined process resulting from the combination.</returns>
-        IProcess InputProcess(IProcess other);
-        
+        public IProcess InputProcess(IProcess other)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Feeds the other process into this process. Any outputs of other which are
         /// inputs for this cancel, otherwise inputs, capital, and outputs are added
@@ -243,7 +381,10 @@ namespace EconomicSim.Objects.Processes
         /// The other process will be multiplied to satisfy this.
         /// </param>
         /// <returns>The combined process resulting from the combination.</returns>
-        IProcess InputProcess(IProcess other, IProduct target);
+        public IProcess InputProcess(IProcess other, IProduct target)
+        {
+            throw new NotImplementedException();
+        }
         
         /// <summary>
         /// Feeds the other process into this process. Any outputs of other which are
@@ -256,7 +397,10 @@ namespace EconomicSim.Objects.Processes
         /// The other process will be multiplied to satisfy this.
         /// </param>
         /// <returns>The combined process resulting from the combination.</returns>
-        IProcess InputProcess(IProcess other, IWant target);
+        public IProcess InputProcess(IProcess other, IWant target)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Feeds this process's outputs into the <see cref="other"/> process as
@@ -265,7 +409,10 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         /// <param name="other">The process we are moving our outputs to.</param>
         /// <returns>The resulting combined process.</returns>
-        IProcess OutputToProcess(IProcess other);
+        public IProcess OutputToProcess(IProcess other)
+        {
+            throw new NotImplementedException();
+        }
         
         /// <summary>
         /// Feeds this process's outputs into the <see cref="other"/> process as
@@ -278,7 +425,10 @@ namespace EconomicSim.Objects.Processes
         /// The other process will be multiplied to satisfy this.
         /// </param>
         /// <returns>The resulting combined process.</returns>
-        IProcess OutputToProcess(IProcess other, IProduct target);
+        public IProcess OutputToProcess(IProcess other, IProduct target)
+        {
+            throw new NotImplementedException();
+        }
         
         /// <summary>
         /// Feeds this process's outputs into the <see cref="other"/> process as
@@ -291,7 +441,10 @@ namespace EconomicSim.Objects.Processes
         /// The other process will be multiplied to satisfy this.
         /// </param>
         /// <returns>The resulting combined process.</returns>
-        IProcess OutputToProcess(IProcess other, IWant target);
+        public IProcess OutputToProcess(IProcess other, IWant target)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Feeds the <see cref="other"/> process into this process as a source
@@ -302,7 +455,10 @@ namespace EconomicSim.Objects.Processes
         /// </remarks>
         /// <param name="other">The process we are taking in for capital goods.</param>
         /// <returns></returns>
-        IProcess TakeAsCapital(IProcess other);
+        public IProcess TakeAsCapital(IProcess other)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Feeds the <see cref="other"/> process into this process as a source
@@ -319,7 +475,7 @@ namespace EconomicSim.Objects.Processes
         /// <returns></returns>
         public IProcess TakeAsCapital(IProcess other, IWant target)
         {
-            
+            throw new NotImplementedException();
         }
 
         #endregion

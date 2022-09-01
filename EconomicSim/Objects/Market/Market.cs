@@ -14,6 +14,8 @@ namespace EconomicSim.Objects.Market
     public class Market : IMarket
     {
         private IDictionary<IProduct, decimal> _paymentPreference;
+        private readonly Dictionary<IProduct, decimal> _productsForSale;
+        private readonly Dictionary<IProduct, decimal> _productExchangeTotal;
 
         public Market()
         {
@@ -110,7 +112,12 @@ namespace EconomicSim.Objects.Market
             => ProductSold.ToDictionary(
                 x => (IProduct)x.Key,
                 x => x.Value);
-        
+
+        /// <summary>
+        /// The amount of product that was put up for sale today.
+        /// </summary>
+        public IReadOnlyDictionary<IProduct, decimal> ProductsForSale => _productsForSale;
+
         /// <summary>
         /// The amount of the product that has been successfully sold on
         /// the market so far. Updated to match daily.
@@ -120,7 +127,9 @@ namespace EconomicSim.Objects.Market
             => ProductSold.ToDictionary(
                 x => (IProduct)x.Key,
                 x => x.Value);
-        
+
+        IReadOnlyDictionary<IProduct, decimal> IMarket.ProductExchangeTotal => _productExchangeTotal;
+
         /// <summary>
         /// The amount of product that has been produced, but not
         /// necessarily sold, in the market.
@@ -228,6 +237,11 @@ namespace EconomicSim.Objects.Market
                     ProductSellerWeight[product] += weight;
                 else
                     ProductSellerWeight[product] = weight;
+                // add however much the seller has to offer to the total for sale today.
+                if (_productsForSale.ContainsKey(product))
+                    _productsForSale[product] += amount;
+                else
+                    _productsForSale[product] = amount;
             } 
             // the seller had been added and their products recorded, so everything is good to go.
         }

@@ -74,6 +74,11 @@ namespace EconomicSim.Objects.Market
         IReadOnlyDictionary<IProduct, decimal> MarketPrices { get; }
         
         /// <summary>
+        /// The amount of product that was put up for sale today.
+        /// </summary>
+        IReadOnlyDictionary<IProduct, decimal> ProductsForSale { get; }
+        
+        /// <summary>
         /// The amount of the product that has been successfully sold on
         /// the market so far. Updated to match daily.
         /// </summary>
@@ -84,6 +89,11 @@ namespace EconomicSim.Objects.Market
         /// necessarily sold, in the market.
         /// </summary>
         IReadOnlyDictionary<IProduct, decimal> ProductOutput { get; }
+
+        /// <summary>
+        /// The Total value exchanged for a product in the market today.
+        /// </summary>
+        IReadOnlyDictionary<IProduct, decimal> ProductExchangeTotal { get; }
 
         #endregion
         

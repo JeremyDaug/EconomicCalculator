@@ -62,6 +62,7 @@
         <Button Grid.Row="3" Grid.Column="3" Width="100" HorizontalContentAlignment="Center"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Culture</Button>
         <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Width="150" HorizontalContentAlignment="Center"
+                Click="SaveAllData"
                 HorizontalAlignment="Center" VerticalAlignment="Center">Save Data Set</Button>
         
         <TextBlock Grid.Row="5" Grid.ColumnSpan="4" Grid.Column="0"

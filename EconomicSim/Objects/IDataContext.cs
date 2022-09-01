@@ -88,5 +88,6 @@ namespace EconomicSim.Objects
         #endregion
 
         Task RunDay();
+        void SaveAllData();
     }
 }

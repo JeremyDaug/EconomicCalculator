@@ -9,7 +9,7 @@ namespace EconomicSim.Objects.Firms
     /// Read Only Firm Interface
     /// </summary>
     [JsonConverter(typeof(FirmJsonConverter))]
-    public interface IFirm : ICanSell
+    public interface IFirm : ICanSell, ICanBuy
     {
         /// <summary>
         /// Id of the firm
@@ -20,6 +20,8 @@ namespace EconomicSim.Objects.Firms
         /// Name of the firm.
         /// </summary>
         string Name { get; }
+        
+        FirmKind FirmKind { get; }
 
         /// <summary>
         /// The rank of the firm.
@@ -86,5 +88,11 @@ namespace EconomicSim.Objects.Firms
         IReadOnlyList<(ITechnology tech, int research)> Techs { get; }
 
         // Research stuff here.
+
+        /// <summary>
+        /// Makes the firm recalculate it's position, alter job weights, and the
+        /// like to try and get a better position in the future.
+        /// </summary>
+        void RecalculatePlans();
     }
 }

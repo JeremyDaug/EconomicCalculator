@@ -21,7 +21,7 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The want in question.
         /// </summary>
-        public Want Want { get; set; }
+        public IWant Want { get; set; }
 
         /// <summary>
         /// The amount of the want desired or produced.

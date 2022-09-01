@@ -1,5 +1,15 @@
 [
   {
+    "Name": "Ambrosia Farmer",
+    "VariantName": "",
+    "Labor": "Fruit Gathering",
+    "Skill": "Fruit Gathering",
+    "Processes": [
+      "Ambrosia Hunting",
+      "Fruit Gathering"
+    ]
+  },
+  {
     "Name": "Ambrosia Subsistence Farmer",
     "VariantName": "",
     "Labor": "Simple Construction",
@@ -13,39 +23,19 @@
     ]
   },
   {
-    "Name": "Ambrosia Farmer",
+    "Name": "Clothing Line",
     "VariantName": "",
-    "Labor": "Fruit Gathering",
-    "Skill": "Fruit Gathering",
+    "Labor": "Tailoring",
+    "Skill": "Tailoring",
     "Processes": [
-      "Ambrosia Hunting",
-      "Fruit Gathering"
-    ]
-  },
-  {
-    "Name": "Hut Builder",
-    "VariantName": "",
-    "Labor": "Simple Construction",
-    "Skill": "Simple Construction",
-    "Processes": [
-      "Ambrosia Hunting",
-      "Hut Construction",
-      "Hut Repairs",
-      "Fruit Gathering",
-      "Simple Construction"
-    ]
-  },
-  {
-    "Name": "Clothes Maker",
-    "VariantName": "",
-    "Labor": "Simple Construction",
-    "Skill": "Simple Construction",
-    "Processes": [
-      "Ambrosia Hunting",
-      "Hut Construction",
-      "Hut Repairs",
-      "Fruit Gathering",
-      "Simple Construction"
+      "Cotton Farming",
+      "Cotton Picking",
+      "Cotton Spinning",
+      "Spinning",
+      "Tailoring",
+      "Tailoring(Cotton)",
+      "Weaving",
+      "Weaving(Cotton)"
     ]
   },
   {
@@ -54,5 +44,16 @@
     "Labor": "Wheat Farming",
     "Skill": "Wheat Farming",
     "Processes": []
+  },
+  {
+    "Name": "Hut Builder",
+    "VariantName": "",
+    "Labor": "Simple Construction",
+    "Skill": "Simple Construction",
+    "Processes": [
+      "Hut Construction",
+      "Hut Repairs",
+      "Simple Construction"
+    ]
   }
 ]

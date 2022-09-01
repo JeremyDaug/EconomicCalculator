@@ -13,7 +13,7 @@ namespace EconomicSim.Objects.Processes
         /// <summary>
         /// The desired or recieved Want.
         /// </summary>
-        Want Want { get; }
+        IWant Want { get; }
 
         /// <summary>
         /// The amount of the want desired.

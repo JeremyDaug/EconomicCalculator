@@ -11,6 +11,7 @@ using EconomicSim.Objects;
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Processes.ProductionTags;
+using EconomicSim.Objects.Products;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
 using ReactiveUI;
@@ -449,15 +450,15 @@ public class ProcessEditorViewModel : ViewModelBase
             // check find old product connections and remove
             foreach (var product in oldProc.InputProducts)
             {
-                product.Product.ProductProcesses.Remove(oldProc);
+                ((Product)product.Product).ProductProcesses.Remove(oldProc);
             }
             foreach (var product in oldProc.CapitalProducts)
             {
-                product.Product.ProductProcesses.Remove(oldProc);
+                ((Product)product.Product).ProductProcesses.Remove(oldProc);
             }
             foreach (var product in oldProc.OutputProducts)
             {
-                product.Product.ProductProcesses.Remove(oldProc);
+                ((Product)product.Product).ProductProcesses.Remove(oldProc);
             }
             // tags
             oldProc.ProcessTags.Clear();

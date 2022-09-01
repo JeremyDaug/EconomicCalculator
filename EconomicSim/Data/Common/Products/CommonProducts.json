@@ -75,7 +75,7 @@
       }
     ],
     "Wants": {
-        "Food": 2
+      "Food": 2
     }
   },
   {
@@ -83,7 +83,7 @@
     "VariantName": "Cotton",
     "UnitName": "Set",
     "Quality": 2,
-    "Mass": 0.15,
+    "Mass": 2,
     "Bulk": 0.001,
     "Fractional": true,
     "Icon": "",
@@ -131,18 +131,6 @@
     "Wants": {}
   },
   {
-    "Name": "Cotton",
-    "VariantName": "Spool",
-    "UnitName": "Kg",
-    "Quality": 2,
-    "Mass": 1,
-    "Bulk": 0.0003,
-    "Fractional": true,
-    "Icon": "",
-    "ProductTags": [],
-    "Wants": {}
-  },
-  {
     "Name": "Cotton Farming",
     "VariantName": "",
     "UnitName": "man hour",
@@ -156,6 +144,18 @@
         "Service": null
       }
     ],
+    "Wants": {}
+  },
+  {
+    "Name": "Cotton",
+    "VariantName": "Spool",
+    "UnitName": "Kg",
+    "Quality": 2,
+    "Mass": 1,
+    "Bulk": 0.0003,
+    "Fractional": true,
+    "Icon": "",
+    "ProductTags": [],
     "Wants": {}
   },
   {
@@ -249,7 +249,7 @@
     "Icon": "",
     "ProductTags": [],
     "Wants": {
-        "Luxury": 0.25
+      "Luxury": 0.25
     }
   },
   {
@@ -327,8 +327,8 @@
     "Icon": "",
     "ProductTags": [],
     "Wants": {
-        "Security": 10,
-        "Housing": 1
+      "Security": 10,
+      "Housing": 1
     }
   },
   {
@@ -342,7 +342,7 @@
     "Icon": "",
     "ProductTags": [],
     "Wants": {
-        "Housing": 1
+      "Housing": 1
     },
     "TechRequirement": "Survivalism"
   },
@@ -635,7 +635,7 @@
     "Wants": {}
   },
   {
-    "Name": "Weaver",
+    "Name": "Weaving",
     "VariantName": "",
     "UnitName": "man hour",
     "Quality": 1,
@@ -681,7 +681,7 @@
       }
     ],
     "Wants": {
-        "Luxury": 1.75
+      "Luxury": 1.75
     }
   },
   {
@@ -699,7 +699,7 @@
       }
     ],
     "Wants": {
-        "Food": 0.3
+      "Food": 0.3
     }
   }
 ]

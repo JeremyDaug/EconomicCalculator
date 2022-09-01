@@ -1,17 +1,53 @@
 [
   {
-    "Count": 1,
-    "Job": "Ambrosia Subsistence Farmer",
-    "Firm": "Bobistan Subsistence Farmers",
+    "Count": 10,
+    "Job": "Ambrosia Farmer",
+    "Firm": "Bobistan Ambrosia Farmers",
     "Market": "Bobistan",
     "LowerSkillLevel": 3,
     "HigherSkillLevel": 0,
     "Species": {
-      "Humie": 1
+      "Humie": 10
     },
     "Cultures": {
-      "Simple": 1
+      "Simple": 10
     },
-    "Property": {}
+    "Property": {
+      "Hut": 10
+    }
+  },
+  {
+    "Count": 10,
+    "Job": "Hut Builder",
+    "Firm": "Bobistan Builders",
+    "Market": "Bobistan",
+    "LowerSkillLevel": 3,
+    "HigherSkillLevel": 0,
+    "Species": {
+      "Humie": 10
+    },
+    "Cultures": {
+      "Simple": 10
+    },
+    "Property": {
+      "Hut": 10
+    }
+  },
+  {
+    "Count": 10,
+    "Job": "Clothing Line",
+    "Firm": "Bobistan Clothiers",
+    "Market": "Bobistan",
+    "LowerSkillLevel": 3,
+    "HigherSkillLevel": 0,
+    "Species": {
+      "Humie": 10
+    },
+    "Cultures": {
+      "Simple": 10
+    },
+    "Property": {
+      "Hut": 10
+    }
   }
 ]

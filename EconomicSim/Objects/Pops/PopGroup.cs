@@ -21,7 +21,7 @@ namespace EconomicSim.Objects.Pops
             Property = new Dictionary<IProduct, decimal>();
             Species = new List<SpeciesCount>();
             Cultures = new List<CultureCount>();
-            ForSale = new Dictionary<IProduct, decimal>();
+            _forSale = new Dictionary<IProduct, decimal>();
         }
 
         /// <summary>
@@ -221,18 +221,26 @@ namespace EconomicSim.Objects.Pops
         public decimal GetTotalHours()
         {
             // TODO make this more flexible and use available productivity based on the population's details (species, culture, etc).
+            // TODO make productivity dependent on available light.
+                // for example. with a 12 hrs of day and night give the 12 day hours full
+                // time, and the night hours for less. Light allows one to improve the
+                // efficiency of 
             return Count * 16;
         }
 
         #region ICanSellRegion
 
-        public Dictionary<IProduct, decimal> SellWeight { get; set; }
+        public IDictionary<IProduct, decimal> SellWeight { get; }
+
         public bool IsSelling { get; set; }
 
-        private Dictionary<IProduct, decimal> ForSale { get; set; }
+        public decimal Revenue { get; }
+
+        public IReadOnlyDictionary<IProduct, decimal> ForSale => _forSale;
+
         public decimal SalePrice(IProduct product)
-        { // not needed until Sell Phase is completed.
-            throw new NotImplementedException();
+        {
+            return Market.GetMarketPrice(product);
         }
 
         public async Task<ICanSell> SellPhase()
@@ -261,6 +269,15 @@ namespace EconomicSim.Objects.Pops
 
         IReadOnlyDictionary<IProduct, decimal> IPopGroup.ForSale => ForSale;
 
+        public Task StartExchange(ICanBuy buyer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IReadOnlyDictionary<IProduct, decimal> GoodsSold => _goodsSold;
+
+        public IReadOnlyDictionary<IProduct, decimal> OriginalStock => _originalStock;
+        
         #endregion
 
         #region SafeProductExchange
@@ -280,7 +297,7 @@ namespace EconomicSim.Objects.Pops
                 result.Add(product, ForSale[product]);
                 // and remove what was lost from both sale and property
                 Property[product] -= ForSale[product];
-                ForSale.Remove(product);
+                _forSale.Remove(product);
             }
             
             return result;
@@ -305,9 +322,9 @@ namespace EconomicSim.Objects.Pops
                 result.Add(product, val);
                 // and remove what was lost from both sale and property
                 Property[product] -= val;
-                ForSale[product] -= val;
+                _forSale[product] -= val;
                 if (ForSale[product] == 0)
-                    ForSale.Remove(product);
+                    _forSale.Remove(product);
             }
             
             return result;
@@ -333,9 +350,9 @@ namespace EconomicSim.Objects.Pops
                 Property[product] -= val;
                 if (ForSale.ContainsKey(product))
                 { // also remove it from sale
-                    ForSale[product] -= amount;
+                    _forSale[product] -= amount;
                     if (ForSale[product] <= 0) // if no sale is left, remove it entirely.
-                        ForSale.Remove(product);
+                        _forSale.Remove(product);
                 }
             }
             
@@ -406,7 +423,7 @@ namespace EconomicSim.Objects.Pops
             // rest time and shopping time has been reserved,
             // add it to the 'for sale' block so firms can 'buy' it.
             var timeReserved = ShoppingTarget / 10 + RestTarget / 2;
-            ForSale.Add(dc.Time, GetTotalHours() - timeReserved);
+            _forSale.Add(dc.Time, GetTotalHours() - timeReserved);
         }
 
         /// <summary>
@@ -439,8 +456,44 @@ namespace EconomicSim.Objects.Pops
         /// </summary>
         private decimal RestTarget;
 
+        private readonly Dictionary<IProduct, decimal> _goodsSold;
+        private readonly Dictionary<IProduct, decimal> _originalStock;
+        private readonly Dictionary<IProduct, decimal> _forSale;
+
         #endregion
 
-        IDictionary<IProduct, decimal> ICanSell.ForSale { get; }
+        /// <summary>
+        /// Gives a pop a number of products.
+        /// </summary>
+        /// <param name="product">A product.</param>
+        /// <param name="amount">A positive amount of that product to add.</param>
+        /// <exception cref="ArgumentException">If <see cref="amount"/> is not positive.</exception>
+        public void ReceiveGoods(IProduct product, decimal amount)
+        {
+            if (amount <= 0)
+                throw new ArgumentException("amount must be > 0");
+            if (Property.ContainsKey(product))
+                Property[product] += amount;
+            else
+                Property[product] = amount;
+        }
+
+        #region Buying
+
+        public bool IsBuying { get; } = true;
+        
+        public IReadOnlyDictionary<IProduct, decimal> ForExchange { get; } = new Dictionary<IProduct, decimal>();
+        
+        public decimal Expenditures { get; }
+        
+        public decimal Budget { get; }
+        
+        public IReadOnlyDictionary<IProduct, decimal> ShoppingList { get; } = new Dictionary<IProduct, decimal>();
+        public void BuyGoods()
+        {
+            // get estimated available stuff to sell.
+        }
+
+        #endregion
     }
 }

@@ -146,7 +146,8 @@ namespace EconomicSim.Objects
             // TODO, do this later, when governments exist.
 
             // Pop Buy Phase, where all pops and firms buy what they desire.
-            // TODO, do this later, when pops actually buy shit.
+            // TODO be sure to pull the pops from the market currently being set up here.
+            
 
             // Firm Recalculation and Buy Phase.
             // Firm Recalculation follows the order of the most successful to
@@ -159,10 +160,16 @@ namespace EconomicSim.Objects
             // as those who can't be bought from buy from those with goods to sell
             // making them more likely to stock out, and thus have all the info they
             // need to recalculate accurately.
+            // get all the firms
+            var firmBuyers = Firms.Values
+                .Where(x => x.IsBuying);
+            
+            // TODO do Buy Phase Later, when there's actually stuff to buy.
+            // for now, select the only firm and have them recalculate.
 
             // Pop Consumption phase, where pops get to consume and enjoy
             // the fruits of their labors.
-            
+
             // Maintenance phase, where all goods that can be or will be maintained
             // are maintained.
 
@@ -204,8 +211,17 @@ namespace EconomicSim.Objects
         #region Saving
 
         public void SaveAllData()
-        {
-            
+        { // TODO, update this for set Mechanics.
+            SaveWants();
+            SaveTechnologies();
+            SaveTechFamilies();
+            SaveSkills();
+            SaveSkillGroups();
+            SaveProducts();
+            SaveProcesses();
+            SaveJobs();
+            SaveSpecies();
+            SaveCultures();
         }
 
         public void SaveGame()
@@ -295,7 +311,8 @@ namespace EconomicSim.Objects
         public void SaveProcesses(string set = "")
         {
             var filename = GetDataFile("Common", "Processes");
-            var json = JsonSerializer.Serialize(Processes.Values,
+            var json = JsonSerializer.Serialize(Processes.Values
+                    .Where(x => !RequiredItems.Processes.ContainsKey(x.GetName())),
                 new JsonSerializerOptions
                 {
                     WriteIndented = true
@@ -645,13 +662,13 @@ namespace EconomicSim.Objects
             {
                 // if it has that product, add it to their processes
                 foreach (var product in process.InputProducts)
-                    product.Product.ProductProcesses.Add(process);
+                    ((Product)product.Product).ProductProcesses.Add(process);
                 foreach (var product in process.CapitalProducts)
                     if (!product.Product.ProductProcesses.Contains(process))
-                        product.Product.ProductProcesses.Add(process);
+                        ((Product)product.Product).ProductProcesses.Add(process);
                 foreach (var product in process.OutputProducts)
                     if (!product.Product.ProductProcesses.Contains(process))
-                        product.Product.ProductProcesses.Add(process);
+                        ((Product)product.Product).ProductProcesses.Add(process);
             }
 
             foreach (var product in Products.Values)

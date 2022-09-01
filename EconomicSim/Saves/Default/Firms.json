@@ -1,31 +1,86 @@
 [
   {
-    "Name": "Bobistan Subsistence Farmers",
+    "Name": "Bobistan Ambrosia Farmers",
     "FirmRank": "Firm",
     "OwnershipStructure": "SelfEmployed",
     "ProfitStructure": "Distributed",
     "Jobs": [
       {
-        "Job": "Ambrosia Subsistence Farmer",
+        "Job": "Ambrosia Farmer",
         "WageType": "LossSharing",
         "Wage": 0,
         "Assignments": {
-          "Ambrosia Hunting": 0,
-          "Hut Construction": 0,
-          "Hut Repairs": 0,
-          "Fruit Gathering": 8,
+          "Ambrosia Hunting": 8,
+          "Fruit Gathering": 8
+        }
+      }
+    ],
+    "Products": {
+      "Ambrosia Fruit": 1
+    },
+    "Resources": {
+      "Ambrosia Fruit": 1
+    },
+    "HeadQuarters": "Bobistan",
+    "Regions": [],
+    "Techs": {
+      "Brainstorming": -1
+    }
+  },
+  {
+    "Name": "Bobistan Builders",
+    "FirmRank": "Firm",
+    "OwnershipStructure": "SelfEmployed",
+    "ProfitStructure": "Distributed",
+    "Jobs": [
+      {
+        "Job": "Hut Builder",
+        "WageType": "LossSharing",
+        "Wage": 0,
+        "Assignments": {
+          "Hut Construction": 8,
+          "Hut Repairs": 8,
           "Simple Construction": 8
         }
       }
     ],
     "Products": {
-      "Ambrosia Fruit": 1,
-      "Hut": 20,
-      "Simple Construction" : 5
+      "Simple Construction": 1,
+      "Hut": 100
     },
-    "Resources": {
-      "Ambrosia Fruit": 1
+    "Resources": {},
+    "HeadQuarters": "Bobistan",
+    "Regions": [],
+    "Techs": {
+      "Brainstorming": -1
+    }
+  },
+  {
+    "Name": "Bobistan Clothiers",
+    "FirmRank": "Firm",
+    "OwnershipStructure": "SelfEmployed",
+    "ProfitStructure": "Distributed",
+    "Jobs": [
+      {
+        "Job": "Clothing Line",
+        "WageType": "LossSharing",
+        "Wage": 0,
+        "Assignments": {
+          "Cotton Farming": 0,
+          "Cotton Picking": 0,
+          "Cotton Spinning": 0,
+          "Spinning": 0,
+          "Tailoring": 0,
+          "Tailoring(Cotton)": 0,
+          "Weaving": 0,
+          "Weaving(Cotton)": 0
+        }
+      }
+    ],
+    "Products": {
+      "Clothes(Cotton)": 10
     },
+    "Resources": {},
     "HeadQuarters": "Bobistan",
     "Regions": [],
     "Techs": {
