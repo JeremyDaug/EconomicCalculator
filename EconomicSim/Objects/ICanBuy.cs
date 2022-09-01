@@ -1,3 +1,4 @@
+using EconomicSim.Helpers;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 
@@ -31,9 +32,14 @@ public interface ICanBuy
     decimal Budget { get; }
     
     /// <summary>
-    /// What the buyer is seeking to purchase.
+    /// What products we are seeking to buy.
     /// </summary>
-    IReadOnlyDictionary<IProduct, decimal> ShoppingList { get; }
+    IReadOnlyList<INeedDesire> ProductShoppingList { get; }
+    
+    /// <summary>
+    /// What wants we are seeking to have satisfied.
+    /// </summary>
+    IReadOnlyList<IWantDesire> WantShoppingList { get; }
 
     /// <summary>
     /// We go to our market to try and buy goods that we desire.

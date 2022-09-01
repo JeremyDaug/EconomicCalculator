@@ -344,8 +344,6 @@ namespace EconomicSim.Objects.Firms
             
             // Reserve what we already have and need for tomorrow's (inaccurate) projection.
             // reserve inputs first
-            // TODO maybe rework this to just 'buy' from themselves first instead of reserving ahead of time.
-            // Doing that would risk others buyng from them first, which if they intend to use it, is silly.
             foreach (var job in Jobs)
             {
                 var inputReqs = job.InputProductRequirements();
@@ -402,7 +400,7 @@ namespace EconomicSim.Objects.Firms
                 else
                     temp[reserve] = amount;
             }
-            // go through each reserved product
+            // go through each reserved product and reserve what maintains it.
             foreach (var (product, amount) in temp)
             {
                 // if it can't be maintained, skip it.

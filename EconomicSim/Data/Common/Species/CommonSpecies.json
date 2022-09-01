@@ -9,6 +9,16 @@
         "Want": "Food",
         "Tier": 0,
         "Amount": 1
+      },
+      {
+        "Want": "Housing",
+        "Tier": 1,
+        "Amount": 1
+      },
+      {
+        "Want": "Clothing",
+        "Tier": 1,
+        "Amount": 1
       }
     ],
     "Tags": [],

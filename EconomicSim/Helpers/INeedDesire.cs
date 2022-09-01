@@ -25,5 +25,6 @@ public interface INeedDesire
     /// How much of the Desire has been satisfied so far. Resets before daily consumption
     /// for record purposes. Not Stored in Json.
     /// </summary>
+    [JsonIgnore]
     decimal Satisfaction { get; set; }
 }
