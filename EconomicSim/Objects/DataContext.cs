@@ -95,7 +95,7 @@ namespace EconomicSim.Objects
             var LaborPhase = new List<Task>();
             foreach (var pop in Pops.Values)
             {
-                pop.Property.Add((Product)Time, pop.GetTotalHours());
+                pop.AddDailyHours();
                 LaborPhase.Add(pop.ReserveItems());
             }
             await Task.WhenAll(LaborPhase);
@@ -161,9 +161,7 @@ namespace EconomicSim.Objects
             // making them more likely to stock out, and thus have all the info they
             // need to recalculate accurately.
             // get all the firms
-            var firmBuyers = Firms.Values
-                .Where(x => x.IsBuying);
-            
+
             // TODO do Buy Phase Later, when there's actually stuff to buy.
             // for now, select the only firm and have them recalculate.
 

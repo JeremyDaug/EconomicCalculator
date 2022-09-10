@@ -4,7 +4,6 @@ using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Pops;
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Products;
-using EconomicSim.Objects.Wants;
 
 namespace EconomicSim.Objects.Firms;
 

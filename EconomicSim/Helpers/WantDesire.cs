@@ -4,10 +4,19 @@ using EconomicSim.Objects.Wants;
 namespace EconomicSim.Helpers;
 
 [JsonConverter(typeof(WantDesireJsonConverter))]
-public class WantDesire : IWantDesire
+public class WantDesire : ADesire, IWantDesire
 {
+    public WantDesire() {}
+
+    public WantDesire(IWantDesire other)
+    {
+        Want = other.Want;
+        IsConsumed = other.IsConsumed;
+        StartTier = other.StartTier;
+        Step = other.Step;
+        EndTier = other.EndTier;
+        Amount = other.Amount;
+    }
+    
     public IWant Want { get; set; }
-    public int Tier { get; set; }
-    public decimal Amount { get; set; }
-    public decimal Satisfaction { get; set; }
 }

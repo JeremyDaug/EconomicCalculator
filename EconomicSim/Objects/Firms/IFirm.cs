@@ -9,7 +9,7 @@ namespace EconomicSim.Objects.Firms
     /// Read Only Firm Interface
     /// </summary>
     [JsonConverter(typeof(FirmJsonConverter))]
-    public interface IFirm : ICanSell, ICanBuy
+    public interface IFirm
     {
         /// <summary>
         /// Id of the firm

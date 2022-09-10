@@ -113,19 +113,12 @@ namespace EconomicSim.Objects.Pops
                     {
                         // check if the desire has already been added.
                         var extant = result.SingleOrDefault(x => x.Product == desire.Product && 
-                                                                 x.Tier == desire.Tier);
+                                                                 x.StartTier == desire.StartTier);
                         if (extant == null)
-                        { // if is hasn't, add it and set extant.
-                            extant = new NeedDesire
-                            {
-                                Product = desire.Product,
-                                Amount = 0,
-                                Tier = desire.Tier
-                            };
+                        { // if is hasn't, copy and add it and set extant.
+                            extant = new NeedDesire(desire);
                             result.Add(extant);
                         }
-                        // then update the amount
-                        extant.Amount += desire.Amount;
                     }
                 }
                 // do the same with Culture desires
@@ -135,19 +128,12 @@ namespace EconomicSim.Objects.Pops
                     {
                         // check if the desire has already been added.
                         var extant = result.SingleOrDefault(x => x.Product == desire.Product && 
-                                                                 x.Tier == desire.Tier);
+                                                                 x.StartTier == desire.StartTier);
                         if (extant == null)
-                        { // if is hasn't, add it and set extant.
-                            extant = new NeedDesire
-                            {
-                                Product = desire.Product,
-                                Amount = 0,
-                                Tier = desire.Tier
-                            };
+                        { // if is hasn't, copy and add it and set extant.
+                            extant = new NeedDesire(desire);
                             result.Add(extant);
                         }
-                        // then update the amount
-                        extant.Amount += desire.Amount;
                     }
                 }
                 
@@ -171,19 +157,12 @@ namespace EconomicSim.Objects.Pops
                     {
                         // check if the desire has already been added.
                         var extant = result.SingleOrDefault(x => x.Want == desire.Want && 
-                                                                 x.Tier == desire.Tier);
+                                                                 x.StartTier == desire.StartTier);
                         if (extant == null)
-                        { // if is hasn't, add it and set extant.
-                            extant = new WantDesire
-                            {
-                                Want = desire.Want,
-                                Amount = 0,
-                                Tier = desire.Tier
-                            };
+                        { // if is hasn't, copy and add it and set extant.
+                            extant = new WantDesire(desire);
                             result.Add(extant);
                         }
-                        // then update the amount
-                        extant.Amount += desire.Amount;
                     }
                 }
                 // do the same with Culture desires
@@ -193,25 +172,20 @@ namespace EconomicSim.Objects.Pops
                     {
                         // check if the desire has already been added.
                         var extant = result.SingleOrDefault(x => x.Want == desire.Want && 
-                                                                 x.Tier == desire.Tier);
+                                                                 x.StartTier == desire.StartTier);
                         if (extant == null)
-                        { // if is hasn't, add it and set extant.
-                            extant = new WantDesire
-                            {
-                                Want = desire.Want,
-                                Amount = 0,
-                                Tier = desire.Tier
-                            };
+                        { // if is hasn't, copy and add it and set extant.
+                            extant = new WantDesire(desire);
                             result.Add(extant);
                         }
-                        // then update the amount
-                        extant.Amount += desire.Amount;
                     }
                 }
                 
                 return result;
             }
         }
+
+        
 
         /// <summary>
         /// Gets the hours of the population group
@@ -228,16 +202,25 @@ namespace EconomicSim.Objects.Pops
             return Count * 16;
         }
 
+        /// <summary>
+        /// Adds the daily hours the pop has available to it here.
+        /// Should only be run once, as the first step of the day.
+        /// </summary>
+        public void AddDailyHours()
+        {
+            Property.Add((Product)DataContext.Instance.Time, GetTotalHours());
+        }
+
         #region ICanSellRegion
 
         public IDictionary<IProduct, decimal> SellWeight { get; }
-
         public bool IsSelling { get; set; }
-
         public decimal Revenue { get; }
-
         public IReadOnlyDictionary<IProduct, decimal> ForSale => _forSale;
-
+        public IReadOnlyDictionary<IProduct, decimal> GoodsSold => _goodsSold;
+        public IReadOnlyDictionary<IProduct, decimal> OriginalStock => _originalStock;
+        IReadOnlyDictionary<IProduct, decimal> IPopGroup.ForSale => ForSale;
+        
         public decimal SalePrice(IProduct product)
         {
             return Market.GetMarketPrice(product);
@@ -247,15 +230,10 @@ namespace EconomicSim.Objects.Pops
         {
             // check we need to sell at all
             if (Firm.OwnershipStructure == OwnershipStructure.SelfEmployed)
-            { // if firm is self-employed, the firm sells for them.
-                // This may need to be altered/reversed to function properly
-                // Pops need to buy their needs
-                // firms need to buy their inputs
-                // but self-employed pops and firms are the same, until they aren't.
-                // Self-employed pops and similar firms are going to need to include their
-                // workers desires to function properly. 
-                // TODO make Self-Employed Workers be included under firms.
-                IsSelling = false;
+            { // if firm is self-employed, the firm is just for production.
+                // The pop buys and sells themselves. Their price is the firm's,
+                // but they will use the products to buy later if necissary.
+                IsSelling = true;
                 return this; // set selling to false and return.
             }
             // TODO check the pop's storage to ensure they won't overflow.
@@ -267,17 +245,11 @@ namespace EconomicSim.Objects.Pops
             return this;
         }
 
-        IReadOnlyDictionary<IProduct, decimal> IPopGroup.ForSale => ForSale;
-
         public Task StartExchange(ICanBuy buyer)
         {
             throw new NotImplementedException();
         }
 
-        public IReadOnlyDictionary<IProduct, decimal> GoodsSold => _goodsSold;
-
-        public IReadOnlyDictionary<IProduct, decimal> OriginalStock => _originalStock;
-        
         #endregion
 
         #region SafeProductExchange
@@ -383,13 +355,23 @@ namespace EconomicSim.Objects.Pops
         #region ReserveItems
 
         /// <summary>
+        /// Sorts the property based on the pop's desire to keep it. 
+        /// </summary>
+        public async Task OrganizeProperty()
+        {
+            // get a copy of all of our property which needs to be sorted.
+            var ToBeSorted = new Dictionary<IProduct, decimal>(Property);
+            
+        }
+
+        /// <summary>
         /// Reserves items before anything happens during the day.
         /// Prioritization logic is TBD, so currently it reserves 2 hours of time.
         /// </summary>
         public async Task ReserveItems()
         {
             var dc = DataContext.Instance;
-            // preemptively, if Shopping target is set to 0, then 
+            // preemptively, if Shopping target is set to 0, then up to a guess
             if (ShoppingTarget == 0)
                 ShoppingTarget = Needs.Count + Wants.Count;
             
@@ -399,7 +381,7 @@ namespace EconomicSim.Objects.Pops
             // var needs = Needs; Not needed here, but may be in future iteration.
 
             // if rest is included as a level 0 value, set the target value.
-            if (wants.Any(x => x.Want == dc.Rest && x.Tier == 0))
+            if (wants.Any(x => x.Want == dc.Rest && x.StartTier == 0))
                 RestTarget = wants.Single(x => x.Want == dc.Rest).Amount;
             
             // calculate estimated time for shopping.
@@ -487,7 +469,9 @@ namespace EconomicSim.Objects.Pops
         public decimal Expenditures { get; }
         
         public decimal Budget { get; }
-        
+        public IReadOnlyList<INeedDesire> ProductShoppingList { get; }
+        public IReadOnlyList<IWantDesire> WantShoppingList { get; }
+
         public IReadOnlyDictionary<IProduct, decimal> ShoppingList { get; } = new Dictionary<IProduct, decimal>();
         public void BuyGoods()
         {

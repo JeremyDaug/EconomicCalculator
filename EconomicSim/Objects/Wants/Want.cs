@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Products;
 

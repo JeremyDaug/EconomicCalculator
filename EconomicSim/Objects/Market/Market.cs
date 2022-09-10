@@ -13,7 +13,7 @@ namespace EconomicSim.Objects.Market
     [JsonConverter(typeof(MarketJsonConverter))]
     public class Market : IMarket
     {
-        private IDictionary<IProduct, decimal> _paymentPreference;
+        private IDictionary<IProduct, decimal> _paymentPreference = new Dictionary<IProduct, decimal>();
         private readonly Dictionary<IProduct, decimal> _productsForSale;
         private readonly Dictionary<IProduct, decimal> _productExchangeTotal;
 
@@ -27,7 +27,6 @@ namespace EconomicSim.Objects.Market
             MarketPrices = new Dictionary<IProduct, decimal>();
             ProductSold = new Dictionary<IProduct, decimal>();
             ProductOutput = new Dictionary<Product, decimal>();
-            _paymentPreference = new Dictionary<IProduct, decimal>();
 
             ProductSellers = new Dictionary<IProduct, IList<ICanSell>>();
             ProductSellerWeight = new Dictionary<IProduct, decimal>();
@@ -108,10 +107,9 @@ namespace EconomicSim.Objects.Market
         /// values rolling forward (values at startup are approximations).
         /// </summary>
         public Dictionary<IProduct, decimal> MarketPrices { get; set; }
+
         IReadOnlyDictionary<IProduct, decimal> IMarket.MarketPrices
-            => ProductSold.ToDictionary(
-                x => (IProduct)x.Key,
-                x => x.Value);
+            => MarketPrices;
 
         /// <summary>
         /// The amount of product that was put up for sale today.
@@ -261,8 +259,21 @@ namespace EconomicSim.Objects.Market
 
         /// <summary>
         /// The list of products which have reached currency status.
+        /// Salability still effects these products, but reduces their immediate need.
         /// </summary>
-        public IList<IProduct> Currencies { get; set; }
+        public IList<IProduct> Currencies { get; } = new List<IProduct>();
+
+        /// <summary>
+        /// This is a list of items and their Salability in the market.
+        /// If a product is not in this list, then it's not considered Salable.
+        /// Salability is altered by the effective results in
+        /// 1. Scale, ie it's price is small enough per unit or easily divided
+        /// 2. Space, it's value dense, high value to weight/volume.
+        /// 3. Time, it's value over time is stable or improving consistently.
+        /// 4. Availability, it's plentiful enough that everyone can have or get some.
+        /// 5. Trust, it's easily accepted, regardless of it's other properties.
+        /// </summary>
+        public IDictionary<IProduct, float> SalabilityIndex { get; } = new Dictionary<IProduct, float>();
 
         public override string ToString()
         {

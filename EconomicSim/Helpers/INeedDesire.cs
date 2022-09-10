@@ -4,27 +4,10 @@ using EconomicSim.Objects.Products;
 namespace EconomicSim.Helpers;
 
 [JsonConverter(typeof(NeedDesireJsonConverter))]
-public interface INeedDesire
+public interface INeedDesire : IDesire
 {
     /// <summary>
     /// The product desired.
     /// </summary>
     IProduct Product { get; }
-    
-    /// <summary>
-    /// The tier of the desire.
-    /// </summary>
-    int Tier { get; }
-    
-    /// <summary>
-    /// The amount requested
-    /// </summary>
-    decimal Amount { get; set; }
-    
-    /// <summary>
-    /// How much of the Desire has been satisfied so far. Resets before daily consumption
-    /// for record purposes. Not Stored in Json.
-    /// </summary>
-    [JsonIgnore]
-    decimal Satisfaction { get; set; }
 }

@@ -4,20 +4,46 @@
     "VariantName": null,
     "GrowthRate": 0.02,
     "DeathRate": 0,
+    "Needs": [
+      {
+        "Product": "Ambrosia Fruit",
+        "IsConsumed": false,
+        "StartTier": 1000,
+        "Step": 10,
+        "Amount": 1
+      }
+    ],
     "Wants": [
       {
         "Want": "Food",
-        "Tier": 0,
-        "Amount": 1
+        "StartTier": -1000,
+        "IsConsumed": true,
+        "Amount": 0.5
+      },
+      {
+        "Want": "Food",
+        "StartTier": 0,
+        "IsConsumed": true,
+        "Amount": 0.5
       },
       {
         "Want": "Housing",
-        "Tier": 1,
+        "StartTier": 0,
+        "IsConsumed": true,
         "Amount": 1
       },
       {
         "Want": "Clothing",
-        "Tier": 1,
+        "StartTier": 0,
+        "IsConsumed": true,
+        "Amount": 1
+      },
+      {
+        "Want": "Rest",
+        "IsConsumed": true,
+        "StartTier": 5,
+        "Step": 5,
+        "EndTier": 100,
         "Amount": 1
       }
     ],

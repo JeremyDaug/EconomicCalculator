@@ -1,5 +1,4 @@
 using EconomicSim.Helpers;
-using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 
 namespace EconomicSim.Objects;
@@ -12,7 +11,7 @@ public interface ICanBuy
     bool IsBuying { get; }
     
     /// <summary>
-    /// The items we are willing to exchange for goods.
+    /// The items we are willing to exchange for goods, and how much.
     /// </summary>
     IReadOnlyDictionary<IProduct, decimal> ForExchange { get; }
 

@@ -1,5 +1,4 @@
-﻿using System.Resources;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Technology;
@@ -297,10 +296,10 @@ namespace EconomicSim.Objects.Firms
         
         public decimal Revenue { get; set; }
         
-        IMarket ICanSell.Market
-        {
-            get => HeadQuarters;
-        }
+        // IMarket ICanSell.Market
+        // {
+        //     get => HeadQuarters;
+        // }
 
         public IReadOnlyDictionary<IProduct, decimal> ForSale => _forSale;
 
@@ -500,7 +499,7 @@ namespace EconomicSim.Objects.Firms
                 _originalStock[product] = amount;
             
             IsSelling = true;
-            return this;
+            return null;
         }
         
         public async Task StartExchange(ICanBuy buyer)
@@ -643,7 +642,7 @@ namespace EconomicSim.Objects.Firms
             var pop = Jobs.First().Pop;
             var needSats = new Dictionary<IProduct, decimal>();
             foreach (var need in pop.Needs
-                         .Where(x => x.Tier == 0))
+                         .Where(x => x.StartTier == 0))
             {
                 needSats[need.Product] = 0;
                 decimal available; // get the available 
@@ -661,7 +660,7 @@ namespace EconomicSim.Objects.Firms
             // do the same for wants
             var wantSats = new Dictionary<IWant, decimal>();
             foreach (var want in pop.Wants
-                         .Where(x => x.Tier == 0))
+                         .Where(x => x.StartTier == 0))
             {
                 decimal satisfaction = 0;
                 var target = want.Amount * pop.Count;

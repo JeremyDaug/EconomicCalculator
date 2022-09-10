@@ -1,6 +1,5 @@
 ﻿using EconomicSim.Objects.Processes;
 using EconomicSim.Objects.Processes.ProcessTags;
-using EconomicSim.Objects.Processes.ProductionTags;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Products.ProductTags;
 using EconomicSim.Objects.Technology;
@@ -26,6 +25,26 @@ namespace EconomicSim.Objects
             Id = 1,
             Name = "Rest",
             Description = "A time to rest and recuperate from the hardships of life."
+        };
+
+        /// <summary>
+        /// Space, used or not, which a pop desires/owns.
+        /// </summary>
+        public readonly static IWant Space = new Want
+        {
+            Id = 2,
+            Name = "Space",
+            Description = "Space is needed to do lots of things, and gets used regularly."
+        };
+        
+        /// <summary>
+        /// The Extra space which a pop desires, possibly for use, possibly just to feel less cramped.
+        /// </summary>
+        public readonly static IWant FreeSpace = new Want
+        {
+            Id = 3,
+            Name = "Free Space",
+            Description = "Space which isn't being used to store things."
         };
 
         /// <summary>
@@ -59,7 +78,7 @@ namespace EconomicSim.Objects
                     },
             Icon = ""
         };
-
+        
         public readonly static IProduct Wasteland = new Product
         {
             Id = 1,
@@ -410,6 +429,8 @@ namespace EconomicSim.Objects
                 {
                     _wants[Land.Name] = Land;
                     _wants[Rest.Name] = Rest;
+                    _wants[Space.Name] = Space;
+                    _wants[FreeSpace.Name] = FreeSpace;
                 }
 
                 return _wants;

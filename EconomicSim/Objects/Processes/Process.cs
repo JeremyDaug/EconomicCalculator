@@ -1,13 +1,10 @@
-﻿using System.Data;
-using System.Text.Json.Serialization;
-using EconomicSim.Objects.Pops;
+﻿using System.Text.Json.Serialization;
 using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Processes.ProductionTags;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
 using EconomicSim.Objects.Technology;
 using EconomicSim.Objects.Wants;
-using Ninject.Infrastructure.Language;
 
 namespace EconomicSim.Objects.Processes
 {
