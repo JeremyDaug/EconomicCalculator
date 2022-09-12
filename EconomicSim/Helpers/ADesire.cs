@@ -16,24 +16,27 @@ public abstract class ADesire : IDesire
         get
         {
             if (EndTier == null) return -1;
-            return EndTier.Value - StartTier / Step;
+            // add +1 to ensure we get both start and end tiers.
+            return (EndTier.Value - StartTier) / Step + 1;
         }
     }
 
     public bool IsStretched => Step > 0;
     public bool IsInfinite => !EndTier.HasValue && IsStretched;
-    
+
     public decimal Satisfaction { get; set; }
-    
+
     public decimal Reserved { get; set; }
 
     public decimal TotalDesireAtTier(int tier)
     {
         // if tier is below our starting tier, return 0.
         if (tier < StartTier) return 0;
-        // get the steps this tier takes
-        var currentSteps = (tier - StartTier) / Step;
-        if (currentSteps > Steps) // if this oversteps, cap
+        // if it doesn't step at all and we're at or above the start,
+        if (!IsStretched) return Amount;
+        // get the steps this tier takes, add 1 for the ending fencepost.
+        var currentSteps = (tier - StartTier) / Step + 1;
+        if (currentSteps > Steps && !IsInfinite) // if this oversteps, cap
             return Steps * Amount;
         return currentSteps * Amount; // otherwise just continue.
     }
@@ -43,11 +46,27 @@ public abstract class ADesire : IDesire
         return Satisfaction / Amount;
     }
 
+    public decimal TotalDesire()
+    {
+        if (IsInfinite)
+            return -1;
+        if (!IsStretched)
+            return Amount;
+        return Steps * Amount;
+    }
+
     public decimal SatisfiedAtTier(int tier)
     {
+        if (!StepsOnTier(tier))
+            throw new ArgumentException("Tier does is not valid for this desire.");
+        if (!IsStretched)
+        { // if only one step
+            if (tier != StartTier) return 1; // return 1 if not equal
+            return Satisfaction / Amount; // otherwise return the correct amount
+        }
+        
         if ((tier - StartTier) % Step == 0 &&
-            StartTier <= tier &&
-            tier <= EndTier) 
+            StartTier <= tier) 
         {// if a valid step (= Tier + n * step and between Tier and Stop)
             // If we're in here, then no remainder is possible.
             var stepCount = Decimal.Divide(tier - StartTier, Step);
@@ -62,12 +81,12 @@ public abstract class ADesire : IDesire
 
     public bool StepsOnTier(int tier)
     {
+        if (tier < StartTier) // if the tier is before our start, we can't step on it.
+            return false;
         if (StartTier == tier)
         { // if the given tier is our start, we guaranteed step on it.
             return true;
         }
-        if (tier < StartTier) // if the tier is before our start, we can't step on it.
-            return false;
         if (IsStretched)
         { // if we cover multiple tiers
             if ((tier - StartTier) % Step == 0)
@@ -90,7 +109,7 @@ public abstract class ADesire : IDesire
         if (tier < StartTier) // if below the start tier, then it's the start tier next.
             return StartTier;
 
-        if ((EndTier.HasValue && tier > EndTier) || // if after our last possible tier
+        if ((EndTier.HasValue && tier >= EndTier) || // if after our last possible tier
             !IsStretched) // if we don't have multiple tiers (we should've gotten the first)
             return (int) DesireTier.NonTier;
 

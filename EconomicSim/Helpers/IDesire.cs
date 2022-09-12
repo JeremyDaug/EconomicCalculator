@@ -82,6 +82,12 @@ public interface IDesire
     decimal TotalSatisfaction();
 
     /// <summary>
+    /// Calculates how the total amount desired.
+    /// </summary>
+    /// <returns>Returns the total amount desired, if infinite it returns -1.</returns>
+    decimal TotalDesire();
+
+    /// <summary>
     /// Calculates how much of a desire has been met at a specific tier level.
     /// If tier is not valid (it's between steps) or above the stopping point it
     /// returns 1 to ensure no excess searches at higher tiers.
@@ -92,6 +98,7 @@ public interface IDesire
     /// If tier is not valid (it's between steps) or above the stopping point it
     /// returns 1 to ensure no excess searches at higher tiers.
     /// </returns>
+    /// <exception cref="ArgumentException"></exception>
     decimal SatisfiedAtTier(int tier);
     
     /// <summary>

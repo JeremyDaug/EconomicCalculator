@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayApp", "PlayApp\PlayApp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaEditorUI", "AvaEditorUI\AvaEditorUI.csproj", "{C3933AE6-E52B-4832-9B42-F46EFB2FC843}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconSimTest", "EconSimTest\EconSimTest.csproj", "{BA6160AE-8854-483E-BBD8-3B73F7FCEC42}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{C3933AE6-E52B-4832-9B42-F46EFB2FC843}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3933AE6-E52B-4832-9B42-F46EFB2FC843}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3933AE6-E52B-4832-9B42-F46EFB2FC843}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA6160AE-8854-483E-BBD8-3B73F7FCEC42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA6160AE-8854-483E-BBD8-3B73F7FCEC42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA6160AE-8854-483E-BBD8-3B73F7FCEC42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA6160AE-8854-483E-BBD8-3B73F7FCEC42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

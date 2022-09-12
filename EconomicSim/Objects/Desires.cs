@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
@@ -35,7 +36,7 @@ public class Desires
     /// <summary>
     /// The how many products have been reserved for owning or consuming.
     /// </summary>
-    private readonly Dictionary<IProduct, OwnConsumePair> _satisfiedOwnConsume =
+    private readonly Dictionary<IProduct, OwnConsumePair> _ownConsumeSat =
         new Dictionary<IProduct, OwnConsumePair>();
     /// <summary>
     /// Products which have been reserved, on top of satisfied needs, for wants.
@@ -83,11 +84,26 @@ public class Desires
             // add to our total list of products for easier searching.
             _desiredProducts.Add(need.Product);
             // add to our targets
-            if (!_productConsumeVsOwn.ContainsKey(need.Product)) // if it doesn't already contain that product add it
+            // if it doesn't already contain that product add it
+            if (!_productConsumeVsOwn.ContainsKey(need.Product))
                 _productConsumeVsOwn[need.Product] = new();
             if (need.IsConsumed)
             {
-                // TODO Fix me!
+                if (_productConsumeVsOwn[need.Product].Consume == -1)
+                    continue; // if infinite, go to next need 
+                if (need.IsInfinite) // if the need is infinite, set to -1
+                    _productConsumeVsOwn[need.Product].Consume = -1;
+                else // if not infinite add to extant desire.
+                    _productConsumeVsOwn[need.Product].Consume += need.TotalDesire();
+            }
+            else // if not consumed
+            {
+                if (_productConsumeVsOwn[need.Product].Own == -1)
+                    continue; // if infinite, go to next need 
+                if (need.IsInfinite) // if the need is infinite, set to -1
+                    _productConsumeVsOwn[need.Product].Own = -1;
+                else // if not infinite add to extant desire.
+                    _productConsumeVsOwn[need.Product].Own += need.TotalDesire();
             }
         }
         foreach (var want in wants)
@@ -213,14 +229,34 @@ public class Desires
                     needsToSatisfy.RemoveAll(x => Equals(x.Product, need.Product));
                     continue; // and skip to next loop
                 }
+                // check that ownConsumeSat has the key
+                if (!_ownConsumeSat.ContainsKey(need.Product)) 
+                    _ownConsumeSat[need.Product] = new OwnConsumePair(); // if not initialize.
                 // get the lower between the available goods and the desired amount at this tier
                 var available = _excessProperty[need.Product];
                 var take = Math.Min(available, need.Amount);
                 // move those goods from storage to the proper category shared category and add
                 _excessProperty[need.Product] -= take;
-                // TODO Pick up Here!
-            }
-
+                _satisfiedNeeds[need.Product] += take;
+                if (need.IsConsumed)
+                    _ownConsumeSat[need.Product].Consume += take;
+                else
+                    _ownConsumeSat[need.Product].Own += take;
+                need.Satisfaction += take;
+            } // with excess product moved to it's targets, move to next.
+            // with all steps completed on this tier,
+            // remove those which don't have multiple steps and are at this tier
+            needsToSatisfy.RemoveAll(x => !x.IsStretched && x.StartTier == tier);
+            // then remove those which we've passed the endpoints for
+            needsToSatisfy.RemoveAll(x => !x.IsInfinite && x.EndTier.Value <= tier);
+            // those we've messed with so far, if they have multiple steps, get the next from them
+            var nextSteps = needsOnTier
+                .Where(x => x.IsStretched) // has multiple steps
+                .Where(x => (!x.IsInfinite && x.EndTier <= tier) || x.IsInfinite) // and we haven't reached it's end 
+                .Select(x => x.GetNextTier(tier)).Distinct(); // get the next tier
+            foreach (var next in nextSteps)
+                orderedStarts.Add(next); // add those next steps into our starts.
+            
             // finish the loop by removing the tier we are currently on.
             orderedStarts.Remove(tier);
         }
