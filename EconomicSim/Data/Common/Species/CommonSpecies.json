@@ -7,7 +7,6 @@
     "Needs": [
       {
         "Product": "Ambrosia Fruit",
-        "IsConsumed": false,
         "StartTier": 1000,
         "Step": 10,
         "Amount": 1
@@ -17,30 +16,25 @@
       {
         "Want": "Food",
         "StartTier": -1000,
-        "IsConsumed": true,
         "Amount": 0.5
       },
       {
         "Want": "Food",
         "StartTier": 0,
-        "IsConsumed": true,
         "Amount": 0.5
       },
       {
         "Want": "Housing",
         "StartTier": 0,
-        "IsConsumed": true,
         "Amount": 1
       },
       {
         "Want": "Clothing",
         "StartTier": 0,
-        "IsConsumed": true,
         "Amount": 1
       },
       {
         "Want": "Rest",
-        "IsConsumed": true,
         "StartTier": 5,
         "Step": 5,
         "EndTier": 100,

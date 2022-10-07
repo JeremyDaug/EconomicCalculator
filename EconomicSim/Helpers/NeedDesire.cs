@@ -11,7 +11,6 @@ public class NeedDesire : ADesire, INeedDesire
     public NeedDesire(INeedDesire other)
     {
         Product = other.Product;
-        IsConsumed = other.IsConsumed;
         StartTier = other.StartTier;
         Step = other.Step;
         EndTier = other.EndTier;
@@ -19,4 +18,18 @@ public class NeedDesire : ADesire, INeedDesire
     }
 
     public IProduct Product { get; set; }
+    public bool IsEquivalentTo(INeedDesire desire)
+    {
+        if (StartTier != desire.StartTier || // check it covers the same range
+            EndTier != desire.EndTier ||
+            Step != desire.Step ||
+            !Equals(Product, desire.Product)) // and the same want
+            return false;
+        return true;
+    }
+
+    public override string ToString()
+    {
+        return Product.ToString() + " " + base.ToString();
+    }
 }

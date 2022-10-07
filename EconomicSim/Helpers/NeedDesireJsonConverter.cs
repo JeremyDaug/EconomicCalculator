@@ -36,9 +36,6 @@ internal class NeedDesireJsonConverter : JsonConverter<NeedDesire>
                     var productName = reader.GetString();
                     result.Product = DataContext.Instance.Products[productName];
                     break;
-                case nameof(result.IsConsumed):
-                    result.IsConsumed = reader.GetBoolean();
-                    break;
                 case nameof(result.StartTier):
                     result.StartTier = reader.GetInt32();
                     break;
@@ -73,8 +70,6 @@ internal class NeedDesireJsonConverter : JsonConverter<NeedDesire>
         writer.WriteStartObject();
         
         writer.WriteString(nameof(value.Product), value.Product.Name);
-        if (value.IsConsumed)
-            writer.WriteBoolean(nameof(value.IsConsumed), value.IsConsumed);
         writer.WriteString(nameof(value.StartTier), value.StartTier.ToString());
         if (value.Step > 0)
             writer.WriteNumber(nameof(value.Step), value.Step);

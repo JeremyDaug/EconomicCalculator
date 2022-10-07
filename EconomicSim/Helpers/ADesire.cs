@@ -5,7 +5,6 @@ namespace EconomicSim.Helpers;
 /// </summary>
 public abstract class ADesire : IDesire
 {
-    public bool IsConsumed { get; set; }
     public int StartTier { get; set; }
     public int? EndTier { get; set; }
     public decimal Amount { get; set; }
@@ -119,5 +118,30 @@ public abstract class ADesire : IDesire
         if (EndTier < next) // if the next is after our end tier (EndTier should be equal to the last), return none.
             return (int) DesireTier.NonTier;
         return next;
+    }
+
+    public int SatisfactionUpToTier()
+    {
+        var SatisfiedSteps = Math.Ceiling(Satisfaction / Amount) - 1;
+
+        if (IsStretched)
+        {
+            if (IsInfinite)
+                return StartTier + (int) SatisfiedSteps * Step;
+            var cappedSatisfaction = Math.Min(Steps, SatisfiedSteps);
+            return StartTier + (int) cappedSatisfaction * Step;
+        }
+        // if not stretched return the start Tier.
+        return StartTier;
+    }
+
+    public override string ToString()
+    {
+        if (IsInfinite)
+            return $"{Amount} : {StartTier}({Step})+";
+        if (IsStretched && !IsInfinite)
+            return $"{Amount} : {StartTier}({Step}) -> {EndTier}";
+        else // not stretched
+            return $"{Amount} : {StartTier}";
     }
 }

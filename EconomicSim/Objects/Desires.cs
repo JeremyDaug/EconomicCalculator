@@ -1,4 +1,7 @@
+using System.Reflection.PortableExecutable;
+using Avalonia.Animation.Animators;
 using Avalonia.Input;
+using Avalonia.Media.Transformation;
 using EconomicSim.Helpers;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Products;
@@ -13,44 +16,70 @@ namespace EconomicSim.Objects;
 /// </summary>
 public class Desires
 {
-    private readonly List<INeedDesire> _needs = new List<INeedDesire>();
-    private readonly List<IWantDesire> _wants = new List<IWantDesire>();
-    
-    private readonly List<INeedDesire> _stretchedNeeds = new List<INeedDesire>();
-    private readonly List<IWantDesire> _stretchedWants = new List<IWantDesire>();
-    
-    private readonly List<INeedDesire> _infiniteNeeds = new List<INeedDesire>();
-    private readonly List<IWantDesire> _infiniteWants = new List<IWantDesire>();
-    
-    private readonly HashSet<IProduct> _desiredProducts = new HashSet<IProduct>();
-    private readonly Dictionary<IProduct, OwnConsumePair> _productConsumeVsOwn =
-        new Dictionary<IProduct, OwnConsumePair>(); 
-    private readonly HashSet<IWant> _desiredWants = new HashSet<IWant>();
-    // placeholder spot for distinguishing between owned and consumed wants.
-    // The distinction means nothing as all wants are destroyed at the end of the day regardless.
+    #region NeedOrg
+    /// <summary>
+    /// All Product Desires
+    /// </summary>
+    public readonly List<INeedDesire> Needs = new List<INeedDesire>();
+    /// <summary>
+    /// All Want Desires
+    /// </summary>
+    public readonly List<IWantDesire> Wants = new List<IWantDesire>();
+    /// <summary>
+    /// All Product Desires with a definite range.
+    /// </summary>
+    public readonly List<INeedDesire> StretchedNeeds = new List<INeedDesire>();
+    /// <summary>
+    /// All Want Desires with a definite range.
+    /// </summary>
+    public readonly List<IWantDesire> StretchedWants = new List<IWantDesire>();
+    /// <summary>
+    /// All Product Desires with a indefinite range.
+    /// </summary>
+    public readonly List<INeedDesire> InfiniteNeeds = new List<INeedDesire>();
+    /// <summary>
+    /// All Want Desires with a indefinite range.
+    /// </summary>
+    public readonly List<IWantDesire> InfiniteWants = new List<IWantDesire>();
+    #endregion
+    /// <summary>
+    /// All products which we explicitly desire here.
+    /// </summary>
+    public readonly HashSet<IProduct> DesiredProducts = new();
+    /// <summary>
+    /// All wants which we desire.
+    /// </summary>
+    public readonly HashSet<IWant> DesiredWants = new();
+    /// <summary>
+    /// All property owned owned.
+    /// </summary>
+    public readonly Dictionary<IProduct, decimal> AllProperty = new();
+    /// <summary>
+    /// The products which satisfy our Needs.
+    /// </summary>
+    public readonly Dictionary<IProduct, decimal> ProductsSatisfied = new();
+    /// <summary>
+    /// Products saved to satisfy wants.
+    /// </summary>
+    public readonly Dictionary<IProduct, decimal> ProductsReserved = new();
+    /// <summary>
+    /// How many of our products we want in total.
+    /// </summary>
+    public readonly Dictionary<IProduct, decimal> ProductTargets = new();
+    /// <summary>
+    /// Product which has been expended, but not consumed, to satisfy wants.
+    /// </summary>
+    public readonly Dictionary<IProduct, decimal> ProductExpended = new();
+    /// <summary>
+    /// The current amount of wants which are (predicted) to be satisfied today.
+    /// </summary>
+    public readonly Dictionary<IWant, decimal> WantsSatisfied = new();
+    /// <summary>
+    /// How many of each want we want in total.
+    /// </summary>
+    public readonly Dictionary<IWant, decimal> WantTargets = new();
 
-    /// <summary>
-    /// The products which have been reserved to satisfy a need.
-    /// </summary>
-    private readonly Dictionary<IProduct, decimal> _satisfiedNeeds = new Dictionary<IProduct, decimal>();
-    /// <summary>
-    /// The how many products have been reserved for owning or consuming.
-    /// </summary>
-    private readonly Dictionary<IProduct, OwnConsumePair> _ownConsumeSat =
-        new Dictionary<IProduct, OwnConsumePair>();
-    /// <summary>
-    /// Products which have been reserved, on top of satisfied needs, for wants.
-    /// </summary>
-    private readonly Dictionary<IProduct, decimal> _productsForWants = new Dictionary<IProduct, decimal>();
-    /// <summary>
-    /// wants that are being satisfied by either products in need or productsForWants.
-    /// </summary>
-    private readonly Dictionary<IWant, decimal> _satisfiedWants = new Dictionary<IWant, decimal>();
-    
-    private readonly Dictionary<IProduct, decimal> _needTargets = new Dictionary<IProduct, decimal>();
-    private readonly Dictionary<IWant, decimal> _wantTargets = new Dictionary<IWant, decimal>();
-    
-    private readonly Dictionary<IProduct, decimal> _excessProperty = new Dictionary<IProduct, decimal>();
+    #region Constructors
 
     /// <summary>
     /// Basic Constructor
@@ -75,66 +104,11 @@ public class Desires
     {
         foreach (var need in needs)
         { // copy over the needs so the originals aren't hurt.
-            var newNeed = new NeedDesire(need);
-            _needs.Add(newNeed);
-            if (newNeed.IsStretched) // if it has steps, note that.
-                _stretchedNeeds.Add(newNeed);
-            if (newNeed.IsInfinite) // if it's infinite, note that.
-                _infiniteNeeds.Add(newNeed);
-            // add to our total list of products for easier searching.
-            _desiredProducts.Add(need.Product);
-            // add to our targets
-            // if it doesn't already contain that product add it
-            if (!_productConsumeVsOwn.ContainsKey(need.Product))
-                _productConsumeVsOwn[need.Product] = new();
-            if (need.IsConsumed)
-            {
-                if (_productConsumeVsOwn[need.Product].Consume == -1)
-                    continue; // if infinite, go to next need 
-                if (need.IsInfinite) // if the need is infinite, set to -1
-                    _productConsumeVsOwn[need.Product].Consume = -1;
-                else // if not infinite add to extant desire.
-                    _productConsumeVsOwn[need.Product].Consume += need.TotalDesire();
-            }
-            else // if not consumed
-            {
-                if (_productConsumeVsOwn[need.Product].Own == -1)
-                    continue; // if infinite, go to next need 
-                if (need.IsInfinite) // if the need is infinite, set to -1
-                    _productConsumeVsOwn[need.Product].Own = -1;
-                else // if not infinite add to extant desire.
-                    _productConsumeVsOwn[need.Product].Own += need.TotalDesire();
-            }
+            AddDesire(need);
         }
         foreach (var want in wants)
         { // copy over the wants so the originals aren't hurt.
-            var newWant = new WantDesire(want);
-            _wants.Add(newWant);
-            if (newWant.IsStretched) // if it has steps, note that.
-                _stretchedWants.Add(newWant);
-            if (newWant.IsInfinite) // if it's infinite, note that.
-                _infiniteWants.Add(newWant);
-            // add to our total list of products for easier searching.
-            _desiredWants.Add(want.Want);
-            // add to our targets
-            if (_wantTargets.ContainsKey(want.Want))
-            { // if it already exists
-                if (want.IsInfinite)
-                { // and the need is inifite, set it to -1
-                    _wantTargets[want.Want] = -1;
-                }
-                if (_wantTargets[want.Want] != -1)
-                { // if it's not infinite and not set to infinite, add to it.
-                    _wantTargets[want.Want] += want.Amount;
-                }
-            }
-            else
-            {
-                if (want.IsInfinite) // if infinite, set to -1
-                    _wantTargets[want.Want] = -1;
-                else // if not infinite, set to the amount desired.
-                    _wantTargets[want.Want] = want.Amount;
-            }
+            AddDesire(want);
         }
         // TODO come back here to consider adding in the savings pile.
         // Not everything has a savings pile, but most things should and making it 
@@ -154,13 +128,12 @@ public class Desires
     {
         foreach (var (product, owned) in currentProperty)
         { // throw all property into excess property for now. We'll sift at the end of this.
-            _excessProperty[product] = owned;
+            AllProperty[product] = owned;
         }
-
-        // Sift the satisfaction downwards and get our highest full satisfaction
-        SiftItems();
     }
 
+    #endregion
+    
     /// <summary>
     /// The minimum satisfaction retention when exchanging satisfaction in one tier
     /// for satisfaction in a tier one lower.
@@ -173,94 +146,324 @@ public class Desires
     public IMarket Market { get; }
 
     /// <summary>
-    /// All products desired in disorganized list.
-    /// </summary>
-    public IReadOnlyList<INeedDesire> Needs => _needs;
-
-    /// <summary>
-    /// All wants desired in disorganized list.
-    /// </summary>
-    public IReadOnlyList<IWantDesire> Wants => _wants;
-    
-    /// <summary>
     /// The highest tier to which these desires have been satisfied fully.
     /// </summary>
     public int FullTier { get; private set; }
+    
+    /// <summary>
+    /// The highest tier that any of our products begins satisfying.
+    /// </summary>
+    public int HighestTier { get; private set; }
 
     /// <summary>
-    /// Takes the existing list of items and 'shakes' them to compact them down further.
-    /// Starts at the bottom and works it way up. Also sets where our <see cref="FullTier"/> is.
-    /// Try to run only once per day near the start if possible.
+    /// Sifts a product from Excess into satisfaction
+    /// does not assume any sifting prior to work.
     /// </summary>
-    public void SiftItems()
-    {
-        // reset our full tier
-        FullTier = -1001;
-        // clear out satisfaction to ensure consistent use
-        _needs.ForEach(x => x.Satisfaction = 0);
-        _wants.ForEach(x => x.Satisfaction = 0);
-        // Clear our satisfied needs, wants, and productsForWants
-        _satisfiedNeeds.Clear();
-        _productsForWants.Clear();
-        _satisfiedWants.Clear();
-        // copy over excess property, and clear excess for later storage.
-        // var available = new Dictionary<IProduct, decimal>(_excessProperty);
-        // _excessProperty.Clear();
-        // now start sifting. Start with needs to consume/use products first then satisfy wants
-        // get the starting levels of all needs and order them lowest to highest.
-        var orderedStarts = new SortedSet<int>(_needs
-            .Select(x => x.StartTier)
-            .Distinct());
-        var needsToSatisfy = new List<INeedDesire>(_needs);
-        while (orderedStarts.Any())
-        { // go through until all needStarts are cleared
-            var tier = orderedStarts.First(); // get the lowest tier
-            // then get all of the needs on that tier
-            var needsOnTier = needsToSatisfy
-                .Where(x => x.StepsOnTier(tier));
-            foreach (var need in needsOnTier)
-            {
-                // check that the need can be satisfied at all
-                if (!_excessProperty.ContainsKey(need.Product))
-                { // if it doesn't exist in the excess,
-                    // remove it all needs which desire that product from the working set
-                    // we'll still do any of this product in the same tier,
-                    // but the effects should be minimal.
-                    needsToSatisfy.RemoveAll(x => Equals(x.Product, need.Product));
-                    continue; // and skip to next loop
-                }
-                // check that ownConsumeSat has the key
-                if (!_ownConsumeSat.ContainsKey(need.Product)) 
-                    _ownConsumeSat[need.Product] = new OwnConsumePair(); // if not initialize.
-                // get the lower between the available goods and the desired amount at this tier
-                var available = _excessProperty[need.Product];
-                var take = Math.Min(available, need.Amount);
-                // move those goods from storage to the proper category shared category and add
-                _excessProperty[need.Product] -= take;
-                _satisfiedNeeds[need.Product] += take;
-                if (need.IsConsumed)
-                    _ownConsumeSat[need.Product].Consume += take;
-                else
-                    _ownConsumeSat[need.Product].Own += take;
-                need.Satisfaction += take;
-            } // with excess product moved to it's targets, move to next.
-            // with all steps completed on this tier,
-            // remove those which don't have multiple steps and are at this tier
-            needsToSatisfy.RemoveAll(x => !x.IsStretched && x.StartTier == tier);
-            // then remove those which we've passed the endpoints for
-            needsToSatisfy.RemoveAll(x => !x.IsInfinite && x.EndTier.Value <= tier);
-            // those we've messed with so far, if they have multiple steps, get the next from them
-            var nextSteps = needsOnTier
-                .Where(x => x.IsStretched) // has multiple steps
-                .Where(x => (!x.IsInfinite && x.EndTier <= tier) || x.IsInfinite) // and we haven't reached it's end 
-                .Select(x => x.GetNextTier(tier)).Distinct(); // get the next tier
-            foreach (var next in nextSteps)
-                orderedStarts.Add(next); // add those next steps into our starts.
-            
-            // finish the loop by removing the tier we are currently on.
-            orderedStarts.Remove(tier);
+    /// <param name="product">The product we are attempting to sift.</param>
+    public void SiftProduct(IProduct product)
+    {/*
+        if (!_excessProperty.ContainsKey(product) || 
+            _excessProperty[product] == 0 ||
+            !_desiredProducts.Contains(product))
+            return; // if no available product exists or it's not desired, skip.
+        // since we have product we can shift and a desire for said product, start sifting
+        if (!_ownVsConsumeSatisfaction.ContainsKey(product))
+            _ownVsConsumeSatisfaction[product] = new OwnConsumePair();
+        
+        // shift from excess over into Satisfaction whatever we need/can
+        decimal target = 0;
+        if (_productReserved[product].Consume == -1 ||
+            _productReserved[product].Own == -1)
+            target = -1;
+        else
+            target = _productReserved[product].Consume + _productReserved[product].Own;
+
+        if (target == -1)
+        { // if infinite target
+            var shifting = _excessProperty[product];
+            _excessProperty[product] -= shifting;
+            _satisfiedNeeds[product] += shifting;
+        }
+        else
+        { // if finite target
+            var missingSat = target - _satisfiedNeeds[product];
+            var shifting = Math.Min(missingSat, _excessProperty[product]);
+            _excessProperty[product] -= shifting;
+            _satisfiedNeeds[product] += shifting;
+        }
+        // with the product shifted over, break it up into Consumed and Owned
+        // get all needs for this product.
+        var needs = _needs.Where(x => Equals(x.Product, product)).ToList();
+        // clear out prior satisfaction values and recalculate for ease of use
+        _ownVsConsumeSatisfaction[product].Consume = 0;
+        _ownVsConsumeSatisfaction[product].Own = 0;
+        foreach (var need in needs)
+            need.Satisfaction = 0;
+
+        var unassignedProducts = _satisfiedNeeds[product];
+
+        foreach (var (tier, need) in WalkUpTiersForNeeds(needs))
+        {
+            if (unassignedProducts == 0)
+                break; // if nothing left to assign, stop.
+            // get the amount we need or have available
+            var assigning = Math.Min(need.Amount, unassignedProducts);
+            need.Satisfaction += assigning; // add to satisfaction
+            unassignedProducts -= assigning; // remove from unassigned amount
+            if (need.IsConsumed) // add to either consumed or owned as necessary.
+                _ownVsConsumeSatisfaction[product].Consume += assigning;
+            else
+                _ownVsConsumeSatisfaction[product].Own += assigning;
+        }*/
+    }
+
+    /// <summary>
+    /// Goes through reserved items and predicts whatever they'd produce from their position.
+    /// Resets <seealso cref="WantsFromNeeds"/> and <seealso cref="SatisfiedWants"/>.
+    /// </summary>
+    public void PredictWantOutputs()
+    {/*
+        var totalOutputs = new Dictionary<IWant, decimal>();
+        foreach (var (product, sat) in _ownVsConsumeSatisfaction)
+        {
+            // get the outputs predicted from consumption.
+            if (product.ConsumptionProcesses != null && sat.Consume > 0)
+            { // if valid consumption process is available and any are up for consumption
+                // get only those wants which output something we want.
+                var validOutput = product
+                    .ConsumptionProcesses;
+
+                if (validOutput.Any())
+                { // if there are any valid output processes, calculate based around them.
+                    var sharedOutputs = new Dictionary<IWant, decimal>();
+                    foreach (var option in validOutput)
+                    {
+                        foreach (var output in option.OutputWants)
+                        { // TODO, update to deal with chance outputs better.
+                            sharedOutputs.AddOrInclude(output.Want, output.Amount);
+                        }
+                    }
+
+                    var split = validOutput.Count();
+                    // split multiply by the available output, and divide by the options
+                    // (a conservative split).
+                    foreach (var want in sharedOutputs.Keys)
+                        sharedOutputs[want] = sharedOutputs[want] * sat.Consume / split;
+                    foreach (var share in sharedOutputs)
+                        totalOutputs.AddOrInclude(share.Key, share.Value);
+                } 
+            }
+            // get the outputs predicted from ownership.
+            if (product.Wants.Any() && sat.Own > 0)
+            { // if valid wants exist from owning the product
+                // get only those wants which output something we want.
+                var validOutput = product
+                    .Wants
+                    .Where(x => _desiredWants.Contains(x.Key)).ToList();
+
+                if (validOutput.Any())
+                { // if there are any valid output processes, calculate based around them.
+                    var sharedOutputs = new Dictionary<IWant, decimal>();
+                    foreach (var option in validOutput)
+                    {
+                        sharedOutputs.AddOrInclude(option.Key, option.Value);
+                    }
+
+                    // split multiply by the available output, and divide by the options
+                    // (a conservative split).
+                    foreach (var want in sharedOutputs.Keys)
+                        sharedOutputs[want] *= sat.Own;
+                    foreach (var share in sharedOutputs)
+                        totalOutputs.AddOrInclude(share.Key, share.Value);
+                } 
+            }
         }
 
+        _wantsFromNeeds.Clear();
+        foreach (var (key, value) in _satisfiedWants)
+        { // reset satisfaction as well
+            _satisfiedWants[key] = 0;
+        }
+        // go through and add these to the desires in question.
+        foreach (var (want, amount) in totalOutputs)
+        { // update wants from products and satisfaction
+            _wantsFromNeeds[want] = amount;
+            SiftProductWant(want);
+        }*/
+    }
+
+    /// <summary>
+    /// Sifts wants from the WantsFromProducts  
+    /// </summary>
+    public void SiftProductWant(IWant want)
+    { /*
+        // given a want, walk up the tiers for them
+        if (!_wantsFromNeeds.ContainsKey(want) || 
+            _wantsFromNeeds[want] == 0 ||
+            !_desiredWants.Contains(want))
+            return; // if the want is not available in _wantsFromProducts, break out
+        // since we have wants we can shift and a desire for said want, start sifting
+        // shift from excess over into Satisfaction whatever we need/can
+        decimal target = 0;
+        if (_wantTargets[want] == -1)
+            target = -1;
+        else
+            target = _wantTargets[want];
+
+        if (target == -1)
+        { // if infinite target
+            var shifting = _wantsFromNeeds[want];
+            _wantsFromNeeds[want] -= shifting;
+            _satisfiedWants[want] += shifting;
+        }
+        else
+        { // if finite target
+            var missingSat = target - _satisfiedWants[want];
+            var shifting = Math.Min(missingSat, _wantsFromNeeds[want]);
+            _wantsFromNeeds[want] -= shifting;
+            _satisfiedWants[want] += shifting;
+        }
+        // with the want shifted over into satisfaction, break it up into Consumed and Ow
+        // get all needs for this product.
+        var wants = _wants.Where(x => Equals(x.Want, want)).ToList();
+        // clear out prior satisfaction values and recalculate for ease of use
+        foreach (var desire in wants)
+            desire.Satisfaction = 0;
+
+        var unassignedProducts = _satisfiedWants[want];
+
+        foreach (var (tier, wantDesire) in WalkUpTiersForWants(wants))
+        {
+            if (unassignedProducts == 0)
+                break; // if nothing left to assign, stop.
+            // get the amount we need or have available
+            var assigning = Math.Min(wantDesire.Amount, unassignedProducts);
+            wantDesire.Satisfaction += assigning; // add to satisfaction
+            unassignedProducts -= assigning; // remove from unassigned amount
+        }*/
+    }
+
+    /// <summary>
+    /// Sifts excess property into the proper places for a specified want to be satisfied.
+    /// Do Assumes products have been run first, do not run before products have been sifted.
+    /// </summary>
+    public void SiftWants()
+    {/*
+        var LastTier = -1001;
+        var availableSatisfaction = _satisfiedWants.ToList();
+        foreach (var (teir, wantDesire) in WalkUpTiersForWants(_wants))
+        { // before we start working seriously, add satisfaction from products into our list
+            
+            
+            
+            // end by checking that we can satisfy anything left
+            if (!availableSatisfaction.Any())
+                break;
+        } */
+    }
+    
+    public void UpdateFullTier()
+    {/*
+        FullTier = -1001;
+        foreach (var need in _needs)
+        {
+            var tier = need.SatisfactionUpToTier();
+            var satisfaction = need.SatisfiedAtTier(tier);
+            if (satisfaction < 1)
+                tier -= 1; // if satisfaction is incomplete at the level given, then subtract down.
+            FullTier = Math.Max(FullTier, tier);
+        }
+        foreach (var want in _wants)
+        {
+            var tier = want.SatisfactionUpToTier();
+            var satisfaction = want.SatisfiedAtTier(tier);
+            if (satisfaction < 1)
+                tier -= 1; // if satisfaction is incomplete at the level given, then subtract down.
+            FullTier = Math.Max(FullTier, tier);
+        }*/
+    }
+
+    public void UpdateHighestTier()
+    {
+        
+    }
+
+    public IEnumerable<(int tier, IWantDesire desire)> WalkUpTiersForWants(IList<IWantDesire> wants)
+    {
+        int tier = -1001;
+        Dictionary<int, List<IWantDesire>> tieredDesires = new();
+
+        foreach (var want in wants)
+        { // go through and add to the list of the tiers.
+            if (tieredDesires.ContainsKey(want.StartTier))
+                tieredDesires[want.StartTier].Add(want);
+            else
+                tieredDesires[want.StartTier] = new List<IWantDesire> {want};
+        }
+
+        while (tieredDesires.Any())
+        {
+            // update the tier to the new minimum
+            tier = tieredDesires.Keys.Min();
+            // get the first in our list
+            var want = tieredDesires[tier].First();
+            yield return (tier, want);
+            // remove from it's current location
+            tieredDesires[tier].Remove(want);
+            // when we come back, get the next tier of the current need
+            var nextTier = want.GetNextTier(tier);
+            // if last item in tier, remove that tier
+            if (!tieredDesires[tier].Any())
+                tieredDesires.Remove(tier);
+            if (nextTier == (int) DesireTier.NonTier)
+                continue; // if there is no next tier, skip the rest
+            // add the need back in at the appropriate tier.
+            if (tieredDesires.ContainsKey(nextTier))
+                tieredDesires[nextTier].Add(want);
+            else
+                tieredDesires[nextTier] = new List<IWantDesire> {want};
+            // then go back to start
+        }
+    }
+
+    public IEnumerable<(int tier, INeedDesire desire)> WalkUpTiersForNeeds(IList<INeedDesire> needs)
+    {
+        int tier = -1001;
+        Dictionary<int, List<INeedDesire>> tieredDesires = new();
+
+        foreach (var need in needs)
+        { // go through and add to the list of the tiers.
+            if (tieredDesires.ContainsKey(need.StartTier))
+                tieredDesires[need.StartTier].Add(need);
+            else
+            {
+                tieredDesires[need.StartTier] = new List<INeedDesire> {need};
+            }
+        }
+
+        while (tieredDesires.Any())
+        {
+            // update the tier to the new minimum
+            tier = tieredDesires.Keys.Min();
+            // get the first in our list
+            var need = tieredDesires[tier].First();
+            yield return (tier, need);
+            // remove from it's current location
+            tieredDesires[tier].Remove(need);
+            // when we come back, get the next tier of the current need
+            var nextTier = need.GetNextTier(tier);
+            // if last item in tier, remove that tier
+            if (!tieredDesires[tier].Any())
+                tieredDesires.Remove(tier);
+            if (nextTier == (int) DesireTier.NonTier)
+                continue; // if there is no next tier, skip the rest
+            // add the need back in at the appropriate tier.
+            if (tieredDesires.ContainsKey(nextTier))
+                tieredDesires[nextTier].Add(need);
+            else
+                tieredDesires[nextTier] = new List<INeedDesire> {need};
+            // then go back to start
+        }
     }
 
     /// <summary>
@@ -269,9 +472,9 @@ public class Desires
     /// <param name="tier">The tier we are looking at.</param>
     /// <returns>The satisfaction between 0 and 1. If no desires in tier, we return -1.</returns>
     public decimal SatisfactionAtTier(int tier)
-    {
-        // shortcut! If FullTier is above or equal to the tier given, we can assume full satisfaction.
-        if (FullTier >= tier) return 1;
+    { // shortcut! If FullTier is above or equal to the tier given, we can assume full satisfaction.
+        throw new NotImplementedException();
+        /*if (FullTier >= tier) return 1;
 
         List<IDesire> desires = new();
         foreach (var need in _needs.Where(x => x.StepsOnTier(tier)))
@@ -282,8 +485,9 @@ public class Desires
         if (!desires.Any()) return -1;
 
         return desires.Average(x => x.SatisfiedAtTier(tier));
+        */
     }
-    
+
     /// <summary>
     /// Calculates the effective equivalence between 2 tiers.
     /// </summary>
@@ -304,6 +508,8 @@ public class Desires
     /// <returns>The next lowest tier above our given. If no tier found, returns -1001.</returns>
     public int NextLowestTierAbove(int tier)
     {
+        throw new NotImplementedException();
+        /*
         // if any infinite desire starts at or before our tier, then we must have a a tier+1
         if (_infiniteNeeds.Any(x => x.StartTier <= tier && x.Step == 1) ||
             _infiniteWants.Any(x => x.StartTier <= tier && x.Step == 1))
@@ -340,6 +546,95 @@ public class Desires
         
         // since we have something, run through the list getting the next tier
         return desires.Select(x => x.GetNextTier(tier)).Min();
+        */
+    }
+
+    /// <summary>
+    /// Adds desire to our sets.
+    /// </summary>
+    /// <param name="desire">The desire to add</param>
+    public void AddDesire(INeedDesire desire)
+    {
+        // check to see if we can consolidate this new desire into an existing desire
+        var dupe = Needs.SingleOrDefault(x =>
+            x.IsEquivalentTo(desire));
+        if (dupe != null)
+        { // if a desire just like it already exists
+            dupe.Amount += desire.Amount;
+            if (!desire.IsInfinite)
+                ProductTargets[dupe.Product] += desire.TotalDesire();
+            return;
+        }
+        // if not a duplicate of an existing need, add it.
+        // add to our list a duplicate for safe keeping 
+        var newNeed = new NeedDesire(desire); 
+        Needs.Add(newNeed);
+        if (newNeed.IsStretched) // if it has steps, note that.
+            StretchedNeeds.Add(newNeed);
+        if (newNeed.IsInfinite) // if it's infinite, note that.
+            InfiniteNeeds.Add(newNeed);
+        // get our product for ease of working forward.
+        var prod = desire.Product;
+        // add to the set of desired products if possible.
+        DesiredProducts.Add(prod);
+        // add to our satisfaction for later use.
+        if (!ProductsSatisfied.ContainsKey(prod))
+            ProductsSatisfied[prod] = 0;
+        // add to our targets
+        if (!ProductTargets.ContainsKey(newNeed.Product))
+            ProductTargets[prod] = 0;
+        if(ProductTargets[prod] != -1)
+        {
+            if (newNeed.IsInfinite)
+                ProductTargets[prod] = -1;
+            else
+                ProductTargets[prod] += newNeed.Amount;
+        }
+    }
+
+    /// <summary>
+    /// Adds desire to our sets.
+    /// </summary>
+    /// <param name="desire">The desire to add</param>
+    public void AddDesire(IWantDesire desire)
+    {
+        // check to see if we can consolidate this new desire into an existing desire
+        var dupe = Wants.SingleOrDefault(x =>
+            x.IsEquivalentTo(desire));
+        if (dupe != null)
+        {
+            // if a desire just like it already exists
+            dupe.Amount += desire.Amount;
+            if (!desire.IsInfinite)
+                WantTargets[dupe.Want] += desire.TotalDesire();
+            return;
+        }
+
+        // add to our list a duplicate for safe keeping
+        var newWant = new WantDesire(desire);
+        Wants.Add(newWant);
+        if (newWant.IsStretched) // if it has steps, note that.
+            StretchedWants.Add(newWant);
+        if (newWant.IsInfinite) // if it's infinite, note that.
+            InfiniteWants.Add(newWant);
+        // get our product for ease of working forward.
+        var want = desire.Want;
+        // add to the set of desired products if possible.
+        DesiredWants.Add(want);
+        // add our satisfaction if it's not there
+        if (!WantsSatisfied.ContainsKey(want))
+            WantsSatisfied[want] = 0;
+        // add to targets if it's not there.
+        if (!WantTargets.ContainsKey(want))
+            WantTargets[want] = 0;
+        if (WantTargets[want] != -1)
+        {
+            if ( desire.IsInfinite) // if new desire is infinite, set to infinite
+                WantTargets[want] = -1;
+            else
+                // if not infinite, add to desire and that's it.
+                WantTargets[want] += desire.TotalDesire();
+        }
     }
 
     /// <summary>
@@ -349,7 +644,8 @@ public class Desires
     /// <returns>All the products which can be satisfied at that tier.</returns>
     public IReadOnlyList<INeedDesire> NeedsAtTier(int tier)
     {
-        return _needs.Where(x => x.StepsOnTier(tier)).ToList();
+        throw new NotImplementedException();
+        //return _needs.Where(x => x.StepsOnTier(tier)).ToList();
     }
     
     /// <summary>
@@ -359,6 +655,72 @@ public class Desires
     /// <returns>All the products which can be satisfied at that tier.</returns>
     public IReadOnlyList<IWantDesire> WantsAtTier(int tier)
     {
-        return _wants.Where(x => x.StepsOnTier(tier)).ToList();;
+        throw new NotImplementedException();
+        //return _wants.Where(x => x.StepsOnTier(tier)).ToList();
+    }
+    
+    /// <summary>
+    /// Gets the total amount of a specific desire at a particular tier across multiple wants.
+    /// </summary>
+    /// <param name="product">The want sought</param>
+    /// <param name="tier">The tier we are looking at.</param>
+    /// <returns>The summarized want and how satisfied it is at this tier.</returns>
+    public decimal TotalNeedDesiredAtTier(IProduct product, int tier)
+    {
+        var onTier = Needs.Where(x => x.Product == product)
+            .Where(x => x.StepsOnTier(tier));
+
+        return onTier.Sum(x => x.Amount);
+    }
+    
+    /// <summary>
+    /// Gets the total amount of a specific desire at a particular tier across multiple wants.
+    /// </summary>
+    /// <param name="want">The want sought</param>
+    /// <param name="tier">The tier we are looking at.</param>
+    /// <returns>The summarized want and how satisfied it is at this tier.</returns>
+    public decimal TotalWantDesiredAtTier(IWant want, int tier)
+    {
+        var onTier = Wants.Where(x => x.Want == want)
+            .Where(x => x.StepsOnTier(tier));
+
+        return onTier.Sum(x => x.Amount);
+    }
+    
+    /// <summary>
+    /// Gets the total amount of a specific desire at a particular tier across multiple wants.
+    /// </summary>
+    /// <param name="product">The want sought</param>
+    /// <param name="tier">The tier we are looking at.</param>
+    /// <returns>The summarized want and how satisfied it is at this tier.</returns>
+    public decimal TotalNeedSatisfiedAtTier(IProduct product, int tier)
+    {
+        var onTier = Needs.Where(x => x.Product == product)
+            .Where(x => x.StepsOnTier(tier));
+
+        return onTier.Sum(x => x.SatisfiedAtTier(tier));
+    }
+    
+    /// <summary>
+    /// Gets the total amount of a specific desire at a particular tier across multiple wants.
+    /// </summary>
+    /// <param name="want">The want sought</param>
+    /// <param name="tier">The tier we are looking at.</param>
+    /// <returns>Satisfaction of that product on this tier</returns>
+    public decimal TotalWantSatisfiedAtTier(IWant want, int tier)
+    {
+        return Wants.Where(x => x.Want == want)
+            .Where(x => x.StepsOnTier(tier)).Sum(x => x.SatisfiedAtTier(tier));
+    }
+
+    /// <summary>
+    /// Given a product and an amount of it, how much satisfaction do we gain.
+    /// </summary>
+    /// <param name="product">The product to check adding.</param>
+    /// <param name="amount">The number of units to check for that item.</param>
+    /// <returns>The starting tier and satisfaction gained based on that tier.</returns>
+    public (int tier, decimal satisfaction) SatisfactionGainedFrom(IProduct product, decimal amount)
+    {
+        throw new NotImplementedException();
     }
 }

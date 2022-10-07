@@ -1,14 +1,7 @@
 namespace EconomicSim.Helpers;
 
 public interface IDesire
-{
-    /// <summary>
-    /// If the product requested will be consumed or not (just owned)
-    /// TODO flip this later to be IsConsumed, rather than IsNotConsumed. I'm an idiot.
-    /// </summary>
-    bool IsConsumed { get; }
-    
-    /// <summary>
+{/// <summary>
     /// The tier of the desire.
     /// -1000 is for the absolute minimum needed for the pop to survive (starvation ration level)
     /// -999 - -1 is space for productive needs, where the inputs/capital requirements for self-owned firms go.
@@ -114,4 +107,11 @@ public interface IDesire
     /// <param name="tier"></param>
     /// <returns></returns>
     int GetNextTier(int tier);
+
+    /// <summary>
+    /// Calculates what tier this desire is satisfied to, stopping at the last tier
+    /// it has any satisfaction in.
+    /// </summary>
+    /// <returns>The last tier it satisfies any amount.</returns>
+    int SatisfactionUpToTier();
 }
