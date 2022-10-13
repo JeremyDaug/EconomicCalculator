@@ -91,12 +91,12 @@ namespace EconomicSim.Objects.Products
         /// <summary>
         /// The Use Processes of the Product
         /// </summary>
-        IReadOnlyList<IProcess> UseProcesses { get; }
+        IProcess? UseProcess { get; }
 
         /// <summary>
         /// The ways the product can be used.
         /// </summary>
-        IReadOnlyList<IProcess> ConsumptionProcesses { get; }
+        IProcess? ConsumptionProcess { get; }
 
         /// <summary>
         /// They ways the product can be maintained.

@@ -10,4 +10,9 @@ public static class HelperExtensions
         else
             dict[key] = value;
     }
+
+    public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> enumerable) where T : class
+    {
+        return enumerable.Where(x => x != null).Select(x => x!);
+    }
 }
