@@ -670,18 +670,32 @@ namespace EconomicSim.Objects
             }
 
             foreach (var product in Products.Values)
-            {
+            { // Check that Products don't double up Failure, Consumption, or Use processes.
                 try
                 {
                     var test = product.FailureProcess;
-                    var test1 = product.ConsumptionProcesses;
-                    var test2 = product.UseProcesses;
-                    var test3 = product.MaintenanceProcesses;
                 }
                 catch
                 {
-                    errors.Add($"Product {product.GetName()}, had a duplicate Failure, Consumption, Use, or Maintenance process.");
+                    errors.Add($"Product {product.GetName()}, had a duplicate Failure process.");
                 }
+                try
+                {
+                    var test1 = product.ConsumptionProcess;
+                }
+                catch
+                {
+                    errors.Add($"Product {product.GetName()}, had a duplicate Consumption process.");
+                }
+                try 
+                {
+                    var test2 = product.UseProcess;
+                }
+                catch
+                {
+                    errors.Add($"Product {product.GetName()}, had a duplicate Use process.");
+                }
+                // maintenance should have multiples, so no need to test.
             }
             
             // connect processes to wants which they produce

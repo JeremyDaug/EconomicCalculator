@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using EconomicSim.Helpers;
 using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Skills;
@@ -255,6 +256,13 @@ namespace EconomicSim.Objects.Processes
         /// <param name="part">The part we are calculating.</param>
         /// <returns>the projected amount.</returns>
         decimal ProjectedPartAmount(IProcessProduct part);
+        
+        /// <summary>
+        /// Gets the amount of a product part, taking chance into account.
+        /// </summary>
+        /// <param name="part">The part we are calculating.</param>
+        /// <returns>the projected amount.</returns>
+        decimal ProjectedPartAmount(IProcessWant part);
 
         /// <summary>
         /// Get's the projected amount of product produced and/or consumed by the
@@ -273,8 +281,17 @@ namespace EconomicSim.Objects.Processes
         decimal ProjectedProductAmount(IProduct product, ProcessPartTag part);
 
         /// <summary>
+        /// Gets the projected amount of product involved in a part of the process.
+        /// </summary>
+        /// <param name="want">The want in question.</param>
+        /// <param name="part">Which part (input, capital, output) to return.</param>
+        /// <returns>The total amount, inputs are negative.</returns>
+        decimal ProjectedWantAmount(IWant want, ProcessPartTag part);
+        
+        /// <summary>
         /// Do the process's work. Takes in inputs and capitals,
         /// outputs the product made/consumed, capital used, and wants made or consumed.
+        /// Does not remove items from inputs, leaves that to the caller.
         /// </summary>
         /// <param name="iterations">How many iterations to try and complete.</param>
         /// <param name="progress">The progress being brought in (will round up iterations sought).</param>
@@ -294,5 +311,13 @@ namespace EconomicSim.Objects.Processes
             DoProcess(decimal iterations, decimal progress,
                 Dictionary<IProduct, decimal> products,
                 Dictionary<IWant, decimal> wants);
+
+        /// <summary>
+        /// Calculates the bonus or penalty for a process given a
+        /// particular skill level.
+        /// </summary>
+        /// <param name="skillLevel"></param>
+        /// <returns></returns>
+        decimal SkillThroughputModifier(decimal skillLevel);
     }
 }

@@ -696,8 +696,8 @@ namespace EconomicSim.Objects.Firms
                         continue; // if it doesn't contain any, move on.
                     // get the efficiency from the use processes,
                     // select the minimum for conservative calculation.
-                    var efficiency = use.UseProcesses
-                        .SelectMany(x => x.OutputWants)
+                    var efficiency = use.UseProcess
+                        .OutputWants
                         .Where(x => x.Want == want.Want)
                         .Select(x => x.Amount)
                         .Min();
@@ -726,8 +726,8 @@ namespace EconomicSim.Objects.Firms
                         continue; // if it doesn't contain any, move on.
                     // get the efficiency from the use processes,
                     // select the minimum for conservative calculation.
-                    var efficiency = consumption.ConsumptionProcesses
-                        .SelectMany(x => x.OutputWants)
+                    var efficiency = consumption.ConsumptionProcess
+                        .OutputWants
                         .Where(x => x.Want == want.Want)
                         .Select(x => x.Amount)
                         .Min();

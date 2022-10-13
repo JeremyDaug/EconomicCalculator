@@ -456,6 +456,60 @@ public class DesiresShould
     }
 
     [Test]
+    public void WalkUpTiersForWantsCorrectly()
+    {
+        var list = new List<IWantDesire>
+        {
+            SingleWantMock1,
+            StretchedWantMock1,
+            InfiniteWantMock1
+        };
+
+        int count = 0;
+        var lastTier = -1001;
+        List<string> order = new List<string>();
+        foreach (var item in test.WalkUpTiersForWants(list))
+        {
+            order.Add($"{item.desire.Amount} {item.desire.Want}(s) at Tier: {item.tier}");
+            if (count > 100)
+                break;
+            if (item.desire == SingleNeedMock1)
+            {
+                Assert.That(SingleNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.EqualTo(0));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+            else if (item.desire == StretchedNeedMock1)
+            {
+                Assert.That(StretchedNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(item.desire.StartTier));
+                Assert.That(item.tier, Is.LessThanOrEqualTo(item.desire.EndTier));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+            else if (item.desire == InfiniteNeedMock1)
+            {
+                Assert.That(InfiniteNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(item.desire.StartTier));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+
+            count += 1;
+        }
+    }
+
+    [TestCase(1, 2)]
+    [TestCase(1, 6)]
+    [TestCase(1, -100)]
+    [TestCase(6, 2)]
+    [TestCase(3, 2)]
+    public void GiveCorrectEvalForTierDesireEquivalence(int start, int end)
+    {
+        var diff = test.TierDesireEquivalence(start, end);
+        
+        Assert.That(diff, Is.EqualTo(Math.Pow(Desires.TierRatio, start - end)));
+    }
+    
+    [Test]
     public void SiftProductIntoDesiresCorrectly()
     {
         var SingleNeedMock1 = new NeedDesire(); // 1 at tier 0
@@ -505,9 +559,6 @@ public class DesiresShould
 
         test.SiftProduct(ProductMock1.Object);
 
-        var consumed = SingleNeedMock1.TotalDesire() + StretchedNeedMock1.TotalDesire();
-        var owned = SingleNeedMock2.TotalDesire() + StretchedNeedMock2.TotalDesire();
-        
         Assert.That(test.ProductsSatisfied[ProductMock1.Object], Is.EqualTo(100));
         
         foreach (var need in test.Needs.Where(x => !x.IsInfinite))
@@ -526,10 +577,10 @@ public class DesiresShould
         Assert.That(S4.Satisfaction, Is.EqualTo(9));
         
         var S5 = test.Needs.Single(x => x.StartTier == 0 && x.IsInfinite && x.Step == 6);
-        Assert.That(S5.Satisfaction, Is.GreaterThanOrEqualTo(10));
+        Assert.That(S5.Satisfaction, Is.EqualTo(35));
         
         var S6 = test.Needs.Single(x => x.StartTier == 10 && x.IsInfinite && x.Step == 5);
-        Assert.That(S5.Satisfaction, Is.GreaterThanOrEqualTo(10));
+        Assert.That(S6.Satisfaction, Is.EqualTo(40));
     }
 
     [Test]
@@ -575,8 +626,8 @@ public class DesiresShould
                 outputWantMock
             });
 
-        consumeProduct.Setup(x => x.ConsumptionProcesses)
-            .Returns(new List<IProcess>{consumeProcess.Object});
+        consumeProduct.Setup(x => x.ConsumptionProcess)
+            .Returns(consumeProcess.Object);
 
         var needDesire1 = new NeedDesire
         {

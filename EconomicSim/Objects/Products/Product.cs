@@ -113,28 +113,28 @@ namespace EconomicSim.Objects.Products
         /// <summary>
         /// The Use Processes of the Product
         /// </summary>
-        public IReadOnlyList<IProcess> UseProcesses
+        public IProcess UseProcess
         {
             get
             {
                 return ProductProcesses
                     .Where(x => x.ProcessTags.ContainsKey(ProcessTag.Use))
-                    .Where(x => ((Product) x.ProcessTags[ProcessTag.Use]["Product"]).GetName() == GetName())
-                    .ToList();
+                    .SingleOrDefault(x => ((Product) x.ProcessTags[ProcessTag.Use]["Product"]).GetName() == GetName());
             }
         }
 
         /// <summary>
         /// The ways the product can be used.
         /// </summary>
-        public IReadOnlyList<IProcess> ConsumptionProcesses
+        public IProcess ConsumptionProcess
         {
             get
             {
                 return ProductProcesses
-                    .Where(x => x.ProcessTags.ContainsKey(ProcessTag.Consumption))
-                    .Where(x => ((Product) x.ProcessTags[ProcessTag.Consumption]["Product"]).GetName() == GetName())
-                    .ToList();
+                    .Where(x => 
+                        x.ProcessTags.ContainsKey(ProcessTag.Consumption))
+                    .SingleOrDefault(x => 
+                        ((Product) x.ProcessTags[ProcessTag.Consumption]["Product"]).GetName() == GetName());
             }
         }
 
