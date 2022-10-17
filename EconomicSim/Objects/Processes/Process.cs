@@ -176,6 +176,19 @@ namespace EconomicSim.Objects.Processes
             return Name + "(" + VariantName + ")";
         }
 
+        /// <summary>
+        /// Checks if two processes are compatible with each other and
+        /// can be added together.
+        /// Currently, if either process has ANY tags, they are invalid for addition.
+        /// </summary>
+        /// <returns></returns>
+        public bool ValidProcessTagAddition(IProcess other)
+        {
+            if (ProcessTags.Any() || other.ProcessTags.Any())
+                return false;
+            return true;
+        }
+
         #region ProcessAdditions
 
         /// <summary>
@@ -183,31 +196,15 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         /// <param name="other">The process we are adding to this one</param>
         /// <returns>The resulting sum between the two.</returns>
+        /// <exception cref="ProcessTagMismatchException">
+        /// If the processes being added have incompatible tags.
+        /// </exception>
         public IProcess AddProcess(IProcess other)
         {
             var result = new Process();
             // check that it's process Tags do not clash
-            foreach (var tag in other.ProcessTags)
-            { // TODO make this actually check that tags clash rather than just throw a fit on more complex interactions.
-                switch (tag.Key)
-                {
-                    case ProcessTag.Tap:
-                    case ProcessTag.Sorter:
-                    case ProcessTag.Scrubber:
-                    case ProcessTag.Scrapping:
-                    case ProcessTag.Refiner:
-                    case ProcessTag.Mine:
-                    case ProcessTag.Maintenance:
-                    case ProcessTag.Failure:
-                    case ProcessTag.Consumption:
-                    case ProcessTag.Use:
-                    case ProcessTag.Extractor:
-                    case ProcessTag.Crop:
-                        break; // No special interactions here, ignore and drop them.
-                    case ProcessTag.Chance:
-                        throw new InvalidOperationException("Adding this process is not currently sported.");
-                }
-            }
+            if (!ValidProcessTagAddition(other))
+                throw new ProcessTagMismatchException("Processes with tags cannot be added together."); 
             // set it's easy data.
             result.Name = $"{GetName()} + {other.GetName()}";
             result.MinimumTime = MinimumTime + other.MinimumTime;
@@ -219,7 +216,7 @@ namespace EconomicSim.Objects.Processes
             // do the addition of the components.
             foreach (var input in InputProducts)
             {
-                result.InputProducts.Add(
+                result.ProcessProducts.Add(
                     new ProcessProduct
                     {
                         Product = input.Product,
@@ -230,7 +227,7 @@ namespace EconomicSim.Objects.Processes
             }
             foreach (var input in InputWants)
             {
-                result.InputWants.Add(
+                result.ProcessWants.Add(
                     new ProcessWant
                     {
                         Want = input.Want,
@@ -241,54 +238,54 @@ namespace EconomicSim.Objects.Processes
             }
             foreach (var input in CapitalProducts)
             {
-                result.CapitalProducts.Add(
+                result.ProcessProducts.Add(
                     new ProcessProduct
                     {
                         Product = input.Product,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Capital,
                         TagData = input.TagData.ToList()
                     });
             }
             foreach (var input in CapitalWants)
             {
-                result.CapitalWants.Add(
+                result.ProcessWants.Add(
                     new ProcessWant
                     {
                         Want = input.Want,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Capital,
                         TagData = input.TagData.ToList()
                     });
             }
             foreach (var input in OutputProducts)
             {
-                result.OutputProducts.Add(
+                result.ProcessProducts.Add(
                     new ProcessProduct
                     {
                         Product = input.Product,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Output,
                         TagData = input.TagData.ToList()
                     });
             }
             foreach (var input in OutputWants)
             {
-                result.OutputWants.Add(
+                result.ProcessWants.Add(
                     new ProcessWant
                     {
                         Want = input.Want,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Output,
                         TagData = input.TagData.ToList()
                     });
             }
             // add the other process parts,
             // TODO, I'm a lazy fuck, so these are just tacked onto the end,
-            // not properly added to existing ones. Should be 
+            // not properly added to existing ones. Should be tho
             foreach (var input in other.InputProducts)
             {
-                result.InputProducts.Add(
+                result.ProcessProducts.Add(
                 new ProcessProduct
                 {
                     Product = input.Product,
@@ -299,7 +296,7 @@ namespace EconomicSim.Objects.Processes
             }
             foreach (var input in other.InputWants)
             {
-                result.InputWants.Add(
+                result.ProcessWants.Add(
                     new ProcessWant
                     {
                         Want = input.Want,
@@ -310,45 +307,45 @@ namespace EconomicSim.Objects.Processes
             }
             foreach (var input in other.CapitalProducts)
             {
-                result.CapitalProducts.Add(
+                result.ProcessProducts.Add(
                     new ProcessProduct
                     {
                         Product = input.Product,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Capital,
                         TagData = input.TagData.ToList()
                     });
             }
             foreach (var input in other.CapitalWants)
             {
-                result.CapitalWants.Add(
+                result.ProcessWants.Add(
                     new ProcessWant
                     {
                         Want = input.Want,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Capital,
                         TagData = input.TagData.ToList()
                     });
             }
             foreach (var input in OutputProducts)
             {
-                result.OutputProducts.Add(
+                result.ProcessProducts.Add(
                     new ProcessProduct
                     {
                         Product = input.Product,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Output,
                         TagData = input.TagData.ToList()
                     });
             }
             foreach (var input in OutputWants)
             {
-                result.OutputWants.Add(
+                result.ProcessWants.Add(
                     new ProcessWant
                     {
                         Want = input.Want,
                         Amount = input.Amount,
-                        Part = ProcessPartTag.Input,
+                        Part = ProcessPartTag.Output,
                         TagData = input.TagData.ToList()
                     });
             }
@@ -363,8 +360,45 @@ namespace EconomicSim.Objects.Processes
         /// </summary>
         /// <param name="other">The process to bring in as an input to this one.</param>
         /// <returns>The combined process resulting from the combination.</returns>
+        /// <exception cref="ProcessTagMismatchException"></exception>
+        /// <exception cref="ProcessInterfaceMismatchException"></exception>
+        /// <exception cref="ProcessInterfaceTagMismatchException"></exception>
         public IProcess InputProcess(IProcess other)
         {
+            if (!ValidProcessTagAddition(other))
+                throw new ProcessTagMismatchException($"{other.GetName()} and {GetName()} have incompatible tags.");
+
+            // get the outputs which exist in inputs
+            var matchedProducts = other
+                .OutputProducts
+                .Select(x => x.Product)
+                .Intersect(InputProducts.Select(x => x.Product))
+                .ToList();
+            var matchedWants = other
+                .OutputWants
+                .Select(x => x.Want)
+                .Intersect(InputWants.Select(x => x.Want))
+                .ToList();
+            
+            if (!(matchedProducts.Any() || matchedWants.Any()))
+                throw new ProcessInterfaceMismatchException($"Process {other.GetName()} must output an input of {GetName()}");
+            
+            // check that these matches don't have Tags
+            if (other.OutputProducts
+                    .Where(x => matchedProducts.Contains(x.Product))
+                    .Any(x => x.TagData.Any()) ||
+                InputProducts
+                    .Where(x => matchedProducts.Contains(x.Product))
+                    .Any(x => x.TagData.Any()))
+                throw new ProcessInterfaceTagMismatchException("Inputs being fed in cannot have any tags.");
+            if (other.OutputWants
+                    .Where(x => matchedWants.Contains(x.Want))
+                    .Any(x => x.TagData.Any()) ||
+                InputWants
+                    .Where(x => matchedWants.Contains(x.Want))
+                    .Any(x => x.TagData.Any()))
+                throw new ProcessInterfaceTagMismatchException("Outputs being fed cannot have any tags.");
+
             throw new NotImplementedException();
         }
 
@@ -381,6 +415,40 @@ namespace EconomicSim.Objects.Processes
         /// <returns>The combined process resulting from the combination.</returns>
         public IProcess InputProcess(IProcess other, IProduct target)
         {
+            if (!ValidProcessTagAddition(other))
+                throw new ProcessTagMismatchException($"{other.GetName()} and {GetName()} have incompatible tags.");
+
+            // get the outputs which exist in inputs
+            var matchedProducts = other
+                .OutputProducts
+                .Select(x => x.Product)
+                .Intersect(InputProducts.Select(x => x.Product))
+                .ToList();
+            var matchedWants = other
+                .OutputWants
+                .Select(x => x.Want)
+                .Intersect(InputWants.Select(x => x.Want))
+                .ToList();
+            
+            if (!(matchedProducts.Any() || matchedWants.Any()))
+                throw new ProcessInterfaceMismatchException($"Process {other.GetName()} must output an input of {GetName()}");
+            
+            // check that these matches don't have Tags
+            if (other.OutputProducts
+                    .Where(x => matchedProducts.Contains(x.Product))
+                    .Any(x => x.TagData.Any()) ||
+                InputProducts
+                    .Where(x => matchedProducts.Contains(x.Product))
+                    .Any(x => x.TagData.Any()))
+                throw new ProcessInterfaceTagMismatchException("Inputs being fed in cannot have any tags.");
+            if (other.OutputWants
+                    .Where(x => matchedWants.Contains(x.Want))
+                    .Any(x => x.TagData.Any()) ||
+                InputWants
+                    .Where(x => matchedWants.Contains(x.Want))
+                    .Any(x => x.TagData.Any()))
+                throw new ProcessInterfaceTagMismatchException("Outputs being fed cannot have any tags.");
+
             throw new NotImplementedException();
         }
         
@@ -550,11 +618,10 @@ namespace EconomicSim.Objects.Processes
         {
             decimal reduction = 1;
             // do what we just did, but for wants
-            foreach (var want in InputWants.Select(x => x.Want).Distinct())
+            foreach (var want in inputWants.Keys)
             {
-                decimal input = 0, available = 0;
-                inputWants.TryGetValue(want, out input); // input desired
-                availableWants.TryGetValue(want, out available); // wants available
+                var input = inputWants[want];
+                availableWants.TryGetValue(want, out var available); // wants available
                 
                 // get the lower between the two
                 var current = Math.Min(input, available);
@@ -565,6 +632,18 @@ namespace EconomicSim.Objects.Processes
             
             // if reduction is 0 return with empty values, no iterations could be done.
             return reduction;
+        }
+
+        /// <summary>
+        /// Checks if this process is valid to be run or not.
+        /// If this process has a 
+        /// </summary>
+        /// <returns></returns>
+        public bool ProcessValid()
+        {
+            if (CapitalWants.Any())
+                return false;
+            return true;
         }
         
         /// <summary>
@@ -631,6 +710,8 @@ namespace EconomicSim.Objects.Processes
                 .Where(x => !x.ContainsTag(ProductionTag.Optional))
                 .ToDictionary(x => x.Product,
                     x => x.Amount * target);
+            if (CapitalWants.Any())
+                throw new NotImplementedException("DoProcess");
             /*var capitalWants = CapitalWants
                 .Where(x => !x.ContainsTag(ProductionTag.Optional))
                 .ToDictionary(x => x.Want,
@@ -668,7 +749,8 @@ namespace EconomicSim.Objects.Processes
             
             // with the reduction found (and it not being zero) we find out how
             // much of everything we use/consume and output
-            var endIter = target * reduction + progress;
+            // Don't add Progress back in as we allow fractional products in inventory.
+            var endIter = target * reduction;
 
             var prodChange = new Dictionary<IProduct, decimal>();
             var used = new Dictionary<IProduct, decimal>();
@@ -691,7 +773,7 @@ namespace EconomicSim.Objects.Processes
             foreach (var cap in CapitalProducts)
                 used[cap.Product] = cap.Amount * endIter;
             // we don't actually allow Capital wants, and thus can't 'use' them.
-
+            
             return ((int)Math.Floor(endIter),
                     endIter % 1, 
                     prodChange, used, wantChange);

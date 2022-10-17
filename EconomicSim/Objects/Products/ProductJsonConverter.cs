@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Data;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using EconomicSim.Objects.Products.ProductTags;
 
@@ -37,6 +38,9 @@ namespace EconomicSim.Objects.Products
                         break;
                     case "Quality":
                         result.Quality = reader.GetInt32();
+                        break;
+                    case "MeanTimeToFailure":
+                        result.MeanTimeToFailure = reader.GetInt32();
                         break;
                     case "Mass":
                         result.Mass = reader.GetDecimal();
@@ -77,6 +81,8 @@ namespace EconomicSim.Objects.Products
                             .Deserialize<Dictionary<string, decimal>>(ref reader, options);
                         foreach (var (want, amount) in wants)
                         {
+                            if (amount <= 0)
+                                throw new DataException($"Product: {result.GetName()}. Want '{want}' must have a positive value.");
                             result.Wants.Add(DataContext.Instance.Wants[want], amount);
                         }
                         break;
@@ -120,6 +126,10 @@ namespace EconomicSim.Objects.Products
             // Bulk
             writer.WritePropertyName(nameof(value.Bulk));
             JsonSerializer.Serialize(writer, value.Bulk, options);
+            
+            // MTTF
+            writer.WritePropertyName(nameof(value.MeanTimeToFailure));
+            JsonSerializer.Serialize(writer, value.MeanTimeToFailure, options);
 
             // Fractional
             writer.WritePropertyName(nameof(value.Fractional));

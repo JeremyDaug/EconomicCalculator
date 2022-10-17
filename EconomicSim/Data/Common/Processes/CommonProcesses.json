@@ -97,24 +97,9 @@
       "Capital": [],
       "Outputs": [
         {
-          "Product": "Ambrosia Fruit",
-          "Amount": 1,
-          "Tags": {
-            "Chance": {
-              "Group": "a",
-              "Weight": "9"
-            }
-          }
-        },
-        {
-          "Product": "Nothing",
+          "Product": "Bio Waste",
           "Amount": 0,
-          "Tags": {
-            "Chance": {
-              "Group": "b",
-              "Weight": "1"
-            }
-          }
+          "Tags": {}
         }
       ]
     },
@@ -252,24 +237,9 @@
       "Capital": [],
       "Outputs": [
         {
-          "Product": "Nothing",
+          "Product": "Bio Waste",
           "Amount": 1,
-          "Tags": {
-            "Chance": {
-              "Group": "a",
-              "Weight": "1"
-            }
-          }
-        },
-        {
-          "Product": "Clothes(Cotton)",
-          "Amount": 1,
-          "Tags": {
-            "Chance": {
-              "Group": "b",
-              "Weight": "29"
-            }
-          }
+          "Tags": {}
         }
       ]
     },
@@ -369,16 +339,6 @@
       ],
       "Capital": [],
       "Outputs": [
-        {
-          "Product": "Hut",
-          "Amount": 1,
-          "Tags": {
-            "Chance": {
-              "Group": "a",
-              "Weight": "1"
-            }
-          }
-        },
         {
           "Product": "Nothing",
           "Amount": 1,

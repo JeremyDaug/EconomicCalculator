@@ -63,6 +63,12 @@ namespace EconomicSim.Objects.Products
         public decimal Bulk { get; set; }
 
         /// <summary>
+        /// How many days an item is expected to last before it decays.
+        /// -1 means it doesn't decay.
+        /// </summary>
+        public int MeanTimeToFailure { get; set; } = -1;
+
+        /// <summary>
         /// Whether the product can be devided into decmial units.
         /// </summary>
         public bool Fractional { get; set; }

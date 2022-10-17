@@ -218,10 +218,11 @@ public class Desires
 
     /// <summary>
     /// Goes through reserved items and predicts whatever they'd produce from their position.
+    /// This should be rune before <seealso cref="SiftWants"/>.
     /// Resets <seealso cref="WantsFromNeeds"/> and <seealso cref="SatisfiedWants"/>.
     /// </summary>
-    public void PredictWantOutputs()
-    {/*
+    public void CalculateWants()
+    {
         var totalOutputs = new Dictionary<IWant, decimal>();
         foreach (var (product, sat) in _ownVsConsumeSatisfaction)
         {
@@ -288,14 +289,14 @@ public class Desires
         { // update wants from products and satisfaction
             _wantsFromNeeds[want] = amount;
             SiftProductWant(want);
-        }*/
+        }
     }
 
     /// <summary>
     /// Sifts wants from the WantsFromProducts  
     /// </summary>
     public void SiftProductWant(IWant want)
-    { /*
+    { 
         // given a want, walk up the tiers for them
         if (!_wantsFromNeeds.ContainsKey(want) || 
             _wantsFromNeeds[want] == 0 ||
@@ -339,16 +340,15 @@ public class Desires
             var assigning = Math.Min(wantDesire.Amount, unassignedProducts);
             wantDesire.Satisfaction += assigning; // add to satisfaction
             unassignedProducts -= assigning; // remove from unassigned amount
-        }*/
+        }
     }
 
     private void FulfillWant(IWantDesire desire, int tier, decimal amount)
     {
         // try to satisfy from excess Wants available, if possible.
-        if (UnclaimedWants.ContainsKey(desire.Want) &&
-            UnclaimedWants[desire.Want] > 0)
+        if (UnclaimedWants.TryGetValue(desire.Want, out var availableWant))
         {
-            var available = Math.Min(amount, UnclaimedWants[desire.Want]);
+            var available = Math.Min(amount, availableWant);
             amount -= available;
             WantsSatisfied[desire.Want] += available;
             desire.Satisfaction += available;
@@ -356,7 +356,6 @@ public class Desires
         if (amount == 0)
             return; // if satisfied, break out.
         
-        // with our want, try to fulfill it.
         // try to fulfill from owning products first.
         if (desire.Want.OwnershipSources.Any() &&
             AllProperty.Keys.Any(x => desire.Want.OwnershipSources.Contains(x)))
@@ -368,9 +367,11 @@ public class Desires
                 .Select(x => x.Key);
             foreach (var product in validProducts)
             {
-                // get either the amount desired by the product, or the amount available.
+                // get how efficient the product is per unit
+                var wantEff = product.Wants[desire.Want];
+                // get either the amount of product needed, or the amount available.
                 // Should have a value above 0 available.
-                var available = Math.Min(desire.Amount, AllProperty[product] - ProductsReserved[product]);
+                var available = Math.Min(desire.Amount / wantEff, AllProperty[product] - ProductsReserved[product]);
                 // reserve it
                 if (!ProductsReserved.ContainsKey(product))
                     ProductsReserved[product] = 0;
@@ -500,6 +501,8 @@ public class Desires
     /// <summary>
     /// Sifts excess property into the proper places for a specified want to be satisfied.
     /// Do Assumes products have been run first, do not run before products have been sifted.
+    /// Does not consume products here, must run <seealso cref="SatisfyWants"/> to consume what
+    /// was calculated here.
     /// </summary>
     public void SiftWants()
     {
@@ -513,6 +516,11 @@ public class Desires
             if (!availableSatisfaction.Any())
                 break;
         }
+    }
+
+    public void SatisfyWants()
+    {
+        throw new NotImplementedException();
     }
     
     public void UpdateFullTier()

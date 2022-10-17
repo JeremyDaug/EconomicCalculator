@@ -37,8 +37,8 @@ public class ProductEditorModel
         Wants = new List<Pair<string, decimal>>();
         foreach (var want in product.Wants)
             Wants.Add(new Pair<string, decimal>(want.Key.Name, want.Value));
-        UseProcesses = new List<string>(product.UseProcess.Select(x => x.GetName()));
-        ConsumptionProcesses = new List<string>(product.ConsumptionProcess.Select(x => x.GetName()));
+        UseProcesses = new List<string>{product.UseProcess.GetName()};
+        ConsumptionProcesses = new List<string>{product.ConsumptionProcess.GetName()};
         MaintenanceProcesses = new List<string>(product.MaintenanceProcesses.Select(x => x.GetName()));
     }
     

@@ -53,6 +53,11 @@ namespace EconomicSim.Objects.Products
         /// The space the object takes up in m^3.
         /// </summary>
         decimal Bulk { get; }
+        
+        /// <summary>
+        /// How many days an item is expected to last before it decays.
+        /// </summary>
+        int MeanTimeToFailure { get; }
 
         /// <summary>
         /// Whether the product can be devided into decmial units.

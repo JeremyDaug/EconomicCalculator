@@ -671,7 +671,7 @@ public class DesiresShould
         test.SiftProduct(consumeProduct.Object);
         test.SiftProduct(ownProduct.Object);
 
-        test.PredictWantOutputs();
+        test.CalculateWants();
         
         //Assert.That(test.WantsFromNeeds[Want1.Object], Is.EqualTo(50));
         //Assert.That(test.WantsFromNeeds[Want2.Object], Is.EqualTo(100));

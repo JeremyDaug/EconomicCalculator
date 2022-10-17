@@ -11,8 +11,6 @@ namespace EconomicSim.Objects.Wants
     {
         public Want()
         {
-            Name = "";
-            Description = "";
             UseSources = new List<IProduct>();
             ConsumptionSources = new List<IProduct>();
             OwnershipSources = new List<IProduct>();
@@ -79,10 +77,10 @@ namespace EconomicSim.Objects.Wants
 
         public override bool Equals(object? obj)
         {
-            return Equals(obj as Product);
+            return Equals(obj as Want);
         }
 
-        public bool Equals(Product? obj)
+        public bool Equals(Want? obj)
         {
             if (obj == null) return false;
             return string.Equals(Name, obj.Name);
