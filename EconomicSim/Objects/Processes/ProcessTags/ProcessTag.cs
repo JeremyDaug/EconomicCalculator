@@ -57,7 +57,19 @@
         /// </summary>
         Extractor,
         /// <summary>
-        /// This process extracts resources from the planet as a whole. This gives now scew
+        /// A scrapping procedure, often based on a consumption
+        /// or failure process. This is for turning processed goods into simpler goods, usually
+        /// more conducive to being made into other things.
+        /// </summary>
+        Scrapping,
+        // TODO rework these later.
+        /// <summary>
+        /// Scrubbing, a special kind of process that allows for one or more offset(s) in the 
+        /// outputs, typically of another product that is a pollutant.
+        /// </summary>
+        /* Scrubber,
+        /// <summary>
+        /// This process extracts resources from the planet as a whole. This gives now skew
         /// based on local environment, but the output of the process is dependent on the
         /// planet as a whole.
         /// </summary>
@@ -72,17 +84,6 @@
         /// This process is an Extraction or Tap process which takes everything given and
         /// sorts it into it's constituent parts. Nothing returns to the environment naturally.
         /// </summary>
-        Sorter,
-        /// <summary>
-        /// A scrapping procedure, often based on a consumption
-        /// or failure process. This is for turning processed goods into simpler goods, usually
-        /// more condusive to being made into other things.
-        /// </summary>
-        Scrapping,
-        /// <summary>
-        /// Scrubbing, a special kind of process that allows for one or more offset(s) in the 
-        /// outputs, typically of another product that is a pollutant.
-        /// </summary>
-        Scrubber
+        Sorter,*/
     }
 }

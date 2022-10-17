@@ -151,10 +151,10 @@ public class ProcessEditorViewModel : ViewModelBase
         Crop = model.ProcessTags.Contains(ProcessTag.Crop);
         Mine = model.ProcessTags.Contains(ProcessTag.Mine);
         Extractor = model.ProcessTags.Contains(ProcessTag.Extractor);
-        Tap = model.ProcessTags.Contains(ProcessTag.Tap);
+        /*Tap = model.ProcessTags.Contains(ProcessTag.Tap);
         Refiner = model.ProcessTags.Contains(ProcessTag.Refiner);
         Sorter = model.ProcessTags.Contains(ProcessTag.Sorter);
-        Scrubber = model.ProcessTags.Contains(ProcessTag.Scrubber);
+        Scrubber = model.ProcessTags.Contains(ProcessTag.Scrubber);*/
         Scrapping = model.ProcessTags.Contains(ProcessTag.Scrapping);
 
         // if it has a selected product, select it appropriately.
@@ -509,14 +509,14 @@ public class ProcessEditorViewModel : ViewModelBase
                 oldProc.ProcessTags.Add(ProcessTag.Mine, null);
             if (Extractor)
                 oldProc.ProcessTags.Add(ProcessTag.Extractor, null);
-            if (Tap)
+            /*if (Tap)
                 oldProc.ProcessTags.Add(ProcessTag.Tap, null);
             if (Refiner)
                 oldProc.ProcessTags.Add(ProcessTag.Refiner, null);
             if (Sorter)
                 oldProc.ProcessTags.Add(ProcessTag.Sorter, null);
             if (Scrubber)
-                oldProc.ProcessTags.Add(ProcessTag.Scrubber, null);
+                oldProc.ProcessTags.Add(ProcessTag.Scrubber, null);*/
             if (Scrapping)
                 oldProc.ProcessTags.Add(ProcessTag.Scrapping, null);
             
@@ -748,14 +748,14 @@ public class ProcessEditorViewModel : ViewModelBase
                 newProcess.ProcessTags.Add(ProcessTag.Mine, null);
             if (Extractor)
                 newProcess.ProcessTags.Add(ProcessTag.Extractor, null);
-            if (Tap)
+            /*if (Tap)
                 newProcess.ProcessTags.Add(ProcessTag.Tap, null);
             if (Refiner)
                 newProcess.ProcessTags.Add(ProcessTag.Refiner, null);
             if (Sorter)
                 newProcess.ProcessTags.Add(ProcessTag.Sorter, null);
             if (Scrubber)
-                newProcess.ProcessTags.Add(ProcessTag.Scrubber, null);
+                newProcess.ProcessTags.Add(ProcessTag.Scrubber, null);*/
             if (Scrapping)
                 newProcess.ProcessTags.Add(ProcessTag.Scrapping, null);
 
