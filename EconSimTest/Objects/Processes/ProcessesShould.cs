@@ -316,10 +316,9 @@ public class ProcessesShould
         };
 
         var results
-            = Test.DoProcess(1, 0, inputs, wants);
+            = Test.DoProcess(1, inputs, wants);
         
         Assert.That(results.successes, Is.EqualTo(1));
-        Assert.That(results.progress, Is.EqualTo(0));
         // should consume an input, and produce an output
         Assert.That(results.productChange[InputProduct1], Is.EqualTo(-1));
         Assert.That(results.productChange[OutputProduct1], Is.EqualTo(1));
@@ -350,10 +349,9 @@ public class ProcessesShould
         };
 
         var results
-            = Test.DoProcess(1, 0, inputs, wants);
+            = Test.DoProcess(1, inputs, wants);
         
-        Assert.That(results.successes, Is.EqualTo(0));
-        Assert.That(results.progress, Is.EqualTo(0.5));
+        Assert.That(results.successes, Is.EqualTo(0.5));
         // should consume an input, and produce an output
         Assert.That(results.productChange[InputProduct1], Is.EqualTo(-0.5));
         Assert.That(results.productChange[OutputProduct1], Is.EqualTo(0.5));
@@ -384,10 +382,9 @@ public class ProcessesShould
         };
 
         var results
-            = Test.DoProcess(0, 0.5m, inputs, wants);
+            = Test.DoProcess(0.5m, inputs, wants);
         
-        Assert.That(results.successes, Is.EqualTo(0));
-        Assert.That(results.progress, Is.EqualTo(0.5));
+        Assert.That(results.successes, Is.EqualTo(0.5));
         // should consume an input, and produce an output
         Assert.That(results.productChange[InputProduct1], Is.EqualTo(-0.5));
         Assert.That(results.productChange[OutputProduct1], Is.EqualTo(0.5));
@@ -424,6 +421,6 @@ public class ProcessesShould
             {OutputWant1, 10},
         };
         
-        Assert.Throws<NotImplementedException>(() => proc.DoProcess(1, 0, inputs, wants));
+        Assert.Throws<NotImplementedException>(() => proc.DoProcess(1, inputs, wants));
     }
 }

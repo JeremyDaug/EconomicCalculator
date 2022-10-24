@@ -662,18 +662,16 @@ namespace EconomicSim.Objects.Processes
         /// productUsed is the products that have been used as capital (positive values).
         /// wantsChange is the change in wants, cap wants are still consumed.
         /// </returns>
-        public (int successes, decimal progress,
+        public (decimal successes,
                 Dictionary<IProduct, decimal> productChange,
                 Dictionary<IProduct, decimal> productUsed,
                 Dictionary<IWant, decimal> wantsChange)
-            DoProcess(decimal iterations, decimal progress,
+            DoProcess(decimal iterations,
                 Dictionary<IProduct, decimal> products,
                 Dictionary<IWant, decimal> wants)
         {
             // get the target iterations desired and no more.
             var target = iterations;
-            if (progress != 0)
-                target += 1 - progress;
             
             // get optional items
             // TODO work on optional inclusions later. Will likely need small rework.
@@ -730,7 +728,7 @@ namespace EconomicSim.Objects.Processes
             
             // if reduction is 0 return with empty values, no iterations could be done.
             if (reduction == 0)
-                return (0, 0,
+                return (0,
                     new Dictionary<IProduct, decimal>(),
                     new Dictionary<IProduct, decimal>(),
                     new Dictionary<IWant, decimal>());
@@ -739,7 +737,7 @@ namespace EconomicSim.Objects.Processes
             var wantReduction = ProcessReductionBasedOnWants(inputWants, wants);
             // if reduction is 0 return with empty values, no iterations could be done.
             if (wantReduction == 0)
-                return (0, 0,
+                return (0,
                     new Dictionary<IProduct, decimal>(),
                     new Dictionary<IProduct, decimal>(),
                     new Dictionary<IWant, decimal>());
@@ -774,8 +772,7 @@ namespace EconomicSim.Objects.Processes
                 used[cap.Product] = cap.Amount * endIter;
             // we don't actually allow Capital wants, and thus can't 'use' them.
 
-            return ((int)Math.Floor(endIter),
-                    endIter % 1, 
+            return (endIter,
                     prodChange, used, wantChange);
         }
 

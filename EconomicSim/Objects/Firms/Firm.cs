@@ -237,19 +237,18 @@ namespace EconomicSim.Objects.Firms
                     { // attempt to do each process to the maximum capabilities.
                         if (job.Assignments[proc].Iterations == 0)
                             continue; // if no iterations are required for the process, skip.
-                        (int successes,
-                            decimal progress,
+                        (decimal successes,
                             Dictionary<IProduct, decimal> productChange,
                             Dictionary<IProduct, decimal> productUsed,
                             Dictionary<IWant, decimal> wantsChange) 
                             outcome
-                                = proc.DoProcess(job.Assignments[proc].Iterations,
-                                    job.Assignments[proc].Progress, Resources, _remnantWants);
+                                = proc.DoProcess(job.Assignments[proc].Iterations + job.Assignments[proc].Progress,
+                                     Resources, _remnantWants);
                         // if nothing was done, skip over the remainder.
-                        if (outcome.successes == 0 && outcome.progress == 0)
+                        if (outcome.successes == 0)
                             continue;
                         // update the progress
-                        job.Assignments[proc].Progress = outcome.progress;
+                        job.Assignments[proc].Progress = outcome.successes % 1;
                         // update the change in products
                         foreach (var (key, val) in outcome.productChange)
                         {

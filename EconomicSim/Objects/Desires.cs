@@ -1,4 +1,5 @@
 using System.Reflection.PortableExecutable;
+using System.Security.Claims;
 using Avalonia.Animation.Animators;
 using Avalonia.Input;
 using Avalonia.Media.Transformation;
@@ -85,6 +86,10 @@ public class Desires
     /// Excess wants which are available to be absorbed elsewhere.
     /// </summary>
     public readonly Dictionary<IWant, decimal> UnclaimedWants = new();
+    /// <summary>
+    /// Wants which have been claimed for processes.
+    /// </summary>
+    public readonly Dictionary<IWant, decimal> ClaimedWants = new();
     /// <summary>
     /// The current amount of wants which are (predicted) to be satisfied today.
     /// </summary>
@@ -216,8 +221,20 @@ public class Desires
         }
     }
 
-    private void FulfillWant(IWantDesire desire, int tier, decimal amount)
+    /// <summary>
+    /// Tries to fill a want at a specified tier.
+    /// </summary>
+    /// <param name="desire">The desire to fill.</param>
+    /// <param name="tier">The tier we're filling at.</param>
+    private void FulfillWant(IWantDesire desire, int tier)
     {
+        // sanity check that we need to satisfy at this tier at all.
+        var satisfaction = desire.SatisfiedAtTier(tier);
+        if (satisfaction == 1)
+            return; // if we are already satisfied, just skip out.
+        // if any remains, set our target amount to satisfy to the unsatisfied amount.
+        var amount = desire.Amount - desire.Amount * satisfaction;
+        
         // try to satisfy from excess Wants available, if possible.
         if (UnclaimedWants.TryGetValue(desire.Want, out var availableWant))
         {
@@ -246,25 +263,24 @@ public class Desires
                 // Should have a value above 0 available.
                 var available = Math.Min(desire.Amount / wantEff, AllProperty[product] - ProductsReserved[product]);
                 // reserve it
-                if (!ProductsReserved.ContainsKey(product))
-                    ProductsReserved[product] = 0;
-                ProductsReserved[product] += available;
+                ProductsReserved.AddOrInclude(product, available);
                 // and update our satisfaction from our product
-                foreach (var sat in product.Wants)
+                foreach (var (satisfiedWant, rate) in product.Wants)
                 {
-                    var created = sat.Value * available;
-                    if (!WantsSatisfied.ContainsKey(sat.Key))
-                        WantsSatisfied[sat.Key] = 0;
-                    if (!UnclaimedWants.ContainsKey(sat.Key))
-                        UnclaimedWants[sat.Key] = 0;
-                    if (Equals(desire.Want, sat.Key))
-                    {
-                        WantsSatisfied[sat.Key] += created;
+                    var created = rate * available;
+                    // add entry to satisfied wants and unclaimed wants if they aren't there.
+                    if (!WantsSatisfied.ContainsKey(satisfiedWant))
+                        WantsSatisfied[satisfiedWant] = 0;
+                    if (!UnclaimedWants.ContainsKey(satisfiedWant))
+                        UnclaimedWants[satisfiedWant] = 0;
+                    if (Equals(desire.Want, satisfiedWant))
+                    { // the satisfiedWant is what we are trying to satisfy
+                        WantsSatisfied[satisfiedWant] += created; // add it to our satisfaction
                         desire.Satisfaction += created;
-                        amount -= created;
+                        amount -= created; // and remove it from the amount
                     }
-                    else
-                        UnclaimedWants[sat.Key] += created;
+                    else // if not what we are trying to satisfy, save it for later possible use.
+                        UnclaimedWants[satisfiedWant] += created;
                 }
             }
             if (amount == 0)
@@ -276,17 +292,15 @@ public class Desires
         {
             var useProcs = desire.Want.UseSources // from the usable products
                 .Where(x => AllProperty.ContainsKey(x)) // get the items we can even use
-                .Select(x => x.UseProcess!) // select their use processes (which are guaranteed to exist)
-                .Where(x => x.OutputWants.Any(y => Equals(y.Want, desire.Want))); 
-            // and get the processes which output our want
+                .Select(x => x.UseProcess!); // select their use processes (which are guaranteed to exist)
+                // these processes output our want by definition (they wouldn't be in the want's use processes otherwise)
             foreach (var process in useProcs)
-            {
-                // how much it outputs on average.
+            { // try each process
+                // get how much it outputs on average.
                 var output = process.ProjectedWantAmount(desire.Want, ProcessPartTag.Output);
                 var target = amount / output; // how many times we would need to do it
-                var processData = process.DoProcess(target, 0, AllProperty,
+                var processData = process.DoProcess(target, AllProperty,
                     UnclaimedWants);
-                // TODO consider saving and using the progress as well.
                 if (processData.successes == 0)
                     continue; // if no wants can be gotten, try the next.
                 // with some number possible, reserve the inputs/capital
@@ -305,10 +319,10 @@ public class Desires
                 }
                 // claim any input wants also
                 foreach (var (want, consumed) in processData.wantsChange.Where(x => x.Value < 0))
-                { // if we're consuming a want, then we must have claimed it earlier
+                { // if we're consuming a want, then claim it and remove it from unclaimed.
                     UnclaimedWants[want] -= consumed;
-                    if (UnclaimedWants[want] == 0) // if it's reduced to 0, remove entirely for sanity.
-                        UnclaimedWants.Remove(want);
+                    // move consumed wants into claimed wants.
+                    ClaimedWants.AddOrInclude(want, consumed);
                 }
                 // and record that we're using this process for later uses
                 UseProcesses[desire.Want][process] = processData.successes;
@@ -326,17 +340,15 @@ public class Desires
         {
             var consumptionProcs = desire.Want.ConsumptionSources // from the usable products
                 .Where(x => AllProperty.ContainsKey(x)) // get the items we can even use
-                .Select(x => x.UseProcess!) // select their use processes (which are guaranteed to exist)
-                .Where(x => x.OutputWants.Any(y => Equals(y.Want, desire.Want))); 
-            // and get the processes which output our want
+                .Select(x => x.ConsumptionProcess!); // select their consumption processes (which are guaranteed to exist)
+            // these processes are guaranteed to 
             foreach (var process in consumptionProcs)
             {
                 // how much it outputs on average.
                 var output = process.ProjectedWantAmount(desire.Want, ProcessPartTag.Output);
                 var target = amount / output; // how many times we would need to do it
-                var processData = process.DoProcess(target, 0, AllProperty,
+                var processData = process.DoProcess(target, AllProperty,
                     UnclaimedWants);
-                // TODO consider saving and using the progress as well. 
                 if (processData.successes == 0)
                     continue; // if no wants can be gotten, try the next.
                 // with some number possible, reserve the inputs/capital
@@ -352,15 +364,13 @@ public class Desires
                 { // do the same with capital
                     ProductsReserved.AddOrInclude(prod, used);
                 }
-                // claim any input wants also
+                // claim any input wants also 
                 foreach (var (want, consumed) in processData.wantsChange.Where(x => x.Value < 0))
                 { // if we're consuming a want, then we must have claimed it earlier
                     UnclaimedWants[want] -= consumed;
-                    if (UnclaimedWants[want] == 0) // if it's reduced to 0, remove entirely for sanity.
-                        UnclaimedWants.Remove(want);
                 }
                 // and record that we're using this process for later uses
-                UseProcesses[desire.Want][process] = processData.successes;
+                ConsumedProcesses[desire.Want][process] = processData.successes;
                 // get how much we expect to be output for this
                 var expectation = processData.wantsChange[desire.Want]; // this Must output the want, otherwise it's connection is false.
                 WantsSatisfied[desire.Want] = expectation;

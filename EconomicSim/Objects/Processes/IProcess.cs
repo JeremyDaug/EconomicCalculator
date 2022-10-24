@@ -293,22 +293,20 @@ namespace EconomicSim.Objects.Processes
         /// outputs the product made/consumed, capital used, and wants made or consumed.
         /// Does not remove items from inputs, leaves that to the caller.
         /// </summary>
-        /// <param name="iterations">How many iterations to try and complete.</param>
-        /// <param name="progress">The progress being brought in (will round up iterations sought).</param>
+        /// <param name="iterations">How many iterations to try and complete, fractions allowed.</param>
         /// <param name="products">The products available to be consumed/used.</param>
         /// <param name="wants">The wants available to be used directly.</param>
         /// <returns>
-        /// Successes is how many iterations were completed.
-        /// Progress is how much overflow remains.
+        /// Successes is how many iterations were completed. Fractional values represent incomplete processes.
         /// productChange is the product that has been created/consumed.
         /// productUsed is the products that have been used as capital.
         /// wantsChange is the change in wants, cap wants are still consumed.
         /// </returns>
-        (int successes, decimal progress,
+        (decimal successes,
             Dictionary<IProduct, decimal> productChange,
             Dictionary<IProduct, decimal> productUsed,
             Dictionary<IWant, decimal> wantsChange)
-            DoProcess(decimal iterations, decimal progress,
+            DoProcess(decimal iterations,
                 Dictionary<IProduct, decimal> products,
                 Dictionary<IWant, decimal> wants);
 
