@@ -773,7 +773,7 @@ namespace EconomicSim.Objects.Processes
             foreach (var cap in CapitalProducts)
                 used[cap.Product] = cap.Amount * endIter;
             // we don't actually allow Capital wants, and thus can't 'use' them.
-            
+
             return ((int)Math.Floor(endIter),
                     endIter % 1, 
                     prodChange, used, wantChange);
