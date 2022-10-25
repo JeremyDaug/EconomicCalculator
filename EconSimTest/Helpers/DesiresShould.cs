@@ -587,7 +587,6 @@ public class DesiresShould
     public void PredictWantOutputsCorrectlyAndSiftThemCorrectly()
     {
         var Want1 = new Mock<IWant>();
-        var Want2 = new Mock<IWant>();
         
         // setup product which supplies via ownership.
         var ownProduct = new Mock<IProduct>();
@@ -599,35 +598,63 @@ public class DesiresShould
                 {Want1.Object, 1}
             });
         
+        // product which needs to be used.
+        var useProduct = new Mock<IProduct>();
+        useProduct.Setup(x => x.Name)
+            .Returns("Used");
+        useProduct.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal>());
+        // setup the process for the use product.
+        var useProcess = new Mock<IProcess>();
+        useProcess.Setup(x => x.Name)
+            .Returns("Using!");
+        useProcess.Setup(x => x.ProjectedWantAmount(Want1.Object, ProcessPartTag.Output))
+            .Returns(1);
+        useProcess
+            .Setup(x => x.DoProcess(1,
+                test.AllProperty,
+                test.UnclaimedWants))
+            .Returns((1, new Dictionary<IProduct, decimal>(),
+                new Dictionary<IProduct, decimal>
+                {
+                    {useProduct.Object, 1}
+                }, 
+                new Dictionary<IWant, decimal>
+                {
+                    {Want1.Object, 1}
+                }));
+        // add the use process into the use product.
+        useProduct.Setup(x => x.UseProcess)
+            .Returns(useProcess.Object);
+        
         // product which needs to be consumed.
         var consumeProduct = new Mock<IProduct>();
         consumeProduct.Setup(x => x.Name)
             .Returns("Consumed");
         consumeProduct.Setup(x => x.Wants)
             .Returns(new Dictionary<IWant, decimal>());
-
-        var inputProductMock = new ProcessProduct();
-        inputProductMock.Product = consumeProduct.Object;
-        inputProductMock.Amount = 1;
-        inputProductMock.Part = ProcessPartTag.Input;
-        var outputWantMock = new ProcessWant();
-        outputWantMock.Want = Want2.Object;
-        outputWantMock.Amount = 1;
-        outputWantMock.Part = ProcessPartTag.Output;
-        var consumeProcess = new Mock<IProcess>();
-        consumeProcess.Setup(x => x.InputProducts)
-            .Returns(new List<IProcessProduct>
-            {
-                inputProductMock
-            });
-        consumeProcess.Setup(x => x.OutputWants)
-            .Returns(new List<IProcessWant>
-            {
-                outputWantMock
-            });
-
-        consumeProduct.Setup(x => x.ConsumptionProcess)
-            .Returns(consumeProcess.Object);
+        // create consumption process
+        var consumptionProcess = new Mock<IProcess>();
+        consumptionProcess.Setup(x => x.Name)
+            .Returns("Consuming!");
+        consumptionProcess.Setup(x => x.ProjectedWantAmount(Want1.Object, ProcessPartTag.Output))
+            .Returns(1);
+        consumptionProcess
+            .Setup(x => x.DoProcess(1,
+                test.AllProperty,
+                test.UnclaimedWants))
+            .Returns((1, new Dictionary<IProduct, decimal>
+                {
+                    {consumeProduct.Object, -1}
+                }, 
+                new Dictionary<IProduct, decimal>(),
+                new Dictionary<IWant, decimal>
+                {
+                    {Want1.Object, 1}
+                }));
+        // add the use process into the use product.
+        consumeProduct.Setup(x => x.UseProcess)
+            .Returns(consumptionProcess.Object);
 
         var needDesire1 = new NeedDesire
         {
@@ -638,12 +665,19 @@ public class DesiresShould
         };
         var needDesire2 = new NeedDesire
         {
+            Product = useProduct.Object,
+            Amount = 1,
+            Step = 1,
+            StartTier = 0
+        };
+        var needDesire3 = new NeedDesire
+        {
             Product = ownProduct.Object,
             Amount = 1,
             Step = 1,
             StartTier = 0
         };
-        var testNeeds = new List<INeedDesire>{needDesire1, needDesire2};
+        var testNeeds = new List<INeedDesire>{needDesire1, needDesire2, needDesire3};
 
         var wantDesire1 = new WantDesire
         {
@@ -653,25 +687,19 @@ public class DesiresShould
             Step = 1,
             EndTier = null
         };
-        var wantDesire2 = new WantDesire
-        {
-            Want = Want2.Object,
-            Amount = 1,
-            StartTier = 0,
-            Step = 1,
-            EndTier = null
-        };
-        var testWants = new List<IWantDesire>{ wantDesire1, wantDesire2};
+        var testWants = new List<IWantDesire>{ wantDesire1 };
 
         test = new Desires(MarketMock.Object, testNeeds, testWants);
         
         test.AllProperty.Add(consumeProduct.Object, 100);
-        test.AllProperty.Add(ownProduct.Object, 50);
+        test.AllProperty.Add(useProduct.Object, 100);
+        test.AllProperty.Add(ownProduct.Object, 100);
         
         test.SiftProduct(consumeProduct.Object);
+        test.SiftProduct(useProduct.Object);
         test.SiftProduct(ownProduct.Object);
 
-        // TODO test want sift here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+        test.SiftWants();
         
         //Assert.That(test.WantsFromNeeds[Want1.Object], Is.EqualTo(50));
         //Assert.That(test.WantsFromNeeds[Want2.Object], Is.EqualTo(100));
@@ -681,8 +709,6 @@ public class DesiresShould
         
         Assert.That(test.Wants.Single(x => x.Want == Want1.Object)
             .Satisfaction, Is.EqualTo(50));
-        Assert.That(test.Wants.Single(x => x.Want == Want2.Object)
-            .Satisfaction, Is.EqualTo(100));
     }
 
     [Test]
