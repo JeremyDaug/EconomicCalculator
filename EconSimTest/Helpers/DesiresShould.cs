@@ -695,9 +695,11 @@ public class DesiresShould
         test.AllProperty.Add(useProduct.Object, 100);
         test.AllProperty.Add(ownProduct.Object, 100);
         
-        test.SiftProduct(consumeProduct.Object);
-        test.SiftProduct(useProduct.Object);
-        test.SiftProduct(ownProduct.Object);
+        test.SiftProducts();
+        // sanity check Products
+        Assert.That(test.ProductsSatisfied[consumeProduct.Object], Is.EqualTo(100));
+        Assert.That(test.ProductsSatisfied[useProduct.Object], Is.EqualTo(100));
+        Assert.That(test.ProductsSatisfied[ownProduct.Object], Is.EqualTo(100));
 
         test.SiftWants();
         

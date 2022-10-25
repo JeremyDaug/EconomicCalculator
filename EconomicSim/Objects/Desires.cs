@@ -176,6 +176,17 @@ public class Desires
     public int HighestTier { get; private set; }
 
     /// <summary>
+    /// Sifts all products in our desires.
+    /// </summary>
+    public void SiftProducts()
+    {
+        foreach (var product in DesiredProducts)
+        {
+            SiftProduct(product);
+        }
+    }
+    
+    /// <summary>
     /// Sifts a product from Excess into satisfaction
     /// does not assume any sifting prior to work.
     /// </summary>
@@ -226,12 +237,13 @@ public class Desires
     /// </summary>
     /// <param name="desire">The desire to fill.</param>
     /// <param name="tier">The tier we're filling at.</param>
-    private void FulfillWant(IWantDesire desire, int tier)
+    /// <returns>True if satisfied, false in unable to satisfy completely.</returns>
+    private bool FulfillWant(IWantDesire desire, int tier)
     {
         // sanity check that we need to satisfy at this tier at all.
         var satisfaction = desire.SatisfiedAtTier(tier);
         if (satisfaction == 1)
-            return; // if we are already satisfied, just skip out.
+            return true; // if we are already satisfied, just skip out.
         // if any remains, set our target amount to satisfy to the unsatisfied amount.
         var amount = desire.Amount - desire.Amount * satisfaction;
         
@@ -244,7 +256,7 @@ public class Desires
             desire.Satisfaction += available;
         }
         if (amount == 0)
-            return; // if satisfied, break out.
+            return true; // if satisfied, break out.
         
         // try to fulfill from owning products first.
         if (desire.Want.OwnershipSources.Any() &&
@@ -284,7 +296,7 @@ public class Desires
                 }
             }
             if (amount == 0)
-                return; // if completed amount, break out!
+                return true; // if completed amount, break out!
         }
         
         // if we get here and there is desire remaining, check for use processes
@@ -331,7 +343,7 @@ public class Desires
                 WantsSatisfied[desire.Want] = expectation;
                 amount -= expectation;
                 if (amount == 0)
-                    return; // if no want left, breakout. 
+                    return true; // if no want left, breakout. 
             }
         }
         
@@ -376,9 +388,11 @@ public class Desires
                 WantsSatisfied[desire.Want] = expectation;
                 amount -= expectation;
                 if (amount == 0)
-                    return; // if no want left, breakout. 
+                    return true; // if no want left, breakout. 
             }
         }
+
+        return false;
     }
 
     /// <summary>
@@ -390,17 +404,32 @@ public class Desires
     public void SiftWants()
     {
         var LastTier = -1001;
-        var availableSatisfaction = WantsSatisfied.ToList();
-        foreach (var (teir, wantDesire) in WalkUpTiersForWants(Wants))
-        { // before we start working seriously, add satisfaction from products into our list
-            
-            
-            // end by checking that we can satisfy anything left
-            if (!availableSatisfaction.Any())
+
+        var wantsToSatisfy = new HashSet<IWant>(DesiredWants);
+        foreach (var (tier, wantDesire) in WalkUpTiersForWants(Wants))
+        {
+            // if we can't satisfy the want anymore, go to the next.
+            if (!wantsToSatisfy.Contains(wantDesire.Want))
+                continue;
+            // try to satisfy the want
+            var success = FulfillWant(wantDesire, tier);
+            // if we are able to satisfy, continue to the next want. If not remove it from our wants to satisfy list.
+            if (success)
+                continue;
+            // since we didn't succeed, remove it.
+            wantsToSatisfy.Remove(wantDesire.Want);
+            // if we've run out of wants we can satisfy, break out.
+            if (!wantsToSatisfy.Any())
                 break;
         }
+        
+        // since wants always run last, update our Tier Satisfaction.
     }
 
+    /// <summary>
+    /// Completes satisfying the wants, using or consuming any products which remain.
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
     public void SatisfyWants()
     {
         throw new NotImplementedException();
