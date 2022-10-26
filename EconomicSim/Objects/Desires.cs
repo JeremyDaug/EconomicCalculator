@@ -150,6 +150,7 @@ public class Desires
         { // throw all property into excess property for now. We'll sift at the end of this.
             AllProperty[product] = owned;
         }
+        
     }
 
     #endregion

@@ -586,7 +586,7 @@ public class DesiresShould
     [Test]
     public void PredictWantOutputsCorrectlyAndSiftThemCorrectly()
     {
-        var Want1 = new Mock<IWant>();
+        var want1 = new Mock<IWant>();
         
         // setup product which supplies via ownership.
         var ownProduct = new Mock<IProduct>();
@@ -595,7 +595,7 @@ public class DesiresShould
         ownProduct.Setup(x => x.Wants)
             .Returns(new Dictionary<IWant, decimal>
             {
-                {Want1.Object, 1}
+                {want1.Object, 1}
             });
         
         // product which needs to be used.
@@ -608,7 +608,7 @@ public class DesiresShould
         var useProcess = new Mock<IProcess>();
         useProcess.Setup(x => x.Name)
             .Returns("Using!");
-        useProcess.Setup(x => x.ProjectedWantAmount(Want1.Object, ProcessPartTag.Output))
+        useProcess.Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
             .Returns(1);
         useProcess
             .Setup(x => x.DoProcess(1,
@@ -621,7 +621,7 @@ public class DesiresShould
                 }, 
                 new Dictionary<IWant, decimal>
                 {
-                    {Want1.Object, 1}
+                    {want1.Object, 1}
                 }));
         // add the use process into the use product.
         useProduct.Setup(x => x.UseProcess)
@@ -637,7 +637,7 @@ public class DesiresShould
         var consumptionProcess = new Mock<IProcess>();
         consumptionProcess.Setup(x => x.Name)
             .Returns("Consuming!");
-        consumptionProcess.Setup(x => x.ProjectedWantAmount(Want1.Object, ProcessPartTag.Output))
+        consumptionProcess.Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
             .Returns(1);
         consumptionProcess
             .Setup(x => x.DoProcess(1,
@@ -650,11 +650,27 @@ public class DesiresShould
                 new Dictionary<IProduct, decimal>(),
                 new Dictionary<IWant, decimal>
                 {
-                    {Want1.Object, 1}
+                    {want1.Object, 1}
                 }));
         // add the use process into the use product.
         consumeProduct.Setup(x => x.UseProcess)
             .Returns(consumptionProcess.Object);
+
+        want1.Setup(x => x.OwnershipSources)
+            .Returns(new List<IProduct>
+            {
+                ownProduct.Object
+            });
+        want1.Setup(x => x.UseSources)
+            .Returns(new List<IProduct>
+            {
+                useProduct.Object
+            });
+        want1.Setup(x => x.ConsumptionSources)
+            .Returns(new List<IProduct>
+            {
+                consumeProduct.Object
+            });
 
         var needDesire1 = new NeedDesire
         {
@@ -681,7 +697,7 @@ public class DesiresShould
 
         var wantDesire1 = new WantDesire
         {
-            Want = Want1.Object,
+            Want = want1.Object,
             Amount = 1,
             StartTier = 0,
             Step = 1,
@@ -709,7 +725,7 @@ public class DesiresShould
         // Assert.That(test.SatisfiedWants[Want1.Object], Is.EqualTo(50));
         // Assert.That(test.SatisfiedWants[Want1.Object], Is.EqualTo(100));
         
-        Assert.That(test.Wants.Single(x => x.Want == Want1.Object)
+        Assert.That(test.Wants.Single(x => x.Want == want1.Object)
             .Satisfaction, Is.EqualTo(50));
     }
 
