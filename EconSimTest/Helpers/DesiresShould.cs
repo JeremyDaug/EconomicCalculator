@@ -652,9 +652,17 @@ public class DesiresShould
                 {
                     {want1.Object, 1}
                 }));
+        consumptionProcess
+            .Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
+            .Returns(1);
         // add the use process into the use product.
         consumeProduct.Setup(x => x.UseProcess)
             .Returns(consumptionProcess.Object);
+        want1.Setup(x => x.ConsumptionSources)
+            .Returns(new List<IProduct>
+            {
+                consumeProduct.Object
+            });
 
         want1.Setup(x => x.OwnershipSources)
             .Returns(new List<IProduct>

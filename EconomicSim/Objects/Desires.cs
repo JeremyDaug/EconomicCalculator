@@ -265,16 +265,22 @@ public class Desires
         {
             // check that any possible products have a value
             var validProducts = AllProperty
-                .Where(x => desire.Want.ConsumptionSources.Contains(x.Key))
-                .Where(x => x.Value-ProductsReserved[x.Key] > 0)
-                .Select(x => x.Key);
+                .Where(x => desire.Want.OwnershipSources.Contains(x.Key))
+                .Where(x =>
+                {
+                    ProductsReserved.TryGetValue(x.Key, out var reservation);
+                    return x.Value - reservation > 0;
+                })
+                .Select(x => x.Key)
+                .ToList();
             foreach (var product in validProducts)
             {
                 // get how efficient the product is per unit
                 var wantEff = product.Wants[desire.Want];
                 // get either the amount of product needed, or the amount available.
                 // Should have a value above 0 available.
-                var available = Math.Min(desire.Amount / wantEff, AllProperty[product] - ProductsReserved[product]);
+                ProductsReserved.TryGetValue(product, out var reservation);
+                var available = Math.Min(desire.Amount / wantEff, AllProperty[product] - reservation);
                 // reserve it
                 ProductsReserved.AddOrInclude(product, available);
                 // and update our satisfaction from our product
