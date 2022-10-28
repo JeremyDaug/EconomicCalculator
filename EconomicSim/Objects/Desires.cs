@@ -243,11 +243,12 @@ public class Desires
         var amount = desire.Amount - desire.Amount * satisfaction;
         
         // try to satisfy from excess Wants available, if possible.
-        if (UnclaimedWants.TryGetValue(desire.Want, out var availableWant))
+        if (UnclaimedWants.TryGetValue(desire.Want, out var availableWant) && availableWant > 0)
         {
             var available = Math.Min(amount, availableWant);
             amount -= available;
             WantsSatisfied[desire.Want] += available;
+            UnclaimedWants[desire.Want] -= available;
             desire.Satisfaction += available;
         }
         if (amount == 0)

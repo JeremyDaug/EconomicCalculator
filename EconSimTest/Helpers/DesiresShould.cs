@@ -718,6 +718,8 @@ public class DesiresShould
         test.AddProducts(consumeProduct.Object, 100);
         test.AddProducts(useProduct.Object, 100);
         test.AddProducts(ownProduct.Object, 100);
+
+        test.UnclaimedWants[want1.Object] = 100;
         
         test.SiftProducts();
         // sanity check Products
@@ -737,7 +739,7 @@ public class DesiresShould
         
         // and check that the satisfaction has been properly marked
         Assert.That(test.Wants.Single(x => x.Want == want1.Object)
-            .Satisfaction, Is.EqualTo(300));
+            .Satisfaction, Is.EqualTo(400));
     }
 
     [Test]
