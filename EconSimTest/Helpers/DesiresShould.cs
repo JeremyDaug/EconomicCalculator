@@ -87,77 +87,77 @@ public class DesiresShould
         
         #region WantSetups
         
-        WantMock1.Setup(x => x.ConsumptionSources).Returns(new List<IProduct>
+        WantMock1.Setup(x => x.ConsumptionSources).Returns(new HashSet<IProduct>
         {
             ProductMock1.Object
         });
-        WantMock2.Setup(x => x.ConsumptionSources).Returns(new List<IProduct>
+        WantMock2.Setup(x => x.ConsumptionSources).Returns(new HashSet<IProduct>
         {
             ProductMock2.Object
         });
-        WantMock3.Setup(x => x.ConsumptionSources).Returns(new List<IProduct>
+        WantMock3.Setup(x => x.ConsumptionSources).Returns(new HashSet<IProduct>
         {
             ProductMock3.Object
         });
-        WantMock4.Setup(x => x.ConsumptionSources).Returns(new List<IProduct>
+        WantMock4.Setup(x => x.ConsumptionSources).Returns(new HashSet<IProduct>
         {
             ProductMock4.Object
         });
-        WantMock5.Setup(x => x.ConsumptionSources).Returns(new List<IProduct>
+        WantMock5.Setup(x => x.ConsumptionSources).Returns(new HashSet<IProduct>
         {
             ProductMock5.Object
         });
-        WantMock6.Setup(x => x.ConsumptionSources).Returns(new List<IProduct>
+        WantMock6.Setup(x => x.ConsumptionSources).Returns(new HashSet<IProduct>
         {
             ProductMock6.Object
         });
         
-        WantMock1.Setup(x => x.OwnershipSources).Returns(new List<IProduct>
+        WantMock1.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
         {
             ProductMock3.Object
         });
-        WantMock2.Setup(x => x.OwnershipSources).Returns(new List<IProduct>
+        WantMock2.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
         {
             ProductMock4.Object
         });
-        WantMock3.Setup(x => x.OwnershipSources).Returns(new List<IProduct>
+        WantMock3.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
         {
             ProductMock5.Object
         });
-        WantMock4.Setup(x => x.OwnershipSources).Returns(new List<IProduct>
+        WantMock4.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
         {
             ProductMock6.Object
         });
-        WantMock5.Setup(x => x.OwnershipSources).Returns(new List<IProduct>
+        WantMock5.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
         {
             ProductMock1.Object
         });
-        WantMock6.Setup(x => x.OwnershipSources).Returns(new List<IProduct>
+        WantMock6.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
         {
             ProductMock2.Object
         });
         
-        WantMock1.Setup(x => x.UseSources).Returns(new List<IProduct>
+        WantMock1.Setup(x => x.UseSources).Returns(new HashSet<IProduct>
         {
             ProductMock5.Object
         });
-        WantMock2.Setup(x => x.UseSources).Returns(new List<IProduct>
+        WantMock2.Setup(x => x.UseSources).Returns(new HashSet<IProduct>
         {
             ProductMock6.Object
         });
-        WantMock3.Setup(x => x.UseSources).Returns(new List<IProduct>
+        WantMock3.Setup(x => x.UseSources).Returns(new HashSet<IProduct>
         {
             ProductMock1.Object
         });
-        WantMock4.Setup(x => x.UseSources).Returns(new List<IProduct>
+        WantMock4.Setup(x => x.UseSources).Returns(new HashSet<IProduct>
         {
             ProductMock2.Object
         });
-        WantMock5.Setup(x => x.UseSources).Returns(new List<IProduct>
+        WantMock5.Setup(x => x.UseSources).Returns(new HashSet<IProduct>
         {
             ProductMock3.Object
         });
-        WantMock6.Setup(x => x.UseSources).Returns(new List<IProduct>
+        WantMock6.Setup(x => x.UseSources).Returns(new HashSet<IProduct>
         {
             ProductMock4.Object
         });
@@ -555,7 +555,7 @@ public class DesiresShould
 
         test = new Desires(MarketMock.Object, TestNeeds, new List<IWantDesire>());
 
-        test.AllProperty[ProductMock1.Object] = 100;
+        test.AddProducts(ProductMock1.Object, 100);
 
         test.SiftProduct(ProductMock1.Object);
 
@@ -611,9 +611,9 @@ public class DesiresShould
         useProcess.Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
             .Returns(1);
         useProcess
-            .Setup(x => x.DoProcess(1,
-                test.AllProperty,
-                test.UnclaimedWants))
+            .Setup(x => x.DoProcess(It.IsAny<decimal>(),
+                It.IsAny<Dictionary<IProduct, decimal>>(),
+                It.IsAny<Dictionary<IWant, decimal>>()))
             .Returns((1, new Dictionary<IProduct, decimal>(),
                 new Dictionary<IProduct, decimal>
                 {
@@ -640,9 +640,9 @@ public class DesiresShould
         consumptionProcess.Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
             .Returns(1);
         consumptionProcess
-            .Setup(x => x.DoProcess(1,
-                test.AllProperty,
-                test.UnclaimedWants))
+            .Setup(x => x.DoProcess(It.IsAny<decimal>(),
+                It.IsAny<Dictionary<IProduct, decimal>>(),
+                It.IsAny<Dictionary<IWant, decimal>>()))
             .Returns((1, new Dictionary<IProduct, decimal>
                 {
                     {consumeProduct.Object, -1}
@@ -656,26 +656,26 @@ public class DesiresShould
             .Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
             .Returns(1);
         // add the use process into the use product.
-        consumeProduct.Setup(x => x.UseProcess)
+        consumeProduct.Setup(x => x.ConsumptionProcess)
             .Returns(consumptionProcess.Object);
         want1.Setup(x => x.ConsumptionSources)
-            .Returns(new List<IProduct>
+            .Returns(new HashSet<IProduct>
             {
                 consumeProduct.Object
             });
 
         want1.Setup(x => x.OwnershipSources)
-            .Returns(new List<IProduct>
+            .Returns(new HashSet<IProduct>
             {
                 ownProduct.Object
             });
         want1.Setup(x => x.UseSources)
-            .Returns(new List<IProduct>
+            .Returns(new HashSet<IProduct>
             {
                 useProduct.Object
             });
         want1.Setup(x => x.ConsumptionSources)
-            .Returns(new List<IProduct>
+            .Returns(new HashSet<IProduct>
             {
                 consumeProduct.Object
             });
@@ -714,10 +714,10 @@ public class DesiresShould
         var testWants = new List<IWantDesire>{ wantDesire1 };
 
         test = new Desires(MarketMock.Object, testNeeds, testWants);
-        
-        test.AllProperty.Add(consumeProduct.Object, 100);
-        test.AllProperty.Add(useProduct.Object, 100);
-        test.AllProperty.Add(ownProduct.Object, 100);
+
+        test.AddProducts(consumeProduct.Object, 100);
+        test.AddProducts(useProduct.Object, 100);
+        test.AddProducts(ownProduct.Object, 100);
         
         test.SiftProducts();
         // sanity check Products
@@ -727,14 +727,17 @@ public class DesiresShould
 
         test.SiftWants();
         
-        //Assert.That(test.WantsFromNeeds[Want1.Object], Is.EqualTo(50));
-        //Assert.That(test.WantsFromNeeds[Want2.Object], Is.EqualTo(100));
+        // check that products have been reserved correctly
+        Assert.That(test.AllProperty[consumeProduct.Object].Reserved, Is.EqualTo(100));
+        Assert.That(test.AllProperty[useProduct.Object].Reserved, Is.EqualTo(100));
+        Assert.That(test.AllProperty[ownProduct.Object].Reserved, Is.EqualTo(100));
         
-        // Assert.That(test.SatisfiedWants[Want1.Object], Is.EqualTo(50));
-        // Assert.That(test.SatisfiedWants[Want1.Object], Is.EqualTo(100));
+        // and check that the wants satisfied have also been recorded
+        Assert.That(test.WantsSatisfied[want1.Object], Is.EqualTo(300));
         
+        // and check that the satisfaction has been properly marked
         Assert.That(test.Wants.Single(x => x.Want == want1.Object)
-            .Satisfaction, Is.EqualTo(50));
+            .Satisfaction, Is.EqualTo(300));
     }
 
     [Test]

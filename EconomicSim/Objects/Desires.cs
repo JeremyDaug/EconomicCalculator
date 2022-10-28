@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Reflection.PortableExecutable;
 using System.Security.Claims;
 using Avalonia.Animation.Animators;
@@ -57,15 +58,11 @@ public class Desires
     /// <summary>
     /// All property owned owned.
     /// </summary>
-    public readonly Dictionary<IProduct, decimal> AllProperty = new();
+    public readonly Dictionary<IProduct, PropertyTriple> AllProperty = new();
     /// <summary>
     /// The products which satisfy our Needs.
     /// </summary>
     public readonly Dictionary<IProduct, decimal> ProductsSatisfied = new();
-    /// <summary>
-    /// Products saved to satisfy wants by some means.
-    /// </summary>
-    public readonly Dictionary<IProduct, decimal> ProductsReserved = new();
     /// <summary>
     /// The Use Processes as used by to satisfy the want, order shouldn't really matter.
     /// </summary>
@@ -78,10 +75,6 @@ public class Desires
     /// How many of our products we want in total.
     /// </summary>
     public readonly Dictionary<IProduct, decimal> ProductTargets = new();
-    /// <summary>
-    /// Product which has been expended to satisfy wants and are unavailable going forward.
-    /// </summary>
-    public readonly Dictionary<IProduct, decimal> ProductExpended = new();
     /// <summary>
     /// Excess wants which are available to be absorbed elsewhere.
     /// </summary>
@@ -148,7 +141,7 @@ public class Desires
     {
         foreach (var (product, owned) in currentProperty)
         { // throw all property into excess property for now. We'll sift at the end of this.
-            AllProperty[product] = owned;
+            AllProperty[product] = new PropertyTriple(owned);
         }
         
     }
@@ -195,23 +188,22 @@ public class Desires
     public void SiftProduct(IProduct product)
     {
         if (!AllProperty.ContainsKey(product) || 
-            AllProperty[product] == 0 ||
+            AllProperty[product].Total == 0 ||
             !DesiredProducts.Contains(product))
             return; // if no available product exists or it's not desired, skip.
         // since we have product we can shift and a desire for said product, start sifting
         // shift from excess over into Satisfaction whatever we need/can
         if (ProductTargets[product] == -1)
         { // if infinite target
-            var shifting = AllProperty[product];
+            var shifting = AllProperty[product].Total;
             ProductsSatisfied[product] += shifting;
         }
         else
         { // if finite target
             var missingSat = ProductTargets[product] - ProductsSatisfied[product];
-            var shifting = Math.Min(missingSat, AllProperty[product]-ProductsSatisfied[product]);
+            var shifting = Math.Min(missingSat, AllProperty[product].Total-ProductsSatisfied[product]);
             ProductsSatisfied[product] += shifting;
         }
-        // with the product shifted over, break it up into Consumed and Owned
         // get all needs for this product.
         var needs = Needs
             .Where(x => Equals(x.Product, product))
@@ -222,6 +214,8 @@ public class Desires
 
         var unassignedProducts = ProductsSatisfied[product];
 
+        // TODO upgrade this to something better. Perhaps max/divide evenly then push down from
+        // those which are in higher tiers to those with empty tiers below it.
         foreach (var (tier, need) in WalkUpTiersForNeeds(needs))
         {
             if (unassignedProducts == 0)
@@ -232,7 +226,7 @@ public class Desires
             unassignedProducts -= assigning; // remove from unassigned amount
         }
     }
-
+    
     /// <summary>
     /// Tries to fill a want at a specified tier.
     /// </summary>
@@ -258,7 +252,7 @@ public class Desires
         }
         if (amount == 0)
             return true; // if satisfied, break out.
-        
+
         // try to fulfill from owning products first.
         if (desire.Want.OwnershipSources.Any() &&
             AllProperty.Keys.Any(x => desire.Want.OwnershipSources.Contains(x)))
@@ -266,11 +260,7 @@ public class Desires
             // check that any possible products have a value
             var validProducts = AllProperty
                 .Where(x => desire.Want.OwnershipSources.Contains(x.Key))
-                .Where(x =>
-                {
-                    ProductsReserved.TryGetValue(x.Key, out var reservation);
-                    return x.Value - reservation > 0;
-                })
+                .Where(x => x.Value.Available > 0)
                 .Select(x => x.Key)
                 .ToList();
             foreach (var product in validProducts)
@@ -279,10 +269,9 @@ public class Desires
                 var wantEff = product.Wants[desire.Want];
                 // get either the amount of product needed, or the amount available.
                 // Should have a value above 0 available.
-                ProductsReserved.TryGetValue(product, out var reservation);
-                var available = Math.Min(desire.Amount / wantEff, AllProperty[product] - reservation);
+                var available = Math.Min(desire.Amount / wantEff, AllProperty[product].Available);
                 // reserve it
-                ProductsReserved.AddOrInclude(product, available);
+                AllProperty[product].Reserved += available;
                 // and update our satisfaction from our product
                 foreach (var (satisfiedWant, rate) in product.Wants)
                 {
@@ -310,7 +299,7 @@ public class Desires
         if (desire.Want.UseSources.Any())
         {
             var useProcs = desire.Want.UseSources // from the usable products
-                .Where(x => AllProperty.ContainsKey(x)) // get the items we can even use
+                .Where(x => AllProperty.ContainsKey(x) && AllProperty[x].Available > 0) // get the items we can even use
                 .Select(x => x.UseProcess!); // select their use processes (which are guaranteed to exist)
                 // these processes output our want by definition (they wouldn't be in the want's use processes otherwise)
             foreach (var process in useProcs)
@@ -318,23 +307,25 @@ public class Desires
                 // get how much it outputs on average.
                 var output = process.ProjectedWantAmount(desire.Want, ProcessPartTag.Output);
                 var target = amount / output; // how many times we would need to do it
-                var processData = process.DoProcess(target, AllProperty,
+                var processData = process.DoProcess(target, 
+                    AllProperty.ToDictionary(x => x.Key,
+                        y => y.Value.Available),
                     UnclaimedWants);
                 if (processData.successes == 0)
                     continue; // if no wants can be gotten, try the next.
                 // with some number possible, reserve the inputs/capital
                 foreach (var (prod, change) in processData.productChange)
                 {
-                    // if it's consumed, add to reserve (created items shouldn't be recorded yet)
+                    // if it's consumed, remove from available/reserve it (created items shouldn't be recorded yet)
                     if (change < 0)
                     {
-                        ProductsReserved.AddOrInclude(prod, change);
+                        AllProperty[prod].Available += change;
                     } // don't include new products for sanity purposes
                 }
                 // do the same with capital
                 foreach (var (prod, used) in processData.productUsed)
                 {
-                    ProductsReserved.AddOrInclude(prod, used);
+                    AllProperty[prod].Reserved += used;
                 }
                 // claim any input wants also
                 foreach (var (want, consumed) in processData.wantsChange.Where(x => x.Value < 0))
@@ -344,10 +335,13 @@ public class Desires
                     ClaimedWants.AddOrInclude(want, consumed);
                 }
                 // and record that we're using this process for later uses
+                if (!UseProcesses.ContainsKey(desire.Want))
+                    UseProcesses.Add(desire.Want, new Dictionary<IProcess, decimal>());
                 UseProcesses[desire.Want][process] = processData.successes;
                 // get how much we expect to be output for this
                 var expectation = processData.wantsChange[desire.Want]; // this Must output the want, otherwise it's connection is false.
                 WantsSatisfied[desire.Want] = expectation;
+                desire.Satisfaction += expectation;
                 amount -= expectation;
                 if (amount == 0)
                     return true; // if no want left, breakout. 
@@ -358,7 +352,7 @@ public class Desires
         if (desire.Want.ConsumptionSources.Any())
         {
             var consumptionProcs = desire.Want.ConsumptionSources // from the usable products
-                .Where(x => AllProperty.ContainsKey(x)) // get the items we can even use
+                .Where(x => AllProperty.ContainsKey(x) && AllProperty[x].Available > 0) // get the items we can even use
                 .Select(x => x.ConsumptionProcess!); // select their consumption processes (which are guaranteed to exist)
             // these processes are guaranteed to 
             foreach (var process in consumptionProcs)
@@ -366,7 +360,9 @@ public class Desires
                 // how much it outputs on average.
                 var output = process.ProjectedWantAmount(desire.Want, ProcessPartTag.Output);
                 var target = amount / output; // how many times we would need to do it
-                var processData = process.DoProcess(target, AllProperty,
+                var processData = process.DoProcess(target, 
+                    AllProperty.ToDictionary(x => x.Key,
+                        x => x.Value.Available),
                     UnclaimedWants);
                 if (processData.successes == 0)
                     continue; // if no wants can be gotten, try the next.
@@ -376,12 +372,12 @@ public class Desires
                     // if it's consumed, add to reserve (created items shouldn't be recorded yet)
                     if (change < 0)
                     {
-                        ProductsReserved.AddOrInclude(prod, change);
+                        AllProperty[prod].Available += change;
                     } // don't include new products for sanity purposes
                 }
                 foreach (var (prod, used) in processData.productUsed)
                 { // do the same with capital
-                    ProductsReserved.AddOrInclude(prod, used);
+                    AllProperty[prod].Reserved += used;
                 }
                 // claim any input wants also 
                 foreach (var (want, consumed) in processData.wantsChange.Where(x => x.Value < 0))
@@ -389,10 +385,13 @@ public class Desires
                     UnclaimedWants[want] -= consumed;
                 }
                 // and record that we're using this process for later uses
+                if (!ConsumedProcesses.ContainsKey(desire.Want))
+                    ConsumedProcesses.Add(desire.Want, new Dictionary<IProcess, decimal>());
                 ConsumedProcesses[desire.Want][process] = processData.successes;
                 // get how much we expect to be output for this
                 var expectation = processData.wantsChange[desire.Want]; // this Must output the want, otherwise it's connection is false.
                 WantsSatisfied[desire.Want] = expectation;
+                desire.Satisfaction += expectation;
                 amount -= expectation;
                 if (amount == 0)
                     return true; // if no want left, breakout. 
@@ -802,5 +801,18 @@ public class Desires
     public (int tier, decimal satisfaction) SatisfactionGainedFrom(IProduct product, decimal amount)
     { // Untested
         throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Adds a product to the desires safely.
+    /// </summary>
+    /// <param name="product"></param>
+    /// <param name="p1"></param>
+    public void AddProducts(IProduct product, int p1)
+    {
+        if (!AllProperty.ContainsKey(product))
+            AllProperty[product] = new PropertyTriple(p1);
+        else
+            AllProperty[product].Total += p1;
     }
 }

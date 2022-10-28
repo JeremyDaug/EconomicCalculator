@@ -11,20 +11,20 @@ namespace EconomicSim.Objects.Wants
     {
         public Want()
         {
-            UseSources = new List<IProduct>();
-            ConsumptionSources = new List<IProduct>();
-            OwnershipSources = new List<IProduct>();
-            ProcessSources = new List<IProcess>();
+            UseSources = new HashSet<IProduct>();
+            ConsumptionSources = new HashSet<IProduct>();
+            OwnershipSources = new HashSet<IProduct>();
+            ProcessSources = new HashSet<IProcess>();
         }
 
         public Want(IWant copy)
         {
             Name = copy.Name;
             Description = copy.Description;
-            UseSources = new List<IProduct>();
-            ConsumptionSources = new List<IProduct>();
-            OwnershipSources = new List<IProduct>();
-            ProcessSources = new List<IProcess>();
+            UseSources = new HashSet<IProduct>();
+            ConsumptionSources = new HashSet<IProduct>();
+            OwnershipSources = new HashSet<IProduct>();
+            ProcessSources = new HashSet<IProcess>();
         }
         
         /// <summary>
@@ -50,25 +50,25 @@ namespace EconomicSim.Objects.Wants
         /// Products which this want can be gotten from if used.
         /// </summary>
         [JsonIgnore]
-        public IList<IProduct> UseSources { get; }
+        public ISet<IProduct> UseSources { get; }
         
         /// <summary>
         /// Products which this want can be gotten from if consumed.
         /// </summary>
         [JsonIgnore]
-        public IList<IProduct> ConsumptionSources { get; }
+        public ISet<IProduct> ConsumptionSources { get; }
         
         /// <summary>
         /// Products which this want can be gotten from if Owned.
         /// </summary>
         [JsonIgnore]
-        public IList<IProduct> OwnershipSources { get; }
+        public ISet<IProduct> OwnershipSources { get; }
         
         /// <summary>
         /// The processes which produce this Wont (includes Use and Consumption Processes).
         /// </summary>
         [JsonIgnore]
-        public IList<IProcess> ProcessSources { get; }
+        public ISet<IProcess> ProcessSources { get; }
 
         public override string ToString()
         {

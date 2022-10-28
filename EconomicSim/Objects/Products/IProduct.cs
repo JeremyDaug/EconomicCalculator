@@ -95,11 +95,14 @@ namespace EconomicSim.Objects.Products
 
         /// <summary>
         /// The Use Processes of the Product
+        /// Use process is guaranteed to have 1 unit of the product as a capital and
+        /// no other capital.
         /// </summary>
         IProcess? UseProcess { get; }
 
         /// <summary>
-        /// The ways the product can be used.
+        /// The ways the product can be consumed.
+        /// Guaranteed to have only the product and some time as inputs.
         /// </summary>
         IProcess? ConsumptionProcess { get; }
 

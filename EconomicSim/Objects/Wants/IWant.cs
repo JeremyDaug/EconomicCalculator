@@ -29,24 +29,24 @@ namespace EconomicSim.Objects.Wants
         /// Products which this want can be gotten from if used.
         /// </summary>
         [JsonIgnore]
-        IList<IProduct> UseSources { get; }
+        ISet<IProduct> UseSources { get; }
         
         /// <summary>
         /// Products which this want can be gotten from if consumed.
         /// </summary>
         [JsonIgnore]
-        IList<IProduct> ConsumptionSources { get; }
+        ISet<IProduct> ConsumptionSources { get; }
         
         /// <summary>
         /// Products which this want can be gotten from if Owned.
         /// </summary>
         [JsonIgnore]
-        IList<IProduct> OwnershipSources { get; }
+        ISet<IProduct> OwnershipSources { get; }
         
         /// <summary>
         /// The processes which produce this Wont (includes Use and Consumption Processes).
         /// </summary>
         [JsonIgnore]
-        IList<IProcess> ProcessSources { get; }
+        ISet<IProcess> ProcessSources { get; }
     }
 }
