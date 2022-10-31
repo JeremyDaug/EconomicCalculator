@@ -30,6 +30,22 @@ public class DesiresShould
     private Mock<IWant> WantMock5;
     private Mock<IWant> WantMock6;
 
+    // consumption process mocks
+    private Mock<IProcess> P1toW1Con;
+    private Mock<IProcess> P2toW2Con;
+    private Mock<IProcess> P3toW3Con;
+    private Mock<IProcess> P4toW4Con;
+    private Mock<IProcess> P5toW5Con;
+    private Mock<IProcess> P6toW6Con;
+    
+    // use process mocks
+    private Mock<IProcess> P5toW1Use;
+    private Mock<IProcess> P6toW2Use;
+    private Mock<IProcess> P1toW3Use;
+    private Mock<IProcess> P2toW4Use;
+    private Mock<IProcess> P3toW5Use;
+    private Mock<IProcess> P4toW6Use;
+
     private NeedDesire SingleNeedMock1;
     private NeedDesire SingleNeedMock2;
     private NeedDesire StretchedNeedMock1;
@@ -43,9 +59,6 @@ public class DesiresShould
     private WantDesire StretchedWantMock2;
     private WantDesire InfiniteWantMock1;
     private WantDesire InfiniteWantMock2;
-
-    private List<NeedDesire> needs;
-    private List<WantDesire> wants;
 
     private Dictionary<IProduct, decimal> testProperty;
     private List<IProduct> allProducts;
@@ -68,25 +81,166 @@ public class DesiresShould
         WantMock4 = new Mock<IWant>();
         WantMock5 = new Mock<IWant>();
         WantMock6 = new Mock<IWant>();
-        SingleNeedMock1 = new NeedDesire();
-        SingleNeedMock2 = new NeedDesire();
-        StretchedNeedMock1 = new NeedDesire();
-        StretchedNeedMock2 = new NeedDesire();
-        InfiniteNeedMock1 = new NeedDesire();
-        InfiniteNeedMock2 = new NeedDesire();
-        SingleWantMock1 = new WantDesire();
-        SingleWantMock2 = new WantDesire();
-        StretchedWantMock1 = new WantDesire();
-        StretchedWantMock2 = new WantDesire();
-        InfiniteWantMock1 = new WantDesire();
-        InfiniteWantMock2 = new WantDesire();
-        needs = new List<NeedDesire>();
-        wants = new List<WantDesire>();
+        P1toW1Con = new Mock<IProcess>();
+        P2toW2Con = new Mock<IProcess>();
+        P3toW3Con = new Mock<IProcess>();
+        P4toW4Con = new Mock<IProcess>();
+        P5toW5Con = new Mock<IProcess>();
+        P6toW6Con = new Mock<IProcess>();
+        P5toW1Use = new Mock<IProcess>();
+        P6toW2Use = new Mock<IProcess>();
+        P1toW3Use = new Mock<IProcess>();
+        P2toW4Use = new Mock<IProcess>();
+        P3toW5Use = new Mock<IProcess>();
+        P4toW6Use = new Mock<IProcess>();
+        SingleNeedMock1 = new NeedDesire
+        {
+            Product = ProductMock1.Object,
+            Amount = 1,
+            StartTier = 0
+        };
+        SingleNeedMock2 = new NeedDesire
+        {
+            Product = ProductMock2.Object,
+            Amount = 1,
+            StartTier = 2,
+        };
+        StretchedNeedMock1 = new NeedDesire
+        {
+            Product = ProductMock3.Object,
+            Amount = 1,
+            StartTier = 1,
+            Step = 1,
+            EndTier = 10,
+        };
+        StretchedNeedMock2 = new NeedDesire
+        {
+            Product = ProductMock4.Object,
+            Amount = 1,
+            StartTier = 10,
+            Step = 5,
+            EndTier = 50,
+        };
+        InfiniteNeedMock1 = new NeedDesire
+        {
+            Product = ProductMock5.Object,
+            Amount = 1,
+            StartTier = 0,
+            Step = 1,
+        };
+        InfiniteNeedMock2 = new NeedDesire
+        {
+            Product = ProductMock6.Object,
+            Amount = 1,
+            StartTier = 10,
+            Step = 5,
+        };
+        SingleWantMock1 = new WantDesire
+        {
+            Want = WantMock1.Object,
+            Amount = 1,
+            StartTier = 0,
+        };
+        SingleWantMock2 = new WantDesire
+        {
+            Want = WantMock2.Object,
+            Amount = 1,
+            StartTier = 2,
+        };
+        StretchedWantMock1 = new WantDesire
+        {
+            Want = WantMock3.Object,
+            Amount = 1,
+            StartTier = 1,
+            Step = 1,
+            EndTier = 10,
+        };
+        StretchedWantMock2 = new WantDesire
+        {
+            Want = WantMock4.Object,
+            Amount = 1,
+            StartTier = 10,
+            Step = 5,
+            EndTier = 50,
+        };
+        InfiniteWantMock1 = new WantDesire
+        {
+            Want = WantMock5.Object,
+            Amount = 1,
+            StartTier = 0,
+            Step = 1,
+        };
+        InfiniteWantMock2 = new WantDesire
+        {
+            Want = WantMock6.Object,
+            Amount = 1,
+            StartTier = 10,
+            Step = 5,
+        };
         testProperty = new Dictionary<IProduct, decimal>();
         allProducts = new List<IProduct>();
+
+        #region ProductDataSetup
+        
+        ProductMock1.Setup(x => x.Name).Returns(nameof(ProductMock1));
+        ProductMock2.Setup(x => x.Name).Returns(nameof(ProductMock2));
+        ProductMock3.Setup(x => x.Name).Returns(nameof(ProductMock3));
+        ProductMock4.Setup(x => x.Name).Returns(nameof(ProductMock4));
+        ProductMock5.Setup(x => x.Name).Returns(nameof(ProductMock5));
+        ProductMock6.Setup(x => x.Name).Returns(nameof(ProductMock6));
+
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock1.Object)).Returns(1);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock2.Object)).Returns(5);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock3.Object)).Returns(20);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock4.Object)).Returns(0.75m);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock5.Object)).Returns(50);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock6.Object)).Returns(0.25m);
+
+        #endregion
         
         #region WantSetups
+
+        #region OwnershipSources
         
+        WantMock1.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
+        {
+            ProductMock3.Object
+        });
+        ProductMock3.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal> { { WantMock1.Object, 1 } });
+        WantMock2.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
+        {
+            ProductMock4.Object
+        });
+        ProductMock4.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal> { { WantMock2.Object, 2 } });
+        WantMock3.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
+        {
+            ProductMock5.Object
+        });
+        ProductMock5.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal> { { WantMock3.Object, 5 } });
+        WantMock4.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
+        {
+            ProductMock6.Object
+        });
+        ProductMock6.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal> { { WantMock4.Object, 10 } });
+        WantMock5.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
+        {
+            ProductMock1.Object
+        });
+        ProductMock1.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal> { { WantMock5.Object, 0.5m } });
+        WantMock6.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
+        {
+            ProductMock2.Object
+        });
+        ProductMock2.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal> { { WantMock6.Object, 0.25m } });
+        #endregion
+        
+        #region ConsumptionSources
         WantMock1.Setup(x => x.ConsumptionSources).Returns(new HashSet<IProduct>
         {
             ProductMock1.Object
@@ -111,32 +265,9 @@ public class DesiresShould
         {
             ProductMock6.Object
         });
-        
-        WantMock1.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
-        {
-            ProductMock3.Object
-        });
-        WantMock2.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
-        {
-            ProductMock4.Object
-        });
-        WantMock3.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
-        {
-            ProductMock5.Object
-        });
-        WantMock4.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
-        {
-            ProductMock6.Object
-        });
-        WantMock5.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
-        {
-            ProductMock1.Object
-        });
-        WantMock6.Setup(x => x.OwnershipSources).Returns(new HashSet<IProduct>
-        {
-            ProductMock2.Object
-        });
-        
+        #endregion
+
+        #region UseSources
         WantMock1.Setup(x => x.UseSources).Returns(new HashSet<IProduct>
         {
             ProductMock5.Object
@@ -161,83 +292,10 @@ public class DesiresShould
         {
             ProductMock4.Object
         });
-        
         #endregion
         
-        SingleNeedMock1.Product = ProductMock1.Object;
-        SingleNeedMock1.Amount = 1;
-        SingleNeedMock1.StartTier = 0;
-        
-        SingleNeedMock2.Product = ProductMock2.Object;
-        SingleNeedMock2.Amount = 1;
-        SingleNeedMock2.StartTier = 2;
-        
-        StretchedNeedMock1.Product = ProductMock3.Object;
-        StretchedNeedMock1.Amount = 1;
-        StretchedNeedMock1.StartTier = 1;
-        StretchedNeedMock1.Step = 1;
-        StretchedNeedMock1.EndTier = 10;
-        
-        StretchedNeedMock2.Product = ProductMock4.Object;
-        StretchedNeedMock2.Amount = 1;
-        StretchedNeedMock2.StartTier = 10;
-        StretchedNeedMock2.Step = 5;
-        StretchedNeedMock2.EndTier = 50;
-        
-        InfiniteNeedMock1.Product = ProductMock5.Object;
-        InfiniteNeedMock1.Amount = 1;
-        InfiniteNeedMock1.StartTier = 0;
-        InfiniteNeedMock1.Step = 1;
+        #endregion
 
-        InfiniteNeedMock2.Product = ProductMock6.Object;
-        InfiniteNeedMock2.Amount = 1;
-        InfiniteNeedMock2.StartTier = 10;
-        InfiniteNeedMock2.Step = 5;
-        
-        SingleWantMock1.Want = WantMock1.Object; 
-        SingleWantMock1.Amount = 1;
-        SingleWantMock1.StartTier = 0;
-        
-        SingleWantMock2.Want = WantMock2.Object;
-        SingleWantMock2.Amount = 1;
-        SingleWantMock2.StartTier = 2;
-        
-        StretchedWantMock1.Want = WantMock3.Object;
-        StretchedWantMock1.Amount = 1;
-        StretchedWantMock1.StartTier = 1;
-        StretchedWantMock1.Step = 1;
-        StretchedWantMock1.EndTier = 10;
-        
-        StretchedWantMock2.Want = WantMock4.Object;
-        StretchedWantMock2.Amount = 1;
-        StretchedWantMock2.StartTier = 10;
-        StretchedWantMock2.Step = 5;
-        StretchedWantMock2.EndTier = 50;
-        
-        InfiniteWantMock1.Want = WantMock5.Object;
-        InfiniteWantMock1.Amount = 1;
-        InfiniteWantMock1.StartTier = 0;
-        InfiniteWantMock1.Step = 1;
-        
-        InfiniteWantMock2.Want = WantMock6.Object;
-        InfiniteWantMock2.Amount = 1;
-        InfiniteWantMock2.StartTier = 10;
-        InfiniteWantMock2.Step = 5;
-        
-        needs.Add(SingleNeedMock1);
-        needs.Add(SingleNeedMock2);
-        needs.Add(StretchedNeedMock1);
-        needs.Add(StretchedNeedMock2);
-        needs.Add(InfiniteNeedMock1);
-        needs.Add(InfiniteNeedMock2);
-        
-        wants.Add(SingleWantMock1);
-        wants.Add(SingleWantMock2);
-        wants.Add(StretchedWantMock1);
-        wants.Add(StretchedWantMock2);
-        wants.Add(InfiniteWantMock1);
-        wants.Add(InfiniteWantMock2);
-        
         TestNeeds.Add(SingleNeedMock1);
         TestNeeds.Add(SingleNeedMock2);
         TestNeeds.Add(StretchedNeedMock1);
@@ -290,7 +348,7 @@ public class DesiresShould
         test = new Desires(MarketMock.Object, TestNeeds, TestWants);
         
         // check that needs and wants are added correctly.
-        foreach (var need in needs)
+        foreach (var need in TestNeeds)
         {
             var single = test.Needs.Single(x => Equals(x.Product, need.Product));
             
@@ -301,7 +359,7 @@ public class DesiresShould
             Assert.That(single.EndTier, Is.EqualTo(need.EndTier));
         }
         
-        foreach (var want in wants)
+        foreach (var want in TestWants)
         {
             var single = test.Wants.Single(x => Equals(x.Want, want.Want));
             
@@ -778,8 +836,68 @@ public class DesiresShould
     }
         
     [Test]
-    public void SiftProductsIntoWantsCorrectly()
+    public void CalculateSatisfactionsCorrectly()
     {
+        // create wants and products, 3 of each, each product satisfying each want, but by different methods
+        var want1 = new Mock<IWant>();
+        want1.Setup(x => x.Name).Returns(nameof(want1));
+        var want2 = new Mock<IWant>();
+        want2.Setup(x => x.Name).Returns(nameof(want2));
+        var want3 = new Mock<IWant>();
+        want3.Setup(x => x.Name).Returns(nameof(want3));
+
+        var product1 = new Mock<IProduct>();
+        product1.Setup(x => x.Name).Returns(nameof(product1));
+        var product2 = new Mock<IProduct>();
+        product2.Setup(x => x.Name).Returns(nameof(product2));
+        var product3 = new Mock<IProduct>();
+        product3.Setup(x => x.Name).Returns(nameof(product3));
+
+        // prod1 want1 ownership
+        var prod1_want2_cons_proc = new Mock<IProcess>();
+        prod1_want2_cons_proc.Setup(x => x.Name).Returns(nameof(prod1_want2_cons_proc));
+        var prod1_want3_used_proc = new Mock<IProcess>();
+        prod1_want3_used_proc.Setup(x => x.Name).Returns(nameof(prod1_want3_used_proc));
+        // prod2 want2 ownership
+        var prod2_want3_cons_proc = new Mock<IProcess>();
+        prod2_want3_cons_proc.Setup(x => x.Name).Returns(nameof(prod2_want3_cons_proc));
+        var prod2_want1_used_proc = new Mock<IProcess>();
+        prod2_want1_used_proc.Setup(x => x.Name).Returns(nameof(prod2_want1_used_proc));
+        // prod3 want3 ownership
+        var prod3_want1_cons_proc = new Mock<IProcess>();
+        prod3_want1_cons_proc.Setup(x => x.Name).Returns(nameof(prod3_want1_cons_proc));
+        var prod3_want2_used_proc = new Mock<IProcess>();
+        prod3_want2_used_proc.Setup(x => x.Name).Returns(nameof(prod3_want2_used_proc));
+
+        // try to use more complex values.
+        product1.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal>
+            {
+                { want1.Object, 1 }
+            });
+        product2.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal>
+            {
+                { want2.Object, 5 }
+            });
+        product3.Setup(x => x.Wants)
+            .Returns(new Dictionary<IWant, decimal>
+            {
+                { want3.Object, 2 }
+            });
+
+        var prod1_need = new NeedDesire
+        {
+            Amount = 1,
+            Product = product1.Object,
+            StartTier = 0
+        };
+        var prod1_need = new 
         
+        test.AddProducts(product1.Object, 100);
+        test.AddProducts(product2.Object, 200);
+        test.AddProducts(product3.Object, 300);
+        
+        test.AddDesire(prod1_need);
     }
 }

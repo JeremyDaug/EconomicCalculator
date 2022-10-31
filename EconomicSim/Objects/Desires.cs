@@ -185,6 +185,14 @@ public class Desires
     /// </summary>
     public decimal PartialSatisfaction { get; private set; }
     /// <summary>
+    /// Retrieves the satisfaction of our desires in their abstract market value equivalent.
+    /// </summary>
+    public decimal MarketSatisfaction { get; private set; }
+    /// <summary>
+    /// The total wealth contained in abstract market value terms.
+    /// </summary>
+    public decimal MarketWealth { get; private set; }
+    /// <summary>
     /// The highest tier that any of our products begins satisfying.
     /// </summary>
     public int HighestTier { get; private set; }
@@ -578,7 +586,61 @@ public class Desires
         // get quantity satisfied real quick also.
         QuantitySatisfied = Needs.Sum(x => x.Satisfaction) + Wants.Sum(x => x.Satisfaction);
         
+         // get partial satisfaction
+         PartialSatisfaction = 0;
+         for (int i = FullTierSatisfaction + 1; i <= HighestTier || i < 50; ++i)
+         { // go from our highest max tier to our highest tier, capping at 50 steps for accuracy reasons.
+             // TODO consider pruning desires we can't touch as we walk up.
+             var (satisfaction, total) = TotalDesireAtTier(i);
+             if (total > 0)
+             {
+                 var satATtTier = ScaleSatisfactionByTier(i, FullTierSatisfaction, satisfaction);
+                 PartialSatisfaction += satATtTier;
+             }
+         }
          
+         // get market satisfaction
+         MarketSatisfaction = 0;
+         foreach (var need in Needs)
+             MarketSatisfaction += Market.GetMarketPrice(need.Product) * need.Satisfaction;
+        
+         // get total wealth while we're at it.
+         MarketWealth = AllProperty.Sum(x => Market.GetMarketPrice(x.Key) * x.Value.Total);
+         
+         // finish by getting the Hard Satisfaction
+         var skipped = 0;
+         for (int i = -1000; i <= FullTierSatisfaction; ++i)
+         {
+             if (Wants.Any(x => x.StepsOnTier(i)) ||
+                 Needs.Any(x => x.StepsOnTier(i)))
+                 continue;
+             skipped += 1;
+         }
+
+         HardSatisfaction = FullTierSatisfaction - skipped;
+    }
+
+    private decimal ScaleSatisfactionByTier(int startTier, int targetTier, decimal satisfaction)
+    {
+        return (decimal)Math.Pow((double)satisfaction, targetTier - startTier);
+    }
+
+    private (decimal satisfaction, decimal desired) TotalDesireAtTier(int tier)
+    {
+        decimal satisfied = 0;
+        decimal desired = 0;
+        foreach (var want in Wants.Where(x => x.StepsOnTier(tier)))
+        {
+            satisfied += want.SatisfiedAtTier(tier);
+            desired += want.Amount;
+        }
+
+        foreach (var need in Needs.Where(x => x.StepsOnTier(tier)))
+        {
+            satisfied += need.SatisfiedAtTier(tier);
+            desired += need.Amount;
+        }
+        return (satisfied, desired);
     }
 
     public IEnumerable<(int tier, IWantDesire desire)> WalkUpTiersForWants(IList<IWantDesire> wants)
