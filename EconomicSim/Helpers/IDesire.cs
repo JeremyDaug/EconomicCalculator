@@ -73,6 +73,11 @@ public interface IDesire
     /// 0.XX is partial satisfaction.
     /// </returns>
     decimal TotalSatisfaction();
+    
+    /// <summary>
+    /// Checks whether the desire is fully satisfied (maxed out) or not.
+    /// </summary>
+    bool FullySatisfied { get; }
 
     /// <summary>
     /// Calculates how the total amount desired.

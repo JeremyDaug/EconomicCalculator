@@ -5,6 +5,7 @@ public class PropertyTriple
     private decimal _reserved;
     private decimal _available;
     private decimal _total;
+    private decimal _exhausted;
 
     public PropertyTriple(decimal total, decimal reserved = 0)
     {
@@ -18,7 +19,9 @@ public class PropertyTriple
         set
         {
             _total = value;
-            _available = _reserved - _total;
+            if (_reserved > _total)
+                _reserved = _total; // if total has been reduced below the reserve, reduce reserve.
+            _available = _total - _reserved - _exhausted;
         }
     }
 
@@ -28,7 +31,17 @@ public class PropertyTriple
         set
         {
             _reserved = value;
-            _available = _total - _reserved;
+            _available = _total - _reserved - _exhausted;
+        }
+    }
+
+    public decimal Exhausted
+    {
+        get => _exhausted;
+        set
+        {
+            _exhausted = value;
+            _available = _total - _reserved - _exhausted;
         }
     }
 
@@ -38,7 +51,7 @@ public class PropertyTriple
         set
         {
             _available = value;
-            _reserved = _total - _available;
+            _reserved = _total - _available - _exhausted;
         }
     }
 }

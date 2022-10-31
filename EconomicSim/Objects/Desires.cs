@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Reflection.PortableExecutable;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using Avalonia.Animation.Animators;
 using Avalonia.Input;
@@ -64,6 +65,10 @@ public class Desires
     /// </summary>
     public readonly Dictionary<IProduct, decimal> ProductsSatisfied = new();
     /// <summary>
+    /// Products saved specifically for ownership purposes.
+    /// </summary>
+    public readonly Dictionary<IProduct, decimal> OwnershipProducts = new();
+    /// <summary>
     /// The Use Processes as used by to satisfy the want, order shouldn't really matter.
     /// </summary>
     public readonly Dictionary<IWant, Dictionary<IProcess, decimal>> UseProcesses = new();
@@ -101,7 +106,7 @@ public class Desires
     public Desires(IMarket market)
     {
         Market = market;
-        FullTier = (int) DesireTier.NonTier;
+        FullTierSatisfaction = (int) DesireTier.NonTier;
     }
 
     /// <summary>
@@ -162,8 +167,23 @@ public class Desires
     /// <summary>
     /// The highest tier to which these desires have been satisfied fully.
     /// </summary>
-    public int FullTier { get; private set; }
-    
+    public int FullTierSatisfaction { get; private set; }
+    /// <summary>
+    /// This is how many full tiers, skipping empty ones, which have been filled.
+    /// </summary>
+    public int HardSatisfaction { get; private set; }
+    /// <summary>
+    /// The raw number of products and wants which have been satisfied.
+    /// </summary>
+    public decimal QuantitySatisfied { get; private set; }
+    /// <summary>
+    /// How many products we own.
+    /// </summary>
+    public decimal ProductsOwned => AllProperty.Sum(x => x.Value.Total);
+    /// <summary>
+    /// The remaining satisfaction gained above full tier.
+    /// </summary>
+    public decimal PartialSatisfaction { get; private set; }
     /// <summary>
     /// The highest tier that any of our products begins satisfying.
     /// </summary>
@@ -273,23 +293,20 @@ public class Desires
                 var available = Math.Min(desire.Amount / wantEff, AllProperty[product].Available);
                 // reserve it
                 AllProperty[product].Reserved += available;
+                OwnershipProducts.AddOrInclude(product, available);
                 // and update our satisfaction from our product
                 foreach (var (satisfiedWant, rate) in product.Wants)
                 {
                     var created = rate * available;
                     // add entry to satisfied wants and unclaimed wants if they aren't there.
-                    if (!WantsSatisfied.ContainsKey(satisfiedWant))
-                        WantsSatisfied[satisfiedWant] = 0;
-                    if (!UnclaimedWants.ContainsKey(satisfiedWant))
-                        UnclaimedWants[satisfiedWant] = 0;
                     if (Equals(desire.Want, satisfiedWant))
                     { // the satisfiedWant is what we are trying to satisfy
-                        WantsSatisfied[satisfiedWant] += created; // add it to our satisfaction
+                        WantsSatisfied.AddOrInclude(satisfiedWant, created); // add it to our satisfaction
                         desire.Satisfaction += created;
                         amount -= created; // and remove it from the amount
                     }
                     else // if not what we are trying to satisfy, save it for later possible use.
-                        UnclaimedWants[satisfiedWant] += created;
+                        UnclaimedWants.AddOrInclude(satisfiedWant, created);
                 }
             }
             if (amount == 0)
@@ -338,10 +355,10 @@ public class Desires
                 // and record that we're using this process for later uses
                 if (!UseProcesses.ContainsKey(desire.Want))
                     UseProcesses.Add(desire.Want, new Dictionary<IProcess, decimal>());
-                UseProcesses[desire.Want][process] = processData.successes;
+                UseProcesses[desire.Want].AddOrInclude(process, processData.successes);
                 // get how much we expect to be output for this
                 var expectation = processData.wantsChange[desire.Want]; // this Must output the want, otherwise it's connection is false.
-                WantsSatisfied[desire.Want] = expectation;
+                WantsSatisfied.AddOrInclude(desire.Want, expectation);
                 desire.Satisfaction += expectation;
                 amount -= expectation;
                 if (amount == 0)
@@ -388,10 +405,10 @@ public class Desires
                 // and record that we're using this process for later uses
                 if (!ConsumedProcesses.ContainsKey(desire.Want))
                     ConsumedProcesses.Add(desire.Want, new Dictionary<IProcess, decimal>());
-                ConsumedProcesses[desire.Want][process] = processData.successes;
+                ConsumedProcesses[desire.Want].AddOrInclude(process, processData.successes);
                 // get how much we expect to be output for this
                 var expectation = processData.wantsChange[desire.Want]; // this Must output the want, otherwise it's connection is false.
-                WantsSatisfied[desire.Want] = expectation;
+                WantsSatisfied.AddOrInclude(desire.Want, expectation);
                 desire.Satisfaction += expectation;
                 amount -= expectation;
                 if (amount == 0)
@@ -431,41 +448,137 @@ public class Desires
         }
         
         // since wants always run last, update our Tier Satisfaction.
+        UpdateSatisfaction();
     }
 
     /// <summary>
     /// Completes satisfying the wants, using or consuming any products which remain.
+    /// Does no recalculation and return false if we overdraw our products in our current iteration.
     /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
-    public void SatisfyWants()
+    public decimal SatisfyWants()
     {
-        throw new NotImplementedException();
-    }
-    
-    public void UpdateFullTier()
-    {/*
-        FullTier = -1001;
-        foreach (var need in _needs)
-        {
-            var tier = need.SatisfactionUpToTier();
-            var satisfaction = need.SatisfiedAtTier(tier);
-            if (satisfaction < 1)
-                tier -= 1; // if satisfaction is incomplete at the level given, then subtract down.
-            FullTier = Math.Max(FullTier, tier);
+        // since we assume that all products are properly placed, just run everything
+        // and then check if we succeeded or not.
+        
+        // we don't consume any products to satisfy desires. Leave them in place.
+        // go through the processes and consume as given.
+
+        // since calculation is complete (hypothetically) by this point,
+        // just run the process. No need to run ownership or consume other wants
+        
+        foreach (var (want, useSources) in UseProcesses)
+        { // for each want
+            foreach (var source in useSources)
+            {
+                if (source.Value == 0)
+                    continue; // if no uses included, skip.
+                var result = source.Key.DoProcess(source.Value,
+                    AllProperty.ToDictionary(x => x.Key,
+                        x => x.Value.Total),
+                    ClaimedWants);
+                // with results gotten, add and remove products and wants
+                foreach (var (product, change) in result.productChange)
+                {
+                    // add or remove from total as needed
+                    if (AllProperty.ContainsKey(product))
+                    { // if it already exists, add/sub from total and reserve
+                        AllProperty[product].Total += change;
+                        AllProperty[product].Reserved += change;
+                    }
+                }
+                foreach (var (product, used) in result.productUsed)
+                { // also move product from all to used, to ensure no double dipping.
+                    AllProperty[product].Reserved -= used;
+                    AllProperty[product].Exhausted += used;
+                }
+                foreach (var (changedWant, amount) in result.wantsChange)
+                { // update wants also, remove from claimed, add to unclaimed
+                    if (amount > 0)
+                        UnclaimedWants.AddOrInclude(changedWant, amount);
+                    else
+                        ClaimedWants.AddOrInclude(changedWant, amount);
+                }
+            }
         }
-        foreach (var want in _wants)
+
+        foreach (var (want, consumptionSources) in ConsumedProcesses)
+        { // for each want
+            foreach (var source in consumptionSources )
+            {
+                if (source.Value == 0)
+                    continue; // if no uses included, skip.
+                var result = source.Key.DoProcess(source.Value,
+                    AllProperty.ToDictionary(x => x.Key,
+                        x => x.Value.Total),
+                    ClaimedWants);
+                // with results gotten, add and remove products and wants
+                foreach (var (product, change) in result.productChange)
+                {
+                    // add or remove from total as needed
+                    if (AllProperty.ContainsKey(product))
+                    { // if it already exists, add/sub from total and reserve
+                        AllProperty[product].Total += change;
+                        AllProperty[product].Reserved += change;
+                    }
+                }
+                foreach (var (product, used) in result.productUsed)
+                { // also move product from all to used, to ensure no double dipping.
+                    AllProperty[product].Reserved -= used;
+                    AllProperty[product].Exhausted += used;
+                }
+                foreach (var (changedWant, amount) in result.wantsChange)
+                { // update wants also, remove from claimed, add to unclaimed
+                    if (amount > 0)
+                        UnclaimedWants.AddOrInclude(changedWant, amount);
+                    else
+                        ClaimedWants.AddOrInclude(changedWant, amount);
+                }
+            }
+        }
+        // any leftover wants are saved for the next day.
+        // check that we haven't overdrawn, if we have, return by how much.
+        if (AllProperty.Any(x => x.Value.Total < 0))
         {
-            var tier = want.SatisfactionUpToTier();
-            var satisfaction = want.SatisfiedAtTier(tier);
-            if (satisfaction < 1)
-                tier -= 1; // if satisfaction is incomplete at the level given, then subtract down.
-            FullTier = Math.Max(FullTier, tier);
-        }*/
+            return AllProperty
+                .Where(x => x.Value.Total < 0)
+                .Sum(x => x.Value.Total);
+        }
+
+        return 0;
     }
 
-    public void UpdateHighestTier()
-    { // not tested
-        throw new NotImplementedException();
+    public void UpdateSatisfaction()
+    {
+        // start with FullTierSat and highest tier.
+        FullTierSatisfaction = int.MaxValue;
+        HighestTier = -1001;
+        foreach (var need in Needs)
+        { // check needs
+            var tier = need.SatisfactionUpToTier();
+            if (!need.FullySatisfied)
+            { // if not fully satisfied, run against FullTierSatisfaction
+                FullTierSatisfaction = Math.Min(
+                    need.SatisfiedAtTier(tier) < 1 ? tier - 1 : tier,
+                    FullTierSatisfaction);
+            }
+            // always check against highest tier reached
+            HighestTier = Math.Max(HighestTier, tier);
+        }
+        foreach (var want in Wants)
+        { // as above so below.
+            var tier = want.SatisfactionUpToTier();
+            if (!want.FullySatisfied)
+            {
+                FullTierSatisfaction = Math.Min(
+                    want.SatisfiedAtTier(tier) < 1 ? tier - 1 : tier,
+                    FullTierSatisfaction);
+            }
+            HighestTier = Math.Max(HighestTier, tier);
+        }
+        // get quantity satisfied real quick also.
+        QuantitySatisfied = Needs.Sum(x => x.Satisfaction) + Wants.Sum(x => x.Satisfaction);
+        
+         
     }
 
     public IEnumerable<(int tier, IWantDesire desire)> WalkUpTiersForWants(IList<IWantDesire> wants)

@@ -423,4 +423,10 @@ public class ProcessesShould
         
         Assert.Throws<NotImplementedException>(() => proc.DoProcess(1, inputs, wants));
     }
+
+    [Test]
+    public void ReturnTrueWhenProcessComparisonsShowClashing()
+    {
+        Assert.Ignore();
+    }
 }

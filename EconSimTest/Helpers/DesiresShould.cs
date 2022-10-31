@@ -584,7 +584,7 @@ public class DesiresShould
     }
 
     [Test]
-    public void PredictWantOutputsCorrectlyAndSiftThemCorrectly()
+    public void PredictWantOutputsCorrectlyAndCorrectlyConsumeProducts()
     {
         var want1 = new Mock<IWant>();
         
@@ -611,7 +611,7 @@ public class DesiresShould
         useProcess.Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
             .Returns(1);
         useProcess
-            .Setup(x => x.DoProcess(It.IsAny<decimal>(),
+            .Setup(x => x.DoProcess(1,
                 It.IsAny<Dictionary<IProduct, decimal>>(),
                 It.IsAny<Dictionary<IWant, decimal>>()))
             .Returns((1, new Dictionary<IProduct, decimal>(),
@@ -622,6 +622,19 @@ public class DesiresShould
                 new Dictionary<IWant, decimal>
                 {
                     {want1.Object, 1}
+                }));
+        useProcess
+            .Setup(x => x.DoProcess(100,
+                It.IsAny<Dictionary<IProduct, decimal>>(),
+                It.IsAny<Dictionary<IWant, decimal>>()))
+            .Returns((100, new Dictionary<IProduct, decimal>(),
+                new Dictionary<IProduct, decimal>
+                {
+                    {useProduct.Object, 100}
+                }, 
+                new Dictionary<IWant, decimal>
+                {
+                    {want1.Object, 100}
                 }));
         // add the use process into the use product.
         useProduct.Setup(x => x.UseProcess)
@@ -640,7 +653,7 @@ public class DesiresShould
         consumptionProcess.Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
             .Returns(1);
         consumptionProcess
-            .Setup(x => x.DoProcess(It.IsAny<decimal>(),
+            .Setup(x => x.DoProcess(1,
                 It.IsAny<Dictionary<IProduct, decimal>>(),
                 It.IsAny<Dictionary<IWant, decimal>>()))
             .Returns((1, new Dictionary<IProduct, decimal>
@@ -651,6 +664,19 @@ public class DesiresShould
                 new Dictionary<IWant, decimal>
                 {
                     {want1.Object, 1}
+                }));
+        consumptionProcess
+            .Setup(x => x.DoProcess(100,
+                It.IsAny<Dictionary<IProduct, decimal>>(),
+                It.IsAny<Dictionary<IWant, decimal>>()))
+            .Returns((100, new Dictionary<IProduct, decimal>
+                {
+                    {consumeProduct.Object, -100}
+                }, 
+                new Dictionary<IProduct, decimal>(),
+                new Dictionary<IWant, decimal>
+                {
+                    {want1.Object, 100}
                 }));
         consumptionProcess
             .Setup(x => x.ProjectedWantAmount(want1.Object, ProcessPartTag.Output))
@@ -735,13 +761,22 @@ public class DesiresShould
         Assert.That(test.AllProperty[ownProduct.Object].Reserved, Is.EqualTo(100));
         
         // and check that the wants satisfied have also been recorded
-        Assert.That(test.WantsSatisfied[want1.Object], Is.EqualTo(300));
+        Assert.That(test.WantsSatisfied[want1.Object], Is.EqualTo(400));
         
         // and check that the satisfaction has been properly marked
         Assert.That(test.Wants.Single(x => x.Want == want1.Object)
             .Satisfaction, Is.EqualTo(400));
+        
+        var result = test.SatisfyWants();
+        
+        Assert.That(result, Is.EqualTo(0));
+        
+        // assert products have bene consumed to order
+        Assert.That(test.AllProperty[ownProduct.Object].Total, Is.EqualTo(100));
+        Assert.That(test.AllProperty[consumeProduct.Object].Total, Is.EqualTo(0));
+        Assert.That(test.AllProperty[useProduct.Object].Total, Is.EqualTo(100));
     }
-
+        
     [Test]
     public void SiftProductsIntoWantsCorrectly()
     {

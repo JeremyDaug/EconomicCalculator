@@ -10,7 +10,7 @@ public interface INeedDesire : IDesire
     /// The product desired.
     /// </summary>
     IProduct Product { get; }
-    
+
     /// <summary>
     /// Checks to see if the desire is equivalent to another
     /// Does not include checking amount or satisfaction, only the tiers it covers.

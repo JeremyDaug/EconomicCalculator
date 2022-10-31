@@ -45,6 +45,19 @@ public abstract class ADesire : IDesire
         return Satisfaction / Amount;
     }
 
+    public bool FullySatisfied
+    {
+        get
+        {
+            // if infinite, we can never be fully satisfied.
+            if (IsInfinite) return false;
+            // if total desire is equal to our satisfaction, we are totally satisfied.
+            if (TotalDesire() == Satisfaction)
+                return true;
+            return false;
+        }
+    }
+
     public decimal TotalDesire()
     {
         if (IsInfinite)
