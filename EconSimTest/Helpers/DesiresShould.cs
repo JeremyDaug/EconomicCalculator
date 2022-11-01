@@ -189,12 +189,12 @@ public class DesiresShould
         ProductMock5.Setup(x => x.Name).Returns(nameof(ProductMock5));
         ProductMock6.Setup(x => x.Name).Returns(nameof(ProductMock6));
 
-        MarketMock.Setup(x => x.GetMarketPrice(ProductMock1.Object)).Returns(1);
-        MarketMock.Setup(x => x.GetMarketPrice(ProductMock2.Object)).Returns(5);
-        MarketMock.Setup(x => x.GetMarketPrice(ProductMock3.Object)).Returns(20);
-        MarketMock.Setup(x => x.GetMarketPrice(ProductMock4.Object)).Returns(0.75m);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock1.Object)).Returns(10);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock2.Object)).Returns(20);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock3.Object)).Returns(15);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock4.Object)).Returns(1);
         MarketMock.Setup(x => x.GetMarketPrice(ProductMock5.Object)).Returns(50);
-        MarketMock.Setup(x => x.GetMarketPrice(ProductMock6.Object)).Returns(0.25m);
+        MarketMock.Setup(x => x.GetMarketPrice(ProductMock6.Object)).Returns(100);
 
         #endregion
         
@@ -296,6 +296,28 @@ public class DesiresShould
         
         #endregion
 
+        #region Processes
+
+        P1toW1Con = new Mock<IProcess>();
+        P1toW1Con.Setup(x => x.Name).Returns(nameof(P1toW1Con));
+        P1toW1Con.Setup(x => x.ProjectedWantAmount(WantMock1.Object, ProcessPartTag.Output))
+            .Returns(1);
+        P1toW1Con.Setup(x => x.DoProcess())
+        P2toW2Con = new Mock<IProcess>();
+        P3toW3Con = new Mock<IProcess>();
+        P4toW4Con = new Mock<IProcess>();
+        P5toW5Con = new Mock<IProcess>();
+        P6toW6Con = new Mock<IProcess>();
+        
+        P1toW3Use = new Mock<IProcess>();
+        P2toW4Use = new Mock<IProcess>();
+        P3toW5Use = new Mock<IProcess>();
+        P4toW6Use = new Mock<IProcess>();
+        P5toW1Use = new Mock<IProcess>();
+        P6toW2Use = new Mock<IProcess>();
+
+        #endregion
+        
         TestNeeds.Add(SingleNeedMock1);
         TestNeeds.Add(SingleNeedMock2);
         TestNeeds.Add(StretchedNeedMock1);
@@ -316,29 +338,10 @@ public class DesiresShould
         allProducts.Add(ProductMock4.Object);
         allProducts.Add(ProductMock5.Object);
         allProducts.Add(ProductMock6.Object);
-        
+
         foreach (var product in allProducts)
             testProperty.Add(product, 10);
 
-        MarketMock
-            .Setup(x => x.GetMarketPrice(ProductMock1.Object))
-            .Returns(10);
-        MarketMock
-            .Setup(x => x.GetMarketPrice(ProductMock2.Object))
-            .Returns(20);
-        MarketMock
-            .Setup(x => x.GetMarketPrice(ProductMock3.Object))
-            .Returns(15);
-        MarketMock
-            .Setup(x => x.GetMarketPrice(ProductMock4.Object))
-            .Returns(1);
-        MarketMock
-            .Setup(x => x.GetMarketPrice(ProductMock5.Object))
-            .Returns(50);
-        MarketMock
-            .Setup(x => x.GetMarketPrice(ProductMock6.Object))
-            .Returns(100);
-        
         test = new Desires(MarketMock.Object);
     }
 
