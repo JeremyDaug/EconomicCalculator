@@ -2,6 +2,7 @@ using EconomicSim.Helpers;
 using EconomicSim.Objects;
 using EconomicSim.Objects.Market;
 using EconomicSim.Objects.Processes;
+using EconomicSim.Objects.Processes.ProcessTags;
 using EconomicSim.Objects.Products;
 using EconomicSim.Objects.Wants;
 using Moq;
@@ -31,20 +32,20 @@ public class DesiresShould
     private Mock<IWant> WantMock6;
 
     // consumption process mocks
-    private Mock<IProcess> P1toW1Con;
-    private Mock<IProcess> P2toW2Con;
-    private Mock<IProcess> P3toW3Con;
-    private Mock<IProcess> P4toW4Con;
-    private Mock<IProcess> P5toW5Con;
-    private Mock<IProcess> P6toW6Con;
+    private IProcess P1toW1Con1to1;
+    private IProcess P2toW2Con1to2;
+    private IProcess P3toW3Con1to10;
+    private IProcess P4toW4Con2to1;
+    private IProcess P5toW5Con1to5;
+    private IProcess P6toW6Con4to1;
     
     // use process mocks
-    private Mock<IProcess> P5toW1Use;
-    private Mock<IProcess> P6toW2Use;
-    private Mock<IProcess> P1toW3Use;
-    private Mock<IProcess> P2toW4Use;
-    private Mock<IProcess> P3toW5Use;
-    private Mock<IProcess> P4toW6Use;
+    private IProcess P5toW1Use4to1;
+    private IProcess P6toW2Use1to10;
+    private IProcess P1toW3Use1to1;
+    private IProcess P2toW4Use1to2;
+    private IProcess P3toW5Use1to5;
+    private IProcess P4toW6Use2to1;
 
     private NeedDesire SingleNeedMock1;
     private NeedDesire SingleNeedMock2;
@@ -75,24 +76,14 @@ public class DesiresShould
         ProductMock4 = new Mock<IProduct>();
         ProductMock5 = new Mock<IProduct>();
         ProductMock6 = new Mock<IProduct>();
+        
         WantMock1 = new Mock<IWant>();
         WantMock2 = new Mock<IWant>();
         WantMock3 = new Mock<IWant>();
         WantMock4 = new Mock<IWant>();
         WantMock5 = new Mock<IWant>();
         WantMock6 = new Mock<IWant>();
-        P1toW1Con = new Mock<IProcess>();
-        P2toW2Con = new Mock<IProcess>();
-        P3toW3Con = new Mock<IProcess>();
-        P4toW4Con = new Mock<IProcess>();
-        P5toW5Con = new Mock<IProcess>();
-        P6toW6Con = new Mock<IProcess>();
-        P5toW1Use = new Mock<IProcess>();
-        P6toW2Use = new Mock<IProcess>();
-        P1toW3Use = new Mock<IProcess>();
-        P2toW4Use = new Mock<IProcess>();
-        P3toW5Use = new Mock<IProcess>();
-        P4toW6Use = new Mock<IProcess>();
+        // needs
         SingleNeedMock1 = new NeedDesire
         {
             Product = ProductMock1.Object,
@@ -102,7 +93,7 @@ public class DesiresShould
         SingleNeedMock2 = new NeedDesire
         {
             Product = ProductMock2.Object,
-            Amount = 1,
+            Amount = 5,
             StartTier = 2,
         };
         StretchedNeedMock1 = new NeedDesire
@@ -135,6 +126,7 @@ public class DesiresShould
             StartTier = 10,
             Step = 5,
         };
+        // wants
         SingleWantMock1 = new WantDesire
         {
             Want = WantMock1.Object,
@@ -144,7 +136,7 @@ public class DesiresShould
         SingleWantMock2 = new WantDesire
         {
             Want = WantMock2.Object,
-            Amount = 1,
+            Amount = 5,
             StartTier = 2,
         };
         StretchedWantMock1 = new WantDesire
@@ -297,24 +289,308 @@ public class DesiresShould
         #endregion
 
         #region Processes
-
-        P1toW1Con = new Mock<IProcess>();
-        P1toW1Con.Setup(x => x.Name).Returns(nameof(P1toW1Con));
-        P1toW1Con.Setup(x => x.ProjectedWantAmount(WantMock1.Object, ProcessPartTag.Output))
-            .Returns(1);
-        P1toW1Con.Setup(x => x.DoProcess())
-        P2toW2Con = new Mock<IProcess>();
-        P3toW3Con = new Mock<IProcess>();
-        P4toW4Con = new Mock<IProcess>();
-        P5toW5Con = new Mock<IProcess>();
-        P6toW6Con = new Mock<IProcess>();
+        // Use Real Processes to simplify setup.
+        P1toW1Con1to1 = new Process
+        {
+            Name = nameof(P1toW1Con1to1),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Input, Product = ProductMock1.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 1, Part = ProcessPartTag.Output, Want = WantMock1.Object
+                    
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Use , new Dictionary<string, object>{{"Product", ProductMock1.Object}}}
+            }
+        };
+        P2toW2Con1to2 = new Process
+        {
+            Name = nameof(P2toW2Con1to2),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Input, Product = ProductMock2.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 2, Part = ProcessPartTag.Output, Want = WantMock2.Object
+                    
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Use , new Dictionary<string, object>{{"Product", ProductMock2.Object}}}
+            }
+        };
+        P3toW3Con1to10 = new Process
+        {
+            Name = nameof(P3toW3Con1to10),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Input, Product = ProductMock3.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 10, Part = ProcessPartTag.Output, Want = WantMock3.Object
+                    
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Use , new Dictionary<string, object>{{"Product", ProductMock3.Object}}}
+            }
+        };
+        P4toW4Con2to1 = new Process
+        {
+            Name = nameof(P4toW4Con2to1),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Input, Product = ProductMock4.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 0.5m, Part = ProcessPartTag.Output, Want = WantMock4.Object
+                    
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Use , new Dictionary<string, object>{{"Product", ProductMock4.Object}}}
+            }
+        };
+        P5toW5Con1to5 = new Process
+        {
+            Name = nameof(P5toW5Con1to5),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Input, Product = ProductMock5.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 5, Part = ProcessPartTag.Output, Want = WantMock5.Object
+                    
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Use , new Dictionary<string, object>{{"Product", ProductMock5.Object}}}
+            }
+        };
+        P6toW6Con4to1 = new Process
+        {
+            Name = nameof(P6toW6Con4to1),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Input, Product = ProductMock6.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 0.25m, Part = ProcessPartTag.Output, Want = WantMock6.Object
+                    
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Use , new Dictionary<string, object>{{"Product", ProductMock6.Object}}}
+            }
+        };
         
-        P1toW3Use = new Mock<IProcess>();
-        P2toW4Use = new Mock<IProcess>();
-        P3toW5Use = new Mock<IProcess>();
-        P4toW6Use = new Mock<IProcess>();
-        P5toW1Use = new Mock<IProcess>();
-        P6toW2Use = new Mock<IProcess>();
+        P1toW3Use1to1 = new Process
+        {
+            Name = nameof(P1toW3Use1to1),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Capital, Product = ProductMock1.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 1, Part = ProcessPartTag.Output, Want = WantMock3.Object
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Consumption , new Dictionary<string, object>{{"Product", ProductMock1.Object}}}
+            }
+        };
+        P2toW4Use1to2 = new Process
+        {
+            Name = nameof(P2toW4Use1to2),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Capital, Product = ProductMock2.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 2, Part = ProcessPartTag.Output, Want = WantMock4.Object
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Consumption , new Dictionary<string, object>{{"Product", ProductMock2.Object}}}
+            }
+        };
+        P3toW5Use1to5 = new Process
+        {
+            Name = nameof(P3toW5Use1to5),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Capital, Product = ProductMock3.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 5, Part = ProcessPartTag.Output, Want = WantMock5.Object
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Consumption , new Dictionary<string, object>{{"Product", ProductMock3.Object}}}
+            }
+        };
+        P4toW6Use2to1 = new Process
+        {
+            Name = nameof(P4toW6Use2to1),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Capital, Product = ProductMock4.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 0.5m, Part = ProcessPartTag.Output, Want = WantMock6.Object
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Consumption , new Dictionary<string, object>{{"Product", ProductMock4.Object}}}
+            }
+        };
+        P5toW1Use4to1 = new Process
+        {
+            Name = nameof(P5toW1Use4to1),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 0.25m, Part = ProcessPartTag.Capital, Product = ProductMock5.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 1, Part = ProcessPartTag.Output, Want = WantMock1.Object
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Consumption , new Dictionary<string, object>{{"Product", ProductMock5.Object}}}
+            }
+        };
+        P6toW2Use1to10 = new Process
+        {
+            Name = nameof(P6toW2Use1to10),
+            ProcessProducts =
+            {
+                new ProcessProduct
+                {
+                    Amount = 1, Part = ProcessPartTag.Capital, Product = ProductMock6.Object
+                }
+            },
+            ProcessWants =
+            {
+                new ProcessWant
+                {
+                    Amount = 10, Part = ProcessPartTag.Output, Want = WantMock2.Object
+                }
+            },
+            ProcessTags =
+            {
+                { ProcessTag.Consumption , new Dictionary<string, object>{{"Product", ProductMock6.Object}}}
+            }
+        };
+
+        #endregion
+
+        #region AddProductProcesses
+
+        ProductMock1.Setup(x => x.ConsumptionProcess)
+            .Returns(P1toW1Con1to1);
+        ProductMock2.Setup(x => x.ConsumptionProcess)
+            .Returns(P2toW2Con1to2);
+        ProductMock3.Setup(x => x.ConsumptionProcess)
+            .Returns(P3toW3Con1to10);
+        ProductMock4.Setup(x => x.ConsumptionProcess)
+            .Returns(P4toW4Con2to1);
+        ProductMock5.Setup(x => x.ConsumptionProcess)
+            .Returns(P5toW5Con1to5);
+        ProductMock6.Setup(x => x.ConsumptionProcess)
+            .Returns(P6toW6Con4to1);
+        
+        ProductMock1.Setup(x => x.UseProcess)
+            .Returns(P1toW3Use1to1);
+        ProductMock2.Setup(x => x.UseProcess)
+            .Returns(P2toW4Use1to2);
+        ProductMock3.Setup(x => x.UseProcess)
+            .Returns(P3toW5Use1to5);
+        ProductMock4.Setup(x => x.UseProcess)
+            .Returns(P4toW6Use2to1);
+        ProductMock5.Setup(x => x.UseProcess)
+            .Returns(P5toW1Use4to1);
+        ProductMock6.Setup(x => x.UseProcess)
+            .Returns(P6toW2Use1to10);
 
         #endregion
         
@@ -839,68 +1115,45 @@ public class DesiresShould
     }
         
     [Test]
-    public void CalculateSatisfactionsCorrectly()
+    public void SatisfyCorrectlyAndCalculateSatisfactionsCorrectlyTotalTest()
     {
-        // create wants and products, 3 of each, each product satisfying each want, but by different methods
-        var want1 = new Mock<IWant>();
-        want1.Setup(x => x.Name).Returns(nameof(want1));
-        var want2 = new Mock<IWant>();
-        want2.Setup(x => x.Name).Returns(nameof(want2));
-        var want3 = new Mock<IWant>();
-        want3.Setup(x => x.Name).Returns(nameof(want3));
-
-        var product1 = new Mock<IProduct>();
-        product1.Setup(x => x.Name).Returns(nameof(product1));
-        var product2 = new Mock<IProduct>();
-        product2.Setup(x => x.Name).Returns(nameof(product2));
-        var product3 = new Mock<IProduct>();
-        product3.Setup(x => x.Name).Returns(nameof(product3));
-
-        // prod1 want1 ownership
-        var prod1_want2_cons_proc = new Mock<IProcess>();
-        prod1_want2_cons_proc.Setup(x => x.Name).Returns(nameof(prod1_want2_cons_proc));
-        var prod1_want3_used_proc = new Mock<IProcess>();
-        prod1_want3_used_proc.Setup(x => x.Name).Returns(nameof(prod1_want3_used_proc));
-        // prod2 want2 ownership
-        var prod2_want3_cons_proc = new Mock<IProcess>();
-        prod2_want3_cons_proc.Setup(x => x.Name).Returns(nameof(prod2_want3_cons_proc));
-        var prod2_want1_used_proc = new Mock<IProcess>();
-        prod2_want1_used_proc.Setup(x => x.Name).Returns(nameof(prod2_want1_used_proc));
-        // prod3 want3 ownership
-        var prod3_want1_cons_proc = new Mock<IProcess>();
-        prod3_want1_cons_proc.Setup(x => x.Name).Returns(nameof(prod3_want1_cons_proc));
-        var prod3_want2_used_proc = new Mock<IProcess>();
-        prod3_want2_used_proc.Setup(x => x.Name).Returns(nameof(prod3_want2_used_proc));
-
-        // try to use more complex values.
-        product1.Setup(x => x.Wants)
-            .Returns(new Dictionary<IWant, decimal>
-            {
-                { want1.Object, 1 }
-            });
-        product2.Setup(x => x.Wants)
-            .Returns(new Dictionary<IWant, decimal>
-            {
-                { want2.Object, 5 }
-            });
-        product3.Setup(x => x.Wants)
-            .Returns(new Dictionary<IWant, decimal>
-            {
-                { want3.Object, 2 }
-            });
-
-        var prod1_need = new NeedDesire
-        {
-            Amount = 1,
-            Product = product1.Object,
-            StartTier = 0
-        };
-        var prod1_need = new 
+        test = new Desires(MarketMock.Object, TestNeeds, TestWants);
         
-        test.AddProducts(product1.Object, 100);
-        test.AddProducts(product2.Object, 200);
-        test.AddProducts(product3.Object, 300);
+        test.AddProducts(ProductMock1.Object, 100);
+        test.AddProducts(ProductMock2.Object, 100);
+        test.AddProducts(ProductMock3.Object, 100);
+        test.AddProducts(ProductMock4.Object, 100);
+        test.AddProducts(ProductMock5.Object, 100);
+        test.AddProducts(ProductMock6.Object, 100);
         
-        test.AddDesire(prod1_need);
+        test.SiftProducts();
+        
+        Assert.That(test.Needs.Single(x => x.Product == ProductMock1.Object).Satisfaction,
+            Is.EqualTo(SingleNeedMock1.TotalDesire()));
+        Assert.That(test.Needs.Single(x => x.Product == ProductMock2.Object).Satisfaction,
+            Is.EqualTo(SingleNeedMock2.TotalDesire()));
+        Assert.That(test.Needs.Single(x => x.Product == ProductMock3.Object).Satisfaction,
+            Is.EqualTo(StretchedNeedMock1.TotalDesire()));
+        Assert.That(test.Needs.Single(x => x.Product == ProductMock4.Object).Satisfaction,
+            Is.EqualTo(StretchedNeedMock2.TotalDesire()));
+        Assert.That(test.Needs.Single(x => x.Product == ProductMock5.Object).Satisfaction,
+            Is.EqualTo(100));
+        Assert.That(test.Needs.Single(x => x.Product == ProductMock6.Object).Satisfaction,
+            Is.EqualTo(100));
+        
+        test.SiftWants();
+        
+        Assert.That(test.Wants.Single(x => x.Want == WantMock1).Satisfaction,
+            Is.EqualTo(SingleWantMock1.TotalDesire()));
+        Assert.That(test.Wants.Single(x => x.Want == WantMock2).Satisfaction,
+            Is.EqualTo(SingleWantMock2.TotalDesire()));
+        Assert.That(test.Wants.Single(x => x.Want == WantMock3).Satisfaction,
+            Is.EqualTo(StretchedWantMock1.TotalDesire()));
+        Assert.That(test.Wants.Single(x => x.Want == WantMock4).Satisfaction,
+            Is.EqualTo(StretchedWantMock2.TotalDesire()));
+        Assert.That(test.Wants.Single(x => x.Want == WantMock5).Satisfaction,
+            Is.EqualTo(100));
+        Assert.That(test.Wants.Single(x => x.Want == WantMock6).Satisfaction,
+            Is.EqualTo(100));
     }
 }
