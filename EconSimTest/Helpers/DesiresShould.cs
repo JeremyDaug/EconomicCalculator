@@ -667,7 +667,7 @@ public class DesiresShould
         Assert.That(test.InfiniteNeeds.Any(x => x.Product == StretchedNeedMock1.Product), Is.False);
         Assert.That(test.DesiredProducts.Contains(StretchedNeedMock1.Product), Is.True);
         Assert.That(test.ProductsSatisfied[StretchedNeedMock1.Product], Is.EqualTo(0));
-        Assert.That(test.ProductTargets[StretchedNeedMock1.Product], Is.EqualTo(SingleNeedMock1.TotalDesire()));
+        Assert.That(test.ProductTargets[StretchedNeedMock1.Product], Is.EqualTo(StretchedNeedMock1.TotalDesire()));
         
         test.AddDesire(InfiniteNeedMock1);
         Assert.That(test.Needs.Any(x => x.Product == InfiniteNeedMock1.Product), Is.True);

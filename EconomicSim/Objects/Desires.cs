@@ -843,7 +843,7 @@ public class Desires
             if (newNeed.IsInfinite)
                 ProductTargets[prod] = -1;
             else
-                ProductTargets[prod] += newNeed.Amount;
+                ProductTargets[prod] += newNeed.TotalDesire();
         }
     }
 
