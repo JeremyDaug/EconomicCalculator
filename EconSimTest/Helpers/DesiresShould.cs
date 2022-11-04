@@ -1143,17 +1143,27 @@ public class DesiresShould
         
         test.SiftWants();
         
-        Assert.That(test.Wants.Single(x => x.Want == WantMock1).Satisfaction,
+        Assert.That(test.Wants.Single(x => x.Want == WantMock1.Object).Satisfaction,
             Is.EqualTo(SingleWantMock1.TotalDesire()));
-        Assert.That(test.Wants.Single(x => x.Want == WantMock2).Satisfaction,
+        
+        Assert.That(test.Wants.Single(x => x.Want == WantMock2.Object).Satisfaction,
             Is.EqualTo(SingleWantMock2.TotalDesire()));
-        Assert.That(test.Wants.Single(x => x.Want == WantMock3).Satisfaction,
+        Assert.That(test.Wants.Single(x => x.Want == WantMock3.Object).Satisfaction,
             Is.EqualTo(StretchedWantMock1.TotalDesire()));
-        Assert.That(test.Wants.Single(x => x.Want == WantMock4).Satisfaction,
+        Assert.That(test.Wants.Single(x => x.Want == WantMock4.Object).Satisfaction,
             Is.EqualTo(StretchedWantMock2.TotalDesire()));
-        Assert.That(test.Wants.Single(x => x.Want == WantMock5).Satisfaction,
-            Is.EqualTo(100));
-        Assert.That(test.Wants.Single(x => x.Want == WantMock6).Satisfaction,
-            Is.EqualTo(100));
+        Assert.That(test.Wants.Single(x => x.Want == WantMock5.Object).Satisfaction,
+            Is.EqualTo(1035));
+        Assert.That(test.Wants.Single(x => x.Want == WantMock6.Object).Satisfaction,
+            Is.EqualTo(98.525));
+        
+        Assert.That(test.HardSatisfaction, Is.EqualTo(100));
+        Assert.That(test.FullTierSatisfaction, Is.EqualTo(100));
+        Assert.That(test.QuantitySatisfied, Is.EqualTo(600));
+        Assert.That(test.PartialSatisfaction, Is.EqualTo(15));
+        Assert.That(test.MarketSatisfaction, Is.EqualTo(15));
+        Assert.That(test.MarketWealth, Is.EqualTo(15));
     }
+    
+    // TODO add more thorough Want Sifting Tests as needed.
 }

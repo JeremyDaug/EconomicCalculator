@@ -446,7 +446,7 @@ public class Desires
             // try to satisfy the want
             var success = FulfillWant(wantDesire, tier);
             // if we are able to satisfy, continue to the next want. If not remove it from our wants to satisfy list.
-            if (success)
+            if (!wantDesire.FullySatisfied && success)
                 continue;
             // since we didn't succeed, remove it.
             wantsToSatisfy.Remove(wantDesire.Want);
