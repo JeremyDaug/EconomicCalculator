@@ -9,22 +9,39 @@ namespace EconomicSim.Helpers;
 /// </summary>
 public class WantSourcing
 {
+    public WantSourcing(IWant want)
+    {
+        Want = want;
+        // setup possible sources, since we know what their sources are.
+        foreach (var val in want.OwnershipSources)
+            OwnSource.Add(val, 0);
+        foreach (var val in want.UseSources)
+            UseSource.Add(val.UseProcess!, 0);
+        foreach (var val in want.ConsumptionSources)
+            ConsumptionSource.Add(val.ConsumptionProcess!, 0);
+    }
+    
+    /// <summary>
+    /// The want we are sourcing.
+    /// </summary>
+    public IWant Want { get; set; }
+
     /// <summary>
     /// The Ownership sources for this want, product and number of the product.
     /// </summary>
-    public Dictionary<IProduct, decimal> OwnSource { get; set; }
+    public Dictionary<IProduct, decimal> OwnSource { get; set; } = new();
     
     /// <summary>
     /// The Use Process Sources for this want we are using.
     /// Process and number of cycles expected.
     /// </summary>
-    public Dictionary<IProcess, decimal> UseSource { get; set; }
+    public Dictionary<IProcess, decimal> UseSource { get; set; } = new();
     
     /// <summary>
     /// The Consumption Process Sources for this want we are using.
     /// Process and number of cycles expected.
     /// </summary>
-    public Dictionary<IProcess, decimal> ConsumptionSource { get; set; }
+    public Dictionary<IProcess, decimal> ConsumptionSource { get; set; } = new();
 
     /// <summary>
     /// Calculates what is required for all of these sources to properly function.
