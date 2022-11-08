@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace EconomicSim.Helpers;
 
 /// <summary>
@@ -116,7 +118,7 @@ public abstract class ADesire : IDesire
         return false;
     }
 
-    public int GetNextTier(int tier)
+    public int GetNextTierUp(int tier)
     {
         if (tier < StartTier) // if below the start tier, then it's the start tier next.
             return StartTier;
@@ -131,6 +133,35 @@ public abstract class ADesire : IDesire
         if (EndTier < next) // if the next is after our end tier (EndTier should be equal to the last), return none.
             return (int) DesireTier.NonTier;
         return next;
+    }
+
+    public int GetNextTierDown(int tier)
+    {
+        // if below our start, return none.
+        if (StartTier >= tier) return (int) DesireTier.NonTier;
+        
+        // if it's not stretched and not at/below start,
+        // then we can only have the start.
+        if (!IsStretched) return StartTier;
+        
+        // if infinite or we are at or below the endtier, just mod and subtract down
+        if (IsInfinite || EndTier >= tier)
+        {
+            var offstep = (tier - StartTier) % Step;
+            var actualTier = tier - offstep;
+            if (offstep == 0)
+                actualTier -= Step;
+            return actualTier;
+        }
+        // if we are at or after the end tier
+        // get the offset
+        var offset = (EndTier - StartTier) % Step;
+        // correct for that offset
+        var corrTier = EndTier - offset;
+        // if the tier, end tier, and corrected tier are the same, shift down.
+        if (tier == EndTier && offset == 0)
+            corrTier -= Step;
+        return corrTier.Value;
     }
 
     public int SatisfactionUpToTier()

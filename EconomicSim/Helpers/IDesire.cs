@@ -111,7 +111,14 @@ public interface IDesire
     /// </summary>
     /// <param name="tier"></param>
     /// <returns></returns>
-    int GetNextTier(int tier);
+    int GetNextTierUp(int tier);
+
+    /// <summary>
+    /// Gets the next tier below the parameter. If none, it returns -1001.
+    /// </summary>
+    /// <param name="tier"></param>
+    /// <returns></returns>
+    int GetNextTierDown(int tier);
 
     /// <summary>
     /// Calculates what tier this desire is satisfied to, stopping at the last tier

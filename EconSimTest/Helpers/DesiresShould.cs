@@ -84,6 +84,7 @@ public class DesiresShould
         WantMock5 = new Mock<IWant>();
         WantMock6 = new Mock<IWant>();
         // needs
+        #region Desires
         SingleNeedMock1 = new NeedDesire
         {
             Product = ProductMock1.Object,
@@ -169,6 +170,7 @@ public class DesiresShould
             StartTier = 10,
             Step = 5,
         };
+        #endregion
         testProperty = new Dictionary<IProduct, decimal>();
         allProducts = new List<IProduct>();
 
@@ -791,6 +793,51 @@ public class DesiresShould
         // var lines = string.Join('\n', order);
         // Console.WriteLine(lines);
     }
+    
+    [Test]
+    public void WalkDownTiersForNeedsCorrectly()
+    {
+        var list = new List<INeedDesire>
+        {
+            SingleNeedMock1,
+            StretchedNeedMock1,
+            InfiniteNeedMock1
+        };
+
+        int count = 0;
+        var lastTier = -1001;
+        List<string> order = new List<string>();
+        foreach (var item in test.WalkDownTiersForNeeds(list, 100))
+        {
+            order.Add($"{item.desire.Amount} {item.desire.Product}(s) at Tier: {item.tier}");
+            if (count > 100)
+                break;
+            if (item.desire == SingleNeedMock1)
+            {
+                Assert.That(SingleNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.EqualTo(0));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+            else if (item.desire == StretchedNeedMock1)
+            {
+                Assert.That(StretchedNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(item.desire.StartTier));
+                Assert.That(item.tier, Is.LessThanOrEqualTo(item.desire.EndTier));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+            else if (item.desire == InfiniteNeedMock1)
+            {
+                Assert.That(InfiniteNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(item.desire.StartTier));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+
+            count += 1;
+        }
+
+        // var lines = string.Join('\n', order);
+        // Console.WriteLine(lines);
+    }
 
     [Test]
     public void WalkUpTiersForWantsCorrectly()
@@ -806,6 +853,48 @@ public class DesiresShould
         var lastTier = -1001;
         List<string> order = new List<string>();
         foreach (var item in test.WalkUpTiersForWants(list))
+        {
+            order.Add($"{item.desire.Amount} {item.desire.Want}(s) at Tier: {item.tier}");
+            if (count > 100)
+                break;
+            if (item.desire == SingleNeedMock1)
+            {
+                Assert.That(SingleNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.EqualTo(0));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+            else if (item.desire == StretchedNeedMock1)
+            {
+                Assert.That(StretchedNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(item.desire.StartTier));
+                Assert.That(item.tier, Is.LessThanOrEqualTo(item.desire.EndTier));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+            else if (item.desire == InfiniteNeedMock1)
+            {
+                Assert.That(InfiniteNeedMock1.StepsOnTier(item.tier), Is.True);
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(item.desire.StartTier));
+                Assert.That(item.tier, Is.GreaterThanOrEqualTo(lastTier));
+            }
+
+            count += 1;
+        }
+    }
+    
+    [Test]
+    public void WalkDownTiersForWantsCorrectly()
+    {
+        var list = new List<IWantDesire>
+        {
+            SingleWantMock1,
+            StretchedWantMock1,
+            InfiniteWantMock1
+        };
+
+        int count = 0;
+        var lastTier = -1001;
+        List<string> order = new List<string>();
+        foreach (var item in test.WalkDownTiersForWants(list, 100))
         {
             order.Add($"{item.desire.Amount} {item.desire.Want}(s) at Tier: {item.tier}");
             if (count > 100)
@@ -1157,13 +1246,111 @@ public class DesiresShould
         Assert.That(test.Wants.Single(x => x.Want == WantMock6.Object).Satisfaction,
             Is.EqualTo(98.525));
         
-        Assert.That(test.HardSatisfaction, Is.EqualTo(100));
-        Assert.That(test.FullTierSatisfaction, Is.EqualTo(100));
-        Assert.That(test.QuantitySatisfied, Is.EqualTo(600));
-        Assert.That(test.PartialSatisfaction, Is.EqualTo(15));
-        Assert.That(test.MarketSatisfaction, Is.EqualTo(15));
-        Assert.That(test.MarketWealth, Is.EqualTo(15));
+        Assert.That(test.FullTierSatisfaction, Is.EqualTo(99));
+        Assert.That(test.QuantitySatisfied, Is.EqualTo(1383.525m));
+        // no point in testing this, it's a big partial value anyway.
+        // Assert.That(test.PartialSatisfaction, Is.EqualTo(15));
+        Assert.That(test.MarketSatisfaction, Is.EqualTo(15269));
+        Assert.That(test.MarketWealth, Is.EqualTo(19600));
+        Assert.That(test.HardSatisfaction, Is.EqualTo(99));
     }
     
     // TODO add more thorough Want Sifting Tests as needed.
+
+    [Test]
+    public void ReturnNeedsAtATierCorrectly()
+    {
+        for (int i = 0; i < 100; ++i)
+        {
+            var expectedNeeds = test
+                .Needs.Where(x => x.StepsOnTier(i));
+            var retrievedNeeds = test.NeedsAtTier(i);
+            Assert.That(expectedNeeds.Count, Is.EqualTo(retrievedNeeds.Count));
+            foreach (var expectation in expectedNeeds)
+            {
+                Assert
+                    .That(retrievedNeeds.Any(x => x == expectation), 
+                        Is.True);
+            }
+        }
+    }
+    
+    [Test]
+    public void ReturnWantsAtATierCorrectly()
+    {
+        for (int i = 0; i < 100; ++i)
+        {
+            var expectedWants = test
+                .Wants.Where(x => x.StepsOnTier(i));
+            var retrievedWants = test.WantsAtTier(i);
+            Assert.That(expectedWants.Count, Is.EqualTo(retrievedWants.Count));
+            foreach (var expectation in expectedWants)
+            {
+                Assert
+                    .That(retrievedWants.Any(x => x == expectation), 
+                        Is.True);
+            }
+        }
+    }
+
+    [Test]
+    public void ReturnSatisfactionGainedFromAProduct()
+    {
+        var testNeedDesire = new NeedDesire
+        { // 1 per tier
+            Product = ProductMock1.Object,
+            Amount = 1,
+            StartTier = 0,
+            Step = 1
+        };
+
+        var testWantOwnDesire = new WantDesire
+        { // 1 t 0 : 1 (2 products)
+            Want = WantMock5.Object,
+            Amount = 1,
+            StartTier = 0,
+        };
+        
+        var testWantUseDesire = new WantDesire
+        { // 1 t 0-1 : 2
+            Want = WantMock3.Object,
+            Amount = 1,
+            StartTier = 0,
+            Step = 1,
+            EndTier = 1
+        };
+        
+        var testWantConsumptionDesire = new WantDesire
+        { // 1 t 0-2 : 3
+            Want = WantMock1.Object,
+            Amount = 1,
+            StartTier = 0,
+            Step = 1,
+        };
+        
+        // 7 products used
+        // tier : products : wants
+        // 0    : 1        : 3
+        // 1    : 1        : 2
+        // 2    : 1        : 1
+        // 3    : 1        : 1
+        // 4    : 1
+        // 5    : 1
+
+        var locTest = new Desires(MarketMock.Object,
+            new List<INeedDesire>{testNeedDesire},
+            new List<IWantDesire>{testWantOwnDesire, testWantUseDesire, testWantConsumptionDesire});
+
+        var result = locTest
+            .SatisfactionGainedFrom(ProductMock1.Object, 7);
+        
+        Assert.That(result.Count, Is.EqualTo(7));
+        Assert.That(result[0], Is.EqualTo(4));
+        Assert.That(result[1], Is.EqualTo(3));
+        Assert.That(result[2], Is.EqualTo(2));
+        Assert.That(result[3], Is.EqualTo(1));
+        Assert.That(result[4], Is.EqualTo(1));
+        Assert.That(result[5], Is.EqualTo(1));
+        Assert.That(result[6], Is.EqualTo(1));
+    }
 }

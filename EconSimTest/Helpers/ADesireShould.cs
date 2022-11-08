@@ -146,12 +146,27 @@ public class ADesireShould
     [TestCase(0, 1, 2, 2, -1001)]
     [TestCase(0, 5, 10, 10, -1001)]
     [TestCase(0, 5, null, 6, 10)]
-    public void GetTheNextTierAvailable(int start, int step, int? end, int tier, int target)
+    public void GetTheNextTierUpAvailable(int start, int step, int? end, int tier, int target)
     {
         test.StartTier = start;
         test.Step = step;
         test.EndTier = end;
-        Assert.That(test.GetNextTier(tier), Is.EqualTo(target));
+        Assert.That(test.GetNextTierUp(tier), Is.EqualTo(target));
+    }
+    
+    [TestCase(0, 0, null, -1, -1001)]
+    [TestCase(0, 0, null, 0, -1001)]
+    [TestCase(0, 0, null, 1, 0)]
+    [TestCase(0, 1, 4, 2, 1)]
+    [TestCase(0, 5, 10, 11, 10)]
+    [TestCase(0, 5, 10, 10, 5)]
+    [TestCase(0, 5, null, 6, 5)]
+    public void GetTheNextTierDownAvailable(int start, int step, int? end, int tier, int target)
+    {
+        test.StartTier = start;
+        test.Step = step;
+        test.EndTier = end;
+        Assert.That(test.GetNextTierDown(tier), Is.EqualTo(target));
     }
 
     [TestCase(1, 0, null, 1, 1, 1)]
