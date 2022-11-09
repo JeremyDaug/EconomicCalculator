@@ -684,24 +684,24 @@ public class DesiresShould
         Assert.That(test.StretchedWants.Any(x => x.Want == SingleWantMock1.Want), Is.False);
         Assert.That(test.InfiniteWants.Any(x => x.Want == SingleWantMock1.Want), Is.False);
         Assert.That(test.DesiredWants.Contains(SingleWantMock1.Want), Is.True);
-        Assert.That(test.WantsSatisfied[SingleWantMock1.Want], Is.EqualTo(0));
-        Assert.That(test.WantTargets[SingleWantMock1.Want], Is.EqualTo(SingleWantMock1.Amount));
+        Assert.That(test.AllWants[SingleWantMock1.Want].Satisfaction, Is.EqualTo(0));
+        Assert.That(test.AllWants[SingleWantMock1.Want].Target, Is.EqualTo(SingleWantMock1.Amount));
         
         test.AddDesire(StretchedWantMock1);
         Assert.That(test.Wants.Any(x => x.Want == StretchedWantMock1.Want), Is.True);
         Assert.That(test.StretchedWants.Any(x => x.Want == StretchedWantMock1.Want), Is.True);
         Assert.That(test.InfiniteWants.Any(x => x.Want == StretchedWantMock1.Want), Is.False);
         Assert.That(test.DesiredWants.Contains(StretchedWantMock1.Want), Is.True);
-        Assert.That(test.WantsSatisfied[StretchedWantMock1.Want], Is.EqualTo(0));
-        Assert.That(test.WantTargets[StretchedWantMock1.Want], Is.EqualTo(StretchedWantMock1.TotalDesire()));
+        Assert.That(test.AllWants[StretchedWantMock1.Want].Satisfaction, Is.EqualTo(0));
+        Assert.That(test.AllWants[StretchedWantMock1.Want].Target, Is.EqualTo(StretchedWantMock1.TotalDesire()));
         
         test.AddDesire(InfiniteWantMock1);
         Assert.That(test.Wants.Any(x => x.Want == InfiniteWantMock1.Want), Is.True);
         Assert.That(test.StretchedWants.Any(x => x.Want == InfiniteWantMock1.Want), Is.True);
         Assert.That(test.InfiniteWants.Any(x => x.Want == InfiniteWantMock1.Want), Is.True);
         Assert.That(test.DesiredWants.Contains(InfiniteWantMock1.Want), Is.True);
-        Assert.That(test.WantsSatisfied[InfiniteWantMock1.Want], Is.EqualTo(0));
-        Assert.That(test.WantTargets[InfiniteWantMock1.Want], Is.EqualTo(-1));
+        Assert.That(test.AllWants[InfiniteWantMock1.Want].Satisfaction, Is.EqualTo(0));
+        Assert.That(test.AllWants[InfiniteWantMock1.Want].Target, Is.EqualTo(-1));
     }
 
     [Test]
@@ -735,8 +735,8 @@ public class DesiresShould
         Assert.That(test.StretchedWants.Any(x => x.Want == SingleWantMock1.Want), Is.False);
         Assert.That(test.InfiniteWants.Any(x => x.Want == SingleWantMock1.Want), Is.False);
         Assert.That(test.DesiredWants.Contains(SingleWantMock1.Want), Is.True);
-        Assert.That(test.WantsSatisfied[SingleWantMock1.Want], Is.EqualTo(0));
-        Assert.That(test.WantTargets[SingleWantMock1.Want], Is.EqualTo(SingleWantMock1.Amount));
+        Assert.That(test.AllWants[SingleWantMock1.Want].Satisfaction, Is.EqualTo(0));
+        Assert.That(test.AllWants[SingleWantMock1.Want].Target, Is.EqualTo(SingleWantMock1.Amount));
         
         test.AddDesire(SingleWantMock1);
         Assert.That(test.Wants.Any(x => x.Want == SingleWantMock1.Want), Is.True);
@@ -745,8 +745,8 @@ public class DesiresShould
         Assert.That(test.StretchedWants.Any(x => x.Want == SingleWantMock1.Want), Is.False);
         Assert.That(test.InfiniteWants.Any(x => x.Want == SingleWantMock1.Want), Is.False);
         Assert.That(test.DesiredWants.Contains(SingleWantMock1.Want), Is.True);
-        Assert.That(test.WantsSatisfied[SingleWantMock1.Want], Is.EqualTo(0));
-        Assert.That(test.WantTargets[SingleWantMock1.Want], Is.EqualTo(SingleWantMock1.Amount * 2));
+        Assert.That(test.AllWants[SingleWantMock1.Want].Satisfaction, Is.EqualTo(0));
+        Assert.That(test.AllWants[SingleWantMock1.Want].Target, Is.EqualTo(SingleWantMock1.Amount * 2));
     }
 
     [Test]
@@ -1171,7 +1171,7 @@ public class DesiresShould
         test.AddProducts(useProduct.Object, 100);
         test.AddProducts(ownProduct.Object, 100);
 
-        test.UnclaimedWants[want1.Object] = 100;
+        test.AllWants[want1.Object].Free = 100;
         
         test.SiftProducts();
         // sanity check Products
@@ -1187,7 +1187,7 @@ public class DesiresShould
         Assert.That(test.AllProperty[ownProduct.Object].Reserved, Is.EqualTo(100));
         
         // and check that the wants satisfied have also been recorded
-        Assert.That(test.WantsSatisfied[want1.Object], Is.EqualTo(400));
+        Assert.That(test.AllWants[want1.Object].Satisfaction, Is.EqualTo(400));
         
         // and check that the satisfaction has been properly marked
         Assert.That(test.Wants.Single(x => x.Want == want1.Object)

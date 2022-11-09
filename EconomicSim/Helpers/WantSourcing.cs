@@ -59,6 +59,11 @@ public class WantSourcing
     public Dictionary<IProcess, decimal> ConsumptionSource { get; set; } = new();
 
     /// <summary>
+    /// How much has actually been satisfied.
+    /// </summary>
+    public decimal Satisfaction { get; set; }
+
+    /// <summary>
     /// Calculates what is required for all of these sources to properly function.
     /// Does not include outputs.
     /// </summary>

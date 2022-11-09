@@ -61,18 +61,6 @@ public class Desires
     /// </summary>
     public readonly Dictionary<IProduct, decimal> ProductsSatisfied = new();
     /// <summary>
-    /// Products saved specifically for ownership purposes.
-    /// </summary>
-    public readonly Dictionary<IProduct, decimal> OwnershipProducts = new();
-    /// <summary>
-    /// The Use Processes as used by to satisfy the want, order shouldn't really matter.
-    /// </summary>
-    public readonly Dictionary<IWant, Dictionary<IProcess, decimal>> UseProcesses = new();
-    /// <summary>
-    /// The Consumption processes used to satisfy the want, order shouldn't matter.
-    /// </summary>
-    public readonly Dictionary<IWant, Dictionary<IProcess, decimal>> ConsumedProcesses = new();
-    /// <summary>
     /// How many of our products we want in total.
     /// </summary>
     public readonly Dictionary<IProduct, decimal> ProductTargets = new();
@@ -80,14 +68,6 @@ public class Desires
     /// Wants which have been claimed for processes.
     /// </summary>
     public readonly Dictionary<IWant, decimal> ClaimedWants = new();
-    /// <summary>
-    /// The current amount of wants which are (predicted) to be satisfied today.
-    /// </summary>
-    public readonly Dictionary<IWant, decimal> WantsSatisfied = new();
-    /// <summary>
-    /// How many of each want we want in total.
-    /// </summary>
-    public readonly Dictionary<IWant, decimal> WantTargets = new();
 
     #region Constructors
 
@@ -116,9 +96,9 @@ public class Desires
         { // copy over the needs so the originals aren't hurt.
             AddDesire(need);
         }
-        foreach (var want in wants)
+        foreach (var wantDesire in wants)
         { // copy over the wants so the originals aren't hurt.
-            AddDesire(want);
+            AddDesire(wantDesire);
         }
         // TODO come back here to consider adding in the savings pile.
         // Not everything has a savings pile, but most things should and making it 
@@ -188,6 +168,12 @@ public class Desires
     /// The highest tier that any of our products begins satisfying.
     /// </summary>
     public int HighestTier { get; private set; }
+
+    private Dictionary<IWant, decimal> GetFreeWants()
+    {
+        return AllWants.ToDictionary(x => x.Key, 
+            x => x.Value.Free);
+    }
 
     /// <summary>
     /// Sifts all products in our desires.
@@ -263,12 +249,12 @@ public class Desires
         var amount = desire.Amount - desire.Amount * satisfaction;
         
         // try to satisfy from excess Wants available, if possible.
-        if (UnclaimedWants.TryGetValue(desire.Want, out var availableWant) && availableWant > 0)
+        if (AllWants.TryGetValue(desire.Want, out var availableWant) && availableWant.Free > 0)
         {
-            var available = Math.Min(amount, availableWant);
+            var available = Math.Min(amount, availableWant.Free);
             amount -= available;
-            WantsSatisfied[desire.Want] += available;
-            UnclaimedWants[desire.Want] -= available;
+            AllWants[desire.Want].Satisfaction += available;
+            AllWants[desire.Want].Free -= available;
             desire.Satisfaction += available;
         }
         if (amount == 0)
@@ -293,7 +279,7 @@ public class Desires
                 var available = Math.Min(desire.Amount / wantEff, AllProperty[product].Available);
                 // reserve it
                 AllProperty[product].Reserved += available;
-                OwnershipProducts.AddOrInclude(product, available);
+                AllWants[desire.Want].OwnSource[product] += available;
                 // and update our satisfaction from our product
                 foreach (var (satisfiedWant, rate) in product.Wants)
                 {
@@ -301,12 +287,18 @@ public class Desires
                     // add entry to satisfied wants and unclaimed wants if they aren't there.
                     if (Equals(desire.Want, satisfiedWant))
                     { // the satisfiedWant is what we are trying to satisfy
-                        WantsSatisfied.AddOrInclude(satisfiedWant, created); // add it to our satisfaction
+                        if (!AllWants.ContainsKey(satisfiedWant))
+                            AllWants.Add(satisfiedWant, new WantSourcing(satisfiedWant));
+                        AllWants[satisfiedWant].Satisfaction += created; // add it to our satisfaction
                         desire.Satisfaction += created;
                         amount -= created; // and remove it from the amount
                     }
                     else // if not what we are trying to satisfy, save it for later possible use.
-                        UnclaimedWants.AddOrInclude(satisfiedWant, created);
+                    {
+                        if (!AllWants.ContainsKey(satisfiedWant))
+                            AllWants.Add(satisfiedWant, new WantSourcing(satisfiedWant));
+                        AllWants[satisfiedWant].Free += created;
+                    }
                 }
             }
             if (amount == 0)
@@ -328,7 +320,7 @@ public class Desires
                 var processData = process.DoProcess(target, 
                     AllProperty.ToDictionary(x => x.Key,
                         y => y.Value.Available),
-                    UnclaimedWants);
+                    GetFreeWants());
                 if (processData.successes == 0)
                     continue; // if no wants can be gotten, try the next.
                 // with some number possible, reserve the inputs/capital
@@ -348,17 +340,17 @@ public class Desires
                 // claim any input wants also
                 foreach (var (want, consumed) in processData.wantsChange.Where(x => x.Value < 0))
                 { // if we're consuming a want, then claim it and remove it from unclaimed.
-                    UnclaimedWants[want] -= consumed;
+                    AllWants[want].Free -= consumed;
                     // move consumed wants into claimed wants.
                     ClaimedWants.AddOrInclude(want, consumed);
                 }
                 // and record that we're using this process for later uses
-                if (!UseProcesses.ContainsKey(desire.Want))
-                    UseProcesses.Add(desire.Want, new Dictionary<IProcess, decimal>());
-                UseProcesses[desire.Want].AddOrInclude(process, processData.successes);
+                AllWants[desire.Want].UseSource[process] += processData.successes;
                 // get how much we expect to be output for this
                 var expectation = processData.wantsChange[desire.Want]; // this Must output the want, otherwise it's connection is false.
-                WantsSatisfied.AddOrInclude(desire.Want, expectation);
+                if (!AllWants.ContainsKey(desire.Want))
+                    AllWants.Add(desire.Want, new WantSourcing(desire.Want));
+                AllWants[desire.Want].Satisfaction += expectation;
                 desire.Satisfaction += expectation;
                 amount -= expectation;
                 if (amount == 0)
@@ -381,7 +373,7 @@ public class Desires
                 var processData = process.DoProcess(target, 
                     AllProperty.ToDictionary(x => x.Key,
                         x => x.Value.Available),
-                    UnclaimedWants);
+                    GetFreeWants());
                 if (processData.successes == 0)
                     continue; // if no wants can be gotten, try the next.
                 // with some number possible, reserve the inputs/capital
@@ -400,15 +392,15 @@ public class Desires
                 // claim any input wants also 
                 foreach (var (want, consumed) in processData.wantsChange.Where(x => x.Value < 0))
                 { // if we're consuming a want, then we must have claimed it earlier
-                    UnclaimedWants[want] -= consumed;
+                    AllWants[want].Free -= consumed;
                 }
                 // and record that we're using this process for later uses
-                if (!ConsumedProcesses.ContainsKey(desire.Want))
-                    ConsumedProcesses.Add(desire.Want, new Dictionary<IProcess, decimal>());
-                ConsumedProcesses[desire.Want].AddOrInclude(process, processData.successes);
+                AllWants[desire.Want].ConsumptionSource[process] += processData.successes;
                 // get how much we expect to be output for this
                 var expectation = processData.wantsChange[desire.Want]; // this Must output the want, otherwise it's connection is false.
-                WantsSatisfied.AddOrInclude(desire.Want, expectation);
+                if (!AllWants.ContainsKey(desire.Want))
+                    AllWants.Add(desire.Want, new WantSourcing(desire.Want));
+                AllWants[desire.Want].Satisfaction += expectation;
                 desire.Satisfaction += expectation;
                 amount -= expectation;
                 if (amount == 0)
@@ -466,7 +458,8 @@ public class Desires
         // since calculation is complete (hypothetically) by this point,
         // just run the process. No need to run ownership or consume other wants
         
-        foreach (var (want, useSources) in UseProcesses)
+        foreach (var (want, useSources) in AllWants.ToDictionary(x => x.Key,
+                     x => x.Value.UseSource))
         { // for each want
             foreach (var source in useSources)
             {
@@ -494,14 +487,20 @@ public class Desires
                 foreach (var (changedWant, amount) in result.wantsChange)
                 { // update wants also, remove from claimed, add to unclaimed
                     if (amount > 0)
-                        UnclaimedWants.AddOrInclude(changedWant, amount);
+                    {
+                        if (!AllWants.ContainsKey(changedWant))
+                            AllWants.Add(changedWant, new WantSourcing(changedWant));
+                        AllWants[changedWant].Free += amount;
+                    }
                     else
                         ClaimedWants.AddOrInclude(changedWant, amount);
                 }
             }
         }
 
-        foreach (var (want, consumptionSources) in ConsumedProcesses)
+        foreach (var (want, consumptionSources) in AllWants
+                     .ToDictionary(x => x.Key,
+                         x => x.Value.ConsumptionSource))
         { // for each want
             foreach (var source in consumptionSources )
             {
@@ -529,7 +528,11 @@ public class Desires
                 foreach (var (changedWant, amount) in result.wantsChange)
                 { // update wants also, remove from claimed, add to unclaimed
                     if (amount > 0)
-                        UnclaimedWants.AddOrInclude(changedWant, amount);
+                    {
+                        if (!AllWants.ContainsKey(changedWant))
+                            AllWants.Add(changedWant, new WantSourcing(changedWant));
+                        AllWants[changedWant].Free += amount;
+                    }
                     else
                         ClaimedWants.AddOrInclude(changedWant, amount);
                 }
@@ -935,7 +938,7 @@ public class Desires
             // if a desire just like it already exists
             dupe.Amount += desire.Amount;
             if (!desire.IsInfinite)
-                WantTargets[dupe.Want] += desire.TotalDesire();
+                AllWants[dupe.Want].Target += desire.TotalDesire();
             return;
         }
 
@@ -951,18 +954,16 @@ public class Desires
         // add to the set of desired products if possible.
         DesiredWants.Add(want);
         // add our satisfaction if it's not there
-        if (!WantsSatisfied.ContainsKey(want))
-            WantsSatisfied[want] = 0;
         // add to targets if it's not there.
-        if (!WantTargets.ContainsKey(want))
-            WantTargets[want] = 0;
-        if (WantTargets[want] != -1)
+        if (!AllWants.ContainsKey(want))
+            AllWants.Add(want, new WantSourcing(want));
+        if(AllWants[want].Target != -1)
         {
-            if ( desire.IsInfinite) // if new desire is infinite, set to infinite
-                WantTargets[want] = -1;
+            if (desire.IsInfinite) // if new desire is infinite, set to infinite
+                AllWants[want].Target = -1;
             else
                 // if not infinite, add to desire and that's it.
-                WantTargets[want] += desire.TotalDesire();
+                AllWants[want].Target += desire.TotalDesire();
         }
     }
 
@@ -1259,6 +1260,8 @@ public class Desires
 
     public void AddWant(IWant want, int amount)
     { 
-        UnclaimedWants.AddOrInclude(want, amount);
+        if (!AllWants.ContainsKey(want))
+            AllWants.Add(want, new WantSourcing(want));
+        AllWants[want].Free += amount;
     }
 }
