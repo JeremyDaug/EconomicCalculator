@@ -53,9 +53,9 @@ public class Desires
     /// </summary>
     public readonly Dictionary<IProduct, PropertyTriple> AllProperty = new();
     /// <summary>
-    /// Excess wants which are available to be absorbed elsewhere.
+    /// All wants owned, and how we get more from products.
     /// </summary>
-    public readonly Dictionary<IWant, decimal> UnclaimedWants = new();
+    public readonly Dictionary<IWant, WantSourcing> AllWants = new();
     /// <summary>
     /// The products which satisfy our desired Products.
     /// </summary>

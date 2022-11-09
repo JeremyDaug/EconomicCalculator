@@ -14,9 +14,15 @@ public class WantSourcingShould
 
     private IWant testWant;
 
+    private IWant inputWant2;
+    private IWant inputWant3;
+
     private Product testProduct1;
     private Product testProduct2;
     private Product testProduct3;
+    
+    private Product trashProduct2;
+    private Product trashProduct3;
 
     private Process UseProcess;
     private Process ConsumptionProcess;
@@ -27,6 +33,14 @@ public class WantSourcingShould
         testWant = new Want
         {
             Name = "Want"
+        };
+        inputWant2 = new Want
+        {
+            Name = "inputWant2"
+        };
+        inputWant3 = new Want
+        {
+            Name = "inputWant3"
         };
         testProduct1 = new Product
         {
@@ -44,6 +58,14 @@ public class WantSourcingShould
         {
             Name = "prod3"
         };
+        trashProduct2 = new Product
+        {
+            Name = "trash2"
+        };
+        trashProduct3 = new Product
+        {
+            Name = "trash3"
+        };
 
         UseProcess = new Process
         {
@@ -55,6 +77,12 @@ public class WantSourcingShould
                     Product = testProduct2,
                     Amount = 1,
                     Part = ProcessPartTag.Capital
+                },
+                new ProcessProduct
+                {
+                    Product = trashProduct2,
+                    Amount = 1,
+                    Part = ProcessPartTag.Output
                 }
             },
             ProcessWants = new List<ProcessWant>
@@ -62,6 +90,10 @@ public class WantSourcingShould
                 new ProcessWant
                 {
                     Want = testWant, Amount = 1, Part = ProcessPartTag.Output
+                },
+                new ProcessWant
+                {
+                Want = inputWant2, Amount = 1, Part = ProcessPartTag.Input
                 }
             },
             ProcessTags = new Dictionary<ProcessTag, Dictionary<string, object>?>
@@ -83,6 +115,12 @@ public class WantSourcingShould
                     Product = testProduct3,
                     Amount = 1,
                     Part = ProcessPartTag.Input
+                },
+                new ProcessProduct
+                {
+                    Product = trashProduct3,
+                    Amount = 1,
+                    Part = ProcessPartTag.Output
                 }
             },
             ProcessWants = new List<ProcessWant>
@@ -90,6 +128,10 @@ public class WantSourcingShould
                 new ProcessWant
                 {
                     Want = testWant, Amount = 1, Part = ProcessPartTag.Output
+                },
+                new ProcessWant
+                {
+                    Want = inputWant3, Amount = 1, Part = ProcessPartTag.Input
                 }
             },
             ProcessTags = new Dictionary<ProcessTag, Dictionary<string, object>?>
@@ -134,8 +176,71 @@ public class WantSourcingShould
     {
         test.OwnSource[testProduct1] = 5;
         test.ConsumptionSource[ConsumptionProcess] = 10;
-        test.UseSource[UseProcess] = 1;
+        test.UseSource[UseProcess] = 2;
+
+        var (productsEffected, wantsChanged) =
+            test.WantSourcingRequirements();
         
+        Assert.That(productsEffected.Count, Is.EqualTo(3));
+        Assert.That(productsEffected[testProduct1].Change, Is.EqualTo(0));
+        Assert.That(productsEffected[testProduct1].Use, Is.EqualTo(5));
+        Assert.That(productsEffected[testProduct2].Change, Is.EqualTo(0));
+        Assert.That(productsEffected[testProduct2].Use, Is.EqualTo(2));
+        Assert.That(productsEffected[testProduct3].Change, Is.EqualTo(-10));
+        Assert.That(productsEffected[testProduct3].Use, Is.EqualTo(0));
         
+        Assert.That(wantsChanged.Count, Is.EqualTo(2));
+        Assert.That(wantsChanged[inputWant2], Is.EqualTo(-2));
+        Assert.That(wantsChanged[inputWant3], Is.EqualTo(-10));
+    }
+    
+    [Test]
+    public void ReturnSourcingOutputsCorrectly()
+    {
+        test.OwnSource[testProduct1] = 5;
+        test.ConsumptionSource[ConsumptionProcess] = 10;
+        test.UseSource[UseProcess] = 2;
+
+        var (productsEffected, wantsChanged) =
+            test.WantSourcingOutputs();
+        
+        Assert.That(productsEffected.Count, Is.EqualTo(2));
+        Assert.That(productsEffected[trashProduct2].Change, Is.EqualTo(2));
+        Assert.That(productsEffected[trashProduct2].Use, Is.EqualTo(0));
+        Assert.That(productsEffected[trashProduct3].Change, Is.EqualTo(10));
+        Assert.That(productsEffected[trashProduct3].Use, Is.EqualTo(0));
+        
+        Assert.That(wantsChanged.Count, Is.EqualTo(1));
+        Assert.That(wantsChanged[testWant], Is.EqualTo(17));
+    }
+    
+    [Test]
+    public void ReturnSourcingSummaryCorrectly()
+    {
+        test.OwnSource[testProduct1] = 5;
+        test.ConsumptionSource[ConsumptionProcess] = 10;
+        test.UseSource[UseProcess] = 2;
+
+        var (productsEffected, wantsChanged) =
+            test.WantSourcingSummary();
+        
+        Assert.That(productsEffected.Count, Is.EqualTo(5));
+        Assert.That(productsEffected[testProduct1].Change, Is.EqualTo(0));
+        Assert.That(productsEffected[testProduct1].Use, Is.EqualTo(5));
+        Assert.That(productsEffected[testProduct2].Change, Is.EqualTo(0));
+        Assert.That(productsEffected[testProduct2].Use, Is.EqualTo(2));
+        Assert.That(productsEffected[testProduct3].Change, Is.EqualTo(-10));
+        Assert.That(productsEffected[testProduct3].Use, Is.EqualTo(0));
+        Assert.That(productsEffected[trashProduct2].Change, Is.EqualTo(2));
+        Assert.That(productsEffected[trashProduct2].Use, Is.EqualTo(0));
+        Assert.That(productsEffected[trashProduct3].Change, Is.EqualTo(10));
+        Assert.That(productsEffected[trashProduct3].Use, Is.EqualTo(0));
+        
+        Assert.That(wantsChanged.Count, Is.EqualTo(3));
+        Assert.That(wantsChanged[testWant], Is.EqualTo(17));
+        Assert.That(wantsChanged[inputWant2], Is.EqualTo(-2));
+        Assert.That(wantsChanged[inputWant3], Is.EqualTo(-10));
+        
+        Assert.That(test.Projected, Is.EqualTo(17));
     }
 }
