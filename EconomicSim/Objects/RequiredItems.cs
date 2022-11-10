@@ -323,7 +323,7 @@ namespace EconomicSim.Objects
             }
         };
         
-        public readonly static IProcess RestTime = new Process
+        /*public readonly static IProcess RestTime = new Process
         {
             Name = "Rest",
             Description = "Rest is important, but it still takes time.",
@@ -354,7 +354,7 @@ namespace EconomicSim.Objects
                     {"Product", Time}
                 }}
             }
-        };
+        };*/
 
         /// <summary>
         /// The first technology, the ability to solve problems and learn from the solution.
@@ -444,7 +444,7 @@ namespace EconomicSim.Objects
                 if (!_processes.Any())
                 {
                     _processes[ShoppingTime.GetName()] = ShoppingTime;
-                    _processes[RestTime.GetName()] = RestTime;
+                    //_processes[RestTime.GetName()] = RestTime;
                 }
 
                 return _processes;
