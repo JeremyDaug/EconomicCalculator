@@ -1,2 +1,2 @@
-mod want;
-mod product;
+pub mod want;
+pub mod product;

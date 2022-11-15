@@ -18,7 +18,7 @@ pub struct Product {
         // use
         // consume
         // maintenance
-    // Techrequirements
+    TechRequired: Technology
 }
 
 enum ProductTag {
@@ -35,5 +35,11 @@ enum ProductTag {
 }
 
 impl Product {
-    get_name(&self, )
+    pub fn get_name(&self) -> String {
+        self.Name + "(" + self.VariantName + ")"
+    }
+
+    pub fn get_tech(&self) -> String {
+        self.TechRequired.Name
+    }
 }
