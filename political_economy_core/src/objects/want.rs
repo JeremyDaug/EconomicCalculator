@@ -1,30 +1,21 @@
 #[derive(Debug)]
-struct Want {
-    Id: u32,
-    Name: String,
-    Description: String,
+pub struct Want {
+    id: u64,
+    name: String,
+    description: String,
 
 }
 
 impl Want {
-    fn new() -> Want {
-        Want{
-            Id = 0,
-            Name = "Rest",
-            Description = "The desire to relax and recuperate, using time to do nothing.",
-
-        }
+    pub fn id(&self) -> u64 {
+        self.id
     }
 
-    fn my_print(&self) {
-        println!("{self.Name}: {self.Description}");
+    pub fn name(&self) -> &str {
+        self.name.as_ref()
     }
-}
 
-fn build_want(Id: String, Name: String, Description: String) -> Want {
-    Want {
-        Id,
-        Name,
-        Description
+    pub fn description(&self) -> &str {
+        self.description.as_ref()
     }
 }
