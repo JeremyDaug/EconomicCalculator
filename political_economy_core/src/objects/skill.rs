@@ -4,12 +4,12 @@ use super::{product::Product, skill_group::SkillGroup};
 
 #[derive(Debug)]
 pub struct Skill {
-    id: u64,
-    name: String,
-    description: String,
-    labor: Product,
-    skill_group: HashSet<SkillGroup>,
-    related_skills: HashMap<Skill, f64>,
+    pub(crate) id: u64,
+    pub(crate) name: String,
+    pub(crate) description: String,
+    pub(crate) labor: Product,
+    pub(crate) skill_group: HashSet<u64>,
+    pub(crate) related_skills: HashMap<u64, f64>,
 }
 
 impl Skill {
