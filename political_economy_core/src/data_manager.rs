@@ -58,7 +58,7 @@ impl DataManager {
 
     /// Loads wants from a file into the data manager,
     /// Currently, this just loads pre-existing data.
-    pub fn load_wants(&mut self, file_name: String) {
+    pub fn load_wants(&mut self, _file_name: String) {
         let rest =  match Want::new(0, 
             String::from("Rest"), 
             String::from("Rest is the joy of Idle time."), 
@@ -132,6 +132,10 @@ impl DataManager {
 
     pub fn load_technologies(&mut self, _file_name: String) {
         todo!("Not doing right now. Have better things to do than test out technology rules.")
+    }
+
+    pub fn load_technology_families(&mut self, _file_name: String) {
+        todo!("Skipping for same reason as Load Technologies.")
     }
 
     pub fn load_products(&mut self, _file_name: String) {
@@ -428,7 +432,7 @@ impl DataManager {
             String::from("Cabin(s)"), 
             3,
             250.0,
-            30,
+            30.0,
             Some(60),
             false,
             Vec::new(),
@@ -659,18 +663,87 @@ impl DataManager {
         self.products.insert(stoneGathering.id(), stoneGathering);
     }
 
-    pub fn load_skills(&self, file_name: String) {
+    pub fn load_skills(&mut self, _file_name: String) {
         // (labors and Services)
         // Ambrosia Farming
+        let mut ambrosia_farming = Skill::new(0,
+            String::from("Ambrosia Farming"),
+            String::from("Ambrosia Farming"),
+            16);
         // Cotton Farming
+        let mut cotton_farming = Skill::new(1,
+            String::from("Cotton Farming"),
+            String::from("Cotton Farming"),
+            17);
         // Thread Spinning
+        let mut thread_spinning = Skill::new(2,
+            String::from("Thread Spinning"),
+            String::from("Thread Spinning"),
+            18);
         // Weaving
+        let mut weaving = Skill::new(3,
+            String::from("Weaving"),
+            String::from("Weaving"),
+            19);
         // Tailoring
+        let mut tailoring = Skill::new(4,
+            String::from("Tailoring"),
+            String::from("Tailoring"),
+            20);
         // lumbering
+        let mut lumbering = Skill::new(5,
+            String::from("Lumbering"),
+            String::from("Lumbering"),
+            21);
         // tool making
+        let mut tool_making = Skill::new(6,
+            String::from("Tool Making"),
+            String::from("Tool Making"),
+            22);
         // construction
+        let mut construction = Skill::new(7,
+            String::from("Construction"),
+            String::from("Construction"),
+            23);
         // building repair
+        let mut building_repair = Skill::new(8,
+            String::from("Building Repair"),
+            String::from("Building Repair"),
+            24);
         // stone gathering
+        let stone_gathering = Skill::new(9,
+            String::from("Stone Gathering"),
+            String::from("Stone Gathering"),
+            25);
+
+        // add skill interconnections
+        // ambrosia and cotton farming are connected at 0.75 efficiency
+        ambrosia_farming.set_mutual_relation(&mut cotton_farming, 0.75);
+        // cotton farming, spinning, weaving, and tailoring relate
+        // cotton 
+        cotton_farming.set_mutual_relation(&mut thread_spinning, 0.2);
+        cotton_farming.set_mutual_relation(&mut weaving, 0.2);
+        cotton_farming.set_mutual_relation(&mut tailoring, 0.2);
+        // thread
+        thread_spinning.set_mutual_relation(&mut weaving, 0.5);
+        thread_spinning.set_mutual_relation(&mut tailoring, 0.5);
+        // weaving
+        weaving.set_mutual_relation(&mut tailoring, 0.75);
+        // lumbering
+        lumbering.set_mutual_relation(&mut tool_making, 0.3);
+        // construction - building repair
+        construction.set_mutual_relation(&mut building_repair, 0.8);
+
+        self.skills.insert(ambrosia_farming.id(), ambrosia_farming);
+        self.skills.insert(cotton_farming.id(), cotton_farming);
+        self.skills.insert(thread_spinning.id(), thread_spinning);
+        self.skills.insert(weaving.id(), weaving);
+        self.skills.insert(tailoring.id(), tailoring);
+        self.skills.insert(lumbering.id(), lumbering);
+        self.skills.insert(tool_making.id(), tool_making);
+        self.skills.insert(construction.id(), construction);
+        self.skills.insert(building_repair.id(), building_repair);
+        self.skills.insert(stone_gathering.id(), stone_gathering);
     }
 
 }

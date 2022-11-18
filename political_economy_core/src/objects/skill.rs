@@ -1,13 +1,15 @@
 use std::collections::{HashSet, HashMap};
 
+use crate::data_manager::DataManager;
+
 use super::{product::Product, skill_group::SkillGroup};
 
 #[derive(Debug)]
 pub struct Skill {
-    pub(crate) id: u64,
+    id: u64,
     pub(crate) name: String,
     pub(crate) description: String,
-    pub(crate) labor: Product,
+    pub(crate) labor: u64,
     pub(crate) skill_group: HashSet<u64>,
     pub(crate) related_skills: HashMap<u64, f64>,
 }
@@ -16,7 +18,7 @@ impl Skill {
     pub fn new(id: u64, 
         name: String, 
         description: String, 
-        labor: Product) -> Self {
+        labor: u64) -> Self {
 
         Self {
             id, 
@@ -41,7 +43,16 @@ impl Skill {
         self.description.as_ref()
     }
 
-    pub fn labor(&self) -> &Product {
-        &self.labor
+    pub fn labor<'a>(&self, manager: &'a DataManager) -> &'a Product {
+        manager.products.get(&self.id()).unwrap()
+    }
+
+    pub fn set_relation(&mut self, relation: &Skill, rate: f64) {
+        *self.related_skills.entry(relation.id).or_insert(rate) = rate;
+    }
+
+    pub fn set_mutual_relation(&mut self, relation: &mut Skill, rate: f64) {
+        self.set_relation(relation, rate);
+        relation.set_relation(&self, rate);
     }
 }
