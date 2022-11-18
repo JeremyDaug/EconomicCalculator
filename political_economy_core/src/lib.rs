@@ -13,7 +13,6 @@ mod tests {
     use crate::objects::product::Product;
 
     use super::*;
-    use super::objects::pop::Pop;
 
     #[test]
     fn it_works() {

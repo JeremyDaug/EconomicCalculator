@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::error::Error;
 use std::hash::Hash;
+
+use crate::data_manager::DataManager;
 
 use super::firm::Firm;
 use super::process::Process;
@@ -66,11 +69,12 @@ impl Product {
          use_processes: HashSet<u64>, 
          consumption_processes: HashSet<u64>, 
          maintenance_processes: HashSet<u64>, 
-         tech_required: Option<u64>) -> Self {
-            if tags.contains(&ProductTag::Magic) {
-
+         tech_required: Option<u64>) -> Option<Self> {
+            if !tags.contains(&ProductTag::Magic) &&
+                (mass < 0.0 || bulk < 0.0) {
+                    return None
             }
-             Self { 
+             Some(Self { 
                 id, 
                 name, 
                 variant_name, 
@@ -89,7 +93,7 @@ impl Product {
                 consumption_processes, 
                 maintenance_processes, 
                 tech_required 
-            } 
+            } )
         }
 
     pub fn is_equal_to(&self, other: Product) -> bool{

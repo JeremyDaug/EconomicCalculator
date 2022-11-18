@@ -44,12 +44,4 @@ impl Skill {
     pub fn labor(&self) -> &Product {
         &self.labor
     }
-
-    pub fn skill_group(&self) -> &HashSet<SkillGroup> {
-        &self.skill_group
-    }
-
-    pub fn related_skills(&self) -> &HashMap<Skill, f64> {
-        &self.related_skills
-    }
 }
