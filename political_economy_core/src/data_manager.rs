@@ -1,5 +1,5 @@
 use core::panic;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 use crate::objects::{want::Want, skill_group::SkillGroup, skill::Skill, technology::Technology, technology_family::TechnologyFamily, product::Product, process_node::ProcessNode, process::Process, job::Job, species::Species, culture::Culture, pop::Pop, market::Market, firm::Firm};
 
@@ -63,8 +63,8 @@ impl DataManager {
             String::from("Rest"), 
             String::from("Rest is the joy of Idle time."), 
             0.1) {
-                Option::None => panic!(),
-                Option::Some(want) => want
+                Result::Err(_) => panic!(),
+                Result::Ok(want) => want
             };
 
         let food = match Want::new(
@@ -72,8 +72,8 @@ impl DataManager {
             String::from("Food"),
             String::from("Food is the desire for sustenance, necissary for all living things."),
             0.2) {
-                Option::None => panic!(),
-                Option::Some(want) => want
+                Result::Err(_) => panic!(),
+                Result::Ok(want) => want
             };
 
         let shelter = match Want::new(
@@ -81,8 +81,8 @@ impl DataManager {
             String::from("Shelter"),
             String::from("Shelter is the protection from the elements, a space where the difficulties of the outside world are lessened and made tolerable."),
             0.2) {
-            Option::None => panic!(),
-            Option::Some(want) => want
+                Result::Err(_) => panic!(),
+                Result::Ok(want) => want
         };
 
         let clothing = match Want::new(
@@ -90,35 +90,26 @@ impl DataManager {
             String::from("Clothing"),
             String::from("Clothing is the personal protection from the elements, while it does not separate one from the wider world wholly, it does lessen it's toll."),
             0.2) {
-            Option::None => panic!(),
-            Option::Some(want) => want
-        };
-
-        let clothing = match Want::new(
-            4,
-            String::from("Clothing"),
-            String::from("Clothing is the personal protection from the elements, while it does not separate one from the wider world wholly, it does lessen it's toll."),
-            0.2) {
-            Option::None => panic!(),
-            Option::Some(want) => want
+                Result::Err(_) => panic!(),
+                Result::Ok(want) => want
         };
 
         let fashion = match Want::new(
-            5,
+            4,
             String::from("Fashion"),
             String::from("Fashion is about presentation, showing your wealth through jewelry, and higher quality clothing."),
             0.2) {
-            Option::None => panic!(),
-            Option::Some(want) => want
+                Result::Err(_) => panic!(),
+                Result::Ok(want) => want
         };
 
         let wealth = match Want::new(
-            6,
+            5,
             String::from("Wealth"),
             String::from("Wealth is the amount of things you have built up. Not just money, but things. This is a required item."),
             0.2) {
-            Option::None => panic!(),
-            Option::Some(want) => want
+                Result::Err(_) => panic!(),
+                Result::Ok(want) => want
         };
 
         self.wants.insert(rest.id(), rest);
@@ -151,15 +142,9 @@ impl DataManager {
             Some(0),
             true,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // Shopping Time
-        let shoppingTime = Product::new(1,
+        let shopping_time = Product::new(1,
             String::from("Time"),
             String::from(""),
             String::from("Shopping Time, productive, but sometimes frustrating."), 
@@ -170,15 +155,9 @@ impl DataManager {
             Some(0),
             true,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // Ambrosia Fruit (food source)
-        let ambrosiaFruit = Product::new(2,
+        let ambrosia_fruit = Product::new(2,
             String::from("Ambrosia Fruit"),
             String::from(""),
             String::from("Ambrosia fruit are all one needs to sate their hunger."), 
@@ -189,15 +168,9 @@ impl DataManager {
             Some(10),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // cotton boll
-        let cottonBoll = Product::new(3,
+        let cotton_boll = Product::new(3,
             String::from("Cotton Boll"),
             String::from(""),
             String::from("A bunch of raw cotton. Useful in some ways, but in need of refinement."), 
@@ -208,15 +181,9 @@ impl DataManager {
             Some(4),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // cotton thread
-        let cottonThread = Product::new(4,
+        let cotton_thread = Product::new(4,
             String::from("Thread"),
             String::from("Cotton"),
             String::from("Cotton Thread, needed for various things."), 
@@ -227,15 +194,9 @@ impl DataManager {
             Some(8),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // cotton bolt
-        let cottonBolt = Product::new(5,
+        let cotton_bolt = Product::new(5,
             String::from("Bolt"),
             String::from("Cotton"),
             String::from("Cotton Bolt, a bundle of cloth, useful as a simple robe, but better used in clothing."), 
@@ -246,15 +207,9 @@ impl DataManager {
             None,
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // cotton clothes
-        let cottonClothes = Product::new(6,
+        let mut cotton_clothes = Product::new(6,
             String::from("Clothes"),
             String::from("Cotton"),
             String::from("Cotton Clothes, keeps you warm, but kind of ugly looking."), 
@@ -265,15 +220,9 @@ impl DataManager {
             Some(30),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // cotton suit
-        let cottonSuit = Product::new(7,
+        let mut cotton_suit = Product::new(7,
             String::from("Suit"),
             String::from("Cotton"),
             String::from("Cotton Suit, a better set of clothes, looks nice."), 
@@ -284,15 +233,9 @@ impl DataManager {
             Some(50),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // wood logs
-        let woodLogs = Product::new(8,
+        let wood_logs = Product::new(8,
             String::from("Wood Logs"),
             String::from(""),
             String::from("Wooden logs, used for many things."), 
@@ -303,15 +246,9 @@ impl DataManager {
             None,
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // wood gatherer stick
-        let woodGathererSticks = Product::new(9,
+        let wood_gatherer_sticks = Product::new(9,
             String::from("Gatherer Stick"),
             String::from("Wood"),
             String::from("Wooden Gathering sticks make farming much easier, less hurt backs."), 
@@ -322,15 +259,9 @@ impl DataManager {
             Some(15),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // wood spinning wheel
-        let spinningWheel = Product::new(10,
+        let spinning_wheel = Product::new(10,
             String::from("Spinning Wheel"),
             String::from("Wood"),
             String::from("Spinning Wheels, makes spinning thread so much easier to do."), 
@@ -341,15 +272,9 @@ impl DataManager {
             Some(60),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // wood loom
-        let woodLoom = Product::new(11,
+        let wood_loom = Product::new(11,
             String::from("Loom"),
             String::from("Wood"),
             String::from("Looms, make weaving so much easier. How did we do it before them?"), 
@@ -360,15 +285,9 @@ impl DataManager {
             Some(30),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // wood-stone axe
-        let woodStoneAxe = Product::new(12,
+        let wood_stone_axe = Product::new(12,
             String::from("Stone Axe"),
             String::from(""),
             String::from("Stone Axe, useful for getting even more wood."), 
@@ -379,12 +298,6 @@ impl DataManager {
             Some(10),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // Stone
         let stone = Product::new(13,
@@ -398,15 +311,9 @@ impl DataManager {
             None,
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // hut (no resource, low efficiency, un-maintainable)
-        let hut = Product::new(14,
+        let mut hut = Product::new(14,
             String::from("Hut"),
             String::from(""),
             String::from("Hut, simple, made of dried mud and thatch, doesn't live long, but lives long enough."), 
@@ -417,15 +324,9 @@ impl DataManager {
             Some(15),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // cabin (costs wood, medium efficiency, maintainable)
-        let cabin = Product::new(15,
+        let mut cabin = Product::new(15,
             String::from("Cabin"),
             String::from(""),
             String::from("Cabin, warm, sturdy, and homely."), 
@@ -436,16 +337,10 @@ impl DataManager {
             Some(60),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // (labors and Services)
         // Ambrosia Farming
-        let ambrosiaFarming = Product::new(16,
+        let ambrosia_farming = Product::new(16,
             String::from("Ambrosia Farming"),
             String::from(""),
             String::from("Ambrosia Farming, a simple enough job, but it requires pacing yourself."), 
@@ -456,15 +351,9 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // Cotton Farming
-        let cottonFarming = Product::new(17,
+        let cotton_farming = Product::new(17,
             String::from("Cotton Farming"),
             String::from(""),
             String::from("Cotton farming, always hard work, but rewarding if successful."), 
@@ -475,15 +364,9 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // Thread Spinning
-        let threadSpinning = Product::new(18,
+        let thread_spinning = Product::new(18,
             String::from("Thread Spinning"),
             String::from(""),
             String::from("Thread Spinning, a slow and methodical task, but important."), 
@@ -494,12 +377,6 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // Weaving
         let weaving = Product::new(19,
@@ -513,12 +390,6 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // Tailoring
         let tailoring = Product::new(20,
@@ -532,12 +403,6 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // lumbering
         let lumbering = Product::new(21,
@@ -551,15 +416,9 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // tool making
-        let toolMaking = Product::new(22,
+        let tool_making = Product::new(22,
             String::from("Tool Making"),
             String::from(""),
             String::from("Tool Making, creating tools requires forethought and effort."), 
@@ -570,12 +429,6 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // construction
         let construction = Product::new(23,
@@ -589,15 +442,9 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // building repair
-        let buildingRepair = Product::new(24,
+        let building_repair = Product::new(24,
             String::from("Building Repair"),
             String::from(""),
             String::from("Building Repair, reinforcing failing buildings is a subtle art."), 
@@ -608,15 +455,9 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
         // stone gathering
-        let stoneGathering = Product::new(25,
+        let stone_gathering = Product::new(25,
             String::from("Stone Gathering"),
             String::from(""),
             String::from("Stone Gathering, requires a sharp eye and a bit of tenacity."), 
@@ -627,40 +468,53 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
-            HashMap::new(),
-            HashSet::new(),
-            None,
-            HashSet::new(),
-            HashSet::new(),
-            HashSet::new(),
             None).unwrap();
 
+        let mut shelter = self.wants
+            .get_mut(&2).unwrap();
+        hut.connect_want(&mut shelter, 1.0).expect("Big Problem");
+        cabin.connect_want(&mut shelter, 1.5).expect("Big Problem");
+
+        let clothes = self.wants
+            .get_mut(&3).unwrap();
+        cotton_clothes.set_want(&clothes, 1.0).expect("Big Problem");
+        cotton_suit.set_want(&clothes,1.5).expect("Big Problem");
+
+        let fashion = self.wants
+            .get_mut(&4).unwrap();
+        cotton_suit.set_want(fashion,1.0).expect("Big Problem");
+
+        let wealth = self.wants
+            .get_mut(&4).unwrap();
+        cotton_suit.set_want(wealth,1.0).expect("Big Problem");
+        cabin.set_want(wealth, 2.0).expect("Big Problem");
+
         self.products.insert(time.id(), time);
-        self.products.insert(shoppingTime.id(), shoppingTime);
-        self.products.insert(ambrosiaFruit.id(), ambrosiaFruit);
-        self.products.insert(cottonBoll.id(), cottonBoll);
-        self.products.insert(cottonThread.id(), cottonThread);
-        self.products.insert(cottonBolt.id(), cottonBolt);
-        self.products.insert(cottonClothes.id(), cottonClothes);
-        self.products.insert(cottonSuit.id(), cottonSuit);
-        self.products.insert(woodLogs.id(), woodLogs);
-        self.products.insert(woodGathererSticks.id(), woodGathererSticks);
-        self.products.insert(spinningWheel.id(), spinningWheel);
-        self.products.insert(woodLoom.id(), woodLoom);
-        self.products.insert(woodStoneAxe.id(), woodStoneAxe);
+        self.products.insert(shopping_time.id(), shopping_time);
+        self.products.insert(ambrosia_fruit.id(), ambrosia_fruit);
+        self.products.insert(cotton_boll.id(), cotton_boll);
+        self.products.insert(cotton_thread.id(), cotton_thread);
+        self.products.insert(cotton_bolt.id(), cotton_bolt);
+        self.products.insert(cotton_clothes.id(), cotton_clothes);
+        self.products.insert(cotton_suit.id(), cotton_suit);
+        self.products.insert(wood_logs.id(), wood_logs);
+        self.products.insert(wood_gatherer_sticks.id(), wood_gatherer_sticks);
+        self.products.insert(spinning_wheel.id(), spinning_wheel);
+        self.products.insert(wood_loom.id(), wood_loom);
+        self.products.insert(wood_stone_axe.id(), wood_stone_axe);
         self.products.insert(stone.id(), stone);
         self.products.insert(hut.id(), hut);
         self.products.insert(cabin.id(), cabin);
-        self.products.insert(ambrosiaFarming.id(), ambrosiaFarming);
-        self.products.insert(cottonFarming.id(), cottonFarming);
-        self.products.insert(threadSpinning.id(), threadSpinning);
+        self.products.insert(ambrosia_farming.id(), ambrosia_farming);
+        self.products.insert(cotton_farming.id(), cotton_farming);
+        self.products.insert(thread_spinning.id(), thread_spinning);
         self.products.insert(weaving.id(), weaving);
         self.products.insert(tailoring.id(), tailoring);
         self.products.insert(lumbering.id(), lumbering);
-        self.products.insert(toolMaking.id(), toolMaking);
+        self.products.insert(tool_making.id(), tool_making);
         self.products.insert(construction.id(), construction);
-        self.products.insert(buildingRepair.id(), buildingRepair);
-        self.products.insert(stoneGathering.id(), stoneGathering);
+        self.products.insert(building_repair.id(), building_repair);
+        self.products.insert(stone_gathering.id(), stone_gathering);
     }
 
     pub fn load_skills(&mut self, _file_name: String) {
@@ -745,5 +599,6 @@ impl DataManager {
         self.skills.insert(building_repair.id(), building_repair);
         self.skills.insert(stone_gathering.id(), stone_gathering);
     }
+
 
 }

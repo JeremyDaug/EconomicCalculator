@@ -2,36 +2,38 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::hash::Hash;
 
-use crate::data_manager::DataManager;
+// use crate::data_manager::DataManager;
 
-use super::firm::Firm;
 use super::process::Process;
-use super::technology::Technology;
+use super::process::ProcessTag;
+// use super::firm::Firm;
+// use super::process::Process;
+// use super::technology::Technology;
 use super::want::Want;
 
 #[derive(Debug)]
 pub struct Product {
     id: u64,
-    pub(crate) name: String,
-    pub(crate) variant_name: String,
-    pub(crate) description: String,
-    pub(crate) unit_name: String,
-    pub(crate) quality: i32,
-    pub(crate) mass: f64,
-    pub(crate) bulk: f64,
-    pub(crate) mean_time_to_failure: Option<u32>,
-    pub(crate) fractional: bool,
+    pub name: String,
+    pub variant_name: String,
+    pub description: String,
+    pub unit_name: String,
+    pub quality: i32,
+    pub mass: f64,
+    pub bulk: f64,
+    pub mean_time_to_failure: Option<u32>,
+    pub fractional: bool,
     // icon
-    pub(crate) tags: Vec<ProductTag>,
-    pub(crate) wants: HashMap<u64, f64>,
+    pub tags: Vec<ProductTag>,
+    pub wants: HashMap<u64, f64>,
 
-    pub(crate) processes: HashSet<u64>,
-    pub(crate) failure_process: Option<u64>,
-    pub(crate) use_processes: HashSet<u64>,
-    pub(crate) consumption_processes: HashSet<u64>,
-    pub(crate) maintenance_processes: HashSet<u64>,
+    pub processes: HashSet<u64>,
+    pub failure_process: Option<u64>,
+    pub use_processes: HashSet<u64>,
+    pub consumption_processes: HashSet<u64>,
+    pub maintenance_processes: HashSet<u64>,
 
-    pub(crate) tech_required: Option<u64>
+    pub tech_required: Option<u64>
 }
 
 impl Hash for Product {
@@ -60,14 +62,8 @@ impl Product {
          mass: f64, 
          bulk: f64, 
          mean_time_to_failure: Option<u32>, 
-         fractional: bool, 
-         tags: Vec<ProductTag>, 
-         wants: HashMap<u64, f64>, 
-         processes: HashSet<u64>, 
-         failure_process: Option<u64>, 
-         use_processes: HashSet<u64>, 
-         consumption_processes: HashSet<u64>, 
-         maintenance_processes: HashSet<u64>, 
+         fractional: bool,
+         tags: Vec<ProductTag>,
          tech_required: Option<u64>) -> Option<Self> {
             if !tags.contains(&ProductTag::Magic) &&
                 (mass < 0.0 || bulk < 0.0) {
@@ -77,7 +73,7 @@ impl Product {
                 id, 
                 name, 
                 variant_name, 
-                description, 
+                description,
                 unit_name, 
                 quality, 
                 mass, 
@@ -85,17 +81,19 @@ impl Product {
                 mean_time_to_failure, 
                 fractional, 
                 tags, 
-                wants, 
-                processes, 
-                failure_process, 
-                use_processes, 
-                consumption_processes, 
-                maintenance_processes, 
+                wants: HashMap::new(), 
+                processes: HashSet::new(), 
+                failure_process: None, 
+                use_processes: HashSet::new(), 
+                consumption_processes: HashSet::new(), 
+                maintenance_processes: HashSet::new(), 
                 tech_required 
             } )
         }
 
-    pub fn is_equal_to(&self, other: Product) -> bool{
+    /// Checks if a product is overly similar to another.
+    /// Not Thoroughly tested.
+    pub fn is_equal_to(&self, other: &Product) -> bool{
         if self.id != other.id ||
            self.name != other.name ||
            self.variant_name != other.variant_name ||
@@ -113,11 +111,83 @@ impl Product {
     }
 
     pub fn get_name(&self) -> String {
-        String::from("{self.name}({self.variant_name})")
+        if self.variant_name.trim().len() > 0 {
+            return format!("{}({})", self.name, self.variant_name);
+        }
+        String::from(format!("{}", self.name))
+    }
+
+    /// Sets the value of a want that this product satisfies via ownership
+    pub fn set_want(&mut self, want: &Want, eff: f64) -> Result<(),&str> {
+        if eff < 0.0 {
+            return Result::Err("Efficiency must be >= 0.");
+        }
+        *self.wants.entry(want.id()).or_insert(eff) = eff;
+        Result::Ok(())
+    }
+
+    /// As set_want(self, want, eff), but also ensures that want is connected back.
+    pub fn connect_want(&mut self, want: &mut Want, eff: f64) -> Result<(),&str> {
+        if eff < 0.0 {
+            return Result::Err("Efficiency must be >= 0.");
+        }
+        *self.wants.entry(want.id()).or_insert(eff) = eff;
+        want.add_ownership_source(&self);
+        Result::Ok(())
+    }
+
+    pub fn add_tag(&mut self, tag: ProductTag) {
+        self.tags.push(tag);
+    }
+
+    /// !TODO Test this for correctness and if there is a better way to do it.
+    pub fn get_tags(&self, tag: &ProductTag) -> Vec<&ProductTag> {
+        let mut result = Vec::new();
+        for item in self.tags.iter() {
+            if item == tag {
+                result.push(item);
+            }
+        }
+        result
     }
 
     pub fn id(&self) -> u64 {
         self.id
+    }
+
+    /// Adds a process to the product. Also adds it to all appropriate subcategories.
+    /// Returns a Err if duplicate failure product was found.
+    pub fn add_process<'a>(&mut self, process: &Process) -> Result<(), &'a str> {
+        self.processes.insert(process.id());
+
+        for tag in process.process_tags().iter() {
+            match tag {
+                ProcessTag::Failure(_proc) => {
+                    match self.failure_process {
+                        None => self.failure_process = Some(process.id()),
+                        Some(_) => return Result::Err("Duplicate Failure Product found in {self.name}")
+                    }
+                },
+                ProcessTag::Maintenance(prod) => {
+                    if prod.id == self.id {
+                        self.maintenance_processes.insert(process.id());
+                    }
+                }, 
+                ProcessTag::Use(prod) => {
+                    if prod.id == self.id {
+                        self.use_processes.insert(process.id());
+                    }
+                },
+                ProcessTag::Consumption(prod) => {
+                    if prod.id == self.id {
+                        self.maintenance_processes.insert(process.id());
+                    }
+                },
+                _ => ()
+            }
+        }
+
+        Result::Ok(())
     }
 }
 

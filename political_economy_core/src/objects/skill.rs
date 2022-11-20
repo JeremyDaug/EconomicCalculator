@@ -2,16 +2,16 @@ use std::collections::{HashSet, HashMap};
 
 use crate::data_manager::DataManager;
 
-use super::{product::Product, skill_group::SkillGroup};
+use super::product::Product;
 
 #[derive(Debug)]
 pub struct Skill {
     id: u64,
-    pub(crate) name: String,
-    pub(crate) description: String,
-    pub(crate) labor: u64,
-    pub(crate) skill_group: HashSet<u64>,
-    pub(crate) related_skills: HashMap<u64, f64>,
+    pub name: String,
+    pub description: String,
+    pub labor: u64,
+    pub skill_group: HashSet<u64>,
+    pub related_skills: HashMap<u64, f64>,
 }
 
 impl Skill {

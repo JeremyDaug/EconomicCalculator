@@ -1,24 +1,26 @@
-use std::fmt::Error;
-
 /// A Want is a generic desire that can be sought after. It cannot be
 /// bought, sold, or otherwise traded directly, but must be produced
 /// by a product or process.
 #[derive(Debug)]
 pub struct Want {
-    /// Th
+    /// The unique id of the want
     id: u64,
+    /// 
     pub name: String,
     pub description: String,
-    decay: f64
+    pub decay: f64,
+    pub ownership_sources: Vec<u64>,
+    pub process_sources: Vec<u64>
 }
 
 impl Want {
-    pub fn new(id: u64, name: String, description: String, decay: f64) -> Option<Self> { 
+    pub fn new(id: u64, name: String, 
+        description: String, decay: f64) -> Result<Self, String> { 
         if decay < 0.0 || decay > 1.0 {
-            None
+            Result::Err(String::from("Invalid Decay Rate, must be between 0 and 1 (inclusive)"))
         }
         else {
-            Some(Self { id, name, description, decay } )
+            Result::Ok(Self { id, name, description, decay, ownership_sources: Vec::new(), process_sources: Vec::new()} )
         }
     }
 
@@ -42,6 +44,13 @@ impl Want {
 
     pub fn id(&self) -> u64 {
         self.id
+    }
+
+    /// adds a product to self.ownership_sources, ensures no duplicates.
+    pub fn add_ownership_source(&mut self, product: &super::product::Product) {
+        if self.ownership_sources.iter().all(|x| x != &product.id()) {
+            self.ownership_sources.push(product.id());
+        }
     }
 }
 
