@@ -1,5 +1,5 @@
 use core::panic;
-use std::collections::{HashMap};
+use std::collections::{HashMap, HashSet};
 
 use crate::objects::{want::Want, skill_group::SkillGroup, skill::Skill, technology::Technology, technology_family::TechnologyFamily, product::Product, process_node::ProcessNode, process::Process, job::Job, species::Species, culture::Culture, pop::Pop, market::Market, firm::Firm};
 
@@ -515,6 +515,71 @@ impl DataManager {
         self.products.insert(construction.id(), construction);
         self.products.insert(building_repair.id(), building_repair);
         self.products.insert(stone_gathering.id(), stone_gathering);
+    }
+
+    pub fn load_skill_groups(&mut self, _file_name: String) {
+        // farming 
+        let mut farming_skills = HashSet::new();
+        farming_skills.insert(0);
+        farming_skills.insert(1);
+        let mut farming = SkillGroup::new(0,
+            String::from("Agriculture"),
+            String::from("While the details differ, a farm is a farm."),
+            0.4, farming_skills).unwrap();
+        let a_farming = self.skills.get_mut(&0).unwrap();
+        a_farming.connect_skill_group(&mut farming);
+        let c_farming = self.skills.get_mut(&1).unwrap();
+        c_farming.connect_skill_group(&mut farming);
+
+        // clothing
+        let mut clothing_skills = HashSet::new();
+        clothing_skills.insert(1);
+        clothing_skills.insert(2);
+        clothing_skills.insert(3);
+        clothing_skills.insert(4);
+        let mut clothier = SkillGroup::new(1,
+            String::from("Clothier"),
+            String::from("Dealing with thread, no matter it's form, is fairly similar."),
+            0.5, clothing_skills).unwrap();
+        c_farming.connect_skill_group(&mut clothier);
+        let spinning = self.skills.get_mut(&2).unwrap();
+        spinning.connect_skill_group(&mut clothier);
+        let weaving = self.skills.get_mut(&3).unwrap();
+        weaving.connect_skill_group(&mut clothier);
+        let tailoring = self.skills.get_mut(&4).unwrap();
+        tailoring.connect_skill_group(&mut clothier);
+
+        // carpentry
+        let mut carpentry_skills = HashSet::new();
+        carpentry_skills.insert(5);
+        carpentry_skills.insert(6);
+        carpentry_skills.insert(7);
+        carpentry_skills.insert(8);
+        let mut carpentry = SkillGroup::new(1,
+            String::from("Carpentry"),
+            String::from("Working with wood, no matter the purpose, has plenty in common."),
+            0.5, carpentry_skills).unwrap();
+        let skill = self.skills.get_mut(&5).unwrap();
+        skill.connect_skill_group(&mut carpentry);
+        let skill = self.skills.get_mut(&6).unwrap();
+        skill.connect_skill_group(&mut carpentry);
+        let skill = self.skills.get_mut(&7).unwrap();
+        skill.connect_skill_group(&mut carpentry);
+        let skill = self.skills.get_mut(&8).unwrap();
+        skill.connect_skill_group(&mut carpentry);
+
+        // architecture
+        let mut architecture_skills = HashSet::new();
+        architecture_skills.insert(7);
+        architecture_skills.insert(8);
+        let mut architecture = SkillGroup::new(1,
+            String::from("Architecture"),
+            String::from("Making and repairing buildings is always similar."),
+            0.5, architecture_skills).unwrap();
+        let skill = self.skills.get_mut(&7).unwrap();
+        skill.connect_skill_group(&mut architecture);
+        let skill = self.skills.get_mut(&8).unwrap();
+        skill.connect_skill_group(&mut architecture);
     }
 
     pub fn load_skills(&mut self, _file_name: String) {

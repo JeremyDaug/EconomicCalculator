@@ -2,7 +2,7 @@ use std::collections::{HashSet, HashMap};
 
 use crate::data_manager::DataManager;
 
-use super::product::Product;
+use super::{product::Product, skill_group::SkillGroup};
 
 #[derive(Debug)]
 pub struct Skill {
@@ -54,5 +54,14 @@ impl Skill {
     pub fn set_mutual_relation(&mut self, relation: &mut Skill, rate: f64) {
         self.set_relation(relation, rate);
         relation.set_relation(&self, rate);
+    }
+
+    pub(crate) fn insert_skill_group(&mut self, skill_group: &SkillGroup) -> bool {
+        self.skill_group.insert(skill_group.id())
+    }
+
+    pub fn connect_skill_group(&mut self, skill_group: &mut SkillGroup) {
+        self.skill_group.insert(skill_group.id());
+        skill_group.add_skill(&self);
     }
 }

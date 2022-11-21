@@ -8,8 +8,12 @@ pub fn add(left: usize, right: usize) -> usize {
 #[cfg(test)]
 mod tests {
 
+    mod skill_group_tests {
+        // skipped, shouldn't have much need right now.
+    }
     mod skill_tests {
         use crate::objects::skill::Skill;
+        // Tests here are kept to a minimum, they should 'just work'.
 
         #[test]
         pub fn set_relation_correctly() {
