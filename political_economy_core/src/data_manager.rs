@@ -1,7 +1,7 @@
 use core::panic;
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, intrinsics::nontemporal_store};
 
-use crate::objects::{want::Want, skill_group::SkillGroup, skill::Skill, technology::Technology, technology_family::TechnologyFamily, product::Product, process_node::ProcessNode, process::Process, job::Job, species::Species, culture::Culture, pop::Pop, market::Market, firm::Firm};
+use crate::objects::{want::Want, skill_group::SkillGroup, skill::Skill, technology::Technology, technology_family::TechnologyFamily, product::Product, process_node::ProcessNode, process::{Process, ProcessPortion, ProcessPartTag, PartItem}, job::Job, species::Species, culture::Culture, pop::Pop, market::Market, firm::Firm};
 
 
 #[derive(Debug)]
@@ -665,5 +665,226 @@ impl DataManager {
         self.skills.insert(stone_gathering.id(), stone_gathering);
     }
 
-
+    pub fn load_processes(&mut self, _file_name: String) {
+        // We for test cases, we are ignoring closed loop logic for now.
+        // shopping time first, this is a required process by the system.
+        let shop_input = ProcessPortion{
+            item: PartItem::Product(0),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Input,
+        };
+        let shop_output = ProcessPortion{
+            item: PartItem::Product(1),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Output,
+        };
+        let shopping_products = Vec::new();
+        shopping_products.push(shop_input);
+        shopping_products.push(shop_output);
+        let mut go_shopping = Process{
+            id: 0,
+            name: String::from("Go Shopping"),
+            variant_name: String::new(),
+            description: String::from("Shopping takes time."),
+            minimum_time: 1.0,
+            process_parts: shopping_products,
+            process_tags: Vec::new(),
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 0.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(go_shopping.id(), go_shopping);
+        
+        // next do labors, they'll be easy.
+        // ambrosia farming
+        let time_input = ProcessPortion{
+            item: PartItem::Product(0),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Input,
+        };
+        let labor_output = ProcessPortion{
+            item: PartItem::Product(16),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Output,
+        };
+        let service_products = Vec::new();
+        service_products.push(time_input);
+        service_products.push(labor_output);
+        let mut ambrosia_farming = Process{
+            id: 0,
+            name: String::from("Ambrosia Farming"),
+            variant_name: String::new(),
+            description: String::from("Ambrosia Farming process."),
+            minimum_time: 1.0,
+            process_parts: service_products,
+            process_tags: Vec::new(),
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 3.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(ambrosia_farming.id(), ambrosia_farming);
+        // cotton farming
+        let time_input = ProcessPortion{
+            item: PartItem::Product(0),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Input,
+        };
+        let labor_output = ProcessPortion{
+            item: PartItem::Product(17),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Output,
+        };
+        let service_products = Vec::new();
+        service_products.push(time_input);
+        service_products.push(labor_output);
+        let mut cotton_farming = Process{
+            id: 0,
+            name: String::from("Cotton Farming"),
+            variant_name: String::new(),
+            description: String::from("Cotton Farming process."),
+            minimum_time: 1.0,
+            process_parts: service_products,
+            process_tags: Vec::new(),
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 3.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(cotton_farming.id(), cotton_farming);
+        // thread spinning
+        let time_input = ProcessPortion{
+            item: PartItem::Product(0),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Input,
+        };
+        let labor_output = ProcessPortion{
+            item: PartItem::Product(18),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Output,
+        };
+        let service_products = Vec::new();
+        service_products.push(time_input);
+        service_products.push(labor_output);
+        let mut spinning = Process{
+            id: 0,
+            name: String::from("Spinning"),
+            variant_name: String::new(),
+            description: String::from("Spinning process."),
+            minimum_time: 1.0,
+            process_parts: service_products,
+            process_tags: Vec::new(),
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 3.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(spinning.id(), spinning);
+        // Weaving
+        let time_input = ProcessPortion{
+            item: PartItem::Product(0),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Input,
+        };
+        let labor_output = ProcessPortion{
+            item: PartItem::Product(19),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Output,
+        };
+        let service_products = Vec::new();
+        service_products.push(time_input);
+        service_products.push(labor_output);
+        let mut ambrosia_farming = Process{
+            id: 0,
+            name: String::from("Ambrosia Farming"),
+            variant_name: String::new(),
+            description: String::from("Ambrosia Farming process."),
+            minimum_time: 1.0,
+            process_parts: service_products,
+            process_tags: Vec::new(),
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 3.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(ambrosia_farming.id(), ambrosia_farming);
+        // Tailoring
+        let time_input = ProcessPortion{
+            item: PartItem::Product(0),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Input,
+        };
+        let labor_output = ProcessPortion{
+            item: PartItem::Product(20),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Output,
+        };
+        let service_products = Vec::new();
+        service_products.push(time_input);
+        service_products.push(labor_output);
+        let mut tailoring = Process{
+            id: 0,
+            name: String::from("Tailoring"),
+            variant_name: String::new(),
+            description: String::from("Tailoring."),
+            minimum_time: 1.0,
+            process_parts: service_products,
+            process_tags: Vec::new(),
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 3.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(tailoring.id(), tailoring);
+        // Lumbering
+        let time_input = ProcessPortion{
+            item: PartItem::Product(0),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Input,
+        };
+        let labor_output = ProcessPortion{
+            item: PartItem::Product(21),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessPartTag::Output,
+        };
+        let service_products = Vec::new();
+        service_products.push(time_input);
+        service_products.push(labor_output);
+        let mut lumbering = Process{
+            id: 0,
+            name: String::from("Lumbering"),
+            variant_name: String::new(),
+            description: String::from("Lumbering."),
+            minimum_time: 1.0,
+            process_parts: service_products,
+            process_tags: Vec::new(),
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 3.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(lumbering.id(), lumbering);
+    }
 }

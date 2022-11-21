@@ -30,7 +30,7 @@ impl SkillGroup {
         self.id
     }
 
-    pub(crate) fn add_skill(&self, skill: &Skill) -> bool {
+    pub fn add_skill(&mut self, skill: &Skill) -> bool {
         self.skills.insert(skill.id())
     }
 

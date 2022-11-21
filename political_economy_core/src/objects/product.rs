@@ -160,7 +160,7 @@ impl Product {
     pub fn add_process<'a>(&mut self, process: &Process) -> Result<(), &'a str> {
         self.processes.insert(process.id());
 
-        for tag in process.process_tags().iter() {
+        for tag in process.process_tags.iter() {
             match tag {
                 ProcessTag::Failure(_proc) => {
                     match self.failure_process {
@@ -169,17 +169,17 @@ impl Product {
                     }
                 },
                 ProcessTag::Maintenance(prod) => {
-                    if prod.id == self.id {
+                    if prod == &self.id {
                         self.maintenance_processes.insert(process.id());
                     }
                 }, 
                 ProcessTag::Use(prod) => {
-                    if prod.id == self.id {
+                    if prod == &self.id {
                         self.use_processes.insert(process.id());
                     }
                 },
                 ProcessTag::Consumption(prod) => {
-                    if prod.id == self.id {
+                    if prod == &self.id {
                         self.maintenance_processes.insert(process.id());
                     }
                 },
