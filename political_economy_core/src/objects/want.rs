@@ -1,3 +1,5 @@
+use super::process::{Process, ProcessTag, ProcessSectionTag, ProcessPart, PartItem};
+
 /// A Want is a generic desire that can be sought after. It cannot be
 /// bought, sold, or otherwise traded directly, but must be produced
 /// by a product or process.
@@ -9,8 +11,14 @@ pub struct Want {
     pub name: String,
     pub description: String,
     pub decay: f64,
+    /// The products which produce it via owning it.
     pub ownership_sources: Vec<u64>,
-    pub process_sources: Vec<u64>
+    /// All processes which produce it.
+    pub process_sources: Vec<u64>,
+    /// All use processes which produce it.
+    pub use_sources: Vec<u64>,
+    // All consumption processes which produce it.
+    pub consumption_sources: Vec<u64>
 }
 
 impl Want {
@@ -20,7 +28,11 @@ impl Want {
             Result::Err(String::from("Invalid Decay Rate, must be between 0 and 1 (inclusive)"))
         }
         else {
-            Result::Ok(Self { id, name, description, decay, ownership_sources: Vec::new(), process_sources: Vec::new()} )
+            Result::Ok(Self { id, name, description, decay, 
+                ownership_sources: Vec::new(), 
+                process_sources: Vec::new(),
+                use_sources: vec![],
+                consumption_sources: vec![]} )
         }
     }
 
@@ -51,6 +63,42 @@ impl Want {
         if self.ownership_sources.iter().all(|x| x != &product.id()) {
             self.ownership_sources.push(product.id());
         }
+    }
+
+    /// Not Tested
+    /// Adds a process to this want if that want is an output of the process
+    /// if it's not it won't add it and will return an Result::Err().
+    pub fn add_process_source<'a>(&mut self, process: &Process) 
+        -> Result<(), &'a str> {
+        
+        // sanity check that the process has us in it.
+        let mut contains_want = false;
+        for output in process.process_parts.iter()
+            .filter(|x| x.part.is_output()) {
+            if let PartItem::Want(id) = output.item {
+                if id == self.id {
+                    contains_want = true;
+                }
+            }
+        };
+        if contains_want {
+            return Result::Err("Process does not contain Want!");
+        }
+        // since it does, go through it's tags and add it to the appropriate sections.
+        for tag in process.process_tags.iter() {
+            match tag {
+                ProcessTag::Use(_prod) => {
+                    self.use_sources.push(process.id);
+                },
+                ProcessTag::Consumption(_prod) => {
+                    self.consumption_sources.push(process.id);
+                },
+                _ => {}
+            }
+        }
+        // always add the process to all since we do output the want.
+        self.process_sources.push(process.id);
+        Ok(())
     }
 }
 

@@ -1,12 +1,12 @@
 #[derive(Debug)]
 pub struct Process {
-    id: u64,
+    pub id: u64,
     pub name: String,
     pub variant_name: String,
     pub description: String,
     // icon
     pub minimum_time: f64,
-    pub process_parts: Vec<ProcessPortion>,
+    pub process_parts: Vec<ProcessPart>,
     pub process_tags: Vec<ProcessTag>,
     pub skill: Option<u64>,
     pub skill_minimum: f64,
@@ -23,25 +23,47 @@ impl Process {
 }
 
 #[derive(Debug)]
-pub struct ProcessPortion {
+pub struct ProcessPart {
     pub item: PartItem,
     pub amount: f64,
-    pub part_tags: Vec<ProcessPortionTag>,
-    pub part: ProcessPartTag
+    pub part_tags: Vec<ProcessPartTag>,
+    pub part: ProcessSectionTag
 }
 
-impl ProcessPortion {
+impl ProcessPart {
 }
 
 #[derive(Debug)]
-pub enum ProcessPartTag {
+pub enum ProcessSectionTag {
     Input,
     Capital,
     Output
 }
+impl ProcessSectionTag {
+    pub fn is_output(&self) -> bool {
+        match self {
+            ProcessSectionTag::Output => true,
+            _ => false
+        }
+    }
+
+    pub fn is_input(&self) -> bool {
+        match self {
+            ProcessSectionTag::Input => true,
+            _ => false
+        }
+    }
+
+    pub fn is_capital(&self) -> bool {
+        match self {
+            ProcessSectionTag::Capital => true,
+            _ => false
+        }
+    }
+}
 
 #[derive(Debug)]
-pub enum ProcessPortionTag {
+pub enum ProcessPartTag {
     Optional(f64),
     Fixed,
     Investment,
@@ -70,4 +92,19 @@ pub enum ProcessTag {
 pub enum PartItem {
     Product(u64),
     Want(u64)
+}
+impl PartItem {
+    pub fn is_want(&self) -> bool {
+        match self {
+            PartItem::Product(_) => false,
+            PartItem::Want(_) => true,
+        }
+    }
+
+    pub fn is_product(&self) -> bool {
+        match self {
+            PartItem::Product(_) => true,
+            PartItem::Want(_) => false,
+        }
+    }
 }
