@@ -1,4 +1,6 @@
-use super::process::{Process, ProcessTag, ProcessSectionTag, ProcessPart, PartItem};
+use std::collections::HashSet;
+
+use super::process::{Process, ProcessTag, PartItem};
 
 /// A Want is a generic desire that can be sought after. It cannot be
 /// bought, sold, or otherwise traded directly, but must be produced
@@ -12,7 +14,7 @@ pub struct Want {
     pub description: String,
     pub decay: f64,
     /// The products which produce it via owning it.
-    pub ownership_sources: Vec<u64>,
+    pub ownership_sources: HashSet<u64>,
     /// All processes which produce it.
     pub process_sources: Vec<u64>,
     /// All use processes which produce it.
@@ -29,7 +31,7 @@ impl Want {
         }
         else {
             Result::Ok(Self { id, name, description, decay, 
-                ownership_sources: Vec::new(), 
+                ownership_sources: HashSet::new(), 
                 process_sources: Vec::new(),
                 use_sources: vec![],
                 consumption_sources: vec![]} )
@@ -60,9 +62,7 @@ impl Want {
 
     /// adds a product to self.ownership_sources, ensures no duplicates.
     pub fn add_ownership_source(&mut self, product: &super::product::Product) {
-        if self.ownership_sources.iter().all(|x| x != &product.id()) {
-            self.ownership_sources.push(product.id());
-        }
+            self.ownership_sources.insert(product.id());
     }
 
     /// Not Tested

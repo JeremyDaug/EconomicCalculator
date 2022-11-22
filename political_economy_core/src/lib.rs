@@ -424,7 +424,7 @@ mod tests {
 
             assert_eq!(test_want.ownership_sources.len(), 0);
 
-            test_want.add_ownership_source(&test_product);
+            test_want.ownership_sources.insert(test_product.id());
 
             assert_eq!(test_want.ownership_sources.len(), 1);
 
