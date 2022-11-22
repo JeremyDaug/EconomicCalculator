@@ -81,7 +81,7 @@ impl Want {
                 }
             }
         };
-        if contains_want {
+        if !contains_want {
             return Result::Err("Process does not contain Want!");
         }
         // since it does, go through it's tags and add it to the appropriate sections.
