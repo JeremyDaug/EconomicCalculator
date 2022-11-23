@@ -10,6 +10,41 @@ use crate::objects::{want::Want, skill_group::SkillGroup,
         ProcessPartTag, PartItem, ProcessSectionTag, ProcessTag}, job::Job, species::Species, culture::Culture, pop::Pop, market::Market, firm::Firm};
 
 
+/// The DataManager is the main manager for our simulation
+/// It contains all of the data needed for the simulation in active memory, available for
+/// use as needed.
+/// 
+/// Items are stored and retrieved via their IDs.
+/// IDs for items should be fixed in place from loading onwards.
+/// 
+/// # Required Items
+/// 
+/// Currently, there are a handful of items which are considered 'Required' by the system.
+/// These are items which should always be there and will effectively always have some use.
+/// 
+/// Required Wants
+///     - ID 0: Rest
+///     - TODO Items
+///         + Space
+///         + Free Space
+/// Required Products:
+///     - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
+///                         refreshed every day)
+///     - ID 1: Shopping Time
+///     - TODO Items
+///         + Land (abstract)
+///         + Land (Wasteland)
+///         + Land (Marignal Land)
+///         + Land (Scrub Land)
+///         + Land (Quality Land)
+///         + Land (Fertile Land)
+///         + Land (Very Fertile Land)
+///         + Nothing (void item, may not be needed)
+/// Required Processes:
+///     - ID 0: Shopping (Time -> Shopping Time)
+/// Required Tech:
+///     - TODO Items
+///         + Brainstorming (origin tech)
 #[derive(Debug)]
 pub struct DataManager {
     // Stand Alone items
@@ -37,7 +72,23 @@ pub struct DataManager {
     pub territories: HashMap<u64, Species>,
     pub markets: HashMap<u64, Market>,
     pub firms: HashMap<u64, Firm>,
-    pub sets: Vec<String>
+    pub sets: Vec<String>,
+
+    // id creation data
+    want_id: u64,
+    tech_id: u64,
+    tech_fam_id: u64,
+    product_id: u64,
+    skill_group_id: u64,
+    skill_id: u64,
+    process_id: u64,
+    job_id: u64,
+    species_id: u64,
+    culture_id: u64,
+    pop_id: u64,
+    territory_id: u64,
+    market_id: u64,
+    firm_id: u64
 }
 
 impl DataManager {
@@ -58,7 +109,21 @@ impl DataManager {
             territories: HashMap::new(),
             markets: HashMap::new(),
             firms: HashMap::new(),
-            sets: Vec::new()
+            sets: Vec::new(),
+            want_id: 0,
+            tech_id: 0,
+            tech_fam_id: 0,
+            product_id: 0,
+            skill_group_id: 0,
+            skill_id: 0,
+            process_id: 0,
+            job_id: 0,
+            species_id: 0,
+            culture_id: 0,
+            pop_id: 0,
+            territory_id: 0,
+            market_id: 0,
+            firm_id: 0
         }
     }
 
@@ -711,350 +776,93 @@ impl DataManager {
         
         // next do labors, they'll be easy.
         // ambrosia farming
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(16),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let ambrosia_farming = Process{
-            id: 1,
-            name: String::from("Ambrosia Farming"),
-            variant_name: String::new(),
-            description: String::from("Ambrosia Farming process."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let ambrosia = self.skills.get(&0).unwrap();
+        let ambrosia_default 
+            = ambrosia.build_skill_process(new_id).expect("Uh Oh!");
         self.products.get_mut(&0).unwrap()
-            .add_process(&ambrosia_farming).expect("Uh Oh");
+            .add_process(&ambrosia_default).expect("Uh Oh");
         self.products.get_mut(&16).unwrap()
-            .add_process(&ambrosia_farming).expect("Uh Oh");
-        self.processes.insert(ambrosia_farming.id(), ambrosia_farming);
+            .add_process(&ambrosia_default).expect("Uh Oh");
+        self.processes.insert(ambrosia_default.id(), ambrosia_default);
         // cotton farming
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(17),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let cotton_farming = Process{
-            id: 2,
-            name: String::from("Cotton Farming"),
-            variant_name: String::new(),
-            description: String::from("Cotton Farming process."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let cottoning = self.skills.get(&1).unwrap();
+        let cotton_farming 
+            = cottoning.build_skill_process(new_id)
+            .expect("Uh OH!");
         self.products.get_mut(&0).unwrap()
             .add_process(&cotton_farming).expect("Uh Oh");
         self.products.get_mut(&17).unwrap()
             .add_process(&cotton_farming).expect("Uh Oh");
         self.processes.insert(cotton_farming.id(), cotton_farming);
         // thread spinning
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(18),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let spinning = Process{
-            id: 3,
-            name: String::from("Spinning"),
-            variant_name: String::new(),
-            description: String::from("Spinning process."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let spin_skill = self.skills.get(&2).unwrap();
+        let spinning = spin_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&spinning).expect("Uh Oh");
         self.products.get_mut(&18).unwrap()
             .add_process(&spinning).expect("Uh Oh");
         self.processes.insert(spinning.id(), spinning);
-        // Weaving
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(19),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let weaving = Process{
-            id: 4,
-            name: String::from("Weaving"),
-            variant_name: String::new(),
-            description: String::from("Weaving process."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        // Weaving 
+        let new_id = self.new_process_id();
+        let weave_skill = self.skills.get(&3).unwrap();
+        let weaving = weave_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&weaving).expect("Uh Oh");
         self.products.get_mut(&19).unwrap()
             .add_process(&weaving).expect("Uh Oh");
         self.processes.insert(weaving.id(), weaving);
         // Tailoring
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(20),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let tailoring = Process{
-            id: 5,
-            name: String::from("Tailoring"),
-            variant_name: String::new(),
-            description: String::from("Tailoring."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let tailor_skill = self.skills.get(&4).unwrap();
+        let tailoring = tailor_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&tailoring).expect("Uh Oh");
         self.products.get_mut(&20).unwrap()
             .add_process(&tailoring).expect("Uh Oh");
         self.processes.insert(tailoring.id(), tailoring);
         // Lumbering
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(21),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let lumbering = Process{
-            id: 0,
-            name: String::from("Lumbering"),
-            variant_name: String::new(),
-            description: String::from("Lumbering."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let lumber_skill = self.skills.get(&5).unwrap();
+        let lumbering = lumber_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&lumbering).expect("Uh Oh");
         self.products.get_mut(&21).unwrap()
             .add_process(&lumbering).expect("Uh Oh");
         self.processes.insert(lumbering.id(), lumbering);
         // Tool Maker
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(22),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let tool_maker = Process{
-            id: 0,
-            name: String::from("Tool Making"),
-            variant_name: String::new(),
-            description: String::from("Tool Making."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let tool_skill = self.skills.get(&6).unwrap();
+        let tool_maker = tool_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&tool_maker).expect("Uh Oh");
         self.products.get_mut(&22).unwrap()
             .add_process(&tool_maker).expect("Uh Oh");
         self.processes.insert(tool_maker.id(), tool_maker);
         // construction
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(23),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let construction = Process{
-            id: 0,
-            name: String::from("Construction"),
-            variant_name: String::new(),
-            description: String::from("Construction."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let construction_skill = self.skills.get(&7).unwrap();
+        let construction = construction_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&construction).expect("Uh Oh");
         self.products.get_mut(&23).unwrap()
             .add_process(&construction).expect("Uh Oh");
         self.processes.insert(construction.id(), construction);
         // building repair
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(24),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let building_repair = Process{
-            id: 0,
-            name: String::from("Building Repair"),
-            variant_name: String::new(),
-            description: String::from("Building Repair."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let building_repair_skill = self.skills.get(&8).unwrap();
+        let building_repair = building_repair_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&building_repair).expect("Uh Oh");
         self.products.get_mut(&24).unwrap()
             .add_process(&building_repair).expect("Uh Oh");
         self.processes.insert(building_repair.id(), building_repair);
         // stone gathering
-        let time_input = ProcessPart{
-            item: PartItem::Product(0),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Input,
-        };
-        let labor_output = ProcessPart{
-            item: PartItem::Product(25),
-            amount: 1.0,
-            part_tags: Vec::new(),
-            part: ProcessSectionTag::Output,
-        };
-        let mut service_products = Vec::new();
-        service_products.push(time_input);
-        service_products.push(labor_output);
-        let stone_gathering = Process{
-            id: 0,
-            name: String::from("Stone Gathering"),
-            variant_name: String::new(),
-            description: String::from("Stone Gathering."),
-            minimum_time: 1.0,
-            process_parts: service_products,
-            process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
-            technology_requirement: None,
-            tertiary_tech: None,
-        };
+        let new_id = self.new_process_id();
+        let stone_gathering_skill = self.skills.get(&9).unwrap();
+        let stone_gathering = stone_gathering_skill.build_skill_process(new_id).unwrap();
         self.products.get_mut(&0).unwrap()
             .add_process(&stone_gathering).expect("Uh Oh");
         self.products.get_mut(&25).unwrap()
@@ -1066,21 +874,19 @@ impl DataManager {
         let fixed_input = ProcessPartTag::Fixed;
         let labor_input = ProcessPart{
             item: PartItem::Product(16),
-            amount: 12.0,
+            amount: 1.0,
             part_tags: vec![fixed_input],
             part: ProcessSectionTag::Input,
         };
-        let cap_efficiency_boost 
-            = ProcessPartTag::Optional(0.5);
         let harvester_capital = ProcessPart{
             item: PartItem::Product(9),
             amount: 1.0,
-            part_tags: vec![cap_efficiency_boost],
+            part_tags: vec![ProcessPartTag::Optional(0.25)],
             part: ProcessSectionTag::Capital,
         };
         let fruit_output = ProcessPart{
             item: PartItem::Product(2),
-            amount: 8.0,
+            amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
         };
@@ -1120,14 +926,13 @@ impl DataManager {
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
         };
-        let consumption_products = vec![food_input, food_output];
         let ambrosia_consumption = Process{
             id: 0,
             name: String::from("Stone Gathering"),
             variant_name: String::new(),
             description: String::from("Stone Gathering."),
             minimum_time: 0.1,
-            process_parts: consumption_products,
+            process_parts: vec![food_input, food_output],
             process_tags: vec![ProcessTag::Consumption(2)],
             skill: None,
             skill_minimum: 0.0,
@@ -1142,19 +947,16 @@ impl DataManager {
 
         // Cotton Chain
         // Cotton Farmer -> Spinner -> weaver -> clothing
-        let fixed_input = ProcessPartTag::Fixed;
         let labor_input = ProcessPart{
             item: PartItem::Product(16),
             amount: 12.0,
-            part_tags: vec![fixed_input],
+            part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
-        let cap_efficiency_boost 
-            = ProcessPartTag::Optional(0.5);
         let harvester_capital = ProcessPart{
             item: PartItem::Product(9),
             amount: 1.0,
-            part_tags: vec![cap_efficiency_boost],
+            part_tags: vec![ProcessPartTag::Optional(0.5)],
             part: ProcessSectionTag::Input,
         };
         let fruit_output = ProcessPart{
@@ -1186,5 +988,154 @@ impl DataManager {
         self.products.get_mut(&2).unwrap()
             .add_process(&ambrosia_farming).expect("Uh Oh");
         self.processes.insert(ambrosia_farming.id(), ambrosia_farming);
+    }
+}
+
+// new ids section
+impl DataManager {
+    pub fn new_want_id(&mut self) -> u64 {
+        loop {
+            if self.wants.contains_key(&self.want_id) {
+                self.want_id += 1;
+            }
+            else {
+                return self.want_id;
+            }
+        }
+    }
+
+    pub fn new_tech_id(&mut self) -> u64 {
+        loop {
+            if self.technology.contains_key(&self.tech_id) {
+                self.tech_id += 1;
+            }
+            else {
+                return self.tech_id;
+            }
+        }
+    }
+
+    pub fn new_tech_fam_id(&mut self) -> u64 {
+        loop {
+            if self.technology_families.contains_key(&self.tech_fam_id) {
+                self.tech_fam_id += 1;
+            }
+            else {
+                return self.tech_fam_id;
+            }
+        }
+    }
+
+    pub fn new_product_id(&mut self) -> u64 {
+        loop {
+            if self.products.contains_key(&self.product_id) {
+                self.product_id += 1;
+            }
+            else {
+                return self.product_id;
+            }
+        }
+    }
+
+    pub fn new_skill_group_id(&mut self) -> u64 {
+        loop {
+            if self.skill_groups.contains_key(&self.skill_group_id) {
+                self.skill_group_id += 1;
+            }
+            else {
+                return self.skill_group_id;
+            }
+        }
+    }
+
+    pub fn new_skill_id(&mut self) -> u64 {
+        loop {
+            if self.skills.contains_key(&self.skill_id) {
+                self.skill_id += 1;
+            }
+            else {
+                return self.skill_id;
+            }
+        }
+    }
+    pub fn new_process_id(&mut self) -> u64 {
+        loop {
+            if self.processes.contains_key(&self.process_id) {
+                self.process_id += 1;
+            }
+            else {
+                return self.process_id;
+            }
+        }
+    }
+    pub fn new_job_id(&mut self) -> u64 {
+        loop {
+            if self.jobs.contains_key(&self.job_id) {
+                self.job_id += 1;
+            }
+            else {
+                return self.job_id;
+            }
+        }
+    }
+    pub fn new_species_id(&mut self) -> u64 {
+        loop {
+            if self.species.contains_key(&self.species_id) {
+                self.species_id += 1;
+            }
+            else {
+                return self.species_id;
+            }
+        }
+    }
+    pub fn new_culture_id(&mut self) -> u64 {
+        loop {
+            if self.cultures.contains_key(&self.culture_id) {
+                self.culture_id += 1;
+            }
+            else {
+                return self.culture_id;
+            }
+        }
+    }
+    pub fn new_pop_id(&mut self) -> u64 {
+        loop {
+            if self.pops.contains_key(&self.pop_id) {
+                self.pop_id += 1;
+            }
+            else {
+                return self.pop_id;
+            }
+        }
+    }
+    pub fn new_territory_id(&mut self) -> u64 {
+        loop {
+            if self.territories.contains_key(&self.territory_id) {
+                self.territory_id += 1;
+            }
+            else {
+                return self.territory_id;
+            }
+        }
+    }
+    pub fn new_market_id(&mut self) -> u64 {
+        loop {
+            if self.markets.contains_key(&self.market_id) {
+                self.market_id += 1;
+            }
+            else {
+                return self.market_id;
+            }
+        }
+    }
+    pub fn new_firm_i(&mut self) -> u64 {
+        loop {
+            if self.firms.contains_key(&self.firm_id) {
+                self.firm_id += 1;
+            }
+            else {
+                return self.firm_id;
+            }
+        }
     }
 }
