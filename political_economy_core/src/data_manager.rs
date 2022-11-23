@@ -1138,7 +1138,7 @@ impl DataManager {
         self.products.get_mut(&2).unwrap()
             .add_process(&ambrosia_consumption).expect("Uh Oh");
         self.wants.get_mut(&1).unwrap()
-            .process_sources.push(ambrosia_consumption.id);
+            .add_process_source(&ambrosia_consumption).expect("Uh Oh!");
 
         // Cotton Chain
         // Cotton Farmer -> Spinner -> weaver -> clothing

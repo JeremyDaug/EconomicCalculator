@@ -344,10 +344,36 @@ mod tests {
 
     mod want_tests {
 
-        use crate::objects::{want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag}};
+        use crate::objects::{want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}};
 
         #[test]
-        fn add_process_source_functions_correctly() {
+        pub fn add_process_source_returns_err_on() {
+            let mut test = Want::new(0, 
+                String::from("Test"),
+                String::from("Desc"),
+                0.5).expect("Nothing");
+
+            let test_process = Process{
+                id: 0,
+                name: String::from("Test"),
+                variant_name: String::new(),
+                description: String::from(""),
+                minimum_time: 1.0,
+                process_parts: vec![],
+                process_tags: Vec::new(),
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 3.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+
+            let result = test.add_process_source(&test_process);
+            assert!(result.is_err());
+        }
+
+        #[test]
+        pub fn add_process_which_is_not_tagged() {
             let mut test = Want::new(0, 
                 String::from("Test"),
                 String::from("Desc"),
@@ -382,8 +408,6 @@ mod tests {
                 tertiary_tech: None,
             };
 
-            let result = test.add_process_source(&test_process);
-            assert!(result.is_err());
             let want_output = ProcessPart{
                 item: PartItem::Want(test.id()),
                 amount: 1.0,
@@ -395,17 +419,124 @@ mod tests {
             assert!(result.is_ok());
             assert_eq!(test.process_sources.len(), 1);
             assert!(test.process_sources.iter().any(|x| x == &0));
+        }
 
-            let product_input = ProcessPart {
+        #[test]
+        pub fn add_process_should_add_to_use_when_use_process() {
+            let mut test = Want::new(0, 
+                String::from("Test"),
+                String::from("Desc"),
+                0.5).expect("Nothing");
+
+            let test_product = Product::new(
+                0, String::from("Test"),
+                String::from(""), 
+                String::from("des"),
+                String::from("unit(s)"),
+                0, 
+                0.0,
+                0.0,
+                None,
+                true,
+                Vec::new(),
+                None
+            ).expect("Error, should've returned a product!");
+            let tag = ProcessTag::Use(test_product.id());
+            let mut test_process = Process{
+                id: 0,
+                name: String::from("Test"),
+                variant_name: String::new(),
+                description: String::from(""),
+                minimum_time: 1.0,
+                process_parts: vec![],
+                process_tags: vec![tag],
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 3.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+            let product_input = ProcessPart{
                 item: PartItem::Product(test_product.id()),
                 amount: 1.0,
                 part_tags: vec![],
-                part: ProcessSectionTag::Input
+                part: ProcessSectionTag::Output,
             };
-            test_process.process_parts.push(value)
-            test.process_sources.clear();
+            let want_output = ProcessPart{
+                item: PartItem::Want(test.id()),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test_process.process_parts.push(product_input);
+            test_process.process_parts.push(want_output);
             let result = test.add_process_source(&test_process);
+            assert!(result.is_ok());
+            assert_eq!(test.process_sources.len(), 1);
+            assert_eq!(test.use_sources.len(), 1);
+            assert_eq!(test.consumption_sources.len(), 0);
+            assert!(test.process_sources.iter().any(|x| x == &0));
+            assert!(test.use_sources.iter().any(|x| x == &0));
         }
+
+        #[test]
+        pub fn add_process_should_add_to_consumption_when_consumption_process() {
+            let mut test = Want::new(0, 
+                String::from("Test"),
+                String::from("Desc"),
+                0.5).expect("Nothing");
+
+            let test_product = Product::new(
+                0, String::from("Test"),
+                String::from(""), 
+                String::from("des"),
+                String::from("unit(s)"),
+                0, 
+                0.0,
+                0.0,
+                None,
+                true,
+                Vec::new(),
+                None
+            ).expect("Error, should've returned a product!");
+            let tag = ProcessTag::Consumption(test_product.id());
+            let mut test_process = Process{
+                id: 0,
+                name: String::from("Test"),
+                variant_name: String::new(),
+                description: String::from(""),
+                minimum_time: 1.0,
+                process_parts: vec![],
+                process_tags: vec![tag],
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 3.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+            let product_input = ProcessPart{
+                item: PartItem::Product(test_product.id()),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            let want_output = ProcessPart{
+                item: PartItem::Want(test.id()),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test_process.process_parts.push(product_input);
+            test_process.process_parts.push(want_output);
+            let result = test.add_process_source(&test_process);
+            assert!(result.is_ok());
+            assert_eq!(test.process_sources.len(), 1);
+            assert_eq!(test.use_sources.len(), 0);
+            assert_eq!(test.consumption_sources.len(), 1);
+            assert!(test.process_sources.iter().any(|x| x == &0));
+            assert!(test.consumption_sources.iter().any(|x| x == &0));
+        }
+
         #[test]
         fn set_decay_does_not_accept_invalid_values(){
             let mut test = Want::new(0, 
