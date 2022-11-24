@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PartItem",""],["ProcessPartTag",""],["ProcessSectionTag",""],["ProcessTag",""]],"struct":[["Process",""],["ProcessPart",""]]};

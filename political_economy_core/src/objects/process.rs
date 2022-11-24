@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 #[derive(Debug)]
 pub struct Process {
     pub id: u64,
@@ -19,6 +21,13 @@ pub struct Process {
 impl Process {
     pub fn id(&self) -> u64 {
         self.id
+    }
+
+    pub fn get_name(&self) -> String {
+        if self.variant_name.len() > 0 {
+            return format!("{}({})", self.name, self.variant_name);
+        }
+        self.name.clone()
     }
 }
 
@@ -94,6 +103,13 @@ pub enum PartItem {
     Want(u64)
 }
 impl PartItem {
+    pub fn unwrap(&self) -> u64 {
+        match self {
+            PartItem::Product(item) => *item,
+            PartItem::Want(item) => *item,
+        }
+    }
+
     pub fn is_want(&self) -> bool {
         match self {
             PartItem::Product(_) => false,

@@ -12,8 +12,88 @@ mod tests {
         // skipped, shouldn't have much need right now.
     }
     mod skill_tests {
-        use crate::objects::skill::Skill;
+        use crate::objects::{skill::Skill, product::ProductTag};
         // Tests here are kept to a minimum, they should 'just work'.
+
+        #[test]
+        pub fn should_return_process_from_process_build_if_labor(){
+            let test_skill = Skill::new(0, 
+                format!("Name"),
+                format!("Desc"),
+                1);
+
+            let result = test_skill.build_skill_process(1);
+
+            assert!(result.is_ok());
+
+            let result = result.unwrap();
+
+            assert_eq!(result.id, 1);
+            assert_eq!(result.name, test_skill.name);
+            assert_eq!(result.variant_name, String::new());
+            assert_eq!(result.description, test_skill.description);
+            assert_eq!(result.minimum_time, 0.0);
+            assert!(result.process_parts.iter()
+                .any(|x| {
+                    x.item.is_product() && x.item.unwrap() == 0
+                }));
+            assert!(result.process_parts.iter()
+                .any(|x| {
+                    x.item.is_product() && x.item.unwrap() == test_skill.labor
+                }));
+            assert!(result.process_tags.is_empty());
+            assert_eq!(result.skill_minimum, 0.0);
+            assert_eq!(result.skill_maximum, 3.0);
+            assert!(result.technology_requirement.is_none());
+            assert!(result.tertiary_tech.is_none());
+        }
+
+        #[test]
+        pub fn should_return_err_from_process_build_if_no_labor(){
+            let test_skill = Skill::new(0, 
+                format!("Name"),
+                format!("Desc"),
+                0);
+
+        let result = test_skill.build_skill_process(1);
+
+        assert!(result.is_err());
+        }
+
+        #[test]
+        pub fn should_return_product_if_skill_has_no_labor(){
+            let test_skill = Skill::new(0, 
+                format!("Name"),
+                format!("Desc"),
+                0);
+
+            let result = test_skill.build_skill_labor(1);
+
+            assert!(result.is_some());
+
+            let result = result.unwrap();
+
+            assert_eq!(result.name, test_skill.name);
+            assert_eq!(result.variant_name, String::new());
+            assert_eq!(result.description, test_skill.description);
+            assert_eq!(result.unit_name, String::from("Hour(s)"));
+            assert!(result.mean_time_to_failure.is_some());
+            assert_eq!(result.mean_time_to_failure.unwrap(), 0);
+            assert!(result.tags.contains(&ProductTag::Service));
+            assert!(result.tech_required.is_none());
+        }
+
+        #[test]
+        pub fn should_return_none_if_skill_has_labor(){
+            let test_skill = Skill::new(0, 
+                format!("Name"),
+                format!("Desc"),
+                2);
+
+            let result = test_skill.build_skill_labor(1);
+
+            assert!(result.is_none());
+        }
 
         #[test]
         pub fn set_relation_correctly() {

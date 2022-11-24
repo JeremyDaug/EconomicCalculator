@@ -780,10 +780,6 @@ impl DataManager {
         let ambrosia = self.skills.get(&0).unwrap();
         let ambrosia_default 
             = ambrosia.build_skill_process(new_id).expect("Uh Oh!");
-        self.products.get_mut(&0).unwrap()
-            .add_process(&ambrosia_default).expect("Uh Oh");
-        self.products.get_mut(&16).unwrap()
-            .add_process(&ambrosia_default).expect("Uh Oh");
         self.processes.insert(ambrosia_default.id(), ambrosia_default);
         // cotton farming
         let new_id = self.new_process_id();
@@ -791,82 +787,46 @@ impl DataManager {
         let cotton_farming 
             = cottoning.build_skill_process(new_id)
             .expect("Uh OH!");
-        self.products.get_mut(&0).unwrap()
-            .add_process(&cotton_farming).expect("Uh Oh");
-        self.products.get_mut(&17).unwrap()
-            .add_process(&cotton_farming).expect("Uh Oh");
         self.processes.insert(cotton_farming.id(), cotton_farming);
         // thread spinning
         let new_id = self.new_process_id();
         let spin_skill = self.skills.get(&2).unwrap();
         let spinning = spin_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&spinning).expect("Uh Oh");
-        self.products.get_mut(&18).unwrap()
-            .add_process(&spinning).expect("Uh Oh");
         self.processes.insert(spinning.id(), spinning);
         // Weaving 
         let new_id = self.new_process_id();
         let weave_skill = self.skills.get(&3).unwrap();
         let weaving = weave_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&weaving).expect("Uh Oh");
-        self.products.get_mut(&19).unwrap()
-            .add_process(&weaving).expect("Uh Oh");
         self.processes.insert(weaving.id(), weaving);
         // Tailoring
         let new_id = self.new_process_id();
         let tailor_skill = self.skills.get(&4).unwrap();
         let tailoring = tailor_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&tailoring).expect("Uh Oh");
-        self.products.get_mut(&20).unwrap()
-            .add_process(&tailoring).expect("Uh Oh");
         self.processes.insert(tailoring.id(), tailoring);
         // Lumbering
         let new_id = self.new_process_id();
         let lumber_skill = self.skills.get(&5).unwrap();
         let lumbering = lumber_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&lumbering).expect("Uh Oh");
-        self.products.get_mut(&21).unwrap()
-            .add_process(&lumbering).expect("Uh Oh");
         self.processes.insert(lumbering.id(), lumbering);
         // Tool Maker
         let new_id = self.new_process_id();
         let tool_skill = self.skills.get(&6).unwrap();
         let tool_maker = tool_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&tool_maker).expect("Uh Oh");
-        self.products.get_mut(&22).unwrap()
-            .add_process(&tool_maker).expect("Uh Oh");
         self.processes.insert(tool_maker.id(), tool_maker);
         // construction
         let new_id = self.new_process_id();
         let construction_skill = self.skills.get(&7).unwrap();
         let construction = construction_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&construction).expect("Uh Oh");
-        self.products.get_mut(&23).unwrap()
-            .add_process(&construction).expect("Uh Oh");
         self.processes.insert(construction.id(), construction);
         // building repair
         let new_id = self.new_process_id();
         let building_repair_skill = self.skills.get(&8).unwrap();
         let building_repair = building_repair_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&building_repair).expect("Uh Oh");
-        self.products.get_mut(&24).unwrap()
-            .add_process(&building_repair).expect("Uh Oh");
         self.processes.insert(building_repair.id(), building_repair);
         // stone gathering
         let new_id = self.new_process_id();
         let stone_gathering_skill = self.skills.get(&9).unwrap();
         let stone_gathering = stone_gathering_skill.build_skill_process(new_id).unwrap();
-        self.products.get_mut(&0).unwrap()
-            .add_process(&stone_gathering).expect("Uh Oh");
-        self.products.get_mut(&25).unwrap()
-            .add_process(&stone_gathering).expect("Uh Oh");
         self.processes.insert(stone_gathering.id(), stone_gathering);
 
         // ambrosia chain 
@@ -890,15 +850,15 @@ impl DataManager {
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
         };
-        let service_products
+        let process_parts
             = vec![labor_input, harvester_capital, fruit_output];
         let ambrosia_farming = Process{
             id: 0,
-            name: String::from("Stone Gathering"),
+            name: String::from("Ambrosia Farming"),
             variant_name: String::new(),
-            description: String::from("Stone Gathering."),
+            description: String::from("Ambrosia Farming."),
             minimum_time: 1.0,
-            process_parts: service_products,
+            process_parts,
             process_tags: Vec::new(),
             skill: None,
             skill_minimum: 0.0,
@@ -906,12 +866,6 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.products.get_mut(&16).unwrap()
-            .add_process(&ambrosia_farming).expect("Uh Oh");
-        self.products.get_mut(&9).unwrap()
-            .add_process(&ambrosia_farming).expect("Uh Oh");
-        self.products.get_mut(&2).unwrap()
-            .add_process(&ambrosia_farming).expect("Uh Oh");
         self.processes.insert(ambrosia_farming.id(), ambrosia_farming);
         // eating food
         let food_input = ProcessPart{
@@ -988,6 +942,21 @@ impl DataManager {
         self.products.get_mut(&2).unwrap()
             .add_process(&ambrosia_farming).expect("Uh Oh");
         self.processes.insert(ambrosia_farming.id(), ambrosia_farming);
+
+        // once all processes are loaded connect the products to the processes
+        for process in self.processes.values() {
+            for part in process.process_parts.iter() {
+                if part.item.is_product() {
+                    let id = part.item.unwrap();
+                    let product = self.products.get_mut(&id).unwrap();
+                    product.add_process(process)
+                    .expect(
+                        format!("An error occured connecting process '{}' to proudct '{}'",
+                        process.get_name(), 
+                        product.get_name()).as_str());
+                }
+            }
+        }
     }
 }
 

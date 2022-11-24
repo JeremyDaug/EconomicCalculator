@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["add",""]],"mod":[["data_manager",""],["objects",""]]};

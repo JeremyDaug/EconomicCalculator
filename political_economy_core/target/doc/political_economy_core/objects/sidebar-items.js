@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["culture",""],["desire",""],["firm",""],["job",""],["market",""],["pop",""],["process",""],["process_node",""],["product",""],["skill",""],["skill_group",""],["species",""],["technology",""],["technology_family",""],["territory",""],["want",""]]};

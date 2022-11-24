@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"political_economy_core":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.65.0/core/cmp/trait.Eq.html\" title=\"trait core::cmp::Eq\">Eq</a> for <a class=\"struct\" href=\"political_economy_core/objects/product/struct.Product.html\" title=\"struct political_economy_core::objects::product::Product\">Product</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

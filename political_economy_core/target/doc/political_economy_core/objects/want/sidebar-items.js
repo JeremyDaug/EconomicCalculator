@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Want","A Want is a generic desire that can be sought after. It cannot be bought, sold, or otherwise traded directly, but must be produced by a product or process."]]};
