@@ -42,12 +42,13 @@ pub struct ProcessPart {
 impl ProcessPart {
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ProcessSectionTag {
     Input,
     Capital,
     Output
 }
+
 impl ProcessSectionTag {
     pub fn is_output(&self) -> bool {
         match self {
@@ -97,12 +98,24 @@ pub enum ProcessTag {
     Scrubber
 }
 
+/// Part item defines what kind of item the part requests.
+/// 
+/// Products or Wants.
 #[derive(Debug)]
 pub enum PartItem {
+    /// The Part is a Product and should be treated as such.
     Product(u64),
+    /// The Part is a want and should be treated as such.
     Want(u64)
 }
 impl PartItem {
+    /// Unwraps the id in either want or product Enum.
+    /// 
+    /// # Note
+    /// 
+    /// If id's are replaced with references, this will need to be changed to 
+    /// 
+    /// accept the difference.
     pub fn unwrap(&self) -> u64 {
         match self {
             PartItem::Product(item) => *item,
@@ -110,6 +123,7 @@ impl PartItem {
         }
     }
 
+    /// Checks if the item is a Want.
     pub fn is_want(&self) -> bool {
         match self {
             PartItem::Product(_) => false,
@@ -117,6 +131,7 @@ impl PartItem {
         }
     }
 
+    /// Checks if the item is a Product.
     pub fn is_product(&self) -> bool {
         match self {
             PartItem::Product(_) => true,

@@ -65,8 +65,8 @@ impl Want {
             self.ownership_sources.insert(product.id());
     }
 
-    /// Not Tested
     /// Adds a process to this want if that want is an output of the process
+    /// 
     /// if it's not it won't add it and will return an Result::Err().
     pub fn add_process_source<'a>(&mut self, process: &Process) 
         -> Result<(), &'a str> {
