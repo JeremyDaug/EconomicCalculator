@@ -115,10 +115,6 @@ impl Skill {
         self.description.as_ref()
     }
 
-    pub fn labor<'a>(&self, manager: &'a DataManager) -> &'a Product {
-        manager.products.get(&self.id()).unwrap()
-    }
-
     pub fn set_relation(&mut self, relation: &Skill, rate: f64) {
         *self.related_skills.entry(relation.id).or_insert(rate) = rate;
     }

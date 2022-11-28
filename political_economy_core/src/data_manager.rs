@@ -1,14 +1,29 @@
 use core::panic;
-use std::{collections::{HashMap, HashSet}};
+use std::{collections::{HashMap, HashSet}, sync::RwLock};
 
-use crate::objects::{want::Want, skill_group::SkillGroup,
-    skill::Skill, technology::Technology,
+use crate::objects::{want::Want, 
+    skill_group::SkillGroup,
+    skill::Skill, 
+    technology::Technology,
     technology_family::TechnologyFamily, 
     product::Product, 
     process_node::ProcessNode, 
-    process::{Process, ProcessPart, 
-        ProcessPartTag, PartItem, ProcessSectionTag, ProcessTag}, job::Job, species::Species, culture::Culture, pop::Pop, market::Market, firm::Firm};
+    process::{Process, 
+        ProcessPart, 
+        ProcessPartTag, 
+        PartItem, 
+        ProcessSectionTag, 
+        ProcessTag}, 
+    job::Job, 
+    species::Species, 
+    culture::Culture, 
+    pop::Pop, 
+    market::Market, 
+    firm::Firm};
 
+lazy_static! {
+    static ref INSTANCE: RwLock<DataManager> = RwLock::new(DataManager::new());
+}
 
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
@@ -92,6 +107,11 @@ pub struct DataManager {
 }
 
 impl DataManager {
+
+    pub fn read_instance() -> std::sync::RwLockReadGuard<'static, DataManager> {
+        INSTANCE.read().unwrap()
+    }
+
     fn new() -> Self {
         Self { 
             wants: HashMap::new(),
@@ -193,7 +213,7 @@ impl DataManager {
     }
 
     pub fn load_technologies(&mut self, _file_name: String) {
-        todo!("Not doing right now. Have better things to do than test out technology rules.")
+        todo!("Not doing right now. Have better things to do than test out technology rules.");
     }
 
     pub fn load_technology_families(&mut self, _file_name: String) {
@@ -543,22 +563,22 @@ impl DataManager {
 
         let mut shelter = self.wants
             .get_mut(&2).unwrap();
-        hut.connect_want(&mut shelter, 1.0).expect("Big Problem");
-        cabin.connect_want(&mut shelter, 1.5).expect("Big Problem");
+        hut.connect_want(&mut shelter, 1.0).unwrap();
+        cabin.connect_want(&mut shelter, 1.5).unwrap();
 
         let clothes = self.wants
             .get_mut(&3).unwrap();
-        cotton_clothes.set_want(&clothes, 1.0).expect("Big Problem");
-        cotton_suit.set_want(&clothes,1.5).expect("Big Problem");
+        cotton_clothes.set_want(&clothes, 1.0).unwrap();
+        cotton_suit.set_want(&clothes,1.5).unwrap();
 
         let fashion = self.wants
             .get_mut(&4).unwrap();
-        cotton_suit.set_want(fashion,1.0).expect("Big Problem");
+        cotton_suit.set_want(fashion,1.0).unwrap();
 
         let wealth = self.wants
             .get_mut(&4).unwrap();
-        cotton_suit.set_want(wealth,1.0).expect("Big Problem");
-        cabin.set_want(wealth, 2.0).expect("Big Problem");
+        cotton_suit.set_want(wealth,1.0).unwrap();
+        cabin.set_want(wealth, 2.0).unwrap();
 
         self.products.insert(time.id(), time);
         self.products.insert(shopping_time.id(), shopping_time);
@@ -737,6 +757,7 @@ impl DataManager {
     }
 
     pub fn load_processes(&mut self, _file_name: String) {
+
         let time = 0;
         let shopping_time = 1;
         let ambrosia_fruit = 2;
@@ -789,14 +810,13 @@ impl DataManager {
         let new_id = self.new_process_id();
         let ambrosia = self.skills.get(&0).unwrap();
         let ambrosia_default 
-            = ambrosia.build_skill_process(new_id).expect("Uh Oh!");
+            = ambrosia.build_skill_process(new_id).unwrap();
         self.processes.insert(ambrosia_default.id(), ambrosia_default);
         // cotton farming
         let new_id = self.new_process_id();
         let cottoning = self.skills.get(&1).unwrap();
         let cotton_farming 
-            = cottoning.build_skill_process(new_id)
-            .expect("Uh OH!");
+            = cottoning.build_skill_process(new_id).unwrap();
         self.processes.insert(cotton_farming.id(), cotton_farming);
         // thread spinning
         let new_id = self.new_process_id();
@@ -1464,7 +1484,16 @@ impl DataManager {
                 }
             }
         }
-        // todo, connect process nodes up.
+    
+        // connect up process nodes.
+        for (id, process) in self.processes.iter() {
+            // processes share an ID with their node for simplicity.
+            let mut new_node = ProcessNode::new(*id);
+
+            new_node.can_feed_self = process.can_feed_self();
+
+            self.process_nodes.insert(*id, new_node);
+        }
     }
 }
 

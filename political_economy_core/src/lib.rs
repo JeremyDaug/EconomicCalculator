@@ -1,12 +1,126 @@
 pub mod objects;
 pub mod data_manager;
 
+#[macro_use]
+extern crate lazy_static;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
 #[cfg(test)]
 mod tests {
+
+    mod process_tests {
+        use crate::objects::{process::{Process, ProcessPart, PartItem, ProcessSectionTag}};
+
+        #[test]
+        pub fn should_return_correctly_can_feed_self(){
+            let mut test = Process {
+                id: 0,
+                name: String::from("Test"),
+                variant_name: String::from("Variant"),
+                description: String::new(),
+                minimum_time: 0.0,
+                process_parts: vec![],
+                process_tags: vec![],
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 0.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+
+            // no match (empty set)
+            assert!(!test.can_feed_self());
+            // match on input-output product
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            });
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            });
+
+            assert!(test.can_feed_self());
+
+            // match on capital-output product
+            test.process_parts.clear();
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            });
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            });
+
+            assert!(test.can_feed_self());
+            // match on input-output want
+            test.process_parts.clear();
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            });
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            });
+
+            assert!(test.can_feed_self());
+            // don't match on capital-output want
+            test.process_parts.clear();
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            });
+            test.process_parts.push(ProcessPart {
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            });
+
+            assert!(!test.can_feed_self());
+        }
+        
+        #[test]
+        pub fn should_correctly_get_name() {
+            let test = Process {
+                id: 0,
+                name: String::from("Test"),
+                variant_name: String::from("Variant"),
+                description: String::new(),
+                minimum_time: 0.0,
+                process_parts: vec![],
+                process_tags: vec![],
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 0.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+
+            let expectation = format!("{}({})", test.name, test.variant_name);
+
+            assert_eq!(test.get_name(), expectation);
+        }
+    }
 
     mod skill_group_tests {
         // skipped, shouldn't have much need right now.
