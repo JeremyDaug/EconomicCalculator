@@ -156,8 +156,13 @@ impl Product {
     }
 
     /// Adds a process to the product. Also adds it to all appropriate subcategories.
-    /// Returns a Err if duplicate failure product was found.
+    /// Returns a Err if duplicate failure product was found, or the process doesn't use the product.
     pub fn add_process<'a>(&mut self, process: &Process) -> Result<(), &'a str> {
+        // sanity check the product is used
+        if process.process_parts.iter()
+            .all(|x| !(x.item.is_product() && x.item.unwrap() == self.id)) {
+                return Result::Err("Process does not contain the product.");
+        }
         self.processes.insert(process.id());
 
         for tag in process.process_tags.iter() {

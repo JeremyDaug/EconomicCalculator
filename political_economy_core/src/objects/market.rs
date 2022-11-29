@@ -4,18 +4,18 @@ use super::{territory::Territory, product::Product, firm::Firm, pop::Pop};
 
 #[derive(Debug)]
 pub struct Market {
-    id: u64,
-    name: String,
-    firms: Vec<Firm>,
-    pops: Vec<Pop>,
-    territories: Vec<Territory>,
-    neighbors: HashMap<Market, f64>,
-    resources: HashMap<Product, f64>,
-    market_prices: HashMap<Product, f64>,
-    products_for_sale: HashMap<Product, f64>,
-    product_sold: HashMap<Product, f64>,
-    product_output: HashMap<Product, f64>,
-    product_exchanged_total: HashMap<Product, f64>
+    pub id: u64,
+    pub name: String,
+    pub firms: Vec<Firm>,
+    pub pops: Vec<Pop>,
+    pub territories: Vec<Territory>,
+    pub neighbors: HashMap<Market, f64>,
+    pub resources: HashMap<Product, f64>,
+    pub market_prices: HashMap<Product, f64>,
+    pub products_for_sale: HashMap<Product, f64>,
+    pub product_sold: HashMap<Product, f64>,
+    pub product_output: HashMap<Product, f64>,
+    pub product_exchanged_total: HashMap<Product, f64>
 }
 
 impl Market {

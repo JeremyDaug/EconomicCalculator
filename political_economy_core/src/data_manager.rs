@@ -1,5 +1,5 @@
 use core::panic;
-use std::{collections::{HashMap, HashSet}, sync::RwLock};
+use std::{collections::{HashMap, HashSet}, sync::RwLock, ops::DerefMut};
 
 use crate::objects::{want::Want, 
     skill_group::SkillGroup,
@@ -20,10 +20,6 @@ use crate::objects::{want::Want,
     pop::Pop, 
     market::Market, 
     firm::Firm};
-
-lazy_static! {
-    static ref INSTANCE: RwLock<DataManager> = RwLock::new(DataManager::new());
-}
 
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
@@ -107,12 +103,7 @@ pub struct DataManager {
 }
 
 impl DataManager {
-
-    pub fn read_instance() -> std::sync::RwLockReadGuard<'static, DataManager> {
-        INSTANCE.read().unwrap()
-    }
-
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { 
             wants: HashMap::new(),
             technology: HashMap::new(), 
@@ -149,7 +140,7 @@ impl DataManager {
 
     /// Loads wants from a file into the data manager,
     /// Currently, this just loads pre-existing data.
-    pub fn load_wants(&mut self, _file_name: String) {
+    pub fn load_wants(&mut self, _file_name: &String) {
         let rest =  match Want::new(0, 
             String::from("Rest"), 
             String::from("Rest is the joy of Idle time."), 
@@ -212,15 +203,15 @@ impl DataManager {
 
     }
 
-    pub fn load_technologies(&mut self, _file_name: String) {
-        todo!("Not doing right now. Have better things to do than test out technology rules.");
+    pub fn load_technologies(&mut self, _file_name: &String) {
+        //todo!("Not doing right now. Have better things to do than test out technology rules.");
     }
 
-    pub fn load_technology_families(&mut self, _file_name: String) {
-        todo!("Skipping for same reason as Load Technologies.")
+    pub fn load_technology_families(&mut self, _file_name: &String) {
+        //todo!("Skipping for same reason as Load Technologies.")
     }
 
-    pub fn load_products(&mut self, _file_name: String) {
+    pub fn load_products(&mut self, _file_name: &String) {
         // Generic Time
         let time = Product::new(0,
             String::from("Time"),
@@ -608,7 +599,7 @@ impl DataManager {
         self.products.insert(stone_gathering.id(), stone_gathering);
     }
 
-    pub fn load_skill_groups(&mut self, _file_name: String) {
+    pub fn load_skill_groups(&mut self, _file_name: &String) {
         // farming 
         let mut farming_skills = HashSet::new();
         farming_skills.insert(0);
@@ -673,7 +664,7 @@ impl DataManager {
         skill.connect_skill_group(&mut architecture);
     }
 
-    pub fn load_skills(&mut self, _file_name: String) {
+    pub fn load_skills(&mut self, _file_name: &String) {
         // (labors and Services)
         // Ambrosia Farming
         let mut ambrosia_farming = Skill::new(0,
@@ -756,8 +747,7 @@ impl DataManager {
         self.skills.insert(stone_gathering.id(), stone_gathering);
     }
 
-    pub fn load_processes(&mut self, _file_name: String) {
-
+    pub fn load_processes(&mut self, _file_name: &String) {
         let time = 0;
         let shopping_time = 1;
         let ambrosia_fruit = 2;
@@ -806,54 +796,54 @@ impl DataManager {
         self.processes.insert(go_shopping.id(), go_shopping);
         
         // next do labors, they'll be easy.
-        // ambrosia farming
-        let new_id = self.new_process_id();
+        // ambrosia farming 1
+        let new_id = self.new_process_id(); // 1
         let ambrosia = self.skills.get(&0).unwrap();
         let ambrosia_default 
             = ambrosia.build_skill_process(new_id).unwrap();
         self.processes.insert(ambrosia_default.id(), ambrosia_default);
-        // cotton farming
+        // cotton farming 2
         let new_id = self.new_process_id();
         let cottoning = self.skills.get(&1).unwrap();
         let cotton_farming 
             = cottoning.build_skill_process(new_id).unwrap();
         self.processes.insert(cotton_farming.id(), cotton_farming);
-        // thread spinning
+        // thread spinning 3
         let new_id = self.new_process_id();
         let spin_skill = self.skills.get(&2).unwrap();
         let spinning = spin_skill.build_skill_process(new_id).unwrap();
         self.processes.insert(spinning.id(), spinning);
-        // Weaving 
+        // Weaving 4
         let new_id = self.new_process_id();
         let weave_skill = self.skills.get(&3).unwrap();
         let weaving = weave_skill.build_skill_process(new_id).unwrap();
         self.processes.insert(weaving.id(), weaving);
-        // Tailoring
+        // Tailoring 5
         let new_id = self.new_process_id();
         let tailor_skill = self.skills.get(&4).unwrap();
         let tailoring = tailor_skill.build_skill_process(new_id).unwrap();
         self.processes.insert(tailoring.id(), tailoring);
-        // Lumbering
+        // Lumbering 6
         let new_id = self.new_process_id();
         let lumber_skill = self.skills.get(&5).unwrap();
         let lumbering = lumber_skill.build_skill_process(new_id).unwrap();
         self.processes.insert(lumbering.id(), lumbering);
-        // Tool Maker
+        // Tool Maker 7
         let new_id = self.new_process_id();
         let tool_skill = self.skills.get(&6).unwrap();
         let tool_maker = tool_skill.build_skill_process(new_id).unwrap();
         self.processes.insert(tool_maker.id(), tool_maker);
-        // construction
+        // construction 8
         let new_id = self.new_process_id();
         let construction_skill = self.skills.get(&7).unwrap();
         let construction = construction_skill.build_skill_process(new_id).unwrap();
         self.processes.insert(construction.id(), construction);
-        // building repair
+        // building repair 9
         let new_id = self.new_process_id();
         let building_repair_skill = self.skills.get(&8).unwrap();
         let building_repair = building_repair_skill.build_skill_process(new_id).unwrap();
         self.processes.insert(building_repair.id(), building_repair);
-        // stone gathering
+        // stone gathering 10
         let new_id = self.new_process_id();
         let stone_gathering_skill = self.skills.get(&9).unwrap();
         let stone_gathering = stone_gathering_skill.build_skill_process(new_id).unwrap();
@@ -880,7 +870,7 @@ impl DataManager {
             part: ProcessSectionTag::Output,
         };
         let ambrosia_farming = Process{
-            id: self.new_process_id(),
+            id: self.new_process_id(), // 11
             name: String::from("Ambrosia Farming"),
             variant_name: String::new(),
             description: String::from("Ambrosia Farming."),
@@ -908,7 +898,7 @@ impl DataManager {
             part: ProcessSectionTag::Output,
         };
         let ambrosia_consumption = Process{
-            id: self.new_process_id(),
+            id: self.new_process_id(), // 12
             name: String::from("Ambrosia Meal"),
             variant_name: String::new(),
             description: String::from("A meal of Ambrosia, even one fruit is enough to satisfy for a day."),
@@ -944,7 +934,7 @@ impl DataManager {
             part: ProcessSectionTag::Output,
         };
         let cotton_farming = Process{
-            id: self.new_process_id(),
+            id: self.new_process_id(), // 13
             name: String::from("Cotton Farming"),
             variant_name: String::new(),
             description: String::from("Cotton Farming."),
@@ -984,7 +974,7 @@ impl DataManager {
             part: ProcessSectionTag::Output,
         };
         let thread_spinning = Process{
-            id: self.new_process_id(),
+            id: self.new_process_id(), // 14
             name: String::from("Thread Spinning"),
             variant_name: String::new(),
             description: String::from("Spinning thread."),
@@ -1025,7 +1015,7 @@ impl DataManager {
             part: ProcessSectionTag::Output,
         };
         let weaving = Process{
-            id: self.new_process_id(),
+            id: self.new_process_id(), // 15
             name: String::from("Weaving"),
             variant_name: String::new(),
             description: String::from("Weaving Cloth from Thread."),
@@ -1060,7 +1050,7 @@ impl DataManager {
             part: ProcessSectionTag::Output,
         };
         let clothing = Process{
-            id: self.new_process_id(),
+            id: self.new_process_id(), // 16
             name: String::from("Clothes"),
             variant_name: String::from("Normal"),
             description: String::from("Normal Clothes."),
@@ -1101,7 +1091,7 @@ impl DataManager {
             part: ProcessSectionTag::Output,
         };
         let clothing = Process{
-            id: self.new_process_id(),
+            id: self.new_process_id(), // 17
             name: String::from("Clothes"),
             variant_name: String::from("Quality"),
             description: String::from("Making Quality Clothes."),
@@ -1510,19 +1500,19 @@ impl DataManager {
                 }
                 let other_node = self.process_nodes.get_mut(other_id).unwrap();
                 // check connections to other process and add to both if there is one
-                if process.takes_input_from(other_process) {
+                if process.takes_input_from(other_process) { // inputs to output
                     new_node.inputs.push(*other_id);
                     other_node.outputs.push(*id);
                 }
-                if process.takes_capital_from(other_process) {
+                if process.takes_capital_from(other_process) { // capital to output (product only)
                     new_node.capitals.push(*other_id);
                     other_node.outputs.push(*id);
                 }
-                if process.gives_output_to_others_input(other_process) {
+                if process.gives_output_to_others_input(other_process) { // output to input
                     new_node.outputs.push(*other_id);
                     other_node.inputs.push(*id);
                 }
-                if process.gives_output_to_others_capital(other_process) {
+                if process.gives_output_to_others_capital(other_process) { // output to capital (product only)
                     new_node.outputs.push(*other_id);
                     other_node.capitals.push(*id);
                 }
@@ -1530,6 +1520,21 @@ impl DataManager {
 
             self.process_nodes.insert(*id, new_node);
         }
+    }
+
+    pub fn load_jobs(&mut self, _file_name: &String) {
+
+    }
+
+    pub fn load_all(&mut self, _file_name: &String) {
+        self.load_wants(_file_name);
+        self.load_technologies(_file_name);
+        self.load_technology_families(_file_name);
+        self.load_products(_file_name);
+        self.load_skills(_file_name);
+        self.load_skill_groups(_file_name);
+        self.load_processes(_file_name);
+        self.load_jobs(_file_name);
     }
 }
 

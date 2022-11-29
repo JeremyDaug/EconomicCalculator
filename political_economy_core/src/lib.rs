@@ -10,6 +10,113 @@ pub fn add(left: usize, right: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    mod data_manager_tests {
+        use crate::data_manager::{DataManager, self};
+
+        #[test]
+        pub fn output_existing_data_ids() {
+            let mut test = DataManager::new();
+            test.load_all(&String::new());
+
+            println!("----- Wants -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for want in test.wants.iter() {
+                println!("{:>3} | {:<}", want.0, want.1.name);
+            }
+
+            println!("----- Technology -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, tech) in test.technology.iter() {
+                println!("{:>3} | {:<}", id, tech.name());
+            }
+
+            println!("----- Technology Family -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, fam) in test.technology_families.iter() {
+                println!("{:>3} | {:<}", id, fam.name());
+            }
+
+            println!("----- Product -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, product) in test.products.iter() {
+                println!("{:>3} | {:<}", id, product.get_name());
+            }
+
+            println!("----- Skill Group -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, group) in test.skill_groups.iter() {
+                println!("{:>3} | {:<}", id, group.name);
+            }
+
+            println!("----- Skill -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, skill) in test.skills.iter() {
+                println!("{:>3} | {:<}", id, skill.name);
+            }
+
+            println!("----- Processes -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, process) in test.processes.iter() {
+                println!("{:>3} | {:<}", id, process.get_name());
+            }
+
+            println!("----- Jobs -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, job) in test.jobs.iter() {
+                println!("{:>3} | {:<}", id, job.get_name());
+            }
+
+            println!("----- Species -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, species) in test.species.iter() {
+                println!("{:>3} | {:<}", id, species.get_name());
+            }
+
+            println!("----- Cultures -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, culture) in test.cultures.iter() {
+                println!("{:>3} | {:<}", id, culture.get_name());
+            }
+
+            println!("----- Pops -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, pop) in test.pops.iter() {
+                println!("{:>3} | {:<}", id, pop.name());
+            }
+
+            println!("----- Territories -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, terr) in test.territories.iter() {
+                println!("{:>3} | {:<}", id, terr.name);
+            }
+
+            println!("----- Markets -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, market) in test.markets.iter() {
+                println!("{:>3} | {:<}", id, market.name);
+            }
+
+            println!("----- Firms -----");
+            println!("---+------------------");
+            println!("| id|name");
+            for (id, firm) in test.firms.iter() {
+                println!("{:>3} | {:<}", id, firm.get_name());
+            }
+        }
+    }
 
     mod process_tests {
         use crate::objects::{process::{Process, ProcessPart, PartItem, ProcessSectionTag}};
@@ -676,11 +783,11 @@ mod tests {
     }
 
     mod product_tests {
-        use crate::objects::{product::{Product, ProductTag}, want::Want};
+        use crate::objects::{product::{Product, ProductTag}, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}};
 
         #[test]
         pub fn product_should_add_process_correctly() {
-            let _test = Product::new(
+            let mut test = Product::new(
                 0,
                 String::from("Test"),
                 String::from(""),
@@ -694,7 +801,41 @@ mod tests {
                 Vec::new(),
                 None).unwrap();
 
-            todo!("test after processes sanity checked.")
+            let mut test_process = Process{
+                id: 0,
+                name: String::from("Test"),
+                variant_name: String::new(),
+                description: String::from(""),
+                minimum_time: 1.0,
+                process_parts: vec![],
+                process_tags: Vec::new(),
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 3.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+
+            // err on no relation found
+            assert!(test.add_process(&test_process).is_err());
+
+            // ignore the untagged
+            let part = ProcessPart { 
+                item: PartItem::Product(0), 
+                amount: 1.0, 
+                part_tags: vec![], 
+                part: ProcessSectionTag::Input
+            };
+            test_process.process_parts.push(part);
+            assert!(test.add_process(&test_process).is_ok());
+            assert!(test.processes.contains(&0));
+            assert!(test.failure_process.is_none());
+
+            // check failure connects
+            // check double dipping failure errors
+            // check maintenance
+            // check use
+            // check consumption
         }
 
         #[test]
