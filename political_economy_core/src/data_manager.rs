@@ -1486,11 +1486,47 @@ impl DataManager {
         }
     
         // connect up process nodes.
+        // preemtively create all of them so we can add as we go.
+        for id in self.processes.keys() {
+            self.process_nodes.insert(*id, ProcessNode::new(*id));
+        }
         for (id, process) in self.processes.iter() {
             // processes share an ID with their node for simplicity.
             let mut new_node = ProcessNode::new(*id);
 
             new_node.can_feed_self = process.can_feed_self();
+
+            for (other_id, other_process) in self.processes.iter() {
+                // for our current process, iterate through again
+                // skip if same id (we already checked it)
+                if id == other_id {
+                    continue;
+                }
+                if  new_node.inputs.contains(other_id) || 
+                    new_node.capitals.contains(other_id) ||
+                    new_node.outputs.contains(other_id) {
+                    // if current node already references other_id, skip
+                    continue;
+                }
+                let other_node = self.process_nodes.get_mut(other_id).unwrap();
+                // check connections to other process and add to both if there is one
+                if process.takes_input_from(other_process) {
+                    new_node.inputs.push(*other_id);
+                    other_node.outputs.push(*id);
+                }
+                if process.takes_capital_from(other_process) {
+                    new_node.capitals.push(*other_id);
+                    other_node.outputs.push(*id);
+                }
+                if process.gives_output_to_others_input(other_process) {
+                    new_node.outputs.push(*other_id);
+                    other_node.inputs.push(*id);
+                }
+                if process.gives_output_to_others_capital(other_process) {
+                    new_node.outputs.push(*other_id);
+                    other_node.capitals.push(*id);
+                }
+            }
 
             self.process_nodes.insert(*id, new_node);
         }

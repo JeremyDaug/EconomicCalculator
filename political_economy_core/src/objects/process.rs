@@ -30,12 +30,12 @@ impl Process {
         self.name.clone()
     }
 
-    /// Process takes output from the other process.
+    /// Checks if the Process takes output from the other process as input
     /// 
     /// Returns true if the process this is called on takes any of the outputs of 'other'.
     /// 
     /// Returns false otherwise.
-    pub fn accepts_output_as_input_from(&self, other: &Process) -> bool {
+    pub fn takes_input_from(&self, other: &Process) -> bool {
         let inputs = self.process_parts.iter().filter(|x| x.part.is_input());
         let mut outputs = other.process_parts.iter().filter(|x| x.part.is_output());
 
@@ -48,12 +48,65 @@ impl Process {
         false
     }
 
-    pub fn process_takes_output_from_as_capital(&self, other: &Process) -> bool {
-        let capitals = self.process_parts.iter().filter(|x| x.part.is_capital());
-        let mut outputs = other.process_parts.iter().filter(|x| x.part.is_output());
+    /// Checks if the Process takes output from the other process as capital
+    /// 
+    /// Wants are not checked as they have special rules as capital.
+    /// 
+    /// Returns true if the process this is called on takes any of the outputs of 'other'.
+    /// 
+    /// Returns false otherwise.
+    pub fn takes_capital_from(&self, other: &Process) -> bool {
+        // check that the product is a capital and a product (no want capitals handled yet)
+        let capitals =
+            self.process_parts.iter().filter(|x| x.part.is_capital() &&
+                        x.item.is_product());
+        let mut outputs 
+            = other.process_parts.iter().filter(|x| x.part.is_output());
 
-        for input in capitals {
-            if outputs.any(|x| x.item == input.item) {
+        for capital in capitals {
+            if outputs.any(|x| x.item == capital.item) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    /// Checks if the Process outputs to the other process input
+    /// 
+    /// Returns true if the process this is called on takes any of the outputs of 'other'.
+    /// 
+    /// Returns false otherwise.
+    pub fn gives_output_to_others_input(&self, other: &Process) -> bool {
+        let outputs =
+            self.process_parts.iter().filter(|x| x.part.is_output());
+        // check against all inputs and capital products (not capital wants)
+        let mut inputs 
+            = other.process_parts.iter().filter(|x| x.part.is_input());
+
+        for output in outputs {
+            if inputs.any(|x| x.item == output.item) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    /// Checks if the Process outputs to the other process capital
+    /// 
+    /// Returns true if the process this is called on takes any of the outputs of 'other'.
+    /// 
+    /// Returns false otherwise.
+    pub fn gives_output_to_others_capital(&self, other: &Process) -> bool {
+        let outputs =
+            self.process_parts.iter().filter(|x| x.part.is_output());
+        // check against all inputs and capital products (not capital wants)
+        let mut inputs 
+            = other.process_parts.iter().filter(|x| x.part.is_capital() && x.item.is_product());
+
+        for output in outputs {
+            if inputs.any(|x| x.item == output.item) {
                 return true;
             }
         }
