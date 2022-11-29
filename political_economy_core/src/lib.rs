@@ -14,6 +14,420 @@ mod tests {
     mod process_tests {
         use crate::objects::{process::{Process, ProcessPart, PartItem, ProcessSectionTag}};
 
+        /// TODO, rework this to be more space efficinet (loop over options rather than write it all out)
+        #[test]
+        pub fn should_return_correctly_on_input_or_capital_to_output_checking(){
+            let mut test = Process {
+                id: 0,
+                name: String::from("Test"),
+                variant_name: String::from("Variant"),
+                description: String::new(),
+                minimum_time: 0.0,
+                process_parts: vec![],
+                process_tags: vec![],
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 0.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+
+            let mut test_other = Process {
+                id: 1,
+                name: String::from("Test Other"),
+                variant_name: String::from("Variant"),
+                description: String::new(),
+                minimum_time: 0.0,
+                process_parts: vec![],
+                process_tags: vec![],
+                skill: None,
+                skill_minimum: 0.0,
+                skill_maximum: 0.0,
+                technology_requirement: None,
+                tertiary_tech: None,
+            };
+
+            // product never matches want ever, don't bother checking those mismatches
+            // test input product to test_other input correct (never match)
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // input to capital (never match)
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // input to output
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // capital to input (never match)
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // capital to capital (never match)
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // capital to output (match only products)
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // output to input
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Input,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // output to capital (don't match on wants)
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Capital,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+            // output to output (never match)
+            let input = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            let output = ProcessPart{
+                item: PartItem::Product(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+                // want check
+            let input = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            let output = ProcessPart{
+                item: PartItem::Want(0),
+                amount: 1.0,
+                part_tags: vec![],
+                part: ProcessSectionTag::Output,
+            };
+            test.process_parts.push(input);
+            test_other.process_parts.push(output);
+            assert!(!test.takes_input_from(&test_other));
+            assert!(!test.takes_capital_from(&test_other));
+            assert!(!test.gives_output_to_others_input(&test_other));
+            assert!(!test.gives_output_to_others_capital(&test_other));
+            test.process_parts.clear();
+            test_other.process_parts.clear();
+        }
+
         #[test]
         pub fn should_return_correctly_can_feed_self(){
             let mut test = Process {
@@ -572,20 +986,6 @@ mod tests {
                 String::from("Test"),
                 String::from("Desc"),
                 0.5).expect("Nothing");
-
-            let test_product = Product::new(
-                0, String::from("Test"),
-                String::from(""), 
-                String::from("des"),
-                String::from("unit(s)"),
-                0, 
-                0.0,
-                0.0,
-                None,
-                true,
-                Vec::new(),
-                None
-            ).expect("Error, should've returned a product!");
 
             let mut test_process = Process{
                 id: 0,

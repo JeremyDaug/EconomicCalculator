@@ -1,8 +1,6 @@
-use std::{collections::{HashSet, HashMap}, process::Output, vec};
+use std::{collections::{HashSet, HashMap}, vec};
 
-use crate::data_manager::DataManager;
-
-use super::{product::Product, skill_group::SkillGroup, process::{Process, ProcessTag, ProcessPart, ProcessPartTag}};
+use super::{product::Product, skill_group::SkillGroup, process::{Process, ProcessPart, ProcessPartTag}};
 
 #[derive(Debug)]
 pub struct Skill {
