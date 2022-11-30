@@ -185,7 +185,7 @@ impl Product {
                 },
                 ProcessTag::Consumption(prod) => {
                     if prod == &self.id {
-                        self.maintenance_processes.insert(process.id());
+                        self.consumption_processes.insert(process.id());
                     }
                 },
                 _ => ()

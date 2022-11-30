@@ -11,25 +11,27 @@ pub fn add(left: usize, right: usize) -> usize {
 #[cfg(test)]
 mod tests {
     mod data_manager_tests {
-        use crate::data_manager::{DataManager, self};
+        use crate::data_manager::DataManager;
 
         #[test]
         pub fn output_existing_data_ids() {
+            use itertools::Itertools;
+
             let mut test = DataManager::new();
             test.load_all(&String::new());
 
             println!("----- Wants -----");
             println!("---+------------------");
             println!("| id|name");
-            for want in test.wants.iter() {
-                println!("{:>3} | {:<}", want.0, want.1.name);
+            for id in test.wants.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.wants[id].name);
             }
 
             println!("----- Technology -----");
             println!("---+------------------");
             println!("| id|name");
-            for (id, tech) in test.technology.iter() {
-                println!("{:>3} | {:<}", id, tech.name());
+            for id in test.technology.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.technology[id].name());
             }
 
             println!("----- Technology Family -----");
@@ -783,7 +785,7 @@ mod tests {
     }
 
     mod product_tests {
-        use crate::objects::{product::{Product, ProductTag}, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}};
+        use crate::objects::{product::{Product, ProductTag}, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}};
 
         #[test]
         pub fn product_should_add_process_correctly() {
@@ -830,12 +832,66 @@ mod tests {
             assert!(test.add_process(&test_process).is_ok());
             assert!(test.processes.contains(&0));
             assert!(test.failure_process.is_none());
+            assert!(test.consumption_processes.len() == 0);
+            assert!(test.use_processes.len() == 0);
+            assert!(test.maintenance_processes.len() == 0);
+            // cleanup
+            test.processes.clear();
+            test.failure_process = None;
 
             // check failure connects
+            test_process.process_tags.push(ProcessTag::Failure(0));
+            assert!(test.add_process(&test_process).is_ok());
+            assert!(test.processes.contains(&0));
+            assert!(test.failure_process.is_some());
+            assert!(test.consumption_processes.len() == 0);
+            assert!(test.use_processes.len() == 0);
+            assert!(test.maintenance_processes.len() == 0);
             // check double dipping failure errors
+            assert!(test.add_process(&test_process).is_err());
+            assert!(test.processes.contains(&0));
+            assert!(test.failure_process.is_some());
+            assert!(test.consumption_processes.len() == 0);
+            assert!(test.use_processes.len() == 0);
+            assert!(test.maintenance_processes.len() == 0);
+            // cleanup
+            test.processes.clear();
+            test.failure_process = None;
+            test_process.process_tags.clear();
             // check maintenance
+            test_process.process_tags.push(ProcessTag::Maintenance(0));
+            assert!(test.add_process(&test_process).is_ok());
+            assert!(test.processes.contains(&0));
+            assert!(test.failure_process.is_none());
+            assert!(test.consumption_processes.len() == 0);
+            assert!(test.use_processes.len() == 0);
+            assert!(test.maintenance_processes.len() == 1);
+            // cleanup
+            test.processes.clear();
+            test.failure_process = None;
+            test_process.process_tags.clear();
+            test.maintenance_processes.clear();
             // check use
+            test_process.process_tags.push(ProcessTag::Use(0));
+            assert!(test.add_process(&test_process).is_ok());
+            assert!(test.processes.contains(&0));
+            assert!(test.failure_process.is_none());
+            assert!(test.consumption_processes.len() == 0);
+            assert!(test.use_processes.len() == 1);
+            assert!(test.maintenance_processes.len() == 0);
+            // cleanup
+            test.processes.clear();
+            test.failure_process = None;
+            test_process.process_tags.clear();
+            test.use_processes.clear();
             // check consumption
+            test_process.process_tags.push(ProcessTag::Consumption(0));
+            assert!(test.add_process(&test_process).is_ok());
+            assert!(test.processes.contains(&0));
+            assert!(test.failure_process.is_none());
+            assert!(test.consumption_processes.len() == 1);
+            assert!(test.use_processes.len() == 0);
+            assert!(test.maintenance_processes.len() == 0);
         }
 
         #[test]
