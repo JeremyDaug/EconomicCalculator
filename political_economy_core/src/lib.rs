@@ -21,101 +21,101 @@ mod tests {
             test.load_all(&String::new());
 
             println!("----- Wants -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
             for id in test.wants.keys().sorted() {
                 println!("{:>3} | {:<}", id, test.wants[id].name);
             }
 
             println!("----- Technology -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
             for id in test.technology.keys().sorted() {
                 println!("{:>3} | {:<}", id, test.technology[id].name());
             }
 
             println!("----- Technology Family -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, fam) in test.technology_families.iter() {
-                println!("{:>3} | {:<}", id, fam.name());
+            for id in test.technology_families.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.technology_families[id].name());
             }
 
             println!("----- Product -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, product) in test.products.iter() {
-                println!("{:>3} | {:<}", id, product.get_name());
+            for id in test.products.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.products[id].get_name());
             }
 
             println!("----- Skill Group -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, group) in test.skill_groups.iter() {
-                println!("{:>3} | {:<}", id, group.name);
+            for id in test.skill_groups.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.skill_groups[id].name);
             }
 
             println!("----- Skill -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, skill) in test.skills.iter() {
-                println!("{:>3} | {:<}", id, skill.name);
+            for id in test.skills.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.skills[id].name);
             }
 
             println!("----- Processes -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, process) in test.processes.iter() {
-                println!("{:>3} | {:<}", id, process.get_name());
+            for id in test.processes.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.processes[id].get_name());
             }
 
             println!("----- Jobs -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, job) in test.jobs.iter() {
-                println!("{:>3} | {:<}", id, job.get_name());
+            for id in test.jobs.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.jobs[id].get_name());
             }
 
             println!("----- Species -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, species) in test.species.iter() {
-                println!("{:>3} | {:<}", id, species.get_name());
+            for id in test.species.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.species[id].get_name());
             }
 
             println!("----- Cultures -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, culture) in test.cultures.iter() {
-                println!("{:>3} | {:<}", id, culture.get_name());
+            for id in test.cultures.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.cultures[id].get_name());
             }
 
             println!("----- Pops -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, pop) in test.pops.iter() {
-                println!("{:>3} | {:<}", id, pop.name());
+            for id in test.pops.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.pops[id].name());
             }
 
             println!("----- Territories -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, terr) in test.territories.iter() {
-                println!("{:>3} | {:<}", id, terr.name);
+            for id in test.territories.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.territories[id].name);
             }
 
             println!("----- Markets -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, market) in test.markets.iter() {
-                println!("{:>3} | {:<}", id, market.name);
+            for id in test.markets.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.markets[id].name);
             }
 
             println!("----- Firms -----");
-            println!("---+------------------");
+            println!("----+------------------");
             println!("| id|name");
-            for (id, firm) in test.firms.iter() {
-                println!("{:>3} | {:<}", id, firm.get_name());
+            for id in test.firms.keys().sorted() {
+                println!("{:>3} | {:<}", id, test.firms[id].get_name());
             }
         }
     }
