@@ -1523,9 +1523,39 @@ impl DataManager {
     }
 
     pub fn load_jobs(&mut self, _file_name: &String) {
+        let mut subsistance_farmer = Job::new(self.new_job_id(), 
+            "Subsistence Farmer".into(),
+            String::new(),
+            0);
+        subsistance_farmer.processes.push(0);
+        subsistance_farmer.processes.push(0);
+    }
+
+    pub fn load_species(&mut self, _file_name: &String) {
 
     }
 
+    pub fn load_cultures(&mut self, _file_name: &String) {
+
+    }
+
+    pub fn load_pop(&mut self, _file_name: &String) {
+
+    }
+
+    pub fn load_territories(&mut self, _file_name: &String) {
+
+    }
+
+    pub fn load_markets(&mut self, _file_name: &String) {
+
+    }
+
+    pub fn load_firms(&mut self, _file_name: &String) {
+
+    }
+
+    /// Placeholder loader for everything Should load by sets later on, rather than all at once.
     pub fn load_all(&mut self, _file_name: &String) {
         self.load_wants(_file_name);
         self.load_technologies(_file_name);
@@ -1535,6 +1565,12 @@ impl DataManager {
         self.load_skill_groups(_file_name);
         self.load_processes(_file_name);
         self.load_jobs(_file_name);
+        self.load_species(_file_name);
+        self.load_cultures(_file_name);
+        self.load_pop(_file_name);
+        self.load_territories(_file_name);
+        self.load_markets(_file_name);
+        self.load_firms(_file_name);
     }
 }
 
