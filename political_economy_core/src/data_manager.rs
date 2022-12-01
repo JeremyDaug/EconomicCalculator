@@ -1,5 +1,5 @@
 use core::panic;
-use std::{collections::{HashMap, HashSet}, sync::RwLock, ops::DerefMut};
+use std::{collections::{HashMap, HashSet}};
 
 use crate::objects::{want::Want, 
     skill_group::SkillGroup,
@@ -140,7 +140,7 @@ impl DataManager {
 
     /// Loads wants from a file into the data manager,
     /// Currently, this just loads pre-existing data.
-    pub fn load_wants(&mut self, _file_name: &String) {
+    pub fn load_wants(&mut self, _file_name: &String) -> Result<(), String> {
         let rest =  match Want::new(0, 
             String::from("Rest"), 
             String::from("Rest is the joy of Idle time."), 
@@ -201,17 +201,20 @@ impl DataManager {
         self.wants.insert(fashion.id(), fashion);
         self.wants.insert(wealth.id(), wealth);
 
+        Ok(())
     }
 
-    pub fn load_technologies(&mut self, _file_name: &String) {
+    pub fn load_technologies(&mut self, _file_name: &String) -> Result<(), String> {
         //todo!("Not doing right now. Have better things to do than test out technology rules.");
+        Ok(())
     }
 
-    pub fn load_technology_families(&mut self, _file_name: &String) {
+    pub fn load_technology_families(&mut self, _file_name: &String) -> Result<(), String> {
         //todo!("Skipping for same reason as Load Technologies.")
+        Ok(())
     }
 
-    pub fn load_products(&mut self, _file_name: &String) {
+    pub fn load_products(&mut self, _file_name: &String) -> Result<(), String> {
         // Generic Time
         let time = Product::new(0,
             String::from("Time"),
@@ -227,7 +230,7 @@ impl DataManager {
             None).unwrap();
         // Shopping Time
         let shopping_time = Product::new(1,
-            String::from("Time"),
+            String::from("Shopping Time"),
             String::from(""),
             String::from("Shopping Time, productive, but sometimes frustrating."), 
             String::from("Hour(s)"), 
@@ -597,9 +600,11 @@ impl DataManager {
         self.products.insert(construction.id(), construction);
         self.products.insert(building_repair.id(), building_repair);
         self.products.insert(stone_gathering.id(), stone_gathering);
+
+        Ok(())
     }
 
-    pub fn load_skill_groups(&mut self, _file_name: &String) {
+    pub fn load_skill_groups(&mut self, _file_name: &String) -> Result<(), String> {
         // farming 
         let mut farming_skills = HashSet::new();
         farming_skills.insert(0);
@@ -662,9 +667,11 @@ impl DataManager {
         skill.connect_skill_group(&mut architecture);
         let skill = self.skills.get_mut(&8).unwrap();
         skill.connect_skill_group(&mut architecture);
+
+        Ok(())
     }
 
-    pub fn load_skills(&mut self, _file_name: &String) {
+    pub fn load_skills(&mut self, _file_name: &String) -> Result<(), String> {
         // (labors and Services)
         // Ambrosia Farming
         let mut ambrosia_farming = Skill::new(0,
@@ -745,9 +752,11 @@ impl DataManager {
         self.skills.insert(construction.id(), construction);
         self.skills.insert(building_repair.id(), building_repair);
         self.skills.insert(stone_gathering.id(), stone_gathering);
+
+        Ok(())
     }
 
-    pub fn load_processes(&mut self, _file_name: &String) {
+    pub fn load_processes(&mut self, _file_name: &String) -> Result<(), String> {
         let time = 0;
         let shopping_time = 1;
         let ambrosia_fruit = 2;
@@ -871,7 +880,7 @@ impl DataManager {
         };
         let ambrosia_farming = Process{
             id: self.new_process_id(), // 11
-            name: String::from("Ambrosia Farming"),
+            name: String::from("Ambrosia Culture"),
             variant_name: String::new(),
             description: String::from("Ambrosia Farming."),
             minimum_time: 1.0,
@@ -935,7 +944,7 @@ impl DataManager {
         };
         let cotton_farming = Process{
             id: self.new_process_id(), // 13
-            name: String::from("Cotton Farming"),
+            name: String::from("Cottonculture"),
             variant_name: String::new(),
             description: String::from("Cotton Farming."),
             minimum_time: 1.0,
@@ -975,8 +984,8 @@ impl DataManager {
         };
         let thread_spinning = Process{
             id: self.new_process_id(), // 14
-            name: String::from("Thread Spinning"),
-            variant_name: String::new(),
+            name: String::from("Spinning"),
+            variant_name: String::from("Cotton Thread"),
             description: String::from("Spinning thread."),
             minimum_time: 1.0,
             process_parts: vec![cotton_input, labor_input,
@@ -1017,7 +1026,7 @@ impl DataManager {
         let weaving = Process{
             id: self.new_process_id(), // 15
             name: String::from("Weaving"),
-            variant_name: String::new(),
+            variant_name: String::from("Cotton"),
             description: String::from("Weaving Cloth from Thread."),
             minimum_time: 1.0,
             process_parts: vec![thread_input, labor_input,
@@ -1356,8 +1365,8 @@ impl DataManager {
         };
         let loom_making = Process{
             id: self.new_process_id(),
-            name: String::from("Craft"),
-            variant_name: String::from("Loom"),
+            name: String::from("Construct"),
+            variant_name: String::from("Cabin"),
             description: String::from("Craft a Loom!"),
             minimum_time: 12.0,
             process_parts: vec![labor_input, wood_input, wood_output],
@@ -1519,58 +1528,98 @@ impl DataManager {
             }
 
             self.process_nodes.insert(*id, new_node);
+        };
+
+        // check for duplicate items (TODO update to only check the new items, not the old)
+        let mut dups: HashMap<String, Vec<u64>> = HashMap::new();
+        for (id, process) in self.processes.iter() {
+            dups.entry(process.get_name()).or_insert(vec![]).push(*id);
         }
+        let mut err = String::new();
+        for (name, ids) in dups.iter() {
+            if ids.len() > 1 { // If there is more than 1 id here, add it to our return.
+                let mut dup_error = format!("Duplicate process '{}'\n", name);
+                for id in ids {
+                    dup_error += format!("{:>5}\n", id).as_str();
+                }
+                err += dup_error.as_str();
+            }
+        }
+        if err.len() > 0 {
+            return Err(err);
+        }
+
+        Ok(())
     }
 
-    pub fn load_jobs(&mut self, _file_name: &String) {
-        let mut subsistance_farmer = Job::new(self.new_job_id(), 
+    pub fn load_jobs(&mut self, _file_name: &String) -> Result<(), String> {
+        // Food, clothes, and shelter
+        let mut subsistence_farmer = Job::new(
+            0, 
             "Subsistence Farmer".into(),
             String::new(),
             0);
-        subsistance_farmer.processes.push(0);
-        subsistance_farmer.processes.push(0);
+        subsistence_farmer.processes.push(1); // Labor(Ambrosia Farming)
+        subsistence_farmer.processes.push(2); // Labor(Cotton Farming)
+        subsistence_farmer.processes.push(3); // Labor(Thread Spinning)
+        subsistence_farmer.processes.push(4); // Labor(Weaving)
+        subsistence_farmer.processes.push(5); // Labor(Tailoring)
+        subsistence_farmer.processes.push(8); // Labor(Construction)
+        subsistence_farmer.processes.push(9); // Labor(Building Repair)
+        subsistence_farmer.processes.push(11); // Ambrosia Culture
+        subsistence_farmer.processes.push(13); // cottonculture
+        subsistence_farmer.processes.push(14); // Spinning(Cotton Thread)
+        subsistence_farmer.processes.push(15); // Weaving(Cotton)
+        subsistence_farmer.processes.push(16); // Clothes(Normal)
+        subsistence_farmer.processes.push(19); // Hut Construction
+        subsistence_farmer.processes.push(20); // Hut Repair
+        self.jobs.insert(0, subsistence_farmer);
+
+        Ok(())
     }
 
-    pub fn load_species(&mut self, _file_name: &String) {
-
+    pub fn load_species(&mut self, _file_name: &String) -> Result<(), String> {
+        Ok(())
     }
 
-    pub fn load_cultures(&mut self, _file_name: &String) {
-
+    pub fn load_cultures(&mut self, _file_name: &String) -> Result<(), String> {
+        Ok(())
     }
 
-    pub fn load_pop(&mut self, _file_name: &String) {
-
+    pub fn load_pop(&mut self, _file_name: &String) -> Result<(), String> {
+        Ok(())
     }
 
-    pub fn load_territories(&mut self, _file_name: &String) {
-
+    pub fn load_territories(&mut self, _file_name: &String) -> Result<(), String> {
+        Ok(())
     }
 
-    pub fn load_markets(&mut self, _file_name: &String) {
-
+    pub fn load_markets(&mut self, _file_name: &String)  -> Result<(), String> {
+        Ok(())
     }
 
-    pub fn load_firms(&mut self, _file_name: &String) {
-
+    pub fn load_firms(&mut self, _file_name: &String) -> Result<(), String> {
+        Ok(())
     }
 
     /// Placeholder loader for everything Should load by sets later on, rather than all at once.
-    pub fn load_all(&mut self, _file_name: &String) {
-        self.load_wants(_file_name);
-        self.load_technologies(_file_name);
-        self.load_technology_families(_file_name);
-        self.load_products(_file_name);
-        self.load_skills(_file_name);
-        self.load_skill_groups(_file_name);
-        self.load_processes(_file_name);
-        self.load_jobs(_file_name);
-        self.load_species(_file_name);
-        self.load_cultures(_file_name);
-        self.load_pop(_file_name);
-        self.load_territories(_file_name);
-        self.load_markets(_file_name);
-        self.load_firms(_file_name);
+    pub fn load_all(&mut self, _file_name: &String) -> Result<(), String> {
+        self.load_wants(_file_name)?;
+        self.load_technologies(_file_name)?;
+        self.load_technology_families(_file_name)?;
+        self.load_products(_file_name)?;
+        self.load_skills(_file_name)?;
+        self.load_skill_groups(_file_name)?;
+        self.load_processes(_file_name)?;
+        self.load_jobs(_file_name)?;
+        self.load_species(_file_name)?;
+        self.load_cultures(_file_name)?;
+        self.load_pop(_file_name)?;
+        self.load_territories(_file_name)?;
+        self.load_markets(_file_name)?;
+        self.load_firms(_file_name)?;
+
+        Ok(())
     }
 }
 

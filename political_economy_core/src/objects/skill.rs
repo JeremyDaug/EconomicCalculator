@@ -61,9 +61,15 @@ impl Skill {
     /// 
     /// # Defalts
     /// 
-    /// The process defaults to taking 1 Time(fixed) (always id 0) and outputting 1 unit of labor.
-    /// The name and description is same as the skill, with no variant name given.
+    /// The process defaults to taking 1 Time(fixed) (always id 0) 
+    /// and outputting 1 unit of labor.
+    /// 
+    /// 
+    /// The name is Labor, while vairant_name and description are the skill's name.
+    /// 
+    /// 
     /// Minimum time = 0, skill min = 0, skill max = 3, and no techs attached.
+    /// 
     /// The skill is also connected as the process's skill
     /// 
     /// # Notes
@@ -87,8 +93,8 @@ impl Skill {
         };
         Ok(Process {
                     id: id,
-                    name: self.name.clone(),
-                    variant_name: String::new(),
+                    name: "Labor".into(),
+                    variant_name: self.name.clone(),
                     description: self.description.clone(),
                     minimum_time: 0.0,
                     process_parts: vec![input, output],

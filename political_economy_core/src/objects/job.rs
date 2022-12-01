@@ -1,7 +1,3 @@
-use std::fmt::format;
-
-use super::{product::Product, skill::Skill, process::Process};
-
 #[derive(Debug)]
 pub struct Job {
     pub id: u64,

@@ -1,7 +1,6 @@
 pub mod objects;
 pub mod data_manager;
 
-#[macro_use]
 extern crate lazy_static;
 
 pub fn add(left: usize, right: usize) -> usize {
@@ -18,7 +17,11 @@ mod tests {
             use itertools::Itertools;
 
             let mut test = DataManager::new();
-            test.load_all(&String::new());
+            let result = test.load_all(&String::new());
+
+            if let Err(message) = result {
+                panic!("\n{}", message);
+            }
 
             println!("----- Wants -----");
             println!("----+------------------");
