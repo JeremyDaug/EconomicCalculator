@@ -1,5 +1,5 @@
 use core::panic;
-use std::{collections::{HashMap, HashSet}};
+use std::{collections::{HashMap, HashSet}, slice::range};
 
 use crate::objects::{want::Want, 
     skill_group::SkillGroup,
@@ -58,32 +58,39 @@ use crate::objects::{want::Want,
 ///         + Brainstorming (origin tech)
 #[derive(Debug)]
 pub struct DataManager {
-    // Stand Alone items
-
+    // Sets are an organizational and loading tool, once loaded, only the sets are needed.
+    pub sets: Vec<String>,
+    // These should be fixed during common running, and should be immutable passed around
+    // the threads.
     pub wants: HashMap<u64, Want>,
-
     pub technology: HashMap<u64, Technology>,
     pub technology_families: HashMap<u64, TechnologyFamily>,
-
     pub products: HashMap<u64, Product>,
-
     pub skill_groups: HashMap<u64, SkillGroup>,
     pub skills: HashMap<u64, Skill>,
-
     pub processes: HashMap<u64, Process>,
+    // TODO Consider combining this with Processes (would still need to be set after loading)
     pub process_nodes: HashMap<u64, ProcessNode>,
-
     pub jobs: HashMap<u64, Job>,
 
+    // These are mutable, but only record changes as noted, typically demographic data.
+    // These should be their own thread (or more accurately grouped together in their
+    // own thread.) These are updated only when pops change, and merely record the changes
+    // the don't act or send messages. These should have a RWLock on them (only their thread writes).
     pub species: HashMap<u64, Species>,
     pub cultures: HashMap<u64, Culture>,
 
-    pub pops: HashMap<u64, Pop>,
-
+    // These structs are semi-mutable, they can be updated while the rest of the
+    // system is running, race conditions are expected, but they are light on actions.
     pub territories: HashMap<u64, Species>,
     pub markets: HashMap<u64, Market>,
+
+    // These structs are totally mutable, and should expect lots of messages passing 
+    // between them.
+    pub pops: HashMap<u64, Pop>,
     pub firms: HashMap<u64, Firm>,
-    pub sets: Vec<String>,
+    // institutions
+    // states
 
     // id creation data
     want_id: u64,
@@ -99,7 +106,9 @@ pub struct DataManager {
     pop_id: u64,
     territory_id: u64,
     market_id: u64,
-    firm_id: u64
+    firm_id: u64,
+    _institution_id: u64,
+    _state_id: u64,
 }
 
 impl DataManager {
@@ -134,7 +143,9 @@ impl DataManager {
             pop_id: 0,
             territory_id: 0,
             market_id: 0,
-            firm_id: 0
+            firm_id: 0, 
+            _institution_id: 0,
+            _state_id: 0
         }
     }
 
@@ -1263,8 +1274,8 @@ impl DataManager {
         };
         let hooker_making = Process{
             id: self.new_process_id(),
-            name: String::from("Gathering Stick Creation"),
-            variant_name: String::new(),
+            name: String::from("Craft"),
+            variant_name: String::from("Gathering Stick"),
             description: String::from("Gathering Stick making."),
             minimum_time: 12.0,
             process_parts: vec![labor_input, wood_input, wood_output],
@@ -1574,6 +1585,163 @@ impl DataManager {
         subsistence_farmer.processes.push(19); // Hut Construction
         subsistence_farmer.processes.push(20); // Hut Repair
         self.jobs.insert(0, subsistence_farmer);
+
+        // Ambrosia Farming
+        let mut ambrosia_farmer = Job::new(
+            1,
+            "Ambrosia Farmer".into(),
+            String::new(),
+            0
+        );
+        ambrosia_farmer.processes.push(1);
+        ambrosia_farmer.processes.push(11);
+        self.jobs.insert(1, ambrosia_farmer);
+
+        // all of these share the same processes, but focus on different parts
+        // cotton farming
+        let mut cotton_farming = Job::new(
+            2,
+            "Cotton Farmer".into(),
+            String::new(),
+            1
+        );
+        cotton_farming.processes.push(2);
+        cotton_farming.processes.push(3);
+        cotton_farming.processes.push(4);
+        cotton_farming.processes.push(5);
+        cotton_farming.processes.push(13);
+        cotton_farming.processes.push(14);
+        cotton_farming.processes.push(15);
+        cotton_farming.processes.push(16);
+        cotton_farming.processes.push(17);
+        self.jobs.insert(2, cotton_farming);
+        // spinning
+        let mut thread_spinning = Job::new(
+            3,
+            "Thread Spinner".into(),
+            String::new(),
+            2
+        );
+        thread_spinning.processes.push(2);
+        thread_spinning.processes.push(3);
+        thread_spinning.processes.push(4);
+        thread_spinning.processes.push(5);
+        thread_spinning.processes.push(13);
+        thread_spinning.processes.push(14);
+        thread_spinning.processes.push(15);
+        thread_spinning.processes.push(16);
+        thread_spinning.processes.push(17);
+        self.jobs.insert(3, thread_spinning);
+        // weaving
+        let mut thread_spinning = Job::new(
+            4,
+            "Weaving".into(),
+            String::new(),
+            3
+        );
+        thread_spinning.processes.push(2);
+        thread_spinning.processes.push(3);
+        thread_spinning.processes.push(4);
+        thread_spinning.processes.push(5);
+        thread_spinning.processes.push(13);
+        thread_spinning.processes.push(14);
+        thread_spinning.processes.push(15);
+        thread_spinning.processes.push(16);
+        thread_spinning.processes.push(17);
+        self.jobs.insert(4, thread_spinning);
+        // tailoring
+        let mut thread_spinning = Job::new(
+            5,
+            "Tailoring".into(),
+            String::new(),
+            4
+        );
+        thread_spinning.processes.push(2);
+        thread_spinning.processes.push(3);
+        thread_spinning.processes.push(4);
+        thread_spinning.processes.push(5);
+        thread_spinning.processes.push(13);
+        thread_spinning.processes.push(14);
+        thread_spinning.processes.push(15);
+        thread_spinning.processes.push(16);
+        thread_spinning.processes.push(17);
+        self.jobs.insert(5, thread_spinning);
+
+        // these two are cousin jobs
+        // lumbering
+        let mut lumbering = Job::new(
+            6,
+            "Lumbering".into(),
+            String::new(),
+            5
+        );
+        lumbering.processes.push(6);
+        lumbering.processes.push(7);
+        lumbering.processes.push(21);
+        lumbering.processes.push(22);
+        lumbering.processes.push(23);
+        lumbering.processes.push(24);
+        lumbering.processes.push(27);
+        self.jobs.insert(6, lumbering);
+        // tool making
+        let mut tool_making = Job::new(
+            7,
+            "Tool Making".into(),
+            String::new(),
+            6
+        );
+        tool_making.processes.push(6);
+        tool_making.processes.push(7);
+        tool_making.processes.push(21);
+        tool_making.processes.push(22);
+        tool_making.processes.push(23);
+        tool_making.processes.push(24);
+        tool_making.processes.push(27);
+        self.jobs.insert(7, tool_making);
+        
+        // construction / repair
+        let mut construction = Job::new(
+            8,
+            "Constructing".into(),
+            String::new(),
+            7
+        );
+        construction.processes.push(6);
+        construction.processes.push(8);
+        construction.processes.push(9);
+        construction.processes.push(19);
+        construction.processes.push(20);
+        construction.processes.push(21);
+        construction.processes.push(25);
+        construction.processes.push(26);
+        self.jobs.insert(8, construction);
+        // repair
+        let mut repair = Job::new(
+            9,
+            "Repairman".into(),
+            String::new(),
+            8
+        );
+        repair.processes.push(6);
+        repair.processes.push(8);
+        repair.processes.push(9);
+        repair.processes.push(19);
+        repair.processes.push(20);
+        repair.processes.push(21);
+        repair.processes.push(25);
+        repair.processes.push(26);
+        self.jobs.insert(9, repair);
+
+        // stone gathering the outlier
+        let mut stone_gathering = Job::new(
+            10,
+            "Stone Gathering".into(),
+            String::new(),
+            9
+        );
+        stone_gathering.processes.push(10);
+        stone_gathering.processes.push(18);
+        self.jobs.insert(10, stone_gathering);
 
         Ok(())
     }
