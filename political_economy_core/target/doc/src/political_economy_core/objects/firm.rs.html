@@ -2,8 +2,28 @@
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
 </pre><pre class="rust"><code><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Firm {
-    
+    <span class="kw">pub </span>id: usize,
+    <span class="kw">pub </span>name: String,
+    <span class="kw">pub </span>variant_name: String
+}
+
+<span class="kw">impl </span>Firm {
+    <span class="kw">pub fn </span>new(id: usize, name: String, variant_name: String) -&gt; <span class="self">Self </span>{ <span class="self">Self </span>{ id, name, variant_name } }
+
+    <span class="kw">pub fn </span>get_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="macro">format!</span>(<span class="string">&quot;{}({})&quot;</span>, <span class="self">self</span>.name, <span class="self">self</span>.variant_name)
+    }
 }</code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="political_economy_core" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

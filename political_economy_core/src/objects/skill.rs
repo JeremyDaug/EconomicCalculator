@@ -4,19 +4,19 @@ use super::{product::Product, skill_group::SkillGroup, process::{Process, Proces
 
 #[derive(Debug)]
 pub struct Skill {
-    id: u64,
+    id: usize,
     pub name: String,
     pub description: String,
-    pub labor: u64,
-    pub skill_group: HashSet<u64>,
-    pub related_skills: HashMap<u64, f64>,
+    pub labor: usize,
+    pub skill_group: HashSet<usize>,
+    pub related_skills: HashMap<usize, f64>,
 }
 
 impl Skill {
-    pub fn new(id: u64, 
+    pub fn new(id: usize, 
         name: String, 
         description: String, 
-        labor: u64) -> Self {
+        labor: usize) -> Self {
 
         Self {
             id, 
@@ -39,7 +39,7 @@ impl Skill {
     /// It has a Mean Time To Failure of 0 (not entirely necessary)
     /// It is tagged as a Service
     /// It has no required tech.
-    pub fn build_skill_labor(&self, id: u64) -> Option<Product> {
+    pub fn build_skill_labor(&self, id: usize) -> Option<Product> {
         // if labor == 0, then it must not have a labor (0 is time which is not a labor.)
         if self.labor != 0 {
             return Option::None;
@@ -75,7 +75,7 @@ impl Skill {
     /// # Notes
     /// 
     /// Edit to meet your needs later, as needed.
-    pub fn build_skill_process(&self, id: u64) -> Result<Process, String> {
+    pub fn build_skill_process(&self, id: usize) -> Result<Process, String> {
         if self.labor == 0 {
             return Err(format!("Skill '{}' has no Labor.", self.name))
         }
@@ -107,7 +107,7 @@ impl Skill {
                 })
     }
 
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> usize {
         self.id
     }
 

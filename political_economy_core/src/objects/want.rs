@@ -8,23 +8,23 @@ use super::process::{Process, ProcessTag, PartItem};
 #[derive(Debug)]
 pub struct Want {
     /// The unique id of the want
-    id: u64,
+    id: usize,
     /// 
     pub name: String,
     pub description: String,
     pub decay: f64,
     /// The products which produce it via owning it.
-    pub ownership_sources: HashSet<u64>,
+    pub ownership_sources: HashSet<usize>,
     /// All processes which produce it.
-    pub process_sources: Vec<u64>,
+    pub process_sources: Vec<usize>,
     /// All use processes which produce it.
-    pub use_sources: Vec<u64>,
+    pub use_sources: Vec<usize>,
     // All consumption processes which produce it.
-    pub consumption_sources: Vec<u64>
+    pub consumption_sources: Vec<usize>
 }
 
 impl Want {
-    pub fn new(id: u64, name: String, 
+    pub fn new(id: usize, name: String, 
         description: String, decay: f64) -> Result<Self, String> { 
         if decay < 0.0 || decay > 1.0 {
             Result::Err(String::from("Invalid Decay Rate, must be between 0 and 1 (inclusive)"))
@@ -56,7 +56,7 @@ impl Want {
         true
     }
 
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> usize {
         self.id
     }
 

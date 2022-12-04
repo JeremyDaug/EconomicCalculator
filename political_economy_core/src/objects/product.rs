@@ -13,7 +13,7 @@ use super::want::Want;
 
 #[derive(Debug)]
 pub struct Product {
-    id: u64,
+    id: usize,
     pub name: String,
     pub variant_name: String,
     pub description: String,
@@ -25,15 +25,15 @@ pub struct Product {
     pub fractional: bool,
     // icon
     pub tags: Vec<ProductTag>,
-    pub wants: HashMap<u64, f64>,
+    pub wants: HashMap<usize, f64>,
 
-    pub processes: HashSet<u64>,
-    pub failure_process: Option<u64>,
-    pub use_processes: HashSet<u64>,
-    pub consumption_processes: HashSet<u64>,
-    pub maintenance_processes: HashSet<u64>,
+    pub processes: HashSet<usize>,
+    pub failure_process: Option<usize>,
+    pub use_processes: HashSet<usize>,
+    pub consumption_processes: HashSet<usize>,
+    pub maintenance_processes: HashSet<usize>,
 
-    pub tech_required: Option<u64>
+    pub tech_required: Option<usize>
 }
 
 impl Hash for Product {
@@ -53,7 +53,7 @@ impl PartialEq for Product {
 }
 
 impl Product {
-    pub fn new(id: u64,
+    pub fn new(id: usize,
          name: String, 
          variant_name: String, 
          description: String, 
@@ -64,7 +64,7 @@ impl Product {
          mean_time_to_failure: Option<u32>, 
          fractional: bool,
          tags: Vec<ProductTag>,
-         tech_required: Option<u64>) -> Option<Self> {
+         tech_required: Option<usize>) -> Option<Self> {
             if !tags.contains(&ProductTag::Magic) &&
                 (mass < 0.0 || bulk < 0.0) {
                     return None
@@ -151,7 +151,7 @@ impl Product {
         result
     }
 
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> usize {
         self.id
     }
 
@@ -201,25 +201,25 @@ pub enum ProductTag {
     /// The item has improved efficiency at satisfying itself as it's price increases.
     SelfLuxury{efficiency: f64},
     /// The item has improved efficiency at satisfying a want as it's price increases.
-    WantLuxury{want: u64, efficiency: f64},
+    WantLuxury{want: usize, efficiency: f64},
     /// The item has improved efficiency at satisfying a different product as it's price increases.
-    ProductLuxury{product: u64, efficiency: f64},
+    ProductLuxury{product: usize, efficiency: f64},
     /// The item has improved efficiency at satisfying itself as it's price decreases.
     SelfBargain{efficiency: f64},
     /// The item has improved efficiency at satisfying a want as it's price decreases.
-    WantBargain{want: u64, efficiency: f64},
+    WantBargain{want: usize, efficiency: f64},
     /// The item has improved efficiency at satisfying a different product as it's price decreases.
-    ProductBargain{product: u64, efficiency: f64},
+    ProductBargain{product: usize, efficiency: f64},
     /// The item is a public good, the value it contains is how many people it can be shared
     /// between without losing efficiency. Decay is how quickly it falls per person after it
     /// maxes out.
-    Public{capacity: u64, decay: f64},
+    Public{capacity: usize, decay: f64},
     // The product isn't an item, but a claim on another item, which is being rented out.
     // This is being shifted on hold for later reasons.
-    //Claim{product: u64, renter: Pop},
+    //Claim{product: usize, renter: Pop},
     /// The product is a share of ownership in a company. The company manages the details of 
     /// the share's effects on the firms
-    Share{firm: u64},
+    Share{firm: usize},
     /// The item is actually a living creature (placed her for later purposes.)
     Animate,
     /// The item is a consumer good, making variants is more open ended, but the product

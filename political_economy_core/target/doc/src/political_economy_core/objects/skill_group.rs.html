@@ -45,16 +45,16 @@
 
 <span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>SkillGroup {
-    id: u64,
+    id: usize,
     <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>description: String,
     <span class="kw">pub </span>default: f64,
-    <span class="kw">pub </span>skills: HashSet&lt;u64&gt;
+    <span class="kw">pub </span>skills: HashSet&lt;usize&gt;
 }
 
 <span class="kw">impl </span>SkillGroup {
-    <span class="kw">pub fn </span>new(id: u64, name: String, description: String,
-        default: f64, skills: HashSet&lt;u64&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">pub fn </span>new(id: usize, name: String, description: String,
+        default: f64, skills: HashSet&lt;usize&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>default &lt; <span class="number">0.0 </span>|| default &gt; <span class="number">1.0 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -67,7 +67,7 @@
         })
     }
     
-    <span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+    <span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.id
     }
 

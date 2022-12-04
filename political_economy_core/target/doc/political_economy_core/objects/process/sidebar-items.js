@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["PartItem",""],["ProcessPartTag",""],["ProcessSectionTag",""],["ProcessTag",""]],"struct":[["Process",""],["ProcessPart",""]]};
+window.SIDEBAR_ITEMS = {"enum":[["PartItem","Part item defines what kind of item the part requests."],["ProcessPartTag",""],["ProcessSectionTag",""],["ProcessTag",""]],"struct":[["Process",""],["ProcessPart",""]]};

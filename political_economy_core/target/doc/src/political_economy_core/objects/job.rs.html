@@ -47,63 +47,53 @@
 <span id="47">47</span>
 <span id="48">48</span>
 <span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-</pre><pre class="rust"><code><span class="kw">use super</span>::{product::Product, skill::Skill, process::Process};
-
-<span class="attribute">#[derive(Debug)]
+</pre><pre class="rust"><code><span class="doccomment">/// # The Job class
+/// 
+/// ## Purpose
+/// 
+/// The Job struct is how the system stores related processes.
+/// A firm stores jobs, which store processes available to them.
+/// It does not define how people are assigned or rewarded from it, that&#39;s
+/// a Firm&#39;s task.
+</span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Job {
-    id: u64,
-    name: String,
-    variant_name: String,
-    labor: Product,
-    skill: Skill,
-    processes: Vec&lt;Process&gt;
+    <span class="kw">pub </span>id: usize,
+    <span class="kw">pub </span>name: String,
+    <span class="kw">pub </span>variant_name: String,
+    <span class="comment">// labor not needed, default attached to the skill
+    //pub labor: usize,
+    </span><span class="kw">pub </span>skill: usize,
+    <span class="kw">pub </span>processes: Vec&lt;usize&gt;,
+    <span class="kw">pub </span>consistency_modifier: f64
 }
 
 <span class="kw">impl </span>Job {
-    <span class="kw">pub fn </span>new(id: u64,
-        name: String, 
-        variant_name: String, 
-        labor: Product, 
-        skill: Skill, 
-        processes: Vec&lt;Process&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(id: usize,
+        name: String,
+        variant_name: String,
+        skill: usize) -&gt; <span class="self">Self </span>{
+            <span class="self">Self </span>{
+                id, 
+                name, 
+                variant_name, 
+                skill, 
+                processes:  <span class="macro">vec!</span>[],
+                consistency_modifier: <span class="number">1.0
+            </span>} 
+        }
 
-        <span class="self">Self </span>{
-            id, 
-            name, 
-            variant_name, 
-            labor, 
-            skill, 
-            processes 
-        } 
+    <span class="doccomment">/// Adds a process&#39;s id, ensuring no duplication.
+    </span><span class="kw">pub fn </span>insert_process(<span class="kw-2">&amp;mut </span><span class="self">self</span>, process_id: usize) {
+        <span class="kw">if </span>!<span class="self">self</span>.processes.contains(<span class="kw-2">&amp;</span>process_id) {
+            <span class="self">self</span>.processes.push(process_id);
+        }
     }
 
-    <span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.id
-    }
-
-    <span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="self">self</span>.name.as_ref()
-    }
-
-    <span class="kw">pub fn </span>variant_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="self">self</span>.variant_name.as_ref()
-    }
-
-    <span class="kw">pub fn </span>labor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Product {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.labor
-    }
-
-    <span class="kw">pub fn </span>skill(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Skill {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.skill
-    }
-
-    <span class="kw">pub fn </span>processes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[Process] {
-        <span class="self">self</span>.processes.as_ref()
+    <span class="kw">pub fn </span>get_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="kw">if </span><span class="self">self</span>.variant_name.len() == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="self">self</span>.name.clone();
+        }
+        <span class="macro">format!</span>(<span class="string">&quot;{}({})&quot;</span>, <span class="self">self</span>.name, <span class="self">self</span>.variant_name)
     }
 }</code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="political_economy_core" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

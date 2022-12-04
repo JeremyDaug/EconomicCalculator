@@ -4,16 +4,16 @@ use super::skill::Skill;
 
 #[derive(Debug)]
 pub struct SkillGroup {
-    id: u64,
+    id: usize,
     pub name: String,
     pub description: String,
     pub default: f64,
-    pub skills: HashSet<u64>
+    pub skills: HashSet<usize>
 }
 
 impl SkillGroup {
-    pub fn new(id: u64, name: String, description: String,
-        default: f64, skills: HashSet<u64>) -> Option<Self> {
+    pub fn new(id: usize, name: String, description: String,
+        default: f64, skills: HashSet<usize>) -> Option<Self> {
         if default < 0.0 || default > 1.0 {
             return None;
         }
@@ -26,7 +26,7 @@ impl SkillGroup {
         })
     }
     
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> usize {
         self.id
     }
 

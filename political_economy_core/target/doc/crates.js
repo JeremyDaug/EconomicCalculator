@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["political_economy_core"];
+window.ALL_CRATES = ["bus","cfg_if","crossbeam_channel","crossbeam_utils","either","itertools","lazy_static","libc","num_cpus","parking_lot_core","political_economy_core","smallvec"];

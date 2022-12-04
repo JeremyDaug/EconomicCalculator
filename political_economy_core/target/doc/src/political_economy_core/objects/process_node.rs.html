@@ -12,18 +12,48 @@
 <span id="12">12</span>
 <span id="13">13</span>
 <span id="14">14</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::process::Process;
-
-<span class="attribute">#[derive(Debug)]
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+</pre><pre class="rust"><code><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>ProcessNode {
-    <span class="kw">pub </span>process: Process,
-    <span class="kw">pub </span>inputs: Vec&lt;ProcessNode&gt;,
-    <span class="kw">pub </span>capital: Vec&lt;ProcessNode&gt;,
-    <span class="kw">pub </span>output: Vec&lt;ProcessNode&gt;,
-    <span class="kw">pub </span>can_feed_self: bool
+    <span class="doccomment">/// The Process we represent
+    </span>process: usize,
+    <span class="doccomment">/// the processes which output things we take in
+    </span><span class="kw">pub </span>inputs: Vec&lt;usize&gt;,
+    <span class="doccomment">/// the processes which output things we take as capital
+    </span><span class="kw">pub </span>capitals: Vec&lt;usize&gt;,
+    <span class="doccomment">/// the processes which take what we output
+    </span><span class="kw">pub </span>outputs: Vec&lt;usize&gt;,
+    <span class="doccomment">/// whether we output our own inputs
+    </span><span class="kw">pub </span>can_feed_self: bool
 }
 
 <span class="kw">impl </span>ProcessNode {
-    
+    <span class="kw">pub fn </span>new(process: usize) -&gt; <span class="self">Self </span>{
+         <span class="self">Self </span>{ process: process, 
+            inputs: <span class="macro">vec!</span>[], 
+            capitals: <span class="macro">vec!</span>[], 
+            outputs: <span class="macro">vec!</span>[], 
+            can_feed_self: <span class="bool-val">false
+        </span>} 
+    }
+
+
+    <span class="kw">pub fn </span>process(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.process
+    }
 }</code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="political_economy_core" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

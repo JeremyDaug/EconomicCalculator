@@ -9,6 +9,25 @@ pub fn add(left: usize, right: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    mod desire_tests {
+        use crate::objects::desire::{Desire, DesireItem};
+
+        #[test]
+        pub fn correctly_return_steps() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 0,
+                tags: vec![] };
+
+
+        }
+    }
+
     mod data_manager_tests {
         use crate::data_manager::DataManager;
 
@@ -651,6 +670,7 @@ mod tests {
     mod skill_group_tests {
         // skipped, shouldn't have much need right now.
     }
+
     mod skill_tests {
         use crate::objects::{skill::Skill, product::ProductTag};
         // Tests here are kept to a minimum, they should 'just work'.

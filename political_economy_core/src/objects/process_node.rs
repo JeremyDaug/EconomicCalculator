@@ -1,19 +1,19 @@
 #[derive(Debug)]
 pub struct ProcessNode {
     /// The Process we represent
-    process: u64,
+    process: usize,
     /// the processes which output things we take in
-    pub inputs: Vec<u64>,
+    pub inputs: Vec<usize>,
     /// the processes which output things we take as capital
-    pub capitals: Vec<u64>,
+    pub capitals: Vec<usize>,
     /// the processes which take what we output
-    pub outputs: Vec<u64>,
+    pub outputs: Vec<usize>,
     /// whether we output our own inputs
     pub can_feed_self: bool
 }
 
 impl ProcessNode {
-    pub fn new(process: u64) -> Self {
+    pub fn new(process: usize) -> Self {
          Self { process: process, 
             inputs: vec![], 
             capitals: vec![], 
@@ -23,7 +23,7 @@ impl ProcessNode {
     }
 
 
-    pub fn process(&self) -> u64 {
+    pub fn process(&self) -> usize {
         self.process
     }
 }

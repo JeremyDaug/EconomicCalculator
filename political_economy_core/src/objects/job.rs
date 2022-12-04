@@ -1,7 +1,3 @@
-use crate::data_manager::DataManager;
-
-use super::process::Process;
-
 /// # The Job class
 /// 
 /// ## Purpose
@@ -12,21 +8,21 @@ use super::process::Process;
 /// a Firm's task.
 #[derive(Debug)]
 pub struct Job {
-    pub id: u64,
+    pub id: usize,
     pub name: String,
     pub variant_name: String,
     // labor not needed, default attached to the skill
-    //pub labor: u64,
-    pub skill: u64,
-    pub processes: Vec<u64>,
+    //pub labor: usize,
+    pub skill: usize,
+    pub processes: Vec<usize>,
     pub consistency_modifier: f64
 }
 
 impl Job {
-    pub fn new(id: u64,
+    pub fn new(id: usize,
         name: String,
         variant_name: String,
-        skill: u64) -> Self {
+        skill: usize) -> Self {
             Self {
                 id, 
                 name, 
@@ -38,13 +34,16 @@ impl Job {
         }
 
     /// Adds a process's id, ensuring no duplication.
-    pub fn insert_process(&mut self, process_id: u64) {
+    pub fn insert_process(&mut self, process_id: usize) {
         if !self.processes.contains(&process_id) {
             self.processes.push(process_id);
         }
     }
 
     pub fn get_name(&self) -> String {
+        if self.variant_name.len() == 0 {
+            return self.name.clone();
+        }
         format!("{}({})", self.name, self.variant_name)
     }
 }

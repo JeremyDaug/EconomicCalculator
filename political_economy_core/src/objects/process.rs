@@ -2,7 +2,7 @@ use std::{collections::HashMap};
 
 #[derive(Debug)]
 pub struct Process {
-    pub id: u64,
+    pub id: usize,
     pub name: String,
     pub variant_name: String,
     pub description: String,
@@ -10,16 +10,16 @@ pub struct Process {
     pub minimum_time: f64,
     pub process_parts: Vec<ProcessPart>,
     pub process_tags: Vec<ProcessTag>,
-    pub skill: Option<u64>,
+    pub skill: Option<usize>,
     pub skill_minimum: f64,
     pub skill_maximum: f64,
     // Processes are always fractional, fractional items are handled on the product end.
-    pub technology_requirement: Option<u64>,
-    pub tertiary_tech: Option<u64>,
+    pub technology_requirement: Option<usize>,
+    pub tertiary_tech: Option<usize>,
 }
 
 impl Process {
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> usize {
         self.id
     }
 
@@ -208,16 +208,16 @@ pub enum ProcessPartTag {
     Fixed,
     Investment,
     Pollutant,
-    Chance(char, u64)
+    Chance(char, usize)
 }
 
 #[derive(Debug)]
 pub enum ProcessTag {
-    Failure(u64),
-    Maintenance(u64),
-    Consumption(u64),
-    Use(u64),
-    Chance(u64),
+    Failure(usize),
+    Maintenance(usize),
+    Consumption(usize),
+    Use(usize),
+    Chance(usize),
     Crop,
     Mine,
     Extractor,
@@ -234,9 +234,9 @@ pub enum ProcessTag {
 #[derive(Debug, PartialEq, Eq)]
 pub enum PartItem {
     /// The Part is a Product and should be treated as such.
-    Product(u64),
+    Product(usize),
     /// The Part is a want and should be treated as such.
-    Want(u64)
+    Want(usize)
 }
 
 impl PartItem {
@@ -247,7 +247,7 @@ impl PartItem {
     /// If id's are replaced with references, this will need to be changed to 
     /// 
     /// accept the difference.
-    pub fn unwrap(&self) -> u64 {
+    pub fn unwrap(&self) -> usize {
         match self {
             PartItem::Product(item) => *item,
             PartItem::Want(item) => *item,

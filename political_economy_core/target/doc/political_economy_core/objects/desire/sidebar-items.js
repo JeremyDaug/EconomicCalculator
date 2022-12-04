@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Desire",""]]};
+window.SIDEBAR_ITEMS = {"enum":[["DesireItem",""],["DesireTag","The tags a desire can be marked by, modifying how the desire is viewed. Many of these alter how they are treated, removing them from common calculations."]],"struct":[["Desire","Desires"]]};

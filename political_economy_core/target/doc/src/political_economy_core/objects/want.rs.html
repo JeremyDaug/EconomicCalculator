@@ -117,23 +117,23 @@
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Want {
     <span class="doccomment">/// The unique id of the want
-    </span>id: u64,
+    </span>id: usize,
     <span class="doccomment">/// 
     </span><span class="kw">pub </span>name: String,
     <span class="kw">pub </span>description: String,
     <span class="kw">pub </span>decay: f64,
     <span class="doccomment">/// The products which produce it via owning it.
-    </span><span class="kw">pub </span>ownership_sources: HashSet&lt;u64&gt;,
+    </span><span class="kw">pub </span>ownership_sources: HashSet&lt;usize&gt;,
     <span class="doccomment">/// All processes which produce it.
-    </span><span class="kw">pub </span>process_sources: Vec&lt;u64&gt;,
+    </span><span class="kw">pub </span>process_sources: Vec&lt;usize&gt;,
     <span class="doccomment">/// All use processes which produce it.
-    </span><span class="kw">pub </span>use_sources: Vec&lt;u64&gt;,
+    </span><span class="kw">pub </span>use_sources: Vec&lt;usize&gt;,
     <span class="comment">// All consumption processes which produce it.
-    </span><span class="kw">pub </span>consumption_sources: Vec&lt;u64&gt;
+    </span><span class="kw">pub </span>consumption_sources: Vec&lt;usize&gt;
 }
 
 <span class="kw">impl </span>Want {
-    <span class="kw">pub fn </span>new(id: u64, name: String, 
+    <span class="kw">pub fn </span>new(id: usize, name: String, 
         description: String, decay: f64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, String&gt; { 
         <span class="kw">if </span>decay &lt; <span class="number">0.0 </span>|| decay &gt; <span class="number">1.0 </span>{
             Result::Err(String::from(<span class="string">&quot;Invalid Decay Rate, must be between 0 and 1 (inclusive)&quot;</span>))
@@ -165,7 +165,7 @@
         <span class="bool-val">true
     </span>}
 
-    <span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+    <span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.id
     }
 
@@ -174,8 +174,8 @@
             <span class="self">self</span>.ownership_sources.insert(product.id());
     }
 
-    <span class="doccomment">/// Not Tested
-    /// Adds a process to this want if that want is an output of the process
+    <span class="doccomment">/// Adds a process to this want if that want is an output of the process
+    /// 
     /// if it&#39;s not it won&#39;t add it and will return an Result::Err().
     </span><span class="kw">pub fn </span>add_process_source&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, process: <span class="kw-2">&amp;</span>Process) 
         -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {

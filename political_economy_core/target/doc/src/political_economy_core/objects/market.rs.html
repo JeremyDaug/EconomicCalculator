@@ -73,22 +73,22 @@
 
 <span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Market {
-    id: u64,
-    name: String,
-    firms: Vec&lt;Firm&gt;,
-    pops: Vec&lt;Pop&gt;,
-    territories: Vec&lt;Territory&gt;,
-    neighbors: HashMap&lt;Market, f64&gt;,
-    resources: HashMap&lt;Product, f64&gt;,
-    market_prices: HashMap&lt;Product, f64&gt;,
-    products_for_sale: HashMap&lt;Product, f64&gt;,
-    product_sold: HashMap&lt;Product, f64&gt;,
-    product_output: HashMap&lt;Product, f64&gt;,
-    product_exchanged_total: HashMap&lt;Product, f64&gt;
+    <span class="kw">pub </span>id: usize,
+    <span class="kw">pub </span>name: String,
+    <span class="kw">pub </span>firms: Vec&lt;usize&gt;,
+    <span class="kw">pub </span>pops: Vec&lt;usize&gt;,
+    <span class="kw">pub </span>territories: Vec&lt;usize&gt;,
+    <span class="kw">pub </span>neighbors: HashMap&lt;usize, f64&gt;,
+    <span class="kw">pub </span>resources: HashMap&lt;usize, f64&gt;,
+    <span class="kw">pub </span>market_prices: HashMap&lt;usize, f64&gt;,
+    <span class="kw">pub </span>products_for_sale: HashMap&lt;usize, f64&gt;,
+    <span class="kw">pub </span>product_sold: HashMap&lt;usize, f64&gt;,
+    <span class="kw">pub </span>product_output: HashMap&lt;usize, f64&gt;,
+    <span class="kw">pub </span>product_exchanged_total: HashMap&lt;usize, f64&gt;
 }
 
 <span class="kw">impl </span>Market {
-    <span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+    <span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.id
     }
 
@@ -96,43 +96,43 @@
         <span class="self">self</span>.name.as_ref()
     }
 
-    <span class="kw">pub fn </span>firms(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;Firm&gt; {
+    <span class="kw">pub fn </span>firms(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;usize&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.firms
     }
 
-    <span class="kw">pub fn </span>pops(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;Pop&gt; {
+    <span class="kw">pub fn </span>pops(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;usize&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.pops
     }
 
-    <span class="kw">pub fn </span>territories(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[Territory] {
+    <span class="kw">pub fn </span>territories(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[usize] {
         <span class="self">self</span>.territories.as_ref()
     }
 
-    <span class="kw">pub fn </span>neighbors(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Market, f64&gt; {
+    <span class="kw">pub fn </span>neighbors(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;usize, f64&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.neighbors
     }
 
-    <span class="kw">pub fn </span>resources(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Product, f64&gt; {
+    <span class="kw">pub fn </span>resources(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;usize, f64&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.resources
     }
 
-    <span class="kw">pub fn </span>products_for_sale(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Product, f64&gt; {
+    <span class="kw">pub fn </span>products_for_sale(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;usize, f64&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.products_for_sale
     }
 
-    <span class="kw">pub fn </span>market_prices(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Product, f64&gt; {
+    <span class="kw">pub fn </span>market_prices(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;usize, f64&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.market_prices
     }
 
-    <span class="kw">pub fn </span>product_sold(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Product, f64&gt; {
+    <span class="kw">pub fn </span>product_sold(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;usize, f64&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.product_sold
     }
 
-    <span class="kw">pub fn </span>product_output(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Product, f64&gt; {
+    <span class="kw">pub fn </span>product_output(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;usize, f64&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.product_output
     }
 
-    <span class="kw">pub fn </span>product_exchanged_total(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Product, f64&gt; {
+    <span class="kw">pub fn </span>product_exchanged_total(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;usize, f64&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.product_exchanged_total
     }
 }</code></pre></div>

@@ -1,5 +1,5 @@
 use core::panic;
-use std::{collections::{HashMap, HashSet}, slice::range};
+use std::{collections::{HashMap, HashSet}};
 
 use crate::objects::{want::Want, 
     skill_group::SkillGroup,
@@ -62,53 +62,53 @@ pub struct DataManager {
     pub sets: Vec<String>,
     // These should be fixed during common running, and should be immutable passed around
     // the threads.
-    pub wants: HashMap<u64, Want>,
-    pub technology: HashMap<u64, Technology>,
-    pub technology_families: HashMap<u64, TechnologyFamily>,
-    pub products: HashMap<u64, Product>,
-    pub skill_groups: HashMap<u64, SkillGroup>,
-    pub skills: HashMap<u64, Skill>,
-    pub processes: HashMap<u64, Process>,
+    pub wants: HashMap<usize, Want>,
+    pub technology: HashMap<usize, Technology>,
+    pub technology_families: HashMap<usize, TechnologyFamily>,
+    pub products: HashMap<usize, Product>,
+    pub skill_groups: HashMap<usize, SkillGroup>,
+    pub skills: HashMap<usize, Skill>,
+    pub processes: HashMap<usize, Process>,
     // TODO Consider combining this with Processes (would still need to be set after loading)
-    pub process_nodes: HashMap<u64, ProcessNode>,
-    pub jobs: HashMap<u64, Job>,
+    pub process_nodes: HashMap<usize, ProcessNode>,
+    pub jobs: HashMap<usize, Job>,
 
     // These are mutable, but only record changes as noted, typically demographic data.
     // These should be their own thread (or more accurately grouped together in their
     // own thread.) These are updated only when pops change, and merely record the changes
     // the don't act or send messages. These should have a RWLock on them (only their thread writes).
-    pub species: HashMap<u64, Species>,
-    pub cultures: HashMap<u64, Culture>,
+    pub species: HashMap<usize, Species>,
+    pub cultures: HashMap<usize, Culture>,
 
     // These structs are semi-mutable, they can be updated while the rest of the
     // system is running, race conditions are expected, but they are light on actions.
-    pub territories: HashMap<u64, Species>,
-    pub markets: HashMap<u64, Market>,
+    pub territories: HashMap<usize, Species>,
+    pub markets: HashMap<usize, Market>,
 
     // These structs are totally mutable, and should expect lots of messages passing 
     // between them.
-    pub pops: HashMap<u64, Pop>,
-    pub firms: HashMap<u64, Firm>,
+    pub pops: HashMap<usize, Pop>,
+    pub firms: HashMap<usize, Firm>,
     // institutions
     // states
 
     // id creation data
-    want_id: u64,
-    tech_id: u64,
-    tech_fam_id: u64,
-    product_id: u64,
-    skill_group_id: u64,
-    skill_id: u64,
-    process_id: u64,
-    job_id: u64,
-    species_id: u64,
-    culture_id: u64,
-    pop_id: u64,
-    territory_id: u64,
-    market_id: u64,
-    firm_id: u64,
-    _institution_id: u64,
-    _state_id: u64,
+    want_id: usize,
+    tech_id: usize,
+    tech_fam_id: usize,
+    product_id: usize,
+    skill_group_id: usize,
+    skill_id: usize,
+    process_id: usize,
+    job_id: usize,
+    species_id: usize,
+    culture_id: usize,
+    pop_id: usize,
+    territory_id: usize,
+    market_id: usize,
+    firm_id: usize,
+    _institution_id: usize,
+    _state_id: usize,
 }
 
 impl DataManager {
@@ -1542,7 +1542,7 @@ impl DataManager {
         };
 
         // check for duplicate items (TODO update to only check the new items, not the old)
-        let mut dups: HashMap<String, Vec<u64>> = HashMap::new();
+        let mut dups: HashMap<String, Vec<usize>> = HashMap::new();
         for (id, process) in self.processes.iter() {
             dups.entry(process.get_name()).or_insert(vec![]).push(*id);
         }
@@ -1793,7 +1793,7 @@ impl DataManager {
 
 // new ids section
 impl DataManager {
-    pub fn new_want_id(&mut self) -> u64 {
+    pub fn new_want_id(&mut self) -> usize {
         loop {
             if self.wants.contains_key(&self.want_id) {
                 self.want_id += 1;
@@ -1804,7 +1804,7 @@ impl DataManager {
         }
     }
 
-    pub fn new_tech_id(&mut self) -> u64 {
+    pub fn new_tech_id(&mut self) -> usize {
         loop {
             if self.technology.contains_key(&self.tech_id) {
                 self.tech_id += 1;
@@ -1815,7 +1815,7 @@ impl DataManager {
         }
     }
 
-    pub fn new_tech_fam_id(&mut self) -> u64 {
+    pub fn new_tech_fam_id(&mut self) -> usize {
         loop {
             if self.technology_families.contains_key(&self.tech_fam_id) {
                 self.tech_fam_id += 1;
@@ -1826,7 +1826,7 @@ impl DataManager {
         }
     }
 
-    pub fn new_product_id(&mut self) -> u64 {
+    pub fn new_product_id(&mut self) -> usize {
         loop {
             if self.products.contains_key(&self.product_id) {
                 self.product_id += 1;
@@ -1837,7 +1837,7 @@ impl DataManager {
         }
     }
 
-    pub fn new_skill_group_id(&mut self) -> u64 {
+    pub fn new_skill_group_id(&mut self) -> usize {
         loop {
             if self.skill_groups.contains_key(&self.skill_group_id) {
                 self.skill_group_id += 1;
@@ -1848,7 +1848,7 @@ impl DataManager {
         }
     }
 
-    pub fn new_skill_id(&mut self) -> u64 {
+    pub fn new_skill_id(&mut self) -> usize {
         loop {
             if self.skills.contains_key(&self.skill_id) {
                 self.skill_id += 1;
@@ -1858,7 +1858,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_process_id(&mut self) -> u64 {
+    pub fn new_process_id(&mut self) -> usize {
         loop {
             if self.processes.contains_key(&self.process_id) {
                 self.process_id += 1;
@@ -1868,7 +1868,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_job_id(&mut self) -> u64 {
+    pub fn new_job_id(&mut self) -> usize {
         loop {
             if self.jobs.contains_key(&self.job_id) {
                 self.job_id += 1;
@@ -1878,7 +1878,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_species_id(&mut self) -> u64 {
+    pub fn new_species_id(&mut self) -> usize {
         loop {
             if self.species.contains_key(&self.species_id) {
                 self.species_id += 1;
@@ -1888,7 +1888,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_culture_id(&mut self) -> u64 {
+    pub fn new_culture_id(&mut self) -> usize {
         loop {
             if self.cultures.contains_key(&self.culture_id) {
                 self.culture_id += 1;
@@ -1898,7 +1898,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_pop_id(&mut self) -> u64 {
+    pub fn new_pop_id(&mut self) -> usize {
         loop {
             if self.pops.contains_key(&self.pop_id) {
                 self.pop_id += 1;
@@ -1908,7 +1908,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_territory_id(&mut self) -> u64 {
+    pub fn new_territory_id(&mut self) -> usize {
         loop {
             if self.territories.contains_key(&self.territory_id) {
                 self.territory_id += 1;
@@ -1918,7 +1918,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_market_id(&mut self) -> u64 {
+    pub fn new_market_id(&mut self) -> usize {
         loop {
             if self.markets.contains_key(&self.market_id) {
                 self.market_id += 1;
@@ -1928,7 +1928,7 @@ impl DataManager {
             }
         }
     }
-    pub fn new_firm_i(&mut self) -> u64 {
+    pub fn new_firm_i(&mut self) -> usize {
         loop {
             if self.firms.contains_key(&self.firm_id) {
                 self.firm_id += 1;
