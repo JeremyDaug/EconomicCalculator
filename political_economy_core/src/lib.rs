@@ -13,6 +13,23 @@ mod tests {
         use crate::objects::desire::{Desire, DesireItem};
 
         #[test]
+        pub fn change_end_correctly() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 0,
+                tags: vec![] };
+            // normal change
+            assert!(test.change_end(10, 2).is_ok());
+            // bad change (end and step don't coincide.)
+            assert!(test.change_end(10, 3).is_err());
+        }
+
+        #[test]
         pub fn correctly_return_steps() {
             let mut test = Desire{ 
                 item: DesireItem::Product(0), 
@@ -24,8 +41,50 @@ mod tests {
                 step: 0,
                 tags: vec![] };
 
+            assert_eq!(test.steps(), 0);
 
+            test.change_end(10, 2).expect("Do Check the end dumbass!");
+            assert_eq!(test.steps(), 6);
         }
+
+        #[test]
+        pub fn show_is_stretched() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 0,
+                tags: vec![] };
+            
+            assert!(!test.is_stretched());
+            test.change_end(10, 2).expect("Stop being dumb!");
+            assert!(test.is_stretched());
+            test.end = None;
+            assert!(test.is_stretched());
+        }
+
+        #[test]
+        pub fn shew_is_infinite() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 0,
+                tags: vec![] };
+            
+            assert!(!test.is_infinite());
+            test.change_end(10, 2).expect("Stop being dumb!");
+            assert!(!test.is_infinite());
+            test.end = None;
+            assert!(test.is_infinite());
+        }
+
     }
 
     mod data_manager_tests {

@@ -33,29 +33,29 @@ use crate::objects::{want::Want,
 /// Currently, there are a handful of items which are considered 'Required' by the system.
 /// These are items which should always be there and will effectively always have some use.
 /// 
-/// Required Wants
-///     - ID 0: Rest
-///     - TODO Items
-///         + Space
-///         + Free Space
-/// Required Products:
-///     - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
+/// - Required Wants
+///   - ID 0: Rest
+///   - TODO Items
+///     - Space
+///     - Free Space
+/// - Required Products:
+///   - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
 ///                         refreshed every day)
-///     - ID 1: Shopping Time
-///     - TODO Items
-///         + Land (abstract)
-///         + Land (Wasteland)
-///         + Land (Marignal Land)
-///         + Land (Scrub Land)
-///         + Land (Quality Land)
-///         + Land (Fertile Land)
-///         + Land (Very Fertile Land)
-///         + Nothing (void item, may not be needed)
-/// Required Processes:
-///     - ID 0: Shopping (Time -> Shopping Time)
-/// Required Tech:
-///     - TODO Items
-///         + Brainstorming (origin tech)
+///   - ID 1: Shopping Time
+///   - TODO Items
+///     - Land (abstract)
+///     - Land (Wasteland)
+///     - Land (Marignal Land)
+///     - Land (Scrub Land)
+///     - Land (Quality Land)
+///     - Land (Fertile Land)
+///     - Land (Very Fertile Land)
+///     - Nothing (void item, may not be needed)
+/// - Required Processes:
+///   - ID 0: Shopping (Time -> Shopping Time)
+/// - Required Tech:
+///   - TODO Items
+///     - Brainstorming (origin tech)
 #[derive(Debug)]
 pub struct DataManager {
     // Sets are an organizational and loading tool, once loaded, only the sets are needed.
