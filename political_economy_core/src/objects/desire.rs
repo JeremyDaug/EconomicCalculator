@@ -16,21 +16,30 @@ pub struct Desire {
 }
 
 impl Desire {
-    pub fn change_end(&mut self, end: u64, step: u64) -> Result<(), String> {
+    /// Changes the end and step for the desire. 
+    pub fn change_end(&mut self, end: Option<u64>, step: u64) -> Result<(), String> {
         // check that the end can be stepped on by the new values
-        if ((end - self.start) % step) != 0 {
+        if end.is_some() && ((end.unwrap() - self.start) % step) != 0 {
             return Err("End does not get stepped on by the step. Correct so they do.".into());
         }
 
-        self.end = Some(end);
+        self.end = end;
         self.step = step;
 
         Ok(())
     }
 
+    /// Gets how many steps the desire has in total.
+    /// 
+    /// If the desire is infinite, it return 0.
+    /// 
+    /// If the desire has only 1 tier, then it's 1.
     pub fn steps(&self) -> u64 {
         if self.end.is_none() {
-            return 0;
+            if self.step > 0 {
+                return 0;
+            }
+            return 1;
         }
         (self.end.unwrap() - self.start) / self.step + 1
     }
@@ -46,31 +55,28 @@ impl Desire {
     }
 
     /// How much satisfaction this desire has at a specific tier.
-    pub fn satisfied_at_tier(&self, tier: u64) -> Result<f64, String> {
-        if !self.steps_on_tier(tier) {
-            return Err("Does not step on tier.".into())
-        }
-
-        // since we know we step on a valid tier, get the total satisfaction
+    /// 
+    /// Returns the amount in units requested satisfied at this level.
+    /// It caps at 0 and self.amount. 
+    pub fn satisfaction_at_tier(&self, tier: u64) -> Result<f64, String> {// since we know we step on a valid tier, get the total satisfaction
         let total = self.total_satisfaction();
 
         // get how many steps we have taken at this tier (start == tier = 0)
+        let steps = self.steps_to_tier(tier)?;
 
-        return Ok(1.0)
+        let mut at_tier = total - steps as f64;
+        // cap the satisfaction at amount.
+        if at_tier > 1.0 {
+            at_tier = 1.0;
+        }
+        else if at_tier < 0.0 {
+            at_tier = 0.0;
+        }
+
+        Ok(at_tier)
     }
 
     /// How many steps it takes for this desire to reach the given tier.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use political_economy_core::objects::desire::Desire;
-    /// use political_economy_core::objects::desire::DesireItem;
-    ///
-    /// let desire = Desire{item: DesireItem::Product(0),start: 2, end: Some(10),
-    ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
-    /// assert_eq!(desire.steps_to_tier(6), 2);
-    /// ```
     pub fn steps_to_tier(&self, tier: u64) -> Result<u64, String> {
         if !self.steps_on_tier(tier) {
             return Err("Does not Step on Tier".into());
@@ -141,19 +147,6 @@ impl Desire {
     /// Retrieves the total amount desired across all tiers for the desire.
     /// 
     /// If the desire is infinite, then it returns -1.
-    /// 
-    /// 
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use political_economy_core::objects::desire::Desire;
-    /// use political_economy_core::objects::desire::DesireItem;
-    ///
-    /// let desire = Desire{item: DesireItem::Product(0),start: 2, end: Some(10),
-    ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
-    /// assert_eq!(desire.total_desire(), 25.0);
-    /// ```
     pub fn total_desire(&self) -> f64 {
         if self.is_infinite() { return -1.0; }
 
@@ -166,16 +159,6 @@ impl Desire {
     /// measured in the number of tiers satisfied.
     /// 
     /// Does not include skipped tiers
-    /// # Examples
-    ///
-    /// ```
-    /// use political_economy_core::objects::desire::Desire;
-    /// use political_economy_core::objects::desire::DesireItem;
-    ///
-    /// let desire = Desire{item: DesireItem::Product(0),start: 2, end: Some(10),
-    ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
-    /// assert_eq!(desire.total_satisfaction(), 3.0);
-    /// ```
     pub fn total_satisfaction(&self) -> f64 {
         self.satisfaction / self.amount
     }
@@ -186,36 +169,25 @@ impl Desire {
     /// 
     /// If the tier is between its start and end tier, it returns
     /// the amount * the tiers belowe it's current tier.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use political_economy_core::objects::desire::Desire;
-    /// use political_economy_core::objects::desire::DesireItem;
-    ///
-    /// let desire = Desire{item: DesireItem::Product(0),start: 2, end: Some(10),
-    ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
-    /// assert_eq!(desire.total_desire_at_tier(&4), 10.0);
-    /// ```
-    pub fn total_desire_at_tier(&self, tier: &u64) -> f64 {
+    pub fn total_desire_at_tier(&self, tier: u64) -> Result<f64, String> {
         // if tier is below starting tier
-        if tier < &self.start {
-            return 0.0;
+        if !self.steps_on_tier(tier) {
+            return Err("Does not step on tier!".into());
         }
 
         // if it isn't stretched and we're at or above the
         // start
         if !self.is_stretched() {
-            return self.amount;
+            return Ok(self.amount);
         }
 
         // get the steps up to the given tier, +1
         let current_steps = (tier - self.start) / self.step + 1;
         // if current steps after last 
-        if self.end.is_some() && self.end.unwrap() < *tier {
-            return self.amount * (self.steps() as f64);
+        if self.end.is_some() && self.end.unwrap() < tier {
+            return Ok(self.amount * (self.steps() as f64));
         }
-        (current_steps as f64) * self.amount
+        Ok((current_steps as f64) * self.amount)
     }
 }
 

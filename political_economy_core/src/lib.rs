@@ -24,9 +24,11 @@ mod tests {
                 step: 0,
                 tags: vec![] };
             // normal change
-            assert!(test.change_end(10, 2).is_ok());
+            assert!(test.change_end(Some(10), 2).is_ok());
             // bad change (end and step don't coincide.)
-            assert!(test.change_end(10, 3).is_err());
+            assert!(test.change_end(Some(10), 3).is_err());
+            // good change (infinite desire)
+            assert!(test.change_end(None, 3).is_ok());
         }
 
         #[test]
@@ -41,10 +43,13 @@ mod tests {
                 step: 0,
                 tags: vec![] };
 
-            assert_eq!(test.steps(), 0);
+            assert_eq!(test.steps(), 1);
 
-            test.change_end(10, 2).expect("Do Check the end dumbass!");
+            test.change_end(Some(10), 2).expect("Do it right dumbass!");
             assert_eq!(test.steps(), 6);
+
+            test.change_end(None, 2).expect("Do it right dumbass!");
+            assert_eq!(test.steps(), 0);
         }
 
         #[test]
@@ -60,14 +65,14 @@ mod tests {
                 tags: vec![] };
             
             assert!(!test.is_stretched());
-            test.change_end(10, 2).expect("Stop being dumb!");
+            test.change_end(Some(10), 2).expect("Stop being dumb!");
             assert!(test.is_stretched());
             test.end = None;
             assert!(test.is_stretched());
         }
 
         #[test]
-        pub fn shew_is_infinite() {
+        pub fn show_is_infinite() {
             let mut test = Desire{ 
                 item: DesireItem::Product(0), 
                 start: 0, 
@@ -79,12 +84,146 @@ mod tests {
                 tags: vec![] };
             
             assert!(!test.is_infinite());
-            test.change_end(10, 2).expect("Stop being dumb!");
+            test.change_end(Some(10), 2).expect("Stop being dumb!");
             assert!(!test.is_infinite());
             test.end = None;
             assert!(test.is_infinite());
         }
 
+        #[test]
+        pub fn calculate_satisfaction_at_tier() {
+            let test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 2.0, 
+                satisfaction: 3.5,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![] };
+            
+            assert_eq!(test.satisfaction_at_tier(2).expect("Invalid!"), 0.75);
+            assert_eq!(test.satisfaction_at_tier(0).expect("Invalid!"), 1.0);
+            assert_eq!(test.satisfaction_at_tier(4).expect("Invalid!"), 0.0);
+            assert!(test.satisfaction_at_tier(1).is_err());
+        }
+    
+        #[test]
+        pub fn calculate_steps_to_tier_correctly() {
+            let test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 2.0, 
+                satisfaction: 3.5,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![] };
+
+            assert_eq!(test.steps_to_tier(2).expect("Error!"), 1);
+            assert_eq!(test.steps_to_tier(0).expect("Error!"), 0);
+            assert_eq!(test.steps_to_tier(4).expect("Error!"), 2);
+            assert!(test.steps_to_tier(1).is_err());
+        }
+
+        #[test]
+        pub fn calculate_steps_on_tier_correctly() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(10), 
+                amount: 2.0, 
+                satisfaction: 3.5,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![] };
+            
+            assert!(test.steps_on_tier(0));
+            assert!(!test.steps_on_tier(1));
+            assert!(test.steps_on_tier(2));
+            assert!(!test.steps_on_tier(12));
+
+            test.change_end(None, 2).expect("Error!");
+            assert!(test.steps_on_tier(0));
+            assert!(!test.steps_on_tier(1));
+            assert!(test.steps_on_tier(2));
+            assert!(test.steps_on_tier(12));
+        }
+
+        #[test]
+        pub fn check_if_fully_satisfied() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(10), 
+                amount: 2.0, 
+                satisfaction: 3.5,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![] };
+            
+            assert!(!test.is_fully_satisfied());
+            test.satisfaction = 12.0;
+            assert!(test.is_fully_satisfied());
+        }
+    
+        #[test]
+        pub fn calculate_total_desire() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(10), 
+                amount: 2.0, 
+                satisfaction: 3.5,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![] };
+            
+            assert_eq!(test.total_desire(), 12.0);
+            test.change_end(Some(18), 2).expect("Error!");
+            assert_eq!(test.total_desire(), 20.0);
+            test.change_end(None, 2).expect("ERROR!");
+            assert_eq!(test.total_desire(), -1.0);
+        }
+
+        #[test]
+        pub fn calculate_total_satisfaction() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(10), 
+                amount: 2.0, 
+                satisfaction: 3.5,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![] };
+
+            assert_eq!(test.total_satisfaction(), 1.75);
+            test.satisfaction = 9.0;
+            assert_eq!(test.total_satisfaction(), 4.5);
+            test.amount = 3.0;
+            assert_eq!(test.total_satisfaction(), 3.0);
+        }
+
+        #[test]
+        pub fn calculate_total_desire_at_tier() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(10), 
+                amount: 2.0, 
+                satisfaction: 3.5,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![] };
+
+            assert_eq!(test.total_desire_at_tier(2).expect("Error"), 4.0);
+            assert_eq!(test.total_desire_at_tier(0).expect("Error"), 2.0);
+            assert!(test.total_desire_at_tier(1).is_err());
+            test.end = None;
+            test.step = 0;
+            assert_eq!(test.total_desire_at_tier(0).expect("Error"), 2.0);
+        }
     }
 
     mod data_manager_tests {
