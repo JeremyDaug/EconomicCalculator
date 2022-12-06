@@ -13,6 +13,68 @@ mod tests {
         use crate::objects::desire::{Desire, DesireItem};
 
         #[test]
+        pub fn get_satisfaction_up_to_tier() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 0,
+                tags: vec![] };
+
+                assert_eq!(test.satisfaction_up_to_tier(), 0);
+                // stretched
+                test.change_end(Some(10), 2).expect("Error!");
+                assert_eq!(test.satisfaction_up_to_tier(), 0);
+                test.satisfaction = 5.0;
+                assert_eq!(test.satisfaction_up_to_tier(), 10);
+                test.satisfaction = 5.5;
+                assert_eq!(test.satisfaction_up_to_tier(), 10);
+
+                // infinite
+                test.change_end(Some(10), 2).expect("Error!");
+                assert_eq!(test.satisfaction_up_to_tier(), 0);
+                test.satisfaction = 5.0;
+                assert_eq!(test.satisfaction_up_to_tier(), 4);
+                test.satisfaction = 5.5;
+                assert_eq!(test.satisfaction_up_to_tier(), 5);
+        }
+
+        #[test]
+        pub fn get_next_tier_up_correctly() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 10, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 0,
+                tags: vec![] };
+            
+            // single tier
+            assert_eq!(test.get_next_tier_up(9).expect("Error!"), 10);
+            assert!(test.get_next_tier_up(10).is_err());
+            assert!(test.get_next_tier_up(11).is_err());
+
+            // stretched with end
+            test.change_end(Some(100), 10).expect("Bad!");
+            assert_eq!(test.get_next_tier_up(9).expect("Error!"), 10); // before start.
+            assert_eq!(test.get_next_tier_up(10).expect("Error"), 20); // at start
+            assert_eq!(test.get_next_tier_up(11).expect("Error"), 20); // between
+            assert!(test.get_next_tier_up(100).is_err()); // end
+            assert!(test.get_next_tier_up(101).is_err()); // end ++
+
+            // infinite
+            test.change_end(None, 10).expect("Bad!");
+            assert_eq!(test.get_next_tier_up(9).expect("Error!"), 10); // before start.
+            assert_eq!(test.get_next_tier_up(10).expect("Error"), 20); // at start
+            assert_eq!(test.get_next_tier_up(11).expect("Error"), 20); // between
+        }
+
+        #[test]
         pub fn change_end_correctly() {
             let mut test = Desire{ 
                 item: DesireItem::Product(0), 

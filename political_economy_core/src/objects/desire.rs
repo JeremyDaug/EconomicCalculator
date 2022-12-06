@@ -1,3 +1,4 @@
+
 /// Desires
 /// 
 /// Desires are things that are desired and used in a the Desires class.
@@ -16,6 +17,58 @@ pub struct Desire {
 }
 
 impl Desire {
+
+    /// Adds the given value to our satisfaction, capping at our maximum and
+    /// returning the excess.
+    pub fn add_satisfaction(&mut self, add: f64) -> f64 {
+
+    }
+
+    /// Calculates what tier this desire is satisfied to, stopping at the last tier that
+    /// has any satisfaction in it.
+    pub fn satisfaction_up_to_tier(&self) -> u64 {
+        let total_satisfaction = self.total_satisfaction();
+        let satisfied_steps = total_satisfaction.floor() as u64;
+
+        if self.is_stretched() {
+            if self.is_infinite() {
+                return self.start + satisfied_steps as u64 * self.step;
+            }
+            let cap = std::cmp::min(self.steps(), satisfied_steps);
+            return self.start + cap as u64 * self.step;
+        }
+
+        // If not stretched, then it can only go up to start.
+        return self.start;
+    }
+
+    /// Get Next Tier up takes a given tier and gets the next valid tier up.
+    /// 
+    /// Returns err if no tier is next. Otherwise, returns the next valid tier.
+    pub fn get_next_tier_up(&self, tier: u64) -> Result<u64, String> {
+        if tier < self.start {
+            return Ok(self.start);
+        }
+
+        if (self.end.is_some() && tier >= self.end.unwrap()) ||
+            !self.is_stretched() {
+            // if we are at or after the end or at the start and no later steps,
+            // then we have no valid tiers.
+            return Err("No Valid Next Tier.".into());
+        }
+
+        let next = tier + self.step - ((tier - self.start) % self.step);
+
+        if let Some(end) = self.end {
+            if end < next {
+                // if the predicted next tier is after our
+                return Err("No Valid Next Tier.".into());
+            }
+        }
+
+        Ok(next)
+    }
+
     /// Changes the end and step for the desire. 
     pub fn change_end(&mut self, end: Option<u64>, step: u64) -> Result<(), String> {
         // check that the end can be stepped on by the new values
@@ -123,17 +176,6 @@ impl Desire {
     }
 
     /// Checks if the desire is fully satisfied or not.
-    /// 
-    /// # Examples
-    ///
-    /// ```
-    /// use political_economy_core::objects::desire::Desire;
-    /// use political_economy_core::objects::desire::DesireItem;
-    ///
-    /// let desire = Desire{item: DesireItem::Product(0),start: 2, end: Some(10),
-    ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
-    /// assert_eq!(desire.is_fully_satisfied(), false);
-    /// ```
     pub fn is_fully_satisfied(&self) -> bool {
         if self.is_infinite() {
             return false;
