@@ -21,7 +21,20 @@ impl Desire {
     /// Adds the given value to our satisfaction, capping at our maximum and
     /// returning the excess.
     pub fn add_satisfaction(&mut self, add: f64) -> f64 {
+        // if infinite, add it all, then return none
+        if self.is_infinite() {
+            self.satisfaction += add;
+            return 0.0;
+        }
 
+        // since it's not infinite, we need to find how much it can accept
+        // then limit ourselves to that.
+        let unsatisfied = self.total_desire() - self.satisfaction;
+
+        let take = add.min(unsatisfied);
+
+        self.satisfaction += take;
+        add - take
     }
 
     /// Calculates what tier this desire is satisfied to, stopping at the last tier that
