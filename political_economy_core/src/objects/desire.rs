@@ -17,9 +17,10 @@ pub struct Desire {
 }
 
 impl Desire {
-
     /// Adds the given value to our satisfaction, capping at our maximum and
     /// returning the excess.
+    /// 
+    /// Not meant for negative values, but they are accepted.
     pub fn add_satisfaction(&mut self, add: f64) -> f64 {
         // if infinite, add it all, then return none
         if self.is_infinite() {

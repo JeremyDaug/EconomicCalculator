@@ -13,6 +13,28 @@ mod tests {
         use crate::objects::desire::{Desire, DesireItem};
 
         #[test]
+        pub fn correctly_add_satisfaction() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![] };
+
+            // infinite add, take everything.
+            let result = test.add_satisfaction(100.0);
+            assert_eq!(result, 0.0);
+            // finite add, return partial
+            test.satisfaction = 0.0;
+            test.change_end(Some(9), 1).expect("Bad Stuff!");
+            let result = test.add_satisfaction(100.0);
+            assert_eq!(result, 90.0);
+        }
+
+        #[test]
         pub fn get_satisfaction_up_to_tier() {
             let mut test = Desire{ 
                 item: DesireItem::Product(0), 
