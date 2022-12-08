@@ -37,6 +37,11 @@ pub struct Species {
     /// 
     /// Cannot be negative, a value of 0 means no new pops are born naturally.
     pub birth_rate: f64,
+    /// The base mortality rate of the species, representing the base line chance of
+    /// death for the species.
+    /// 
+    /// Cannot be negative values, extreme values should be avoided.
+    pub mortality_rate: f64,
     // Preferences, Fill in later and Iron them out properly.
 }
 
@@ -56,19 +61,33 @@ pub struct Cohort {
     /// If this cohort is the last cohort of the species, this is how long they 
     /// live on average after entering this cohort.
     pub span: u64, 
-    /// How likely a member of this cohort is to die due to various, inescapable
-    /// causes (illness, excess risk taking, whatever)
+    /// The birth rate bonus or malus for this cohort. This is additive with the
+    /// base species and Subtype birth rates. This cannot push Birthrate below 0.
+    pub birth_rate: f64,
+    /// How likely a member of this cohort is to die due to various natural 
+    /// causes (illness, excess risk taking, whatever). This is additive with 
+    /// Mortality Rate from Subtype.
     pub mortality_rate: f64,
     /// how much more or less productive this cohort is from the baseline of the
     /// species.
+    /// 
+    /// This is multiplicative 
     pub productivity_modifier: f64,
     /// The various modifiers and tags that effect this cohort.
     pub cohort_tags: Vec<CohortTag>,
+    /// The desires the cohort has different from the base species.
+    /// 
+    /// Desires here may have negative values, and if they do they cancel out the desire
+    /// from the species. This subtraction cannot push the desire below 0.
+    pub cohort_desires: Vec<Desire>,
 }
 
 #[derive(Debug)]
 pub struct Subtype {
-
+    /// The name of the Subtype
+    pub name: String,
+    /// The weight chance of a member of this species being born as this subtype.
+    pub weight: f64,
 }
 
 /// Tags which are available to a species and modify how they work in the system.
@@ -139,9 +158,6 @@ pub enum CohortTag {
     /// If below 1 they are penalized in their learning.
     /// If above 1 they are particularly gifted in that skill and pick it up faster.
     SkillGroupModifier{skill_group: u64, modifier: f64},
-    /// This cohort cannot produce children for whatever reason, perhaps they have yet to 
-    /// develop, or perhaps their species ages out of fertility.
-    Infertile,
     
 }
 
