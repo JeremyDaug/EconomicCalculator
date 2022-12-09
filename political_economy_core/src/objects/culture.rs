@@ -5,8 +5,8 @@ pub struct Culture{
     pub id: u64,
     pub name: String,
     pub variant_name: String,
-    pub birth_rate_mod: f64,
-    pub death_rate_mod: f64,
+    pub birth_rate_modifier: f64,
+    pub death_rate_modifier: f64,
     pub desires: Vec<Desire>,
     // tags
     pub relations: Vec<Culture>
