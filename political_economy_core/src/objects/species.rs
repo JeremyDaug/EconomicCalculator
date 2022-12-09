@@ -1,9 +1,14 @@
-use super::desire::Desire;
+use std::collections::HashMap;
 
+use super::desire::Desire;
 
 /// A Species, the biological Reality of a Pop which they are built with.
 /// 
 /// Requires either long time frames or biotech to overwrite biology.
+/// 
+/// Will eventually contain data for Cohorts and Subtypes.
+/// 
+/// Some of it is written, but it has been commented out.
 #[derive(Debug)]
 pub struct Species {
     /// The Id of the species.
@@ -23,10 +28,9 @@ pub struct Species {
     /// Related variant species, used for organization.
     pub relations: Vec<u64>,
     /// The cohorts which make up this species, aranged by the order in which they occur.
-    pub cohorts: Vec<Cohort>,
+    //pub cohorts: Vec<Cohort>,
     /// The Subtypes which the species can have and be born into.
-    pub subtypes: Vec<Subtype>,
-
+    //pub subtypes: Vec<Subtype>,
     /// How productive the species is at a basic level. 
     /// 
     /// A value of 1 representing being able to do 1 human hour's worth of work per hour.
@@ -44,26 +48,62 @@ pub struct Species {
     /// Cannot be negative values, extreme values should be avoided.
     pub mortality_rate: f64,
     // Preferences, Fill in later and Iron them out properly.
+    /// The summarized effects of a species and cohort combo. 
+    /// The indices of these are defined such that
+    /// cohort_index + (subtype_index * len(cohorts)) = index of cohort + subtype.
+    pub data_table: Vec<SpeciesSubentry>,
+}
+
+#[derive(Debug)]
+pub struct SpeciesSubentry {
+    /// The summarized desires for a member of this species+cohort+subtype
+    pub desires: Vec<Desire>,
+    /// The final productivity for a member of this species+cohort+subtype.
+    pub productivity: f64,
+    /// The final birth rate for a member of this species+cohort+subtype.
+    pub birth_rate: f64,
+    /// The final mortality rate for a member of this species+cohort+subtype.
+    pub mortality_rate: f64,
+    /// The final skill modifiers for a member of this species+cohort+subtype.
+    pub skill_modifiers: HashMap<u64, f64>,
+    /// The final skill group modifiers for a member of this species+cohort+subtype.
+    pub skill_group_modifiers: HashMap<u64, f64>,
 }
 
 impl Species {
-    pub fn new(id: u64, 
-        name: String, 
-        variant_name: String, 
-        desires: Vec<Desire>, 
-        tags: Vec<SpeciesTag>,
-        relations: Vec<u64>, 
-        cohorts: Vec<Cohort>, 
-        subtypes: Vec<Subtype>, 
-        base_productivity: f64, 
-        birth_rate: f64, 
-        mortality_rate: f64) -> Self { Self { id, name, variant_name, desires, tags, relations, cohorts, subtypes, base_productivity, birth_rate, mortality_rate } }
-
     pub fn get_name(&self) -> String {
         format!("{}({})", self.name, self.variant_name)
     }
-}
 
+    /*
+    /// Updates the data table in the species, consolidating the cohort and subtype effects
+    /// into a singular lookup table.
+    pub fn update_data_table(&mut self) {
+        // clear out the old data for simplicity
+        self.data_table.clear();
+        // iterate over both and summarize their effects.
+        for cohort in self.cohorts.iter() {
+            for subtype in self.subtypes.iter() {
+                let mut entry = SpeciesSubentry{ 
+                    desires: vec![], 
+                    productivity: self.base_productivity, 
+                    birth_rate: self.birth_rate, 
+                    mortality_rate: self.mortality_rate, 
+                    skill_modifiers: HashMap::new(), 
+                    skill_group_modifiers: HashMap::new()
+                };
+            }
+        }
+    }
+
+    pub fn get_subentry(&self, cohort_idx: usize, subtype_idx: usize) -> Result<&SpeciesSubentry, String> {
+        match self.data_table.get(cohort_idx + (subtype_idx * self.cohorts.len())) {
+            Some(val) => Ok(val),
+            None => Err("Invalid Cohort or Species Index given".into())
+        }
+    } */
+}
+/*
 /// Cohort is a subdivision of a Species. Pops are born into the first cohort listed
 /// in the Species, and as time passes they eventually move upwards into different
 /// cohorts. The last cohort is the one which continues and it's average span is the
@@ -100,8 +140,6 @@ pub struct Cohort {
 }
 
 impl Cohort {
-    pub fn new(name: String, 
-        span: u64, birth_rate: f64, mortality_rate: f64, productivity_modifier: f64, tags: Vec<CohortTag>, desires: Vec<Desire>) -> Self { Self { name, span, birth_rate, mortality_rate, productivity_modifier, tags, desires } }
 }
 
 /// Subtype is a subgroup of the species which divides based on innate phenotypes.
@@ -133,14 +171,7 @@ pub struct Subtype {
 }
 
 impl Subtype {
-    pub fn new(name: String, 
-        weight: f64, 
-        birth_rate: f64, 
-        mortality_rate: f64, 
-        productivity_modifier: f64, 
-        subtype_tags: Vec<SubtypeTag>, 
-        desires: Vec<Desire>) -> Self { Self { name, weight, birth_rate, mortality_rate, productivity_modifier, subtype_tags, desires } }
-}
+} */
 
 /// Tags which are available to a species and modify how they work in the system.
 #[derive(Debug)]
@@ -201,7 +232,7 @@ pub enum SpeciesTag {
     /// If above 1 they are particularly gifted in that skill and pick it up faster.
     SkillGroupModifier{skill_group: u64, modifier: f64}
 }
-
+/*
 /// Tags which are available to a Species' Cohort and modify how they work in the system.
 #[derive(Debug)]
 pub enum CohortTag {
@@ -276,3 +307,4 @@ pub enum SubtypeTag {
     /// If above 1 they are particularly gifted in that skill and pick it up faster.
     SkillGroupModifier{skill_group: u64, modifier: f64}
 }
+*/
