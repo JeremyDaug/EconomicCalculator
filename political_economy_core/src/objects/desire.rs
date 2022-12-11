@@ -13,10 +13,24 @@ pub struct Desire {
     pub satisfaction: f64,
     pub reserved: f64,
     pub step: u64,
-    pub tags: Vec<DesireTag>
+    // pub tags: Vec<DesireTag>
 }
 
 impl Desire {
+    pub fn is_match(&self, other: &Desire) -> bool {
+        if self.item != other.item ||
+            self.start != other.start ||
+            self.end != other.end ||
+            self.step != other.step {
+                // if any of these are not the same, we aren't equivalent.
+            return false;
+        }
+
+        
+
+        true
+    }
+
     /// Adds the given value to our satisfaction, capping at our maximum and
     /// returning the excess.
     /// 
@@ -261,11 +275,11 @@ pub enum DesireTag{
     Sporadic(u64),
     /// The item is not needed consistently, but instead periodically and
     /// consistently. The value given is how often they need 
-    Periodic { offset: u64, cycle: u64},
+    Periodic { offset: u64, cycle: u64 },
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DesireItem {
     Want(usize),
     Product(usize)
