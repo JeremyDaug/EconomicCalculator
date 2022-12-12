@@ -20,7 +20,18 @@ pub struct Demographics {
 
 impl Demographics {
     pub fn load_species(&mut self, _file_name: String) -> Result<String, String> {
-
+        let humie = Species{
+            id: todo!(),
+            name: todo!(),
+            variant_name: todo!(),
+            desires: todo!(),
+            tags: todo!(),
+            relations: todo!(),
+            base_productivity: todo!(),
+            birth_rate: todo!(),
+            mortality_rate: todo!(),
+            data_table: todo!(),
+        };
         Ok("No Problemo".into())
     }
 }
