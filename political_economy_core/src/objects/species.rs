@@ -38,7 +38,7 @@ pub struct Species {
     /// Extreme values are discouraged, and negative values are invalid.
     pub base_productivity: f64,
     /// The birthrate of the species assuming 'ideal' environment and no
-    /// contravening effects. 
+    /// contravening effects. This is per annum growth rate.
     /// 
     /// Cannot be negative, a value of 0 means no new pops are born naturally.
     pub birth_rate: f64,
