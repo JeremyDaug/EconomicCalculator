@@ -21,7 +21,8 @@ mod tests {
                 amount: 1.0, 
                 satisfaction: 0.0,
                 reserved: 0.0,
-                step: 1};
+                step: 1,
+                tags: vec![]};
 
             // infinite add, take everything.
             let result = test.add_satisfaction(100.0);
@@ -37,29 +38,47 @@ mod tests {
         pub fn get_satisfaction_up_to_tier() {
             let mut test = Desire{ 
                 item: DesireItem::Product(0), 
-                start: 0, 
+                start: 1, 
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
                 reserved: 0.0,
-                step: 0};
+                step: 0,
+                tags: vec![]};
 
-                assert_eq!(test.satisfaction_up_to_tier(), 0);
+                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                test.satisfaction = 0.5;
+                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                test.satisfaction = 1.0;
+                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                test.satisfaction = 1.5;
+                assert_eq!(test.satisfaction_up_to_tier(), 1);
                 // stretched
-                test.change_end(Some(10), 2).expect("Error!");
-                assert_eq!(test.satisfaction_up_to_tier(), 0);
-                test.satisfaction = 5.0;
+                test.change_end(Some(10), 1).expect("Error!");
+                test.satisfaction = 0.0;
+                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                test.satisfaction = 0.5;
+                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                test.satisfaction = 2.5;
+                assert_eq!(test.satisfaction_up_to_tier(), 3);
+                test.satisfaction = 10.0;
                 assert_eq!(test.satisfaction_up_to_tier(), 10);
-                test.satisfaction = 5.5;
+                test.satisfaction = 11.0;
                 assert_eq!(test.satisfaction_up_to_tier(), 10);
 
                 // infinite
-                test.change_end(Some(10), 2).expect("Error!");
-                assert_eq!(test.satisfaction_up_to_tier(), 0);
+                test.change_end(None, 1).expect("Error!");
+                test.satisfaction = 0.0;
+                assert_eq!(test.satisfaction_up_to_tier(), 1);
                 test.satisfaction = 5.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 4);
+                assert_eq!(test.satisfaction_up_to_tier(), 6);
                 test.satisfaction = 5.5;
-                assert_eq!(test.satisfaction_up_to_tier(), 5);
+                assert_eq!(test.satisfaction_up_to_tier(), 6);
+                test.satisfaction = 6.0;
+                assert_eq!(test.satisfaction_up_to_tier(), 7);
+                test.satisfaction = 100.6;
+                assert_eq!(test.satisfaction_up_to_tier(), 101);
+
         }
 
         #[test]
@@ -71,7 +90,8 @@ mod tests {
                 amount: 1.0, 
                 satisfaction: 0.0,
                 reserved: 0.0,
-                step: 0};
+                step: 0,
+                tags: vec![]};
             
             // single tier
             assert_eq!(test.get_next_tier_up(9).expect("Error!"), 10);
@@ -102,7 +122,8 @@ mod tests {
                 amount: 1.0, 
                 satisfaction: 0.0,
                 reserved: 0.0,
-                step: 0};
+                step: 0,
+                tags: vec![]};
             // normal change
             assert!(test.change_end(Some(10), 2).is_ok());
             // bad change (end and step don't coincide.)
@@ -120,7 +141,8 @@ mod tests {
                 amount: 1.0, 
                 satisfaction: 0.0,
                 reserved: 0.0,
-                step: 0};
+                step: 0,
+                tags: vec![]};
 
             assert_eq!(test.steps(), 1);
 
@@ -140,7 +162,8 @@ mod tests {
                 amount: 1.0, 
                 satisfaction: 0.0,
                 reserved: 0.0,
-                step: 0};
+                step: 0,
+                tags: vec![]};
             
             assert!(!test.is_stretched());
             test.change_end(Some(10), 2).expect("Stop being dumb!");
@@ -158,7 +181,8 @@ mod tests {
                 amount: 1.0, 
                 satisfaction: 0.0,
                 reserved: 0.0,
-                step: 0};
+                step: 0,
+                tags: vec![]};
             
             assert!(!test.is_infinite());
             test.change_end(Some(10), 2).expect("Stop being dumb!");
@@ -176,7 +200,8 @@ mod tests {
                 amount: 2.0, 
                 satisfaction: 3.5,
                 reserved: 0.0,
-                step: 2};
+                step: 2,
+                tags: vec![]};
             
             assert_eq!(test.satisfaction_at_tier(2).expect("Invalid!"), 0.75);
             assert_eq!(test.satisfaction_at_tier(0).expect("Invalid!"), 1.0);
@@ -193,7 +218,8 @@ mod tests {
                 amount: 2.0, 
                 satisfaction: 3.5,
                 reserved: 0.0,
-                step: 2};
+                step: 2,
+                tags: vec![]};
 
             assert_eq!(test.steps_to_tier(2).expect("Error!"), 1);
             assert_eq!(test.steps_to_tier(0).expect("Error!"), 0);
@@ -210,7 +236,8 @@ mod tests {
                 amount: 2.0, 
                 satisfaction: 3.5,
                 reserved: 0.0,
-                step: 2};
+                step: 2,
+                tags: vec![]};
             
             assert!(test.steps_on_tier(0));
             assert!(!test.steps_on_tier(1));
@@ -233,7 +260,8 @@ mod tests {
                 amount: 2.0, 
                 satisfaction: 3.5,
                 reserved: 0.0,
-                step: 2};
+                step: 2,
+                tags: vec![]};
             
             assert!(!test.is_fully_satisfied());
             test.satisfaction = 12.0;
@@ -249,7 +277,8 @@ mod tests {
                 amount: 2.0, 
                 satisfaction: 3.5,
                 reserved: 0.0,
-                step: 2};
+                step: 2,
+                tags: vec![]};
             
             assert_eq!(test.total_desire(), 12.0);
             test.change_end(Some(18), 2).expect("Error!");
@@ -267,7 +296,8 @@ mod tests {
                 amount: 2.0, 
                 satisfaction: 3.5,
                 reserved: 0.0,
-                step: 2};
+                step: 2,
+                tags: vec![]};
 
             assert_eq!(test.total_satisfaction(), 1.75);
             test.satisfaction = 9.0;
@@ -285,7 +315,8 @@ mod tests {
                 amount: 2.0, 
                 satisfaction: 3.5,
                 reserved: 0.0,
-                step: 2};
+                step: 2,
+                tags: vec![]};
 
             assert_eq!(test.total_desire_at_tier(2).expect("Error"), 4.0);
             assert_eq!(test.total_desire_at_tier(0).expect("Error"), 2.0);
@@ -957,8 +988,8 @@ mod tests {
             let result = result.unwrap();
 
             assert_eq!(result.id, 1);
-            assert_eq!(result.name, test_skill.name);
-            assert_eq!(result.variant_name, String::new());
+            assert_eq!(result.name, String::from("Labor"));
+            assert_eq!(result.variant_name, test_skill.name);
             assert_eq!(result.description, test_skill.description);
             assert_eq!(result.minimum_time, 0.0);
             assert!(result.process_parts.iter()

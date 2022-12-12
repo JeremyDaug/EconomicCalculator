@@ -13,7 +13,7 @@ pub struct Desire {
     pub satisfaction: f64,
     pub reserved: f64,
     pub step: u64,
-    // pub tags: Vec<DesireTag>
+    pub tags: Vec<DesireTag>
 }
 
 impl Desire {
@@ -62,8 +62,9 @@ impl Desire {
             if self.is_infinite() {
                 return self.start + satisfied_steps as u64 * self.step;
             }
-            let cap = std::cmp::min(self.steps(), satisfied_steps);
-            return self.start + cap as u64 * self.step;
+            let cap = std::cmp::min(self.steps() - 1, satisfied_steps);
+            return 
+            self.start + cap as u64 * self.step;
         }
 
         // If not stretched, then it can only go up to start.
