@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Species",""]]};
+window.SIDEBAR_ITEMS = {"enum":[["SpeciesTag","Tags which are available to a species and modify how they work in the system."]],"struct":[["Species","A Species, the biological Reality of a Pop which they are built with."],["SpeciesSubentry",""]]};

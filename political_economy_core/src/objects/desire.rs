@@ -1,9 +1,14 @@
+//! A Desire for a want or product.
 
 /// Desires
 /// 
 /// Desires are things that are desired and used in a the Desires class.
 /// It contains an item, either a want or product, and at minimum a tier
 /// at which it applies.
+/// 
+/// This will likely be broken up and simplified in the future, distinguishing
+/// between recorded desires, such as the desires of species, Cultures, etc, and
+/// working desires, which are used for satisfaction and trade guarantees.
 #[derive(Debug)]
 pub struct Desire {
     pub item: DesireItem,
@@ -17,6 +22,18 @@ pub struct Desire {
 }
 
 impl Desire {
+    /// Checks if a desire is a match for the current desire.
+    /// 
+    /// It matches on the 
+    /// 
+    /// - item (product/Want and Id)
+    /// - Start
+    /// - End
+    /// - Step
+    /// 
+    /// No other factors are used. This is used to make adding desires together easier.
+    /// 
+    /// Currently tags are not used. Be aware when using this.
     pub fn is_match(&self, other: &Desire) -> bool {
         if self.item != other.item ||
             self.start != other.start ||
@@ -25,9 +42,6 @@ impl Desire {
                 // if any of these are not the same, we aren't equivalent.
             return false;
         }
-
-        
-
         true
     }
 

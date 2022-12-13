@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"struct":[["Demographics","Demographics is the data handler for our demographic data. It stores all of our shared population data, making it available for reading during most phases and listing and recording during the population change phase."]]};

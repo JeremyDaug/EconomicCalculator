@@ -1,5 +1,3 @@
-//! Demographics
-//! 
 //! Demographics is the storage container and manager common demographic data
 //! like Species, Civilizations, Cultures, and Ideologies.
 //! 
@@ -12,9 +10,9 @@ use super::{species::Species, culture::Culture, desire::{Desire, DesireItem, Des
 /// listing and recording during the population change phase.
 pub struct Demographics {
     /// Non-specific Data for Species.
-    pub Species: Vec<Species>,
+    pub species: Vec<Species>,
     // civilization
-    pub Cultures: Vec<Culture>,
+    pub cultures: Vec<Culture>,
     // Ideology
 }
 
@@ -57,6 +55,52 @@ impl Demographics {
             step: 1, 
             tags: vec![] 
         };
+        humie.desires.push(food);
+        humie.desires.push(rest);
+
+        Ok("No Problemo".into())
+    }
+
+    pub fn load_cultures(&mut self, _file_name: String) -> Result<String, String> {
+        let mut normie = Species{
+            id: 0,
+            name: "Normie".into(),
+            variant_name: String::new(),
+            desires: vec![],
+            tags: vec![],
+            relations: vec![],
+            base_productivity: 1.0,
+            birth_rate: 0.02,
+            mortality_rate: 0.01,
+            data_table: vec![],
+        };
+
+        // food desires, the only Required items for a species currently.
+        // 1 unit prefered total, half is always necissary.
+        let food = Desire{ 
+            item: DesireItem::Want(1), 
+            start: 0, 
+            end: Some(1), 
+            amount: 0.5, 
+            satisfaction: 0.0, 
+            reserved: 0.0, 
+            step: 1, 
+            tags: vec![] 
+        };
+        // Rest desire, 0 required, 4 for health,
+        // 8 hours preferred.
+        let rest = Desire{ 
+            item: DesireItem::Want(0), 
+            start: 1, 
+            end: Some(2), 
+            amount: 4.0, 
+            satisfaction: 0.0, 
+            reserved: 0.0, 
+            step: 1, 
+            tags: vec![] 
+        };
+        normie.desires.push(food);
+        normie.desires.push(rest);
 
         Ok("No Problemo".into())
     }

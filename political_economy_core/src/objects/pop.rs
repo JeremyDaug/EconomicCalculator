@@ -1,21 +1,26 @@
+//! The storage unit of population groups.
+//! 
+//! Used for any productive, intellegent actor in the system. Does not include animal
+//! populations.
 use std::collections::HashMap;
 
 use super::{job::Job, firm::Firm, market::Market, skill::Skill, product::Product, species::Species, culture::Culture};
 
 #[derive(Debug)]
 pub struct Pop {
-    name: String,
-    count: u64,
-    job: Job,
-    firm: Firm,
-    market: Market,
-    skill: Skill,
-    lower_skill_level: f64,
-    higher_skill_level: f64,
-    property: HashMap<Product, f64>,
-    species: HashMap<Species, u64>,
+    pub id: u64,
+    pub name: String,
+    pub count: u64,
+    pub job: Job,
+    pub firm: Firm,
+    pub market: Market,
+    pub skill: Skill,
+    pub lower_skill_level: f64,
+    pub higher_skill_level: f64,
+    pub property: HashMap<Product, f64>,
+    pub species: HashMap<Species, u64>,
     // civilization
-    culture: HashMap<Culture, u64>
+    pub culture: HashMap<Culture, u64>
     // Ideology
     // Movements
     // Mood

@@ -69,24 +69,26 @@
 <span id="69">69</span>
 <span id="70">70</span>
 <span id="71">71</span>
+<span id="72">72</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use super</span>::{job::Job, firm::Firm, market::Market, skill::Skill, product::Product, species::Species, culture::Culture};
 
 <span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Pop {
-    name: String,
-    count: u64,
-    job: Job,
-    firm: Firm,
-    market: Market,
-    skill: Skill,
-    lower_skill_level: f64,
-    higher_skill_level: f64,
-    property: HashMap&lt;Product, f64&gt;,
-    species: HashMap&lt;Species, u64&gt;,
+    <span class="kw">pub </span>id: u64,
+    <span class="kw">pub </span>name: String,
+    <span class="kw">pub </span>count: u64,
+    <span class="kw">pub </span>job: Job,
+    <span class="kw">pub </span>firm: Firm,
+    <span class="kw">pub </span>market: Market,
+    <span class="kw">pub </span>skill: Skill,
+    <span class="kw">pub </span>lower_skill_level: f64,
+    <span class="kw">pub </span>higher_skill_level: f64,
+    <span class="kw">pub </span>property: HashMap&lt;Product, f64&gt;,
+    <span class="kw">pub </span>species: HashMap&lt;Species, u64&gt;,
     <span class="comment">// civilization
-    </span>culture: HashMap&lt;Culture, u64&gt;
+    </span><span class="kw">pub </span>culture: HashMap&lt;Culture, u64&gt;
     <span class="comment">// Ideology
     // Movements
     // Mood

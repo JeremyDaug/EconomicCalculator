@@ -1,3 +1,5 @@
+//! Species covers the biological nature of a pop.
+
 use std::collections::HashMap;
 
 use super::desire::Desire;
