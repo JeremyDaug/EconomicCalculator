@@ -7,9 +7,10 @@ pub struct Culture{
     pub variant_name: String,
     pub birth_rate_modifier: f64,
     pub death_rate_modifier: f64,
+    pub productivity_modifier: f64,
     pub desires: Vec<Desire>,
     // tags
-    pub relations: Vec<Culture>
+    pub relations: Vec<Culture>,
 }
 
 impl Culture {
