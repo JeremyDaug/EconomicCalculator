@@ -3,16 +3,18 @@
 //! 
 //! These are stored for reference here.
 
-use super::{species::Species, culture::Culture, desire::{Desire, DesireItem, DesireTag}};
+use std::collections::HashMap;
+
+use super::{species::Species, culture::Culture, desire::{Desire, DesireItem}};
 
 /// Demographics is the data handler for our demographic data. It stores all of our
 /// shared population data, making it available for reading during most phases and
 /// listing and recording during the population change phase.
 pub struct Demographics {
     /// Non-specific Data for Species.
-    pub species: Vec<Species>,
+    pub species: HashMap<usize, Species>,
     // civilization
-    pub cultures: Vec<Culture>,
+    pub cultures: HashMap<usize, Culture>,
     // Ideology
 }
 
@@ -33,7 +35,7 @@ impl Demographics {
             base_productivity: 1.0,
             birth_rate: 0.02,
             mortality_rate: 0.01,
-            data_table: vec![],
+            //data_table: vec![],
         };
 
         // food desires, the only Required items for a species currently.
@@ -62,6 +64,8 @@ impl Demographics {
         };
         humie.desires.push(food);
         humie.desires.push(rest);
+
+        self.species.insert(humie.id, humie);
 
         Ok("No Problemo".into())
     }
@@ -149,7 +153,7 @@ impl Demographics {
         normie.desires.push(fashion);
         normie.desires.push(wealth);
 
-        self.cultures.push(normie);
+        self.cultures.insert(normie.id, normie);
 
         Ok("No Problemo".into())
     }

@@ -2,7 +2,7 @@ use super::desire::Desire;
 
 #[derive(Debug)]
 pub struct Culture{
-    pub id: u64,
+    pub id: usize,
     pub name: String,
     pub variant_name: String,
     pub birth_rate_modifier: f64,

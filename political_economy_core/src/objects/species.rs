@@ -14,7 +14,7 @@ use super::desire::Desire;
 #[derive(Debug)]
 pub struct Species {
     /// The Id of the species.
-    pub id: u64,
+    pub id: usize,
     /// The Primary name of the species.
     pub name: String,
     /// The Secondary Name of the species, used for sibling species.
@@ -28,7 +28,7 @@ pub struct Species {
     /// Mostly Placeholder.
     pub tags: Vec<SpeciesTag>,
     /// Related variant species, used for organization.
-    pub relations: Vec<u64>,
+    pub relations: Vec<usize>,
     /// The cohorts which make up this species, aranged by the order in which they occur.
     //pub cohorts: Vec<Cohort>,
     /// The Subtypes which the species can have and be born into.
@@ -50,10 +50,11 @@ pub struct Species {
     /// Cannot be negative values, extreme values should be avoided.
     pub mortality_rate: f64,
     // Preferences, Fill in later and Iron them out properly.
-    /// The summarized effects of a species and cohort combo. 
-    /// The indices of these are defined such that
-    /// cohort_index + (subtype_index * len(cohorts)) = index of cohort + subtype.
-    pub data_table: Vec<SpeciesSubentry>,
+
+    // The summarized effects of a species and cohort combo. 
+    // The indices of these are defined such that
+    // cohort_index + (subtype_index * len(cohorts)) = index of cohort + subtype.
+    // pub data_table: Vec<SpeciesSubentry>,
 }
 
 #[derive(Debug)]

@@ -415,7 +415,7 @@ mod tests {
             println!("----+------------------");
             println!("| id|name");
             for id in test.pops.keys().sorted() {
-                println!("{:>3} | {:<}", id, test.pops[id].name());
+                println!("{:>3} | {:<}", id, test.pops[id].name);
             }
 
             println!("----- Territories -----");

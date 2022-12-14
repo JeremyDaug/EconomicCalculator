@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use super::{territory::Territory, product::Product, firm::Firm, pop::Pop};
-
 #[derive(Debug)]
 pub struct Market {
     pub id: usize,
