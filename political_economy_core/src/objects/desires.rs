@@ -14,6 +14,8 @@ pub struct Desires {
     pub items: Vec<Desire>,
     /// The property currently owned bey the actor.
     pub property: HashMap<usize, f64>,
+    /// The wants stored and not used up yet.
+    pub want_store: HashMap<usize, f64>,
     /// The data of our succes in shopping.
     pub shopping_data: HashMap<usize, DesireInfo>,
 }
@@ -37,6 +39,11 @@ impl Desires {
     /// Adds a number of units to the property.
     pub fn add_property(&mut self, product: usize, amount: &f64) {
         *self.property.entry(product).or_insert(0.0) += amount;
+    }
+
+    /// Adds a number of wants.
+    pub fn add_want(&mut self, want: usize, amount: &f64) {
+        *self.want_store.entry(want).or_insert(0.0) += amount;
     }
 
     /// Adds a desire to our collection.
@@ -64,6 +71,44 @@ impl Desires {
         // if it doesn't already exist, duplicate and insert.
         let dup = desire.clone();
         self.items.push(dup);
+    }
+
+    /// Gets the difference in value between the items in and the 
+    /// items out given the current state of the desires.
+    /// 
+    /// If items are on an equal tier then they are equal on a 
+    /// unit-per-unit basis. For each tier of separation the value
+    /// diverges geometrically. For every tier of separation the
+    /// value of an item declines by 0.9^(n) per unit, where n is
+    /// the difference between the lower and higher tier. 
+    /// 
+    /// If item_out is not currently desired (either having no desires 
+    /// which want it or a desire which matches, but it is totally 
+    /// satisfied) then it's value is equal to 0.
+    /// 
+    /// The value returned is the difference between the item_in's 
+    /// value and the item_out's value. If the value is negative, 
+    /// than the items out are more valueable than the items in at
+    /// this moment, if positive then they are less valueable.
+    /// 
+    /// # Example
+    /// 
+    /// Item **A** is on Tier 5, Item **B** is on tier 6.
+    /// 
+    /// The value of **A** = 1 / unit and **B** = 0.9 / unit
+    /// 
+    /// If **B** is on tier 10 then
+    /// 
+    /// **B** = 0.9^5 / unit.
+    pub fn barter_value(&self, item_in: (usize, f64), item_out: (usize,f64)) -> f64 {
+        todo!("Needs a function to find the lowest desire tier which can accept an item. Products only.")
+        // 0.0
+    }
+
+    /// Checks the desires to see if the one being asked would accept
+    /// a barter. If the items in are considered 
+    pub fn check_barter(&self, item_out: (usize, f64), items_in: HashMap<usize, f64>) -> f64 {
+        false
     }
 }
 
