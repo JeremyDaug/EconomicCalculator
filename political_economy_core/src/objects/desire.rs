@@ -9,7 +9,7 @@
 /// This will likely be broken up and simplified in the future, distinguishing
 /// between recorded desires, such as the desires of species, Cultures, etc, and
 /// working desires, which are used for satisfaction and trade guarantees.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Desire {
     pub item: DesireItem,
     pub start: u64,
@@ -279,7 +279,7 @@ impl Desire {
 /// The tags a desire can be marked by, modifying how the desire is viewed.
 /// Many of these alter how they are treated, removing them from common
 /// calculations.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum DesireTag{
     /// The person does not actually desire this item, if this item is 
     /// satisfied, it instead increases their chance of sickness and death.
@@ -294,7 +294,7 @@ pub enum DesireTag{
 }
 
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DesireItem {
     Want(usize),
     Product(usize)
