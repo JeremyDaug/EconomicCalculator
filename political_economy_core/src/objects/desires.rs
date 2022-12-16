@@ -6,12 +6,14 @@
 
 use std::collections::HashMap;
 
+use itertools::Itertools;
+
 use super::desire::{Desire};
 
 #[derive(Debug)]
 pub struct Desires {
     /// All of the desires we are storing and looking over.
-    pub items: Vec<Desire>,
+    pub desires: Vec<Desire>,
     /// The property currently owned bey the actor.
     pub property: HashMap<usize, f64>,
     /// The wants stored and not used up yet.
@@ -30,8 +32,9 @@ impl Desires {
                 DesireInfo::new());
             }
         Desires {
-            items: desires,
+            desires,
             property: HashMap::new(),
+            want_store: HashMap::new(),
             shopping_data,
         }
     }
@@ -56,21 +59,21 @@ impl Desires {
     /// 
     /// If a desire is reduced to 0 or less, then it will be removed.
     pub fn add_desire(&mut self, desire: &Desire) {
-        let existing_position = self.items.iter().position(|x| x.is_match(desire));
+        let existing_position = self.desires.iter().position(|x| x.is_match(desire));
         
         // if the desire is a match for an exsiting one, add to that.
         if let Some(pos) = existing_position {
-            self.items[pos].amount += desire.amount;
+            self.desires[pos].amount += desire.amount;
             // if this match was subtracted such that we are now at or below 0, remove it entirely.
-            if self.items[pos].amount <= 0.0 {
-                self.items.remove(pos);
+            if self.desires[pos].amount <= 0.0 {
+                self.desires.remove(pos);
             }
             return;
         }
 
         // if it doesn't already exist, duplicate and insert.
         let dup = desire.clone();
-        self.items.push(dup);
+        self.desires.push(dup);
     }
 
     /// Gets the difference in value between the items in and the 
@@ -105,10 +108,40 @@ impl Desires {
         // 0.0
     }
 
+    pub fn get_lowest_unsatisfied_tier(&self, item: usize) -> Option<u64> {
+        let possible = self.desires.iter()
+            .filter(|x| x.item.is_this_product(&item)).collect_vec();
+        // if any possible, go over them and select the one with the lowest unsatisfied tier.
+        if possible.len() > 0 {
+            let result = possible.iter().map(|x| {
+                let sat = x.unsatisfied_to_tier();
+                match sat {
+                    Some(val) => val,
+                    None => u64::MAX
+                }
+            });
+            
+        }
+        // if not found in any, return none, meaning there are no tiers which need more of the item.
+        None
+    }
+
     /// Checks the desires to see if the one being asked would accept
     /// a barter. If the items in are considered 
     pub fn check_barter(&self, item_out: (usize, f64), items_in: HashMap<usize, f64>) -> f64 {
-        false
+        0.0
+    }
+
+    /// Used to walk up the tiers of our desires.
+    fn walk_up_tiers(&mut self, tier: u64, idx: usize) -> Option<(u64, usize)> {
+        // any desire has a step above here, return true.
+        while self.desires.iter().any(|x| {
+            x.is_infinite() || matches!(x.end, Some(end) if end > tier)
+        }) {
+
+        }
+
+        None
     }
 }
 

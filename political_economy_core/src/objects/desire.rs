@@ -58,7 +58,8 @@ impl Desire {
 
         // since it's not infinite, we need to find how much it can accept
         // then limit ourselves to that.
-        let unsatisfied = self.total_desire() - self.satisfaction;
+        let unsatisfied = self.total_desire()
+            .expect("Infinite desire given. How'd you get here?") - self.satisfaction;
 
         let take = add.min(unsatisfied);
 
@@ -66,38 +67,49 @@ impl Desire {
         add - take
     }
 
-    /// Calculates what tier this desire is satisfied to, stopping at the last tier that
-    /// has any satisfaction in it.
-    pub fn satisfaction_up_to_tier(&self) -> u64 {
+    /// Calculates what tier this desire is satisfied to, stopping at the last tier
+    /// that has any satisfaction in it. If it fully fills it's highest tier
+    /// it returns that tier.
+    /// 
+    /// IE. Start = 1, Step size 1, amount / level 1.0
+    /// 
+    /// Satisfaction = 100. Highest level satisfied = 100 (not 101).
+    /// 
+    /// If the satisfaction is 0, it returns None.
+    pub fn satisfaction_up_to_tier(&self) -> Option<u64> {
+        // sanity check for 0 on tier 0.
+        if self.satisfaction == 0.0 {
+            return None;
+        }
+
         let total_satisfaction = self.total_satisfaction();
-        let satisfied_steps = total_satisfaction.floor() as u64;
+        let satisfied_steps = total_satisfaction.ceil() as u64 - 1;
 
         if self.is_stretched() {
             if self.is_infinite() {
-                return self.start + satisfied_steps as u64 * self.step;
+                return Some(self.start + satisfied_steps as u64 * self.step);
             }
             let cap = std::cmp::min(self.steps() - 1, satisfied_steps);
-            return 
-            self.start + cap as u64 * self.step;
+            return Some(self.start + cap as u64 * self.step);
         }
 
         // If not stretched, then it can only go up to start.
-        return self.start;
+        return Some(self.start);
     }
 
     /// Get Next Tier up takes a given tier and gets the next valid tier up.
     /// 
     /// Returns err if no tier is next. Otherwise, returns the next valid tier.
-    pub fn get_next_tier_up(&self, tier: u64) -> Result<u64, String> {
+    pub fn get_next_tier_up(&self, tier: u64) -> Option<u64> {
         if tier < self.start {
-            return Ok(self.start);
+            return Some(self.start);
         }
 
         if (self.end.is_some() && tier >= self.end.unwrap()) ||
             !self.is_stretched() {
             // if we are at or after the end or at the start and no later steps,
             // then we have no valid tiers.
-            return Err("No Valid Next Tier.".into());
+            return None;
         }
 
         let next = tier + self.step - ((tier - self.start) % self.step);
@@ -105,11 +117,11 @@ impl Desire {
         if let Some(end) = self.end {
             if end < next {
                 // if the predicted next tier is after our
-                return Err("No Valid Next Tier.".into());
+                return None;
             }
         }
 
-        Ok(next)
+        Some(next)
     }
 
     /// Changes the end and step for the desire. 
@@ -224,7 +236,9 @@ impl Desire {
             return false;
         }
 
-        if self.total_desire() == self.satisfaction { return true; }
+        if let Some(value) = self.total_desire() {
+            return self.satisfaction >= value;
+        }
 
         false
     }
@@ -232,12 +246,12 @@ impl Desire {
     /// Retrieves the total amount desired across all tiers for the desire.
     /// 
     /// If the desire is infinite, then it returns -1.
-    pub fn total_desire(&self) -> f64 {
-        if self.is_infinite() { return -1.0; }
+    pub fn total_desire(&self) -> Option<f64> {
+        if self.is_infinite() { return None; }
 
-        if !self.is_stretched() { return self.amount; }
+        if !self.is_stretched() { return Some(self.amount); }
 
-        self.steps() as f64 * self.amount
+        Some(self.steps() as f64 * self.amount)
     }
 
     /// Calculates the total satisfaction of the desire, returning it
@@ -273,6 +287,34 @@ impl Desire {
             return Ok(self.amount * (self.steps() as f64));
         }
         Ok((current_steps as f64) * self.amount)
+    }
+
+    /// Walking up the desire, it gets the first tier which has any unsatisfied
+    /// quantity.
+    /// 
+    /// If totally sastisfied at a tier, it will return the next available tier,
+    /// or None.
+    /// 
+    /// If it is totally satisfied, it returns None.
+    pub fn unsatisfied_to_tier(&self) -> Option<u64> {
+
+        if self.is_fully_satisfied() {
+            return None;
+        }
+
+        let total_satisfaction = self.total_satisfaction();
+        let satisfied_steps = total_satisfaction.floor() as u64;
+
+        if self.is_stretched() {
+            if self.is_infinite() {
+                return Some(self.start + satisfied_steps as u64 * self.step);
+            }
+            let cap = std::cmp::min(self.steps() - 1, satisfied_steps);
+            return Some(self.start + cap as u64 * self.step);
+        }
+
+        // If not stretched, then it can only go up to start.
+        return Some(self.start);
     }
 }
 
@@ -323,6 +365,22 @@ impl DesireItem {
         match self {
             DesireItem::Product(_) => true,
             DesireItem::Want(_) => false,
+        }
+    }
+
+    /// Checks if this is a specific product.
+    pub fn is_this_product(&self, item: &usize) -> bool {
+        match self {
+            DesireItem::Product(val) => val == item,
+            DesireItem::Want(_) => false
+        }
+    }
+
+    /// Checks if this is a specific want.
+    pub fn is_this_want(&self, item: &usize) -> bool {
+        match self {
+            DesireItem::Product(_) => false,
+            DesireItem::Want(val) => val == item
         }
     }
 }

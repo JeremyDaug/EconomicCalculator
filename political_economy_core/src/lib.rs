@@ -35,6 +35,54 @@ mod tests {
         }
 
         #[test]
+        pub fn get_unsatisfied_to_tier() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 1, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 0,
+                tags: vec![]};
+
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 1);
+                test.satisfaction = 0.5;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 1);
+                test.satisfaction = 1.0;
+                assert_eq!(test.unsatisfied_to_tier(), Option::None);
+                test.satisfaction = 1.5;
+                assert_eq!(test.unsatisfied_to_tier(), Option::None);
+                // stretched
+                test.change_end(Some(10), 1).expect("Error!");
+                test.satisfaction = 0.0;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 1);
+                test.satisfaction = 0.5;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 1);
+                test.satisfaction = 1.0;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 2);
+                test.satisfaction = 2.5;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 3);
+                test.satisfaction = 10.0;
+                assert_eq!(test.unsatisfied_to_tier(), None);
+                test.satisfaction = 11.0;
+                assert_eq!(test.unsatisfied_to_tier(), None);
+
+                // infinite
+                test.change_end(None, 1).expect("Error!");
+                test.satisfaction = 0.0;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 1);
+                test.satisfaction = 5.0;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 6);
+                test.satisfaction = 5.5;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 6);
+                test.satisfaction = 6.0;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 7);
+                test.satisfaction = 100.6;
+                assert_eq!(test.unsatisfied_to_tier().unwrap(), 101);
+        }
+
+        #[test]
         pub fn get_satisfaction_up_to_tier() {
             let mut test = Desire{ 
                 item: DesireItem::Product(0), 
@@ -46,39 +94,43 @@ mod tests {
                 step: 0,
                 tags: vec![]};
 
-                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                assert_eq!(test.satisfaction_up_to_tier(), None);
                 test.satisfaction = 0.5;
-                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
                 test.satisfaction = 1.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
                 test.satisfaction = 1.5;
-                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
                 // stretched
                 test.change_end(Some(10), 1).expect("Error!");
                 test.satisfaction = 0.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                assert_eq!(test.satisfaction_up_to_tier(), None);
                 test.satisfaction = 0.5;
-                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
                 test.satisfaction = 2.5;
-                assert_eq!(test.satisfaction_up_to_tier(), 3);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 3);
                 test.satisfaction = 10.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 10);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 10);
                 test.satisfaction = 11.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 10);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 10);
 
                 // infinite
                 test.change_end(None, 1).expect("Error!");
                 test.satisfaction = 0.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 1);
+                assert_eq!(test.satisfaction_up_to_tier(), None);
                 test.satisfaction = 5.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 6);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 5);
                 test.satisfaction = 5.5;
-                assert_eq!(test.satisfaction_up_to_tier(), 6);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 6);
                 test.satisfaction = 6.0;
-                assert_eq!(test.satisfaction_up_to_tier(), 7);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 6);
                 test.satisfaction = 100.6;
-                assert_eq!(test.satisfaction_up_to_tier(), 101);
+                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 101);
 
+                test.change_end(None, 1).expect("Uh Oh!");
+                test.start = 0;
+                test.satisfaction = 0.0;
+                assert_eq!(test.satisfaction_up_to_tier(), None);
         }
 
         #[test]
@@ -95,16 +147,16 @@ mod tests {
             
             // single tier
             assert_eq!(test.get_next_tier_up(9).expect("Error!"), 10);
-            assert!(test.get_next_tier_up(10).is_err());
-            assert!(test.get_next_tier_up(11).is_err());
+            assert!(test.get_next_tier_up(10).is_none());
+            assert!(test.get_next_tier_up(11).is_none());
 
             // stretched with end
             test.change_end(Some(100), 10).expect("Bad!");
             assert_eq!(test.get_next_tier_up(9).expect("Error!"), 10); // before start.
             assert_eq!(test.get_next_tier_up(10).expect("Error"), 20); // at start
             assert_eq!(test.get_next_tier_up(11).expect("Error"), 20); // between
-            assert!(test.get_next_tier_up(100).is_err()); // end
-            assert!(test.get_next_tier_up(101).is_err()); // end ++
+            assert!(test.get_next_tier_up(100).is_none()); // end
+            assert!(test.get_next_tier_up(101).is_none()); // end ++
 
             // infinite
             test.change_end(None, 10).expect("Bad!");
@@ -280,11 +332,11 @@ mod tests {
                 step: 2,
                 tags: vec![]};
             
-            assert_eq!(test.total_desire(), 12.0);
+            assert_eq!(test.total_desire(), Some(12.0));
             test.change_end(Some(18), 2).expect("Error!");
-            assert_eq!(test.total_desire(), 20.0);
+            assert_eq!(test.total_desire(), Some(20.0));
             test.change_end(None, 2).expect("ERROR!");
-            assert_eq!(test.total_desire(), -1.0);
+            assert_eq!(test.total_desire(), None);
         }
 
         #[test]
