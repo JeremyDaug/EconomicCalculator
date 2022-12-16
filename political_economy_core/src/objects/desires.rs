@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 use itertools::Itertools;
 
-use super::desire::{Desire};
+use super::desire::{Desire, DesireItem};
 
 #[derive(Debug)]
 pub struct Desires {
@@ -132,16 +132,86 @@ impl Desires {
         0.0
     }
 
-    /// Used to walk up the tiers of our desires.
-    fn walk_up_tiers(&mut self, tier: u64, idx: usize) -> Option<(u64, usize)> {
+
+    /// Walk up the tiers of our desires.
+    /// 
+    /// It takes as a parameter our previous desire location.
+    /// If given none, it selects the first and return that
+    /// (lowest tier, first in vector order).
+    /// 
+    /// If there is no next step, it returns None.
+    pub fn walk_up_tiers(&mut self, prev: Option<DesireCoord>) -> Option<DesireCoord> {
+        // If no previous given, make it.
+        // if given increment idx.
+        let mut prev = if prev.is_none() { DesireCoord{tier: 0, idx: 0}} 
+            else { prev.expect("Failed somehow!").increment_idx()};
+
         // any desire has a step above here, return true.
         while self.desires.iter().any(|x| {
-            x.is_infinite() || matches!(x.end, Some(end) if end > tier)
+            x.is_infinite() || matches!(x.end, Some(end) if end > prev.tier)
         }) {
-
+            if prev.idx == self.desires.len() { 
+                prev.idx = 0; 
+                // Could make this smarter, but this will do for now.
+                // if this becomes a problem. rework to be smarter.
+                prev.tier += 1; 
+            }
+            while prev.idx < self.desires.len() {
+                if self.desires[prev.idx].steps_on_tier(prev.tier) {
+                    return Some(prev)
+                }
+                prev.idx += 1;
+            }
         }
-
         None
+    }
+
+    /// Walk up the tiers for a specific desire item.
+    /// 
+    /// It takes in the tier we are starting at, and the index of the previous we looked
+    /// at. The previous index need not be valid to be used.
+    /// 
+    /// If there is no next step, it returns None.
+    pub fn walk_up_tiers_for_item(&mut self, prev: Option<DesireCoord>, item: DesireItem) -> Option<DesireCoord> {
+        // If no previous given, make it.
+        // if given increment idx.
+        let mut curr = if prev.is_none() { DesireCoord{tier: 0, idx: 0}} 
+            else { prev.expect("Failed somehow!").increment_idx()};
+
+        // any desire has a step above here, return true.
+        while self.desires.iter().any(|x| {
+            x.is_infinite() || matches!(x.end, Some(end) if end > curr.tier)
+        }) {
+            if curr.idx == self.desires.len() { 
+                curr.idx = 0; 
+                // Could make this smarter, but this will do for now.
+                // if this becomes a problem. rework to be smarter.
+                curr.tier += 1; 
+            }
+            while curr.idx < self.desires.len() {
+                if self.desires[curr.idx].item == item &&
+                 self.desires[curr.idx].steps_on_tier(curr.tier) {
+                    return Some(curr)
+                }
+                curr.idx += 1;
+            }
+        }
+        None
+    }
+}
+
+/// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.
+pub struct DesireCoord {
+    pub tier: u64,
+    pub idx: usize
+}
+
+impl DesireCoord {
+    /// Increments the index of the desire coord and returns it.
+    /// 
+    /// Easier when copy and increment are needed.
+    fn increment_idx(self) -> Self{
+        DesireCoord { tier: self.tier, idx: self.idx + 1}
     }
 }
 

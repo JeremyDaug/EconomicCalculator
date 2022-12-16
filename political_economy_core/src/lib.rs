@@ -9,6 +9,106 @@ pub fn add(left: usize, right: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    mod desires_tests {
+        use crate::objects::{desires::Desires, desire::{Desire, DesireItem}};
+
+        #[test]
+        pub fn walk_up_tiers_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,4,6
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,3,6,9, ...
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
+            let mut curr = None;
+            let mut results = vec![];
+            for _ in 0..11 {
+                let val = test.walk_up_tiers(curr).expect("Err.");
+                results.push((val.tier, val.idx));
+                curr = Some(val);
+            }
+
+            assert_eq!(results[0], (0,0));
+            assert_eq!(results[1], (0,1));
+            assert_eq!(results[2], (0,2));
+            assert_eq!(results[3], (1,0));
+            assert_eq!(results[4], (2,1));
+            assert_eq!(results[5], (3,2));
+            assert_eq!(results[6], (4,1));
+            assert_eq!(results[7], (6,1));
+            assert_eq!(results[8], (6,2));
+            assert_eq!(results[9], (9,2));
+            assert_eq!(results[10], (12,2));
+        }
+
+        #[test]
+        pub fn walk_up_tiers_correctly_and_return_none_when_out() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,4,6
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
+            let mut curr = None;
+            let mut results = vec![];
+            for _ in 0..7 {
+                let val = test.walk_up_tiers(curr);
+                if let Some(value) = val {
+                    results.push(Some((value.tier, value.idx)));
+                    curr = Some(value);
+                } 
+                else { results.push(None); curr = None;}
+            }
+
+            assert_eq!(results[0].expect("err!"), (0,0));
+            assert_eq!(results[1].expect("err!"), (0,1));
+            assert_eq!(results[2].expect("err!"), (1,0));
+            assert_eq!(results[3].expect("err!"), (2,1));
+            assert_eq!(results[4].expect("err!"), (4,1));
+            assert_eq!(results[5].expect("err!"), (6,1));
+            assert_eq!(results[6], None);
+        }
+    }
+
     mod desire_tests {
         use crate::objects::desire::{Desire, DesireItem};
 
