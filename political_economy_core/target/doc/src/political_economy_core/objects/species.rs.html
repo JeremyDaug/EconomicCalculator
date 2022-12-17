@@ -310,6 +310,7 @@
 <span id="310">310</span>
 <span id="311">311</span>
 <span id="312">312</span>
+<span id="313">313</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Species covers the biological nature of a pop.
 
 </span><span class="kw">use </span>std::collections::HashMap;
@@ -326,7 +327,7 @@
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Species {
     <span class="doccomment">/// The Id of the species.
-    </span><span class="kw">pub </span>id: u64,
+    </span><span class="kw">pub </span>id: usize,
     <span class="doccomment">/// The Primary name of the species.
     </span><span class="kw">pub </span>name: String,
     <span class="doccomment">/// The Secondary Name of the species, used for sibling species.
@@ -340,7 +341,7 @@
     /// Mostly Placeholder.
     </span><span class="kw">pub </span>tags: Vec&lt;SpeciesTag&gt;,
     <span class="doccomment">/// Related variant species, used for organization.
-    </span><span class="kw">pub </span>relations: Vec&lt;u64&gt;,
+    </span><span class="kw">pub </span>relations: Vec&lt;usize&gt;,
     <span class="doccomment">/// The cohorts which make up this species, aranged by the order in which they occur.
     </span><span class="comment">//pub cohorts: Vec&lt;Cohort&gt;,
     </span><span class="doccomment">/// The Subtypes which the species can have and be born into.
@@ -362,11 +363,12 @@
     /// Cannot be negative values, extreme values should be avoided.
     </span><span class="kw">pub </span>mortality_rate: f64,
     <span class="comment">// Preferences, Fill in later and Iron them out properly.
-    </span><span class="doccomment">/// The summarized effects of a species and cohort combo. 
-    /// The indices of these are defined such that
-    /// cohort_index + (subtype_index * len(cohorts)) = index of cohort + subtype.
-    </span><span class="kw">pub </span>data_table: Vec&lt;SpeciesSubentry&gt;,
-}
+
+    // The summarized effects of a species and cohort combo. 
+    // The indices of these are defined such that
+    // cohort_index + (subtype_index * len(cohorts)) = index of cohort + subtype.
+    // pub data_table: Vec&lt;SpeciesSubentry&gt;,
+</span>}
 
 <span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>SpeciesSubentry {

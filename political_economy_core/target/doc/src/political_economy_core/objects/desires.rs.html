@@ -1,0 +1,617 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/objects/desires.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>desires.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../political_economy_core/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../political_economy_core/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../political_economy_core/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+</pre><pre class="rust"><code><span class="doccomment">//! The collection which manages multiple desires.
+//! 
+//! This collection manages and organizes the desires of an
+//! actor into a rational fashion. Here is also where 
+//! the validity of a potential barter is decided or not.
+
+</span><span class="kw">use </span>std::collections::HashMap;
+
+<span class="kw">use </span>itertools::Itertools;
+
+<span class="kw">use </span><span class="kw">super</span>::desire::{Desire, DesireItem};
+
+<span class="kw">const </span>TIER_RATIO: f64 = <span class="number">0.9</span>;
+
+<span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>Desires {
+    <span class="doccomment">/// All of the desires we are storing and looking over.
+    </span><span class="kw">pub </span>desires: Vec&lt;Desire&gt;,
+    <span class="doccomment">/// The property currently owned bey the actor.
+    </span><span class="kw">pub </span>property: HashMap&lt;usize, f64&gt;,
+    <span class="doccomment">/// The wants stored and not used up yet.
+    </span><span class="kw">pub </span>want_store: HashMap&lt;usize, f64&gt;,
+    <span class="doccomment">/// The data of our succes in shopping.
+    </span><span class="kw">pub </span>shopping_data: HashMap&lt;usize, DesireInfo&gt;,
+}
+
+<span class="kw">impl </span>Desires {
+    <span class="doccomment">/// Creates a new desire collection based on a list of desires.
+    </span><span class="kw">pub fn </span>new(desires: Vec&lt;Desire&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>shopping_data: HashMap&lt;usize, DesireInfo&gt; = HashMap::new();
+        <span class="kw">for </span>product <span class="kw">in </span>desires.iter()
+            .filter(|x| x.item.is_product()) {
+                shopping_data.insert(product.item.unwrap().clone(), 
+                DesireInfo::new());
+            }
+        Desires {
+            desires,
+            property: HashMap::new(),
+            want_store: HashMap::new(),
+            shopping_data,
+        }
+    }
+
+    <span class="doccomment">/// Adds a number of units to the property.
+    </span><span class="kw">pub fn </span>add_property(<span class="kw-2">&amp;mut </span><span class="self">self</span>, product: usize, amount: <span class="kw-2">&amp;</span>f64) {
+        <span class="kw-2">*</span><span class="self">self</span>.property.entry(product).or_insert(<span class="number">0.0</span>) += amount;
+    }
+
+    <span class="doccomment">/// Adds a number of wants.
+    </span><span class="kw">pub fn </span>add_want(<span class="kw-2">&amp;mut </span><span class="self">self</span>, want: usize, amount: <span class="kw-2">&amp;</span>f64) {
+        <span class="kw-2">*</span><span class="self">self</span>.want_store.entry(want).or_insert(<span class="number">0.0</span>) += amount;
+    }
+
+    <span class="doccomment">/// Adds a desire to our collection.
+    /// 
+    /// If the desire is a match for an existing desire, it will 
+    /// combine it with the existing match, adding the amount
+    /// desired per level.
+    /// 
+    /// This can also be used to subtract a desire from the collection.
+    /// 
+    /// If a desire is reduced to 0 or less, then it will be removed.
+    </span><span class="kw">pub fn </span>add_desire(<span class="kw-2">&amp;mut </span><span class="self">self</span>, desire: <span class="kw-2">&amp;</span>Desire) {
+        <span class="kw">let </span>existing_position = <span class="self">self</span>.desires.iter().position(|x| x.is_match(desire));
+        
+        <span class="comment">// if the desire is a match for an exsiting one, add to that.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(pos) = existing_position {
+            <span class="self">self</span>.desires[pos].amount += desire.amount;
+            <span class="comment">// if this match was subtracted such that we are now at or below 0, remove it entirely.
+            </span><span class="kw">if </span><span class="self">self</span>.desires[pos].amount &lt;= <span class="number">0.0 </span>{
+                <span class="self">self</span>.desires.remove(pos);
+            }
+            <span class="kw">return</span>;
+        }
+
+        <span class="comment">// if it doesn&#39;t already exist, duplicate and insert.
+        </span><span class="kw">let </span>dup = desire.clone();
+        <span class="self">self</span>.desires.push(dup);
+    }
+
+    <span class="doccomment">/// Gets the difference in value between the items in and the 
+    /// items out given the current state of the desires.
+    /// 
+    /// If items are on an equal tier then they are equal on a 
+    /// unit-per-unit basis. For each tier of separation the value
+    /// diverges geometrically. For every tier of separation the
+    /// value of an item declines by 0.9^(n) per unit, where n is
+    /// the difference between the lower and higher tier. 
+    /// 
+    /// If item_out is not currently desired (either having no desires 
+    /// which want it or a desire which matches, but it is totally 
+    /// satisfied) then it&#39;s value is equal to 0.
+    /// 
+    /// The value returned is the difference between the item_in&#39;s 
+    /// value and the item_out&#39;s value. If the value is negative, 
+    /// than the items out are more valueable than the items in at
+    /// this moment, if positive then they are less valueable.
+    /// 
+    /// # Example
+    /// 
+    /// Item **A** is on Tier 5, Item **B** is on tier 6.
+    /// 
+    /// The value of **A** = 1 / unit and **B** = 0.9 / unit
+    /// 
+    /// If **B** is on tier 10 then
+    /// 
+    /// **B** = 0.9^5 / unit.
+    </span><span class="kw">pub fn </span>barter_valueXXX(<span class="kw-2">&amp;</span><span class="self">self</span>, item_in: (usize, f64), item_out: (usize,f64)) -&gt; f64 {
+        <span class="macro">todo!</span>(<span class="string">&quot;Needs a function to find the lowest desire tier which can accept an item. Products only.&quot;</span>)
+        <span class="comment">// 0.0
+    </span>}
+
+    <span class="kw">pub fn </span>get_lowest_unsatisfied_tier(<span class="kw-2">&amp;</span><span class="self">self</span>, item: usize) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="kw">let </span>possible = <span class="self">self</span>.desires.iter()
+            .filter(|x| x.item.is_this_product(<span class="kw-2">&amp;</span>item)).collect_vec();
+        <span class="comment">// if any possible, go over them and select the one with the lowest unsatisfied tier.
+        </span><span class="kw">if </span>possible.len() &gt; <span class="number">0 </span>{
+            <span class="kw">let </span>result = possible.iter().map(|x| {
+                <span class="kw">let </span>sat = x.unsatisfied_to_tier();
+                <span class="kw">match </span>sat {
+                    <span class="prelude-val">Some</span>(val) =&gt; val,
+                    <span class="prelude-val">None </span>=&gt; u64::MAX
+                }
+            });
+            
+        }
+        <span class="comment">// if not found in any, return none, meaning there are no tiers which need more of the item.
+        </span><span class="prelude-val">None
+    </span>}
+
+    <span class="doccomment">/// Retrieves the internal barter value for a specific product as though it were coming
+    /// in and satisfying desires.
+    /// 
+    /// It returns the tier at which it starts, and the internal satisfaction value
+    /// it satisfies.
+    /// 
+    /// # Example
+    /// 
+    /// A product is desired at at tiers 5 7 9 and 11. One unit each.
+    /// 
+    /// It already has 1 unit in it (tier 5), and we want to insert 1.5 units more.
+    /// 
+    /// It finds that desire and sets the tier to 7, it then walks up the desire and
+    /// calculates the weight (1 + 0.5*0.9 &amp;#8773; 1.45).
+    /// 
+    /// The resulting output would be Some(7, 1.45).
+    </span><span class="kw">pub fn </span>in_barter_value(<span class="kw-2">&amp;</span><span class="self">self</span>, product: usize, amount: f64) -&gt; <span class="prelude-ty">Option</span>&lt;(u64, f64)&gt; {
+        <span class="comment">// if the item is not desired in any way, return none.
+        </span><span class="kw">if </span><span class="self">self</span>.desires.iter().all(|x| !x.item.is_this_product(<span class="kw-2">&amp;</span>product)) {
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        }
+
+        <span class="prelude-val">None
+    </span>}
+
+    <span class="doccomment">/// Tier Equivalence between two tiers. 
+    /// 
+    /// With the start tier equal to 1, end tiers above it decline by 0.9 per level
+    /// difference. Going down they increase by 1/0.9
+    /// 
+    /// This defines how many units at the end tier is considered equivalent to lose in return
+    /// for 1 unit of the start tier.
+    /// 
+    /// IE
+    /// - start 10, end 11 = 0.9^-1    1 start = 0.9 end
+    /// - start 10, end 12 = 0.9^-2    1 start = 0.81 end
+    /// - start 10, end 8 = 0.9^2      1 start = 1.23. end
+    </span><span class="kw">pub fn </span>tier_equivalence(<span class="kw-2">&amp;</span><span class="self">self</span>, start: u64, end: u64) -&gt; f64 {
+        TIER_RATIO.powf((start - end) <span class="kw">as </span>f64)
+    }
+
+    <span class="doccomment">/// Walk up the tiers of our desires.
+    /// 
+    /// It takes as a parameter our previous desire location.
+    /// If given none, it selects the first and return that
+    /// (lowest tier, first in vector order).
+    /// 
+    /// If there is no next step, it returns None.
+    </span><span class="kw">pub fn </span>walk_up_tiers(<span class="kw-2">&amp;mut </span><span class="self">self</span>, prev: <span class="prelude-ty">Option</span>&lt;DesireCoord&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;DesireCoord&gt; {
+        <span class="comment">// If no previous given, make it.
+        // if given increment idx.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>prev = <span class="kw">if </span>prev.is_none() { DesireCoord{tier: <span class="number">0</span>, idx: <span class="number">0</span>}} 
+            <span class="kw">else </span>{ prev.expect(<span class="string">&quot;Failed somehow!&quot;</span>).increment_idx()};
+
+        <span class="comment">// any desire has a step above here, return true.
+        </span><span class="kw">while </span><span class="self">self</span>.desires.iter().any(|x| {
+            x.is_infinite() || <span class="macro">matches!</span>(x.end, <span class="prelude-val">Some</span>(end) <span class="kw">if </span>end &gt; prev.tier)
+        }) {
+            <span class="kw">if </span>prev.idx == <span class="self">self</span>.desires.len() { 
+                prev.idx = <span class="number">0</span>; 
+                <span class="comment">// Could make this smarter, but this will do for now.
+                // if this becomes a problem. rework to be smarter.
+                </span>prev.tier += <span class="number">1</span>; 
+            }
+            <span class="kw">while </span>prev.idx &lt; <span class="self">self</span>.desires.len() {
+                <span class="kw">if </span><span class="self">self</span>.desires[prev.idx].steps_on_tier(prev.tier) {
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(prev)
+                }
+                prev.idx += <span class="number">1</span>;
+            }
+        }
+        <span class="prelude-val">None
+    </span>}
+
+    <span class="doccomment">/// Walk up the tiers for a specific desire item.
+    /// 
+    /// It takes in the tier we are starting at, and the index of the previous we looked
+    /// at. The previous index need not be valid to be used.
+    /// 
+    /// If there is no next step, it returns None.
+    </span><span class="kw">pub fn </span>walk_up_tiers_for_item(<span class="kw-2">&amp;mut </span><span class="self">self</span>, prev: <span class="prelude-ty">Option</span>&lt;DesireCoord&gt;, item: DesireItem) -&gt; <span class="prelude-ty">Option</span>&lt;DesireCoord&gt; {
+        <span class="comment">// If no previous given, make it.
+        // if given increment idx.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>curr = <span class="kw">if </span>prev.is_none() { DesireCoord{tier: <span class="number">0</span>, idx: <span class="number">0</span>}} 
+            <span class="kw">else </span>{ prev.expect(<span class="string">&quot;Failed somehow!&quot;</span>).increment_idx()};
+
+        <span class="comment">// any desire has a step above here, return true.
+        </span><span class="kw">while </span><span class="self">self</span>.desires.iter().any(|x| {
+            x.is_infinite() || <span class="macro">matches!</span>(x.end, <span class="prelude-val">Some</span>(end) <span class="kw">if </span>end &gt; curr.tier)
+        }) {
+            <span class="kw">if </span>curr.idx == <span class="self">self</span>.desires.len() { 
+                curr.idx = <span class="number">0</span>; 
+                <span class="comment">// Could make this smarter, but this will do for now.
+                // if this becomes a problem. rework to be smarter.
+                </span>curr.tier += <span class="number">1</span>; 
+            }
+            <span class="kw">while </span>curr.idx &lt; <span class="self">self</span>.desires.len() {
+                <span class="kw">if </span><span class="self">self</span>.desires[curr.idx].item == item &amp;&amp;
+                 <span class="self">self</span>.desires[curr.idx].steps_on_tier(curr.tier) {
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(curr)
+                }
+                curr.idx += <span class="number">1</span>;
+            }
+        }
+        <span class="prelude-val">None
+    </span>}
+}
+
+<span class="doccomment">/// The coordinates of a desire, both it&#39;s tier and index in desires. Used for tier walking.
+</span><span class="kw">pub struct </span>DesireCoord {
+    <span class="kw">pub </span>tier: u64,
+    <span class="kw">pub </span>idx: usize
+}
+
+<span class="kw">impl </span>DesireCoord {
+    <span class="doccomment">/// Increments the index of the desire coord and returns it.
+    /// 
+    /// Easier when copy and increment are needed.
+    </span><span class="kw">fn </span>increment_idx(<span class="self">self</span>) -&gt; <span class="self">Self</span>{
+        DesireCoord { tier: <span class="self">self</span>.tier, idx: <span class="self">self</span>.idx + <span class="number">1</span>}
+    }
+}
+
+<span class="doccomment">/// The information on a product which is desired.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>DesireInfo {
+    <span class="doccomment">/// The target amount we want to buy.
+    </span><span class="kw">pub </span>target: f64,
+    <span class="doccomment">/// The amount we previously bought.
+    </span><span class="kw">pub </span>bought: f64,
+    <span class="comment">// The amount we gave away in exchange.
+    // pub exchanged: f64,
+    // Moved to a record of the market.
+    </span><span class="doccomment">/// The amount of time put into trying to buy the item.
+    </span><span class="kw">pub </span>time_budget: f64,
+    <span class="doccomment">/// The Abstract Market Value budget considered valid for the exchange
+    /// if barter is not being used.
+    </span><span class="kw">pub </span>amv_budget: f64,
+    <span class="doccomment">/// The amount of time returned as excess.
+    </span><span class="kw">pub </span>time_returned: f64,
+    <span class="doccomment">/// The amount of Abstract Market Value returned as change from a 
+    /// successful exchange.
+    </span><span class="kw">pub </span>amv_returned: f64,
+    <span class="doccomment">/// The rate of success and how well it went yesterday. 
+    /// 
+    /// Should be between 0 and 1 inclusive.
+    /// 
+    /// - Increases if it satisfies desires fully or reasonably.
+    /// - Decreases if it is over satisfied, other desires of lower levels
+    ///   are not being satisfied.
+    /// - Decreases if it was unable to buy up to our target for any reason.
+    </span><span class="kw">pub </span>success: f64,
+}
+
+<span class="kw">impl </span>DesireInfo {
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        DesireInfo { 
+            target: <span class="number">0.0</span>, 
+            bought: <span class="number">0.0</span>, 
+            time_budget: <span class="number">0.0</span>, 
+            amv_budget: <span class="number">0.0</span>, 
+            time_returned: <span class="number">0.0</span>, 
+            amv_returned: <span class="number">0.0</span>, 
+            success: <span class="number">0.5 </span>}
+    }
+
+    <span class="doccomment">/// Updates the sucess rate of the desire info.
+    /// 
+    /// Returns the new value and sets self.success to it as well.
+    /// 
+    /// The updated value is calculated as an estimated rolling average equal to
+    /// (old * 9 + new) / 10
+    </span><span class="kw">pub fn </span>update_sucess_rate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, success: f64) -&gt; f64 {
+        <span class="kw">let </span>result = (<span class="self">self</span>.success * <span class="number">9.0 </span>+ success) / <span class="number">10.0</span>;
+        <span class="self">self</span>.success = result;
+        result
+    }
+}</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="political_economy_core" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

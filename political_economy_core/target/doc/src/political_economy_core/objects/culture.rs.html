@@ -17,18 +17,20 @@
 <span id="17">17</span>
 <span id="18">18</span>
 <span id="19">19</span>
+<span id="20">20</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::desire::Desire;
 
 <span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Culture{
-    <span class="kw">pub </span>id: u64,
+    <span class="kw">pub </span>id: usize,
     <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>variant_name: String,
     <span class="kw">pub </span>birth_rate_modifier: f64,
     <span class="kw">pub </span>death_rate_modifier: f64,
+    <span class="kw">pub </span>productivity_modifier: f64,
     <span class="kw">pub </span>desires: Vec&lt;Desire&gt;,
     <span class="comment">// tags
-    </span><span class="kw">pub </span>relations: Vec&lt;Culture&gt;
+    </span><span class="kw">pub </span>relations: Vec&lt;Culture&gt;,
 }
 
 <span class="kw">impl </span>Culture {

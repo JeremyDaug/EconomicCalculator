@@ -3,6 +3,13 @@
 //! This collection manages and organizes the desires of an
 //! actor into a rational fashion. Here is also where 
 //! the validity of a potential barter is decided or not.
+//! 
+//! The primary struct is the Desires struct, but we also have
+//! additional structs in DesireCoord, a summary of tier and index within a desire,
+//! this is mostly for internal use and helps walking up (or down) desires.
+//! 
+//! DesireInfo is also used to record product data when buying or selling items.
+//! It's the weights we are modifying to improve the AI going forward.
 
 use std::collections::HashMap;
 
@@ -10,6 +17,13 @@ use itertools::Itertools;
 
 use super::desire::{Desire, DesireItem};
 
+/// The ratio of value between one tier and an adjacent tier.
+/// 
+/// IE, a unit at tier 1 is worth 0.9 of an item from tier 0.
+pub const TIER_RATIO: f64 = 0.9;
+
+/// Desires are the collection of an actor's Desires. Includes their property
+/// excess / unused wants, and AI data for acting on buying and selling.
 #[derive(Debug)]
 pub struct Desires {
     /// All of the desires we are storing and looking over.
@@ -103,35 +117,67 @@ impl Desires {
     /// If **B** is on tier 10 then
     /// 
     /// **B** = 0.9^5 / unit.
-    pub fn barter_value(&self, item_in: (usize, f64), item_out: (usize,f64)) -> f64 {
+    pub fn barter_valueXXX(&self, item_in: (usize, f64), item_out: (usize,f64)) -> f64 {
         todo!("Needs a function to find the lowest desire tier which can accept an item. Products only.")
         // 0.0
     }
 
-    pub fn get_lowest_unsatisfied_tier(&self, item: usize) -> Option<u64> {
+    /// Take an item and finds the lowest tier available which can still accept the item.
+    /// 
+    /// Used primarily to nicely find where to put an item when sifting.
+    pub fn get_lowest_unsatisfied_tier(&self, item: DesireItem) -> Option<u64> {
+        // get those desires which contain our item and are not fully satisfied.
         let possible = self.desires.iter()
-            .filter(|x| x.item.is_this_product(&item)).collect_vec();
+            .filter(|x| x.item == item && !x.is_fully_satisfied())
+            .collect_vec();
         // if any possible, go over them and select the one with the lowest unsatisfied tier.
         if possible.len() > 0 {
             let result = possible.iter().map(|x| {
-                let sat = x.unsatisfied_to_tier();
-                match sat {
-                    Some(val) => val,
-                    None => u64::MAX
-                }
-            });
-            
+                x.unsatisfied_to_tier().expect("Full Satisfaction found, check filter.")
+            }).min().expect("Minimum Not Found. Panic!");
+            return Some(result)
         }
         // if not found in any, return none, meaning there are no tiers which need more of the item.
         None
     }
 
-    /// Checks the desires to see if the one being asked would accept
-    /// a barter. If the items in are considered 
-    pub fn check_barter(&self, item_out: (usize, f64), items_in: HashMap<usize, f64>) -> f64 {
-        0.0
+    /// Retrieves the internal barter value for a specific product as though it were coming
+    /// in and satisfying desires.
+    /// 
+    /// It returns the tier at which it starts, and the internal satisfaction value
+    /// it satisfies.
+    /// 
+    /// If it is not desired, it returns None.
+    /// 
+    /// # Example
+    /// 
+    /// A product is desired at at tiers 5 7 9 and 11. One unit each.
+    /// 
+    /// It already has 1 unit in it (tier 5), and we want to insert 1.5 units more.
+    /// 
+    /// It finds that desire and sets the tier to 7, it then walks up the desire and
+    /// calculates the weight (1 + 0.5*0.9 &#8773; 1.45).
+    /// 
+    /// The resulting output would be Some(7, 1.45).
+    pub fn in_barter_value(&self, product: usize, amount: f64) -> Option<(u64, f64)> {
+        todo!("Incomplete, Do get_lowest_unsatisfied_tier() first.");
     }
 
+    /// Tier Equivalence between two tiers. 
+    /// 
+    /// With the start tier equal to 1, end tiers above it decline by 0.9 per level
+    /// difference. Going down they increase by 1/0.9
+    /// 
+    /// This defines how many units at the end tier is considered equivalent to lose in return
+    /// for 1 unit of the start tier.
+    /// 
+    /// IE
+    /// - start 10, end 11 = 0.9^-1    1 start = 0.9 end
+    /// - start 10, end 12 = 0.9^-2    1 start = 0.81 end
+    /// - start 10, end 8 = 0.9^2      1 start = 1.23. end
+    pub fn tier_equivalence(&self, start: u64, end: u64) -> f64 {
+        TIER_RATIO.powf((start - end) as f64)
+    }
 
     /// Walk up the tiers of our desires.
     /// 
@@ -220,7 +266,7 @@ impl DesireCoord {
 pub struct DesireInfo {
     /// The target amount we want to buy.
     pub target: f64,
-    /// The amount we previously bought.
+    /// The amount we have bought today.
     pub bought: f64,
     // The amount we gave away in exchange.
     // pub exchanged: f64,

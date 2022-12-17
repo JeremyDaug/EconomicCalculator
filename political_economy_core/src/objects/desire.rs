@@ -231,6 +231,9 @@ impl Desire {
     }
 
     /// Checks if the desire is fully satisfied or not.
+    /// 
+    /// If overfilled (satisfaction > total_desire) then it still returns 
+    /// true for safety reasons.
     pub fn is_fully_satisfied(&self) -> bool {
         if self.is_infinite() {
             return false;

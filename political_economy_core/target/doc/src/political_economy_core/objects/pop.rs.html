@@ -37,58 +37,36 @@
 <span id="37">37</span>
 <span id="38">38</span>
 <span id="39">39</span>
-<span id="40">40</span>
-<span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
-<span id="62">62</span>
-<span id="63">63</span>
-<span id="64">64</span>
-<span id="65">65</span>
-<span id="66">66</span>
-<span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
-</pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+</pre><pre class="rust"><code><span class="doccomment">//! The storage unit of population groups.
+//! 
+//! Used for any productive, intellegent actor in the system. Does not include animal
+//! populations.
+</span><span class="kw">use </span>std::collections::HashMap;
 
-<span class="kw">use super</span>::{job::Job, firm::Firm, market::Market, skill::Skill, product::Product, species::Species, culture::Culture};
 
-<span class="attribute">#[derive(Debug)]
+<span class="doccomment">/// Pops are the data storage for a population group.
+/// 
+/// Population groups are defines externally by what
+/// market they are in, what firm they work in, and
+/// what their job in that firm is.
+/// 
+/// Internally they are broken appart by the various of the
+/// pop. It breaks them into a table of 
+</span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Pop {
-    <span class="kw">pub </span>id: u64,
+    <span class="kw">pub </span>id: usize,
     <span class="kw">pub </span>name: String,
-    <span class="kw">pub </span>count: u64,
-    <span class="kw">pub </span>job: Job,
-    <span class="kw">pub </span>firm: Firm,
-    <span class="kw">pub </span>market: Market,
-    <span class="kw">pub </span>skill: Skill,
+    <span class="kw">pub </span>count: usize,
+    <span class="kw">pub </span>job: usize,
+    <span class="kw">pub </span>firm: usize,
+    <span class="kw">pub </span>market: usize,
+    <span class="kw">pub </span>skill: usize,
     <span class="kw">pub </span>lower_skill_level: f64,
     <span class="kw">pub </span>higher_skill_level: f64,
-    <span class="kw">pub </span>property: HashMap&lt;Product, f64&gt;,
-    <span class="kw">pub </span>species: HashMap&lt;Species, u64&gt;,
+    <span class="kw">pub </span>property: HashMap&lt;usize, f64&gt;,
+    <span class="kw">pub </span>species: HashMap&lt;usize, usize&gt;,
     <span class="comment">// civilization
-    </span><span class="kw">pub </span>culture: HashMap&lt;Culture, u64&gt;
+    </span><span class="kw">pub </span>culture: HashMap&lt;usize, usize&gt;
     <span class="comment">// Ideology
     // Movements
     // Mood
@@ -97,50 +75,5 @@
 </span>}
 
 <span class="kw">impl </span>Pop {
-    <span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="self">self</span>.name.as_ref()
-    }
-
-    <span class="kw">pub fn </span>count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.count
-    }
-
-    <span class="kw">pub fn </span>job(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Job {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.job
-    }
-
-    <span class="kw">pub fn </span>firm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Firm {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.firm
-    }
-
-    <span class="kw">pub fn </span>market(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Market {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.market
-    }
-
-    <span class="kw">pub fn </span>skill(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Skill {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.skill
-    }
-
-    <span class="kw">pub fn </span>lower_skill_level(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f64 {
-        <span class="self">self</span>.lower_skill_level
-    }
-
-    <span class="kw">pub fn </span>higher_skill_level(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f64 {
-        <span class="self">self</span>.higher_skill_level
-    }
-
-    <span class="kw">pub fn </span>property(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Product, f64&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.property
-    }
-
-    <span class="kw">pub fn </span>species(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Species, u64&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.species
-    }
-
-    <span class="kw">pub fn </span>culture(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;Culture, u64&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.culture
-    }
-}
-
-</code></pre></div>
+}</code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="political_economy_core" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

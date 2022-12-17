@@ -316,8 +316,77 @@
 <span id="316">316</span>
 <span id="317">317</span>
 <span id="318">318</span>
-</pre><pre class="rust"><code>
-<span class="doccomment">/// Desires
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+</pre><pre class="rust"><code><span class="doccomment">//! A Desire for a want or product.
+
+/// Desires
 /// 
 /// Desires are things that are desired and used in a the Desires class.
 /// It contains an item, either a want or product, and at minimum a tier
@@ -326,7 +395,7 @@
 /// This will likely be broken up and simplified in the future, distinguishing
 /// between recorded desires, such as the desires of species, Cultures, etc, and
 /// working desires, which are used for satisfaction and trade guarantees.
-</span><span class="attribute">#[derive(Debug)]
+</span><span class="attribute">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>Desire {
     <span class="kw">pub </span>item: DesireItem,
     <span class="kw">pub </span>start: u64,
@@ -339,7 +408,19 @@
 }
 
 <span class="kw">impl </span>Desire {
-    <span class="kw">pub fn </span>is_match(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Desire) -&gt; bool {
+    <span class="doccomment">/// Checks if a desire is a match for the current desire.
+    /// 
+    /// It matches on the 
+    /// 
+    /// - item (product/Want and Id)
+    /// - Start
+    /// - End
+    /// - Step
+    /// 
+    /// No other factors are used. This is used to make adding desires together easier.
+    /// 
+    /// Currently tags are not used. Be aware when using this.
+    </span><span class="kw">pub fn </span>is_match(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Desire) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.item != other.item ||
             <span class="self">self</span>.start != other.start ||
             <span class="self">self</span>.end != other.end ||
@@ -347,9 +428,6 @@
                 <span class="comment">// if any of these are not the same, we aren&#39;t equivalent.
             </span><span class="kw">return </span><span class="bool-val">false</span>;
         }
-
-        
-
         <span class="bool-val">true
     </span>}
 
@@ -366,7 +444,8 @@
 
         <span class="comment">// since it&#39;s not infinite, we need to find how much it can accept
         // then limit ourselves to that.
-        </span><span class="kw">let </span>unsatisfied = <span class="self">self</span>.total_desire() - <span class="self">self</span>.satisfaction;
+        </span><span class="kw">let </span>unsatisfied = <span class="self">self</span>.total_desire()
+            .expect(<span class="string">&quot;Infinite desire given. How&#39;d you get here?&quot;</span>) - <span class="self">self</span>.satisfaction;
 
         <span class="kw">let </span>take = add.min(unsatisfied);
 
@@ -374,38 +453,49 @@
         add - take
     }
 
-    <span class="doccomment">/// Calculates what tier this desire is satisfied to, stopping at the last tier that
-    /// has any satisfaction in it.
-    </span><span class="kw">pub fn </span>satisfaction_up_to_tier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+    <span class="doccomment">/// Calculates what tier this desire is satisfied to, stopping at the last tier
+    /// that has any satisfaction in it. If it fully fills it&#39;s highest tier
+    /// it returns that tier.
+    /// 
+    /// IE. Start = 1, Step size 1, amount / level 1.0
+    /// 
+    /// Satisfaction = 100. Highest level satisfied = 100 (not 101).
+    /// 
+    /// If the satisfaction is 0, it returns None.
+    </span><span class="kw">pub fn </span>satisfaction_up_to_tier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="comment">// sanity check for 0 on tier 0.
+        </span><span class="kw">if </span><span class="self">self</span>.satisfaction == <span class="number">0.0 </span>{
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        }
+
         <span class="kw">let </span>total_satisfaction = <span class="self">self</span>.total_satisfaction();
-        <span class="kw">let </span>satisfied_steps = total_satisfaction.floor() <span class="kw">as </span>u64;
+        <span class="kw">let </span>satisfied_steps = total_satisfaction.ceil() <span class="kw">as </span>u64 - <span class="number">1</span>;
 
         <span class="kw">if </span><span class="self">self</span>.is_stretched() {
             <span class="kw">if </span><span class="self">self</span>.is_infinite() {
-                <span class="kw">return </span><span class="self">self</span>.start + satisfied_steps <span class="kw">as </span>u64 * <span class="self">self</span>.step;
+                <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.start + satisfied_steps <span class="kw">as </span>u64 * <span class="self">self</span>.step);
             }
             <span class="kw">let </span>cap = std::cmp::min(<span class="self">self</span>.steps() - <span class="number">1</span>, satisfied_steps);
-            <span class="kw">return 
-            </span><span class="self">self</span>.start + cap <span class="kw">as </span>u64 * <span class="self">self</span>.step;
+            <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.start + cap <span class="kw">as </span>u64 * <span class="self">self</span>.step);
         }
 
         <span class="comment">// If not stretched, then it can only go up to start.
-        </span><span class="kw">return </span><span class="self">self</span>.start;
+        </span><span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.start);
     }
 
     <span class="doccomment">/// Get Next Tier up takes a given tier and gets the next valid tier up.
     /// 
     /// Returns err if no tier is next. Otherwise, returns the next valid tier.
-    </span><span class="kw">pub fn </span>get_next_tier_up(<span class="kw-2">&amp;</span><span class="self">self</span>, tier: u64) -&gt; <span class="prelude-ty">Result</span>&lt;u64, String&gt; {
+    </span><span class="kw">pub fn </span>get_next_tier_up(<span class="kw-2">&amp;</span><span class="self">self</span>, tier: u64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="kw">if </span>tier &lt; <span class="self">self</span>.start {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">self</span>.start);
+            <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.start);
         }
 
         <span class="kw">if </span>(<span class="self">self</span>.end.is_some() &amp;&amp; tier &gt;= <span class="self">self</span>.end.unwrap()) ||
             !<span class="self">self</span>.is_stretched() {
             <span class="comment">// if we are at or after the end or at the start and no later steps,
             // then we have no valid tiers.
-            </span><span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;No Valid Next Tier.&quot;</span>.into());
+            </span><span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
         <span class="kw">let </span>next = tier + <span class="self">self</span>.step - ((tier - <span class="self">self</span>.start) % <span class="self">self</span>.step);
@@ -413,11 +503,11 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(end) = <span class="self">self</span>.end {
             <span class="kw">if </span>end &lt; next {
                 <span class="comment">// if the predicted next tier is after our
-                </span><span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;No Valid Next Tier.&quot;</span>.into());
+                </span><span class="kw">return </span><span class="prelude-val">None</span>;
             }
         }
 
-        <span class="prelude-val">Ok</span>(next)
+        <span class="prelude-val">Some</span>(next)
     }
 
     <span class="doccomment">/// Changes the end and step for the desire. 
@@ -532,7 +622,9 @@
             <span class="kw">return </span><span class="bool-val">false</span>;
         }
 
-        <span class="kw">if </span><span class="self">self</span>.total_desire() == <span class="self">self</span>.satisfaction { <span class="kw">return </span><span class="bool-val">true</span>; }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = <span class="self">self</span>.total_desire() {
+            <span class="kw">return </span><span class="self">self</span>.satisfaction &gt;= value;
+        }
 
         <span class="bool-val">false
     </span>}
@@ -540,12 +632,12 @@
     <span class="doccomment">/// Retrieves the total amount desired across all tiers for the desire.
     /// 
     /// If the desire is infinite, then it returns -1.
-    </span><span class="kw">pub fn </span>total_desire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f64 {
-        <span class="kw">if </span><span class="self">self</span>.is_infinite() { <span class="kw">return </span>-<span class="number">1.0</span>; }
+    </span><span class="kw">pub fn </span>total_desire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;f64&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_infinite() { <span class="kw">return </span><span class="prelude-val">None</span>; }
 
-        <span class="kw">if </span>!<span class="self">self</span>.is_stretched() { <span class="kw">return </span><span class="self">self</span>.amount; }
+        <span class="kw">if </span>!<span class="self">self</span>.is_stretched() { <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.amount); }
 
-        <span class="self">self</span>.steps() <span class="kw">as </span>f64 * <span class="self">self</span>.amount
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.steps() <span class="kw">as </span>f64 * <span class="self">self</span>.amount)
     }
 
     <span class="doccomment">/// Calculates the total satisfaction of the desire, returning it
@@ -582,12 +674,40 @@
         }
         <span class="prelude-val">Ok</span>((current_steps <span class="kw">as </span>f64) * <span class="self">self</span>.amount)
     }
+
+    <span class="doccomment">/// Walking up the desire, it gets the first tier which has any unsatisfied
+    /// quantity.
+    /// 
+    /// If totally sastisfied at a tier, it will return the next available tier,
+    /// or None.
+    /// 
+    /// If it is totally satisfied, it returns None.
+    </span><span class="kw">pub fn </span>unsatisfied_to_tier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+
+        <span class="kw">if </span><span class="self">self</span>.is_fully_satisfied() {
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        }
+
+        <span class="kw">let </span>total_satisfaction = <span class="self">self</span>.total_satisfaction();
+        <span class="kw">let </span>satisfied_steps = total_satisfaction.floor() <span class="kw">as </span>u64;
+
+        <span class="kw">if </span><span class="self">self</span>.is_stretched() {
+            <span class="kw">if </span><span class="self">self</span>.is_infinite() {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.start + satisfied_steps <span class="kw">as </span>u64 * <span class="self">self</span>.step);
+            }
+            <span class="kw">let </span>cap = std::cmp::min(<span class="self">self</span>.steps() - <span class="number">1</span>, satisfied_steps);
+            <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.start + cap <span class="kw">as </span>u64 * <span class="self">self</span>.step);
+        }
+
+        <span class="comment">// If not stretched, then it can only go up to start.
+        </span><span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.start);
+    }
 }
 
 <span class="doccomment">/// The tags a desire can be marked by, modifying how the desire is viewed.
 /// Many of these alter how they are treated, removing them from common
 /// calculations.
-</span><span class="attribute">#[derive(Debug)]
+</span><span class="attribute">#[derive(Debug, Clone)]
 </span><span class="kw">pub enum </span>DesireTag{
     <span class="doccomment">/// The person does not actually desire this item, if this item is 
     /// satisfied, it instead increases their chance of sickness and death.
@@ -602,7 +722,7 @@
 }
 
 
-<span class="attribute">#[derive(Debug, PartialEq, Eq)]
+<span class="attribute">#[derive(Debug, PartialEq, Eq, Clone)]
 </span><span class="kw">pub enum </span>DesireItem {
     Want(usize),
     Product(usize)
@@ -631,6 +751,22 @@
         <span class="kw">match </span><span class="self">self </span>{
             DesireItem::Product(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
             DesireItem::Want(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+        }
+    }
+
+    <span class="doccomment">/// Checks if this is a specific product.
+    </span><span class="kw">pub fn </span>is_this_product(<span class="kw-2">&amp;</span><span class="self">self</span>, item: <span class="kw-2">&amp;</span>usize) -&gt; bool {
+        <span class="kw">match </span><span class="self">self </span>{
+            DesireItem::Product(val) =&gt; val == item,
+            DesireItem::Want(<span class="kw">_</span>) =&gt; <span class="bool-val">false
+        </span>}
+    }
+
+    <span class="doccomment">/// Checks if this is a specific want.
+    </span><span class="kw">pub fn </span>is_this_want(<span class="kw-2">&amp;</span><span class="self">self</span>, item: <span class="kw-2">&amp;</span>usize) -&gt; bool {
+        <span class="kw">match </span><span class="self">self </span>{
+            DesireItem::Product(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+            DesireItem::Want(val) =&gt; val == item
         }
     }
 }</code></pre></div>

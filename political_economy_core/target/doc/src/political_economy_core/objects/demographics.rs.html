@@ -105,26 +105,86 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Demographics is the storage container and manager common demographic data
 //! like Species, Civilizations, Cultures, and Ideologies.
 //! 
 //! These are stored for reference here.
 
-</span><span class="kw">use super</span>::{species::Species, culture::Culture, desire::{Desire, DesireItem, DesireTag}};
+</span><span class="kw">use </span>std::collections::HashMap;
+
+<span class="kw">use super</span>::{species::Species, culture::Culture, desire::{Desire, DesireItem}};
 
 <span class="doccomment">/// Demographics is the data handler for our demographic data. It stores all of our
 /// shared population data, making it available for reading during most phases and
 /// listing and recording during the population change phase.
 </span><span class="kw">pub struct </span>Demographics {
     <span class="doccomment">/// Non-specific Data for Species.
-    </span><span class="kw">pub </span>species: Vec&lt;Species&gt;,
+    </span><span class="kw">pub </span>species: HashMap&lt;usize, Species&gt;,
     <span class="comment">// civilization
-    </span><span class="kw">pub </span>cultures: Vec&lt;Culture&gt;,
+    </span><span class="kw">pub </span>cultures: HashMap&lt;usize, Culture&gt;,
     <span class="comment">// Ideology
 </span>}
 
 <span class="kw">impl </span>Demographics {
-    <span class="kw">pub fn </span>load_species(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: String) -&gt; <span class="prelude-ty">Result</span>&lt;String, String&gt; {
+    <span class="doccomment">/// Species Loader.
+    /// 
+    /// Currently does not load from file, just loads hard coded data.
+    /// 
+    /// Will add in file loading later.
+    </span><span class="kw">pub fn </span>load_species(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: String) -&gt; <span class="prelude-ty">Result</span>&lt;String, String&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>humie = Species{
             id: <span class="number">0</span>,
             name: <span class="string">&quot;Humie&quot;</span>.into(),
@@ -135,8 +195,8 @@
             base_productivity: <span class="number">1.0</span>,
             birth_rate: <span class="number">0.02</span>,
             mortality_rate: <span class="number">0.01</span>,
-            data_table: <span class="macro">vec!</span>[],
-        };
+            <span class="comment">//data_table: vec![],
+        </span>};
 
         <span class="comment">// food desires, the only Required items for a species currently.
         // 1 unit prefered total, half is always necissary.
@@ -150,13 +210,13 @@
             step: <span class="number">1</span>, 
             tags: <span class="macro">vec!</span>[] 
         };
-        <span class="comment">// Rest desire, 0 required, 4 for health,
+        <span class="comment">// Rest desire, 0 required, 2 for health every level up,
         // 8 hours preferred.
         </span><span class="kw">let </span>rest = Desire{ 
             item: DesireItem::Want(<span class="number">0</span>), 
             start: <span class="number">1</span>, 
-            end: <span class="prelude-val">Some</span>(<span class="number">2</span>), 
-            amount: <span class="number">4.0</span>, 
+            end: <span class="prelude-val">Some</span>(<span class="number">4</span>), 
+            amount: <span class="number">2.0</span>, 
             satisfaction: <span class="number">0.0</span>, 
             reserved: <span class="number">0.0</span>, 
             step: <span class="number">1</span>, 
@@ -165,49 +225,95 @@
         humie.desires.push(food);
         humie.desires.push(rest);
 
+        <span class="self">self</span>.species.insert(humie.id, humie);
+
         <span class="prelude-val">Ok</span>(<span class="string">&quot;No Problemo&quot;</span>.into())
     }
 
-    <span class="kw">pub fn </span>load_cultures(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: String) -&gt; <span class="prelude-ty">Result</span>&lt;String, String&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>normie = Species{
+    <span class="doccomment">/// Culture Loader function.
+    /// 
+    /// Currently just loads hard coded data. Will improve later.
+    </span><span class="kw">pub fn </span>load_cultures(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: String) -&gt; <span class="prelude-ty">Result</span>&lt;String, String&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>normie = Culture{
             id: <span class="number">0</span>,
             name: <span class="string">&quot;Normie&quot;</span>.into(),
             variant_name: String::new(),
             desires: <span class="macro">vec!</span>[],
-            tags: <span class="macro">vec!</span>[],
-            relations: <span class="macro">vec!</span>[],
-            base_productivity: <span class="number">1.0</span>,
-            birth_rate: <span class="number">0.02</span>,
-            mortality_rate: <span class="number">0.01</span>,
-            data_table: <span class="macro">vec!</span>[],
-        };
+            <span class="comment">//tags: vec![],
+            </span>relations: <span class="macro">vec!</span>[],
+            productivity_modifier: <span class="number">1.0</span>,
+            birth_rate_modifier: <span class="number">0.02</span>,
+            death_rate_modifier: <span class="number">0.01</span>,
+            <span class="comment">//data_table: vec![],
+        </span>};
 
-        <span class="comment">// food desires, the only Required items for a species currently.
-        // 1 unit prefered total, half is always necissary.
-        </span><span class="kw">let </span>food = Desire{ 
-            item: DesireItem::Want(<span class="number">1</span>), 
-            start: <span class="number">0</span>, 
-            end: <span class="prelude-val">Some</span>(<span class="number">1</span>), 
+        <span class="comment">// ambrosia preference, 
+        </span><span class="kw">let </span>ambrosia = Desire{ 
+            item: DesireItem::Product(<span class="number">2</span>), 
+            start: <span class="number">10</span>, 
+            end: <span class="prelude-val">Some</span>(<span class="number">100</span>), 
+            amount: <span class="number">1.0</span>, 
+            satisfaction: <span class="number">0.0</span>, 
+            reserved: <span class="number">0.0</span>, 
+            step: <span class="number">10</span>, 
+            tags: <span class="macro">vec!</span>[] 
+        };
+        <span class="comment">// Housing, a bigger house is always wanted.
+        </span><span class="kw">let </span>housing = Desire{ 
+            item: DesireItem::Want(<span class="number">2</span>), 
+            start: <span class="number">5</span>, 
+            end: <span class="prelude-val">None</span>, 
             amount: <span class="number">0.5</span>, 
             satisfaction: <span class="number">0.0</span>, 
             reserved: <span class="number">0.0</span>, 
-            step: <span class="number">1</span>, 
+            step: <span class="number">10</span>, 
             tags: <span class="macro">vec!</span>[] 
         };
-        <span class="comment">// Rest desire, 0 required, 4 for health,
-        // 8 hours preferred.
-        </span><span class="kw">let </span>rest = Desire{ 
-            item: DesireItem::Want(<span class="number">0</span>), 
-            start: <span class="number">1</span>, 
-            end: <span class="prelude-val">Some</span>(<span class="number">2</span>), 
-            amount: <span class="number">4.0</span>, 
+        <span class="comment">// Clothing, some clothing is just needed, 2 sets is enough for clothing.
+        </span><span class="kw">let </span>clothing = Desire{ 
+            item: DesireItem::Want(<span class="number">3</span>), 
+            start: <span class="number">5</span>, 
+            end: <span class="prelude-val">Some</span>(<span class="number">20</span>), 
+            amount: <span class="number">0.5</span>, 
             satisfaction: <span class="number">0.0</span>, 
             reserved: <span class="number">0.0</span>, 
-            step: <span class="number">1</span>, 
+            step: <span class="number">10</span>, 
             tags: <span class="macro">vec!</span>[] 
         };
-        normie.desires.push(food);
-        normie.desires.push(rest);
+        <span class="comment">// Fashion, once you get enough clothes,
+        // nice clothes are the next option, and you never have
+        // enough.
+        </span><span class="kw">let </span>fashion = Desire{ 
+            item: DesireItem::Want(<span class="number">3</span>), 
+            start: <span class="number">23</span>, 
+            end: <span class="prelude-val">None</span>, 
+            amount: <span class="number">0.1</span>, 
+            satisfaction: <span class="number">0.0</span>, 
+            reserved: <span class="number">0.0</span>, 
+            step: <span class="number">5</span>, 
+            tags: <span class="macro">vec!</span>[] 
+        };
+        <span class="comment">// Wealth, auspicious wealth is a good secondary
+        // desire which never ends after everything else has been
+        // met.
+        </span><span class="kw">let </span>wealth = Desire{ 
+            item: DesireItem::Want(<span class="number">3</span>), 
+            start: <span class="number">25</span>, 
+            end: <span class="prelude-val">None</span>, 
+            amount: <span class="number">0.5</span>, 
+            satisfaction: <span class="number">0.0</span>, 
+            reserved: <span class="number">0.0</span>, 
+            step: <span class="number">5</span>, 
+            tags: <span class="macro">vec!</span>[] 
+        };
+
+        normie.desires.push(ambrosia);
+        normie.desires.push(housing);
+        normie.desires.push(clothing);
+        normie.desires.push(fashion);
+        normie.desires.push(wealth);
+
+        <span class="self">self</span>.cultures.insert(normie.id, normie);
 
         <span class="prelude-val">Ok</span>(<span class="string">&quot;No Problemo&quot;</span>.into())
     }

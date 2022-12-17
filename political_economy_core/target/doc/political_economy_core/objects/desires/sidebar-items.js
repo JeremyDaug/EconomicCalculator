@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["DesireCoord","The coordinates of a desire, both it’s tier and index in desires. Used for tier walking."],["DesireInfo","The information on a product which is desired."],["Desires",""]]};
