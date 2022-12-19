@@ -131,9 +131,29 @@ impl Desires {
     /// for a total loss of roughly 1.61728.
     /// 
     /// The resulting output would be Some(2, 1.61728).
-    pub fn out_barter_value(&self, item: (usize, f64)) -> f64 {
-        todo!("Needs a function to find the lowest desire tier which can accept an item. Products only.")
-        // 0.0
+    pub fn out_barter_value(&self, product: usize, amount: f64) -> Option<(u64, f64)> {
+
+        None
+    }
+
+    /// Take in a location and walk from that location back down our tiers. This should
+    /// result in a full reversal of self.walk_up_tiers().
+    /// 
+    /// This cannot accept a None value, as desires can be infinite, creating no guaranteed 
+    /// that there is a 'last' desire.
+    pub fn walk_down_tiers(&self, prev: &DesireCoord) -> Option<DesireCoord> {
+        // we must have a previous, but that previous might be set above our len, so reduce down if needed
+        let mut curr = *prev;
+        if curr.idx >= self.desires.len() {
+            curr.idx = self.desires.len();
+        }
+        curr.idx -= 1;
+
+        // loop until we find another desire which matches, or we have run out of places to try.
+        loop {
+            
+        }
+        None
     }
 
     /// Take an item and finds the lowest tier available which can still accept the item.

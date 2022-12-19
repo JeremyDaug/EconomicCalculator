@@ -108,7 +108,7 @@ mod tests {
                 reserved: 0.0,
                 step: 1,
                 tags: vec![]});
-            test_desires.push(Desire{ // 0, 2,4,6
+            test_desires.push(Desire{ // 2,4,6
                 item: DesireItem::Product(1), 
                 start: 2, 
                 end: Some(6), 
@@ -117,7 +117,7 @@ mod tests {
                 reserved: 0.0,
                 step: 2,
                 tags: vec![]});
-            test_desires.push(Desire{ // 0,3,6,9, ...
+            test_desires.push(Desire{ // 3,6,9, ...
                 item: DesireItem::Want(0), 
                 start: 3, 
                 end: None, 
@@ -128,22 +128,22 @@ mod tests {
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
 
-            let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result1 = test.get_lowest_unsatisfied_tier()
                 .expect("Error Found on empty thing.");
             assert_eq!(result1, 0);
 
             test.desires[0].add_satisfaction(2.0);
-            let result2 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result2 = test.get_lowest_unsatisfied_tier()
                 .expect("Couldn't find.");
             assert_eq!(result2, 2);
 
             test.desires[1].add_satisfaction(2.0);
-            let result3 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result3 = test.get_lowest_unsatisfied_tier()
                 .expect("Couldn't find.");
             assert_eq!(result3, 3);
 
             test.desires[2].add_satisfaction(2.0);
-            let result4 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result4 = test.get_lowest_unsatisfied_tier()
                 .expect("Couldn't find.");
             assert_eq!(result4, 6);
         }
