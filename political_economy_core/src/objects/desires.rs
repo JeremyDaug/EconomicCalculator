@@ -107,17 +107,31 @@ impl Desires {
     /// value and the item_out's value. If the value is negative, 
     /// than the items out are more valueable than the items in at
     /// this moment, if positive then they are less valueable.
+    pub fn holder(&self) {
+        todo!()
+    }
+
+    /// Retrieves the internal barter value for a specific product as though it were going
+    /// out and becoming unable to satisfy desires.
+    /// 
+    /// It returns the tier at which it starts, and the internal reserves (potential satisfaction) value
+    /// it loses.
+    /// 
+    /// If there is no preexisting desires or there is no existing reserves, it returns None.
     /// 
     /// # Example
     /// 
-    /// Item **A** is on Tier 5, Item **B** is on tier 6.
+    /// A product is desired at at tiers 0 2 4 and 6. One unit each. and it has 2 units of
+    /// reserves.
     /// 
-    /// The value of **A** = 1 / unit and **B** = 0.9 / unit
+    /// We want to remove 1.5 units of the item.
     /// 
-    /// If **B** is on tier 10 then
+    /// It finds that desire and sets the tier to 2, it then goes through, pretending to subtract and
+    /// count up the reserve (potential satisfaction) lost. In this case it has 1 from 2 and 0.5 * 0.9^-2
+    /// for a total loss of roughly 1.61728.
     /// 
-    /// **B** = 0.9^5 / unit.
-    pub fn barter_valueXXX(&self, item_in: (usize, f64), item_out: (usize,f64)) -> f64 {
+    /// The resulting output would be Some(2, 1.61728).
+    pub fn out_barter_value(&self, item: (usize, f64)) -> f64 {
         todo!("Needs a function to find the lowest desire tier which can accept an item. Products only.")
         // 0.0
     }
@@ -125,10 +139,29 @@ impl Desires {
     /// Take an item and finds the lowest tier available which can still accept the item.
     /// 
     /// Used primarily to nicely find where to put an item when sifting.
-    pub fn get_lowest_unsatisfied_tier(&self, item: DesireItem) -> Option<u64> {
+    pub fn get_lowest_unsatisfied_tier_of_item(&self, item: DesireItem) -> Option<u64> {
         // get those desires which contain our item and are not fully satisfied.
         let possible = self.desires.iter()
             .filter(|x| x.item == item && !x.is_fully_satisfied())
+            .collect_vec();
+        // if any possible, go over them and select the one with the lowest unsatisfied tier.
+        if possible.len() > 0 {
+            let result = possible.iter().map(|x| {
+                x.unsatisfied_to_tier().expect("Full Satisfaction found, check filter.")
+            }).min().expect("Minimum Not Found. Panic!");
+            return Some(result)
+        }
+        // if not found in any, return none, meaning there are no tiers which need more of the item.
+        None
+    }
+
+    /// Finds the lowest unsatisfied tier of all of our desires.
+    /// 
+    /// If all desires are satisfied, it returns None.
+    pub fn get_lowest_unsatisfied_tier(&self) -> Option<u64> {
+        // get those desires which contain our item and are not fully satisfied.
+        let possible = self.desires.iter()
+            .filter(|x| !x.is_fully_satisfied())
             .collect_vec();
         // if any possible, go over them and select the one with the lowest unsatisfied tier.
         if possible.len() > 0 {
@@ -160,7 +193,51 @@ impl Desires {
     /// 
     /// The resulting output would be Some(7, 1.45).
     pub fn in_barter_value(&self, product: usize, amount: f64) -> Option<(u64, f64)> {
-        todo!("Incomplete, Do get_lowest_unsatisfied_tier() first.");
+        // get those desires which want it an can still be satisfied
+        let possible = self.desires.iter()
+            .filter(|x| x.item.is_this_product(&product) && !x.is_fully_satisfied())
+            .collect_vec();
+        // if no desires for that item exist, or they are all fully satisfied, return none.
+        if possible.len() == 0 {
+            return None;
+        }
+        // get the amount we are trying to check on adding.
+        let mut amount = amount;
+        let mut curr = None;
+        let tier = self
+            .get_lowest_unsatisfied_tier_of_item(DesireItem::Product(product))
+            .expect("Lowest unsatisfied desire not found.");
+        let mut weight = 0.0;
+        loop {
+            // walk up for this desire. Currently, we cheat and just walk up from the base
+            // and ignore anything that is satisfied at that step.
+            curr = self.walk_up_tiers_for_item(&curr, &DesireItem::Product(product));
+            // if we have run out of amount, or have reached the end of the desires, break our
+            // loop
+            if amount == 0.0 || curr.is_none() {
+                return Some((tier, weight));
+            }
+            // if we got back a new step, work.
+            if let Some(step) = curr {
+                // get the desire and the unsatisfied desire at this step.
+                let desire = self.desires.get(step.idx).expect("Invalid index found.");
+                let diff = desire.amount - desire.satisfaction_at_tier(step.tier).expect("No Value Given.");
+                if diff > 0.0 {
+                    // since the current step has missing satisfaction.
+                    // get the equivalence ratio.
+                    let equiv = Desires::tier_equivalence(tier, step.tier);
+                    // get the smaller of the two
+                    let min = diff.min(amount);
+                    // add the min times equivelancy to the weight
+                    weight += equiv * min;
+                    // subtract the minimum from the amount
+                    amount -= min;
+                }
+            }
+
+            // since we have not reached an end go back to the top.
+        }
+        
     }
 
     /// Tier Equivalence between two tiers. 
@@ -175,8 +252,10 @@ impl Desires {
     /// - start 10, end 11 = 0.9^-1    1 start = 0.9 end
     /// - start 10, end 12 = 0.9^-2    1 start = 0.81 end
     /// - start 10, end 8 = 0.9^2      1 start = 1.23. end
-    pub fn tier_equivalence(&self, start: u64, end: u64) -> f64 {
-        TIER_RATIO.powf((start - end) as f64)
+    pub fn tier_equivalence(start: u64, end: u64) -> f64 {
+        let start = start as f64;
+        let end = end as f64;
+        TIER_RATIO.powf(end - start)
     }
 
     /// Walk up the tiers of our desires.
@@ -218,24 +297,26 @@ impl Desires {
     /// at. The previous index need not be valid to be used.
     /// 
     /// If there is no next step, it returns None.
-    pub fn walk_up_tiers_for_item(&mut self, prev: Option<DesireCoord>, item: DesireItem) -> Option<DesireCoord> {
+    pub fn walk_up_tiers_for_item(&self, prev: &Option<DesireCoord>, item: &DesireItem) -> Option<DesireCoord> {
         // If no previous given, make it.
         // if given increment idx.
         let mut curr = if prev.is_none() { DesireCoord{tier: 0, idx: 0}} 
             else { prev.expect("Failed somehow!").increment_idx()};
 
         // any desire has a step above here, return true.
-        while self.desires.iter().any(|x| {
+        while self.desires.iter()
+            .filter(|x| x.item == *item)
+            .any(|x| {
             x.is_infinite() || matches!(x.end, Some(end) if end > curr.tier)
         }) {
-            if curr.idx == self.desires.len() { 
+            if curr.idx >= self.desires.len() { 
                 curr.idx = 0; 
                 // Could make this smarter, but this will do for now.
                 // if this becomes a problem. rework to be smarter.
                 curr.tier += 1; 
             }
             while curr.idx < self.desires.len() {
-                if self.desires[curr.idx].item == item &&
+                if self.desires[curr.idx].item == *item &&
                  self.desires[curr.idx].steps_on_tier(curr.tier) {
                     return Some(curr)
                 }
@@ -247,6 +328,7 @@ impl Desires {
 }
 
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.
+#[derive(Debug, Clone, Copy)]
 pub struct DesireCoord {
     pub tier: u64,
     pub idx: usize

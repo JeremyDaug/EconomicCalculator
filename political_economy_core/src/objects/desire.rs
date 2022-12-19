@@ -166,11 +166,13 @@ impl Desire {
     /// 
     /// Returns the amount in units requested satisfied at this level.
     /// It caps at 0 and self.amount. 
-    pub fn satisfaction_at_tier(&self, tier: u64) -> Result<f64, String> {// since we know we step on a valid tier, get the total satisfaction
+    pub fn satisfaction_at_tier(&self, tier: u64) -> Result<f64, String> {
+        // since we know we step on a valid tier, get the total satisfaction
         let total = self.total_satisfaction();
 
         // get how many steps we have taken at this tier (start == tier = 0)
         let steps = self.steps_to_tier(tier)?;
+
 
         let mut at_tier = total - steps as f64;
         // cap the satisfaction at amount.

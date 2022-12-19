@@ -1,5 +1,7 @@
 pub mod objects;
 pub mod data_manager;
+pub mod demographics;
+pub mod master;
 
 extern crate lazy_static;
 
@@ -13,6 +15,88 @@ mod tests {
         use crate::objects::{desires::Desires, desire::{Desire, DesireItem}};
 
         #[test]
+        pub fn correctly_calculate_in_barter_value() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0, 2,4,6
+                item: DesireItem::Product(1), 
+                start: 2, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,3,6,9, ...
+                item: DesireItem::Want(0), 
+                start: 3, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+            
+            test.desires[0].satisfaction = 0.5;
+            let results = test.in_barter_value(0, 0.5);
+            assert!(results.is_some());
+            let results = results.unwrap();
+            assert_eq!(results.0, 0);
+            assert_eq!(results.1, 0.5);
+
+            let results = test.in_barter_value(0, 1.0);
+            assert!(results.is_some());
+            let results = results.unwrap();
+            assert_eq!(results.0, 0);
+            assert_eq!(results.1, 0.5+0.5*0.9);
+
+            let results = test.in_barter_value(0, 2.0);
+            assert!(results.is_some());
+            let results = results.unwrap();
+            assert_eq!(results.0, 0);
+            assert_eq!(results.1, 0.5+1.0*0.9);
+
+            // 0 has 0.5 sat for 0 and 1      seeks 1.0 units / lvl
+            // 2 has 0 sat for 0, 3, 6, 9 ... seeks 1.5 units / lvl
+            test.desires[2].item = DesireItem::Product(0);
+            test.desires[2].amount = 1.5;
+            let results = test.in_barter_value(0, 0.5);
+            assert!(results.is_some());
+            let results = results.unwrap();
+            assert_eq!(results.0, 0);
+            assert_eq!(results.1, 0.5);
+
+            // 0.5 in 0,0 and 0.5 in 2,0
+            let results = test.in_barter_value(0, 1.0);
+            assert!(results.is_some());
+            let results = results.unwrap();
+            assert_eq!(results.0, 0);
+            assert_eq!(results.1, 0.95);
+
+            let results = test.in_barter_value(0, 2.0);
+            assert!(results.is_some());
+            let results = results.unwrap();
+            assert_eq!(results.0, 0);
+            assert_eq!(results.1, 1.4+0.5*(0.9 as f64).powf(3.0));
+
+            let results = test.in_barter_value(0, 3.0);
+            assert!(results.is_some());
+            let results = results.unwrap();
+            assert_eq!(results.0, 0);
+            assert_eq!(results.1, 1.4+1.5*(0.9 as f64).powf(3.0));
+
+        }
+
+        #[test]
         pub fn get_lowest_unsatisfied_tier_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
@@ -24,9 +108,9 @@ mod tests {
                 reserved: 0.0,
                 step: 1,
                 tags: vec![]});
-            test_desires.push(Desire{ // 0,2,4,6
-                item: DesireItem::Product(0), 
-                start: 0, 
+            test_desires.push(Desire{ // 0, 2,4,6
+                item: DesireItem::Product(1), 
+                start: 2, 
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
@@ -34,8 +118,8 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,3,6,9, ...
-                item: DesireItem::Product(0), 
-                start: 0, 
+                item: DesireItem::Want(0), 
+                start: 3, 
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
@@ -43,8 +127,131 @@ mod tests {
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
+
+            let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Error Found on empty thing.");
+            assert_eq!(result1, 0);
+
+            test.desires[0].add_satisfaction(2.0);
+            let result2 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result2, 2);
+
+            test.desires[1].add_satisfaction(2.0);
+            let result3 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result3, 3);
+
+            test.desires[2].add_satisfaction(2.0);
+            let result4 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result4, 6);
         }
-        
+
+        #[test]
+        pub fn get_lowest_unsatisfied_tier_for_item_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6
+                item: DesireItem::Product(0), 
+                start: 2, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 3,6,9, ...
+                item: DesireItem::Product(0), 
+                start: 3, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
+            let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Error Found on empty thing.");
+            assert_eq!(result1, 0);
+
+            test.desires[0].add_satisfaction(2.0);
+            let result2 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result2, 2);
+
+            test.desires[1].add_satisfaction(2.0);
+            let result3 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result3, 3);
+
+            test.desires[2].add_satisfaction(2.0);
+            let result4 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result4, 6);
+        }
+
+        #[test]
+        pub fn get_lowest_unsatisfied_tier_for_item_and_exclude_other_items_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6
+                item: DesireItem::Product(0), 
+                start: 2, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 3,6,9, ...
+                item: DesireItem::Product(1), 
+                start: 3, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
+            let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Error Found on empty thing.");
+            assert_eq!(result1, 0);
+
+            test.desires[0].add_satisfaction(2.0);
+            let result2 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result2, 2);
+
+            test.desires[1].add_satisfaction(2.0);
+            let result3 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result3, 6);
+
+            test.desires[2].add_satisfaction(2.0);
+            let result4 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result4, 6);
+        }
+
         #[test]
         pub fn walk_up_tiers_correctly() {
             let mut test_desires = vec![];
@@ -171,17 +378,17 @@ mod tests {
                 reserved: 0.0,
                 step: 2,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let test = Desires::new(test_desires);
 
             let mut curr = None;
             let mut results = vec![];
             loop {
-                let val = test.walk_up_tiers_for_item(curr, DesireItem::Product(0));
+                let val = test.walk_up_tiers_for_item(&curr, &DesireItem::Product(0));
                 if let Some(value) = val {
                     results.push(Some((value.tier, value.idx)));
                     curr = Some(value);
                 } 
-                else { results.push(None); curr = None; break;}
+                else { results.push(None); break;}
             }
 
             assert_eq!(results[0].expect("err!"), (0,0));

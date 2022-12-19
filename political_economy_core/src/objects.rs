@@ -1,5 +1,3 @@
-pub mod master;
-pub mod demographics;
 pub mod product;
 pub mod skill_group;
 pub mod skill;
