@@ -12,7 +12,127 @@ pub fn add(left: usize, right: usize) -> usize {
 #[cfg(test)]
 mod tests {
     mod desires_tests {
-        use crate::objects::{desires::Desires, desire::{Desire, DesireItem}};
+        use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
+
+        #[test]
+        pub fn correctly_walk_down_tiers_for_item() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0, 2,4,6
+                item: DesireItem::Product(1), 
+                start: 0, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,3,6,9, ...
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let test = Desires::new(test_desires);
+
+            let mut current = DesireCoord{ tier: 3,
+                idx: 3 };
+            let mut results = vec![];
+            loop {
+                let result = test.walk_down_tiers(&current);
+                if result.is_none() {
+                    break;
+                }
+                current = result.unwrap();
+                results.push(current.clone());
+            }
+
+            assert_eq!(results[0].idx, 2);
+            assert_eq!(results[0].tier, 3);
+
+            assert_eq!(results[2].idx, 0);
+            assert_eq!(results[2].tier, 1);
+
+            assert_eq!(results[3].idx, 2);
+            assert_eq!(results[3].tier, 0);
+
+            assert_eq!(results[5].idx, 0);
+            assert_eq!(results[5].tier, 0);
+        }
+
+        #[test]
+        pub fn correctly_walk_down_tiers() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0, 2,4,6
+                item: DesireItem::Product(1), 
+                start: 0, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,3,6,9, ...
+                item: DesireItem::Want(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let test = Desires::new(test_desires);
+
+            let mut current = DesireCoord{ tier: 3,
+                idx: 3 };
+            let mut results = vec![];
+            loop {
+                let result = test.walk_down_tiers(&current);
+                if result.is_none() {
+                    break;
+                }
+                current = result.unwrap();
+                results.push(current.clone());
+            }
+
+            assert_eq!(results[0].idx, 2);
+            assert_eq!(results[0].tier, 3);
+
+            assert_eq!(results[1].idx, 1);
+            assert_eq!(results[1].tier, 2);
+
+            assert_eq!(results[2].idx, 0);
+            assert_eq!(results[2].tier, 1);
+
+            assert_eq!(results[3].idx, 2);
+            assert_eq!(results[3].tier, 0);
+
+            assert_eq!(results[4].idx, 1);
+            assert_eq!(results[4].tier, 0);
+
+            assert_eq!(results[5].idx, 0);
+            assert_eq!(results[5].tier, 0);
+        }
 
         #[test]
         pub fn correctly_calculate_in_barter_value() {

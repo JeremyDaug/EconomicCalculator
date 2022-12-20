@@ -11,7 +11,7 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, option};
 
 use itertools::Itertools;
 
@@ -141,19 +141,76 @@ impl Desires {
     /// 
     /// This cannot accept a None value, as desires can be infinite, creating no guaranteed 
     /// that there is a 'last' desire.
+    /// 
+    /// The Desire Coord does not need to have an idx < self.desires.len(), if it
+    /// has an idx > self.desires.len() it will drag it down to len, allowing you to
+    /// start at a tier specifically, without touching a higher tier.
     pub fn walk_down_tiers(&self, prev: &DesireCoord) -> Option<DesireCoord> {
-        // we must have a previous, but that previous might be set above our len, so reduce down if needed
+        // set the current equal to prev so we can edit safely.
         let mut curr = *prev;
-        if curr.idx >= self.desires.len() {
+        // if the current idx is past our endpoint, then smash it down.
+        if curr.idx > self.desires.len() {
             curr.idx = self.desires.len();
         }
-        curr.idx -= 1;
-
-        // loop until we find another desire which matches, or we have run out of places to try.
+        
+        // walk down the idx
         loop {
-            
+            if curr.idx == 0 && curr.tier == 0 {
+                break; // if we are currently at 0,0, then break out and return None.
+            }
+            else if curr.idx == 0 { // if index is 0, then go to next tier.
+                curr.tier -= 1;
+                curr.idx = self.desires.len();
+            }
+            curr.idx -= 1; // subtract index
+
+            if self.desires[curr.idx].steps_on_tier(curr.tier) {
+                // if the desire steps on this tier, then return
+                return Some(curr);
+            }
+            // if it's not try again.
         }
+
         None
+    }
+
+    /// Like walk_down_tiers(), this walks down the desires we have. But, it only returns
+    /// the indexes and tiers for a specific desire, instead of all of them.
+    /// 
+    /// This cannot accept a None value, as desires can be infinite, creating no guaranteed 
+    /// that there is a 'last' desire.
+    /// 
+    /// The Desire Coord does not need to have an idx < self.desires.len(), if it
+    /// has an idx > self.desires.len() it will drag it down to len, allowing you to
+    /// start at a tier specifically, without touching a higher tier.
+    pub fn walk_down_tiers_for_item(&self, prev: &DesireCoord, item: &DesireItem) -> Option<DesireCoord> {
+                // set the current equal to prev so we can edit safely.
+                let mut curr = *prev;
+                // if the current idx is past our endpoint, then smash it down.
+                if curr.idx > self.desires.len() {
+                    curr.idx = self.desires.len();
+                }
+                
+                // walk down the idx
+                loop {
+                    if curr.idx == 0 && curr.tier == 0 {
+                        break; // if we are currently at 0,0, then break out and return None.
+                    }
+                    else if curr.idx == 0 { // if index is 0, then go to next tier.
+                        curr.tier -= 1;
+                        curr.idx = self.desires.len();
+                    }
+                    curr.idx -= 1; // subtract index
+        
+                    if self.desires[curr.idx].steps_on_tier(curr.tier) && 
+                        self.desires[curr.idx].item == *item {
+                        // if the desire steps on this tier, then return
+                        return Some(curr);
+                    }
+                    // if it's not try again.
+                }
+        
+                None
     }
 
     /// Take an item and finds the lowest tier available which can still accept the item.
