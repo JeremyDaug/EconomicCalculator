@@ -11,7 +11,7 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::HashMap, option};
+use std::collections::HashMap;
 
 use itertools::Itertools;
 
@@ -114,25 +114,103 @@ impl Desires {
     /// Retrieves the internal barter value for a specific product as though it were going
     /// out and becoming unable to satisfy desires.
     /// 
-    /// It returns the tier at which it starts, and the internal reserves (potential satisfaction) value
-    /// it loses.
+    /// It returns the tier at which it starts, and the internal satisfaction value
+    /// it will lose.
     /// 
-    /// If there is no preexisting desires or there is no existing reserves, it returns None.
+    /// If there is no preexisting desires or there is no existing satisfaction, it returns None.
     /// 
     /// # Example
     /// 
     /// A product is desired at at tiers 0 2 4 and 6. One unit each. and it has 2 units of
-    /// reserves.
+    /// satisfaction.
     /// 
     /// We want to remove 1.5 units of the item.
     /// 
     /// It finds that desire and sets the tier to 2, it then goes through, pretending to subtract and
-    /// count up the reserve (potential satisfaction) lost. In this case it has 1 from 2 and 0.5 * 0.9^-2
+    /// count up the satisfaction lost. In this case it has 1 from 2 and 0.5 * 0.9^-2
     /// for a total loss of roughly 1.61728.
     /// 
     /// The resulting output would be Some(2, 1.61728).
-    pub fn out_barter_value(&self, product: usize, amount: f64) -> Option<(u64, f64)> {
+    pub fn out_barter_value(&self, product: &usize, amount: f64) -> Option<(u64, f64)> {
+        // get those desires with reserves to remove work with.
+        let possible = self.desires.iter()
+            .filter(|x| x.item.is_this_product(product) && x.reserved != 0.0)
+            .collect_vec();
+        if possible.len() == 0 {
+            return None; // if no possible items to barter, return none.
+        }
+        // get the amount we are trying to remove
+        let mut amount = amount;
+        
+        let tier = self
+            .get_highest_satisfied_tier_for_item(DesireItem::Product(*product))
+            .expect("Highest Satisfied Tier Not Found.");
+        let mut curr = DesireCoord{ tier, idx: self.desires.len() };
+        let mut weight = 0.0;
+        loop {
+            // walk down desires for this product. We start at the highest satisfied tier for that
+            // item.
+            let temp = self
+                .walk_down_tiers_for_item(&curr, &DesireItem::Product(*product));
+            if amount == 0.0 || temp.is_none() {
+                // if none left to remove or no next step.
+                return Some((tier, weight));
+            }
+            // if we have a new step and more to remove go for it
+            if let Some(step) = temp {
+                curr = step;
+                // get the satisfaction available
+                let desire = self.desires.get(step.idx).expect("Invalid Index.");
+                let available = desire.satisfaction_at_tier(step.tier).expect("Bad Tier found.");
+                if available > 0.0 {
+                    // since satisfaction is available, do work
+                    // get tier equivalency 
+                    let eqv = Desires::tier_equivalence(tier, step.tier);
+                    // get the smaller between available and amount
+                    let min = available.min(amount);
+                    // add min times weight to weight
+                    weight += eqv * min;
+                    // subtract from amount
+                    amount -= min;
+                }
+            }
+        }
+        None
+    }
 
+    /// Finds the highest tier for a particular item which has satisfaction
+    /// 
+    /// Returns None if no satisfaction in any product found.
+    pub fn get_highest_satisfied_tier_for_item(&self, item: DesireItem) -> Option<u64> {
+        // get those desires which have any satisfaction
+        let possible = self.desires.iter()
+            .filter(|x| x.item == item && x.satisfaction > 0.0)
+            .collect_vec();
+        // if any possible, go over and select the one with the highest satisfaction.
+        if possible.len() > 0 {
+            let result = possible.iter().map(|x| {
+                x.satisfaction_up_to_tier().expect("No Satisfaction Found!")
+            }).max().expect("No Minimum Found.");
+            return Some(result);
+        }
+        None
+    }
+    
+    /// Finds the highest tier which has any satisfaction.
+    /// 
+    /// Returns None if no satisfaction in any product found.
+    pub fn get_highest_satisfied_tier(&self) -> Option<u64> {
+        // get those desires which have any satisfaction
+        let possible = self.desires.iter()
+            .filter(|x| x.satisfaction > 0.0)
+            .collect_vec();
+        // if any possible, go over and select the one with the highest satisfaction.
+        if possible.len() > 0 {
+            let result = possible.iter().map(|x| {
+                x.satisfaction_up_to_tier().expect("No Satisfaction Found!")
+            }).max().expect("No Minimum Found.");
+            return Some(result);
+        }
         None
     }
 

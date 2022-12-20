@@ -15,6 +15,108 @@ mod tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
         #[test]
+        pub fn get_highest_satisfied_tier_for_item_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6
+                item: DesireItem::Product(1), 
+                start: 2, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 3,6,9, ...
+                item: DesireItem::Want(0), 
+                start: 3, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
+            let result1 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0));
+            assert_eq!(result1, None);
+
+            test.desires[0].add_satisfaction(2.0);
+            let result2 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result2, 1);
+
+            test.desires[1].add_satisfaction(2.0);
+            let result3 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result3, 1);
+
+            test.desires[2].add_satisfaction(2.0);
+            let result4 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0))
+                .expect("Couldn't find.");
+            assert_eq!(result4, 1);
+        }
+
+        #[test]
+        pub fn get_highest_satisfied_tier_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6
+                item: DesireItem::Product(1), 
+                start: 2, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 3,6,9, ...
+                item: DesireItem::Want(0), 
+                start: 3, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
+            let result1 = test.get_highest_satisfied_tier();
+            assert_eq!(result1, None);
+
+            test.desires[0].add_satisfaction(2.0);
+            let result2 = test.get_highest_satisfied_tier()
+                .expect("Couldn't find.");
+            assert_eq!(result2, 1);
+
+            test.desires[1].add_satisfaction(2.0);
+            let result3 = test.get_highest_satisfied_tier()
+                .expect("Couldn't find.");
+            assert_eq!(result3, 4);
+
+            test.desires[2].add_satisfaction(2.0);
+            let result4 = test.get_highest_satisfied_tier()
+                .expect("Couldn't find.");
+            assert_eq!(result4, 6);
+        }
+
+        #[test]
         pub fn correctly_walk_down_tiers_for_item() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
