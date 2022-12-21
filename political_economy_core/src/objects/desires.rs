@@ -117,7 +117,8 @@ impl Desires {
     /// It returns the tier at which it starts, and the internal satisfaction value
     /// it will lose.
     /// 
-    /// If there is no preexisting desires or there is no existing satisfaction, it returns None.
+    /// If there is no desire for that product exists, or there is no satisfaction to pull from,
+    /// it returns None.
     /// 
     /// # Example
     /// 
@@ -134,7 +135,7 @@ impl Desires {
     pub fn out_barter_value(&self, product: &usize, amount: f64) -> Option<(u64, f64)> {
         // get those desires with reserves to remove work with.
         let possible = self.desires.iter()
-            .filter(|x| x.item.is_this_product(product) && x.reserved != 0.0)
+            .filter(|x| x.item.is_this_product(product) && x.satisfaction != 0.0)
             .collect_vec();
         if possible.len() == 0 {
             return None; // if no possible items to barter, return none.
@@ -175,7 +176,6 @@ impl Desires {
                 }
             }
         }
-        None
     }
 
     /// Finds the highest tier for a particular item which has satisfaction
@@ -335,7 +335,7 @@ impl Desires {
     /// It returns the tier at which it starts, and the internal satisfaction value
     /// it satisfies.
     /// 
-    /// If it is not desired, it returns None.
+    /// If it is not desired at all, it returns None.
     /// 
     /// # Example
     /// 

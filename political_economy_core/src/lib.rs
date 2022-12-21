@@ -15,6 +15,69 @@ mod tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
         #[test]
+        pub fn get_out_barter_value_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6
+                item: DesireItem::Product(1), 
+                start: 2, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 3,6,9, ...
+                item: DesireItem::Product(0), 
+                start: 3, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
+            let result = test.out_barter_value(&0, 2.0);
+            assert!(result.is_none());
+
+            test.desires[0].satisfaction = 0.5;
+            let result = test
+                .out_barter_value(&0, 1.0)
+                .expect("Value not found!");
+            assert_eq!(result.0, 0);
+            assert_eq!(result.1, 0.5);
+
+            test.desires[0].satisfaction = 2.0;
+            let result = test
+                .out_barter_value(&0, 2.0)
+                .expect("Value not found!");
+            assert_eq!(result.0, 1);
+            assert_eq!(result.1, 1.0 + 1.0*(1.0/0.9));
+
+            test.desires[2].satisfaction = 1.0;
+            let result = test
+                .out_barter_value(&0, 2.0)
+                .expect("Value not found!");
+            assert_eq!(result.0, 3);
+            assert_eq!(result.1, 1.0 +1.0/(0.9_f64.powf(2.0)));
+
+            let result = test
+                .out_barter_value(&0, 3.0)
+                .expect("Value not found!");
+            assert_eq!(result.0, 3);
+            assert_eq!(result.1, 1.0 +1.0/(0.9_f64.powf(2.0)) +1.0/(0.9_f64.powf(3.0)));
+        }
+
+        #[test]
         pub fn get_highest_satisfied_tier_for_item_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
