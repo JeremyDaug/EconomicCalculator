@@ -103,12 +103,39 @@ impl Desires {
     /// which want it or a desire which matches, but it is totally 
     /// satisfied) then it's value is equal to 0.
     /// 
-    /// The value returned is the difference between the item_in's 
-    /// value and the item_out's value. If the value is negative, 
-    /// than the items out are more valueable than the items in at
-    /// this moment, if positive then they are less valueable.
-    pub fn holder(&self) {
-        todo!()
+    /// It returns the ValueDifference of recieved, allowing the
+    /// caller to see the exact values in and out.
+    pub fn barter_value_difference(&self, 
+        items_in: Vec<(usize, f64)>, 
+        items_out: Vec<(usize, f64)>) -> ValueInOut {
+        // get the value of the items in
+        let mut in_value = vec![];
+        for item in items_in {
+            let value = self.in_barter_value(&item.0, item.1);
+            if let Some(product_value) = value {
+                in_value.push(product_value);
+            }
+        }
+        // do the same for the items in
+        let mut out_value = vec![];
+        for item in items_out {
+            let value = self.out_barter_value(&item.0, item.1);
+            if let Some(product_value) = value {
+                out_value.push(product_value);
+            }
+        }
+
+        // summarize the in values take all things down to tier 0, for simplicity.
+        let mut sum_in_value = 0.0;
+        for value in in_value {
+            sum_in_value += value.1.powf(Desires::tier_equivalence(value.0, 0));
+        }
+        let mut sum_out_value = 0.0;
+        for value in out_value {
+            sum_out_value += value.1.powf(Desires::tier_equivalence(value.0, 0));
+        }
+
+        ValueInOut::new(sum_in_value, sum_out_value)
     }
 
     /// Retrieves the internal barter value for a specific product as though it were going
@@ -347,7 +374,7 @@ impl Desires {
     /// calculates the weight (1 + 0.5*0.9 &#8773; 1.45).
     /// 
     /// The resulting output would be Some(7, 1.45).
-    pub fn in_barter_value(&self, product: usize, amount: f64) -> Option<(u64, f64)> {
+    pub fn in_barter_value(&self, product: &usize, amount: f64) -> Option<(u64, f64)> {
         // get those desires which want it an can still be satisfied
         let possible = self.desires.iter()
             .filter(|x| x.item.is_this_product(&product) && !x.is_fully_satisfied())
@@ -495,6 +522,34 @@ impl DesireCoord {
     /// Easier when copy and increment are needed.
     fn increment_idx(self) -> Self{
         DesireCoord { tier: self.tier, idx: self.idx + 1}
+    }
+}
+
+/// A simple sturct to make passing value difference around easier and
+/// clearer.
+/// 
+/// Likely to move this to someplace more public later as uses elsewhere are foreseeable.
+#[derive(Debug, Clone, Copy)]
+pub struct ValueInOut {
+    pub in_value: f64,
+    pub out_value: f64
+}
+
+impl ValueInOut {
+    pub fn new(in_value: f64, out_value: f64) -> Self { Self { in_value, out_value } }
+
+    /// returns the difference between the in and out values.
+    /// 
+    /// If Positive then it means the in value is greater than the
+    /// out value.
+    pub fn diff(&self) -> f64 {
+        self.in_value - self.out_value
+    }
+
+    /// A quick check to see if the value exchange is acceptable.
+    /// returns true if self.in_value > self.out_value.
+    pub fn acceptable(&self) -> bool {
+        self.in_value > self.out_value
     }
 }
 
