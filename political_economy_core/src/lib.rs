@@ -15,6 +15,11 @@ mod tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
         #[test]
+        pub fn calculate_barter_value_differenec_correctly() {
+            
+        }
+
+        #[test]
         pub fn get_out_barter_value_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
