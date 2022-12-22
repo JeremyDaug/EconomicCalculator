@@ -36,7 +36,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
-                item: DesireItem::Product(0), 
+                item: DesireItem::Product(2), 
                 start: 3, 
                 end: None, 
                 amount: 1.0, 
@@ -44,9 +44,36 @@ mod tests {
                 reserved: 0.0,
                 step: 3,
                 tags: vec![]});
+            test_desires.push(Desire{ // 2, 3, 4, ...
+                item: DesireItem::Product(3), 
+                start: 2, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
             let mut test = Desires::new(test_desires);
 
-            
+            test.desires[0].satisfaction = 2.0;
+            test.desires[2].satisfaction = 1.0;
+            test.desires[3].satisfaction = 1.0;
+
+            let mut offer = vec![];
+            offer.push((1, 1.0));
+            offer.push((2, 1.0));
+            let mut ask = vec![];
+            ask.push((0, 1.0));
+            ask.push((3, 1.0));
+
+            let expected_in = 0.9_f64.powf(2.0) + 0.9_f64.powf(6.0);
+            let expected_out = 0.9_f64.powf(1.0) + 0.9_f64.powf(2.0);
+
+            let result = test.barter_value_difference(offer, ask);
+
+            assert_eq!(result.in_value, expected_in);
+            assert_eq!(result.out_value, expected_out);
+
         }
 
         #[test]
@@ -367,19 +394,19 @@ mod tests {
             let mut test = Desires::new(test_desires);
             
             test.desires[0].satisfaction = 0.5;
-            let results = test.in_barter_value(0, 0.5);
+            let results = test.in_barter_value(&0, 0.5);
             assert!(results.is_some());
             let results = results.unwrap();
             assert_eq!(results.0, 0);
             assert_eq!(results.1, 0.5);
 
-            let results = test.in_barter_value(0, 1.0);
+            let results = test.in_barter_value(&0, 1.0);
             assert!(results.is_some());
             let results = results.unwrap();
             assert_eq!(results.0, 0);
             assert_eq!(results.1, 0.5+0.5*0.9);
 
-            let results = test.in_barter_value(0, 2.0);
+            let results = test.in_barter_value(&0, 2.0);
             assert!(results.is_some());
             let results = results.unwrap();
             assert_eq!(results.0, 0);
@@ -389,26 +416,26 @@ mod tests {
             // 2 has 0 sat for 0, 3, 6, 9 ... seeks 1.5 units / lvl
             test.desires[2].item = DesireItem::Product(0);
             test.desires[2].amount = 1.5;
-            let results = test.in_barter_value(0, 0.5);
+            let results = test.in_barter_value(&0, 0.5);
             assert!(results.is_some());
             let results = results.unwrap();
             assert_eq!(results.0, 0);
             assert_eq!(results.1, 0.5);
 
             // 0.5 in 0,0 and 0.5 in 2,0
-            let results = test.in_barter_value(0, 1.0);
+            let results = test.in_barter_value(&0, 1.0);
             assert!(results.is_some());
             let results = results.unwrap();
             assert_eq!(results.0, 0);
             assert_eq!(results.1, 0.95);
 
-            let results = test.in_barter_value(0, 2.0);
+            let results = test.in_barter_value(&0, 2.0);
             assert!(results.is_some());
             let results = results.unwrap();
             assert_eq!(results.0, 0);
             assert_eq!(results.1, 1.4+0.5*(0.9 as f64).powf(3.0));
 
-            let results = test.in_barter_value(0, 3.0);
+            let results = test.in_barter_value(&0, 3.0);
             assert!(results.is_some());
             let results = results.unwrap();
             assert_eq!(results.0, 0);

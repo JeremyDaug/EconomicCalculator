@@ -106,8 +106,8 @@ impl Desires {
     /// It returns the ValueDifference of recieved, allowing the
     /// caller to see the exact values in and out.
     pub fn barter_value_difference(&self, 
-        items_in: Vec<(usize, f64)>, 
-        items_out: Vec<(usize, f64)>) -> ValueInOut {
+    items_in: Vec<(usize, f64)>, 
+    items_out: Vec<(usize, f64)>) -> ValueInOut {
         // get the value of the items in
         let mut in_value = vec![];
         for item in items_in {
@@ -128,11 +128,11 @@ impl Desires {
         // summarize the in values take all things down to tier 0, for simplicity.
         let mut sum_in_value = 0.0;
         for value in in_value {
-            sum_in_value += value.1.powf(Desires::tier_equivalence(value.0, 0));
+            sum_in_value += value.1 * Desires::tier_equivalence(0, value.0);
         }
         let mut sum_out_value = 0.0;
         for value in out_value {
-            sum_out_value += value.1.powf(Desires::tier_equivalence(value.0, 0));
+            sum_out_value += value.1 * Desires::tier_equivalence(0, value.0);
         }
 
         ValueInOut::new(sum_in_value, sum_out_value)
@@ -387,13 +387,13 @@ impl Desires {
         let mut amount = amount;
         let mut curr = None;
         let tier = self
-            .get_lowest_unsatisfied_tier_of_item(DesireItem::Product(product))
+            .get_lowest_unsatisfied_tier_of_item(DesireItem::Product(*product))
             .expect("Lowest unsatisfied desire not found.");
         let mut weight = 0.0;
         loop {
             // walk up for this desire. Currently, we cheat and just walk up from the base
             // and ignore anything that is satisfied at that step.
-            curr = self.walk_up_tiers_for_item(&curr, &DesireItem::Product(product));
+            curr = self.walk_up_tiers_for_item(&curr, &DesireItem::Product(*product));
             // if we have run out of amount, or have reached the end of the desires, break our
             // loop
             if amount == 0.0 || curr.is_none() {
