@@ -16,6 +16,36 @@ mod tests {
 
         #[test]
         pub fn calculate_barter_value_differenec_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6
+                item: DesireItem::Product(1), 
+                start: 2, 
+                end: Some(6), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 3,6,9, ...
+                item: DesireItem::Product(0), 
+                start: 3, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 3,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+
             
         }
 
