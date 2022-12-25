@@ -2,9 +2,7 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::collections::HashMap;
-
-use super::desires::Desires;
+use super::{desires::Desires, pop_breakdown_table::PopBreakdownTable};
 
 
 /// Pops are the data storage for a population group.
@@ -19,8 +17,6 @@ use super::desires::Desires;
 pub struct Pop {
     /// Pop's unique id for navigation purposes.
     pub id: usize,
-    /// Pop's total population (should be equal to the sum of it's breakdown table.)
-    pub count: usize,
     /// The job of the pop.
     pub job: usize,
     /// Where the pop works.
@@ -35,19 +31,24 @@ pub struct Pop {
     pub higher_skill_level: f64,
     /// The total desires and property of the pop.
     pub desires: Desires,
-    pub species: HashMap<usize, usize>,
-    // civilization
-    pub culture: HashMap<usize, usize>
-    // Ideology
-    // Movements
+    /// A breakdown of the Population's demographics.
+    pub breakdown_table: PopBreakdownTable,
     // Mood
-    // desires
-    // for sale?
+    /// Whether the pop is selling or not.
+    pub is_selling: bool,
 }
 
 impl Pop {
-}
+    /// Get's an automatically generated name for the pop group.
+    /// 
+    /// TODO update to pass in data from elsewhere to get more useful names.
+    /// Possibly add in an option no name them specially.
+    pub fn id_name(&self) -> String {
+        format!("Job:{}|Firm:{}|Market:{}", self.job, self.firm, self.market)
+    }
 
-pub struct PopBreakdownTable {
-
+    /// Get's the total number of people in this pop.
+    pub fn count(&self) -> usize {
+        self.breakdown_table.total
+    }
 }

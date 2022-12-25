@@ -92,3 +92,9 @@
 //! Actors and their Market communicate by bus to collect data and try and 
 //! exchange goods.
 
+use crate::{data_manager::DataManager, demographics::Demographics};
+
+pub struct Runner {
+    pub data_manager: DataManager,
+    pub demographics: Demographics,
+}
