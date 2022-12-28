@@ -2,7 +2,9 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use super::{desires::Desires, pop_breakdown_table::PopBreakdownTable};
+use crate::demographics::Demographics;
+
+use super::{desires::Desires, pop_breakdown_table::PopBreakdownTable, buyer::Buyer, seller::Seller};
 
 
 /// Pops are the data storage for a population group.
@@ -39,6 +41,25 @@ pub struct Pop {
 }
 
 impl Pop {
+    /// Takes the current population table, and updates desires to match the population
+    /// breakdown. This is a hard reset, so is advised to call only as needed.
+    /// 
+    /// Does not take sub-groups of species, culture, ideology into account currently.
+    /// This will need to be updated when those are implemented.
+    pub fn update_desires(&mut self, demos: Demographics) {
+        todo!();
+        self.desires.clear_desires();
+        // add in each species desires
+        for row in self.breakdown_table.table.iter() {
+            //self.desires.add_desire(row);
+        }
+        // placeholder for civilization
+        // add in culture desires
+
+        // add in ideology desires
+        // add in movements
+    }
+
     /// Get's an automatically generated name for the pop group.
     /// 
     /// TODO update to pass in data from elsewhere to get more useful names.
@@ -51,4 +72,12 @@ impl Pop {
     pub fn count(&self) -> usize {
         self.breakdown_table.total
     }
+}
+
+impl Buyer for Pop {
+
+}
+
+impl Seller for Pop {
+
 }

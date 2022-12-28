@@ -1,7 +1,5 @@
 //! Species covers the biological nature of a pop.
 
-use std::collections::HashMap;
-
 use super::desire::Desire;
 
 /// A Species, the biological Reality of a Pop which they are built with.
@@ -57,6 +55,7 @@ pub struct Species {
     // pub data_table: Vec<SpeciesSubentry>,
 }
 
+/*
 #[derive(Debug)]
 pub struct SpeciesSubentry {
     /// The summarized desires for a member of this species+cohort+subtype
@@ -72,8 +71,33 @@ pub struct SpeciesSubentry {
     /// The final skill group modifiers for a member of this species+cohort+subtype.
     pub skill_group_modifiers: HashMap<u64, f64>,
 }
+*/
 
 impl Species {
+    pub fn new(id: usize, name: String, 
+        variant_name: String, desires: Vec<Desire>, 
+        tags: Vec<SpeciesTag>, relations: Vec<usize>, 
+        base_productivity: f64, birth_rate: f64, 
+        mortality_rate: f64) -> Result<Self, String> { 
+            if birth_rate < 0.0 {
+                return Err("birth_rate must be 0 or greater.".into());
+            }
+            else if mortality_rate < 0.0 {
+                return Err("'mortality_rate' must be 0 or greater.".into());
+            }
+            else if base_productivity < 0.0 {
+                return Err("'base_productivity' must be 0 or greater.".into());
+            }
+            else if name.trim().is_empty() {
+                return Err("'name' cannot be empty or whitespace.".into());
+            }
+
+            Ok(Self { 
+                id, name, variant_name, desires, 
+                tags, relations, base_productivity, 
+                birth_rate, mortality_rate } )
+            }
+
     pub fn get_name(&self) -> String {
         format!("{}({})", self.name, self.variant_name)
     }

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::{AddAssign}};
 
 /// Pop Breakdown Table
 /// 
@@ -50,6 +50,33 @@ impl PopBreakdownTable {
         }
     }
 
+    /// Gets the number of pops in each species.
+    pub fn species_makeup(&self) -> HashMap<usize, usize> {
+        let mut result = HashMap::new();
+        for row in self.table.iter() {
+            result.entry(row.species).or_insert(0).add_assign(row.count);
+        }
+        result
+    }
+
+    /// Gets the number of pops in each species.
+    pub fn culture_makeup(&self) -> HashMap<Option<usize>, usize> {
+        let mut result = HashMap::new();
+        for row in self.table.iter() {
+            result.entry(row.culture).or_insert(0).add_assign(row.count);
+        }
+        result
+    }
+
+    /// Gets the number of pops in each species.
+    pub fn ideology_makeup(&self) -> HashMap<Option<usize>, usize> {
+        let mut result = HashMap::new();
+        for row in self.table.iter() {
+            result.entry(row.ideology).or_insert(0).add_assign(row.count);
+        }
+        result
+    }
+
     /// Counts up and returns the percentile division into each species.
     pub fn species_division(&self) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
@@ -59,7 +86,7 @@ impl PopBreakdownTable {
         result
     }
 
-    /// Conuts up and returns the percentile division into each culture.
+    /// Counts up and returns the percentile division into each culture.
     /// Includes pops who have no Ideology.
     pub fn culture_division(&self) -> HashMap<Option<usize>, f64> {
         let mut result = HashMap::new();

@@ -83,7 +83,7 @@ impl Demographics {
             relations: vec![],
             productivity_modifier: 1.0,
             birth_rate_modifier: 0.02,
-            death_rate_modifier: 0.01,
+            mortality_rate_modifier: 0.01,
             //data_table: vec![],
         };
 

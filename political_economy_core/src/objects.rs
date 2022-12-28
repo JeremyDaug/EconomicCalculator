@@ -16,3 +16,6 @@ pub mod desire;
 pub mod culture;
 pub mod desires;
 pub mod pop_breakdown_table;
+pub mod ideology;
+pub mod buyer;
+pub mod seller;

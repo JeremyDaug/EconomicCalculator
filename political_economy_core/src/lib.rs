@@ -15,6 +15,105 @@ mod tests {
         use crate::objects::{pop_breakdown_table::PopBreakdownTable, pop_breakdown_table::PBRow};
 
         #[test]
+        pub fn should_return_species_makeup_correctly() {
+            let mut test = PopBreakdownTable{table: vec![], total: 0};
+
+            let first_row = PBRow::new(1,
+                Some(0),Some(0),Some(0),
+                Some(0),Some(0),
+                Some(0),Some(0),Some(0),
+                10);
+
+            let second_row = PBRow::new(2,
+                Some(0),Some(0),Some(0),
+                Some(0),Some(0),
+                Some(1),Some(0),Some(0),
+                10);
+
+            let third_row = PBRow::new(2,
+                Some(0),Some(0),Some(0),
+                Some(0),Some(0),
+                None,Some(0),Some(0),
+                20);
+
+            test.insert_pops(first_row);
+            test.insert_pops(second_row);
+            test.insert_pops(third_row);
+
+            let result = test.species_makeup();
+
+            assert_eq!(result.len(), 2);
+            assert_eq!(result[&1], 10);
+            assert_eq!(result[&2], 30);
+        }
+
+        #[test]
+        pub fn should_return_culture_makeup_correctly() {
+            let mut test = PopBreakdownTable{table: vec![], total: 0};
+
+            let first_row = PBRow::new(1,
+                Some(0),Some(0),None,
+                Some(0),Some(0),
+                Some(0),Some(0),Some(0),
+                10);
+
+            let second_row = PBRow::new(2,
+                Some(0),Some(0),Some(0),
+                Some(0),Some(0),
+                Some(0),Some(0),Some(0),
+                10);
+
+            let third_row = PBRow::new(2,
+                Some(0),Some(0),Some(0),
+                Some(0),Some(0),
+                None,Some(0),Some(0),
+                20);
+
+            test.insert_pops(first_row);
+            test.insert_pops(second_row);
+            test.insert_pops(third_row);
+
+            let result = test.culture_makeup();
+
+            assert_eq!(result.len(), 2);
+            assert_eq!(result[&None], 10);
+            assert_eq!(result[&Some(0)], 30);
+        }
+
+        #[test]
+        pub fn should_return_ideology_makeup_correctly() {
+            let mut test = PopBreakdownTable{table: vec![], total: 0};
+
+            let first_row = PBRow::new(1,
+                Some(0),Some(0),None,
+                Some(0),Some(0),
+                None,Some(0),Some(0),
+                10);
+
+            let second_row = PBRow::new(2,
+                Some(0),Some(0),Some(0),
+                Some(0),Some(0),
+                Some(0),Some(0),Some(0),
+                10);
+
+            let third_row = PBRow::new(2,
+                Some(0),Some(0),Some(0),
+                Some(0),Some(0),
+                None,Some(0),Some(0),
+                20);
+
+            test.insert_pops(first_row);
+            test.insert_pops(second_row);
+            test.insert_pops(third_row);
+
+            let result = test.ideology_makeup();
+
+            assert_eq!(result.len(), 2);
+            assert_eq!(result[&None], 30);
+            assert_eq!(result[&Some(0)], 10);
+        }
+
+        #[test]
         pub fn should_divide_on_ideologies_correctly() {
             let mut test = PopBreakdownTable{table: vec![], total: 0};
 
