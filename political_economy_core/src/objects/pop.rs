@@ -47,16 +47,38 @@ impl Pop {
     /// Does not take sub-groups of species, culture, ideology into account currently.
     /// This will need to be updated when those are implemented.
     pub fn update_desires(&mut self, demos: Demographics) {
-        todo!();
         self.desires.clear_desires();
         // add in each species desires
-        for row in self.breakdown_table.table.iter() {
-            //self.desires.add_desire(row);
+        for row in self.breakdown_table.species_makeup().iter() {
+            let species = demos.species.get(row.0).expect("Species Id Not Found!");
+            for desire in species.desires.iter() {
+                let upped_desire = desire.create_multiple(*row.1);
+                self.desires.add_desire(&upped_desire);
+            }
         }
         // placeholder for civilization
         // add in culture desires
+        for row in self.breakdown_table.culture_makeup().iter() {
+            if let Some(id) = row.0 {
+                let culture = demos.cultures.get(id).expect("Culture Id Not Found!");
+                for desire in culture.desires.iter() {
+                    let upped_desire = desire.create_multiple(*row.1);
+                    self.desires.add_desire(&upped_desire);
+                }
+            }
+        }
 
         // add in ideology desires
+        for row in self.breakdown_table.ideology_makeup().iter() {
+            if let Some(id) = row.0 {
+                let species = demos.cultures.get(id).expect("Ideology Id Not Found!");
+                for desire in species.desires.iter() {
+                    let upped_desire = desire.create_multiple(*row.1);
+                    self.desires.add_desire(&upped_desire);
+                }
+            }
+        }
+
         // add in movements
     }
 

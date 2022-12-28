@@ -81,7 +81,8 @@ impl PopBreakdownTable {
     pub fn species_division(&self) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
         for group in self.table.iter() {
-            *result.entry(group.species).or_insert(0.0) += (group.count as f64) / (self.total as f64);
+            *result.entry(group.species).or_insert(0.0) += (group.count as f64) 
+            / (self.total as f64);
         }
         result
     }
@@ -91,7 +92,8 @@ impl PopBreakdownTable {
     pub fn culture_division(&self) -> HashMap<Option<usize>, f64> {
         let mut result = HashMap::new();
         for group in self.table.iter() {
-            *result.entry(group.culture).or_insert(0.0) += (group.count as f64) / (self.total as f64);
+            *result.entry(group.culture).or_insert(0.0) += (group.count as f64)
+            / (self.total as f64);
         }
         result
     }
@@ -101,7 +103,8 @@ impl PopBreakdownTable {
     pub fn ideology_division(&self) -> HashMap<Option<usize>, f64> {
         let mut result = HashMap::new();
         for group in self.table.iter() {
-            *result.entry(group.ideology).or_insert(0.0) += (group.count as f64) / (self.total as f64);
+            *result.entry(group.ideology).or_insert(0.0) += (group.count as f64)
+            / (self.total as f64);
         }
         result
     }

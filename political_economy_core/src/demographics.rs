@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 
-use crate::objects::{species::Species, culture::Culture, desire::{Desire, DesireItem}};
+use crate::objects::{species::Species, culture::Culture, desire::{Desire, DesireItem}, ideology::Ideology};
 
 /// Demographics is the data handler for our demographic data. It stores all of our
 /// shared population data, making it available for reading during most phases and
@@ -14,8 +14,10 @@ pub struct Demographics {
     /// Non-specific Data for Species.
     pub species: HashMap<usize, Species>,
     // civilization
+    /// Non-specific data for Cultures
     pub cultures: HashMap<usize, Culture>,
-    // Ideology
+    /// Non-specific data for Ideology.
+    pub ideology: HashMap<usize, Ideology>,
 }
 
 impl Demographics {
@@ -157,4 +159,6 @@ impl Demographics {
 
         Ok("No Problemo".into())
     }
+
+    pub fn load_
 }

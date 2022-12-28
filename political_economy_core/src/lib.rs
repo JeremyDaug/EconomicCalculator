@@ -11,6 +11,31 @@ pub fn add(left: usize, right: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    mod pop_tests {
+        use std::collections::HashMap;
+
+        use crate::{objects::{pop::Pop, pop_breakdown_table::PopBreakdownTable, desires::Desires}, demographics::Demographics};
+
+        #[test]
+        pub fn update_pop_desires_equivalently() {
+            let test = Pop{ 
+                id: 0, 
+                job: 0, 
+                firm: 0, 
+                market: 0, 
+                skill: 0, 
+                lower_skill_level: 0.0, 
+                higher_skill_level: 0.0, 
+                desires: Desires::new(vec![]), 
+                breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
+                is_selling: true};
+
+            let demos = Demographics{ species: HashMap::new(), cultures: HashMap::new(),  }
+
+                test.update_desires(demos);
+        }
+    }
+
     mod pop_breakdown_table_tests {
         use crate::objects::{pop_breakdown_table::PopBreakdownTable, pop_breakdown_table::PBRow};
 
@@ -1058,6 +1083,29 @@ mod tests {
 
     mod desire_tests {
         use crate::objects::desire::{Desire, DesireItem};
+
+        #[test]
+        pub fn correctly_multiply_desire() {
+            let test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 2.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]};
+
+            let result = test.create_multiple(5);
+
+            assert_eq!(result.item, test.item);
+            assert_eq!(result.start, test.start);
+            assert_eq!(result.end, test.end);
+            assert_eq!(result.satisfaction, test.satisfaction);
+            assert_eq!(result.reserved, test.reserved);
+            assert_eq!(result.step, test.step);
+            assert_eq!(result.amount, test.amount * 5.0);
+        }
 
         #[test]
         pub fn correctly_add_satisfaction() {

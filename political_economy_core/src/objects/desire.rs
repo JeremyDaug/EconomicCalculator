@@ -323,6 +323,15 @@ impl Desire {
         // If not stretched, then it can only go up to start.
         return Some(self.start);
     }
+
+    /// Takes this desire, creates a copy, and increases the amount desired.
+    /// 
+    /// Used to easily and safely copy and multiply a desire for pop desires.
+    pub fn create_multiple(&self, factor: usize) -> Self {
+        let mut copy = self.clone();
+        copy.amount *=  factor as f64;
+        copy
+    }
 }
 
 /// The tags a desire can be marked by, modifying how the desire is viewed.
