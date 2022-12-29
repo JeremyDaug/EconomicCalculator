@@ -69,6 +69,30 @@ impl Desire {
         add - take
     }
 
+    /// Adds the given value to our desire at a specific tier.
+    /// 
+    /// Adds all it can until it fills that tier. If it has too much, it returns
+    /// the excess.
+    /// 
+    /// If it adds to a tier that the desire doesn't step on it returns an error.
+    pub fn add_satisfaction_at_tier(&mut self, add: f64, tier: u64) -> Result<f64,String> {
+        // check that we step on the tier and if there's anything to add anyway.
+        let existing_satisfaction = self.satisfaction_at_tier(tier)?;
+        if !self.steps_on_tier(tier) ||
+            self.satisfaction_at_tier(tier)? == self.amount {
+                return Ok(add);
+        }
+
+        // since there is missing satisfaction, get it, and add up to that
+        let unsatisfied = self.amount - self.satisfaction_at_tier(tier)
+            .expect("Infinite desire given. How'd you get here?");
+
+        let take = add.min(unsatisfied);
+
+        self.satisfaction += take;
+        add - take
+    }
+
     /// Calculates what tier this desire is satisfied to, stopping at the last tier
     /// that has any satisfaction in it. If it fully fills it's highest tier
     /// it returns that tier.
@@ -168,6 +192,8 @@ impl Desire {
     /// 
     /// Returns the amount in units requested satisfied at this level.
     /// It caps at 0 and self.amount. 
+    /// 
+    /// Returns Err if it doesn't step on a valid tier.
     pub fn satisfaction_at_tier(&self, tier: u64) -> Result<f64, String> {
         // since we know we step on a valid tier, get the total satisfaction
         let total = self.total_satisfaction();

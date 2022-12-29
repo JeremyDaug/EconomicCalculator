@@ -4,7 +4,9 @@
 //! populations.
 use crate::demographics::Demographics;
 
-use super::{desires::Desires, pop_breakdown_table::PopBreakdownTable, buyer::Buyer, seller::Seller};
+use super::{desires::Desires, 
+    pop_breakdown_table::PopBreakdownTable, 
+    buyer::Buyer, seller::Seller};
 
 
 /// Pops are the data storage for a population group.

@@ -53,6 +53,29 @@ impl Desires {
         }
     }
 
+    /// Goes over the property contained within desires and sifts them into
+    /// the various desires that need them.
+    pub fn sift_products(&mut self) {
+
+    }
+
+    /// Sifts a singular product into the various desires that seek it.
+    /// 
+    /// ## Plan
+    /// 
+    /// This will need to be expanded to allow for both specific product 
+    /// satisfaction as well as general product satisfaction.
+    pub fn sift_product(&mut self, product: &usize) {
+        let curr = self
+            .walk_up_tiers_for_item(&None, &DesireItem::Product(*product));
+
+        while let Some(coord) = curr {
+            let desire = self.desires.get_mut(coord.idx)
+                .expect("Desire Not Found");
+            desire.add_satisfaction(add)
+        }
+    }
+
     /// Adds a number of units to the property.
     pub fn add_property(&mut self, product: usize, amount: &f64) {
         *self.property.entry(product).or_insert(0.0) += amount;
@@ -103,8 +126,8 @@ impl Desires {
     /// which want it or a desire which matches, but it is totally 
     /// satisfied) then it's value is equal to 0.
     /// 
-    /// It returns the ValueDifference of recieved, allowing the
-    /// caller to see the exact values in and out.
+    /// It returns the Values in and out, letting the caller use that
+    /// information at their leasure.
     pub fn barter_value_difference(&self, 
     items_in: Vec<(usize, f64)>, 
     items_out: Vec<(usize, f64)>) -> ValueInOut {
@@ -447,7 +470,7 @@ impl Desires {
     /// (lowest tier, first in vector order).
     /// 
     /// If there is no next step, it returns None.
-    pub fn walk_up_tiers(&mut self, prev: Option<DesireCoord>) -> Option<DesireCoord> {
+    pub fn walk_up_tiers(&self, prev: Option<DesireCoord>) -> Option<DesireCoord> {
         // If no previous given, make it.
         // if given increment idx.
         let mut prev = if prev.is_none() { DesireCoord{tier: 0, idx: 0}} 
@@ -513,6 +536,7 @@ impl Desires {
         self.desires.clear()
     }
 
+    /// How many desires are contained.
     pub fn len(&self) -> usize {
         self.desires.len()
     }
