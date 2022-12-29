@@ -22,7 +22,7 @@ mod tests {
 
         #[test]
         pub fn update_pop_desires_equivalently() {
-            let test = Pop{ 
+            let mut test = Pop{ 
                 id: 0, 
                 job: 0, 
                 firm: 0, 
@@ -108,7 +108,7 @@ mod tests {
                 vec![]).expect("Messed up new.");
 
             let ideology = Ideology::new(0,
-                "Species".into(),
+                "Ideology".into(),
                 "".into(),
                 0.0, 0.0,
                 1.0,
@@ -119,9 +119,9 @@ mod tests {
                  cultures: HashMap::new(), 
                 ideology: HashMap::new() };
 
-            demos.species[&species.id] = species;
-            demos.cultures[&culture.id] = culture;
-            demos.ideology[&ideology.id] = ideology;
+            demos.species.insert(species.id, species);
+            demos.cultures.insert(culture.id, culture);
+            demos.ideology.insert(ideology.id, ideology);
 
             test.breakdown_table.insert_pops(
                 PBRow{ species: 0, 
@@ -176,23 +176,29 @@ mod tests {
 
             assert_eq!(test.desires.len(), 6);
             // species desire 1 x 20
-            let sd1 = test.desires.desires.iter()
-            .find(|x| x.item == DesireItem::Product(0));
-            // species desire 2 x 20
-            let sd1 = test.desires.desires.iter()
-            .find(|x| x.item == DesireItem::Product(0));
+            let desire_test = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(0)).expect("Item Not found");
+            assert_eq!(desire_test.amount, 20.0);
+            // species desire 1 x 20
+            let desire_test = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(1)).expect("Item Not found");
+            assert_eq!(desire_test.amount, 20.0);
             // culture desire 1 x 10
-            let sd1 = test.desires.desires.iter()
-            .find(|x| x.item == DesireItem::Product(0));
+            let desire_test = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(2)).expect("Item Not found");
+            assert_eq!(desire_test.amount, 10.0);
             // culture desire 2 x 10
-            let sd1 = test.desires.desires.iter()
-            .find(|x| x.item == DesireItem::Product(0));
+            let desire_test = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(3)).expect("Item Not found");
+            assert_eq!(desire_test.amount, 10.0);
             // ideology desire 1 x 10
-            let sd1 = test.desires.desires.iter()
-            .find(|x| x.item == DesireItem::Product(0));
-            // ideloogy desire 1 x 10
-            let sd1 = test.desires.desires.iter()
-            .find(|x| x.item == DesireItem::Product(0));
+            let desire_test = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(4)).expect("Item Not found");
+            assert_eq!(desire_test.amount, 10.0);
+            // ideology desire 1 x 10
+            let desire_test = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(5)).expect("Item Not found");
+            assert_eq!(desire_test.amount, 10.0);
 
         }
     }

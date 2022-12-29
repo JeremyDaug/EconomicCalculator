@@ -36,12 +36,13 @@ use crate::objects::{want::Want,
 /// - Required Wants
 ///   - ID 0: Rest
 ///   - TODO Items
-///     - Space
-///     - Free Space
+///     - Space - How much space is available absolutely.
+///     - Free Space - How much unused space they have available, not used in storage.
+///     - Wealth - A Measure of AMV available (unit of AMV -> Wealth may be defined by market)
 /// - Required Products:
 ///   - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
 ///                         refreshed every day)
-///   - ID 1: Shopping Time
+///   - ID 1: Shopping Time (Used to shop)
 ///   - TODO Items
 ///     - Land (abstract)
 ///     - Land (Wasteland)
@@ -1746,30 +1747,6 @@ impl DataManager {
         Ok(())
     }
 
-    pub fn load_species(&mut self, _file_name: &String) -> Result<(), String> {
-        Ok(())
-    }
-
-    pub fn load_cultures(&mut self, _file_name: &String) -> Result<(), String> {
-        Ok(())
-    }
-
-    pub fn load_pop(&mut self, _file_name: &String) -> Result<(), String> {
-        Ok(())
-    }
-
-    pub fn load_territories(&mut self, _file_name: &String) -> Result<(), String> {
-        Ok(())
-    }
-
-    pub fn load_markets(&mut self, _file_name: &String)  -> Result<(), String> {
-        Ok(())
-    }
-
-    pub fn load_firms(&mut self, _file_name: &String) -> Result<(), String> {
-        Ok(())
-    }
-
     /// Placeholder loader for everything Should load by sets later on, rather than all at once.
     pub fn load_all(&mut self, _file_name: &String) -> Result<(), String> {
         self.load_wants(_file_name)?;
@@ -1780,12 +1757,6 @@ impl DataManager {
         self.load_skill_groups(_file_name)?;
         self.load_processes(_file_name)?;
         self.load_jobs(_file_name)?;
-        self.load_species(_file_name)?;
-        self.load_cultures(_file_name)?;
-        self.load_pop(_file_name)?;
-        self.load_territories(_file_name)?;
-        self.load_markets(_file_name)?;
-        self.load_firms(_file_name)?;
 
         Ok(())
     }

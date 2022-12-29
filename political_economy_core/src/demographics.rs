@@ -160,5 +160,61 @@ impl Demographics {
         Ok("No Problemo".into())
     }
 
-    pub fn load_
+    /// Ideology Loader Function.
+    /// 
+    /// Currently just loads hard coded data. Will improve later.
+    pub fn load_ideologies(&mut self, _file_name: String) -> Result<String, String> {
+        let mut casual = Ideology { 
+            id: 0, 
+            name: "Casual".into(), 
+            variant_name: "".into(), 
+            birth_rate_modifier: 0.01, 
+            mortality_rate_modifier: 0.01, 
+            productivity_modifier: 1.0, 
+            desires: vec![], 
+            relations: vec![] 
+        };
+
+        // Suits
+        let suit = Desire{ 
+            item: DesireItem::Product(7), 
+            start: 35, 
+            end: None, 
+            amount: 1.0, 
+            satisfaction: 0.0, 
+            reserved: 0.0, 
+            step: 10, 
+            tags: vec![] 
+        };
+
+        // Cabin
+        let cabin = Desire{ 
+            item: DesireItem::Product(15), 
+            start: 30, 
+            end: None, 
+            amount: 1.0, 
+            satisfaction: 0.0, 
+            reserved: 0.0, 
+            step: 0, 
+            tags: vec![] 
+        };
+
+        // Cotton Boll
+        let cotton_boll = Desire{ 
+            item: DesireItem::Product(3), 
+            start: 50, 
+            end: None, 
+            amount: 1.0, 
+            satisfaction: 0.0, 
+            reserved: 0.0, 
+            step: 0, 
+            tags: vec![] 
+        };
+
+        casual.desires.push(suit);
+        casual.desires.push(cabin);
+        casual.desires.push(cotton_boll);
+
+        Ok("No Problemo".into())
+    }
 }

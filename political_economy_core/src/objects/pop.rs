@@ -71,8 +71,8 @@ impl Pop {
         // add in ideology desires
         for row in self.breakdown_table.ideology_makeup().iter() {
             if let Some(id) = row.0 {
-                let species = demos.cultures.get(id).expect("Ideology Id Not Found!");
-                for desire in species.desires.iter() {
+                let ideology = demos.ideology.get(id).expect("Ideology Id Not Found!");
+                for desire in ideology.desires.iter() {
                     let upped_desire = desire.create_multiple(*row.1);
                     self.desires.add_desire(&upped_desire);
                 }
