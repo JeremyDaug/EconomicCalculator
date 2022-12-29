@@ -14,7 +14,11 @@ mod tests {
     mod pop_tests {
         use std::collections::HashMap;
 
-        use crate::{objects::{pop::Pop, pop_breakdown_table::PopBreakdownTable, desires::Desires}, demographics::Demographics};
+        use crate::{objects::{pop::Pop, 
+            pop_breakdown_table::{PopBreakdownTable, PBRow},
+             desires::Desires, desire::{Desire, DesireItem},
+              species::Species, culture::Culture, ideology::Ideology}, 
+              demographics::Demographics};
 
         #[test]
         pub fn update_pop_desires_equivalently() {
@@ -30,9 +34,166 @@ mod tests {
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true};
 
-            let demos = Demographics{ species: HashMap::new(), cultures: HashMap::new(),  }
+            let species_desire_1 = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(4), 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                reserved: 0.0, 
+                step: 1, 
+                tags: vec![] };
+            let species_desire_2 = Desire{ 
+                item: DesireItem::Product(1), 
+                start: 9, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                reserved: 0.0, 
+                step: 1, 
+                tags: vec![] };
 
-                test.update_desires(demos);
+            let culture_desire_1 = Desire{ 
+                item: DesireItem::Product(2), 
+                start: 10, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                reserved: 0.0, 
+                step: 0, 
+                tags: vec![] };
+            let culture_desire_2 = Desire{ 
+                item: DesireItem::Product(3), 
+                start: 15, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                reserved: 0.0, 
+                step: 10, 
+                tags: vec![] };
+
+            let ideology_desire_1 = Desire{ 
+                item: DesireItem::Product(4), 
+                start: 30, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                reserved: 0.0, 
+                step: 0, 
+                tags: vec![] };
+            let ideology_desire_2 = Desire{ 
+                item: DesireItem::Product(5), 
+                start: 31, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                reserved: 0.0, 
+                step: 0, 
+                tags: vec![] };
+
+            let species = Species::new(0,
+                "Species".into(),
+                "".into(),
+                vec![species_desire_1, species_desire_2],
+                vec![], vec![], 
+                1.0, 0.03,
+                0.02).expect("Messed up new.");
+
+            let culture = Culture::new(0,
+                "Culture".into(),
+                "".into(),
+                1.0, 0.01,
+                0.01,
+                vec![culture_desire_1, culture_desire_2],
+                vec![]).expect("Messed up new.");
+
+            let ideology = Ideology::new(0,
+                "Species".into(),
+                "".into(),
+                0.0, 0.0,
+                1.0,
+                vec![ideology_desire_1, ideology_desire_2],
+                vec![]).expect("Messed up new.");
+
+            let mut demos = Demographics{ species: HashMap::new(),
+                 cultures: HashMap::new(), 
+                ideology: HashMap::new() };
+
+            demos.species[&species.id] = species;
+            demos.cultures[&culture.id] = culture;
+            demos.ideology[&ideology.id] = ideology;
+
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: None,
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: None, 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: Some(0),
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: None, 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: None,
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: Some(0), 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: Some(0),
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: Some(0), 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+
+            test.update_desires(demos);
+
+            assert_eq!(test.desires.len(), 6);
+            // species desire 1 x 20
+            let sd1 = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(0));
+            // species desire 2 x 20
+            let sd1 = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(0));
+            // culture desire 1 x 10
+            let sd1 = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(0));
+            // culture desire 2 x 10
+            let sd1 = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(0));
+            // ideology desire 1 x 10
+            let sd1 = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(0));
+            // ideloogy desire 1 x 10
+            let sd1 = test.desires.desires.iter()
+            .find(|x| x.item == DesireItem::Product(0));
+
         }
     }
 

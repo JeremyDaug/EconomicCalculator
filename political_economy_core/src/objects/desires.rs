@@ -512,6 +512,10 @@ impl Desires {
     pub fn clear_desires(&mut self) {
         self.desires.clear()
     }
+
+    pub fn len(&self) -> usize {
+        self.desires.len()
+    }
 }
 
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.
