@@ -489,10 +489,7 @@ impl DesireItem {
 pub enum DesireError {
     /// An error for a tier mistep, the value contained is where it tried to land
     /// the desire did not have that step.
-    TierMisstep(u64),
-    /// An error that occurs when sifting a product. Contains the tier it occured at
-    /// and the Id for the product in question.
-    SiftError(u64, usize)
+    TierMisstep(u64)
 }
 
 impl fmt::Display for DesireError {

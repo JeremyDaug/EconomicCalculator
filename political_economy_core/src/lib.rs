@@ -513,6 +513,33 @@ mod tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
         #[test]
+        pub fn sift_products_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6,8,10
+                item: DesireItem::Product(1), 
+                start: 2, 
+                end: Some(10), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                step: 2,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+            test.property.insert(0, 100.0);
+            test.property.insert(1, 100.0);
+
+            test.sift_products();
+            assert_eq!(test.desires[1].satisfaction, 5.0);
+            assert_eq!(test.desires[0].satisfaction, 2.0);
+        }
+        #[test]
         pub fn sift_product_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
