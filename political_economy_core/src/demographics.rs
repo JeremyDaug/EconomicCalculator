@@ -48,7 +48,6 @@ impl Demographics {
             end: Some(1), 
             amount: 0.5, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 1, 
             tags: vec![] 
         };
@@ -60,7 +59,6 @@ impl Demographics {
             end: Some(4), 
             amount: 2.0, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 1, 
             tags: vec![] 
         };
@@ -96,7 +94,6 @@ impl Demographics {
             end: Some(100), 
             amount: 1.0, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 10, 
             tags: vec![] 
         };
@@ -107,7 +104,6 @@ impl Demographics {
             end: None, 
             amount: 0.5, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 10, 
             tags: vec![] 
         };
@@ -118,7 +114,6 @@ impl Demographics {
             end: Some(20), 
             amount: 0.5, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 10, 
             tags: vec![] 
         };
@@ -131,7 +126,6 @@ impl Demographics {
             end: None, 
             amount: 0.1, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 5, 
             tags: vec![] 
         };
@@ -144,7 +138,6 @@ impl Demographics {
             end: None, 
             amount: 0.5, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 5, 
             tags: vec![] 
         };
@@ -182,7 +175,6 @@ impl Demographics {
             end: None, 
             amount: 1.0, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 10, 
             tags: vec![] 
         };
@@ -194,7 +186,6 @@ impl Demographics {
             end: None, 
             amount: 1.0, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 0, 
             tags: vec![] 
         };
@@ -206,7 +197,6 @@ impl Demographics {
             end: None, 
             amount: 1.0, 
             satisfaction: 0.0, 
-            reserved: 0.0, 
             step: 0, 
             tags: vec![] 
         };

@@ -9,7 +9,7 @@ var sourcesIndex = JSON.parse('{\
 "libc":["",[["unix",[["linux_like",[["linux",[["arch",[["generic",[],["mod.rs"]]],["mod.rs"]],["gnu",[["b64",[["x86_64",[],["align.rs","mod.rs","not_x32.rs"]]],["mod.rs"]]],["align.rs","mod.rs"]]],["align.rs","mod.rs","non_exhaustive.rs"]]],["mod.rs"]]],["align.rs","mod.rs"]]],["fixed_width_ints.rs","lib.rs","macros.rs"]],\
 "num_cpus":["",[],["lib.rs","linux.rs"]],\
 "parking_lot_core":["",[["thread_parker",[],["linux.rs","mod.rs"]]],["lib.rs","parking_lot.rs","spinwait.rs","util.rs","word_lock.rs"]],\
-"political_economy_core":["",[["objects",[],["culture.rs","demographics.rs","desire.rs","desires.rs","firm.rs","job.rs","market.rs","master.rs","pop.rs","process.rs","process_node.rs","product.rs","skill.rs","skill_group.rs","species.rs","technology.rs","technology_family.rs","territory.rs","want.rs"]]],["data_manager.rs","lib.rs","objects.rs"]],\
+"political_economy_core":["",[["objects",[],["buyer.rs","culture.rs","desire.rs","desires.rs","firm.rs","ideology.rs","job.rs","market.rs","pop.rs","pop_breakdown_table.rs","process.rs","process_node.rs","product.rs","seller.rs","skill.rs","skill_group.rs","species.rs","technology.rs","technology_family.rs","territory.rs","want.rs"]]],["data_manager.rs","demographics.rs","lib.rs","objects.rs","runner.rs"]],\
 "smallvec":["",[],["lib.rs"]]\
 }');
 createSourceSidebar();

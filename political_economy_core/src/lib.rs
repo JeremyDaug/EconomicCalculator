@@ -40,7 +40,6 @@ mod tests {
                 end: Some(4), 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                reserved: 0.0, 
                 step: 1, 
                 tags: vec![] };
             let species_desire_2 = Desire{ 
@@ -49,7 +48,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                reserved: 0.0, 
                 step: 1, 
                 tags: vec![] };
 
@@ -59,7 +57,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                reserved: 0.0, 
                 step: 0, 
                 tags: vec![] };
             let culture_desire_2 = Desire{ 
@@ -68,7 +65,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                reserved: 0.0, 
                 step: 10, 
                 tags: vec![] };
 
@@ -78,7 +74,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                reserved: 0.0, 
                 step: 0, 
                 tags: vec![] };
             let ideology_desire_2 = Desire{ 
@@ -87,7 +82,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                reserved: 0.0, 
                 step: 0, 
                 tags: vec![] };
 
@@ -519,6 +513,33 @@ mod tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
         #[test]
+        pub fn sift_product_correctly() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,1
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(1), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 2,4,6,8,10
+                item: DesireItem::Product(1), 
+                start: 2, 
+                end: Some(10), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                step: 2,
+                tags: vec![]});
+            let mut test = Desires::new(test_desires);
+            test.property.insert(1, 100.0);
+
+            test.sift_product(&1);
+            assert_eq!(test.desires[1].satisfaction, 5.0);
+            assert_eq!(test.desires[0].satisfaction, 0.0);
+        }
+
+        #[test]
         pub fn calculate_barter_value_differenec_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
@@ -527,7 +548,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
@@ -536,7 +556,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
@@ -545,7 +564,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             test_desires.push(Desire{ // 2, 3, 4, ...
@@ -554,7 +572,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -588,7 +605,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
@@ -597,7 +613,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
@@ -606,7 +621,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -651,7 +665,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
@@ -660,7 +673,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
@@ -669,7 +681,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -702,7 +713,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
@@ -711,7 +721,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
@@ -720,7 +729,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -753,7 +761,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 0, 2,4,6
@@ -762,7 +769,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,3,6,9, ...
@@ -771,7 +777,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let test = Desires::new(test_desires);
@@ -810,7 +815,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 0, 2,4,6
@@ -819,7 +823,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,3,6,9, ...
@@ -828,7 +831,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let test = Desires::new(test_desires);
@@ -873,7 +875,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 0, 2,4,6
@@ -882,7 +883,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,3,6,9, ...
@@ -891,7 +891,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -955,7 +954,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
@@ -964,7 +962,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
@@ -973,7 +970,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -1007,7 +1003,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
@@ -1016,7 +1011,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
@@ -1025,7 +1019,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -1059,7 +1052,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
@@ -1068,7 +1060,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
@@ -1077,7 +1068,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -1111,7 +1101,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6
@@ -1120,7 +1109,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,3,6,9, ...
@@ -1129,7 +1117,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 3,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -1164,7 +1151,6 @@ mod tests {
                 end: Some(1), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6
@@ -1173,7 +1159,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
@@ -1207,7 +1192,6 @@ mod tests {
                 end: Some(4), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6
@@ -1216,7 +1200,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6
@@ -1225,7 +1208,6 @@ mod tests {
                 end: Some(6), 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]});
             let test = Desires::new(test_desires);
@@ -1259,7 +1241,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]};
 
@@ -1284,7 +1265,6 @@ mod tests {
                 end: None, 
                 amount: 2.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]};
 
@@ -1294,7 +1274,6 @@ mod tests {
             assert_eq!(result.start, test.start);
             assert_eq!(result.end, test.end);
             assert_eq!(result.satisfaction, test.satisfaction);
-            assert_eq!(result.reserved, test.reserved);
             assert_eq!(result.step, test.step);
             assert_eq!(result.amount, test.amount * 5.0);
         }
@@ -1307,7 +1286,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 1,
                 tags: vec![]};
 
@@ -1329,7 +1307,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 0,
                 tags: vec![]};
 
@@ -1377,7 +1354,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 0,
                 tags: vec![]};
 
@@ -1428,7 +1404,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 0,
                 tags: vec![]};
             
@@ -1460,7 +1435,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 0,
                 tags: vec![]};
             // normal change
@@ -1479,7 +1453,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 0,
                 tags: vec![]};
 
@@ -1500,7 +1473,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 0,
                 tags: vec![]};
             
@@ -1519,7 +1491,6 @@ mod tests {
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0,
-                reserved: 0.0,
                 step: 0,
                 tags: vec![]};
             
@@ -1538,7 +1509,6 @@ mod tests {
                 end: None, 
                 amount: 2.0, 
                 satisfaction: 3.5,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]};
             
@@ -1556,7 +1526,6 @@ mod tests {
                 end: None, 
                 amount: 2.0, 
                 satisfaction: 3.5,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]};
 
@@ -1574,7 +1543,6 @@ mod tests {
                 end: Some(10), 
                 amount: 2.0, 
                 satisfaction: 3.5,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]};
             
@@ -1598,7 +1566,6 @@ mod tests {
                 end: Some(10), 
                 amount: 2.0, 
                 satisfaction: 3.5,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]};
             
@@ -1615,7 +1582,6 @@ mod tests {
                 end: Some(10), 
                 amount: 2.0, 
                 satisfaction: 3.5,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]};
             
@@ -1634,7 +1600,6 @@ mod tests {
                 end: Some(10), 
                 amount: 2.0, 
                 satisfaction: 3.5,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]};
 
@@ -1653,7 +1618,6 @@ mod tests {
                 end: Some(10), 
                 amount: 2.0, 
                 satisfaction: 3.5,
-                reserved: 0.0,
                 step: 2,
                 tags: vec![]};
 

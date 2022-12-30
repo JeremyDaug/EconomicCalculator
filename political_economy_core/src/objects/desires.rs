@@ -15,7 +15,7 @@ use std::collections::HashMap;
 
 use itertools::Itertools;
 
-use super::desire::{Desire, DesireItem};
+use super::desire::{Desire, DesireItem, DesireError};
 
 /// The ratio of value between one tier and an adjacent tier.
 /// 
@@ -55,8 +55,22 @@ impl Desires {
 
     /// Goes over the property contained within desires and sifts them into
     /// the various desires that need them.
+    /// 
+    /// Clears out old satisfactions first, so only use when a hard recalculation
+    /// is desired.
     pub fn sift_products(&mut self) {
-
+        // clear old satisfactions
+        for desire in self.desires.iter_mut() {
+            desire.satisfaction = 0.0;
+        }
+        // Get the keys
+        let keys = self.property.keys()
+            .copied().collect_vec();
+        // iterate over all property and try to add them.
+        for key in keys {
+            // sift that product as much as you can.
+            self.sift_product(&key);
+        }
     }
 
     /// Sifts a singular product into the various desires that seek it.
@@ -66,19 +80,32 @@ impl Desires {
     /// This will need to be expanded to allow for both specific product 
     /// satisfaction as well as general product satisfaction.
     pub fn sift_product(&mut self, product: &usize) {
-        let curr = self
+        // get the first step.
+        let mut curr = self
             .walk_up_tiers_for_item(&None, &DesireItem::Product(*product));
+        // get the available product
         let mut available = match self.property.get(product) {
             Some(val) => val.clone(),
             None => 0.0
         };
-
+        // loop over the desires for the product.
         while let Some(coord) = curr {
-            let desire = self.desires.get_mut(coord.idx)
+            // get the desire we're adding to.
+            let desire = self.desires
+                .get_mut(coord.idx)
                 .expect("Desire Not Found");
-            
-            desire.add_satisfaction_at_tier(available, coord.tier);
+            // add to it at the current tier.
+            available = desire.add_satisfaction_at_tier(available, coord.tier)
+                .expect("Misstep Somehow Occurred.");
+            // if none left, break out of the loop
+            if available == 0.0 {
+                break;
+            }
+            // since do have more available, get the next
+            curr = self
+            .walk_up_tiers_for_item(&curr, &DesireItem::Product(*product));
         }
+        // we have either run out of desires to possibly satisfy
     }
 
     /// Adds a number of units to the property.

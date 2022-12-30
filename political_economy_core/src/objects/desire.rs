@@ -16,17 +16,60 @@ use super::{product::Product, want::Want};
 /// working desires, which are used for satisfaction and trade guarantees.
 #[derive(Debug, Clone)]
 pub struct Desire {
+    /// The item (Product or Want) sought out.
     pub item: DesireItem,
+    /// The tier this desire starts at.
     pub start: u64,
+    /// The last tier which has this desire.
+    /// 
+    /// If null, then it either has no last tier, or does not have
+    /// multiple steps.
     pub end: Option<u64>,
+    /// How much it desires at each tier it steps on.
     pub amount: f64,
+    /// How much has been satisfied so far.
     pub satisfaction: f64,
-    pub reserved: f64,
+    /// The The step size our desire takes.
+    /// 
+    /// Start + step * n = valid tiers
+    /// 
+    /// where n &#8805; 0
+    /// 
+    /// This is up to end, if there is one.
     pub step: u64,
+    /// This defines additional properties of the desire for a pop or 
+    /// Demographic.
+    /// 
+    /// This will likely be broken appart when Demographic desires and pop
+    /// desires are split.
     pub tags: Vec<DesireTag>
 }
 
 impl Desire {
+    pub fn new(item: DesireItem, 
+        start: u64, 
+        end: Option<u64>, 
+        amount: f64, 
+        satisfaction: f64, 
+        step: u64, 
+        tags: Vec<DesireTag>) -> Result<Self, DesireError> { 
+            // check that the end is a valid step.
+            if let Some(val) = end {
+                if (val - start) % step == 0 {
+                    return Err(DesireError::TierMisstep(val));
+                }
+            }
+            Ok( Self { 
+                item, 
+                start, 
+                end, 
+                amount, 
+                satisfaction,
+                step, 
+                tags 
+            } )
+        }
+
     /// Checks if a desire is a match for the current desire.
     /// 
     /// It matches on the 
@@ -44,7 +87,7 @@ impl Desire {
             self.start != other.start ||
             self.end != other.end ||
             self.step != other.step {
-                // if any of these are not the same, we aren't equivalent.
+            // if any of these are not the same, we aren't equivalent.
             return false;
         }
         true
@@ -446,7 +489,10 @@ impl DesireItem {
 pub enum DesireError {
     /// An error for a tier mistep, the value contained is where it tried to land
     /// the desire did not have that step.
-    TierMisstep(u64)
+    TierMisstep(u64),
+    /// An error that occurs when sifting a product. Contains the tier it occured at
+    /// and the Id for the product in question.
+    SiftError(u64, usize)
 }
 
 impl fmt::Display for DesireError {

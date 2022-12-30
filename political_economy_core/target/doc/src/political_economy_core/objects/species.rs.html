@@ -311,11 +311,33 @@
 <span id="311">311</span>
 <span id="312">312</span>
 <span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Species covers the biological nature of a pop.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-
-<span class="kw">use </span><span class="kw">super</span>::desire::Desire;
+</span><span class="kw">use </span><span class="kw">super</span>::desire::Desire;
 
 <span class="doccomment">/// A Species, the biological Reality of a Pop which they are built with.
 /// 
@@ -370,23 +392,49 @@
     // pub data_table: Vec&lt;SpeciesSubentry&gt;,
 </span>}
 
-<span class="attribute">#[derive(Debug)]
-</span><span class="kw">pub struct </span>SpeciesSubentry {
-    <span class="doccomment">/// The summarized desires for a member of this species+cohort+subtype
-    </span><span class="kw">pub </span>desires: Vec&lt;Desire&gt;,
-    <span class="doccomment">/// The final productivity for a member of this species+cohort+subtype.
-    </span><span class="kw">pub </span>productivity: f64,
-    <span class="doccomment">/// The final birth rate for a member of this species+cohort+subtype.
-    </span><span class="kw">pub </span>birth_rate: f64,
-    <span class="doccomment">/// The final mortality rate for a member of this species+cohort+subtype.
-    </span><span class="kw">pub </span>mortality_rate: f64,
-    <span class="doccomment">/// The final skill modifiers for a member of this species+cohort+subtype.
-    </span><span class="kw">pub </span>skill_modifiers: HashMap&lt;u64, f64&gt;,
-    <span class="doccomment">/// The final skill group modifiers for a member of this species+cohort+subtype.
-    </span><span class="kw">pub </span>skill_group_modifiers: HashMap&lt;u64, f64&gt;,
+<span class="comment">/*
+#[derive(Debug)]
+pub struct SpeciesSubentry {
+    /// The summarized desires for a member of this species+cohort+subtype
+    pub desires: Vec&lt;Desire&gt;,
+    /// The final productivity for a member of this species+cohort+subtype.
+    pub productivity: f64,
+    /// The final birth rate for a member of this species+cohort+subtype.
+    pub birth_rate: f64,
+    /// The final mortality rate for a member of this species+cohort+subtype.
+    pub mortality_rate: f64,
+    /// The final skill modifiers for a member of this species+cohort+subtype.
+    pub skill_modifiers: HashMap&lt;u64, f64&gt;,
+    /// The final skill group modifiers for a member of this species+cohort+subtype.
+    pub skill_group_modifiers: HashMap&lt;u64, f64&gt;,
 }
+*/
 
-<span class="kw">impl </span>Species {
+</span><span class="kw">impl </span>Species {
+    <span class="kw">pub fn </span>new(id: usize, name: String, 
+        variant_name: String, desires: Vec&lt;Desire&gt;, 
+        tags: Vec&lt;SpeciesTag&gt;, relations: Vec&lt;usize&gt;, 
+        base_productivity: f64, birth_rate: f64, 
+        mortality_rate: f64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, String&gt; { 
+            <span class="kw">if </span>birth_rate &lt; <span class="number">0.0 </span>{
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;birth_rate must be 0 or greater.&quot;</span>.into());
+            }
+            <span class="kw">else if </span>mortality_rate &lt; <span class="number">0.0 </span>{
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;&#39;mortality_rate&#39; must be 0 or greater.&quot;</span>.into());
+            }
+            <span class="kw">else if </span>base_productivity &lt; <span class="number">0.0 </span>{
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;&#39;base_productivity&#39; must be 0 or greater.&quot;</span>.into());
+            }
+            <span class="kw">else if </span>name.trim().is_empty() {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;&#39;name&#39; cannot be empty or whitespace.&quot;</span>.into());
+            }
+
+            <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ 
+                id, name, variant_name, desires, 
+                tags, relations, base_productivity, 
+                birth_rate, mortality_rate } )
+            }
+
     <span class="kw">pub fn </span>get_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="macro">format!</span>(<span class="string">&quot;{}({})&quot;</span>, <span class="self">self</span>.name, <span class="self">self</span>.variant_name)
     }

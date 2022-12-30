@@ -18,22 +18,98 @@
 <span id="18">18</span>
 <span id="19">19</span>
 <span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::desire::Desire;
 
-<span class="attribute">#[derive(Debug)]
+<span class="doccomment">/// A Culture, the social nature of the pop. How they act unconsciously,
+/// and how they view themselves.
+/// 
+/// Can be changed occasionally throughout a pop&#39;s life.
+/// 
+/// Will eventually contain data for Classes and Generations.
+</span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Culture{
-    <span class="kw">pub </span>id: usize,
-    <span class="kw">pub </span>name: String,
-    <span class="kw">pub </span>variant_name: String,
-    <span class="kw">pub </span>birth_rate_modifier: f64,
-    <span class="kw">pub </span>death_rate_modifier: f64,
-    <span class="kw">pub </span>productivity_modifier: f64,
-    <span class="kw">pub </span>desires: Vec&lt;Desire&gt;,
+    <span class="doccomment">/// The Id of the culture.
+    </span><span class="kw">pub </span>id: usize,
+    <span class="doccomment">/// The name of the Culture, typically shared between sibling cultures.
+    </span><span class="kw">pub </span>name: String,
+    <span class="doccomment">/// The Variant name of thu culture, used to distinguish it from it&#39;s 
+    /// siblings.
+    </span><span class="kw">pub </span>variant_name: String,
+    <span class="doccomment">/// Additional birth rate of the culture, is added to the Species bonus.
+    /// May change this to multiplicative to mesh better with species.
+    /// 
+    /// May be less than 0, but cannot push total pop birth rate below 0.
+    </span><span class="kw">pub </span>birth_rate_modifier: f64,
+    <span class="doccomment">/// The Additional Mortality Rate of the culture, how likely they are to
+    /// die more generally for any reason.
+    /// 
+    /// Likely to be slowly outmoded by modifiers elsewhere.
+    /// 
+    /// May be less than 0, cannot push total mortality below 0.
+    </span><span class="kw">pub </span>mortality_rate_modifier: f64,
+    <span class="doccomment">/// The Additional General Productivity modifier of this culture.
+    /// 
+    /// This is multiplicative with Species.
+    </span><span class="kw">pub </span>productivity_modifier: f64,
+    <span class="doccomment">/// The desires which this culture has on top of their species requirements.
+    </span><span class="kw">pub </span>desires: Vec&lt;Desire&gt;,
     <span class="comment">// tags
-    </span><span class="kw">pub </span>relations: Vec&lt;Culture&gt;,
+    </span><span class="doccomment">/// The ids of cultures which are related to this one. Parents, Siblings, 
+    /// and Children.
+    </span><span class="kw">pub </span>relations: Vec&lt;usize&gt;,
 }
 
 <span class="kw">impl </span>Culture {
+    <span class="kw">pub fn </span>new(id: usize, name: String, variant_name: String, 
+        birth_rate_modifier: f64, mortality_rate_modifier: f64, 
+        productivity_modifier: f64, desires: Vec&lt;Desire&gt;, 
+        relations: Vec&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, String&gt; { 
+            <span class="kw">if </span>name.trim().is_empty() {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;&#39;name&#39; cannot be empty or contain only whitespace.&quot;</span>.into());
+            }
+            <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ id, name, variant_name, birth_rate_modifier, 
+                mortality_rate_modifier, productivity_modifier, 
+                desires, relations })
+            }
+
     <span class="kw">pub fn </span>get_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="macro">format!</span>(<span class="string">&quot;{}({})&quot;</span>, <span class="self">self</span>.name, <span class="self">self</span>.variant_name)
     }

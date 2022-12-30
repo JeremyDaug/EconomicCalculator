@@ -1916,35 +1916,6 @@
 <span id="1916">1916</span>
 <span id="1917">1917</span>
 <span id="1918">1918</span>
-<span id="1919">1919</span>
-<span id="1920">1920</span>
-<span id="1921">1921</span>
-<span id="1922">1922</span>
-<span id="1923">1923</span>
-<span id="1924">1924</span>
-<span id="1925">1925</span>
-<span id="1926">1926</span>
-<span id="1927">1927</span>
-<span id="1928">1928</span>
-<span id="1929">1929</span>
-<span id="1930">1930</span>
-<span id="1931">1931</span>
-<span id="1932">1932</span>
-<span id="1933">1933</span>
-<span id="1934">1934</span>
-<span id="1935">1935</span>
-<span id="1936">1936</span>
-<span id="1937">1937</span>
-<span id="1938">1938</span>
-<span id="1939">1939</span>
-<span id="1940">1940</span>
-<span id="1941">1941</span>
-<span id="1942">1942</span>
-<span id="1943">1943</span>
-<span id="1944">1944</span>
-<span id="1945">1945</span>
-<span id="1946">1946</span>
-<span id="1947">1947</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::panic;
 <span class="kw">use </span>std::{collections::{HashMap, HashSet}};
 
@@ -1983,12 +1954,13 @@
 /// - Required Wants
 ///   - ID 0: Rest
 ///   - TODO Items
-///     - Space
-///     - Free Space
+///     - Space - How much space is available absolutely.
+///     - Free Space - How much unused space they have available, not used in storage.
+///     - Wealth - A Measure of AMV available (unit of AMV -&gt; Wealth may be defined by market)
 /// - Required Products:
 ///   - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
 ///                         refreshed every day)
-///   - ID 1: Shopping Time
+///   - ID 1: Shopping Time (Used to shop)
 ///   - TODO Items
 ///     - Land (abstract)
 ///     - Land (Wasteland)
@@ -3693,30 +3665,6 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub fn </span>load_species(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">pub fn </span>load_cultures(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">pub fn </span>load_pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">pub fn </span>load_territories(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">pub fn </span>load_markets(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: <span class="kw-2">&amp;</span>String)  -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">pub fn </span>load_firms(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
-        <span class="prelude-val">Ok</span>(())
-    }
-
     <span class="doccomment">/// Placeholder loader for everything Should load by sets later on, rather than all at once.
     </span><span class="kw">pub fn </span>load_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _file_name: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
         <span class="self">self</span>.load_wants(_file_name)<span class="question-mark">?</span>;
@@ -3727,12 +3675,6 @@
         <span class="self">self</span>.load_skill_groups(_file_name)<span class="question-mark">?</span>;
         <span class="self">self</span>.load_processes(_file_name)<span class="question-mark">?</span>;
         <span class="self">self</span>.load_jobs(_file_name)<span class="question-mark">?</span>;
-        <span class="self">self</span>.load_species(_file_name)<span class="question-mark">?</span>;
-        <span class="self">self</span>.load_cultures(_file_name)<span class="question-mark">?</span>;
-        <span class="self">self</span>.load_pop(_file_name)<span class="question-mark">?</span>;
-        <span class="self">self</span>.load_territories(_file_name)<span class="question-mark">?</span>;
-        <span class="self">self</span>.load_markets(_file_name)<span class="question-mark">?</span>;
-        <span class="self">self</span>.load_firms(_file_name)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
     }
