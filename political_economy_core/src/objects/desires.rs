@@ -68,11 +68,16 @@ impl Desires {
     pub fn sift_product(&mut self, product: &usize) {
         let curr = self
             .walk_up_tiers_for_item(&None, &DesireItem::Product(*product));
+        let mut available = match self.property.get(product) {
+            Some(val) => val.clone(),
+            None => 0.0
+        };
 
         while let Some(coord) = curr {
             let desire = self.desires.get_mut(coord.idx)
                 .expect("Desire Not Found");
-            desire.add_satisfaction(add)
+            
+            desire.add_satisfaction_at_tier(available, coord.tier);
         }
     }
 

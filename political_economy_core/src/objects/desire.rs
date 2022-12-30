@@ -1,5 +1,8 @@
 //! A Desire for a want or product.
 
+use core::fmt;
+use std::error::Error;
+
 use super::{product::Product, want::Want};
 
 /// Desires
@@ -75,22 +78,21 @@ impl Desire {
     /// the excess.
     /// 
     /// If it adds to a tier that the desire doesn't step on it returns an error.
-    pub fn add_satisfaction_at_tier(&mut self, add: f64, tier: u64) -> Result<f64,String> {
-        // check that we step on the tier and if there's anything to add anyway.
-        let existing_satisfaction = self.satisfaction_at_tier(tier)?;
-        if !self.steps_on_tier(tier) ||
-            self.satisfaction_at_tier(tier)? == self.amount {
-                return Ok(add);
+    pub fn add_satisfaction_at_tier(&mut self, add: f64, tier: u64) -> Result<f64,DesireError> {
+        // check that we stepped on the right tier (error otherwise), and that it is not fully satisfied.
+        if self.satisfaction_at_tier(tier)? == self.amount {
+            // if it's a correct tier, but the tier is full, return our amount safely.
+            return Ok(add);
         }
-
-        // since there is missing satisfaction, get it, and add up to that
+        // since there is missing satisfaction, get it
         let unsatisfied = self.amount - self.satisfaction_at_tier(tier)
             .expect("Infinite desire given. How'd you get here?");
-
+        // get the smaller between what we can add and what we want to satisfy
         let take = add.min(unsatisfied);
-
+        // add our available up to our satisfaction needed.
         self.satisfaction += take;
-        add - take
+        // return the remainder
+        Ok(add-take)
     }
 
     /// Calculates what tier this desire is satisfied to, stopping at the last tier
@@ -151,10 +153,10 @@ impl Desire {
     }
 
     /// Changes the end and step for the desire. 
-    pub fn change_end(&mut self, end: Option<u64>, step: u64) -> Result<(), String> {
+    pub fn change_end(&mut self, end: Option<u64>, step: u64) -> Result<(), DesireError> {
         // check that the end can be stepped on by the new values
         if end.is_some() && ((end.unwrap() - self.start) % step) != 0 {
-            return Err("End does not get stepped on by the step. Correct so they do.".into());
+            return Err(DesireError::TierMisstep(end.unwrap()));
         }
 
         self.end = end;
@@ -194,7 +196,7 @@ impl Desire {
     /// It caps at 0 and self.amount. 
     /// 
     /// Returns Err if it doesn't step on a valid tier.
-    pub fn satisfaction_at_tier(&self, tier: u64) -> Result<f64, String> {
+    pub fn satisfaction_at_tier(&self, tier: u64) -> Result<f64, DesireError> {
         // since we know we step on a valid tier, get the total satisfaction
         let total = self.total_satisfaction();
 
@@ -215,9 +217,9 @@ impl Desire {
     }
 
     /// How many steps it takes for this desire to reach the given tier.
-    pub fn steps_to_tier(&self, tier: u64) -> Result<u64, String> {
+    pub fn steps_to_tier(&self, tier: u64) -> Result<u64, DesireError> {
         if !self.steps_on_tier(tier) {
-            return Err("Does not Step on Tier".into());
+            return Err(DesireError::TierMisstep(tier));
         }
 
         // the current tier reduced by the start tier, divided by the step.
@@ -301,10 +303,10 @@ impl Desire {
     /// 
     /// If the tier is between its start and end tier, it returns
     /// the amount * the tiers belowe it's current tier.
-    pub fn total_desire_at_tier(&self, tier: u64) -> Result<f64, String> {
+    pub fn total_desire_at_tier(&self, tier: u64) -> Result<f64, DesireError> {
         // if tier is below starting tier
         if !self.steps_on_tier(tier) {
-            return Err("Does not step on tier!".into());
+            return Err(DesireError::TierMisstep(tier));
         }
 
         // if it isn't stretched and we're at or above the
@@ -438,3 +440,21 @@ impl DesireItem {
         }
     }
 }
+
+/// Errors for desires, so we know more explicitly how and where we messed up.
+#[derive(Debug)]
+pub enum DesireError {
+    /// An error for a tier mistep, the value contained is where it tried to land
+    /// the desire did not have that step.
+    TierMisstep(u64)
+}
+
+impl fmt::Display for DesireError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            DesireError::TierMisstep(tier) => write!(f, "Tier Misstepped on: {}", tier),
+        }
+    }
+}
+
+impl Error for DesireError {}

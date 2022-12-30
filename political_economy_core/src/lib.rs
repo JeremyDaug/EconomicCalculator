@@ -1252,6 +1252,31 @@ mod tests {
         use crate::objects::desire::{Desire, DesireItem};
 
         #[test]
+        pub fn correctly_add_satisfaction_at_tier() {
+            let mut test = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                reserved: 0.0,
+                step: 1,
+                tags: vec![]};
+
+            // only add 1 tier, return remainder.
+            let result = test.add_satisfaction_at_tier(100.0, 0)
+                .expect("Misstepped");
+            assert_eq!(result, 99.0);
+            // try again, to ensure we get everything back safely.
+            let result = test.add_satisfaction_at_tier(100.0, 0)
+                .expect("Misstepped");
+            assert_eq!(result, 100.0);
+            // force misstep.
+            test.change_end(None, 5);
+            assert!(test.add_satisfaction_at_tier(100.0, 2).is_err());
+        }
+
+        #[test]
         pub fn correctly_multiply_desire() {
             let test = Desire{ 
                 item: DesireItem::Product(0), 
