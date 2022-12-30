@@ -1,4 +1,6 @@
-//! Master, this is the root for our simulation program going forward.
+//! Runner, this is the root for our simulation program going forward,
+//! this will likely be transitioned to the local manager as a higher level
+//! server distributes work to other machines running the game.
 //! 
 //! # Data
 //! 
@@ -97,4 +99,6 @@ use crate::{data_manager::DataManager, demographics::Demographics};
 pub struct Runner {
     pub data_manager: DataManager,
     pub demographics: Demographics,
+    // pub map: Map
+    pub Actors: Actors,
 }
