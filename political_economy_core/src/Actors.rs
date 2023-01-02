@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 
 /// Actors, these have AI attached to them, make active decisions, and try
 /// to satisfy desires either of their own or of others.
@@ -21,11 +22,11 @@
 #[derive(Debug)]
 pub struct Actors {
     /// The markets managed here.
-    pub Markets: Hashmap<usize, Market>,
+    pub Markets: HashMap<usize, usize>,
     /// The Pops within the managed markets.
-    pub Pops: HashMap<usize, Pop>,
+    pub Pops: HashMap<usize, usize>,
     /// The firms within the Managed Markets
-    pub Firms: Hashmap<usize, Firm>,
+    pub Firms: HashMap<usize, usize>,
     // Institutions
     // States
 }

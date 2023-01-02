@@ -94,11 +94,32 @@
 //! Actors and their Market communicate by bus to collect data and try and 
 //! exchange goods.
 
-use crate::{data_manager::DataManager, demographics::Demographics};
+use crate::{data_manager::DataManager, demographics::Demographics, Actors::Actors};
 
+
+/// The Runner, the general manager 
 pub struct Runner {
     pub data_manager: DataManager,
     pub demographics: Demographics,
     // pub map: Map
-    pub Actors: Actors,
+    pub actors: Actors,
+}
+
+impl Runner {
+    pub fn new(data_manager: DataManager, 
+        demographics: Demographics, 
+        actors: Actors) -> Self { 
+            Self { 
+                data_manager, 
+                demographics, 
+                actors 
+            } 
+        }
+
+    /// Checks 
+    pub fn data_update_phase(&mut self) {
+    }
+
+    pub fn market_day(&mut self) {
+    }
 }

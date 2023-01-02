@@ -19,3 +19,4 @@ pub mod pop_breakdown_table;
 pub mod ideology;
 pub mod buyer;
 pub mod seller;
+pub mod FirmJob;
