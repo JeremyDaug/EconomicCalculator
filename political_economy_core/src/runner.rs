@@ -94,14 +94,14 @@
 //! Actors and their Market communicate by bus to collect data and try and 
 //! exchange goods.
 
-use crate::{data_manager::DataManager, demographics::Demographics, Actors::Actors};
+use crate::{data_manager::DataManager, demographics::Demographics, actors::Actors};
 
 
 /// The Runner, the general manager 
 pub struct Runner {
     pub data_manager: DataManager,
     pub demographics: Demographics,
-    // pub map: Map
+    pub map: (),
     pub actors: Actors,
 }
 
@@ -112,14 +112,28 @@ impl Runner {
             Self { 
                 data_manager, 
                 demographics, 
+                map: (),
                 actors 
             } 
         }
 
-    /// Checks 
+    /// Goes through the update phase for the data manager.
+    /// 
+    /// During this phase it attempts to add or remove data, doing so safely
+    /// through messages.
+    /// 
+    /// On a single machine, it will do these updates here, on a MP game, it
+    /// will pass it upwards to the host, who manages not just the local
+    /// state, but the shared state of the game.
     pub fn data_update_phase(&mut self) {
     }
 
+    /// The Market Day
+    /// 
+    /// Calls the Actor to run a market day.
     pub fn market_day(&mut self) {
+        self.actors.run_market_day(&self.data_manager,
+             &self.demographics,
+            &mut self.map);
     }
 }

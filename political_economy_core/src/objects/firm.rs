@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::{seller::Seller, buyer::Buyer};
+use super::{seller::Seller, buyer::Buyer, firm_job::FirmJob};
 
 /// Firms are the productive actors of our system.
 /// 
@@ -36,19 +36,31 @@ pub struct Firm {
     /// The id for a parent firm, Firm may not have a parent.
     pub parent: Option<usize>,
     /// The jobs in the firm. Rank 1 firms can only have 1 here.
-    pub jobs: Vec<usize>,
+    /// Also contains the pops and assignments.
+    pub jobs: Vec<FirmJob>,
     /// The management jobs the firm uses. The first in the list is it's 
     /// preferred, the others are those which it either must have or which
     /// it is transitioning away from.
-    pub management: Vec<usize>,
+    /// 
+    /// Also contains the pops and assignments.
+    /// 
+    /// Unavailable for Disorganized Firms.
+    pub management: Vec<FirmJob>,
     /// The ownership jobs the firm uses. The first is the primary and preferred
     /// option, the others are either required by the structure, or that is being
     /// transitioned away from.
-    pub ownership: Vec<usize>,
-
-    firm_outputs: Vec<usize>,
+    /// 
+    /// Also contains the pops and assignments.
+    pub ownership: Vec<FirmJob>,
     /// The prices of the products the firm sells.
+    /// Stores the ID of the product and the price in AMV it seeks from
+    /// the market.
     pub prices: HashSet<usize, f64>,
+    /// The property owned or otherwise managed by the firm.
+    /// If the firm is not Disorganized or otherwise a distinct entity from
+    /// the pop, this is where all of it's inputs and capital is stored.
+    pub property: HashSet<usize, f64>,
+    firm_outputs: Vec<usize>,
 }
 
 impl Firm {
@@ -132,12 +144,21 @@ pub enum FirmKind {
     Military,
 }
 
+/// How the profits of the firm are distributed.
 #[derive(Debug)]
 pub enum ProfitStructure {
+    /// The profits are distributed equally to all who own, work, or otherwise
+    /// are attached to the firm. This is often for LossSharing, Disorganized,
+    /// or other self-owned firms.
     Distributed,
+    /// The firm has shares, and uses those to distribute profits.
     Shares,
+    /// There is one share, and it belongs to the owner pop of a firm.
     PrivatelyOwned,
+    /// The profits are shared out, but the owners get the lions share.
     ProfitSharing,
+    /// Profits are not distributed, but are used to either invest in the
+    /// company or to reduce prices.
     NonProfit
 }
 
