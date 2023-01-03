@@ -1,4 +1,4 @@
-use std::{collections::HashMap, thread};
+use std::{collections::HashMap, thread, sync::Arc};
 
 use crate::{data_manager::DataManager, 
     demographics::Demographics, objects::{market::Market, pop::Pop, firm::Firm}};
@@ -39,32 +39,61 @@ impl Actors {
     /// Runs the market day for our actors. 
     /// Splits up the work based on the markets, threads each to their own 
     /// portion, and then waits on them to return.
-    pub fn run_market_day(&self, 
-        data_manager: &DataManager, 
-        demographics: &Demographics, 
+    pub fn run_market_day(&mut self, 
+        data_manager: Arc<&DataManager>, 
+        demographics: Arc<&Demographics>, 
         map: &mut ()) {
         let mut threads = vec![];
         // spin up market threads
-        for market in self.markets.values_mut() {
+        for market in self.markets.drain().map(|x| x.1) {
             // steal pops and firms from the list so they can be used properly
             // by their parent markets.
             let mut pops = vec![];
             for pop_id in market.pops.iter() {
-                pops.push(self.pops.get_mut(pop_id));
+                pops.push(self.pops.remove(pop_id).expect("Pop Not Found."));
             }
             let mut firms = vec![];
             for firm_id in market.firms.iter() {
-                firms.push(self.firms.get_mut(firm_id));
+                firms.push(self.firms.remove(firm_id).expect("Firm Not Found."));
             }
-            let handle = thread::spawn(|| {
+            let mut institutions = vec![];
+            for inst_id in market.institutions.iter() {
+                institutions.push(self.institutions.remove(inst_id)
+                    .expect("Institution Not Found."));
+            }
+            let mut states = vec![];
+            for state_ids in market.states.iter() {
+                states.push(self.states.remove(state_ids).expect("States Not Found."));
+            }
+            let data = Arc::clone(&data_manager);
+            let demos = demographics.clone();
+            let handle = thread::spawn(move || {
                 // get immutable references to data and demos
-                let data = data_manager;
-                let demos = demographics;
-                market.run_market_day(&data, &demos, &mut pops, &mut firms)
-
+                market.run_market_day(data, demos, &mut pops, &mut firms,
+                    &mut institutions, &mut states);
+                (market, pops, firms, institutions, states)
             });
             threads.push(handle);
         }
-        // 
+        // wait for them to finish and return the borrowed values to the manager.
+        let mut returns = vec![];
+        for thread in threads {
+            returns.push(thread.join().unwrap());
+        }
+        // return the borrowed values to the manager
+        for set in returns {
+            for pop in set.1 {
+                //self.pops. = pop;
+            }
+            for firm in set.2 {
+
+            }
+            for institution in set.3 {
+
+            }
+            for state in set.4 {
+
+            }
+        }
     }
 }

@@ -1,4 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
+
+use crate::{demographics::Demographics, data_manager::DataManager};
+
+use super::{pop::Pop, firm::Firm};
 
 /// # The Market
 /// 
@@ -49,6 +53,10 @@ pub struct Market {
     pub firms: Vec<usize>,
     /// The pops within the market.
     pub pops: Vec<usize>,
+    /// The institutions within the market.
+    pub institutions: Vec<usize>,
+    /// The States within the market.
+    pub states: Vec<usize>,
     /// The Territories contained in the market.
     /// Needs to be the altered to take the map into account and
     /// ensure we don't kill ourselves with too many territories.
@@ -74,6 +82,16 @@ pub struct Market {
 }
 
 impl Market {
+    pub(crate) fn run_market_day(&self, 
+        data: Arc<&DataManager>, 
+        demos: Arc<&Demographics>, 
+        pops: &mut Vec<Pop>, 
+        firms: &mut Vec<Firm>, 
+        institutions: &mut Vec<()>,
+        states: &mut Vec<()>) {
+        todo!()
+    }
+
 }
 
 /// The Ways in which a market can connect to another market directly.

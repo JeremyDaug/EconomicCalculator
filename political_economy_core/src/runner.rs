@@ -94,6 +94,8 @@
 //! Actors and their Market communicate by bus to collect data and try and 
 //! exchange goods.
 
+use std::sync::Arc;
+
 use crate::{data_manager::DataManager, demographics::Demographics, actors::Actors};
 
 
@@ -132,8 +134,10 @@ impl Runner {
     /// 
     /// Calls the Actor to run a market day.
     pub fn market_day(&mut self) {
-        self.actors.run_market_day(&self.data_manager,
-             &self.demographics,
+        let data_manager = Arc::new(&self.data_manager);
+        let demos = Arc::new(&self.demographics);
+        self.actors.run_market_day(data_manager,
+            demos,
             &mut self.map);
     }
 }
