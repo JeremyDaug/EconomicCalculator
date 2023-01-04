@@ -1,7 +1,5 @@
-use std::{collections::HashMap, sync::Arc};
-
+use std::{collections::HashMap, sync::mpsc};
 use crossbeam_utils::thread;
-
 use crate::{data_manager::DataManager, 
     demographics::Demographics, objects::{market::Market, pop::Pop, firm::Firm}};
 
@@ -49,6 +47,7 @@ impl Actors {
         thread::scope(|scope| {
             // get our thread holder we'll be getting our info back from.
             let mut threads = vec![];
+            // Also start the buss, which we'll be passing to all markets.
             // for each market
             for market in self.markets.values_mut() {
                 // get the pops
@@ -75,9 +74,11 @@ impl Actors {
                     states.push(self.states.remove(&state_id)
                     .expect("State Not Found!"));
                 }
+                // get a channel between us here and the 
                 // spin up the thread
                 threads.push(scope.spawn(move |_| {
-                    market.run_market_day(data_manager, 
+                    market.run_market_day(
+                        data_manager, 
                         demographics, 
                         &mut pops, 
                         &mut firms, 
@@ -93,4 +94,21 @@ impl Actors {
             }
         }).unwrap();
     }
+}
+
+/// Messages meant to be passed between markets.
+#[derive(Debug, Clone, Copy)]
+pub struct MarketMessage {
+    /// The Sender's id, so responses can be addressed appropriately.
+    pub sender: usize,
+    // The Reciever's id, so we know who should recieve it.
+    pub reciever: usize,
+    /// What is being asked or otherwise requested.
+    pub message: MessageEnum,
+}
+
+/// What actions and information can be passed around.
+#[derive(Debug, Clone, Copy)]
+pub enum MessageEnum {
+
 }
