@@ -83,8 +83,8 @@ pub struct Market {
 
 impl Market {
     pub(crate) fn run_market_day(&self, 
-        data: Arc<&DataManager>, 
-        demos: Arc<&Demographics>, 
+        data: &DataManager, 
+        demos: &Demographics, 
         pops: &mut Vec<Pop>, 
         firms: &mut Vec<Firm>, 
         institutions: &mut Vec<()>,

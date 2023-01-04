@@ -1,4 +1,6 @@
-use std::{collections::HashMap, thread, sync::Arc};
+use std::{collections::HashMap, sync::Arc};
+
+use crossbeam_utils::thread;
 
 use crate::{data_manager::DataManager, 
     demographics::Demographics, objects::{market::Market, pop::Pop, firm::Firm}};
@@ -40,60 +42,55 @@ impl Actors {
     /// Splits up the work based on the markets, threads each to their own 
     /// portion, and then waits on them to return.
     pub fn run_market_day(&mut self, 
-        data_manager: Arc<&DataManager>, 
-        demographics: Arc<&Demographics>, 
-        map: &mut ()) {
-        let mut threads = vec![];
-        // spin up market threads
-        for market in self.markets.drain().map(|x| x.1) {
-            // steal pops and firms from the list so they can be used properly
-            // by their parent markets.
-            let mut pops = vec![];
-            for pop_id in market.pops.iter() {
-                pops.push(self.pops.remove(pop_id).expect("Pop Not Found."));
+    data_manager: &DataManager, 
+    demographics: &Demographics, 
+    map: &mut ()) {
+        // get our thread scope, threads cannot leave here.
+        thread::scope(|scope| {
+            // get our thread holder we'll be getting our info back from.
+            let mut threads = vec![];
+            // for each market
+            for market in self.markets.values_mut() {
+                // get the pops
+                let mut pops = vec![];
+                for pop_id in market.pops.iter() {
+                    pops.push(self.pops.remove(&pop_id)
+                    .expect("Pop Not Found!"));
+                }
+                // firms
+                let mut firms = vec![];
+                for firm_id in market.firms.iter() {
+                    firms.push(self.firms.remove(&firm_id)
+                    .expect("Firm Not Found!"));
+                }
+                // institutions
+                let mut insts = vec![];
+                for inst_id in market.institutions.iter() {
+                    insts.push(self.institutions.remove(&inst_id)
+                    .expect("Institution Not Found!"));
+                }
+                // and states within it
+                let mut states = vec![];
+                for state_id in market.states.iter() {
+                    states.push(self.states.remove(&state_id)
+                    .expect("State Not Found!"));
+                }
+                // spin up the thread
+                threads.push(scope.spawn(move |_| {
+                    market.run_market_day(data_manager, 
+                        demographics, 
+                        &mut pops, 
+                        &mut firms, 
+                        &mut insts, 
+                        &mut states);
+                        (market, pops, firms, insts, states)
+                }));
             }
-            let mut firms = vec![];
-            for firm_id in market.firms.iter() {
-                firms.push(self.firms.remove(firm_id).expect("Firm Not Found."));
+            // wait for all of them and get their returns
+            // and get the returned data.
+            for thread in threads {
+                let output = thread.join().unwrap();
             }
-            let mut institutions = vec![];
-            for inst_id in market.institutions.iter() {
-                institutions.push(self.institutions.remove(inst_id)
-                    .expect("Institution Not Found."));
-            }
-            let mut states = vec![];
-            for state_ids in market.states.iter() {
-                states.push(self.states.remove(state_ids).expect("States Not Found."));
-            }
-            let data = Arc::clone(&data_manager);
-            let demos = demographics.clone();
-            let handle = thread::spawn(move || {
-                // get immutable references to data and demos
-                market.run_market_day(data, demos, &mut pops, &mut firms,
-                    &mut institutions, &mut states);
-                (market, pops, firms, institutions, states)
-            });
-            threads.push(handle);
-        }
-        // wait for them to finish and return the borrowed values to the manager.
-        let mut returns = vec![];
-        for thread in threads {
-            returns.push(thread.join().unwrap());
-        }
-        // return the borrowed values to the manager
-        for set in returns {
-            for pop in set.1 {
-                //self.pops. = pop;
-            }
-            for firm in set.2 {
-
-            }
-            for institution in set.3 {
-
-            }
-            for state in set.4 {
-
-            }
-        }
+        }).unwrap();
     }
 }

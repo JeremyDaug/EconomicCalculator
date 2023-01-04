@@ -134,10 +134,8 @@ impl Runner {
     /// 
     /// Calls the Actor to run a market day.
     pub fn market_day(&mut self) {
-        let data_manager = Arc::new(&self.data_manager);
-        let demos = Arc::new(&self.demographics);
-        self.actors.run_market_day(data_manager,
-            demos,
+        self.actors.run_market_day(&self.data_manager,
+            &self.demographics,
             &mut self.map);
     }
 }
