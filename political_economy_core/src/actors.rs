@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::mpsc};
+use std::{collections::{HashMap, HashSet}, any::Any};
 use crossbeam_utils::thread;
 use crate::{data_manager::DataManager, 
     demographics::Demographics, objects::{market::Market, pop::Pop, firm::Firm}};
@@ -47,7 +47,10 @@ impl Actors {
         thread::scope(|scope| {
             // get our thread holder we'll be getting our info back from.
             let mut threads = vec![];
-            // Also start the buss, which we'll be passing to all markets.
+            // also get the many to many broadcaster
+            let (local_sender, 
+                mut local_reciever) 
+                    = barrage::bounded(100);
             // for each market
             for market in self.markets.values_mut() {
                 // get the pops
@@ -75,23 +78,69 @@ impl Actors {
                     .expect("State Not Found!"));
                 }
                 // get a channel between us here and the 
+                let sender = local_sender.clone();
+                let mut reciever = local_reciever.clone();
                 // spin up the thread
                 threads.push(scope.spawn(move |_| {
                     market.run_market_day(
+                        sender,
+                        reciever,
                         data_manager, 
                         demographics, 
                         &mut pops, 
                         &mut firms, 
                         &mut insts, 
                         &mut states);
-                        (market, pops, firms, insts, states)
+                        // return back from the thread the market, and the 
+                        // pops firms, institutions, and states which were 
+                        // acting in it.
+                        (pops, firms, insts, states)
                 }));
             }
-            // wait for all of them and get their returns
-            // and get the returned data.
-            for thread in threads {
-                let output = thread.join().unwrap();
+            // alternate between checking for messages to pass up or around
+            // or for additional information.
+            let mut completed = HashSet::new();
+            // loop until all of them return CloseMarket.
+            while completed.len() != threads.len() {
+                // get the message sent, error if we disconnected prematurely.
+                let message = local_reciever.recv()
+                .expect("Error! Market Threads Disconnected before closing.");
+                // get the message out and see if it's important
+                match message.message {
+                    MarketMessageEnum::CloseMarket => {
+                        completed.insert(message.sender);
+                    },
+                    _ => ()
+                }
             }
+            // Once all markets are closed, send down confirmations for them to shut down
+            for id in completed {
+                local_sender.send(MarketMessage{ sender: 0, reciever: id, 
+                    message: MarketMessageEnum::ConfirmClose});
+            }
+            // Then wait for them all to close.
+            let mut results = vec![];
+            for thread in threads.iter() {
+                results.push(thread.join().expect("Error recieved"));
+            }
+            // With them all complete, move their data back to storage.
+            for group in results {
+                for pop in group.0 {
+                    self.pops.insert(pop.id, pop);
+                }
+                for firm in group.1 {
+                    self.firms.insert(firm.id, firm);
+                }
+                for inst in group.2 {
+                    // TODO update these when Institutions are made.
+                    self.institutions.insert(0, inst);
+                }
+                for state in group.3 {
+                    // TODO update when states are made.
+                    self.states.insert(0, state);
+                }
+            }
+            // with all data back, do any moves 
         }).unwrap();
     }
 }
@@ -104,11 +153,17 @@ pub struct MarketMessage {
     // The Reciever's id, so we know who should recieve it.
     pub reciever: usize,
     /// What is being asked or otherwise requested.
-    pub message: MessageEnum,
+    pub message: MarketMessageEnum,
 }
 
 /// What actions and information can be passed around.
 #[derive(Debug, Clone, Copy)]
-pub enum MessageEnum {
-
+pub enum MarketMessageEnum {
+    /// Tells the main thread that the market thread is complete and ready 
+    /// to close out.
+    CloseMarket,
+    /// Tells the market threads that they will not recieve any more messages 
+    /// and to close out.
+    ConfirmClose,
+    MigratePop(usize)
 }
