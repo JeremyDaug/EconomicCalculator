@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 use barrage::{Sender, Receiver};
 
-use crate::{demographics::Demographics, data_manager::DataManager, 
-    actors::MarketMessage};
+use crate::{demographics::Demographics, data_manager::DataManager, Actors::MarketMessage};
 use super::{pop::Pop, firm::Firm};
 
 /// # The Market
@@ -85,7 +84,7 @@ pub struct Market {
 impl Market {
     pub(crate) fn run_market_day(&self, 
         sender: Sender<MarketMessage>,
-        reciever: Receiver<MarketMessage>,
+        reciever: &mut Receiver<MarketMessage>,
         data: &DataManager, 
         demos: &Demographics, 
         pops: &mut Vec<Pop>, 

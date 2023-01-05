@@ -1,5 +1,6 @@
-use std::{collections::{HashMap, HashSet}, any::Any};
-use crossbeam_utils::thread;
+use std::collections::{HashMap, HashSet};
+use crossbeam::thread;
+
 use crate::{data_manager::DataManager, 
     demographics::Demographics, objects::{market::Market, pop::Pop, firm::Firm}};
 
@@ -35,6 +36,7 @@ pub struct Actors {
     /// The Substates in the Managed Markets
     pub states: HashMap<usize, ()>,
 }
+
 impl Actors {
     /// Runs the market day for our actors. 
     /// Splits up the work based on the markets, threads each to their own 
@@ -42,7 +44,7 @@ impl Actors {
     pub fn run_market_day(&mut self, 
     data_manager: &DataManager, 
     demographics: &Demographics, 
-    map: &mut ()) {
+    _map: &mut ()) {
         // get our thread scope, threads cannot leave here.
         thread::scope(|scope| {
             // get our thread holder we'll be getting our info back from.
@@ -84,7 +86,7 @@ impl Actors {
                 threads.push(scope.spawn(move |_| {
                     market.run_market_day(
                         sender,
-                        reciever,
+                        &mut reciever,
                         data_manager, 
                         demographics, 
                         &mut pops, 
@@ -107,9 +109,7 @@ impl Actors {
                 .expect("Error! Market Threads Disconnected before closing.");
                 // get the message out and see if it's important
                 match message.message {
-                    MarketMessageEnum::CloseMarket => {
-                        completed.insert(message.sender);
-                    },
+                    CloseMarket => (),
                     _ => ()
                 }
             }
@@ -120,7 +120,7 @@ impl Actors {
             }
             // Then wait for them all to close.
             let mut results = vec![];
-            for thread in threads.iter() {
+            for thread in threads.into_iter() {
                 results.push(thread.join().expect("Error recieved"));
             }
             // With them all complete, move their data back to storage.

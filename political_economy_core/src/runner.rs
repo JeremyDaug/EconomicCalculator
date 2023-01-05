@@ -94,9 +94,7 @@
 //! Actors and their Market communicate by bus to collect data and try and 
 //! exchange goods.
 
-use std::sync::Arc;
-
-use crate::{data_manager::DataManager, demographics::Demographics, actors::Actors};
+use crate::{data_manager::DataManager, demographics::Demographics, Actors::Actors};
 
 
 /// The Runner, the general manager 
