@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use barrage::{Sender, Receiver};
 
-use crate::{demographics::Demographics, data_manager::DataManager, Actors::MarketMessage};
+use crate::{demographics::Demographics, data_manager::DataManager};
 use super::{pop::Pop, firm::Firm};
 
 /// # The Market
@@ -82,16 +82,20 @@ pub struct Market {
 }
 
 impl Market {
-    pub(crate) fn run_market_day(&self, 
+    /// Runs the market day for this market. This manages the various actors in the market
+    pub fn run_market_day(&self, 
         sender: Sender<MarketMessage>,
         reciever: &mut Receiver<MarketMessage>,
         data: &DataManager, 
         demos: &Demographics, 
         pops: &mut Vec<Pop>, 
         firms: &mut Vec<Firm>, 
-        institutions: &mut Vec<()>,
-        states: &mut Vec<()>) {
-        todo!()
+        _institutions: &mut Vec<()>,
+        _states: &mut Vec<()>) {
+        // get our thread scope for our children.
+        thread::scope(|scope| {
+            // spin up firms first
+        })
     }
 
 }
@@ -124,4 +128,27 @@ pub enum MarketConnection{
     /// throughput limit in mass, the third is the throughput limit
     /// in volume.
     Portal(f64, f64, f64),
+}
+
+/// Messages meant to be passed between markets.
+#[derive(Debug, Clone, Copy)]
+pub struct MarketMessage {
+    /// The Sender's id, so responses can be addressed appropriately.
+    pub sender: usize,
+    // The Reciever's id, so we know who should recieve it.
+    pub reciever: usize,
+    /// What is being asked or otherwise requested.
+    pub message: MarketMessageEnum,
+}
+
+/// What actions and information can be passed around by the market across 
+/// or up the hierarchy.
+#[derive(Debug, Clone, Copy)]
+pub enum MarketMessageEnum {
+    /// Tells the main thread that the market thread is complete and ready 
+    /// to close out.
+    CloseMarket,
+    /// Tells the market threads that they will not recieve any more messages 
+    /// and to close out.
+    ConfirmClose,
 }

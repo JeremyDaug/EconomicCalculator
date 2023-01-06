@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use crossbeam::thread;
 
 use crate::{data_manager::DataManager, 
-    demographics::Demographics, objects::{market::Market, pop::Pop, firm::Firm}};
+    demographics::Demographics, objects::{market::{Market, MarketMessage, MarketMessageEnum}, pop::Pop, firm::Firm}};
 
 /// Actors, these have AI attached to them, make active decisions, and try
 /// to satisfy desires either of their own or of others.
@@ -140,30 +140,9 @@ impl Actors {
                     self.states.insert(0, state);
                 }
             }
-            // with all data back, do any moves 
+            // with all data back, do any movements between markets
+            // TODO do this later. Then pass up the changes to the runner and
+            // master so the master can share or transfer across runners.
         }).unwrap();
     }
-}
-
-/// Messages meant to be passed between markets.
-#[derive(Debug, Clone, Copy)]
-pub struct MarketMessage {
-    /// The Sender's id, so responses can be addressed appropriately.
-    pub sender: usize,
-    // The Reciever's id, so we know who should recieve it.
-    pub reciever: usize,
-    /// What is being asked or otherwise requested.
-    pub message: MarketMessageEnum,
-}
-
-/// What actions and information can be passed around.
-#[derive(Debug, Clone, Copy)]
-pub enum MarketMessageEnum {
-    /// Tells the main thread that the market thread is complete and ready 
-    /// to close out.
-    CloseMarket,
-    /// Tells the market threads that they will not recieve any more messages 
-    /// and to close out.
-    ConfirmClose,
-    MigratePop(usize)
 }
