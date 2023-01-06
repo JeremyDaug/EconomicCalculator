@@ -60,7 +60,7 @@ pub struct Firm {
     /// If the firm is not Disorganized or otherwise a distinct entity from
     /// the pop, this is where all of it's inputs and capital is stored.
     pub property: HashSet<usize, f64>,
-    firm_outputs: Vec<usize>,
+    _firm_outputs: Vec<usize>,
 }
 
 impl Firm {

@@ -6,10 +6,6 @@ pub mod actors;
 
 extern crate lazy_static;
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
 #[cfg(test)]
 mod tests {
     mod pop_tests {

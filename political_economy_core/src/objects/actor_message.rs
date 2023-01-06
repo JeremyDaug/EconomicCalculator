@@ -3,6 +3,10 @@
 /// two actor threads.
 #[derive(Debug, Copy, Clone)]
 pub enum ActorMessage {
+    /// The start message so that all actors in a market know 
+    /// that all other actors are up and running and they can
+    /// begin messaging back and forth.
+    StartDay,
     /// The find product message, recieved by the market.
     /// Contains the product id and the amount of time
     /// the actor is willing to pay for to find them.

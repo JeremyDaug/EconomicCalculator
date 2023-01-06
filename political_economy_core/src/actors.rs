@@ -2,7 +2,8 @@ use std::collections::{HashMap, HashSet};
 use crossbeam::thread;
 
 use crate::{data_manager::DataManager, 
-    demographics::Demographics, objects::{market::{Market, MarketMessage, MarketMessageEnum}, pop::Pop, firm::Firm}};
+    demographics::Demographics, 
+    objects::{market::{Market, MarketMessage, MarketMessageEnum}, pop::Pop, firm::Firm}};
 
 /// Actors, these have AI attached to them, make active decisions, and try
 /// to satisfy desires either of their own or of others.
@@ -109,14 +110,18 @@ impl Actors {
                 .expect("Error! Market Threads Disconnected before closing.");
                 // get the message out and see if it's important
                 match message.message {
-                    CloseMarket => (),
+                    MarketMessageEnum::CloseMarket => {
+                        // market is closing, mark it down and continue.
+                        completed.insert(message.sender);
+                    },
                     _ => ()
                 }
             }
             // Once all markets are closed, send down confirmations for them to shut down
             for id in completed {
                 local_sender.send(MarketMessage{ sender: 0, reciever: id, 
-                    message: MarketMessageEnum::ConfirmClose});
+                    message: MarketMessageEnum::ConfirmClose})
+                    .expect("Problem, could not send.");
             }
             // Then wait for them all to close.
             let mut results = vec![];

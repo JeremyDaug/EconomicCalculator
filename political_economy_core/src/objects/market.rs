@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use barrage::{Sender, Receiver};
+use crossbeam::thread;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
 use super::{pop::Pop, firm::Firm};
@@ -84,18 +85,21 @@ pub struct Market {
 impl Market {
     /// Runs the market day for this market. This manages the various actors in the market
     pub fn run_market_day(&self, 
-        sender: Sender<MarketMessage>,
-        reciever: &mut Receiver<MarketMessage>,
-        data: &DataManager, 
-        demos: &Demographics, 
-        pops: &mut Vec<Pop>, 
-        firms: &mut Vec<Firm>, 
+        _sender: Sender<MarketMessage>,
+        _reciever: &mut Receiver<MarketMessage>,
+        _data: &DataManager, 
+        _demos: &Demographics, 
+        _pops: &mut Vec<Pop>, 
+        _firms: &mut Vec<Firm>, 
         _institutions: &mut Vec<()>,
         _states: &mut Vec<()>) {
         // get our thread scope for our children.
-        thread::scope(|scope| {
+        thread::scope(|_scope| {
+            // spin up everything first, before letting them loose.
+            let mut threads = vec![];
             // spin up firms first
-        })
+            
+        }).unwrap();
     }
 
 }

@@ -94,8 +94,8 @@
 //! Actors and their Market communicate by bus to collect data and try and 
 //! exchange goods.
 
-use crate::{data_manager::DataManager, demographics::Demographics};
-use crate::actors::Actors;
+use crate::{data_manager::DataManager, demographics::Demographics, actors::Actors};
+
 
 
 /// The Runner, the general manager 
