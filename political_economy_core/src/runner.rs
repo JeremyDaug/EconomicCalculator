@@ -94,7 +94,7 @@
 //! Actors and their Market communicate by bus to collect data and try and 
 //! exchange goods.
 
-use crate::{data_manager::DataManager, demographics::Demographics, actors::Actors};
+use crate::{data_manager::DataManager, demographics::Demographics, actor_manager::ActorManager};
 
 
 
@@ -103,13 +103,13 @@ pub struct Runner {
     pub data_manager: DataManager,
     pub demographics: Demographics,
     pub map: (),
-    pub actors: Actors,
+    pub actors: ActorManager,
 }
 
 impl Runner {
     pub fn new(data_manager: DataManager, 
         demographics: Demographics, 
-        actors: Actors) -> Self { 
+        actors: ActorManager) -> Self { 
             Self { 
                 data_manager, 
                 demographics, 

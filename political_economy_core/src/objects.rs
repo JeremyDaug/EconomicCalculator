@@ -20,3 +20,6 @@ pub mod ideology;
 pub mod buyer;
 pub mod seller;
 pub mod firm_job;
+pub mod actor;
+pub mod actor_message;
+pub mod institution;

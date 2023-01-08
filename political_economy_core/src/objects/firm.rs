@@ -1,6 +1,14 @@
 use std::collections::HashSet;
 
-use super::{seller::Seller, buyer::Buyer, firm_job::FirmJob};
+use barrage::{Sender, Receiver};
+
+use crate::data_manager::DataManager;
+
+use super::{seller::Seller, 
+    buyer::Buyer, 
+    firm_job::FirmJob, 
+    market::{Market, MarketHistory}, 
+    actor::Actor, actor_message::{ActorMessage, ActorInfo, ActorType}};
 
 /// Firms are the productive actors of our system.
 /// 
@@ -70,9 +78,37 @@ impl Firm {
     }
 }
 
-impl Seller for Firm {}
+impl Seller for Firm {
+    fn actor_type(&self) -> ActorType {
+        ActorType::Firm
+    }
+
+    fn get_id(&self) -> usize {
+        self.id
+    }
+
+    fn actor_info(&self) -> ActorInfo {
+        ActorInfo::Firm(self.id)
+    }
+}
 
 impl Buyer for Firm {}
+
+impl Actor for Firm {
+    /// Run the market day of the firm.
+    /// 
+    /// First waits to get the all clear on startup to enusre all other actors
+    /// in it's market are running.
+    /// 
+    /// Second, it puts up what it offers today up for sale.
+    fn run_market_day(&mut self, 
+        sender: Sender<ActorMessage>,
+        reciever: &mut Receiver<ActorMessage>,
+        data: &DataManager,
+        history: &MarketHistory) {
+        todo!()
+    }
+}
 
 #[derive(Debug)]
 pub enum FirmRank {

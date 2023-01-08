@@ -2,11 +2,13 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use crate::demographics::Demographics;
+use barrage::{Sender, Receiver};
+
+use crate::{demographics::Demographics, data_manager::{self, DataManager}};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
-    buyer::Buyer, seller::Seller};
+    buyer::Buyer, seller::Seller, actor::Actor, market::MarketHistory, actor_message::{ActorMessage, ActorType, ActorInfo}};
 
 
 /// Pops are the data storage for a population group.
@@ -103,5 +105,25 @@ impl Buyer for Pop {
 }
 
 impl Seller for Pop {
+    fn actor_type(&self) -> ActorType {
+        ActorType::Pop
+    }
 
+    fn actor_info(&self) -> ActorInfo {
+        ActorInfo::Pop(self.id)
+    }
+
+    fn get_id(&self) -> usize {
+        self.id
+    }
+}
+
+impl Actor for Pop {
+    fn run_market_day(&mut self, 
+        sender: Sender<ActorMessage>,
+        reciever: &mut Receiver<ActorMessage>,
+        data: &DataManager,
+        history: &MarketHistory) {
+        todo!()
+    }
 }

@@ -25,7 +25,7 @@ use crate::{data_manager::DataManager,
 /// do not need to be contained, but should have delegate/representative in
 /// the market to represent and communicate with their them in their capital.
 #[derive(Debug)]
-pub struct Actors {
+pub struct ActorManager {
     /// The markets managed here.
     pub markets: HashMap<usize, Market>,
     /// The Pops within the managed markets.
@@ -38,7 +38,7 @@ pub struct Actors {
     pub states: HashMap<usize, ()>,
 }
 
-impl Actors {
+impl ActorManager {
     /// Runs the market day for our actors. 
     /// Splits up the work based on the markets, threads each to their own 
     /// portion, and then waits on them to return.

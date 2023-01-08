@@ -1,9 +1,12 @@
-use std::collections::HashMap;
+use core::panic;
+use std::collections::{HashMap, HashSet};
 use barrage::{Sender, Receiver};
 use crossbeam::thread;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
-use super::{pop::Pop, firm::Firm};
+use super::{pop::Pop, firm::Firm, actor::Actor, actor_message::{ActorMessage, ActorType, ActorInfo}};
+
+const SHOPPING_TIME_COST: f64 = 0.2;
 
 /// # The Market
 /// 
@@ -71,37 +74,161 @@ pub struct Market {
     pub resources: HashMap<usize, f64>,
     // Available Notdes.
     /// The Current market prices in AMV.
-    pub market_prices: HashMap<usize, f64>,
+    pub prices: HashMap<usize, f64>,
     /// The products which are available for sale, and how many of them.
     pub products_for_sale: HashMap<usize, f64>,
+    /// how much of each proudct was demanded by buyers generally.
+    /// May include double dipped demand.
+    pub product_demanded: HashMap<usize, f64>,
     /// The products sold in this market so far.
     pub product_sold: HashMap<usize, f64>,
     /// The total products produced today.
     pub product_output: HashMap<usize, f64>,
     /// The total amount of products exchanged today.
-    pub product_exchanged_total: HashMap<usize, f64>
+    pub product_exchanged_total: HashMap<usize, f64>,
+    /// The info of the market from yesterday, stored for general
+    /// information.
+    pub previous_day: MarketHistory,
 }
 
 impl Market {
     /// Runs the market day for this market. This manages the various actors in the market
-    pub fn run_market_day(&self, 
-        _sender: Sender<MarketMessage>,
-        _reciever: &mut Receiver<MarketMessage>,
-        _data: &DataManager, 
-        _demos: &Demographics, 
-        _pops: &mut Vec<Pop>, 
-        _firms: &mut Vec<Firm>, 
-        _institutions: &mut Vec<()>,
-        _states: &mut Vec<()>) {
+    pub fn run_market_day(&mut self, 
+        sender: Sender<MarketMessage>,
+        reciever: &mut Receiver<MarketMessage>,
+        data: &DataManager, 
+        demos: &Demographics, 
+        pops: &mut Vec<Pop>, 
+        firms: &mut Vec<Firm>, 
+        institutions: &mut Vec<()>,
+        states: &mut Vec<()>) {
+        // get the lengths of our actors for later use.
+        let pop_count = pops.len();
+        let firm_count = firms.len();
+        let institution_count = institutions.len();
+        let state_count = states.len();
         // get our thread scope for our children.
-        thread::scope(|_scope| {
+        thread::scope(|scope| {
+            // make our history immutable so we can hand it out elsewhere.
+            // TODO get rid of this clone if possible.
+            // get our sender and recievers for the threads
+            let (lcl_sender, 
+                mut lcl_receiver) 
+                    = barrage::bounded(100);
             // spin up everything first, before letting them loose.
             let mut threads = vec![];
             // spin up firms first
-            
+            for firm in firms.iter_mut() {
+                let history = MarketHistory::create(self);
+                let firm_sender = lcl_sender.clone();
+                let mut firm_rcvr = lcl_receiver.clone();
+                threads.push(scope.spawn(move |_| {
+                    firm.run_market_day(firm_sender, &mut firm_rcvr,
+                        data, &history);
+                }))
+            }
+            for pop in pops.iter_mut() {
+                let pop_sender = lcl_sender.clone();
+                let mut pop_recv = lcl_receiver.clone();
+                let history = MarketHistory::create(self);
+                threads.push(scope.spawn(move |_| {
+                    pop.run_market_day(pop_sender, &mut pop_recv,
+                    data, &history);
+                }))
+            }
+            // TODO Placeholder for Institutions and States.
+
+            // once we spin up all actors, send them the OK message.
+            lcl_sender.send(ActorMessage::StartDay);
+
+            // Enter holding pattern while the children do their work
+            let mut completed_firms = HashSet::new();
+            let mut completed_pops = HashSet::new();
+            //let completed_insts = HashSet::new();
+            //let completed_states = HashSet::new();
+            while completed_firms.len() >= firm_count && 
+                completed_pops.len() >= pop_count {
+                let msg = lcl_receiver.recv().expect("Unexpected Disconnect!");
+                match msg {
+                    ActorMessage::Finished { sender } => {
+                        match sender {
+                            ActorInfo::Firm(id) => completed_firms.insert(id),
+                            ActorInfo::Pop(id) => completed_pops.insert(id),
+                            ActorInfo::Institution(_) => todo!(),
+                            ActorInfo::State(_) => todo!(),
+                        };
+                    },
+                    ActorMessage::FindProduct { product, 
+                        amount, time, sender} => {
+                            // record the amount sought from them.
+                            *self.product_demanded.entry(product).or_insert(0.0)
+                                += amount;
+                            let outcome = self.find_product(product,
+                                time, sender);
+                            lcl_sender.send(outcome)
+                                .expect("Local Channel Closed.");
+                    }
+                    _ => ()
+                }
+            }
+
+            // after all actors message done, send our message done up and wait
+            sender.send(MarketMessage { sender: self.id, reciever: 0,
+                 message: MarketMessageEnum::CloseMarket}).expect("Closed, Big Problem.");
+            loop {
+                // with the close sent, read messages and wait for the all clear. 
+                // respond to any messages directed to us.
+                let result = reciever.recv().expect("Unexpected Close.");
+                match result.message {
+                    MarketMessageEnum::ConfirmClose => {
+                        break;
+                    },
+                    _ => ()// do nothing on everything else.
+                }
+            }
+            // if we got here, then we're done. Do any clean and info 
+            // consolidation outside of this thread scope so we can edit stuff.
         }).unwrap();
     }
 
+    pub fn find_product(&mut self, product: usize, time: f64, sender: ActorInfo) -> ActorMessage {
+        // check that we have any sellers in the first place.
+        
+        // if no success (ran out of time or no sellers), return Failure
+        ActorMessage::ProductNotFound { product, buyer: sender, change: time-0.2 }
+    }
+}
+
+/// Market History is all the information contained by the market from the
+/// previous day. This data is updated in the market at the end of the day
+/// and passed to the Actors in the market during the day so they have 
+/// access to this data.
+#[derive(Debug, Clone)]
+pub struct MarketHistory {
+    /// The open resources of the market, these are the 'trash' items
+    /// which are available for anyone to pick up, and includes surface
+    /// resources from the environment.
+    pub resources: HashMap<usize, f64>,
+    /// The Market prices in AMV yesterday.
+    pub market_prices: HashMap<usize, f64>,
+    /// How many of each product was offered in the market yesterday.
+    pub product_offered: HashMap<usize, f64>,
+    /// The products sold in this market yesterday.
+    pub product_sold: HashMap<usize, f64>,
+}
+
+impl MarketHistory {
+
+    /// Creates a market history of yesterday based on the current market given
+    /// to it.
+    pub fn create(market: &Market) -> Self {
+        // TODO update this to actually take all this information.
+        MarketHistory { resources: market.resources.clone(),
+            market_prices: market.prices.clone(), 
+            product_offered: HashMap::new(), 
+            product_sold: HashMap::new() 
+        }
+    }
 }
 
 /// The Ways in which a market can connect to another market directly.

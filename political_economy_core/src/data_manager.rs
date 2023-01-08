@@ -1,5 +1,5 @@
 use core::panic;
-use std::{collections::{HashMap, HashSet}};
+use std::collections::{HashMap, HashSet};
 
 use crate::objects::{want::Want, 
     skill_group::SkillGroup,
