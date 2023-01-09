@@ -1,28 +1,32 @@
-use super::{seller::Seller, actor_message::{ActorType, self, ActorInfo, ActorMessage}, buyer::Buyer, actor::Actor};
+use super::{seller::Seller, actor_message::{ActorType, ActorInfo, self, ActorMessage}, buyer::Buyer, actor::Actor};
 
 
 
-/// An institution, a non-economic entity which acts within the world.
+/// A state is a governmental entity of our system.
 /// 
-/// An institution can produce and consume goods, and 
+/// It is often composed of different Institutions working togteher
+/// or created by one of them gaining a monopoly on Violence.
+/// 
+/// Instead of taking tithes from just it's members, it takes taxes from
+/// all pops which live in it's territory. 
 #[derive(Debug, Clone)]
-pub struct Institution {
+pub struct State {
     pub id: usize,
     pub name: String,
     pub variant_name: String,
 }
 
-impl Institution {
-
+impl State {
+    
 }
 
-impl Seller for Institution {
+impl Seller for State {
     fn actor_type(&self) -> ActorType {
-        ActorType::Institution
+        ActorType::State
     }
 
     fn actor_info(&self) -> ActorInfo {
-        ActorInfo::Institution(self.id)
+        ActorInfo::State(self.id)
     }
 
     fn get_id(&self) -> usize {
@@ -30,12 +34,12 @@ impl Seller for Institution {
     }
 }
 
-impl Buyer for Institution {
+impl Buyer for State {
     
 }
 
-impl Actor for Institution {
-    /// Run Market Day for Institution.
+impl Actor for State {
+    /// Run Market Day for States.
     /// 
     /// This is a placeholder. Currently it just sends Finished, and ends
     /// it there.

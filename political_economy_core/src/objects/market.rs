@@ -4,7 +4,7 @@ use barrage::{Sender, Receiver};
 use crossbeam::thread;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
-use super::{pop::Pop, firm::Firm, actor::Actor, actor_message::{ActorMessage, ActorType, ActorInfo}};
+use super::{pop::Pop, firm::Firm, actor::Actor, actor_message::{ActorMessage, ActorType, ActorInfo}, institution::Institution, state::State};
 
 const SHOPPING_TIME_COST: f64 = 0.2;
 
@@ -100,8 +100,8 @@ impl Market {
         demos: &Demographics, 
         pops: &mut Vec<Pop>, 
         firms: &mut Vec<Firm>, 
-        institutions: &mut Vec<()>,
-        states: &mut Vec<()>) {
+        institutions: &mut Vec<Institution>,
+        states: &mut Vec<State>) {
         // get the lengths of our actors for later use.
         let pop_count = pops.len();
         let firm_count = firms.len();
@@ -113,11 +113,11 @@ impl Market {
             // TODO get rid of this clone if possible.
             // get our sender and recievers for the threads
             let (lcl_sender, 
-                mut lcl_receiver) 
-                    = barrage::bounded(100);
+                lcl_receiver) 
+                    = barrage::bounded(1000);
             // spin up everything first, before letting them loose.
             let mut threads = vec![];
-            // spin up firms first
+            // spin up the actors
             for firm in firms.iter_mut() {
                 let history = MarketHistory::create(self);
                 let firm_sender = lcl_sender.clone();
@@ -125,7 +125,7 @@ impl Market {
                 threads.push(scope.spawn(move |_| {
                     firm.run_market_day(firm_sender, &mut firm_rcvr,
                         data, &history);
-                }))
+                }));
             }
             for pop in pops.iter_mut() {
                 let pop_sender = lcl_sender.clone();
@@ -134,28 +134,47 @@ impl Market {
                 threads.push(scope.spawn(move |_| {
                     pop.run_market_day(pop_sender, &mut pop_recv,
                     data, &history);
-                }))
+                }));
             }
-            // TODO Placeholder for Institutions and States.
+            for inst in institutions.iter_mut() {
+                let sender = lcl_sender.clone();
+                let mut recv = lcl_receiver.clone();
+                let history = MarketHistory::create(self);
+                threads.push(scope.spawn(move |_| {
+                    inst.run_market_day(sender, &mut recv, data, &history);
+                }));
+            }
+            for state in states.iter_mut() {
+                let sender = lcl_sender.clone();
+                let mut recv = lcl_receiver.clone();
+                let history = MarketHistory::create(self);
+                threads.push(scope.spawn(move |_| {
+                    state.run_market_day(sender, &mut recv, data, &history);
+                }));
+            }
 
             // once we spin up all actors, send them the OK message.
-            lcl_sender.send(ActorMessage::StartDay);
+            lcl_sender.send(ActorMessage::StartDay).expect("Someho Closed. Panic!");
+
+            // Possibly enter holding pattern for selling.
 
             // Enter holding pattern while the children do their work
             let mut completed_firms = HashSet::new();
             let mut completed_pops = HashSet::new();
-            //let completed_insts = HashSet::new();
-            //let completed_states = HashSet::new();
+            let mut completed_insts = HashSet::new();
+            let mut completed_states = HashSet::new();
             while completed_firms.len() >= firm_count && 
-                completed_pops.len() >= pop_count {
+                completed_pops.len() >= pop_count && 
+                completed_insts.len() >= institution_count &&
+                completed_states.len() >= state_count {
                 let msg = lcl_receiver.recv().expect("Unexpected Disconnect!");
                 match msg {
                     ActorMessage::Finished { sender } => {
                         match sender {
                             ActorInfo::Firm(id) => completed_firms.insert(id),
                             ActorInfo::Pop(id) => completed_pops.insert(id),
-                            ActorInfo::Institution(_) => todo!(),
-                            ActorInfo::State(_) => todo!(),
+                            ActorInfo::Institution(id) => completed_insts.insert(id),
+                            ActorInfo::State(id) => completed_states.insert(id),
                         };
                     },
                     ActorMessage::FindProduct { product, 

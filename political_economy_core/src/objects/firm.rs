@@ -72,7 +72,6 @@ pub struct Firm {
 }
 
 impl Firm {
-
     pub fn get_name(&self) -> String {
         format!("{}({})", self.name, self.variant_name)
     }
@@ -101,12 +100,32 @@ impl Actor for Firm {
     /// in it's market are running.
     /// 
     /// Second, it puts up what it offers today up for sale.
+    /// 
+    /// Third, rotate between Buying what we need to work,
+    /// doing processes for the day, and completing transactions to (don't 
+    /// block on checking for selling, just go to the end of the current 
+    /// queue) sell what we're offering. Continue until all our processes 
+    /// are done, and we've bought (or failed to) buy everything we wanted.
+    /// 
+    /// Fourth, continue checking and completing selling, while also 
+    /// cogitating with remaining time and labor. This means doing any
+    /// market research, corporate espionage, advanced calculation,  
+    /// business organization/messaging or the like. Complete this until 
+    /// all cogitating time is out.
+    /// 
+    /// Lastly, send out an ActorMessage::Finished to the market and enter 
+    /// a holding pattern, completing sales remaining and observing for 
+    /// messages.
+    /// 
+    /// Once we get the AllFinished message, complete any remaining cleanup, 
+    /// and close out.
     fn run_market_day(&mut self, 
         sender: Sender<ActorMessage>,
         reciever: &mut Receiver<ActorMessage>,
         data: &DataManager,
         history: &MarketHistory) {
-        todo!()
+        sender.send(ActorMessage::Finished { sender: self.actor_info() })
+            .expect("Channel Closed Unexpectedly!");
     }
 }
 

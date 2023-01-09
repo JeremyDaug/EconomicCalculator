@@ -3,7 +3,7 @@ use crossbeam::thread;
 
 use crate::{data_manager::DataManager, 
     demographics::Demographics, 
-    objects::{market::{Market, MarketMessage, MarketMessageEnum}, pop::Pop, firm::Firm}};
+    objects::{market::{Market, MarketMessage, MarketMessageEnum}, pop::Pop, firm::Firm, institution::Institution, state::State}};
 
 /// Actors, these have AI attached to them, make active decisions, and try
 /// to satisfy desires either of their own or of others.
@@ -33,9 +33,9 @@ pub struct ActorManager {
     /// The firms within the Managed Markets
     pub firms: HashMap<usize, Firm>,
     /// The Institutions witihn the managed Markets
-    pub institutions: HashMap<usize, ()>,
+    pub institutions: HashMap<usize, Institution>,
     /// The Substates in the Managed Markets
-    pub states: HashMap<usize, ()>,
+    pub states: HashMap<usize, State>,
 }
 
 impl ActorManager {
@@ -53,7 +53,7 @@ impl ActorManager {
             // also get the many to many broadcaster
             let (local_sender, 
                 mut local_reciever) 
-                    = barrage::bounded(100);
+                    = barrage::bounded(1000);
             // for each market
             for market in self.markets.values_mut() {
                 // get the pops

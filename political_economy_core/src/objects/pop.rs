@@ -124,6 +124,7 @@ impl Actor for Pop {
         reciever: &mut Receiver<ActorMessage>,
         data: &DataManager,
         history: &MarketHistory) {
-        todo!()
+        sender.send(ActorMessage::Finished { sender: self.actor_info() })
+            .expect("Channel Closed Unexpectedly!");
     }
 }
