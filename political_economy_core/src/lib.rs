@@ -510,6 +510,59 @@ mod tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
         #[test]
+        pub fn total_desire_at_tier() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,2
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(2), 
+                amount: 1.0, 
+                satisfaction: 1.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,4,6,8,10
+                item: DesireItem::Product(1), 
+                start: 0, 
+                end: Some(10), 
+                amount: 1.0, 
+                satisfaction: 2.0,
+                step: 2,
+                tags: vec![]});
+            let test = Desires::new(test_desires);
+
+            assert_eq!(test.total_desire_at_tier(0), 2.0);
+            assert_eq!(test.total_desire_at_tier(1), 0.0);
+            assert_eq!(test.total_desire_at_tier(2), 2.0);
+            assert_eq!(test.total_desire_at_tier(4), 1.0);
+        }
+
+        #[test]
+        pub fn total_satisfaction_at_tier() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,2
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(2), 
+                amount: 1.0, 
+                satisfaction: 1.0,
+                step: 2,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,4,6,8,10
+                item: DesireItem::Product(1), 
+                start: 0, 
+                end: Some(10), 
+                amount: 1.0, 
+                satisfaction: 2.0,
+                step: 2,
+                tags: vec![]});
+            let test = Desires::new(test_desires);
+
+            assert_eq!(test.total_satisfaction_at_tier(0), 2.0);
+            assert_eq!(test.total_satisfaction_at_tier(2), 1.0);
+            assert_eq!(test.total_satisfaction_at_tier(4), 0.0);
+        }
+
+        #[test]
         pub fn satisfied_at_tier_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,2

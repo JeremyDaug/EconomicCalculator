@@ -11,7 +11,7 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 use itertools::Itertools;
 
@@ -34,6 +34,33 @@ pub struct Desires {
     pub want_store: HashMap<usize, f64>,
     /// The data of our succes in shopping.
     pub shopping_data: HashMap<usize, DesireInfo>,
+    /// The highest tier to which these desires have been fully
+    /// satisfied.
+    /// 
+    /// A rough measure of contentment. 
+    /// 
+    /// Low values with stuffed desires mark material wealth with
+    /// low contentment. High values with sparse desires mark material
+    /// poverty but personal contentment.
+    pub full_tier_satisfaction: u64,
+    /// How many tiers, skipping empty ones, which have been filled.
+    /// 
+    /// A rough measure of total satisfaction. Removes contentment and
+    /// emphasizes material satisfaction.
+    pub hard_satisfaction: u64,
+    /// The sum of desires satisfied, a more accurate, if market insensitive
+    /// measure of weath.
+    pub quantity_satisfied: f64,
+    /// The satisfaction gained above our self.full_tier_satisfaction,
+    /// items are reduced by tier satisfaction calculations.
+    pub partial_satisfaction: f64,
+    /// The satisfaction of desires measured in abstract market
+    /// value.
+    /// 
+    /// It's the sum of each product's price, not scaled by tier.
+    pub market_satisfaction: f64,
+    /// The highest tier of satisfaction reached by any desire.
+    pub highest_tier: u64,
 }
 
 impl Desires {
@@ -50,6 +77,12 @@ impl Desires {
             property: HashMap::new(),
             want_store: HashMap::new(),
             shopping_data,
+            full_tier_satisfaction: 0,
+            hard_satisfaction: 0,
+            quantity_satisfied: 0.0,
+            partial_satisfaction: 0.0,
+            market_satisfaction: 0.0,
+            highest_tier: 0,
         }
     }
 
@@ -343,34 +376,35 @@ impl Desires {
     /// The Desire Coord does not need to have an idx < self.desires.len(), if it
     /// has an idx > self.desires.len() it will drag it down to len, allowing you to
     /// start at a tier specifically, without touching a higher tier.
-    pub fn walk_down_tiers_for_item(&self, prev: &DesireCoord, item: &DesireItem) -> Option<DesireCoord> {
-                // set the current equal to prev so we can edit safely.
-                let mut curr = *prev;
-                // if the current idx is past our endpoint, then smash it down.
-                if curr.idx > self.desires.len() {
-                    curr.idx = self.desires.len();
-                }
-                
-                // walk down the idx
-                loop {
-                    if curr.idx == 0 && curr.tier == 0 {
-                        break; // if we are currently at 0,0, then break out and return None.
-                    }
-                    else if curr.idx == 0 { // if index is 0, then go to next tier.
-                        curr.tier -= 1;
-                        curr.idx = self.desires.len();
-                    }
-                    curr.idx -= 1; // subtract index
+    pub fn walk_down_tiers_for_item(&self, prev: &DesireCoord, 
+    item: &DesireItem) -> Option<DesireCoord> {
+        // set the current equal to prev so we can edit safely.
+        let mut curr = *prev;
+        // if the current idx is past our endpoint, then smash it down.
+        if curr.idx > self.desires.len() {
+            curr.idx = self.desires.len();
+        }
         
-                    if self.desires[curr.idx].steps_on_tier(curr.tier) && 
-                        self.desires[curr.idx].item == *item {
-                        // if the desire steps on this tier, then return
-                        return Some(curr);
-                    }
-                    // if it's not try again.
-                }
-        
-                None
+        // walk down the idx
+        loop {
+            if curr.idx == 0 && curr.tier == 0 {
+                break; // if we are currently at 0,0, then break out and return None.
+            }
+            else if curr.idx == 0 { // if index is 0, then go to next tier.
+                curr.tier -= 1;
+                curr.idx = self.desires.len();
+            }
+            curr.idx -= 1; // subtract index
+
+            if self.desires[curr.idx].steps_on_tier(curr.tier) && 
+                self.desires[curr.idx].item == *item {
+                // if the desire steps on this tier, then return
+                return Some(curr);
+            }
+            // if it's not try again.
+        }
+
+        None
     }
 
     /// Take an item and finds the lowest tier available which can still accept the item.
@@ -570,41 +604,113 @@ impl Desires {
         .all(|x| x.satisfaction_at_tier(tier).expect("Bad Step") == x.amount)
     }
 
-    /// The number of tiers that are fully satisfied, skipping empty ones.
-    pub fn hard_satisfaction(&self) -> u64 {
-        0
+    /// Get's the total satisfaction of all our desires at a specific tier.
+    /// If nothing steps on it it return's 0.0.
+    pub fn total_satisfaction_at_tier(&self, tier: u64) -> f64 {
+        self.desires.iter().filter(|x| x.steps_on_tier(tier))
+            .map(|x| x.satisfaction_at_tier(tier)
+                        .expect("Doesn't Step on tier."))
+            .sum()
     }
 
-    /// Calculates the tiers that have full satisfaction.
-    /// IE, The tier returned is satisfied and has no desires which are 
-    /// unsatisfied below it.
-    pub fn full_tier_satisfaction(&self) -> u64 {
-        let mut result = u64::MAX;
+    /// Gets the total desired items for all desires at a specific tier.
+    /// If nothing steps on that tier it returns 0.0.
+    pub fn total_desire_at_tier(&self, tier: u64) -> f64 {
+        self.desires.iter().filter(|x| x.steps_on_tier(tier))
+            .map(|x| x.amount)
+            .sum()
+    }
+
+    /// Updates the satisfactions for our desires.
+    /// 
+    /// Does not calculate satisfaction base on market history.
+    /// 
+    /// TODO this needs tests.
+    pub fn update_satisfactions(&mut self) {
+        // start with full tier satisfaction and highest tier.
+        self.full_tier_satisfaction = u64::MAX;
+        self.highest_tier = 0;
+        // for each desire
         for desire in self.desires.iter() {
+            let tier = desire.satisfaction_up_to_tier().expect("Not Satisfied somehow?");
             if !desire.is_fully_satisfied() {
-                let sat_tier = desire.satisfaction_up_to_tier().expect("Not Satisfied somehow?");
-                let sat_tier = if desire.satisfaction_at_tier(sat_tier)
+                // get it's highest fully satisfied tier
+                let tier = if desire.satisfaction_at_tier(tier)
                 .expect("No satisfaction?") < 1.0 {
-                    sat_tier - 1
+                    tier - 1
                 } 
-                else { sat_tier };
-                result = result.min(sat_tier);
+                else { tier };
+                // and set result to the smaller between the current and
+                // the new tier.
+                self.full_tier_satisfaction = self.full_tier_satisfaction.min(tier);
+            }
+            // always check against the highest tier
+            self.highest_tier = self.highest_tier.max(tier)
+        }
+        // get quantity satisfied
+        self.quantity_satisfied = self.desires.iter()
+        .map(|x| x.satisfaction).sum();
+
+        // partial satisfaction
+        self.partial_satisfaction = 0.0;
+
+        for tier in self.full_tier_satisfaction..(self.highest_tier+1) {
+            // go from the full_tier to the highest tier, summing as needed.
+            let sat = self.total_satisfaction_at_tier(tier);
+            let total = self.total_desire_at_tier(tier);
+            if total > 0.0 {
+                let sat_at_tier = sat *
+                    Desires::tier_equivalence(self.full_tier_satisfaction, 
+                        tier);
+                self.partial_satisfaction += sat_at_tier;
             }
         }
-        result
+
+        // finish with hard satisfaction
+        let lowest = self.desires.iter()
+            .map(|x| x.start).min().expect("Value not found!");
+        let mut skipped = 0;
+        for tier in lowest..self.full_tier_satisfaction {
+            if self.desires.iter().filter(|x| x.steps_on_tier(tier)).count() == 0 {
+                skipped += 1;
+            }
+        }
+        self.hard_satisfaction = self.full_tier_satisfaction - skipped;
     }
 
-    pub fn quantity_satisfied(&self) -> f64 {
-        0.0
+    /// Calculates, sets, and returns the market satisfaction for these 
+    /// desires based on the market history given.
+    /// 
+    /// This is an estimate of how much satisfaction we have in terms 
+    /// of AMV. This should be treated as a rough estimate of wealth being 
+    /// used by the pop to satisfy their desires.
+    /// 
+    /// TODO test this.
+    pub fn market_satisfaction(&mut self, market: &MarketHistory) -> f64 {
+        self.market_satisfaction = 0.0;
+        for desire in self.desires.iter()
+        .filter(|x| x.item.is_product()) {
+            let product = desire.item.unwrap();
+            self.market_satisfaction += 
+                market.market_prices.get(product).unwrap_or(&0.0) * 
+                desire.satisfaction;
+        }
+        self.market_satisfaction
     }
 
-    pub fn partial_satisfaction(&self) -> u64 {0}
-
-    pub fn market_satisfaction(&self, market: &MarketHistory) -> f64 {0.0}
-
-    pub fn market_wealth(&self, market: &MarketHistory) -> f64 {0.0}
-
-    pub fn highest_tier(&self) -> u64 {0}
+    /// Market Wealth, a measure of how much is owned in AMV. This is 
+    /// everything, not just satisfaction, measured in it's wealth.
+    /// 
+    /// This is how much they own and how valuable it is in market value.
+    /// 
+    /// TODO Test This.
+    pub fn market_wealth(&mut self, market: &MarketHistory) -> f64 {
+        self.property.iter()
+        // get the price * the amount owned.
+        .map(|x| x.1 * market.market_prices.get(x.0).unwrap_or(&0.0))
+        // then add together.
+        .sum()
+    }
 
     /// Clears self.desires
     pub fn clear_desires(&mut self) {
