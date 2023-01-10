@@ -1,4 +1,8 @@
-use super::{seller::Seller, actor_message::{ActorType, ActorInfo, self, ActorMessage}, buyer::Buyer, actor::Actor};
+use barrage::{Receiver, Sender};
+
+use crate::{demographics::Demographics, data_manager::DataManager};
+
+use super::{seller::Seller, actor_message::{ActorType, ActorInfo, self, ActorMessage}, buyer::Buyer, actor::Actor, market::MarketHistory};
 
 
 
@@ -44,10 +48,11 @@ impl Actor for State {
     /// This is a placeholder. Currently it just sends Finished, and ends
     /// it there.
     fn run_market_day(&mut self, 
-        sender: barrage::Sender<ActorMessage>,
-        reciever: &mut barrage::Receiver<ActorMessage>,
-        data: &crate::data_manager::DataManager,
-        history: &super::market::MarketHistory) {
+        sender: Sender<ActorMessage>,
+        reciever: &mut Receiver<ActorMessage>,
+        data: &DataManager,
+        demos: &Demographics,
+        history: &MarketHistory) {
         // TODO this function needs to be completed
         // Send finished to keep things running, then gtfo.
         sender.send(ActorMessage::Finished { 

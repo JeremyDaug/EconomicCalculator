@@ -15,7 +15,7 @@ use std::collections::HashMap;
 
 use itertools::Itertools;
 
-use super::desire::{Desire, DesireItem, DesireError};
+use super::{desire::{Desire, DesireItem, DesireError}, market::{MarketHistory, Market}};
 
 /// The ratio of value between one tier and an adjacent tier.
 /// 
@@ -562,6 +562,49 @@ impl Desires {
         }
         None
     }
+
+    /// Whether a selected tier is fully satisfied or not.
+    pub fn satisfied_at_tier(&self, tier: u64) -> bool {
+        self.desires.iter()
+        .filter(|x| x.steps_on_tier(tier))
+        .all(|x| x.satisfaction_at_tier(tier).expect("Bad Step") == x.amount)
+    }
+
+    /// The number of tiers that are fully satisfied, skipping empty ones.
+    pub fn hard_satisfaction(&self) -> u64 {
+        0
+    }
+
+    /// Calculates the tiers that have full satisfaction.
+    /// IE, The tier returned is satisfied and has no desires which are 
+    /// unsatisfied below it.
+    pub fn full_tier_satisfaction(&self) -> u64 {
+        let mut result = u64::MAX;
+        for desire in self.desires.iter() {
+            if !desire.is_fully_satisfied() {
+                let sat_tier = desire.satisfaction_up_to_tier().expect("Not Satisfied somehow?");
+                let sat_tier = if desire.satisfaction_at_tier(sat_tier)
+                .expect("No satisfaction?") < 1.0 {
+                    sat_tier - 1
+                } 
+                else { sat_tier };
+                result = result.min(sat_tier);
+            }
+        }
+        result
+    }
+
+    pub fn quantity_satisfied(&self) -> f64 {
+        0.0
+    }
+
+    pub fn partial_satisfaction(&self) -> u64 {0}
+
+    pub fn market_satisfaction(&self, market: &MarketHistory) -> f64 {0.0}
+
+    pub fn market_wealth(&self, market: &MarketHistory) -> f64 {0.0}
+
+    pub fn highest_tier(&self) -> u64 {0}
 
     /// Clears self.desires
     pub fn clear_desires(&mut self) {

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use barrage::{Sender, Receiver};
 
-use crate::data_manager::DataManager;
+use crate::{data_manager::DataManager, demographics::Demographics};
 
 use super::{seller::Seller, 
     buyer::Buyer, 
@@ -123,6 +123,7 @@ impl Actor for Firm {
         sender: Sender<ActorMessage>,
         reciever: &mut Receiver<ActorMessage>,
         data: &DataManager,
+        demos: &Demographics,
         history: &MarketHistory) {
         sender.send(ActorMessage::Finished { sender: self.actor_info() })
             .expect("Channel Closed Unexpectedly!");

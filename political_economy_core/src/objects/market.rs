@@ -124,7 +124,7 @@ impl Market {
                 let mut firm_rcvr = lcl_receiver.clone();
                 threads.push(scope.spawn(move |_| {
                     firm.run_market_day(firm_sender, &mut firm_rcvr,
-                        data, &history);
+                        data, demos, &history);
                 }));
             }
             for pop in pops.iter_mut() {
@@ -133,7 +133,7 @@ impl Market {
                 let history = MarketHistory::create(self);
                 threads.push(scope.spawn(move |_| {
                     pop.run_market_day(pop_sender, &mut pop_recv,
-                    data, &history);
+                    data, demos, &history);
                 }));
             }
             for inst in institutions.iter_mut() {
@@ -141,7 +141,8 @@ impl Market {
                 let mut recv = lcl_receiver.clone();
                 let history = MarketHistory::create(self);
                 threads.push(scope.spawn(move |_| {
-                    inst.run_market_day(sender, &mut recv, data, &history);
+                    inst.run_market_day(sender, &mut recv, 
+                        data, demos, &history);
                 }));
             }
             for state in states.iter_mut() {
@@ -149,7 +150,8 @@ impl Market {
                 let mut recv = lcl_receiver.clone();
                 let history = MarketHistory::create(self);
                 threads.push(scope.spawn(move |_| {
-                    state.run_market_day(sender, &mut recv, data, &history);
+                    state.run_market_day(sender, &mut recv, 
+                        data,  demos, &history);
                 }));
             }
 

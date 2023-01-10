@@ -119,12 +119,29 @@ impl Seller for Pop {
 }
 
 impl Actor for Pop {
+    /// Runs the market day for the pop.
+    /// 
+    /// Called by the pop's market.
+    /// 
+    /// Starts by waiting for the market to spin up (to keep things clean)
+    /// then it begins pre-calculations. For pops this means looking at their
+    /// situation (resources available, demographic habits, Workplace rules)
+    /// to decide whether they will offer their goods for exchange, or not.
+    /// 
+    /// If they are offering stuff for exchange, they will send up messages
+    /// for barter on everything they are offering (possibly more).
+    /// What they offer for exchange is whatever is above their highest
+    /// 
     fn run_market_day(&mut self, 
-        sender: Sender<ActorMessage>,
-        reciever: &mut Receiver<ActorMessage>,
-        data: &DataManager,
-        history: &MarketHistory) {
-        sender.send(ActorMessage::Finished { sender: self.actor_info() })
-            .expect("Channel Closed Unexpectedly!");
+    sender: Sender<ActorMessage>,
+    reciever: &mut Receiver<ActorMessage>,
+    data: &DataManager,
+    demos: &Demographics,
+    history: &MarketHistory) {
+        // started up, so wait for the first message.
+
+        sender.send(ActorMessage::Finished { 
+            sender: self.actor_info() 
+        }).expect("Channel Closed Unexpectedly!");
     }
 }

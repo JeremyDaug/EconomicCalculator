@@ -1,6 +1,6 @@
 use barrage::{Sender, Receiver};
 
-use crate::data_manager::DataManager;
+use crate::{data_manager::DataManager, demographics::Demographics};
 
 use super::{actor_message::ActorMessage, market::MarketHistory};
 
@@ -12,5 +12,6 @@ pub trait Actor {
         sender: Sender<ActorMessage>,
         reciever: &mut Receiver<ActorMessage>,
         data: &DataManager,
+        demos: &Demographics,
         history: &MarketHistory);
 }
