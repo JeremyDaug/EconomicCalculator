@@ -128,10 +128,37 @@ impl Actor for Pop {
     /// situation (resources available, demographic habits, Workplace rules)
     /// to decide whether they will offer their goods for exchange, or not.
     /// 
-    /// If they are offering stuff for exchange, they will send up messages
-    /// for barter on everything they are offering (possibly more).
-    /// What they offer for exchange is whatever is above their highest
+    /// After Precalculation it works for it's job, giving it's time and either
+    /// getting a pay-stub or their paycheck, whichever the job gives. (pay 
+    /// stub is a placeholder for a payment to simplify transfers forward).
     /// 
+    /// Once they recieve their pay from work, they enter their normal day,
+    /// rotating between buying what they desire, and completing processes to 
+    /// use/consume products to get wants.
+    /// 
+    /// If they are putting up things for sale, they will also add selling
+    /// into the rotation, though they are much more limited in how they can
+    /// handle it.
+    /// 
+    /// They continue this cycle until they run out of time to use, in which
+    /// case they tell the market they're done and enter a holding pattern, 
+    /// waiting for either buying messages or for the market day to end.
+    /// 
+    /// # Selling Notes
+    /// 
+    /// If they are offering stuff for exchange, they will send up messages
+    /// for barter on everything they are offering.
+    /// 
+    /// What they offer for exchange are the products which are either
+    /// - not desired at all.
+    /// - not reserved.
+    /// - is excess above the full_tier_satisfied.
+    /// 
+    /// Products offered for sale have their AMV price set at yesterday's
+    /// price, though their sell mechanism is far more fluid.
+    /// 
+    /// Items which have an AMV below the value of their time will be 
+    /// trashed instead, thrown to the market for anyone to pick up.
     fn run_market_day(&mut self, 
     sender: Sender<ActorMessage>,
     reciever: &mut Receiver<ActorMessage>,
