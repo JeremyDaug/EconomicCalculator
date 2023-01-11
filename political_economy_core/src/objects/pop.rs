@@ -166,6 +166,17 @@ impl Actor for Pop {
     demos: &Demographics,
     history: &MarketHistory) {
         // started up, so wait for the first message.
+        loop {
+            match reciever.recv().expect("Channel Broke.") {
+                ActorMessage::StartDay => break,
+                _ => panic!("Pop Recieved something before Day Start. Don't do something before the day starts.")
+            }
+        }
+
+        // precalculate our plans for the day based on yesterday's results and
+        // see if we want to sell and what we want to sell.
+
+        // Wait for our job to poke us and 
 
         sender.send(ActorMessage::Finished { 
             sender: self.actor_info() 
