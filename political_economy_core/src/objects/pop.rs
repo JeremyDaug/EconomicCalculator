@@ -8,7 +8,7 @@ use crate::{demographics::Demographics, data_manager::{self, DataManager}};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
-    buyer::Buyer, seller::Seller, actor::Actor, market::MarketHistory, actor_message::{ActorMessage, ActorType, ActorInfo}};
+    buyer::Buyer, seller::Seller, actor::Actor, market::MarketHistory, actor_message::{ActorMessage, ActorType, ActorInfo}, pop_memory::PopMemory};
 
 
 /// Pops are the data storage for a population group.
@@ -42,6 +42,8 @@ pub struct Pop {
     // Mood
     /// Whether the pop is selling or not.
     pub is_selling: bool,
+    /// The historical records (or rough estimate thereof).
+    pub memory: PopMemory,
 }
 
 impl Pop {
@@ -159,6 +161,11 @@ impl Actor for Pop {
     /// 
     /// Items which have an AMV below the value of their time will be 
     /// trashed instead, thrown to the market for anyone to pick up.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if it recieves any message before ActorMessage::StartDay
+    /// to ensure the broadcast queue is open.
     fn run_market_day(&mut self, 
     sender: Sender<ActorMessage>,
     reciever: &mut Receiver<ActorMessage>,
@@ -172,14 +179,35 @@ impl Actor for Pop {
                 _ => panic!("Pop Recieved something before Day Start. Don't do something before the day starts.")
             }
         }
-
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
+        self.desires.sift_products();
+        self.is_selling = if self.memory.is_disorganized { true }
+        else {
+            // if the separation between the highest full tier and the highest 
+            // tier
 
-        // Wait for our job to poke us and 
+            false
+        };
 
+        // Wait for our job to poke us, asking/telling us what to give them 
+        // and send it all over (will likely get a short lived channel for this)
+        // then wait for the firm to get back.
+        // The firm will return either with a paycheck, paystub if a wage 
+        // employee, or if it's a disorganized owner, it's share of everything.
+
+        // Start free time section, roll between processing for wants, going 
+        // out to buy things, and dealing with recieved sale orders.
+
+        // Once time has run out, send up a finished message.
         sender.send(ActorMessage::Finished { 
             sender: self.actor_info() 
         }).expect("Channel Closed Unexpectedly!");
+        // Then enter a holding pattern, continuing to consume from the 
+        // message queue, and dealing with sale orders shortly.
+        // When we recieve the AllFinished, we know no more messages will 
+        // come, so stop holding and fall out, possibly recording data as
+        // needed.
     }
 }
+

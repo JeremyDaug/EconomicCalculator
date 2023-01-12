@@ -24,3 +24,4 @@ pub mod actor;
 pub mod actor_message;
 pub mod institution;
 pub mod state;
+pub mod pop_memory;

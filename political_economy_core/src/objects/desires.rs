@@ -15,7 +15,7 @@ use std::{collections::HashMap};
 
 use itertools::Itertools;
 
-use super::{desire::{Desire, DesireItem, DesireError}, market::{MarketHistory, Market}};
+use super::{desire::{Desire, DesireItem}, market::{MarketHistory}};
 
 /// The ratio of value between one tier and an adjacent tier.
 /// 
@@ -144,6 +144,52 @@ impl Desires {
     /// Adds a number of units to the property.
     pub fn add_property(&mut self, product: usize, amount: &f64) {
         *self.property.entry(product).or_insert(0.0) += amount;
+    }
+
+    /// Removes a number of product units from property, if needed, it also
+    /// removes it from satisfaction. Returns how much was successfully 
+    /// removed.
+    /// 
+    /// # TODO not tested
+    pub fn remove_property(&mut self, product: usize, amount: &f64) -> f64 {
+        let item = DesireItem::Product(product);
+        let mut target = self.property.get(&product)
+            .unwrap_or(&0.0).min(*amount);
+        let result = target;
+        // with the target (minimum between asked and available) remove 
+        // from property
+        *self.property.entry(product).or_insert(0.0) -= amount;
+
+        // now remove from satisfaction.
+        let start_tier = 
+            self.get_highest_satisfied_tier_for_item(DesireItem::Product(product));
+
+        let mut curr_coord = if start_tier.is_some() {
+            DesireCoord{ tier: start_tier.unwrap(), idx: self.len() }
+        } else {
+            return result;
+        };
+        // remove satisfaction up to our target or we run out of satisfaction to remove.
+        loop {
+            match self.walk_down_tiers_for_item(&curr_coord, &item) {
+                Some(res) => curr_coord = res,
+                None => break,
+            }
+            let mut desire = self.desires.get_mut(curr_coord.idx)
+                .expect("idx Not found?");
+            // get the smaller between the target to remove and the amount 
+            let available = target.min(
+                desire.satisfaction_at_tier(curr_coord.tier)
+                    .expect("Bad Tier?"));
+            // subtract from satisfaction and the target.
+            desire.satisfaction -= available;
+            target -= available;
+            if target == 0.0 {
+                return result;
+            }
+        }
+
+        result
     }
 
     /// Adds a number of wants.
@@ -720,6 +766,12 @@ impl Desires {
     /// How many desires are contained.
     pub fn len(&self) -> usize {
         self.desires.len()
+    }
+
+    /// Gets the sum total satisfaction of a specific item.
+    pub fn total_satisfaction_of_item(&self, item: DesireItem) -> f64 {
+        self.desires.iter().filter(|x| x.item == item)
+            .map(|x| x.satisfaction).sum()
     }
 }
 
