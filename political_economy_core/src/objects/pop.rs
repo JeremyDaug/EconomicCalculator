@@ -4,12 +4,14 @@
 //! populations.
 use barrage::{Sender, Receiver};
 
-use crate::{demographics::Demographics, data_manager::{self, DataManager}};
+use crate::{demographics::Demographics, data_manager::DataManager};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
-    buyer::Buyer, seller::Seller, actor::Actor, market::MarketHistory, actor_message::{ActorMessage, ActorType, ActorInfo}, pop_memory::PopMemory};
-
+    buyer::Buyer, seller::Seller, actor::Actor, 
+    market::MarketHistory, 
+    actor_message::{ActorMessage, ActorType, ActorInfo}, 
+    pop_memory::PopMemory};
 
 /// Pops are the data storage for a population group.
 /// 
@@ -184,15 +186,25 @@ impl Actor for Pop {
         self.desires.sift_products();
         self.is_selling = if self.memory.is_disorganized { true }
         else {
-            // if the separation between the highest full tier and the highest 
-            // tier
-
+            // todo add check here. 
+            // Checks would probably be a panic check, (has resources but 
+            // is starving)
+            // or if they have a bunch of excess resources and a derth of 
+            // support resources (space, security, etc) then they'll also
+            // sell
             false
         };
 
         // Wait for our job to poke us, asking/telling us what to give them 
         // and send it all over (will likely get a short lived channel for this)
         // then wait for the firm to get back.
+        loop {
+            match reciever.recv().expect("Channel Broke!") {
+                
+                _ => todo!(),
+            }
+        }
+
         // The firm will return either with a paycheck, paystub if a wage 
         // employee, or if it's a disorganized owner, it's share of everything.
 

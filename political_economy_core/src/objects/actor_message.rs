@@ -1,8 +1,10 @@
 
 
+
+
 /// Actor Message is a message which can be passed between
 /// two actor threads.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub enum ActorMessage {
     /// The start message so that all actors in a market know 
     /// that all other actors are up and running and they can
@@ -35,6 +37,40 @@ pub enum ActorMessage {
     /// be aware that the item is unavailable.
     ProductNotFound {product: usize, buyer: ActorInfo, 
         change: f64},
+    /// A message which sends a product from the sender to the reciever.
+    /// THe sender SHOULD delete their local item and the reciever SHOULD
+    /// add it to their property.
+    SendProduct {sender: ActorInfo, reciever: ActorInfo,
+        product: usize, amount: f64 },
+    /// Transfers a want from one actor to another. Mostly used for
+    /// firms to employees (dangerous jobs giving bad wants.)
+    SendWant {sender: ActorInfo, reciever: ActorInfo,
+        want: usize, amount: f64 },
+    /// Takes an item and dumps it into the market/environment for it
+    /// to handle. May cause additional effects.
+    DumpProduct {sender: ActorInfo, reciever: ActorInfo,
+        product: usize, amount: f64 },
+    /// Takes a want and splashes it into the market, allowing everyone to
+    /// take some of it's effect. IE, A person buys security for their home
+    /// a bit of that security splashes into the market, making everyone just
+    /// a little bit safer.
+    WantSplash {sender: ActorInfo,
+        want: usize, amount: f64 },
+    /// Sends a message from a firm to an employee pop, making them do 
+    /// something. Primarily used to demark the start of the work day,
+    /// but can also be used to send messages like hirings, firings, and
+    /// job changes (promotions, demotions, transfers).
+    FirmToEmployee {sender: ActorInfo, reciever: ActorInfo,
+        action: FirmEmployeeAction}
+}
+
+/// The actions which a firm can send to it's employees.
+#[derive(Debug, Clone)]
+pub enum FirmEmployeeAction {
+    StartWorkDay,
+    Hire(),
+    Fire,
+    TransferTo,
 }
 
 /// Information about an actor in a nice package.

@@ -6,5 +6,10 @@
 pub struct PopMemory {
     /// If the pop is part of disorganized firm or not.
     pub is_disorganized: bool,
-    
+
+}
+impl PopMemory {
+    pub(crate) fn create_empty() -> PopMemory {
+        PopMemory { is_disorganized: false }
+    }
 }

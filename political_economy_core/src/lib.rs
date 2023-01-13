@@ -14,7 +14,7 @@ mod tests {
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
              desires::Desires, desire::{Desire, DesireItem},
-              species::Species, culture::Culture, ideology::Ideology}, 
+              species::Species, culture::Culture, ideology::Ideology, pop_memory::PopMemory}, 
               demographics::Demographics};
 
         #[test]
@@ -29,7 +29,8 @@ mod tests {
                 higher_skill_level: 0.0, 
                 desires: Desires::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
-                is_selling: true};
+                is_selling: true,
+                memory: PopMemory::create_empty()};
 
             let species_desire_1 = Desire{ 
                 item: DesireItem::Product(0), 
