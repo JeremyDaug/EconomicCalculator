@@ -108,9 +108,54 @@ impl Pop {
         self.breakdown_table.total
     }
 
-    /// a helper function to force push a product to the actor targeted.
-    fn push_product(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>, target: ActorInfo, product: usize, amount: f64) {
+    /// A helper function to push a message to the market.
+    /// Safely pushes without blocking.
+    /// 
+    /// Tries to send, if fails it reads one message, and if it's for us, puts it on the
+    /// backlog. Then tries again, until it succeeds or the channel breaks.
+    /// 
+    /// ## Panics
+    /// 
+    /// If the send fails due to a disconnect.
+    fn push_message(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
+    msg: ActorMessage) {
+        loop {
+            let result = tx.try_send(msg);
+            if let Ok(_) = result {
+                break; // if message got sent out, break.
+            }
+            else if let Err(msg) = result {
+                match msg { // failed to send, check why
+                    // If disconnected, panic, there's nothing more we can do.
+                    barrage::TrySendError::Disconnected(_) => panic!("Unexpected Disconnect"), 
+                    barrage::TrySendError::Full(_) => (), // if just full, consume and try again.
+                }
+            }
+            // if we get here, the queue is blocked, so read and if it's
+            // for us, put it on the back burner.
+            self.try_recieve_and_push(rx);
+        };
+    }
 
+    /// A shorthand function. 
+    /// 
+    /// It tries to recieve a message, checks if it's for us, if it is it 
+    /// pushes it onto the backlog.
+    /// 
+    /// If reciever queue is empty, it simply continues on without blocking.
+    /// 
+    /// ## Panics
+    /// 
+    /// If Reciever is disconnected unexpectedly.
+    fn try_recieve_and_push(&mut self, rx: &Receiver<ActorMessage>) {
+        let result = rx.try_recv()
+            .expect("Unexpected Disconnect"); // if disconnected, panic.
+        if let Some(msg) = result { // if we recieved a message, check it's for us
+            if msg.for_me(self.actor_info()) {
+                self.backlog.push_back(msg);
+            }
+        }
+        // if no message recieved, or it's not for me, continue on.
     }
 
     fn work_day_processing(&mut self, rx: &&mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
@@ -128,23 +173,7 @@ impl Pop {
                             FirmEmployeeAction::WorkDayStarted => break,
                             FirmEmployeeAction::RequestTime => {
                                 // just send time over and call it there.
-                                loop {
-                                    let result = tx.try_send(ActorMessage::SendProduct 
-                                    { sender: self.actor_info(), 
-                                        reciever: sender, 
-                                        product: 0,
-                                        amount: self.memory.work_time });
-                                    if result.is_ok() {
-                                        break; // if message got sent out, break.
-                                    }
-                                    // if we get here, the queue is blocked, so read and if it's
-                                    // for us, put it on the back burner.
-                                    let msg = rx.recv()
-                                    .expect("Disconnected!");
-                                    if msg.for_me(self.actor_info()) {
-                                        self.backlog.push_back(msg);
-                                    }
-                                };
+
                             },
                             FirmEmployeeAction::RequestEverything => {
                                 // loop over everything and send it to the firm.

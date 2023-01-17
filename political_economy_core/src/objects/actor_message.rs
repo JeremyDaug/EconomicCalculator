@@ -4,7 +4,7 @@
 
 /// Actor Message is a message which can be passed between
 /// two actor threads.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum ActorMessage {
     /// The start message so that all actors in a market know 
     /// that all other actors are up and running and they can
@@ -89,7 +89,7 @@ impl ActorMessage {
 }
 
 /// The actions which a firm can send to it's employees.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum FirmEmployeeAction {
     /// Work day has started, (firm got what it want) move along.
     WorkDayStarted,
