@@ -21,6 +21,11 @@ use crate::objects::{want::Want,
     market::Market, 
     firm::Firm};
 
+/// The ID for the required time product.
+const TIME_ID: usize = 0;
+/// the id for the required Shopping Time product.
+const SHOPPING_TIME_ID: usize = 0;
+
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
 /// use as needed.

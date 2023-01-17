@@ -2,7 +2,10 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
+use std::collections::VecDeque;
+
 use barrage::{Sender, Receiver};
+use crossbeam::queue::SegQueue;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
 
@@ -10,7 +13,7 @@ use super::{desires::Desires,
     pop_breakdown_table::PopBreakdownTable, 
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
-    actor_message::{ActorMessage, ActorType, ActorInfo}, 
+    actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
     pop_memory::PopMemory};
 
 /// Pops are the data storage for a population group.
@@ -46,6 +49,8 @@ pub struct Pop {
     pub is_selling: bool,
     /// The historical records (or rough estimate thereof).
     pub memory: PopMemory,
+    /// Backlogs of messages, to help keep things clear.
+    pub backlog: VecDeque<ActorMessage>,
 }
 
 impl Pop {
@@ -101,6 +106,57 @@ impl Pop {
     /// Get's the total number of people in this pop.
     pub fn count(&self) -> usize {
         self.breakdown_table.total
+    }
+
+    /// a helper function to force push a product to the actor targeted.
+    fn push_product(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>, target: ActorInfo, product: usize, amount: f64) {
+
+    }
+
+    fn work_day_processing(&mut self, rx: &&mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
+        loop {
+            match rx.recv().expect("Channel Broke!") {
+                ActorMessage::WantSplash { sender: _, want, amount } => {
+                    // catch any splashed wants for a while.
+                    *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                },
+                ActorMessage::FirmToEmployee { sender, 
+                    reciever, action } => {
+                    if reciever.get_id() == self.id && 
+                    reciever.is_pop() {
+                        match action {
+                            FirmEmployeeAction::WorkDayStarted => break,
+                            FirmEmployeeAction::RequestTime => {
+                                // just send time over and call it there.
+                                loop {
+                                    let result = tx.try_send(ActorMessage::SendProduct 
+                                    { sender: self.actor_info(), 
+                                        reciever: sender, 
+                                        product: 0,
+                                        amount: self.memory.work_time });
+                                    if result.is_ok() {
+                                        break; // if message got sent out, break.
+                                    }
+                                    // if we get here, the queue is blocked, so read and if it's
+                                    // for us, put it on the back burner.
+                                    let msg = rx.recv()
+                                    .expect("Disconnected!");
+                                    if msg.for_me(self.actor_info()) {
+                                        self.backlog.push_back(msg);
+                                    }
+                                };
+                            },
+                            FirmEmployeeAction::RequestEverything => {
+                                // loop over everything and send it to the firm.
+                            },
+                            FirmEmployeeAction::RequestItem { product } => todo!(),
+                            _ => ()
+                        }
+                    } // otherwise, ignore
+                },
+                _ => todo!(),
+            }
+        }
     }
 }
 
@@ -169,17 +225,15 @@ impl Actor for Pop {
     /// Panics if it recieves any message before ActorMessage::StartDay
     /// to ensure the broadcast queue is open.
     fn run_market_day(&mut self, 
-    sender: Sender<ActorMessage>,
-    reciever: &mut Receiver<ActorMessage>,
+    tx: Sender<ActorMessage>,
+    rx: &mut Receiver<ActorMessage>,
     data: &DataManager,
     demos: &Demographics,
     history: &MarketHistory) {
         // started up, so wait for the first message.
-        loop {
-            match reciever.recv().expect("Channel Broke.") {
-                ActorMessage::StartDay => break,
-                _ => panic!("Pop Recieved something before Day Start. Don't do something before the day starts.")
-            }
+        match rx.recv().expect("Channel Broke.") {
+            ActorMessage::StartDay => (), // wait for start day, throw otherwise.
+            _ => panic!("Pop Recieved something before Day Start. Don't do something before the day starts.")
         }
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
@@ -198,12 +252,7 @@ impl Actor for Pop {
         // Wait for our job to poke us, asking/telling us what to give them 
         // and send it all over (will likely get a short lived channel for this)
         // then wait for the firm to get back.
-        loop {
-            match reciever.recv().expect("Channel Broke!") {
-                
-                _ => todo!(),
-            }
-        }
+        self.work_day_processing(&rx, &tx);
 
         // The firm will return either with a paycheck, paystub if a wage 
         // employee, or if it's a disorganized owner, it's share of everything.
@@ -212,7 +261,7 @@ impl Actor for Pop {
         // out to buy things, and dealing with recieved sale orders.
 
         // Once time has run out, send up a finished message.
-        sender.send(ActorMessage::Finished { 
+        tx.send(ActorMessage::Finished { 
             sender: self.actor_info() 
         }).expect("Channel Closed Unexpectedly!");
         // Then enter a holding pattern, continuing to consume from the 

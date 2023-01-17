@@ -9,7 +9,7 @@ extern crate lazy_static;
 #[cfg(test)]
 mod tests {
     mod pop_tests {
-        use std::collections::HashMap;
+        use std::collections::{HashMap, VecDeque};
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
@@ -30,7 +30,8 @@ mod tests {
                 desires: Desires::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
-                memory: PopMemory::create_empty()};
+                memory: PopMemory::create_empty(),
+                backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
                 item: DesireItem::Product(0), 

@@ -48,8 +48,7 @@ pub enum ActorMessage {
         want: usize, amount: f64 },
     /// Takes an item and dumps it into the market/environment for it
     /// to handle. May cause additional effects.
-    DumpProduct {sender: ActorInfo, reciever: ActorInfo,
-        product: usize, amount: f64 },
+    DumpProduct {sender: ActorInfo, product: usize, amount: f64 },
     /// Takes a want and splashes it into the market, allowing everyone to
     /// take some of it's effect. IE, A person buys security for their home
     /// a bit of that security splashes into the market, making everyone just
@@ -63,18 +62,57 @@ pub enum ActorMessage {
     FirmToEmployee {sender: ActorInfo, reciever: ActorInfo,
         action: FirmEmployeeAction}
 }
+impl ActorMessage {
+    pub fn for_me(&self, me: ActorInfo) -> bool {
+        match self {
+            ActorMessage::StartDay => true,
+            ActorMessage::Finished { sender } => me == *sender,
+            ActorMessage::AllFinished => true,
+            ActorMessage::FindProduct { product, amount, time, 
+                sender } => *sender == me, // for market, sender is me.
+            ActorMessage::FoundProduct { seller, 
+                buyer } => *seller == me, // from market, created by FindProduct
+            ActorMessage::ProductNotFound { product, buyer, 
+                change } => *buyer == me, // from market to buyer
+            ActorMessage::SendProduct { sender, reciever, 
+                product, amount } => *reciever == me, // sends product to reciever
+            ActorMessage::SendWant { sender, reciever, 
+                want, amount } => *reciever == me, // sends want to reciever
+            ActorMessage::DumpProduct { sender, 
+                product, amount } => false, // dupms product onto market
+            ActorMessage::WantSplash { sender, want, 
+                amount } => true, // dumps want into market, hits everyone.
+            ActorMessage::FirmToEmployee { sender, reciever, 
+                action } => *reciever == me, // reciever 
+        }
+    }
+}
 
 /// The actions which a firm can send to it's employees.
 #[derive(Debug, Clone)]
 pub enum FirmEmployeeAction {
-    StartWorkDay,
-    Hire(),
+    /// Work day has started, (firm got what it want) move along.
+    WorkDayStarted,
+    /// Requests time from the firm, simplifies the transfer as it's common.
+    RequestTime,
+    /// Used by Disorganized firms or for owners without limited liability
+    /// to take everything from the pop.
+    RequestEverything,
+    /// Requests all of a specific item from the pop.
+    RequestItem {product: usize},
+
+    // TODO consider removing these.
+    /// The firm has hired more people into this pop.
+    Hire,
+    /// The firm has fired a people from this pop.
     Fire,
+    /// The firm is moving some members of this pop elsewhere in
+    /// the firm, may be promotion or demotion.
     TransferTo,
 }
 
 /// Information about an actor in a nice package.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ActorInfo {
     Firm(usize),
     Pop(usize),
@@ -89,6 +127,34 @@ impl ActorInfo {
             ActorInfo::Pop(id) => *id,
             ActorInfo::Institution(id) => *id,
             ActorInfo::State(id) => *id,
+        }
+    }
+
+    pub fn is_pop(&self) -> bool {
+        match self {
+            ActorInfo::Pop(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_firm(&self) -> bool {
+        match self {
+            ActorInfo::Firm(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_institution(&self) -> bool {
+        match self {
+            ActorInfo::Institution(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_state(&self) -> bool {
+        match self {
+            ActorInfo::State(_) => true,
+            _ => false,
         }
     }
 }
