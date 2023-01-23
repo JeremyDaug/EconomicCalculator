@@ -2,10 +2,11 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::collections::VecDeque;
+use std::collections::{VecDeque, HashMap};
 
 use barrage::{Sender, Receiver};
 use crossbeam::queue::SegQueue;
+use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
 
@@ -14,7 +15,7 @@ use super::{desires::Desires,
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
-    pop_memory::PopMemory};
+    pop_memory::PopMemory, product};
 
 /// Pops are the data storage for a population group.
 /// 
@@ -133,57 +134,145 @@ impl Pop {
             }
             // if we get here, the queue is blocked, so read and if it's
             // for us, put it on the back burner.
-            self.try_recieve_and_push(rx);
+            self.msg_catchup(rx);
         };
     }
 
     /// A shorthand function. 
     /// 
-    /// It tries to recieve a message, checks if it's for us, if it is it 
-    /// pushes it onto the backlog.
+    /// Quickly consumes all messages from the queue it can, catching up
+    /// with the current back of the queue.
     /// 
-    /// If reciever queue is empty, it simply continues on without blocking.
+    /// If it finds something for us, it puts it in the backlog for later consumption.
     /// 
-    /// ## Panics
-    /// 
-    /// If Reciever is disconnected unexpectedly.
-    fn try_recieve_and_push(&mut self, rx: &Receiver<ActorMessage>) {
-        let result = rx.try_recv()
-            .expect("Unexpected Disconnect"); // if disconnected, panic.
-        if let Some(msg) = result { // if we recieved a message, check it's for us
-            if msg.for_me(self.actor_info()) {
-                self.backlog.push_back(msg);
+    /// This focuses on keeping the Broadcast Queue open to ensure it doesn't get backed
+    /// up too much.
+    fn msg_catchup(&mut self, rx: &Receiver<ActorMessage>) {
+        loop {
+            let result = rx.try_recv()
+                .expect("Unexpected Disconnect"); // if disconnected, panic.
+
+            if let Some(msg) = result { // if we recieved a message, check it's for us
+                if msg.for_me(self.actor_info()) {
+                    self.backlog.push_back(msg); // if it's for us, push it to the backlog.
+                }
+            }
+            else if result.is_none() { // if no messsage in queue, we've caught up so break out.
+                return;
             }
         }
-        // if no message recieved, or it's not for me, continue on.
     }
 
-    fn work_day_processing(&mut self, rx: &&mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
+    /// Processes firm messages for standard day work. 
+    /// 
+    /// Returns true if the workday has ended.
+    fn process_firm_message(&mut self, 
+        rx: &mut Receiver<ActorMessage>, 
+        tx: &Sender<ActorMessage>, 
+        sender: ActorInfo, 
+        reciever: ActorInfo, 
+        action: FirmEmployeeAction) -> bool {
+            match action {
+                FirmEmployeeAction::WorkDayEnded => return true, // work day over, we can move on.
+                FirmEmployeeAction::RequestTime => {
+                    // just send time over and call it there.
+                    self.push_message(rx, tx, ActorMessage::SendProduct { sender: reciever,
+                        reciever: sender, 
+                        product: 0, 
+                        amount: self.memory.work_time
+                        });
+                },
+                FirmEmployeeAction::RequestEverything => {
+                    // loop over everything and send it to the firm.
+                    let mut to_move = HashMap::new();
+                    for (product, amount) in self.desires.property.iter() {
+                        to_move.insert(*product, *amount);
+                    }
+                    for (product, amount) in to_move {
+                        self.push_message(rx, tx, 
+                        ActorMessage::SendProduct { 
+                            sender: reciever, 
+                            reciever: sender, 
+                            product,
+                            amount 
+                        });
+                        *self.desires.property.get_mut(&product)
+                        .expect("Not found?") = 0.0;
+                    }
+                    // also send over the wants
+                    let mut to_move = HashMap::new();
+                    for (want, amount) in self.desires.want_store.iter() {
+                        to_move.insert(*want, *amount);
+                    }
+                    for (want, amount) in to_move {
+                        self.push_message(rx, tx, 
+                        ActorMessage::SendWant { 
+                            sender: reciever, 
+                            reciever: sender, 
+                            want,
+                            amount 
+                        });
+                        *self.desires.want_store.get_mut(&want)
+                        .expect("Not found?") = 0.0;
+                    }
+                    // Tell the firm we've sent everything to them and they can continue on.
+                    self.push_message(rx, tx, ActorMessage::EmployeeToFirm { 
+                        sender: reciever, 
+                        reciever: sender, 
+                        action: FirmEmployeeAction::RequestSent });
+                },
+                FirmEmployeeAction::RequestItem { product } => {
+                    // firm is requesting a specifc item, send it to them, 
+                    // if we don't have it, then send the empty anyway.
+                    let amount = match self.desires.property.remove(&product) {
+                        Some(amount) => amount,
+                        None => 0.0,
+                    };
+                    self.push_message(rx, tx, 
+                    ActorMessage::SendProduct { sender: reciever, 
+                        reciever: sender, 
+                        product, 
+                        amount 
+                    }); // no need to send more
+                },
+                _ => ()
+            }
+            false
+    }
+
+    fn work_day_processing(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
         loop {
-            match rx.recv().expect("Channel Broke!") {
+            // It's working time, so focus on the firm, don't worry about caluclating more
+            // just block on recieving until we know we've given/gotten everything we need to
+            // give.
+            let msg = rx.recv().expect("Unexpectedly Closed.");
+            // check that it's for us.
+            if !msg.for_me(self.actor_info()) {
+                continue; // if not try again.
+            }
+            // if the message is for me, processes it
+            match msg {
                 ActorMessage::WantSplash { sender: _, want, amount } => {
                     // catch any splashed wants for a while.
                     *self.desires.want_store.entry(want).or_insert(0.0) += amount;
                 },
-                ActorMessage::FirmToEmployee { sender, 
-                    reciever, action } => {
-                    if reciever.get_id() == self.id && 
-                    reciever.is_pop() {
-                        match action {
-                            FirmEmployeeAction::WorkDayStarted => break,
-                            FirmEmployeeAction::RequestTime => {
-                                // just send time over and call it there.
-
-                            },
-                            FirmEmployeeAction::RequestEverything => {
-                                // loop over everything and send it to the firm.
-                            },
-                            FirmEmployeeAction::RequestItem { product } => todo!(),
-                            _ => ()
-                        }
-                    } // otherwise, ignore
+                ActorMessage::SendProduct { 
+                    sender: _, 
+                    reciever: _, 
+                    product, 
+                    amount } => {
+                        *self.desires.property.entry(product)
+                        .or_insert(0.0) = amount;
                 },
-                _ => todo!(),
+                ActorMessage::FirmToEmployee { sender, 
+                reciever, action } => {
+                    if self.process_firm_message(rx, tx, sender, reciever, action) {
+                        break;
+                    }
+                },
+                _ => { // everything else, push to the backlog for later
+                    self.backlog.push_back(msg);
+                },
             }
         }
     }
@@ -259,6 +348,9 @@ impl Actor for Pop {
     data: &DataManager,
     demos: &Demographics,
     history: &MarketHistory) {
+        // before we even begin, add in the time we have for the day.
+        self.desires.add_property(0, &((self.breakdown_table.total as f64) * 24.0 * self.breakdown_table.average_productivity()));
+
         // started up, so wait for the first message.
         match rx.recv().expect("Channel Broke.") {
             ActorMessage::StartDay => (), // wait for start day, throw otherwise.
@@ -269,7 +361,7 @@ impl Actor for Pop {
         self.desires.sift_products();
         self.is_selling = if self.memory.is_disorganized { true }
         else {
-            // todo add check here. 
+            // TODO add check here. 
             // Checks would probably be a panic check, (has resources but 
             // is starving)
             // or if they have a bunch of excess resources and a derth of 
@@ -281,11 +373,10 @@ impl Actor for Pop {
         // Wait for our job to poke us, asking/telling us what to give them 
         // and send it all over (will likely get a short lived channel for this)
         // then wait for the firm to get back.
-        self.work_day_processing(&rx, &tx);
+        self.work_day_processing(rx, &tx);
 
         // The firm will return either with a paycheck, paystub if a wage 
         // employee, or if it's a disorganized owner, it's share of everything.
-
         // Start free time section, roll between processing for wants, going 
         // out to buy things, and dealing with recieved sale orders.
 

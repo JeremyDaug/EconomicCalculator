@@ -1,7 +1,3 @@
-
-
-
-
 /// Actor Message is a message which can be passed between
 /// two actor threads.
 #[derive(Debug, Clone, Copy)]
@@ -60,7 +56,11 @@ pub enum ActorMessage {
     /// but can also be used to send messages like hirings, firings, and
     /// job changes (promotions, demotions, transfers).
     FirmToEmployee {sender: ActorInfo, reciever: ActorInfo,
-        action: FirmEmployeeAction}
+        action: FirmEmployeeAction},
+    /// A message from an employee to a firm.
+    EmployeeToFirm {sender: ActorInfo, reciever: ActorInfo,
+        action: FirmEmployeeAction},
+    
 }
 impl ActorMessage {
     pub fn for_me(&self, me: ActorInfo) -> bool {
@@ -68,31 +68,35 @@ impl ActorMessage {
             ActorMessage::StartDay => true,
             ActorMessage::Finished { sender } => me == *sender,
             ActorMessage::AllFinished => true,
-            ActorMessage::FindProduct { product, amount, time, 
+            ActorMessage::FindProduct { product: _, amount: _, time: _, 
                 sender } => *sender == me, // for market, sender is me.
             ActorMessage::FoundProduct { seller, 
-                buyer } => *seller == me, // from market, created by FindProduct
-            ActorMessage::ProductNotFound { product, buyer, 
-                change } => *buyer == me, // from market to buyer
-            ActorMessage::SendProduct { sender, reciever, 
-                product, amount } => *reciever == me, // sends product to reciever
-            ActorMessage::SendWant { sender, reciever, 
-                want, amount } => *reciever == me, // sends want to reciever
-            ActorMessage::DumpProduct { sender, 
-                product, amount } => false, // dupms product onto market
-            ActorMessage::WantSplash { sender, want, 
-                amount } => true, // dumps want into market, hits everyone.
-            ActorMessage::FirmToEmployee { sender, reciever, 
-                action } => *reciever == me, // reciever 
+                buyer: _ } => *seller == me, // from market, created by FindProduct
+            ActorMessage::ProductNotFound { product: _, buyer, 
+                change: _ } => *buyer == me, // from market to buyer
+            ActorMessage::SendProduct { sender: _, reciever, 
+                product: _, amount: _ } => *reciever == me, // sends product to reciever
+            ActorMessage::SendWant { sender: _, reciever, 
+                want: _, amount: _ } => *reciever == me, // sends want to reciever
+            ActorMessage::DumpProduct { sender: _, 
+                product: _, amount: _ } => false, // dupms product onto market
+            ActorMessage::WantSplash { sender: _, want: _, 
+                amount: _ } => true, // dumps want into market, hits everyone.
+            ActorMessage::FirmToEmployee { sender: _, reciever, 
+                action: _ } => *reciever == me, // reciever 
+            ActorMessage::EmployeeToFirm { sender: _, reciever, 
+                action: _ } => *reciever == me, // reciever 
+            
         }
     }
 }
 
-/// The actions which a firm can send to it's employees.
+/// The actions which a can be sent between firms and employees
 #[derive(Debug, Clone, Copy)]
 pub enum FirmEmployeeAction {
-    /// Work day has started, (firm got what it want) move along.
-    WorkDayStarted,
+    /// Work day has finished and gotten what it needs from it's pops, move 
+    /// along.
+    WorkDayEnded,
     /// Requests time from the firm, simplifies the transfer as it's common.
     RequestTime,
     /// Used by Disorganized firms or for owners without limited liability
@@ -100,6 +104,10 @@ pub enum FirmEmployeeAction {
     RequestEverything,
     /// Requests all of a specific item from the pop.
     RequestItem {product: usize},
+    /// Used by one to tell the other that they have completed sending the
+    /// requested item(s). Intended primarily to end 
+    /// FirmEmployeeAction::RequestEverything logic.
+    RequestSent,
 
     // TODO consider removing these.
     /// The firm has hired more people into this pop.

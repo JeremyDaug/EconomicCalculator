@@ -98,7 +98,7 @@ impl PopBreakdownTable {
         result
     }
 
-    /// Conuts up and returns the percentile division into each ideology.
+    /// Counts up and returns the percentile division into each ideology.
     /// Includes pops who have no Ideology.
     pub fn ideology_division(&self) -> HashMap<Option<usize>, f64> {
         let mut result = HashMap::new();
@@ -107,6 +107,12 @@ impl PopBreakdownTable {
             / (self.total as f64);
         }
         result
+    }
+
+    /// Gets the average productivity of the pops here (weighted average between all options)
+    pub(crate) fn average_productivity(&self) -> f64 {
+        // TODO Upgrade this to actually take the breakdown of the pop into account
+        1.0
     }
 }
 
