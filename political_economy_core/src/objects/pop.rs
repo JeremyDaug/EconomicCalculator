@@ -5,8 +5,6 @@
 use std::collections::{VecDeque, HashMap};
 
 use barrage::{Sender, Receiver};
-use crossbeam::queue::SegQueue;
-use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
 
@@ -15,7 +13,8 @@ use super::{desires::Desires,
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
-    pop_memory::PopMemory, product};
+    pop_memory::PopMemory
+};
 
 /// Pops are the data storage for a population group.
 /// 
@@ -276,10 +275,36 @@ impl Pop {
             }
         }
     }
+
+    /// Goes through the free time that the pop has available to it.
+    /// 
+    /// Free time is spent primarily on buying stuff and organizing their
+    /// property.
+    /// 
+    /// They'll focus most of their early effort on shopping. This means 
+    /// looking at what they target themselves having, then looking at what
+    /// they are missing. Whatever they're missing they'll attempt to buy. Whatever
+    /// they've already got, they'll reserve.
+    /// 
+    /// Before they go anywhere, they'll split their property into 3 camps. Keep, Spend, and 
+    /// Spare. 
+    /// 
+    /// Keep is all the stuff they know they'll need and will refuse to give up 
+    /// without external force. 
+    /// 
+    /// Spend are those things they are willing to give up, either having no use for 
+    /// them, or having enough of them to overflow their desires.
+    /// 
+    /// Spare is the inbetween of the two, things that they want, but would be willing to give
+    /// up for other things. Spare goods are those goods which are desired, but have other desires
+    /// below them.
+    fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
+        market: &MarketHistory) {
+        
+    }
 }
 
 impl Buyer for Pop {
-
 }
 
 impl Seller for Pop {
@@ -379,6 +404,7 @@ impl Actor for Pop {
         // employee, or if it's a disorganized owner, it's share of everything.
         // Start free time section, roll between processing for wants, going 
         // out to buy things, and dealing with recieved sale orders.
+        self.free_time(rx, &tx, history);
 
         // Once time has run out, send up a finished message.
         tx.send(ActorMessage::Finished { 
