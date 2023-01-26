@@ -13,7 +13,7 @@ use super::{desires::Desires,
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
-    pop_memory::PopMemory
+    pop_memory::PopMemory, product::ProductTag
 };
 
 /// Pops are the data storage for a population group.
@@ -298,9 +298,28 @@ impl Pop {
     /// Spare is the inbetween of the two, things that they want, but would be willing to give
     /// up for other things. Spare goods are those goods which are desired, but have other desires
     /// below them.
+    /// 
+    /// Keep and spend are defined/recorded by self.memory rather than calculated, and corrected
+    /// as successes or failure comes in.
     fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
+        data: &DataManager,
         market: &MarketHistory) {
-        
+        // start by splitting property up into keep, and spend;
+        let mut keep = HashMap::new();
+        let mut spend = HashMap::new();
+        // get what we remember over
+        for (id, know) in self.memory.product_knowledge.iter().filter(|x| x.0 != 0) {
+            let mut available = *self.desires.property.get(id).unwrap_or(&0.0);
+            let min = available.min(know.target);
+            spend.insert(id, available - min);
+            keep.insert(id, min);
+        }
+        // repeat for the items which we don't have any memory for so we can offer them up.
+        for (id, excess) in self.desires.property
+        .iter().filter(|x| !keep.contains_key(x.0)) {
+            spend.insert(id, *excess);
+        }
+        // with that done, enter a loop and work on buying up to our targets and expending our time.
     }
 }
 
