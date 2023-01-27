@@ -305,21 +305,33 @@ impl Pop {
         data: &DataManager,
         market: &MarketHistory) {
         // start by splitting property up into keep, and spend;
-        let mut keep = HashMap::new();
-        let mut spend = HashMap::new();
+        let mut keep: HashMap<usize, f64> = HashMap::new();
+        let mut spend: HashMap<usize, f64> = HashMap::new();
         // get what we remember over
-        for (id, know) in self.memory.product_knowledge.iter().filter(|x| x.0 != 0) {
+        for (id, know) in self.memory.product_knowledge.iter() {
             let mut available = *self.desires.property.get(id).unwrap_or(&0.0);
             let min = available.min(know.target);
-            spend.insert(id, available - min);
-            keep.insert(id, min);
+            spend.insert(*id, available - min);
+            keep.insert(*id, min);
         }
         // repeat for the items which we don't have any memory for so we can offer them up.
         for (id, excess) in self.desires.property
         .iter().filter(|x| !keep.contains_key(x.0)) {
-            spend.insert(id, *excess);
+            spend.insert(*id, *excess);
         }
-        // with that done, enter a loop and work on buying up to our targets and expending our time.
+        // with that done, put our spend stuff up for sale, to ease things going forward.
+        for (id, amount) in spend.iter() {
+            let info = data.products.get(id).expect("Product Not Found!");
+            // if nontransferable, don't offer for sale.
+            if info.tags.contains(&ProductTag::NonTransferrable) { continue; }
+            // since it can be sold, offer it up.
+            self.push_message(rx, tx, 
+                ActorMessage::SellOrder { sender: self.actor_info(),
+                product: *id, quantity: *amount, 
+                amv: *market.market_prices.get(id).unwrap_or(&1.0) })
+        }
+        // enter a loop and work on buying up to our targets and 
+        // expending our time while handling any orders coming our way.
     }
 }
 
@@ -423,7 +435,7 @@ impl Actor for Pop {
         // employee, or if it's a disorganized owner, it's share of everything.
         // Start free time section, roll between processing for wants, going 
         // out to buy things, and dealing with recieved sale orders.
-        self.free_time(rx, &tx, history);
+        self.free_time(rx, &tx, data, history);
 
         // Once time has run out, send up a finished message.
         tx.send(ActorMessage::Finished { 

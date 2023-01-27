@@ -257,7 +257,10 @@ pub enum ProductTag {
     /// The product has particular vulnerabilities, 
     Vulnerable{to: ProductVulnerability},
     /// The item is magical, and thus can break our normal rules and requirements for an item.
-    Magic
+    Magic,
+    /// The product is not transferrable. It cannot be bought or sold by normal means.
+    /// This is meant primarily for time, but other possiblities exist.
+    NonTransferrable,
 }
 
 /// The possible Storage Types available.

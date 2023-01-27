@@ -60,16 +60,21 @@ pub enum ActorMessage {
     /// A message from an employee to a firm.
     EmployeeToFirm {sender: ActorInfo, reciever: ActorInfo,
         action: FirmEmployeeAction},
-    
+    /// An offer to the market of the specified product, in for the 
+    /// specified quantity, at the specified amv unit price.
+    SellOrder { sender: ActorInfo, product: usize, quantity: f64,
+        amv: f64 },
 }
 impl ActorMessage {
+    /// Checks whether a message is directed to whoever me is.
+    /// Must actually be directed to me, not come from me.
     pub fn for_me(&self, me: ActorInfo) -> bool {
         match self {
             ActorMessage::StartDay => true,
             ActorMessage::Finished { sender } => me == *sender,
             ActorMessage::AllFinished => true,
             ActorMessage::FindProduct { product: _, amount: _, time: _, 
-                sender } => *sender == me, // for market, sender is me.
+                sender: _ } => false, // for market, sent by me
             ActorMessage::FoundProduct { seller, 
                 buyer: _ } => *seller == me, // from market, created by FindProduct
             ActorMessage::ProductNotFound { product: _, buyer, 
@@ -85,8 +90,9 @@ impl ActorMessage {
             ActorMessage::FirmToEmployee { sender: _, reciever, 
                 action: _ } => *reciever == me, // reciever 
             ActorMessage::EmployeeToFirm { sender: _, reciever, 
-                action: _ } => *reciever == me, // reciever 
-            
+                action: _ } => *reciever == me,
+            ActorMessage::SellOrder { sender: _, product: _, 
+                quantity: _, amv: _ } => false, // for market
         }
     }
 }
