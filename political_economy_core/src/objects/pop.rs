@@ -13,7 +13,7 @@ use super::{desires::Desires,
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
-    pop_memory::PopMemory, product::ProductTag
+    pop_memory::{PopMemory, Knowledge}, product::ProductTag
 };
 
 /// Pops are the data storage for a population group.
@@ -307,6 +307,7 @@ impl Pop {
         // start by splitting property up into keep, and spend;
         let mut keep: HashMap<usize, f64> = HashMap::new();
         let mut spend: HashMap<usize, f64> = HashMap::new();
+        let mut change: HashMap<usize, f64> = HashMap::new(); // for 
         // get what we remember over
         for (id, know) in self.memory.product_knowledge.iter() {
             let mut available = *self.desires.property.get(id).unwrap_or(&0.0);
@@ -332,6 +333,77 @@ impl Pop {
         }
         // enter a loop and work on buying up to our targets and 
         // expending our time while handling any orders coming our way.
+        loop {
+            // if time to spend has been used up, break out.
+            if *spend.get(&0).unwrap_or(&0.0) == 0.0 { break; }
+            // start by clearing out backlog messages for simplicity.
+            while let Some(msg) = self.backlog.pop_front() {
+                self.process_common_message(rx, tx, data, market, msg,
+                    &mut keep, &mut spend, &mut change);
+            }
+        }
+    }
+
+    /// Processes common messages from the ActorMessages for current free time.
+    fn process_common_message(&mut self, rx: &mut Receiver<ActorMessage>, 
+        tx: &Sender<ActorMessage>, data: &DataManager, 
+        market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
+        spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
+        match msg {
+            ActorMessage::FoundProduct { seller, 
+            buyer, product, time_change } => { 
+                // product we were looking for was found, record time returned,
+                // save the excess, then try and buy.
+                let mut know = self.memory.product_knowledge.entry(product).or_insert(Knowledge::new());
+                // add the current budget (budget - time spent) - the time_change recieved back.
+                know.time_spent += know.time_budget - know.time_spent - time_change;
+                self.try_to_buy(rx, tx, data, market, seller);
+            },
+            ActorMessage::ProductNotFound { product, 
+            buyer, time_remaining: change } => { // couldn't find product
+                // liquidate returned time
+                *returned.entry(0).or_insert(0.0) += change;
+                // record the change we got back in time and amv
+                let mut memory = self.memory.product_knowledge.entry(product)
+                    .or_insert(Knowledge::new());
+                memory.time_spent = memory.time_budget - memory.time_spent - change;
+            },
+            ActorMessage::SendProduct { sender, reciever, product, amount } => todo!(),
+            ActorMessage::SendWant { sender, reciever, want, amount } => todo!(),
+            ActorMessage::DumpProduct { sender, product, amount } => todo!(),
+            ActorMessage::WantSplash { sender, want, amount } => todo!(),
+            ActorMessage::FirmToEmployee { sender, reciever, action } => todo!(),
+            ActorMessage::EmployeeToFirm { sender, reciever, action } => todo!(),
+            ActorMessage::SellOrder { sender, product, quantity, amv } => todo!(),
+
+            // Skip these, no actions from us here. Not consoldiated for future additions.
+            ActorMessage::StartDay => (),
+            ActorMessage::Finished { sender } => (),
+            ActorMessage::AllFinished => (),
+            ActorMessage::FindProduct { product, amount, time, sender } => (),
+        }
+    }
+
+    fn try_to_buy(&self, rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    data: &DataManager, 
+    market: &MarketHistory, 
+    seller: ActorInfo) {
+        match seller {
+            ActorInfo::Firm(id) => {
+                // normal buy, maybe barter
+            },
+            ActorInfo::Pop(id) => {
+                // first try to normal buy.
+                if market.currencies.len() > 0 {
+
+                }
+                // then try to barter
+                // then try to force a purchase by overwhelming AMV.
+            },
+            ActorInfo::Institution(id) => (), // placeholder for now. Logic should be same as state.
+            ActorInfo::State(id) => (), // placeholder, should be similar to Institution.
+        }
     }
 }
 

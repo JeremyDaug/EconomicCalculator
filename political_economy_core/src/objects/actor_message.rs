@@ -25,14 +25,15 @@ pub enum ActorMessage {
         sender: ActorInfo},
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
-    FoundProduct{seller: ActorInfo,
-        buyer: ActorInfo},
+    /// Gives the product in question and the time left after finding it.
+    FoundProduct{seller: ActorInfo, buyer: ActorInfo, product: usize,
+        time_change: f64},
     /// Returned from an attempt to buy an item and unable to
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
     /// be aware that the item is unavailable.
     ProductNotFound {product: usize, buyer: ActorInfo, 
-        change: f64},
+        time_remaining: f64},
     /// A message which sends a product from the sender to the reciever.
     /// THe sender SHOULD delete their local item and the reciever SHOULD
     /// add it to their property.
@@ -74,11 +75,11 @@ impl ActorMessage {
             ActorMessage::Finished { sender } => me == *sender,
             ActorMessage::AllFinished => true,
             ActorMessage::FindProduct { product: _, amount: _, time: _, 
-                sender: _ } => false, // for market, sent by me
+                sender: _, } => false, // for market, sent by me
             ActorMessage::FoundProduct { seller, 
-                buyer: _ } => *seller == me, // from market, created by FindProduct
+                buyer: _, product: _, time_change: _ } => *seller == me, // from market, created by FindProduct
             ActorMessage::ProductNotFound { product: _, buyer, 
-                change: _ } => *buyer == me, // from market to buyer
+                time_remaining: _ } => *buyer == me, // from market to buyer
             ActorMessage::SendProduct { sender: _, reciever, 
                 product: _, amount: _ } => *reciever == me, // sends product to reciever
             ActorMessage::SendWant { sender: _, reciever, 

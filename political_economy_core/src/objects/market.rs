@@ -1,12 +1,16 @@
 use core::panic;
 use std::collections::{HashMap, HashSet};
-use barrage::{Sender, Receiver};
+use barrage::{Sender, Receiver, new};
 use crossbeam::thread;
+use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
 use super::{pop::Pop, firm::Firm, actor::Actor, actor_message::{ActorMessage, ActorType, ActorInfo}, institution::Institution, state::State};
 
 const SHOPPING_TIME_COST: f64 = 0.2;
+
+/// The Salability threshold for an item to be considered a currency.
+const SALABILITY_THRESHOLD: f64 = 0.75;
 
 /// # The Market
 /// 
@@ -86,6 +90,13 @@ pub struct Market {
     pub product_output: HashMap<usize, f64>,
     /// The total amount of products exchanged today.
     pub product_exchanged_total: HashMap<usize, f64>,
+    /// The Salability of each item. Any itme above SALABILITY_THRESHOLD 
+    /// is considered a currency for this market naturally. 
+    pub salability: HashMap<usize, f64>,
+    /// Any Currencies which have been declared as currency for this market.
+    /// Typically done by either a state, or another particularly powerful
+    /// entitiy.
+    pub state_currencies: Vec<usize>,
     /// The info of the market from yesterday, stored for general
     /// information.
     pub previous_day: MarketHistory,
@@ -216,7 +227,7 @@ impl Market {
         // check that we have any sellers in the first place.
         
         // if no success (ran out of time or no sellers), return Failure
-        ActorMessage::ProductNotFound { product, buyer: sender, change: time-0.2 }
+        ActorMessage::ProductNotFound { product, buyer: sender, time_remaining: time-0.2 }
     }
 }
 
@@ -236,6 +247,10 @@ pub struct MarketHistory {
     pub product_offered: HashMap<usize, f64>,
     /// The products sold in this market yesterday.
     pub product_sold: HashMap<usize, f64>,
+    /// The currencies in the market and their trust rating.
+    /// All values are at above our threshold (currently 0.75) and
+    /// no greater than 1. If any exist here, than we have at least one currency.
+    pub currencies: HashMap<usize, f64>,
 }
 
 impl MarketHistory {
@@ -244,11 +259,24 @@ impl MarketHistory {
     /// to it.
     pub fn create(market: &Market) -> Self {
         // TODO update this to actually take all this information.
-        MarketHistory { resources: market.resources.clone(),
+        let mut ret = MarketHistory { resources: market.resources.clone(),
             market_prices: market.prices.clone(), 
             product_offered: HashMap::new(), 
-            product_sold: HashMap::new() 
+            product_sold: HashMap::new(),
+            currencies: HashMap::new()
+        };
+        // add in moneys
+        for money in market.salability
+        .iter().filter(|x| *x.1 > SALABILITY_THRESHOLD) {
+            ret.currencies.insert(*money.0, *money.1);
         }
+        // add in currencies
+        for currency in market.state_currencies.iter() {
+            let value = ret.currencies.entry(*currency).or_insert(0.0);
+            *value = *market.salability.get(currency).unwrap_or(&0.5);
+        }
+        // BREAK OUT!
+        ret
     }
 }
 

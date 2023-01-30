@@ -13,12 +13,15 @@ pub struct PopMemory {
     /// The various data for product information. Includes both history
     /// and targets for tomorrow.
     pub product_knowledge: HashMap<usize, Knowledge>,
+    /// The order in which 
+    pub product_priority: Vec<usize>,
 }
 
 impl PopMemory {
     pub(crate) fn create_empty() -> PopMemory {
         PopMemory { is_disorganized: false, work_time: 0.0,
-            product_knowledge: HashMap::new(),}
+            product_knowledge: HashMap::new(),
+            product_priority: vec![]}
     }
 }
 
@@ -27,17 +30,34 @@ impl PopMemory {
 pub struct Knowledge {
     /// The amount targeted to own.
     pub target: f64,
-    /// How much was spent.
+    /// The amount we successfully had (bought or otherwise) by
+    /// the end of the day.
+    pub achieved: f64,
+    /// How much of the item was given in exchange.
     pub spent: f64,
+    /// how much of the item was lost for any reason,
+    /// (taxed, failed etc)
+    pub lost: f64,
     /// How much time we are willing to expend to get our target.
     pub time_budget: f64,
     /// How much AMV we are willing to spend to get our target.
     pub amv_budget: f64,
-    /// How much time was left over from yesterday.
-    pub time_remainder: f64,
-    /// How much AMV was not spent yesterday.
-    pub amv_excess: f64,
+    /// How much time was spent. Time Budget - Time Spent = Remainder.
+    pub time_spent: f64,
+    /// How much AMV was spent. Budget - Spent = Remainder.
+    pub amv_spent: f64,
     /// How successful we have been in the past in satisfying
     /// our target and explicit desires which seek this item.
     pub success_rate: f64,
+}
+
+impl Knowledge {
+    pub fn new() -> Self { 
+        Self { 
+            target: 0.0, achieved: 0.0, 
+            spent: 0.0, lost: 0.0, 
+            time_budget: 0.0, amv_budget: 0.0, 
+            time_spent: 0.0, 
+            amv_spent: 0.0, success_rate: 0.0
+    } }
 }
