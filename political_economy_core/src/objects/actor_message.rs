@@ -1,5 +1,24 @@
+use std::collections::HashMap;
+
 /// Actor Message is a message which can be passed between
 /// two actor threads.
+/// 
+/// # Complex Buy Offers
+/// 
+/// Because Messages cannot pass collections safely, instead we pass chains
+/// off messages. there are 4 offer messages. 
+/// 
+/// 1 for singular item offers, so we can have a shorthand.
+/// 
+/// 3 for chains of items to offer, one open, one next, one close.
+/// 
+/// # Future Options
+/// 
+/// TODO
+/// 
+/// May be worth it to break some of these messages out, specifically move most inter-actor
+/// messages or offer messages to another enum and consolidate them into a more common
+/// message type for here. May do that later, not sure.
 #[derive(Debug, Clone, Copy)]
 pub enum ActorMessage {
     /// The start message so that all actors in a market know 
@@ -12,7 +31,7 @@ pub enum ActorMessage {
     /// responding if proded by other Actors or the market, but with otherwise
     /// wait for the AllDone Message to arrive, letting them close out for the
     /// day.
-    Finished{sender: ActorInfo},
+    Finished{ sender: ActorInfo },
     /// Sent by the market when all Actors have sent their Finished message.
     /// ONce this is nent
     AllFinished,
@@ -21,51 +40,84 @@ pub enum ActorMessage {
     /// amount of time the actor is willing to pay for to find them.
     /// Also includes the sender and their type so
     /// a return message can be sent to them.
-    FindProduct{product: usize, amount: f64, time: f64, 
-        sender: ActorInfo},
+    FindProduct{ product: usize, amount: f64, time: f64, 
+        sender: ActorInfo },
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
     /// Gives the product in question and the time left after finding it.
-    FoundProduct{seller: ActorInfo, buyer: ActorInfo, product: usize,
-        time_change: f64},
+    FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize,
+        time_change: f64 },
     /// Returned from an attempt to buy an item and unable to
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
     /// be aware that the item is unavailable.
-    ProductNotFound {product: usize, buyer: ActorInfo, 
+    ProductNotFound { product: usize, buyer: ActorInfo, 
         time_remaining: f64},
     /// A message which sends a product from the sender to the reciever.
     /// THe sender SHOULD delete their local item and the reciever SHOULD
     /// add it to their property.
-    SendProduct {sender: ActorInfo, reciever: ActorInfo,
+    SendProduct { sender: ActorInfo, reciever: ActorInfo,
         product: usize, amount: f64 },
     /// Transfers a want from one actor to another. Mostly used for
     /// firms to employees (dangerous jobs giving bad wants.)
-    SendWant {sender: ActorInfo, reciever: ActorInfo,
+    SendWant { sender: ActorInfo, reciever: ActorInfo,
         want: usize, amount: f64 },
     /// Takes an item and dumps it into the market/environment for it
     /// to handle. May cause additional effects.
-    DumpProduct {sender: ActorInfo, product: usize, amount: f64 },
+    DumpProduct { sender: ActorInfo, product: usize, amount: f64 },
     /// Takes a want and splashes it into the market, allowing everyone to
     /// take some of it's effect. IE, A person buys security for their home
     /// a bit of that security splashes into the market, making everyone just
     /// a little bit safer.
-    WantSplash {sender: ActorInfo,
+    WantSplash { sender: ActorInfo,
         want: usize, amount: f64 },
     /// Sends a message from a firm to an employee pop, making them do 
     /// something. Primarily used to demark the start of the work day,
     /// but can also be used to send messages like hirings, firings, and
     /// job changes (promotions, demotions, transfers).
-    FirmToEmployee {sender: ActorInfo, reciever: ActorInfo,
-        action: FirmEmployeeAction},
+    FirmToEmployee { sender: ActorInfo, reciever: ActorInfo,
+        action: FirmEmployeeAction },
     /// A message from an employee to a firm.
-    EmployeeToFirm {sender: ActorInfo, reciever: ActorInfo,
-        action: FirmEmployeeAction},
+    EmployeeToFirm { sender: ActorInfo, reciever: ActorInfo,
+        action: FirmEmployeeAction },
+    
     /// An offer to the market of the specified product, in for the 
     /// specified quantity, at the specified amv unit price.
     SellOrder { sender: ActorInfo, product: usize, quantity: f64,
         amv: f64 },
+    /// Buy offer with only 1 item within.
+    BuyOfferOnly { buyer: ActorInfo, seller: ActorInfo, product: usize,
+        quantity: f64, offer_product: usize, offer_quantity: f64 },
+    /// Buy offer with multiple items. This is the first and specifics 
+    /// what is being bought.
+    BuyOfferStart { buyer: ActorInfo, seller: ActorInfo, product: usize,
+        quantity: f64, offer_product: usize, offer_quantity: f64 },
+    /// Middle section of a Buy Offer message chain. Includes just the item as
+    /// the start dictates which item was taken.
+    BuyOfferMiddle { buyer: ActorInfo, seller: ActorInfo,
+        offer_product: usize, offer_quantity: f64 },
+    /// End sectino of a Buy Offer message chain. Includes just the items being
+    /// offered.
+    BuyOfferEnd { buyer: ActorInfo, seller: ActorInfo,
+        offer_product: usize, offer_quantity: f64 },
+    /// The Buy offer has been accepted by the seller.
+    AcceptOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
+    /// The Buy offer has been rejected by the seller, but a new offer will 
+    /// be allowed.
+    RejectOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
+    /// The offer has been rejected and closed, the seller does not
+    /// want to or cannot deal with the buyer again today.
+    RejectAndCloseOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
+    /// The offer has been rebuffed, but only to give the buyer more information.
+    /// This is used for when the buyer is asking for more than the seller has.
+    CorrectOffer { buyer: ActorInfo, seller: ActorInfo, product: usize, 
+        corrected_quantity: usize },
+
+    /// Send information to the 
+    SendProductInfo { buyer: ActorInfo, seller: ActorInfo, 
+        product: usize },
 }
+
 impl ActorMessage {
     /// Checks whether a message is directed to whoever me is.
     /// Must actually be directed to me, not come from me.
@@ -91,9 +143,28 @@ impl ActorMessage {
             ActorMessage::FirmToEmployee { sender: _, reciever, 
                 action: _ } => *reciever == me, // reciever 
             ActorMessage::EmployeeToFirm { sender: _, reciever, 
-                action: _ } => *reciever == me,
+                action: _ } => *reciever == me, // firm can recieve
+
             ActorMessage::SellOrder { sender: _, product: _, 
-                quantity: _, amv: _ } => false, // for market
+                quantity: _, amv: _ } => false,
+            ActorMessage::BuyOfferOnly { buyer: _, seller, 
+                product: _, quantity: _, offer_product: _, 
+                offer_quantity: _ } => *seller == me,
+            ActorMessage::BuyOfferStart { buyer: _, seller, 
+                product: _, quantity: _, offer_product: _, 
+                offer_quantity: _ } => *seller == me,
+            ActorMessage::BuyOfferMiddle { buyer: _, seller, 
+                offer_product: _, offer_quantity: _ } => *seller == me,
+            ActorMessage::BuyOfferEnd { buyer: _, seller, 
+                offer_product: _, offer_quantity: _ } => *seller == me,
+            ActorMessage::AcceptOffer { buyer, seller: _, 
+                product: _ } => *buyer == me,
+            ActorMessage::RejectOffer { buyer, seller: _, 
+                product: _ } => *buyer == me,
+            ActorMessage::RejectAndCloseOffer { buyer, seller: _, 
+                product: _ } => *buyer == me,
+            ActorMessage::CorrectOffer { buyer, seller: _, 
+                product: _, corrected_quantity: _ } => *buyer == me,
         }
     }
 }

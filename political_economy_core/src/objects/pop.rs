@@ -381,6 +381,15 @@ impl Pop {
             ActorMessage::Finished { sender } => (),
             ActorMessage::AllFinished => (),
             ActorMessage::FindProduct { product, amount, time, sender } => (),
+            ActorMessage::BuyOfferOnly { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
+            ActorMessage::BuyOfferStart { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
+            ActorMessage::BuyOfferMiddle { buyer, seller, offer_product, offer_quantity } => todo!(),
+            ActorMessage::BuyOfferEnd { buyer, seller, offer_product, offer_quantity } => todo!(),
+            ActorMessage::AcceptOffer { buyer, seller, product } => todo!(),
+            ActorMessage::RejectOffer { buyer, seller, product } => todo!(),
+            ActorMessage::RejectAndCloseOffer { buyer, seller, product } => todo!(),
+            ActorMessage::CorrectOffer { buyer, seller, product, corrected_quantity } => todo!(),
+            
         }
     }
 
@@ -395,11 +404,18 @@ impl Pop {
             },
             ActorInfo::Pop(id) => {
                 // first try to normal buy.
-                if market.currencies.len() > 0 {
-
+                if market.currencies.len() > 0 { // if we have a currency, try to pay with that.
+                    // get our cash.
+                    let mut cash = HashMap::new();
+                    for currency in self.desires.property
+                    .iter().filter(|x| market.currencies.contains_key(x.0)) {
+                        cash.insert(currency.0, currency.1);
+                    }
+                    // check that we have enough in t
                 }
                 // then try to barter
                 // then try to force a purchase by overwhelming AMV.
+                
             },
             ActorInfo::Institution(id) => (), // placeholder for now. Logic should be same as state.
             ActorInfo::State(id) => (), // placeholder, should be similar to Institution.
