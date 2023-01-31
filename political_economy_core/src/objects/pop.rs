@@ -342,11 +342,18 @@ impl Pop {
             while let Some(msg) = self.backlog.pop_front() {
                 self.process_common_message(rx, tx, data, market, msg,
                     &mut keep, &mut spend, &mut change);
+                    // if this last processed message ate all our time, then gtfo and move
+                    // to the end of day holding pattern.
+                    if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
             }
+            // with the backlog cleared out, catch up with the broadcast queue
+            // don't actually process, just push anything for us into the backlog.
+            self.msg_catchup(rx);
         }
     }
 
     /// Processes common messages from the ActorMessages for current free time.
+    /// Function assumes that msg is for us, so be sure to collect just those.
     fn process_common_message(&mut self, rx: &mut Receiver<ActorMessage>, 
         tx: &Sender<ActorMessage>, data: &DataManager, 
         market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
@@ -370,10 +377,23 @@ impl Pop {
                     .or_insert(Knowledge::new());
                 memory.time_spent = memory.time_budget - memory.time_spent - change;
             },
-            ActorMessage::SendProduct { sender, reciever, product, amount } => todo!(),
-            ActorMessage::SendWant { sender, reciever, want, amount } => todo!(),
-            ActorMessage::DumpProduct { sender, product, amount } => todo!(),
-            ActorMessage::WantSplash { sender, want, amount } => todo!(),
+            ActorMessage::SendProduct { sender: _, reciever: _, 
+            product, amount } => {
+                // product sent to me from someone. Recieve it.
+                *self.desires.property.entry(product).or_insert(0.0) += amount;
+                // TODO gift responses, sender investigation, and other stuff possibly here.
+            },
+            ActorMessage::SendWant { sender: _, reciever: _, 
+            want, amount } => {
+                // Just take the want, don't worry about it for now.
+                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                // TODO possibly look into where this want comes from, maybe reject it.
+            },
+            ActorMessage::WantSplash { sender, want, amount } => {
+                // Want Splash must be accepted regardless.
+                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                // TODO INFO and approval expansion, maybe throw shit back at the sender if the splash is negative.
+            },
             ActorMessage::FirmToEmployee { sender, reciever, action } => todo!(),
             ActorMessage::EmployeeToFirm { sender, reciever, action } => todo!(),
             ActorMessage::SellOrder { sender, product, quantity, amv } => todo!(),
@@ -381,6 +401,7 @@ impl Pop {
             // Skip these, no actions from us here. Not consoldiated for future additions.
             ActorMessage::StartDay => (),
             ActorMessage::Finished { sender } => (),
+            ActorMessage::DumpProduct { sender, product, amount } => todo!(),
             ActorMessage::AllFinished => (),
             ActorMessage::FindProduct { product, amount, time, sender } => (),
             ActorMessage::BuyOfferOnly { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
@@ -391,7 +412,6 @@ impl Pop {
             ActorMessage::RejectOffer { buyer, seller, product } => todo!(),
             ActorMessage::RejectAndCloseOffer { buyer, seller, product } => todo!(),
             ActorMessage::CorrectOffer { buyer, seller, product, corrected_quantity } => todo!(),
-            
         }
     }
 

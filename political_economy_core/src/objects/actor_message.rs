@@ -112,10 +112,6 @@ pub enum ActorMessage {
     /// This is used for when the buyer is asking for more than the seller has.
     CorrectOffer { buyer: ActorInfo, seller: ActorInfo, product: usize, 
         corrected_quantity: usize },
-
-    /// Send information to the 
-    SendProductInfo { buyer: ActorInfo, seller: ActorInfo, 
-        product: usize },
 }
 
 impl ActorMessage {

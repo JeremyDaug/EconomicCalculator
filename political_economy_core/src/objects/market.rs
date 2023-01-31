@@ -1,11 +1,10 @@
 use core::panic;
 use std::collections::{HashMap, HashSet};
-use barrage::{Sender, Receiver, new};
+use barrage::{Sender, Receiver};
 use crossbeam::thread;
-use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager};
-use super::{pop::Pop, firm::Firm, actor::Actor, actor_message::{ActorMessage, ActorType, ActorInfo}, institution::Institution, state::State};
+use super::{pop::Pop, firm::Firm, actor::Actor, actor_message::{ActorMessage, ActorInfo}, institution::Institution, state::State};
 
 const SHOPPING_TIME_COST: f64 = 0.2;
 
@@ -197,7 +196,7 @@ impl Market {
                                 time, sender);
                             lcl_sender.send(outcome)
                                 .expect("Local Channel Closed.");
-                    }
+                    },
                     _ => ()
                 }
             }
@@ -213,7 +212,7 @@ impl Market {
                     MarketMessageEnum::ConfirmClose => {
                         break;
                     },
-                    _ => ()// do nothing on everything else.
+                    _ => panic!("Message other than confirm close found after end of day.")// do nothing on everything else.
                 }
             }
             // if we got here, then we're done. Do any clean and info 
