@@ -320,22 +320,24 @@ impl Pop {
         .iter().filter(|x| !keep.contains_key(x.0)) {
             spend.insert(*id, *excess);
         }
-        // with that done, put our spend stuff up for sale, to ease things going forward.
-        for (id, amount) in spend.iter() {
-            let info = data.products.get(id).expect("Product Not Found!");
-            // if nontransferable, don't offer for sale.
-            if info.tags.contains(&ProductTag::NonTransferrable) { continue; }
-            // since it can be sold, offer it up.
-            self.push_message(rx, tx, 
-                ActorMessage::SellOrder { sender: self.actor_info(),
-                product: *id, quantity: *amount, 
-                amv: *market.market_prices.get(id).unwrap_or(&1.0) })
+        // with that done, put our spend stuff up for sale, if we are selling
+        if self.is_selling {
+            for (id, amount) in spend.iter() {
+                let info = data.products.get(id).expect("Product Not Found!");
+                // if nontransferable, don't offer for sale.
+                if info.tags.contains(&ProductTag::NonTransferrable) { continue; }
+                // since it can be sold, offer it up.
+                self.push_message(rx, tx, 
+                    ActorMessage::SellOrder { sender: self.actor_info(),
+                    product: *id, quantity: *amount, 
+                    amv: *market.market_prices.get(id).unwrap_or(&1.0) })
+            }
         }
         // enter a loop and work on buying up to our targets and 
         // expending our time while handling any orders coming our way.
         loop {
             // if time to spend has been used up, break out.
-            if *spend.get(&0).unwrap_or(&0.0) == 0.0 { break; }
+            if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
             // start by clearing out backlog messages for simplicity.
             while let Some(msg) = self.backlog.pop_front() {
                 self.process_common_message(rx, tx, data, market, msg,
@@ -503,7 +505,9 @@ impl Actor for Pop {
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
         self.desires.sift_products();
-        self.is_selling = if self.memory.is_disorganized { true }
+        self.is_selling = if self.memory.is_disorganized { 
+            true
+        }
         else {
             // TODO add check here. 
             // Checks would probably be a panic check, (has resources but 

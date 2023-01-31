@@ -169,8 +169,6 @@ impl Market {
             // once we spin up all actors, send them the OK message.
             lcl_sender.send(ActorMessage::StartDay).expect("Someho Closed. Panic!");
 
-            // Possibly enter holding pattern for selling.
-
             // Enter holding pattern while the children do their work
             let mut completed_firms = HashSet::new();
             let mut completed_pops = HashSet::new();
