@@ -59,7 +59,7 @@ flowchart TD
                 subgraph freeTimeLoop [Free Time Loop]
                     direction TB
                     ifTimedOut{If out of time} -.false.-> buyGoods[Try Buying Goods]
-
+                    buyGoods --> processInputs[Process Our inputs\nand Backlog]
                 end
             end
         end
