@@ -45,9 +45,9 @@ pub enum ActorMessage {
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
     /// Gives the product in question, the amount available to purchase, 
-    /// and the time left after finding it.
+    /// the price being offered, and the time left after finding it.
     FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize,
-        quantity: f64, time_change: f64 },
+        quantity: f64, price: f64, time_change: f64 },
     /// Returned from an attempt to buy an item and unable to
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
@@ -126,7 +126,7 @@ impl ActorMessage {
             ActorMessage::FindProduct { product: _, amount: _, time: _, 
                 sender: _, } => false, // for market, sent by me
             ActorMessage::FoundProduct { seller, 
-                buyer, product: _, quantity: _, time_change: _ } => {
+                buyer, product: _, quantity: _, price: _, time_change: _ } => {
                     *seller == me || *buyer == me
                 }, // from market, created by FindProduct, you're buyer or seller.
             ActorMessage::ProductNotFound { product: _, buyer, 

@@ -360,7 +360,7 @@ impl Pop {
         spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
         match msg {
             ActorMessage::FoundProduct { seller, 
-            buyer, product, quantity, time_change } => { 
+            buyer, product, quantity, price, time_change } => { 
                 if buyer == self.actor_info() { // Product is for us
                     // product we were looking for was found, record time returned,
                     // save the excess, then try and buy.
@@ -368,7 +368,7 @@ impl Pop {
                     // add the current budget (budget - time spent) - the time_change recieved back.
                     know.time_spent += know.time_budget - know.time_spent - time_change;
                     self.try_to_buy(rx, tx, data, market, keep, 
-                        spend, returned, seller);
+                        spend, returned, seller, product, quantity, price);
                 } else { // product is from us
                     // no need to record anything, enter try to sell.
                     // TODO add to sell here to lock in the exchange.
@@ -430,14 +430,19 @@ impl Pop {
     }
 
     /// Try to buy items
-    fn try_to_buy(&self, rx: &mut Receiver<ActorMessage>, 
+    fn try_to_buy(&self, 
+    rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     market: &MarketHistory, 
     keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
-    seller: ActorInfo, product: usize, quantity: f64) {
+    seller: ActorInfo, 
+    product: usize, 
+    quantity: f64,
+    price: f64) {
+        let summary_price = quantity * price;
         match seller {
             ActorInfo::Firm(id) => {
                 // normal buy, maybe barter
@@ -447,11 +452,17 @@ impl Pop {
                 if market.currencies.len() > 0 { // if we have a currency, try to pay with that.
                     // get our cash.
                     let mut cash = HashMap::new();
+                    let mut sum = 0.0;
                     for currency in self.desires.property
                     .iter().filter(|x| market.currencies.contains_key(x.0)) {
                         cash.insert(currency.0, currency.1);
+                        sum += *currency.1 * market.currencies.get(currency.0).unwrap();
                     }
-                    // check that we have enough in to purchase it
+
+                    
+                    if sum < price * quantity {
+
+                    }
                 }
                 // then try to barter
                 // then try to force a purchase by overwhelming AMV.
