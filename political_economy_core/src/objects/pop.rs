@@ -349,6 +349,9 @@ impl Pop {
             // with the backlog cleared out, catch up with the broadcast queue
             // don't actually process, just push anything for us into the backlog.
             self.msg_catchup(rx);
+
+            // With the backlog caught up, do whatever we need want to do here
+            
         }
     }
 
@@ -443,6 +446,7 @@ impl Pop {
     quantity: f64,
     price: f64) {
         let summary_price = quantity * price;
+        let our_info = self.memory.product_knowledge.get(&product).unwrap();
         match seller {
             ActorInfo::Firm(id) => {
                 // normal buy, maybe barter
@@ -458,11 +462,9 @@ impl Pop {
                         cash.insert(currency.0, currency.1);
                         sum += *currency.1 * market.currencies.get(currency.0).unwrap();
                     }
-
-                    
-                    if sum < price * quantity {
-
-                    }
+                    let amv_target = sum.min(self.memory.product_knowledge
+                        .get(&product).unwrap().amv_budget);
+                    // depending on the amv target and 
                 }
                 // then try to barter
                 // then try to force a purchase by overwhelming AMV.

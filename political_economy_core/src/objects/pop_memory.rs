@@ -60,4 +60,12 @@ impl Knowledge {
             time_spent: 0.0, 
             amv_spent: 0.0, success_rate: 0.0
     } }
+
+    pub fn remaining_amv(&self) -> f64 {
+        self.amv_budget - self.amv_spent
+    }
+
+    pub fn remaining_time(&self) -> f64 {
+        self.time_budget - self.time_spent
+    }
 }
