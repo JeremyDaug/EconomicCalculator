@@ -248,6 +248,9 @@ pub struct MarketHistory {
     /// All values are at above our threshold (currently 0.75) and
     /// no greater than 1. If any exist here, than we have at least one currency.
     pub currencies: HashMap<usize, f64>,
+    /// The Salability of items in the market. Acts as a modifier to AMV and measures
+    /// how likely the currency is to be accepted.
+    pub salability: HashMap<usize, f64>,
 }
 
 impl MarketHistory {
@@ -260,7 +263,8 @@ impl MarketHistory {
             market_prices: market.prices.clone(), 
             product_offered: HashMap::new(), 
             product_sold: HashMap::new(),
-            currencies: HashMap::new()
+            currencies: HashMap::new(),
+            salability: HashMap::new(),
         };
         // add in moneys
         for money in market.salability

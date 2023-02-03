@@ -106,6 +106,9 @@ pub enum ActorMessage {
     /// The Buy offer has been rejected by the seller, but a new offer will 
     /// be allowed.
     RejectOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
+    /// The potential Buyer rejects the current price as too expensive for 
+    /// it's budget and closes the deal.
+    RejectPriceAndClose { buyer: ActorInfo, seller: ActorInfo, product: usize },
     /// The offer has been rejected and closed, the seller does not
     /// want to or cannot deal with the buyer again today.
     RejectAndCloseOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
@@ -148,22 +151,24 @@ impl ActorMessage {
                 quantity: _, amv: _ } => false,
             ActorMessage::BuyOfferOnly { buyer: _, seller, 
                 product: _, quantity: _, offer_product: _, 
-                offer_quantity: _ } => *seller == me,
+                offer_quantity: _ } => *seller == me, // sent from buyer to seller
             ActorMessage::BuyOfferStart { buyer: _, seller, 
                 product: _, quantity: _, offer_product: _, 
-                offer_quantity: _ } => *seller == me,
+                offer_quantity: _ } => *seller == me, // buyer to seller
             ActorMessage::BuyOfferMiddle { buyer: _, seller, 
-                offer_product: _, offer_quantity: _ } => *seller == me,
+                offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
             ActorMessage::BuyOfferEnd { buyer: _, seller, 
-                offer_product: _, offer_quantity: _ } => *seller == me,
+                offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
             ActorMessage::AcceptOffer { buyer, seller: _, 
-                product: _ } => *buyer == me,
+                product: _ } => *buyer == me, // Seller to Buyer
             ActorMessage::RejectOffer { buyer, seller: _, 
-                product: _ } => *buyer == me,
+                product: _ } => *buyer == me, // Seller to buyer
             ActorMessage::RejectAndCloseOffer { buyer, seller: _, 
-                product: _ } => *buyer == me,
+                product: _ } => *buyer == me, // Seller to Buyer
             ActorMessage::CorrectOffer { buyer, seller: _, 
-                product: _, corrected_quantity: _ } => *buyer == me,
+                product: _, corrected_quantity: _ } => *buyer == me, // Seller to Buyer
+            ActorMessage::RejectPriceAndClose { buyer: _, 
+                seller, product: _ } => *seller == me, // Buyer to Seller
         }
     }
 }

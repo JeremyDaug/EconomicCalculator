@@ -16,6 +16,13 @@ use super::{desires::Desires,
     pop_memory::{PopMemory, Knowledge}, product::ProductTag
 };
 
+const TOO_EXPENSIVE: f64 = 1.5;
+const EXPENSIVE: f64 = 1.2;
+const OVERPRICED: f64 = 1.0;
+const REASONABLE: f64 = 0.8;
+const CHEAP: f64 = 0.5;
+// steal
+
 /// Pops are the data storage for a population group.
 /// 
 /// Population groups are defines externally by what
@@ -433,7 +440,7 @@ impl Pop {
     }
 
     /// Try to buy items
-    fn try_to_buy(&self, 
+    fn try_to_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
@@ -446,7 +453,25 @@ impl Pop {
     quantity: f64,
     price: f64) {
         let summary_price = quantity * price;
-        let our_info = self.memory.product_knowledge.get(&product).unwrap();
+        let our_info = self.memory.product_knowledge.get_mut(&product).unwrap();
+        // check the budget as it stands and react before looking too closely.
+        let budget = our_info.remaining_amv();
+        if budget > summary_price * TOO_EXPENSIVE {
+            // Too Expensive, reject, and try again.
+            tx.send(ActorMessage::RejectAndCloseOffer { buyer: self.actor_info(), 
+                seller: seller, product: product });
+            return;
+        } else if budget > EXPENSIVE {
+            // Expensive, but we'll still suffer and buy it.
+        } else if budget > OVERPRICED {
+            // Overpriced, but buy anyway.
+        } else if budget > REASONABLE {
+            // Entirely reasonable, buy.
+        } else if budget > CHEAP {
+            // buy
+        } else if budget <= CHEAP {
+            // It's a steal, buy more than we need.
+        }
         match seller {
             ActorInfo::Firm(id) => {
                 // normal buy, maybe barter
@@ -460,11 +485,13 @@ impl Pop {
                     for currency in self.desires.property
                     .iter().filter(|x| market.currencies.contains_key(x.0)) {
                         cash.insert(currency.0, currency.1);
-                        sum += *currency.1 * market.currencies.get(currency.0).unwrap();
+                        sum += *currency.1 * market.currencies.get(currency.0).unwrap() * 
+                            market.salability.get(currency.0).unwrap();
                     }
                     let amv_target = sum.min(self.memory.product_knowledge
                         .get(&product).unwrap().amv_budget);
-                    // depending on the amv target and 
+                    // depending on the amv target and summary price, react and record the results.
+                    
                 }
                 // then try to barter
                 // then try to force a purchase by overwhelming AMV.
