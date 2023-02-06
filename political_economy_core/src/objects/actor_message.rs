@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use super::actor::Actor;
+
 /// Actor Message is a message which can be passed between
 /// two actor threads.
 /// 
@@ -35,6 +37,14 @@ pub enum ActorMessage {
     /// Sent by the market when all Actors have sent their Finished message.
     /// ONce this is nent
     AllFinished,
+
+    // Break for Deal Items
+
+    /// An offer to the market of the specified product, in for the 
+    /// specified quantity, at the specified amv unit price.
+    SellOrder { sender: ActorInfo, product: usize, quantity: f64,
+        amv: f64 },
+
     /// The find product message, recieved by the market.
     /// Contains the product id, the amount of the item desired, and the 
     /// amount of time the actor is willing to pay for to find them.
@@ -42,18 +52,78 @@ pub enum ActorMessage {
     /// a return message can be sent to them.
     FindProduct{ product: usize, amount: f64, time: f64, 
         sender: ActorInfo },
-    /// A message to both buyer and seller that they should
-    /// meet up and try to make a deal.
-    /// Gives the product in question, the amount available to purchase, 
-    /// the price being offered, and the time left after finding it.
-    FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize,
-        quantity: f64, price: f64, time_change: f64 },
     /// Returned from an attempt to buy an item and unable to
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
     /// be aware that the item is unavailable.
     ProductNotFound { product: usize, buyer: ActorInfo, 
         time_remaining: f64},
+    /// A message to both buyer and seller that they should
+    /// meet up and try to make a deal.
+    /// Gives the product in question, the amount available to purchase, 
+    /// the price / unit being offered, and the time left after finding it.
+    /// 
+    /// Starts the Deal Making Process
+    FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize,
+        quantity: f64, price: f64, time_change: f64 },
+
+    /// Buyer Asks the seller for a barter hint for them to give up the
+    /// product included and at the quantity asked for.
+    AskBarterHint { seller: ActorInfo, buyer: ActorInfo, product: usize,
+        quantity: f64},
+
+    BarterHint { seller: ActorInfo, buyer: ActorInfo, 
+        product: usize, quantity: f64},
+
+    /// Starts an offer with only 1 item within. Send buy a buyer.
+    BuyOfferOnly { buyer: ActorInfo, seller: ActorInfo, product: usize,
+        price_opinion: OfferResult, quantity: f64, offer_product: usize, 
+        offer_quantity: f64 },
+    /// Starts a Buy offer with multiple items. This is the first and specifics 
+    /// what is being bought.
+    BuyOfferStart { buyer: ActorInfo, seller: ActorInfo, product: usize,
+        price_opinion: OfferResult, quantity: f64, offer_product: usize, 
+        offer_quantity: f64 },
+    /// Middle section of a Buy Offer message chain. Includes just the item as
+    /// the start dictates which item was taken.
+    BuyOfferMiddle { buyer: ActorInfo, seller: ActorInfo,
+        offer_product: usize, offer_quantity: f64 },
+    /// End sectino of a Buy Offer message chain. Includes just the items being
+    /// offered.
+    BuyOfferEnd { buyer: ActorInfo, seller: ActorInfo,
+        offer_product: usize, offer_quantity: f64 },
+
+    /// A Response to the current offer. Details of the response are given by
+    /// the result. Regardless, it closes out the current offer being made.
+    /// Allows follow-up offers.
+    OfferResponse { buyer: ActorInfo, seller: ActorInfo,
+        result: OfferResult },
+
+    /// Follow up with a different product then last time. 
+    /// Useful for pops to buy multiple items at the same store, saving time.
+    /// Also uses excess time from existing item instead of next item's time.
+    CheckItem { buyer: ActorInfo, seller: Actor,
+        proudct: usize },
+    /// Return from seller after ActorMessage::CheckItem if they have the item
+    /// in stock. returns their price and available stock.
+    InStock { buyer: ActorInfo, seller: Actor,
+        product: usize, price: f64, quantity: f64 },
+    /// Returned from seller after ActorMessage::CheckItem if they do not have
+    /// the item in stock. 
+    NotInStock {  buyer: ActorInfo, seller: Actor },
+
+    /// A Response to the current offer, but also closes out the deal entirely.
+    /// Details of the response are given by the result. 
+    OfferResponseAndCloseDeal { buyer: ActorInfo, seller: ActorInfo,
+        result: OfferResult },
+    /// A Close out Deal Message, sent by buyer or seller as needed.
+    /// If sent, both sides should assume that the deal is over, don't try anything
+    /// anymore. 
+    CloseDeal { buyer: ActorInfo, seller: ActorInfo,
+        product: usize, result: OfferResult },
+    
+
+
     /// A message which sends a product from the sender to the reciever.
     /// THe sender SHOULD delete their local item and the reciever SHOULD
     /// add it to their property.
@@ -82,40 +152,35 @@ pub enum ActorMessage {
     EmployeeToFirm { sender: ActorInfo, reciever: ActorInfo,
         action: FirmEmployeeAction },
     
-    /// An offer to the market of the specified product, in for the 
-    /// specified quantity, at the specified amv unit price.
-    SellOrder { sender: ActorInfo, product: usize, quantity: f64,
-        amv: f64 },
-    /// Buy offer with only 1 item within.
-    BuyOfferOnly { buyer: ActorInfo, seller: ActorInfo, product: usize,
-        quantity: f64, offer_product: usize, offer_quantity: f64 },
-    /// Buy offer with multiple items. This is the first and specifics 
-    /// what is being bought.
-    BuyOfferStart { buyer: ActorInfo, seller: ActorInfo, product: usize,
-        quantity: f64, offer_product: usize, offer_quantity: f64 },
-    /// Middle section of a Buy Offer message chain. Includes just the item as
-    /// the start dictates which item was taken.
-    BuyOfferMiddle { buyer: ActorInfo, seller: ActorInfo,
-        offer_product: usize, offer_quantity: f64 },
-    /// End sectino of a Buy Offer message chain. Includes just the items being
-    /// offered.
-    BuyOfferEnd { buyer: ActorInfo, seller: ActorInfo,
-        offer_product: usize, offer_quantity: f64 },
-    /// The Buy offer has been accepted by the seller.
-    AcceptOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
-    /// The Buy offer has been rejected by the seller, but a new offer will 
-    /// be allowed.
-    RejectOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
-    /// The potential Buyer rejects the current price as too expensive for 
-    /// it's budget and closes the deal.
-    RejectPriceAndClose { buyer: ActorInfo, seller: ActorInfo, product: usize },
-    /// The offer has been rejected and closed, the seller does not
-    /// want to or cannot deal with the buyer again today.
-    RejectAndCloseOffer { buyer: ActorInfo, seller: ActorInfo, product: usize },
-    /// The offer has been rebuffed, but only to give the buyer more information.
-    /// This is used for when the buyer is asking for more than the seller has.
-    CorrectOffer { buyer: ActorInfo, seller: ActorInfo, product: usize, 
-        corrected_quantity: usize },
+    
+}
+
+/// Used to denote how an offer went and what the buyer felt like for it.
+pub enum OfferResult {
+    /// Totally Rejected, typically by a seller who's not pleased with the offer
+    /// Reduce Weight in selection -3.
+    Rejected,
+    /// Rejected for being too expensive, Send buy a Buyer.
+    /// Reduce Weight in Selection -2
+    TooExpensive,
+    /// Accepted, but unhappy.
+    /// Reduce Weight in selection -1.5
+    Expensive,
+    /// Accepted, but felt too expensive.
+    /// Reduce Weight in selection -1.1
+    Overpriced,
+    /// Accepted, price was reasonable.
+    /// Increase Weight +1.1
+    Reasonable,
+    /// Accepted, price was great.
+    /// INcrease weight +1.5,
+    Cheap,
+    /// Accetped, price was effectively a steal.
+    /// Increase Weight +3.
+    Steal,
+    /// The Seller cannot accept the offer because he is out of stock
+    /// Reduce weight in selection -10
+    OutOfStock,
 }
 
 impl ActorMessage {
@@ -159,7 +224,7 @@ impl ActorMessage {
                 offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
             ActorMessage::BuyOfferEnd { buyer: _, seller, 
                 offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
-            ActorMessage::AcceptOffer { buyer, seller: _, 
+            ActorMessage::OfferResponse { buyer, seller: _, 
                 product: _ } => *buyer == me, // Seller to Buyer
             ActorMessage::RejectOffer { buyer, seller: _, 
                 product: _ } => *buyer == me, // Seller to buyer

@@ -68,4 +68,23 @@ impl Knowledge {
     pub fn remaining_time(&self) -> f64 {
         self.time_budget - self.time_spent
     }
+
+    /// The number of units to still buy.
+    pub fn target_remaining(&self) -> f64 {
+        self.target - self.achieved
+    }
+
+    /// The AMV budget / the target units to buy.
+    pub fn unit_budget(&self) -> f64 {
+        self.amv_budget / self.target
+    }
+
+    /// Gets the current budget per unit of item left to buy.
+    /// If no target remaining it returns 0.0.
+    pub fn current_unit_budget(&self) -> f64 {
+        if self.target_remaining() == 0 {
+            return 0.0;
+        }
+        self.remaining_amv() / self.target_remaining()
+    }
 }

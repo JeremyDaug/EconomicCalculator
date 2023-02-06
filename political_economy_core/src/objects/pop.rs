@@ -432,10 +432,12 @@ impl Pop {
             ActorMessage::BuyOfferStart { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
             ActorMessage::BuyOfferMiddle { buyer, seller, offer_product, offer_quantity } => todo!(),
             ActorMessage::BuyOfferEnd { buyer, seller, offer_product, offer_quantity } => todo!(),
-            ActorMessage::AcceptOffer { buyer, seller, product } => todo!(),
+            ActorMessage::OfferResponse { buyer, seller, product } => todo!(),
             ActorMessage::RejectOffer { buyer, seller, product } => todo!(),
             ActorMessage::RejectAndCloseOffer { buyer, seller, product } => todo!(),
             ActorMessage::CorrectOffer { buyer, seller, product, corrected_quantity } => todo!(),
+            ActorMessage::RejectPriceAndClose { buyer, seller, product } => todo!(),
+            
         }
     }
 
@@ -456,13 +458,15 @@ impl Pop {
         let our_info = self.memory.product_knowledge.get_mut(&product).unwrap();
         // check the budget as it stands and react before looking too closely.
         let budget = our_info.remaining_amv();
+        let mut target = our_info.target;
         if budget > summary_price * TOO_EXPENSIVE {
             // Too Expensive, reject, and try again.
             tx.send(ActorMessage::RejectAndCloseOffer { buyer: self.actor_info(), 
-                seller: seller, product: product });
+                seller: seller, product: product }).expect("Channel Unexpectedly Closed!");
             return;
         } else if budget > EXPENSIVE {
-            // Expensive, but we'll still suffer and buy it.
+            // Expensive, but we'll still suffer and try to buy it.
+
         } else if budget > OVERPRICED {
             // Overpriced, but buy anyway.
         } else if budget > REASONABLE {
