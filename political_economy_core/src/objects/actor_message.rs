@@ -64,10 +64,8 @@ pub enum ActorMessage {
     /// Starts the Deal Making Process
     FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize },
 
-    /// Buyer Asks the seller for a barter hint for them to give up the
-    /// product included and at the quantity asked for.
-    AskBarterHint { seller: ActorInfo, buyer: ActorInfo, product: usize,
-        quantity: f64},
+    /// Buyer Asks the seller for a barter hint,
+    AskBarterHint { seller: ActorInfo, buyer: ActorInfo},
 
     BarterHint { seller: ActorInfo, buyer: ActorInfo, 
         product: usize, quantity: f64, followup: u64 },
@@ -107,7 +105,7 @@ pub enum ActorMessage {
         product: usize, price: f64, quantity: f64 },
     /// Returned from seller after ActorMessage::CheckItem if they do not have
     /// the item in stock. 
-    NotInStock {  buyer: ActorInfo, seller: ActorInfo },
+    NotInStock { buyer: ActorInfo, seller: ActorInfo },
 
     /// A Response to the current offer, but also closes out the deal entirely.
     /// Details of the response are given by the result. 
