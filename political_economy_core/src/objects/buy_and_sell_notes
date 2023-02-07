@@ -14,7 +14,6 @@ If there are no sellers, it returns ProductNotFound, and records that the item w
 If the Market has sellers, it selects one at random and returns ProductFound with the buyer's and seller's id.
 
 
-
 ``` mermaid
 ---
 title: Market Find Product State Machine
@@ -53,18 +52,33 @@ stateDiagram-v2
     SuccessAddition --> [*]
 ```
 
+## Emergency Find
+
 Additionally, in an emergency scenario, such as being totally out of a life good, a pop may force through a Product Find. This ActorMessage::EmergencyFind message expands the search and lowers the bar to find. Instead of looking for sellers, they look for pops who might have it. Weight is measured by pop wealth rather than price or stock, as wealthy people are more likely to have resources to spare. 
 
 The logic here is simple, it recieves the EmergencyFind message, pulls from all pops randomly weighted by their per capita wealth, then sends that person's info over. The buyer either succeeds and continues on or fails and tries again, going back to the start.
 
 This could be improved further through the information expansion. 
+
+```mermaid
+---
+title: Emergency Find
+---
+stateDiagram-v2
+    [*] --> SendRandomBack: RecieveEmergencyFind
+    SendRandomBack --> PopsEnterDeal
+    PopsEnterDeal --> RecordResult
+    RecordResult --> [*]: No additional EmergencyFinds
+    RecordResult --> SendRandomBack: Additional EmergencyFind Sent
+```
+
 ## Deals In Action
 
 Should the Market send out a ProductFound Message, the buyer and seller mentioned will eventually read it and enter their 'deal' state. 
 
-During the Deal State, both buyer and seller are locked in until the deal is completed. The only things they can do is add messages to their backlog, and act in the deal.
+During the Deal State, both buyer and seller are focused on the deal above everything else. The will not accept any other deal requests so they can insure consistent stock in each deal.
 
-Once they enter we can assume they are in lockstep, they share the same info for the most part. If they send a message to the other, they will wait, reading into the backlog until the next deal message is recieved.
+Once they enter we can assume they are in step with each other for the most part. They don't necissarily have the same info, but will share readily and info should remain mostly consistent between them. Both can recieve items, but not lose them. Whether they can use those new times is not currently known, but unlikely.
 
 If the Seller is out of stock the seller Sends a CloseDeal{OutOfStock} message and the buyer doesn't wait, and just drops out of the deal. The Market Recieves this message and reduces the weight of the seller for that item as they are out of stock.
 
@@ -74,6 +88,23 @@ If the unit price is less than x1.5 the unit price then they'll buy it, but make
 
 Knowing they'll try to buy what they can, they'll select which method of purchase they'll attempt. They can attempt to pay Cash, if the market has currency, Barter, if the target can barter (only pops can), or if all else fails, they'll attempt an AMV Overload.
 
+# The Deal
+
+The Deal is what we call the period in which an exchange is being made. The system doesn't necissarily allow for haggling in the sense of a back and forth with both sides giving and taking. The seller sets the price and the buyer can send goods to try and buy them. They don't necissarily get better chances, just more information and a chance to try again.
+
+Typically, the buyer and seller step in, knowing the item and price, but not it's quantity. The Seller, once they step in, send their stock. If out of stock, they'll send that and close immediately.
+
+If the Seller is in stock, they'll send the amount available. The Buyer, while waiting also checks the price against it's budget. 
+
+<mark>TODO</mark> There should likely be a mechanism to decide between buying despite being too expensive or to skip out and try again. 
+
+```mermaid
+---
+title: Deal State Machine Logic
+---
+stateDiagram-v2
+    [*] --> CheckStock: Buyer/Seller Recieve ProductFound
+```
 
 # Thoughts to take forward and update around
 
