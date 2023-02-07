@@ -2,9 +2,17 @@ use core::panic;
 use std::collections::{HashMap, HashSet};
 use barrage::{Sender, Receiver};
 use crossbeam::thread;
+use itertools::Itertools;
+use rand::{Rng, SeedableRng, thread_rng};
 
 use crate::{demographics::Demographics, data_manager::DataManager};
-use super::{pop::Pop, firm::Firm, actor::Actor, actor_message::{ActorMessage, ActorInfo}, institution::Institution, state::State};
+use super::{pop::Pop, 
+    firm::Firm, 
+    actor::Actor, 
+    actor_message::{ActorMessage, ActorInfo}, 
+    institution::Institution, 
+    state::State, 
+    seller::Seller};
 
 const SHOPPING_TIME_COST: f64 = 0.2;
 
@@ -99,6 +107,19 @@ pub struct Market {
     /// The info of the market from yesterday, stored for general
     /// information.
     pub previous_day: MarketHistory,
+
+    /// Stores products offered for sale, and a list of weighted actors to 
+    /// help with selection. Values are the total weight available, followed by
+    /// the list of available sellers.
+    seller_weights: HashMap<usize, (f64, Vec<WeightedActor>)>,
+    /// All pops in the system, weighted by their current wealth.
+    /// 
+    /// TODO May be updated to a rolling average instead of a daily, perfectly
+    /// accurate, measure.
+    pop_wealth_weight: Vec<WeightedActor>,
+    /// Ongoing record of deals, used to keep track more easily and allows us to update
+    /// market data more easily. Why send the same messages twice afterall?.
+    ongoing_deals: Vec<DealRecord>
 }
 
 impl Market {
@@ -138,13 +159,17 @@ impl Market {
                 }));
             }
             for pop in pops.iter_mut() {
+                // add pop to popWealthWeight for later possible use
+                let history = MarketHistory::create(self);
+                self.pop_wealth_weight.push(WeightedActor { actor: pop.actor_info(), 
+                    weight: pop.total_wealth(&history) });
                 let pop_sender = lcl_sender.clone();
                 let mut pop_recv = lcl_receiver.clone();
-                let history = MarketHistory::create(self);
                 threads.push(scope.spawn(move |_| {
                     pop.run_market_day(pop_sender, &mut pop_recv,
                     data, demos, &history);
                 }));
+
             }
             for inst in institutions.iter_mut() {
                 let sender = lcl_sender.clone();
@@ -187,16 +212,24 @@ impl Market {
                             ActorInfo::State(id) => completed_states.insert(id),
                         };
                     },
-                    ActorMessage::FindProduct { product, 
-                        amount, time, sender} => {
-                            // record the amount sought from them.
-                            *self.product_demanded.entry(product).or_insert(0.0)
-                                += amount;
-                            let outcome = self.find_product(product,
-                                time, sender);
-                            lcl_sender.send(outcome)
-                                .expect("Local Channel Closed.");
+                    ActorMessage::FindProduct { product, quantity, sender} => { 
+                        let result = self.find_seller(product, quantity, sender);
+                        lcl_sender.send(result);
                     },
+                    ActorMessage::FoundProduct { seller, buyer, product } => {
+                        // keep track of any deals in progress so we can track their outcomes.
+                        self.ongoing_deals.push(DealRecord::new(
+                            vec![seller, buyer], 
+                            product, 0.0, 
+                            0.0, HashMap::new()));
+                    },
+                    ActorMessage::BuyOfferOnly { buyer, seller, 
+                    product, price_opinion, quantity, 
+                    offer_product, offer_quantity } => {
+                        let mut deal = self.find_deal(buyer, seller, product);
+                    },
+                    ActorMessage::SellOrder { sender, product, 
+                    quantity, amv } => self.add_seller_weight(&sender, product, quantity, amv),
                     _ => ()
                 }
             }
@@ -216,15 +249,72 @@ impl Market {
                 }
             }
             // if we got here, then we're done. Do any clean and info 
+            // clean out sellers
+            self.seller_weights.clear();
+            // product info will be needed for later use, so don't clear out just yet.
             // consolidation outside of this thread scope so we can edit stuff.
         }).unwrap();
     }
 
-    pub fn find_product(&mut self, product: usize, time: f64, sender: ActorInfo) -> ActorMessage {
-        // check that we have any sellers in the first place.
-        
-        // if no success (ran out of time or no sellers), return Failure
-        ActorMessage::ProductNotFound { product, buyer: sender, time_remaining: time-0.2 }
+    /// Adds seller info, also calculating it's weight in the market selection process.
+    fn add_seller_weight(&mut self, sender: &ActorInfo, product: usize, quantity: f64, amv: f64) {
+        let list = self.seller_weights.entry(product).or_insert((0.0, vec![]));
+        let market_price = *self.previous_day.market_prices.get(&product).unwrap_or(&0.0);
+        let mut weight = 0.0;
+        if market_price <= 0.0 && amv <= 0.0 { // TODO 0 or negative amv or market price for product found.
+            todo!("Do later, I can't be bothered right now."); 
+        } else { // Positive market value and price
+            // Inversely proportional to market value. AMV = 1/2 => weight == 2
+            weight = (market_price / amv) * 100.0;
+        }
+        // finish by adding to the total market supply.
+        *self.products_for_sale.entry(product).or_default() += quantity;
+    }
+
+    /// Does the work of finding a seller for a buyer as well as recording 
+    /// their demand for future needs.
+    pub fn find_seller(&mut self, product: usize, quantity: f64, sender: ActorInfo) -> ActorMessage {
+        // record the demand for future purposes
+        // TODO improve demand recording to not double dip on demand.
+        *self.product_demanded.entry(product).or_insert(0.0) += quantity;
+        // if we have any sellers, select one at random
+        if let Some(sellers) = self.seller_weights.get(&product) {
+            // TODO move this outside of here so it can be properly controlled and managed for testing purposes.
+            let mut rng = thread_rng();
+            let select: f64 = rng.gen();
+            let select = select * sellers.0;
+            // iterate over actors until weight is < sum up to that point.
+            let mut sum = 0.0;
+            for actor in sellers.1.iter() {
+                sum += actor.weight;
+                if sum > select {
+                    return ActorMessage::FoundProduct { seller: actor.actor, buyer: sender, product };
+                }
+            }
+        }
+        // if no sellers for taht item (get returned None) return ProductNotFound
+        ActorMessage::ProductNotFound { product, buyer: sender }
+    }
+
+    /// Finds an ongoing deal in our list of deals.
+    /// 
+    /// Panics if deal was not found.
+    fn find_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) -> &mut DealRecord {
+        self.ongoing_deals.iter_mut()
+        .filter(|x| x.request_product == product) // narrow to those with that product
+        .find(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
+        .expect("Deal Not Found, PROBLEM!")
+    }
+
+    /// Finds and removes an ongoing deal, meaning it should be closed out.
+    /// 
+    /// Panics if deal was not found.
+    fn remove_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) {
+        let idx = self.ongoing_deals.iter()
+        .filter(|x| x.request_product == product) // narrow to those with that product
+        .find_position(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
+        .expect("Deal Not Found, PROBLEM!").0;
+        self.ongoing_deals.remove(idx);
     }
 }
 
@@ -332,4 +422,37 @@ pub enum MarketMessageEnum {
     /// Tells the market threads that they will not recieve any more messages 
     /// and to close out.
     ConfirmClose,
+}
+
+/// helper struct for storing actors and their weight. Primarily used for 
+/// seller selection in the Market class.
+/// 
+/// Contains the ActorInfo and the weight of that actor. Bigger number is better.
+#[derive(Debug, Clone, Copy)]
+pub struct WeightedActor {
+    pub actor: ActorInfo,
+    pub weight: f64,
+}
+
+#[derive(Debug)]
+pub struct DealRecord {
+    pub actors: Vec<ActorInfo>,
+    pub request_product: usize,
+    pub request_quantity: f64,
+    pub offer: HashMap<usize, f64>,
+}
+
+impl DealRecord {
+    pub fn new(actors: Vec<ActorInfo>, 
+    request_product: usize, 
+    request_quantity: f64, 
+    unit_price: f64,
+    offer: HashMap<usize, f64>) -> Self {
+        Self { 
+           actors, 
+           request_product, 
+           request_quantity, 
+           offer 
+        } 
+    }
 }

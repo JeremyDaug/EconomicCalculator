@@ -94,9 +94,21 @@ The Deal is what we call the period in which an exchange is being made. The syst
 
 Typically, the buyer and seller step in, knowing the item and price, but not it's quantity. The Seller, once they step in, send their stock. If out of stock, they'll send that and close immediately.
 
-If the Seller is in stock, they'll send the amount available. The Buyer, while waiting also checks the price against it's budget. 
+If the Seller is in stock, they'll send the amount available. The Buyer, while waiting also checks the price against it's budget. Currently, if the price is above 1.5x it's budget per unit it and it has excess item, it will reject and roll again. If it is below that 1.5x threshold, or it lacks the time to try again, it will buy.
 
-<mark>TODO</mark> There should likely be a mechanism to decide between buying despite being too expensive or to skip out and try again. 
+<mark>TODO</mark> There should likely be a mechanism to decide between buying despite being too expensive or to skip out and try again. Most likely mechanism is a combination of population despiration, population excess wealth, and remaining time to try again, immediacy of the desire, market volatility, and a comparison of the current price vs the market price.
+
+Before it goes further it checks it's available currency, calculating their estimated value (Current AMV * Salability) and checking that against the total price requested. If they don't have enough they ask for a Barter Hint. If they have enough, they skip past the following step onto just trying to buy.
+
+Giving a Barter hint costs the seller a small amount of time for each response sent past the first. It tries to give equal time to everyone, so calculates it's expendable budget based on the amount being requested divided by their current stock. With that time availabe, they send at least one hint, the item they desire the most, then repeat it, sending the next item they desire most until they either run out of time, or run out of desired items. It starts with the most desired, walks up their desire tiers, not repeating anything. If they have run out of time, they will give one hint, and stop there.
+
+The Buyer will take these hint(s) and if they feel they need more leverage, will also cross reference with current market demand and make additional educated guesses from there. They will begin gathering an exchange offer in a list of goods. It will prioritize cash, then believed barter items, then everything else. It will also give weight to value dense items as they are less likely to be rejected or ignored by the seller.
+
+<mark>TODO</mark> Value Density preference may become another shared market property. Items that are more dense than this value have their value increased proportionally, or at least not reduced, items with less density have their value reduced proportionally.
+
+With the buyer's offer prepared, they send it to the seller. The seller then runs the calculation to see if the trade is worth it.
+
+First it organizes the items being offered by personal desire priority. Those items that are desired and have a slot are put in the front. Those that are desired but don't have a slot to fill are put next. Then everything else, organized by salability.
 
 ```mermaid
 ---

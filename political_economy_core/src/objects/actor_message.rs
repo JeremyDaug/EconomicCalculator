@@ -46,26 +46,23 @@ pub enum ActorMessage {
         amv: f64 },
 
     /// The find product message, recieved by the market.
-    /// Contains the product id, the amount of the item desired, and the 
-    /// amount of time the actor is willing to pay for to find them.
+    /// Contains the product id and the amount of the item desired.
     /// Also includes the sender and their type so
     /// a return message can be sent to them.
-    FindProduct{ product: usize, amount: f64, time: f64, 
+    FindProduct{ product: usize, quantity: f64, 
         sender: ActorInfo },
     /// Returned from an attempt to buy an item and unable to
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
     /// be aware that the item is unavailable.
-    ProductNotFound { product: usize, buyer: ActorInfo, 
-        time_remaining: f64},
+    ProductNotFound { product: usize, buyer: ActorInfo},
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
     /// Gives the product in question, the amount available to purchase, 
     /// the price / unit being offered, and the time left after finding it.
     /// 
     /// Starts the Deal Making Process
-    FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize,
-        quantity: f64, price: f64, time_change: f64 },
+    FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize },
 
     /// Buyer Asks the seller for a barter hint for them to give up the
     /// product included and at the quantity asked for.
@@ -73,7 +70,7 @@ pub enum ActorMessage {
         quantity: f64},
 
     BarterHint { seller: ActorInfo, buyer: ActorInfo, 
-        product: usize, quantity: f64},
+        product: usize, quantity: f64, followup: u64 },
 
     /// Starts an offer with only 1 item within. Send buy a buyer.
     BuyOfferOnly { buyer: ActorInfo, seller: ActorInfo, product: usize,
@@ -102,15 +99,15 @@ pub enum ActorMessage {
     /// Follow up with a different product then last time. 
     /// Useful for pops to buy multiple items at the same store, saving time.
     /// Also uses excess time from existing item instead of next item's time.
-    CheckItem { buyer: ActorInfo, seller: Actor,
+    CheckItem { buyer: ActorInfo, seller: ActorInfo,
         proudct: usize },
     /// Return from seller after ActorMessage::CheckItem if they have the item
     /// in stock. returns their price and available stock.
-    InStock { buyer: ActorInfo, seller: Actor,
+    InStock { buyer: ActorInfo, seller: ActorInfo,
         product: usize, price: f64, quantity: f64 },
     /// Returned from seller after ActorMessage::CheckItem if they do not have
     /// the item in stock. 
-    NotInStock {  buyer: ActorInfo, seller: Actor },
+    NotInStock {  buyer: ActorInfo, seller: ActorInfo },
 
     /// A Response to the current offer, but also closes out the deal entirely.
     /// Details of the response are given by the result. 
@@ -156,9 +153,12 @@ pub enum ActorMessage {
 }
 
 /// Used to denote how an offer went and what the buyer felt like for it.
+#[derive(Debug, Clone, Copy)]
 pub enum OfferResult {
     /// Totally Rejected, typically by a seller who's not pleased with the offer
     /// Reduce Weight in selection -3.
+    /// 
+    /// Currently Not Used
     Rejected,
     /// Rejected for being too expensive, Send buy a Buyer.
     /// Reduce Weight in Selection -2
@@ -191,18 +191,17 @@ impl ActorMessage {
             ActorMessage::StartDay => true,
             ActorMessage::Finished { sender } => me == *sender,
             ActorMessage::AllFinished => true,
-            ActorMessage::FindProduct { product: _, amount: _, time: _, 
-                sender: _, } => false, // for market, sent by me
+            ActorMessage::FindProduct { .. } => false, // for market, sent by me
             ActorMessage::FoundProduct { seller, 
-                buyer, product: _, quantity: _, price: _, time_change: _ } => {
+                buyer, .. } => {
                     *seller == me || *buyer == me
                 }, // from market, created by FindProduct, you're buyer or seller.
-            ActorMessage::ProductNotFound { product: _, buyer, 
-                time_remaining: _ } => *buyer == me, // from market to buyer
-            ActorMessage::SendProduct { sender: _, reciever, 
-                product: _, amount: _ } => *reciever == me, // sends product to reciever
-            ActorMessage::SendWant { sender: _, reciever, 
-                want: _, amount: _ } => *reciever == me, // sends want to reciever
+            ActorMessage::ProductNotFound { buyer, 
+                .. } => *buyer == me, // from market to buyer
+            ActorMessage::SendProduct { reciever, 
+                .. } => *reciever == me, // sends product to reciever
+            ActorMessage::SendWant { reciever, 
+                .. } => *reciever == me, // sends want to reciever
             ActorMessage::DumpProduct { sender: _, 
                 product: _, amount: _ } => false, // dupms product onto market
             ActorMessage::WantSplash { sender: _, want: _, 
@@ -216,16 +215,18 @@ impl ActorMessage {
                 quantity: _, amv: _ } => false,
             ActorMessage::BuyOfferOnly { buyer: _, seller, 
                 product: _, quantity: _, offer_product: _, 
-                offer_quantity: _ } => *seller == me, // sent from buyer to seller
+                offer_quantity: _,
+                price_opinion: _} => *seller == me, // sent from buyer to seller
             ActorMessage::BuyOfferStart { buyer: _, seller, 
                 product: _, quantity: _, offer_product: _, 
-                offer_quantity: _ } => *seller == me, // buyer to seller
+                offer_quantity: _,
+                price_opinion, } => *seller == me, // buyer to seller
             ActorMessage::BuyOfferMiddle { buyer: _, seller, 
                 offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
             ActorMessage::BuyOfferEnd { buyer: _, seller, 
                 offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
             ActorMessage::OfferResponse { buyer, seller: _, 
-                product: _ } => *buyer == me, // Seller to Buyer
+                result: _, } => *buyer == me, // Seller to Buyer
             ActorMessage::RejectOffer { buyer, seller: _, 
                 product: _ } => *buyer == me, // Seller to buyer
             ActorMessage::RejectAndCloseOffer { buyer, seller: _, 

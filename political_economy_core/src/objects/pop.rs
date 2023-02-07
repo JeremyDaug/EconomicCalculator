@@ -427,7 +427,7 @@ impl Pop {
             ActorMessage::SellOrder { sender, product, quantity, amv } => todo!(),
             ActorMessage::DumpProduct { sender, product, amount } => todo!(),
             ActorMessage::AllFinished => (),
-            ActorMessage::FindProduct { product, amount, time, sender } => (),
+            ActorMessage::FindProduct { product, quantity: amount, time, sender } => (),
             ActorMessage::BuyOfferOnly { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
             ActorMessage::BuyOfferStart { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
             ActorMessage::BuyOfferMiddle { buyer, seller, offer_product, offer_quantity } => todo!(),
@@ -504,6 +504,18 @@ impl Pop {
             ActorInfo::Institution(id) => (), // placeholder for now. Logic should be same as state.
             ActorInfo::State(id) => (), // placeholder, should be similar to Institution.
         }
+    }
+
+    /// gets the total current wealth of the pop in question.
+    pub fn total_wealth(&self, history: &MarketHistory) -> f64 {
+        self.desires.property.iter()
+        .map(|x| history.market_prices.get(x.0).unwrap_or(&0.0))
+        .sum()
+    }
+
+    /// Gets the wealth of the pop on a per-capita basis.
+    pub fn per_capita_wealth(&self, history: &MarketHistory) -> f64 {
+        self.total_wealth(history) / (self.count() as f64)
     }
 }
 
