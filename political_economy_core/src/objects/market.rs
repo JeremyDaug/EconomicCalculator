@@ -9,7 +9,7 @@ use crate::{demographics::Demographics, data_manager::DataManager};
 use super::{pop::Pop, 
     firm::Firm, 
     actor::Actor, 
-    actor_message::{ActorMessage, ActorInfo}, 
+    actor_message::{ActorMessage, ActorInfo, OfferResult}, 
     institution::Institution, 
     state::State, 
     seller::Seller};
@@ -226,8 +226,34 @@ impl Market {
                     ActorMessage::BuyOfferOnly { buyer, seller, 
                     product, price_opinion, quantity, 
                     offer_product, offer_quantity } => {
+                        // update deal
                         let mut deal = self.find_deal(buyer, seller, product);
+                        deal.offer.insert(product, offer_quantity);
                     },
+                    ActorMessage::BuyOfferStart { buyer, seller, product,
+                    price_opinion, quantity, 
+                    offer_product, offer_quantity } => {
+                        // update deal
+                        let mut deal = self.find_deal(buyer, seller, product);
+                        deal.offer.insert(product, offer_quantity);
+                    },
+                    ActorMessage::BuyOfferMiddle { buyer, seller,
+                    product, offer_product, offer_quantity } => {
+                        // update deal
+                        let mut deal = self.find_deal(buyer, seller, product);
+                        deal.offer.insert(product, offer_quantity);
+                    },
+                    ActorMessage::BuyOfferEnd { buyer, seller,
+                    product, offer_product, offer_quantity } => {
+                        // update deal
+                        let mut deal = self.find_deal(buyer, seller, product);
+                        deal.offer.insert(product, offer_quantity);
+                    },
+                    ActorMessage::SellerAcceptOfferAsIs { buyer, seller, 
+                    product, offer_result } => {
+                        // finish the deal, but don't delete it just yet.
+                        self.finish_deal(buyer, seller, product, offer_result);
+                    }
                     ActorMessage::SellOrder { sender, product, 
                     quantity, amv } => self.add_seller_weight(&sender, product, quantity, amv),
                     _ => ()
@@ -315,6 +341,42 @@ impl Market {
         .find_position(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
         .expect("Deal Not Found, PROBLEM!").0;
         self.ongoing_deals.remove(idx);
+    }
+
+    /// Processes a price opinion recieved and applies that modification to the seller's weight.
+    fn process_price_opinion(&mut self, seller: ActorInfo, 
+    product: usize, price_opinion: OfferResult) {
+        let weights = self.seller_weights.get_mut(&product)
+        .expect("Product not Found, Panic!");
+        if let OfferResult::OutOfStock = price_opinion { // if the seller is out of stock, remove them and their weight.
+            let idx = weights.1.iter()
+            .find_position(|x| x.actor == seller).expect("Seller not found?").0;
+            let weight = weights.1.remove(idx);
+            weights.0 -= weight.weight;
+            return;
+        }
+        // seller is not out of stock, alter the weight appropriately to the message.
+        let weight = weights.1.iter_mut().find(|x| x.actor == seller)
+        .expect("Seller not found? PANIC!");
+        let mut alteration = 0.0;
+        match price_opinion {
+            OfferResult::TooExpensive => alteration += -5.0,
+            OfferResult::Expensive => alteration += -2.0,
+            OfferResult::Overpriced => alteration += -1.0,
+            OfferResult::Reasonable => alteration += 1.0,
+            OfferResult::Cheap => alteration += 5.0,
+            OfferResult::Steal => alteration += 10.0,
+            _ => ()
+        }
+        weight.weight += alteration;
+        weights.0 += alteration;
+    }
+
+    /// Finishes out a deal, processing the results for market info and price 
+    /// adjustments, clear out the deal also, but don't close it out totally just yet.
+    fn finish_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize, offer_result: OfferResult) {
+        let deal = self.find_deal(buyer, seller, product);
+        // TODO Pick up here tomorrow.
     }
 }
 

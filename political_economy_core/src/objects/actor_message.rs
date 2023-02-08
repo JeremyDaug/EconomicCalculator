@@ -71,6 +71,7 @@ pub enum ActorMessage {
         product: usize, quantity: f64, followup: u64 },
 
     /// Starts an offer with only 1 item within. Send buy a buyer.
+    /// TODO consolidate these to mork more like BarterHint and OfferAcceptedWithChange using followup params to note length.
     BuyOfferOnly { buyer: ActorInfo, seller: ActorInfo, product: usize,
         price_opinion: OfferResult, quantity: f64, offer_product: usize, 
         offer_quantity: f64 },
@@ -81,18 +82,43 @@ pub enum ActorMessage {
         offer_quantity: f64 },
     /// Middle section of a Buy Offer message chain. Includes just the item as
     /// the start dictates which item was taken.
-    BuyOfferMiddle { buyer: ActorInfo, seller: ActorInfo,
+    BuyOfferMiddle { buyer: ActorInfo, seller: ActorInfo, product: usize,
         offer_product: usize, offer_quantity: f64 },
     /// End sectino of a Buy Offer message chain. Includes just the items being
     /// offered.
-    BuyOfferEnd { buyer: ActorInfo, seller: ActorInfo,
+    BuyOfferEnd { buyer: ActorInfo, seller: ActorInfo, product: usize,
         offer_product: usize, offer_quantity: f64 },
 
-    /// A Response to the current offer. Details of the response are given by
-    /// the result. Regardless, it closes out the current offer being made.
-    /// Allows follow-up offers.
-    OfferResponse { buyer: ActorInfo, seller: ActorInfo,
-        result: OfferResult },
+    /// The Seller accepts his current deal's offer as is, replying with the
+    /// buyer's offer result to simplify closeout processes.
+    SellerAcceptOfferAsIs { buyer: ActorInfo, seller: ActorInfo,
+        product: usize, offer_result: OfferResult },
+
+    /// Seller is correcting the offer, the quantity the offer buys is
+    /// less than expected. No change to be given.
+    /// TODO consolidate these to mork more like BarterHint and OfferAcceptedWithChange using followup params to note length.
+    OfferCorrectionOnly { buyer: ActorInfo, seller: ActorInfo, 
+        product: usize, quantity: f64 },
+    /// Seller is correcting the offer, the quantity the offer buys is
+    /// less than expected, and the amount offered is to be reduced.
+    OfferCorrectionStart { buyer: ActorInfo, seller: ActorInfo, 
+        product: usize, quantity: f64 },
+    /// Followup message to OfferCorrectionStart and OfferCorrectionMiddle 
+    /// messages which came before this one in the deal. Includes the
+    /// product being given back and it's quantity.
+    OfferCorrectionMiddle { buyer: ActorInfo, seller: ActorInfo, 
+        product: usize, offer_product: usize, quantity: f64 },
+    /// The Last message in an offer correction chain. Can follow either 
+    /// OfferCorrectionStart or OfferCorrectionMiddle. Includes the
+    /// last product being removed.
+    OfferCorrectionEnd { buyer: ActorInfo, seller: ActorInfo, 
+        product: usize, offer_product: usize, quantity: f64 },
+
+    /// Asked for quantity is valid and the offer is in fact excessive. The seller
+    /// will send back any items it deems unnecessary. The Followup's is how many 
+    /// items are left in the chain. 0 means it's done.
+    OfferAcceptedWithChange { buyer: ActorInfo, seller: ActorInfo,
+        product: usize, change_product: usize, quantity: f64, followups: usize },
 
     /// Follow up with a different product then last time. 
     /// Useful for pops to buy multiple items at the same store, saving time.
