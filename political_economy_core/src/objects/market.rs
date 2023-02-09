@@ -212,8 +212,8 @@ impl Market {
                             ActorInfo::State(id) => completed_states.insert(id),
                         };
                     },
-                    ActorMessage::FindProduct { product, quantity, sender} => { 
-                        let result = self.find_seller(product, quantity, sender);
+                    ActorMessage::FindProduct { product, sender} => { 
+                        let result = self.find_seller(product, sender);
                         lcl_sender.send(result);
                     },
                     ActorMessage::FoundProduct { seller, buyer, product } => {
@@ -223,30 +223,40 @@ impl Market {
                             product, 0.0, 
                             0.0, HashMap::new()));
                     },
+                    ActorMessage::InStock { buyer, seller, product, 
+                    price, quantity } => {
+                        let mut deal = self.find_deal_mut(buyer, seller, product);
+                        deal.request_product = product;
+                        deal.unit_price = price;
+                    }
                     ActorMessage::BuyOfferOnly { buyer, seller, 
                     product, price_opinion, quantity, 
                     offer_product, offer_quantity } => {
                         // update deal
-                        let mut deal = self.find_deal(buyer, seller, product);
+                        let mut deal = self.find_deal_mut(buyer, seller, product);
                         deal.offer.insert(product, offer_quantity);
+                        deal.request_quantity = quantity;
+                        *self.product_demanded.entry(product).or_insert(0.0) += quantity;
                     },
                     ActorMessage::BuyOfferStart { buyer, seller, product,
                     price_opinion, quantity, 
                     offer_product, offer_quantity } => {
                         // update deal
-                        let mut deal = self.find_deal(buyer, seller, product);
+                        let mut deal = self.find_deal_mut(buyer, seller, product);
                         deal.offer.insert(product, offer_quantity);
+                        deal.request_quantity = quantity;
+                        *self.product_demanded.entry(product).or_insert(0.0) += quantity;
                     },
                     ActorMessage::BuyOfferMiddle { buyer, seller,
                     product, offer_product, offer_quantity } => {
                         // update deal
-                        let mut deal = self.find_deal(buyer, seller, product);
+                        let mut deal = self.find_deal_mut(buyer, seller, product);
                         deal.offer.insert(product, offer_quantity);
                     },
                     ActorMessage::BuyOfferEnd { buyer, seller,
                     product, offer_product, offer_quantity } => {
                         // update deal
-                        let mut deal = self.find_deal(buyer, seller, product);
+                        let mut deal = self.find_deal_mut(buyer, seller, product);
                         deal.offer.insert(product, offer_quantity);
                     },
                     ActorMessage::SellerAcceptOfferAsIs { buyer, seller, 
@@ -299,10 +309,7 @@ impl Market {
 
     /// Does the work of finding a seller for a buyer as well as recording 
     /// their demand for future needs.
-    pub fn find_seller(&mut self, product: usize, quantity: f64, sender: ActorInfo) -> ActorMessage {
-        // record the demand for future purposes
-        // TODO improve demand recording to not double dip on demand.
-        *self.product_demanded.entry(product).or_insert(0.0) += quantity;
+    pub fn find_seller(&mut self, product: usize, sender: ActorInfo) -> ActorMessage {
         // if we have any sellers, select one at random
         if let Some(sellers) = self.seller_weights.get(&product) {
             // TODO move this outside of here so it can be properly controlled and managed for testing purposes.
@@ -325,7 +332,17 @@ impl Market {
     /// Finds an ongoing deal in our list of deals.
     /// 
     /// Panics if deal was not found.
-    fn find_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) -> &mut DealRecord {
+    fn find_deal(&self, buyer: ActorInfo, seller: ActorInfo, product: usize) -> &DealRecord {
+        self.ongoing_deals.iter()
+        .filter(|x| x.request_product == product) // narrow to those with that product
+        .find(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
+        .expect("Deal Not Found, PROBLEM!")
+    }
+
+    /// Finds an ongoing deal in our list of deals.
+    /// 
+    /// Panics if deal was not found.
+    fn find_deal_mut(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) -> &mut DealRecord {
         self.ongoing_deals.iter_mut()
         .filter(|x| x.request_product == product) // narrow to those with that product
         .find(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
@@ -374,9 +391,30 @@ impl Market {
 
     /// Finishes out a deal, processing the results for market info and price 
     /// adjustments, clear out the deal also, but don't close it out totally just yet.
-    fn finish_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize, offer_result: OfferResult) {
+    fn finish_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize, 
+        offer_result: OfferResult) {
         let deal = self.find_deal(buyer, seller, product);
-        // TODO Pick up here tomorrow.
+        // get the price of the merchandise.
+        let product_price = deal.request_quantity * deal.unit_price;
+        // summarize the price of items offered in current market value.
+        let mut offer_value: f64 = deal.offer.iter()
+        .map(|(prod, quant)| quant * self.prices.get(prod).unwrap_or(&1.0))
+        .sum();
+        for (item, quantity) in deal.offer.iter() {
+            let price = self.prices.get(item).unwrap_or(&1.0);
+            offer_value += price * quantity;
+        }
+
+        match offer_result {
+            OfferResult::Rejected => {},
+            OfferResult::TooExpensive => todo!(),
+            OfferResult::Expensive => todo!(),
+            OfferResult::Overpriced => todo!(),
+            OfferResult::Reasonable => todo!(),
+            OfferResult::Cheap => todo!(),
+            OfferResult::Steal => todo!(),
+            OfferResult::OutOfStock => todo!(),
+        }
     }
 }
 
@@ -501,6 +539,7 @@ pub struct DealRecord {
     pub actors: Vec<ActorInfo>,
     pub request_product: usize,
     pub request_quantity: f64,
+    pub unit_price: f64,
     pub offer: HashMap<usize, f64>,
 }
 
@@ -514,6 +553,7 @@ impl DealRecord {
            actors, 
            request_product, 
            request_quantity, 
+           unit_price,
            offer 
         } 
     }

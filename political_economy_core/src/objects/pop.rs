@@ -368,77 +368,7 @@ impl Pop {
         tx: &Sender<ActorMessage>, data: &DataManager, 
         market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
         spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
-        match msg {
-            ActorMessage::FoundProduct { seller, 
-            buyer, product, quantity, price, time_change } => { 
-                if buyer == self.actor_info() { // Product is for us
-                    // product we were looking for was found, record time returned,
-                    // save the excess, then try and buy.
-                    let mut know = self.memory.product_knowledge.entry(product).or_insert(Knowledge::new());
-                    // add the current budget (budget - time spent) - the time_change recieved back.
-                    know.time_spent += know.time_budget - know.time_spent - time_change;
-                    self.try_to_buy(rx, tx, data, market, keep, 
-                        spend, returned, seller, product, quantity, price);
-                } else { // product is from us
-                    // no need to record anything, enter try to sell.
-                    // TODO add to sell here to lock in the exchange.
-                }
-            },
-            ActorMessage::ProductNotFound { product, 
-            buyer: _, time_remaining: change } => { // couldn't find product
-                // liquidate returned time
-                *returned.entry(0).or_insert(0.0) += change;
-                // record the change we got back in time and amv
-                let mut memory = self.memory.product_knowledge.entry(product)
-                    .or_insert(Knowledge::new());
-                memory.time_spent = memory.time_budget - memory.time_spent - change;
-            },
-            ActorMessage::SendProduct { sender: _, reciever: _, 
-            product, amount } => {
-                // product sent to me from someone. Recieve it.
-                *self.desires.property.entry(product).or_insert(0.0) += amount;
-                // TODO gift responses, sender investigation, and other stuff possibly here.
-            },
-            ActorMessage::SendWant { sender: _, reciever: _, 
-            want, amount } => {
-                // Just take the want, don't worry about it for now.
-                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
-                // TODO possibly look into where this want comes from, maybe reject it.
-            },
-            ActorMessage::WantSplash { sender: _, want, amount } => {
-                // Want Splash must be accepted regardless.
-                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
-                // TODO INFO and approval expansion, maybe throw shit back at the sender if the splash is negative.
-            },
-            ActorMessage::FirmToEmployee { sender: _, reciever: _, 
-            action: _ } => {
-                // skip for now, nothing should be needed outside of the workday
-                // TODO maybe have Overtime rules used here, 
-            },
-            ActorMessage::EmployeeToFirm { sender: _, reciever: _, 
-            action: _ } => {
-                // Skip for now, should only be needed in later events
-                // TODO add EmployeeToFirm Actions and the possibility that they can be used at any time.
-            },
-
-            // Skip these, no actions from us here. Not consoldiated for future additions.
-            ActorMessage::StartDay => (),
-            ActorMessage::Finished { sender } => (),
-            ActorMessage::SellOrder { sender, product, quantity, amv } => todo!(),
-            ActorMessage::DumpProduct { sender, product, amount } => todo!(),
-            ActorMessage::AllFinished => (),
-            ActorMessage::FindProduct { product, quantity: amount, time, sender } => (),
-            ActorMessage::BuyOfferOnly { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
-            ActorMessage::BuyOfferStart { buyer, seller, product, quantity, offer_product, offer_quantity } => todo!(),
-            ActorMessage::BuyOfferMiddle { buyer, seller, offer_product, offer_quantity } => todo!(),
-            ActorMessage::BuyOfferEnd { buyer, seller, offer_product, offer_quantity } => todo!(),
-            ActorMessage::OfferResponse { buyer, seller, product } => todo!(),
-            ActorMessage::RejectOffer { buyer, seller, product } => todo!(),
-            ActorMessage::RejectAndCloseOffer { buyer, seller, product } => todo!(),
-            ActorMessage::CorrectOffer { buyer, seller, product, corrected_quantity } => todo!(),
-            ActorMessage::RejectPriceAndClose { buyer, seller, product } => todo!(),
-            
-        }
+        todo!("Processing common messages go here.")
     }
 
     /// Try to buy items
@@ -461,8 +391,7 @@ impl Pop {
         let mut target = our_info.target;
         if budget > summary_price * TOO_EXPENSIVE {
             // Too Expensive, reject, and try again.
-            tx.send(ActorMessage::RejectAndCloseOffer { buyer: self.actor_info(), 
-                seller: seller, product: product }).expect("Channel Unexpectedly Closed!");
+            
             return;
         } else if budget > EXPENSIVE {
             // Expensive, but we'll still suffer and try to buy it.

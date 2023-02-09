@@ -49,8 +49,7 @@ pub enum ActorMessage {
     /// Contains the product id and the amount of the item desired.
     /// Also includes the sender and their type so
     /// a return message can be sent to them.
-    FindProduct{ product: usize, quantity: f64, 
-        sender: ActorInfo },
+    FindProduct{ product: usize, sender: ActorInfo },
     /// Returned from an attempt to buy an item and unable to
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
@@ -63,6 +62,14 @@ pub enum ActorMessage {
     /// 
     /// Starts the Deal Making Process
     FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize },
+
+    /// Return from seller after ActorMessage::CheckItem if they have the item
+    /// in stock. returns their price and available stock.
+    InStock { buyer: ActorInfo, seller: ActorInfo,
+        product: usize, price: f64, quantity: f64 },
+    /// Returned from seller after ActorMessage::CheckItem if they do not have
+    /// the item in stock. 
+    NotInStock { buyer: ActorInfo, seller: ActorInfo },
 
     /// Buyer Asks the seller for a barter hint,
     AskBarterHint { seller: ActorInfo, buyer: ActorInfo},
@@ -125,13 +132,6 @@ pub enum ActorMessage {
     /// Also uses excess time from existing item instead of next item's time.
     CheckItem { buyer: ActorInfo, seller: ActorInfo,
         proudct: usize },
-    /// Return from seller after ActorMessage::CheckItem if they have the item
-    /// in stock. returns their price and available stock.
-    InStock { buyer: ActorInfo, seller: ActorInfo,
-        product: usize, price: f64, quantity: f64 },
-    /// Returned from seller after ActorMessage::CheckItem if they do not have
-    /// the item in stock. 
-    NotInStock { buyer: ActorInfo, seller: ActorInfo },
 
     /// A Response to the current offer, but also closes out the deal entirely.
     /// Details of the response are given by the result. 
@@ -245,20 +245,27 @@ impl ActorMessage {
                 product: _, quantity: _, offer_product: _, 
                 offer_quantity: _,
                 price_opinion, } => *seller == me, // buyer to seller
-            ActorMessage::BuyOfferMiddle { buyer: _, seller, 
-                offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
-            ActorMessage::BuyOfferEnd { buyer: _, seller, 
-                offer_product: _, offer_quantity: _ } => *seller == me, // buyer to seller
-            ActorMessage::OfferResponse { buyer, seller: _, 
-                result: _, } => *buyer == me, // Seller to Buyer
-            ActorMessage::RejectOffer { buyer, seller: _, 
-                product: _ } => *buyer == me, // Seller to buyer
-            ActorMessage::RejectAndCloseOffer { buyer, seller: _, 
-                product: _ } => *buyer == me, // Seller to Buyer
-            ActorMessage::CorrectOffer { buyer, seller: _, 
-                product: _, corrected_quantity: _ } => *buyer == me, // Seller to Buyer
-            ActorMessage::RejectPriceAndClose { buyer: _, 
-                seller, product: _ } => *seller == me, // Buyer to Seller
+            ActorMessage::BuyOfferMiddle { seller, .. } 
+                => *seller == me, // buyer to seller
+            ActorMessage::BuyOfferEnd { seller, .. } 
+                => *seller == me,
+            
+                
+            ActorMessage::InStock { buyer, seller, product, price, quantity } => todo!(),
+            ActorMessage::NotInStock { buyer, seller } => todo!(),
+            ActorMessage::AskBarterHint { seller, buyer } => todo!(),
+            ActorMessage::BarterHint { seller, buyer, product, quantity, followup } => todo!(),
+            ActorMessage::SellerAcceptOfferAsIs { buyer, seller, product, offer_result } => todo!(),
+            ActorMessage::OfferCorrectionOnly { buyer, seller, product, quantity } => todo!(),
+            ActorMessage::OfferCorrectionStart { buyer, seller, product, quantity } => todo!(),
+            ActorMessage::OfferCorrectionMiddle { buyer, seller, product, offer_product, quantity } => todo!(),
+            ActorMessage::OfferCorrectionEnd { buyer, seller, product, offer_product, quantity } => todo!(),
+            ActorMessage::OfferAcceptedWithChange { buyer, seller, product, change_product, quantity, followups } => todo!(),
+            ActorMessage::CheckItem { buyer, seller, proudct } => todo!(),
+            ActorMessage::OfferResponseAndCloseDeal { buyer, seller, result } => todo!(),
+            ActorMessage::CloseDeal { buyer, seller, product, result } => todo!(), // buyer to seller
+
+                
         }
     }
 }
