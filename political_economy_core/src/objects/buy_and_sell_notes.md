@@ -115,7 +115,27 @@ First it organizes the items being offered by personal desire priority. Those it
 title: Deal State Machine Logic
 ---
 stateDiagram-v2
-    [*] --> CheckStock: Buyer/Seller Recieve ProductFound
+    [*] --> SellerChecksStock: Buyer/Seller Recieve ProductFound
+    SellerChecksStock --> SendOutOfStockMessage: Seller Out of Stock
+    SendOutOfStockMessage --> [*]: Deal Closed Out
+
+    SellerChecksStock --> BuyerCheckPrice: Buyer In Stock
+    BuyerCheckPrice --> SendTooExpensiveMessage: Unit Price > 1.5x times budget.
+    SendTooExpensiveMessage --> [*]: Deal Closed Out
+
+    BuyerCheckPrice --> CalculateBuyOffer: Buyer Accepts price
+    CalculateBuyOffer --> SendBuyOfferMessage: Completes Calculation
+    SendBuyOfferMessage --> SellerChecksOffer: Offer Message(s) recieved
+
+    SellerChecksOffer --> SendOfferAcceptance: Accepts offer As Is
+    SellerChecksOffer --> SendAcceptanceAndChange: Accepts offer with Change
+    SellerChecksOffer --> SendReducedAcceptanceWithChange: Accept Reduced Offer with Change
+    SellerChecksOffer --> SendRejectionOffer: Rejects Offer, reduction not valid.
+
+    SendOfferAcceptance --> BuyerDealsWithSuccess
+    SendAcceptanceAndChange --> BuyerDealsWithSuccess
+    SendReducedAcceptanceWithChange --> BuyerDealsWithSuccess
+    SendRejectionOffer --> BuyerDealsWithRejection
 ```
 
 # Thoughts to take forward and update around

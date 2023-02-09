@@ -216,7 +216,8 @@ impl Market {
                         let result = self.find_seller(product, sender);
                         lcl_sender.send(result);
                     },
-                    ActorMessage::FoundProduct { seller, buyer, product } => {
+                    ActorMessage::FoundProduct { seller, buyer, 
+                        product } => {
                         // keep track of any deals in progress so we can track their outcomes.
                         self.ongoing_deals.push(DealRecord::new(
                             vec![seller, buyer], 
@@ -224,7 +225,7 @@ impl Market {
                             0.0, HashMap::new()));
                     },
                     ActorMessage::InStock { buyer, seller, product, 
-                    price, quantity } => {
+                    price, .. } => {
                         let mut deal = self.find_deal_mut(buyer, seller, product);
                         deal.request_product = product;
                         deal.unit_price = price;
@@ -262,7 +263,7 @@ impl Market {
                     ActorMessage::SellerAcceptOfferAsIs { buyer, seller, 
                     product, offer_result } => {
                         // finish the deal, but don't delete it just yet.
-                        self.finish_deal(buyer, seller, product, offer_result);
+                        self.finish_offered_deal(buyer, seller, product, offer_result);
                     }
                     ActorMessage::SellOrder { sender, product, 
                     quantity, amv } => self.add_seller_weight(&sender, product, quantity, amv),
@@ -391,7 +392,7 @@ impl Market {
 
     /// Finishes out a deal, processing the results for market info and price 
     /// adjustments, clear out the deal also, but don't close it out totally just yet.
-    fn finish_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize, 
+    fn finish_offered_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize, 
         offer_result: OfferResult) {
         let deal = self.find_deal(buyer, seller, product);
         // get the price of the merchandise.
@@ -400,20 +401,20 @@ impl Market {
         let mut offer_value: f64 = deal.offer.iter()
         .map(|(prod, quant)| quant * self.prices.get(prod).unwrap_or(&1.0))
         .sum();
-        for (item, quantity) in deal.offer.iter() {
-            let price = self.prices.get(item).unwrap_or(&1.0);
-            offer_value += price * quantity;
-        }
-
+        
+        let DragTogether = 0.0;
         match offer_result {
             OfferResult::Rejected => {},
-            OfferResult::TooExpensive => todo!(),
-            OfferResult::Expensive => todo!(),
-            OfferResult::Overpriced => todo!(),
-            OfferResult::Reasonable => todo!(),
-            OfferResult::Cheap => todo!(),
+
+            OfferResult::Expensive | 
+            OfferResult::Overpriced |
+            OfferResult::Reasonable | 
+            OfferResult::Cheap |
             OfferResult::Steal => todo!(),
-            OfferResult::OutOfStock => todo!(),
+
+            OfferResult::OutOfStock => {},
+
+            _ => ()
         }
     }
 }

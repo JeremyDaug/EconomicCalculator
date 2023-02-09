@@ -73,7 +73,8 @@ pub enum ActorMessage {
 
     /// Buyer Asks the seller for a barter hint,
     AskBarterHint { seller: ActorInfo, buyer: ActorInfo},
-
+    /// Seller gives barter hint for the buyer to act on.
+    /// Follow up tells the Buyer to expect more.
     BarterHint { seller: ActorInfo, buyer: ActorInfo, 
         product: usize, quantity: f64, followup: u64 },
 
