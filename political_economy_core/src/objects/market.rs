@@ -19,6 +19,9 @@ const SHOPPING_TIME_COST: f64 = 0.2;
 /// The Salability threshold for an item to be considered a currency.
 const SALABILITY_THRESHOLD: f64 = 0.75;
 
+/// The standard price movement step we use.
+const STD_PRICE_CHANGE: f64 = 1.0;
+
 /// # The Market
 /// 
 /// A Market is a cohiesive unit of space in which time costs of transporting
@@ -394,7 +397,7 @@ impl Market {
     /// adjustments, clear out the deal also, but don't close it out totally just yet.
     fn finish_offered_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize, 
         offer_result: OfferResult) {
-        let deal = self.find_deal(buyer, seller, product);
+        let deal = self.find_deal(buyer, seller, product).clone();
         // get the price of the merchandise.
         let product_price = deal.request_quantity * deal.unit_price;
         // summarize the price of items offered in current market value.
@@ -402,19 +405,28 @@ impl Market {
         .map(|(prod, quant)| quant * self.prices.get(prod).unwrap_or(&1.0))
         .sum();
         
-        let DragTogether = 0.0;
-        match offer_result {
-            OfferResult::Rejected => {},
-
-            OfferResult::Expensive | 
-            OfferResult::Overpriced |
-            OfferResult::Reasonable | 
-            OfferResult::Cheap |
-            OfferResult::Steal => todo!(),
-
-            OfferResult::OutOfStock => {},
-
-            _ => ()
+        if let OfferResult::Rejected = offer_result { 
+            // if rejected, push requested item's AMV up and offered items' AMV down.
+            // reduce prices for items offered, scaled inversly with their Salability and weighted by value in offer
+            for (item, quantity) in deal.offer.iter() {
+                // 1-Salability (min 0.1)
+                let change_scale: f64 = 0.1_f64.max(1.0 - *self.salability.get(&item).unwrap_or(&0.5));
+                let weighted_change = -STD_PRICE_CHANGE * change_scale
+                    * (self.prices.get(item).expect("Product not found.") * quantity) / offer_value; // drive price down weighted by offer.
+                *self.prices.entry(*item).or_insert(1.0) += weighted_change;
+            }
+            // 1-Salability (min 0.05) Highly Salable items are less mobile in AMV.
+            let change_scale : f64 = 0.05_f64.max(1.0 - *self.salability.get(&deal.request_product).unwrap_or(&0.5));
+            let price_change = STD_PRICE_CHANGE * change_scale ; // drive price up.
+            *self.prices.entry(product).or_insert(1.0) += price_change;
+        } else if let OfferResult::OutOfStock = offer_result {
+            // if out of stock, push item's value up a tiny bit.
+            let change_scale : f64 = 0.05_f64.max(1.0 - *self.salability.get(&deal.request_product).unwrap_or(&0.5));
+            let price_change = STD_PRICE_CHANGE * change_scale / 2.0; // OOS gives smaller boost than normal.
+            *self.prices.entry(product).or_insert(1.0) += price_change;
+        } else {
+            // if Accepted, push AMV of items offered together.
+            // TODO!!!!! pickup Here tomorrow!!!!!!
         }
     }
 }
@@ -535,7 +547,7 @@ pub struct WeightedActor {
     pub weight: f64,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DealRecord {
     pub actors: Vec<ActorInfo>,
     pub request_product: usize,
