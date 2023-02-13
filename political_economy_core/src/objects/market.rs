@@ -395,6 +395,8 @@ impl Market {
 
     /// Finishes out a deal, processing the results for market info and price 
     /// adjustments, clear out the deal also, but don't close it out totally just yet.
+    /// 
+    /// TODO Test this function
     fn finish_offered_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize, 
         offer_result: OfferResult) {
         let deal = self.find_deal(buyer, seller, product).clone();
@@ -427,6 +429,23 @@ impl Market {
         } else {
             // if Accepted, push AMV of items offered together.
             // TODO!!!!! pickup Here tomorrow!!!!!!
+            // Depending on the current value of items, push them together.
+            let mut push = 1.0;
+            if product_price > offer_value {
+                push = -1.0;
+            }
+            // iterate over offer items
+            for (item, quantity) in deal.offer.iter() {
+                // modify their price towards requested item, scaled with salability and weight in offer.
+                let change = 0.1_f64.max(-push - *self.salability.get(&item).unwrap_or(&0.5));
+                let weighted = -STD_PRICE_CHANGE * change 
+                    * (self.prices.get(item).expect("Product Not Found.") * quantity) / offer_value;
+                *self.prices.entry(*item).or_insert(1.0) += weighted;
+            }
+            // modify the price towards the offer scaled with salability.
+            let change_scale : f64 = 0.05_f64.max(1.0 - *self.salability.get(&deal.request_product).unwrap_or(&0.5));
+            let price_change = STD_PRICE_CHANGE * change_scale ; // drive price up.
+            *self.prices.entry(product).or_insert(1.0) += price_change;
         }
     }
 }
