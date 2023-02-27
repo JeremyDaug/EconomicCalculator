@@ -217,7 +217,12 @@ impl Market {
                     },
 
                     ActorMessage::SellOrder { sender, product, 
-                    quantity, amv } => self.add_seller_weight(&sender, product, quantity, amv),
+                    quantity, amv } => self.add_seller_weight(&sender, product,quantity, amv),
+
+                    ActorMessage::DumpProduct { sender, product, amount } => {
+                        // product dumped into the environment
+                        *self.resources.entry(product).or_insert(0.0) += amount;
+                    },
 
                     ActorMessage::FindProduct { product, sender} => { 
                         // buyer is looking for product, send back a seller to them.
@@ -317,6 +322,12 @@ impl Market {
                         self.ongoing_deals.remove(idx);
                     },
 
+                    // CheckItem doesn't do anything and it's a private message.
+                    // SendProduct, and SendWant doesn't do anything for us. This is
+                    // a gift or transfer between actors outside of normal market
+                    // mechanisms (IE charity or internal firm operations).
+                    // WantSplash, FirmToEmployee, and EmployeeToFirm are also
+                    // not for us, but for internal operations with firms.
                     _ => (),
                 }
             }
