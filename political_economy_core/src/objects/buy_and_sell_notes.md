@@ -128,14 +128,22 @@ stateDiagram-v2
     SendBuyOfferMessage --> SellerChecksOffer: Offer Message(s) recieved
 
     SellerChecksOffer --> SendOfferAcceptance: Accepts offer As Is
-    SellerChecksOffer --> SendAcceptanceAndChange: Accepts offer with Change
-    SellerChecksOffer --> SendReducedAcceptanceWithChange: Accept Reduced Offer with Change
+    SellerChecksOffer --> SendAcceptanceAndChange: Accepts offer with change in deal.
     SellerChecksOffer --> SendRejectionOffer: Rejects Offer, reduction not valid.
 
-    SendOfferAcceptance --> BuyerDealsWithSuccess
-    SendAcceptanceAndChange --> BuyerDealsWithSuccess
-    SendReducedAcceptanceWithChange --> BuyerDealsWithSuccess
+    SendOfferAcceptance --> BuyerAcceptsAndCloses
+    SendAcceptanceAndChange --> BuyerRecalculatesWithChange
     SendRejectionOffer --> BuyerDealsWithRejection
+
+    BuyerRecalculatesWithChange --> SendAcceptAndClose: Change is accepted
+
+    SendAcceptAndClose --> [*]: Both Finish out Deal
+
+    BuyerDealsWithRejection --> CalculateBuyOffer: Buyer wishes to try again.
+    BuyerDealsWithRejection --> SendConfirmRejection: Accepts Rejection
+    SendConfirmRejection --> [*]: Deal Closed Out
+
+    BuyerAcceptsAndCloses --> [*]: Both Finish the deal
 ```
 
 # Thoughts to take forward and update around

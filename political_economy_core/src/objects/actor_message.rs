@@ -68,8 +68,8 @@ pub enum ActorMessage {
     InStock { buyer: ActorInfo, seller: ActorInfo,
         product: usize, price: f64, quantity: f64 },
     /// Returned from seller after ActorMessage::CheckItem if they do not have
-    /// the item in stock. 
-    NotInStock { buyer: ActorInfo, seller: ActorInfo },
+    /// the item in stock. If a deal is open, closes out the deal.
+    NotInStock { buyer: ActorInfo, seller: ActorInfo, product: usize },
 
     /// Buyer Asks the seller for a barter hint,
     AskBarterHint { seller: ActorInfo, buyer: ActorInfo},
@@ -78,71 +78,65 @@ pub enum ActorMessage {
     BarterHint { seller: ActorInfo, buyer: ActorInfo, 
         product: usize, quantity: f64, followup: u64 },
 
-    /// Starts an offer with only 1 item within. Send buy a buyer.
-    /// TODO consolidate these to mork more like BarterHint and OfferAcceptedWithChange using followup params to note length.
-    BuyOfferOnly { buyer: ActorInfo, seller: ActorInfo, product: usize,
-        price_opinion: OfferResult, quantity: f64, offer_product: usize, 
-        offer_quantity: f64 },
-    /// Starts a Buy offer with multiple items. This is the first and specifics 
-    /// what is being bought.
-    BuyOfferStart { buyer: ActorInfo, seller: ActorInfo, product: usize,
-        price_opinion: OfferResult, quantity: f64, offer_product: usize, 
-        offer_quantity: f64 },
-    /// Middle section of a Buy Offer message chain. Includes just the item as
-    /// the start dictates which item was taken.
-    BuyOfferMiddle { buyer: ActorInfo, seller: ActorInfo, product: usize,
-        offer_product: usize, offer_quantity: f64 },
-    /// End sectino of a Buy Offer message chain. Includes just the items being
-    /// offered.
-    BuyOfferEnd { buyer: ActorInfo, seller: ActorInfo, product: usize,
-        offer_product: usize, offer_quantity: f64 },
+    /// The start of a Buy offer from a buyer. Includes buyer, seller, and product 
+    /// to make finding easy. It also includes price opinion, the amount requested,
+    /// and how many followup messages to expect.
+    BuyOffer { buyer: ActorInfo, seller: ActorInfo, product: usize,
+        price_opinion: OfferResult, quantity: f64, followup: usize },
+    /// The Followup messages for a buy offer. Includes buyer, seller, and product.
+    /// Also incrludes the id of the product offered in return, it's quantity, and
+    /// how many followup messages to expect. 0 means it's the last.
+    BuyOfferFollowup { buyer: ActorInfo, seller: ActorInfo, product: usize,
+        offer_product: usize, offer_quantity: f64, followup: usize },
 
     /// The Seller accepts his current deal's offer as is, replying with the
     /// buyer's offer result to simplify closeout processes.
     SellerAcceptOfferAsIs { buyer: ActorInfo, seller: ActorInfo,
         product: usize, offer_result: OfferResult },
 
-    /// Seller is correcting the offer, the quantity the offer buys is
-    /// less than expected. No change to be given.
-    /// TODO consolidate these to mork more like BarterHint and OfferAcceptedWithChange using followup params to note length.
-    OfferCorrectionOnly { buyer: ActorInfo, seller: ActorInfo, 
-        product: usize, quantity: f64 },
-    /// Seller is correcting the offer, the quantity the offer buys is
-    /// less than expected, and the amount offered is to be reduced.
-    OfferCorrectionStart { buyer: ActorInfo, seller: ActorInfo, 
-        product: usize, quantity: f64 },
-    /// Followup message to OfferCorrectionStart and OfferCorrectionMiddle 
-    /// messages which came before this one in the deal. Includes the
-    /// product being given back and it's quantity.
-    OfferCorrectionMiddle { buyer: ActorInfo, seller: ActorInfo, 
-        product: usize, offer_product: usize, quantity: f64 },
-    /// The Last message in an offer correction chain. Can follow either 
-    /// OfferCorrectionStart or OfferCorrectionMiddle. Includes the
-    /// last product being removed.
-    OfferCorrectionEnd { buyer: ActorInfo, seller: ActorInfo, 
-        product: usize, offer_product: usize, quantity: f64 },
-
-    /// Asked for quantity is valid and the offer is in fact excessive. The seller
-    /// will send back any items it deems unnecessary. The Followup's is how many 
-    /// items are left in the chain. 0 means it's done.
+    /// The offer has been accepted with changes. 
+    /// 
+    /// Includes buyer, seller, and the product being purchased.
+    /// The quantity is what is being given by the buyer. If the value
+    /// is the same, then the there is no reduction in items being bought.
+    /// It also has followup, which defines how many followup changes 
+    /// to expect.
     OfferAcceptedWithChange { buyer: ActorInfo, seller: ActorInfo,
-        product: usize, change_product: usize, quantity: f64, followups: usize },
+        product: usize, quantity: f64, followups: usize },
+    /// A followup message to ActorMessage::OfferAcceptedWithChange.
+    /// 
+    /// Used to return change to a buyer. via the return_product and return_quantity.
+    /// New items may be added here for alternative re-payments, such as paying
+    /// back smaller denomination items.
+    ChangeFollowup { buyer: ActorInfo, seller: ActorInfo, 
+        product: usize, return_product: usize, return_quantity: f64,
+        followups: usize },
+
+    /// The seller is rejecting the offer for whatever reason,
+    /// 
+    /// Most likely to be used if the seller is unwilling to accept the price offered.
+    /// 
+    /// Could hypethetically be used to when unable to reduce the purchase or unable 
+    /// to return enough change to satisfy the seller. Rejecting being less terrible
+    /// than overcharging in some cases.
+    RejectOffer { buyer: ActorInfo, seller: ActorInfo, 
+        product: usize },
+
+    /// The buyer has recieved the deal (with or without change) and sends out
+    /// a confirmation to close the deal for good.
+    FinishDeal { buyer: ActorInfo, seller: ActorInfo, product: usize },
+    
+    /// A Close out Deal Message, sent by buyer or seller as needed.
+    /// If sent, both sides should assume that the deal is over, don't try anything
+    /// anymore. 
+    CloseDeal { buyer: ActorInfo, seller: ActorInfo,
+        product: usize },
 
     /// Follow up with a different product then last time. 
     /// Useful for pops to buy multiple items at the same store, saving time.
     /// Also uses excess time from existing item instead of next item's time.
     CheckItem { buyer: ActorInfo, seller: ActorInfo,
         proudct: usize },
-
-    /// A Response to the current offer, but also closes out the deal entirely.
-    /// Details of the response are given by the result. 
-    OfferResponseAndCloseDeal { buyer: ActorInfo, seller: ActorInfo,
-        result: OfferResult },
-    /// A Close out Deal Message, sent by buyer or seller as needed.
-    /// If sent, both sides should assume that the deal is over, don't try anything
-    /// anymore. 
-    CloseDeal { buyer: ActorInfo, seller: ActorInfo,
-        product: usize, result: OfferResult },
     
 
 
@@ -180,6 +174,9 @@ pub enum ActorMessage {
 /// Used to denote how an offer went and what the buyer felt like for it.
 #[derive(Debug, Clone, Copy)]
 pub enum OfferResult {
+    /// Neutral result, primarily used for initializing deal results, but also a
+    /// placeholder elsewhere.
+    Incomplete,
     /// Totally Rejected, typically by a seller who's not pleased with the offer
     /// Reduce Weight in selection -3.
     /// 
@@ -203,6 +200,8 @@ pub enum OfferResult {
     /// Accetped, price was effectively a steal.
     /// Increase Weight +3.
     Steal,
+    /// Special case, price is ignored and items are being requested out of generosity.
+    Generous,
     /// The Seller cannot accept the offer because he is out of stock
     /// Reduce weight in selection -10
     OutOfStock,
@@ -238,33 +237,25 @@ impl ActorMessage {
 
             ActorMessage::SellOrder { sender: _, product: _, 
                 quantity: _, amv: _ } => false,
-            ActorMessage::BuyOfferOnly { buyer: _, seller, 
-                product: _, quantity: _, offer_product: _, 
-                offer_quantity: _,
-                price_opinion: _} => *seller == me, // sent from buyer to seller
-            ActorMessage::BuyOfferStart { buyer: _, seller, 
-                product: _, quantity: _, offer_product: _, 
-                offer_quantity: _,
-                price_opinion, } => *seller == me, // buyer to seller
-            ActorMessage::BuyOfferMiddle { seller, .. } 
-                => *seller == me, // buyer to seller
-            ActorMessage::BuyOfferEnd { seller, .. } 
-                => *seller == me,
-            
+            ActorMessage::BuyOffer { buyer, seller, 
+            product, price_opinion, quantity, 
+            followup } => *seller == me, // sent from buyer to seller
+            ActorMessage::BuyOfferFollowup { seller, ..
+            } => *seller == me, // buyer to seller
                 
-            ActorMessage::InStock { buyer, seller, product, price, quantity } => todo!(),
-            ActorMessage::NotInStock { buyer, seller } => todo!(),
-            ActorMessage::AskBarterHint { seller, buyer } => todo!(),
-            ActorMessage::BarterHint { seller, buyer, product, quantity, followup } => todo!(),
-            ActorMessage::SellerAcceptOfferAsIs { buyer, seller, product, offer_result } => todo!(),
-            ActorMessage::OfferCorrectionOnly { buyer, seller, product, quantity } => todo!(),
-            ActorMessage::OfferCorrectionStart { buyer, seller, product, quantity } => todo!(),
-            ActorMessage::OfferCorrectionMiddle { buyer, seller, product, offer_product, quantity } => todo!(),
-            ActorMessage::OfferCorrectionEnd { buyer, seller, product, offer_product, quantity } => todo!(),
-            ActorMessage::OfferAcceptedWithChange { buyer, seller, product, change_product, quantity, followups } => todo!(),
-            ActorMessage::CheckItem { buyer, seller, proudct } => todo!(),
-            ActorMessage::OfferResponseAndCloseDeal { buyer, seller, result } => todo!(),
-            ActorMessage::CloseDeal { buyer, seller, product, result } => todo!(), // buyer to seller
+            ActorMessage::InStock { buyer, .. } => *buyer == me,
+            ActorMessage::NotInStock { buyer, .. } => *buyer == me,
+            ActorMessage::AskBarterHint { seller,.. } => *seller == me,
+            ActorMessage::BarterHint { buyer, .. } => *buyer == me,
+            ActorMessage::SellerAcceptOfferAsIs { buyer, .. } => *buyer == me,
+            ActorMessage::OfferAcceptedWithChange { buyer, .. } => *buyer == me,
+            ActorMessage::ChangeFollowup { buyer, .. } => *buyer == me,
+            ActorMessage::CheckItem { buyer, seller, 
+                proudct } => todo!(),
+            ActorMessage::OfferResponseAndCloseDeal { buyer, seller, 
+                result } => todo!(),
+            ActorMessage::CloseDeal { buyer, seller, 
+                product, result } => todo!(), // buyer to seller
 
                 
         }
