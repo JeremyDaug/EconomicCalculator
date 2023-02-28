@@ -246,6 +246,15 @@ impl Pop {
             false
     }
 
+    /// Work Day Processor.
+    /// 
+    /// During this function, the pop focuses on completing the work day. They don't act within the
+    /// market, instead focusing on reacting to their workplace.
+    /// 
+    /// Consumes Want Splashes (as they are easy to deal with), SendProduct messages directed towards
+    /// the pop. It also waits for messages from the firm.
+    /// 
+    /// All other messages are added to the backlog for later.
     fn work_day_processing(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
         loop {
             // It's working time, so focus on the firm, don't worry about caluclating more
