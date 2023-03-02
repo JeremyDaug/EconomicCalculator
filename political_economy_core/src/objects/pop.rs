@@ -323,12 +323,15 @@ impl Pop {
         // start by splitting property up into keep, and spend;
         let mut keep: HashMap<usize, f64> = HashMap::new();
         let mut spend: HashMap<usize, f64> = HashMap::new();
-        let mut change: HashMap<usize, f64> = HashMap::new(); // for 
+        let mut change: HashMap<usize, f64> = HashMap::new();
         // get what we remember over
         for (id, know) in self.memory.product_knowledge.iter() {
             let mut available = *self.desires.property.get(id).unwrap_or(&0.0);
             let min = available.min(know.target);
-            spend.insert(*id, available - min);
+            if available != min { 
+                // if there will be some available leftover after min, then add to spend
+                spend.insert(*id, available - min);
+            }
             keep.insert(*id, min);
         }
         // repeat for the items which we don't have any memory for so we can offer them up.
@@ -346,7 +349,8 @@ impl Pop {
                 self.push_message(rx, tx, 
                     ActorMessage::SellOrder { sender: self.actor_info(),
                     product: *id, quantity: *amount, 
-                    amv: *market.market_prices.get(id).unwrap_or(&1.0) })
+                    amv: *market.market_prices.get(id).unwrap_or(&1.0) });
+                // private sellers offer at current estimated market price.
             }
         }
         // enter a loop and work on buying up to our targets and 
@@ -358,9 +362,9 @@ impl Pop {
             while let Some(msg) = self.backlog.pop_front() {
                 self.process_common_message(rx, tx, data, market, msg,
                     &mut keep, &mut spend, &mut change);
-                    // if this last processed message ate all our time, then gtfo and move
-                    // to the end of day holding pattern.
-                    if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
+                // if this last processed message ate all our time, then gtfo and move
+                // to the end of day holding pattern.
+                if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
             }
             // with the backlog cleared out, catch up with the broadcast queue
             // don't actually process, just push anything for us into the backlog.
