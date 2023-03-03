@@ -374,18 +374,8 @@ impl Pop {
             // With the backlog caught up, do whatever we need want to do here
             // try to buy the first thing on our list
             if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
-                let product = self.memory.product_priority.get(curr_buy_idx).expect("Product not found?");
-                let quantity = self.memory.product_knowledge
-                    .get(product).expect("Product not found?")
-                    .target_remaining();
-                let price = self.memory.product_knowledge
-                    .get(product).expect("Product not found?")
-                    .current_unit_budget();
                 self.try_to_buy(rx, tx, data, market, &mut keep, &mut spend, 
-                    &mut change, 
-                    product,
-                    &quantity, 
-                    &price);
+                    &mut change, &curr_buy_idx);
             }
 
         }
@@ -400,9 +390,15 @@ impl Pop {
         todo!("Processing common messages go here.")
     }
 
-    /// Try to buy items
+    /// Try to buy items, covers everything needed with buying from 
+    /// finding a seller, handling the trade, finishing it, and adding/removing
+    /// from our property storage.
     /// 
-    /// Returns true if the purchase was successful.
+    /// It has 2 options when it starts.
+    /// - Standard Search, it asks the market to find a guaranteed seller,
+    /// who we'll get in touch with and try to make a deal.
+    /// - Emergency Search, this occurs when either the product being sought 
+    /// is unavailable through sellers and the product sought is important
     fn try_to_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
@@ -411,9 +407,14 @@ impl Pop {
     keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
-    product: &usize, 
-    quantity: &f64,
-    price: &f64){
+    product: &usize) {
+        let product = self.memory.product_priority.get(curr_buy_idx).expect("Product not found?");
+        let quantity = self.memory.product_knowledge
+            .get(product).expect("Product not found?")
+            .target_remaining();
+        let price = self.memory.product_knowledge
+            .get(product).expect("Product not found?")
+            .current_unit_budget();
         todo!("All buy logic and message handling goes here.")
     }
 
@@ -510,6 +511,13 @@ impl Actor for Pop {
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
         self.desires.sift_products();
+        for (key, know) in self.memory.product_knowledge.iter_mut() {
+            know.achieved = 0.0; // reset knowledge info for the day.
+            know.spent = 0.0;
+            know.lost = 0.0;
+            know.time_spent = 0.0;
+            know.amv_spent = 0.0;
+        }
         self.is_selling = if self.memory.is_disorganized { 
             true
         }
