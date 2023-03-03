@@ -4,6 +4,12 @@ use std::collections::HashMap;
 /// A Helper for Pops, recording their data and memories for use in 
 /// various calculations and to remember things which should be known
 /// by the pop without 
+/// 
+/// It remembers if we're disorganized, how much time we're saving for
+/// work, as well as product knowledge and product priority.
+/// 
+/// Time for purchases are stored in product_knowledge just like
+/// every other product knowledge, though it typ
 #[derive(Debug, Clone)]
 pub struct PopMemory {
     /// If the pop is part of disorganized firm or not.
@@ -13,7 +19,7 @@ pub struct PopMemory {
     /// The various data for product information. Includes both history
     /// and targets for tomorrow.
     pub product_knowledge: HashMap<usize, Knowledge>,
-    /// The order in which 
+    /// The order in which products are to be bought.
     pub product_priority: Vec<usize>,
 }
 
@@ -26,6 +32,16 @@ impl PopMemory {
 }
 
 /// Product knowledge for a pop.
+/// 
+/// Reset at the start of each day.
+/// achieved
+/// spent
+/// lost
+/// time_spent
+/// amv_spent
+/// 
+/// All other data is updated at the end of the day and retained
+/// between days.
 #[derive(Debug, Clone, Copy)]
 pub struct Knowledge {
     /// The amount targeted to own.

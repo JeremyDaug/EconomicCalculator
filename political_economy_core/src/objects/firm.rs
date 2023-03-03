@@ -127,6 +127,9 @@ impl Actor for Firm {
         history: &MarketHistory) {
         sender.send(ActorMessage::Finished { sender: self.actor_info() })
             .expect("Channel Closed Unexpectedly!");
+        // TODO idea, Firms hire retailers who handle the details of sales and then report their
+        // results back to here. They are on separate threads. THis is a bad, crazy idea, but fuckit
+        // it may just work.
     }
 }
 

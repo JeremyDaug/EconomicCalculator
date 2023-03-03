@@ -355,6 +355,7 @@ impl Pop {
         }
         // enter a loop and work on buying up to our targets and 
         // expending our time while handling any orders coming our way.
+        let mut curr_buy_idx = 0;
         loop {
             // if time to spend has been used up, break out.
             if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
@@ -371,7 +372,22 @@ impl Pop {
             self.msg_catchup(rx);
 
             // With the backlog caught up, do whatever we need want to do here
-            
+            // try to buy the first thing on our list
+            if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
+                let product = self.memory.product_priority.get(curr_buy_idx).expect("Product not found?");
+                let quantity = self.memory.product_knowledge
+                    .get(product).expect("Product not found?")
+                    .target_remaining();
+                let price = self.memory.product_knowledge
+                    .get(product).expect("Product not found?")
+                    .current_unit_budget();
+                self.try_to_buy(rx, tx, data, market, &mut keep, &mut spend, 
+                    &mut change, 
+                    product,
+                    &quantity, 
+                    &price);
+            }
+
         }
     }
 
@@ -385,6 +401,8 @@ impl Pop {
     }
 
     /// Try to buy items
+    /// 
+    /// Returns true if the purchase was successful.
     fn try_to_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
@@ -393,59 +411,10 @@ impl Pop {
     keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
-    seller: ActorInfo, 
-    product: usize, 
-    quantity: f64,
-    price: f64) {
-        let summary_price = quantity * price;
-        let our_info = self.memory.product_knowledge.get_mut(&product).unwrap();
-        // check the budget as it stands and react before looking too closely.
-        let budget = our_info.remaining_amv();
-        let mut target = our_info.target;
-        if budget > summary_price * TOO_EXPENSIVE {
-            // Too Expensive, reject, and try again.
-            
-            return;
-        } else if budget > EXPENSIVE {
-            // Expensive, but we'll still suffer and try to buy it.
-
-        } else if budget > OVERPRICED {
-            // Overpriced, but buy anyway.
-        } else if budget > REASONABLE {
-            // Entirely reasonable, buy.
-        } else if budget > CHEAP {
-            // buy
-        } else if budget <= CHEAP {
-            // It's a steal, buy more than we need.
-        }
-        match seller {
-            ActorInfo::Firm(id) => {
-                // normal buy, maybe barter
-            },
-            ActorInfo::Pop(id) => {
-                // first try to normal buy.
-                if market.currencies.len() > 0 { // if we have a currency, try to pay with that.
-                    // get our cash.
-                    let mut cash = HashMap::new();
-                    let mut sum = 0.0;
-                    for currency in self.desires.property
-                    .iter().filter(|x| market.currencies.contains_key(x.0)) {
-                        cash.insert(currency.0, currency.1);
-                        sum += *currency.1 * market.currencies.get(currency.0).unwrap() * 
-                            market.salability.get(currency.0).unwrap();
-                    }
-                    let amv_target = sum.min(self.memory.product_knowledge
-                        .get(&product).unwrap().amv_budget);
-                    // depending on the amv target and summary price, react and record the results.
-                    
-                }
-                // then try to barter
-                // then try to force a purchase by overwhelming AMV.
-                
-            },
-            ActorInfo::Institution(id) => (), // placeholder for now. Logic should be same as state.
-            ActorInfo::State(id) => (), // placeholder, should be similar to Institution.
-        }
+    product: &usize, 
+    quantity: &f64,
+    price: &f64){
+        todo!("All buy logic and message handling goes here.")
     }
 
     /// gets the total current wealth of the pop in question.
