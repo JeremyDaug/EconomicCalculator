@@ -6,7 +6,7 @@ use std::collections::{VecDeque, HashMap};
 
 use barrage::{Sender, Receiver};
 
-use crate::{demographics::Demographics, data_manager::DataManager};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::SHOPPING_TIME_COST};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
@@ -15,13 +15,6 @@ use super::{desires::Desires,
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
     pop_memory::{PopMemory, Knowledge}, product::ProductTag, buy_result::BuyResult, 
 };
-
-const TOO_EXPENSIVE: f64 = 1.5;
-const EXPENSIVE: f64 = 1.2;
-const OVERPRICED: f64 = 1.0;
-const REASONABLE: f64 = 0.8;
-const CHEAP: f64 = 0.5;
-// steal
 
 /// Pops are the data storage for a population group.
 /// 
@@ -124,7 +117,7 @@ impl Pop {
     /// ## Panics
     /// 
     /// If the send fails due to a disconnect.
-    fn push_message(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
+    pub fn push_message(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
     msg: ActorMessage) {
         loop {
             let result = tx.try_send(msg);
@@ -153,7 +146,7 @@ impl Pop {
     /// 
     /// This focuses on keeping the Broadcast Queue open to ensure it doesn't get backed
     /// up too much.
-    fn msg_catchup(&mut self, rx: &Receiver<ActorMessage>) {
+    pub fn msg_catchup(&mut self, rx: &Receiver<ActorMessage>) {
         loop {
             let result = rx.try_recv()
                 .expect("Unexpected Disconnect"); // if disconnected, panic.
@@ -386,15 +379,24 @@ impl Pop {
     /// Processes common messages from the ActorMessages for current free time.
     /// Function assumes that msg is for us, so be sure to collect just those.
     fn process_common_message(&mut self, rx: &mut Receiver<ActorMessage>, 
-        tx: &Sender<ActorMessage>, data: &DataManager, 
-        market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
-        spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
+    tx: &Sender<ActorMessage>, data: &DataManager, 
+    market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
+    spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
         todo!("Processing common messages go here.")
     }
 
     /// Try to buy items, covers everything needed with buying from 
     /// finding a seller, handling the trade, finishing it, and adding/removing
     /// from our property storage.
+    /// 
+    /// Starts buy sending the FindProduct request, then actively waits for 
+    /// a response, consuming and processing messages for itself until it 
+    /// recieves ProductFound or ProductNotFound.
+    /// 
+    /// If the product is found, it will check 
+    /// 
+    /// If the product is not found, but the desire is considered high priority
+    /// then it will go into an emergency search. 
     /// 
     /// It has 2 options when it starts.
     /// - Standard Search, it asks the market to find a guaranteed seller,
@@ -424,8 +426,44 @@ impl Pop {
         }
         // since the current market price is within our budget, try to look for it.
         self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
-        // with the message sent, wait for the response back, processing any messages it recieves.
-        self.process_common_message(rx, tx, data, market, msg, keep, spend, returned)
+        // subtract the time from our stock and add it to time spent
+        // TODO update self.breakdown.total to instead use 
+        // 'working population' instead of total to exclude dependents.
+        *spend.get_mut(&0).unwrap() -= SHOPPING_TIME_COST * self.breakdown_table.total as f64;
+        // with the message sent, wait for the response back while in our standard holding pattern.
+        let result = loop {
+            // catchup messages to keep queue clear
+            self.msg_catchup(rx);
+            // pull the first off the backlog and check if it's one of our responses.
+            let msg = self.backlog.pop_front();
+            if let Some(result) = msg {
+                match result {
+                    ActorMessage::ProductNotFound { product, buyer } => {
+                        break result;
+                    },
+                    ActorMessage::FoundProduct { seller, buyer, product } => {
+                        break result;
+                    },
+                    _ => {
+                        self.process_common_message(rx, tx, data, market, 
+                            result, keep, spend, returned);
+                    }
+                };
+            }
+            else { // there is no message, catchup again and try again.
+                continue;
+            }
+        };
+        // result is now either FoundProduct or ProductNotFound, deal with it
+        match result {
+            ActorMessage::ProductNotFound { product, buyer } => {
+
+            },
+            ActorMessage::FoundProduct { seller, buyer, product } => {
+
+            },
+            () => panic!("How TF did you get here? Result returned incorrectly.")
+        }
 
         return BuyResult::NotSuccessful;
     }

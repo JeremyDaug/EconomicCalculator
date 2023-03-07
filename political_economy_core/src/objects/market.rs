@@ -5,7 +5,7 @@ use crossbeam::thread;
 use itertools::Itertools;
 use rand::{Rng, SeedableRng, thread_rng};
 
-use crate::{demographics::Demographics, data_manager::DataManager};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::STD_PRICE_CHANGE};
 use super::{pop::Pop, 
     firm::Firm, 
     actor::Actor, 
@@ -13,14 +13,7 @@ use super::{pop::Pop,
     institution::Institution, 
     state::State, 
     seller::Seller};
-
-const SHOPPING_TIME_COST: f64 = 0.2;
-
-/// The Salability threshold for an item to be considered a currency.
-const SALABILITY_THRESHOLD: f64 = 0.75;
-
-/// The standard price movement step we use.
-const STD_PRICE_CHANGE: f64 = 1.0;
+use crate::constants;
 
 /// # The Market
 /// 

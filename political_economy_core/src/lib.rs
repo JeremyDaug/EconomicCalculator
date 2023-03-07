@@ -3,6 +3,7 @@ pub mod data_manager;
 pub mod demographics;
 pub mod runner;
 pub mod actor_manager;
+pub mod constants;
 
 extern crate lazy_static;
 
