@@ -139,9 +139,8 @@ pub enum ActorMessage {
         proudct: usize },
     
 
-
     /// A message which sends a product from the sender to the reciever.
-    /// THe sender SHOULD delete their local item and the reciever SHOULD
+    /// The sender SHOULD delete their local item and the reciever SHOULD
     /// add it to their property.
     SendProduct { sender: ActorInfo, reciever: ActorInfo,
         product: usize, amount: f64 },
@@ -252,12 +251,11 @@ impl ActorMessage {
             ActorMessage::ChangeFollowup { buyer, .. } => *buyer == me,
             ActorMessage::CheckItem { buyer, seller, 
                 proudct } => todo!(),
-            ActorMessage::OfferResponseAndCloseDeal { buyer, seller, 
-                result } => todo!(),
             ActorMessage::CloseDeal { buyer, seller, 
-                product, result } => todo!(), // buyer to seller
-
-                
+                product} => todo!(),
+            
+            ActorMessage::RejectOffer { buyer, seller, product } => todo!(),
+            ActorMessage::FinishDeal { buyer, seller, product } => todo!(), // buyer to seller
         }
     }
 }

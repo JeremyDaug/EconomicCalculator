@@ -13,7 +13,7 @@ use super::{desires::Desires,
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
-    pop_memory::{PopMemory, Knowledge}, product::ProductTag
+    pop_memory::{PopMemory, Knowledge}, product::ProductTag, buy_result::BuyResult, 
 };
 
 const TOO_EXPENSIVE: f64 = 1.5;
@@ -374,8 +374,10 @@ impl Pop {
             // With the backlog caught up, do whatever we need want to do here
             // try to buy the first thing on our list
             if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
+                let product = *self.memory.product_priority
+                    .get(curr_buy_idx).expect("Product not found?");
                 self.try_to_buy(rx, tx, data, market, &mut keep, &mut spend, 
-                    &mut change, &curr_buy_idx);
+                    &mut change, &product);
             }
 
         }
@@ -407,15 +409,25 @@ impl Pop {
     keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
-    product: &usize) {
-        let product = self.memory.product_priority.get(curr_buy_idx).expect("Product not found?");
+    product: &usize) -> BuyResult {
+        // get the amount we want to get and the unit price budget.
         let quantity = self.memory.product_knowledge
             .get(product).expect("Product not found?")
             .target_remaining();
         let price = self.memory.product_knowledge
             .get(product).expect("Product not found?")
             .current_unit_budget();
-        todo!("All buy logic and message handling goes here.")
+        // with budget gotten, check if it's feasable for us to buy (market price < 1.5 budget)
+        let market_price = *market.market_prices.get(product).unwrap_or(&0.0);
+        if market_price > (price * 1.5) {
+            return BuyResult::CancelBuy;
+        }
+        // since the current market price is within our budget, try to look for it.
+        self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
+        // with the message sent, wait for the response back, processing any messages it recieves.
+        self.process_common_message(rx, tx, data, market, msg, keep, spend, returned)
+
+        return BuyResult::NotSuccessful;
     }
 
     /// gets the total current wealth of the pop in question.
