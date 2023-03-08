@@ -4,4 +4,6 @@ pub enum BuyResult {
     CancelBuy, 
     /// Did not succeed in purchasing everything desired, try again.
     NotSuccessful,
+    /// The Successful
+    Successful
 }

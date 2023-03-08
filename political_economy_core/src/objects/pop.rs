@@ -285,6 +285,41 @@ impl Pop {
         }
     }
 
+    /// Active Wait Function, used whenever we need to wait for a particular 
+    /// result or message. Takes in all the standard stuff for free time, while
+    /// also taking in whatever it's looking to find. If it recieves one of the
+    /// message types requested, it returns it.
+    /// 
+    /// If it gets a message other than what it's looking for, it deals with it
+    /// via the process_common_message. 
+    /// 
+    /// This only returns if it recieves the message it's looking for, it it does 
+    /// not recieve it, it will be stuck in it's loop.
+    pub fn active_wait(&mut self, 
+    rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    data: &DataManager, 
+    market: &MarketHistory, 
+    keep: &mut HashMap<usize, f64>,
+    spend: &mut HashMap<usize, f64>,
+    returned: &mut HashMap<usize, f64>,
+    find: &mut Vec<ActorMessage>) -> ActorMessage {
+        loop {
+            // catchup on messages for good measure
+            self.msg_catchup(rx);
+            // next deal with the first backlog
+            let popped = self.backlog.pop_front();
+            if let Some(msg) = popped {
+                if find.iter().any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                    return msg;
+                }
+                else {
+                    self.process_common_message(rx, tx, data, market, msg, keep, spend, returned);
+                }
+            }
+        }
+    }
+
     /// Goes through the free time that the pop has available to it.
     /// 
     /// Free time is spent primarily on buying stuff and organizing their
@@ -455,17 +490,45 @@ impl Pop {
             }
         };
         // result is now either FoundProduct or ProductNotFound, deal with it
-        match result {
-            ActorMessage::ProductNotFound { product, buyer } => {
-
-            },
-            ActorMessage::FoundProduct { seller, buyer, product } => {
-
-            },
-            () => panic!("How TF did you get here? Result returned incorrectly.")
+        if let ActorMessage::ProductNotFound { product, buyer } = result {
+            // if product not found, do an emergency search instead.
+            return self.emergency_buy(rx, tx, data, market, keep, spend, returned, &product);
         }
+        else if let ActorMessage::FoundProduct { seller, buyer, product } = result {
+            return self.standard_buy(rx, tx, data, market, seller, keep, spend, returned, &product);
+        }
+        else { panic!("Somehow did not get FoundProduct or ProductNotFound."); }
+    }
 
-        return BuyResult::NotSuccessful;
+    /// Standard Buy Function
+    /// 
+    /// THis has been reached when we have successfully recieved a 
+    /// FoundProduct message. So now we enter a wait to recieve the opening 
+    /// message, consuming and addressing messages for us while waiting for
+    /// the deal start message.
+    pub fn standard_buy(&mut self, 
+    rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    data: &DataManager, 
+    market: &MarketHistory, 
+    seller: ActorInfo,
+    keep: &mut HashMap<usize, f64>,
+    spend: &mut HashMap<usize, f64>,
+    returned: &mut HashMap<usize, f64>,
+    product: &usize) -> BuyResult {
+
+    }
+
+    pub fn emergency_buy(&mut self, 
+    rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    data: &DataManager, 
+    market: &MarketHistory, 
+    keep: &mut HashMap<usize, f64>,
+    spend: &mut HashMap<usize, f64>,
+    returned: &mut HashMap<usize, f64>,
+    product: &usize) -> BuyResult {
+        todo!("Emergency Buy here!")
     }
 
     /// gets the total current wealth of the pop in question.
