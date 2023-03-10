@@ -489,10 +489,19 @@ impl Pop {
 
     /// Standard Buy Function
     /// 
-    /// THis has been reached when we have successfully recieved a 
-    /// FoundProduct message. So now we enter a wait to recieve the opening 
-    /// message, consuming and addressing messages for us while waiting for
-    /// the deal start message.
+    /// This has been reached when we have successfully recieved a 
+    /// FoundProduct message. 
+    /// 
+    /// So now we enter here to manage our next steps.
+    /// 
+    /// 1. Actively wait for the response from the seller. This should be
+    ///    either ActorMessage::InStock or ActorMessage::NotInStock.
+    /// 
+    /// 2. If Not in stock, break out and fail. If InStock, begin our deal 
+    /// making in step 3.
+    /// 
+    /// 3. Look at the price given and the quantity they have to offer
+    /// and make an offer for that based on their estimates.
     pub fn standard_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
@@ -504,6 +513,7 @@ impl Pop {
     returned: &mut HashMap<usize, f64>,
     product: &usize) -> BuyResult {
 
+        BuyResult::NotSuccessful
     }
 
     pub fn emergency_buy(&mut self, 
