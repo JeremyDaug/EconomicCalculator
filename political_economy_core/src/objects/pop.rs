@@ -166,77 +166,77 @@ impl Pop {
     /// 
     /// Returns true if the workday has ended.
     fn process_firm_message(&mut self, 
-        rx: &mut Receiver<ActorMessage>, 
-        tx: &Sender<ActorMessage>, 
-        sender: ActorInfo, 
-        reciever: ActorInfo, 
-        action: FirmEmployeeAction) -> bool {
-            match action {
-                FirmEmployeeAction::WorkDayEnded => return true, // work day over, we can move on.
-                FirmEmployeeAction::RequestTime => {
-                    // just send time over and call it there.
-                    self.push_message(rx, tx, ActorMessage::SendProduct { sender: reciever,
-                        reciever: sender, 
-                        product: 0, 
-                        amount: self.memory.work_time
-                        });
-                },
-                FirmEmployeeAction::RequestEverything => {
-                    // loop over everything and send it to the firm.
-                    let mut to_move = HashMap::new();
-                    for (product, amount) in self.desires.property.iter() {
-                        to_move.insert(*product, *amount);
-                    }
-                    for (product, amount) in to_move {
-                        self.push_message(rx, tx, 
-                        ActorMessage::SendProduct { 
-                            sender: reciever, 
-                            reciever: sender, 
-                            product,
-                            amount 
-                        });
-                        *self.desires.property.get_mut(&product)
-                        .expect("Not found?") = 0.0;
-                    }
-                    // also send over the wants
-                    let mut to_move = HashMap::new();
-                    for (want, amount) in self.desires.want_store.iter() {
-                        to_move.insert(*want, *amount);
-                    }
-                    for (want, amount) in to_move {
-                        self.push_message(rx, tx, 
-                        ActorMessage::SendWant { 
-                            sender: reciever, 
-                            reciever: sender, 
-                            want,
-                            amount 
-                        });
-                        *self.desires.want_store.get_mut(&want)
-                        .expect("Not found?") = 0.0;
-                    }
-                    // Tell the firm we've sent everything to them and they can continue on.
-                    self.push_message(rx, tx, ActorMessage::EmployeeToFirm { 
+    rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    sender: ActorInfo, 
+    reciever: ActorInfo, 
+    action: FirmEmployeeAction) -> bool {
+        match action {
+            FirmEmployeeAction::WorkDayEnded => return true, // work day over, we can move on.
+            FirmEmployeeAction::RequestTime => {
+                // just send time over and call it there.
+                self.push_message(rx, tx, ActorMessage::SendProduct { sender: reciever,
+                    reciever: sender, 
+                    product: 0, 
+                    amount: self.memory.work_time
+                    });
+            },
+            FirmEmployeeAction::RequestEverything => {
+                // loop over everything and send it to the firm.
+                let mut to_move = HashMap::new();
+                for (product, amount) in self.desires.property.iter() {
+                    to_move.insert(*product, *amount);
+                }
+                for (product, amount) in to_move {
+                    self.push_message(rx, tx, 
+                    ActorMessage::SendProduct { 
                         sender: reciever, 
                         reciever: sender, 
-                        action: FirmEmployeeAction::RequestSent });
-                },
-                FirmEmployeeAction::RequestItem { product } => {
-                    // firm is requesting a specifc item, send it to them, 
-                    // if we don't have it, then send the empty anyway.
-                    let amount = match self.desires.property.remove(&product) {
-                        Some(amount) => amount,
-                        None => 0.0,
-                    };
-                    self.push_message(rx, tx, 
-                    ActorMessage::SendProduct { sender: reciever, 
-                        reciever: sender, 
-                        product, 
+                        product,
                         amount 
-                    }); // no need to send more
-                },
-                _ => ()
-            }
-            false
+                    });
+                    *self.desires.property.get_mut(&product)
+                    .expect("Not found?") = 0.0;
+                }
+                // also send over the wants
+                let mut to_move = HashMap::new();
+                for (want, amount) in self.desires.want_store.iter() {
+                    to_move.insert(*want, *amount);
+                }
+                for (want, amount) in to_move {
+                    self.push_message(rx, tx, 
+                    ActorMessage::SendWant { 
+                        sender: reciever, 
+                        reciever: sender, 
+                        want,
+                        amount 
+                    });
+                    *self.desires.want_store.get_mut(&want)
+                    .expect("Not found?") = 0.0;
+                }
+                // Tell the firm we've sent everything to them and they can continue on.
+                self.push_message(rx, tx, ActorMessage::EmployeeToFirm { 
+                    sender: reciever, 
+                    reciever: sender, 
+                    action: FirmEmployeeAction::RequestSent });
+            },
+            FirmEmployeeAction::RequestItem { product } => {
+                // firm is requesting a specifc item, send it to them, 
+                // if we don't have it, then send the empty anyway.
+                let amount = match self.desires.property.remove(&product) {
+                    Some(amount) => amount,
+                    None => 0.0,
+                };
+                self.push_message(rx, tx, 
+                ActorMessage::SendProduct { sender: reciever, 
+                    reciever: sender, 
+                    product, 
+                    amount 
+                }); // no need to send more
+            },
+            _ => ()
+        }
+        false
     }
 
     /// Work Day Processor.
@@ -303,14 +303,15 @@ impl Pop {
     keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
-    find: &mut Vec<ActorMessage>) -> ActorMessage {
+    find: &Vec<ActorMessage>) -> ActorMessage {
         loop {
             // catchup on messages for good measure
             self.msg_catchup(rx);
             // next deal with the first backlog
             let popped = self.backlog.pop_front();
             if let Some(msg) = popped {
-                if find.iter().any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                if find.iter()
+                .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
                     return msg;
                 }
                 else {
@@ -327,7 +328,7 @@ impl Pop {
     /// 
     /// They'll focus most of their early effort on shopping. This means 
     /// looking at what they target themselves having, then looking at what
-    /// they are missing. Whatever they're missing they'll attempt to buy. Whatever
+    /// they are missing. Whatever they're missing they'll attempt to buy. Whatever                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
     /// they've already got, they'll reserve.
     /// 
     /// Before they go anywhere, they'll split their property into 3 camps. Keep, Spend, and 
@@ -386,6 +387,7 @@ impl Pop {
         let mut curr_buy_idx = 0;
         loop {
             // if time to spend has been used up, break out.
+            // TODO update to use the smalest possble expendable unit of time instead of 0.0.
             if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
             // start by clearing out backlog messages for simplicity.
             while let Some(msg) = self.backlog.pop_front() {
@@ -417,18 +419,18 @@ impl Pop {
     tx: &Sender<ActorMessage>, data: &DataManager, 
     market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
-        todo!("Processing common messages go here.")
+        todo!("Processing common messages go here. Do this last so other states and state-chains can be handled properly.")
     }
 
-    /// Try to buy items, covers everything needed with buying from 
-    /// finding a seller, handling the trade, finishing it, and adding/removing
-    /// from our property storage.
+    /// ## Try to buy
+    /// 
+    /// Tries to setup a buy deal through normal means.
     /// 
     /// Starts buy sending the FindProduct request, then actively waits for 
     /// a response, consuming and processing messages for itself until it 
     /// recieves ProductFound or ProductNotFound.
     /// 
-    /// If the product is found, it will check 
+    /// If the product is found, it will enter the deal state, and try to buy tho item.
     /// 
     /// If the product is not found, but the desire is considered high priority
     /// then it will go into an emergency search. 
@@ -466,36 +468,21 @@ impl Pop {
         // 'working population' instead of total to exclude dependents.
         *spend.get_mut(&0).unwrap() -= SHOPPING_TIME_COST * self.breakdown_table.total as f64;
         // with the message sent, wait for the response back while in our standard holding pattern.
-        let result = loop {
-            // catchup messages to keep queue clear
-            self.msg_catchup(rx);
-            // pull the first off the backlog and check if it's one of our responses.
-            let msg = self.backlog.pop_front();
-            if let Some(result) = msg {
-                match result {
-                    ActorMessage::ProductNotFound { product, buyer } => {
-                        break result;
-                    },
-                    ActorMessage::FoundProduct { seller, buyer, product } => {
-                        break result;
-                    },
-                    _ => {
-                        self.process_common_message(rx, tx, data, market, 
-                            result, keep, spend, returned);
-                    }
-                };
-            }
-            else { // there is no message, catchup again and try again.
-                continue;
-            }
-        };
+        let result = self.active_wait(rx, tx, data, market, keep, spend, returned, 
+            &vec![ActorMessage::ProductNotFound { product: 0, buyer: ActorInfo::Firm(0) },
+            ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
         // result is now either FoundProduct or ProductNotFound, deal with it
-        if let ActorMessage::ProductNotFound { product, buyer } = result {
+        // TODO update this to be smarter about doing emergency buy searches.
+        if let ActorMessage::ProductNotFound { product, buyer } 
+        = result {
             // if product not found, do an emergency search instead.
-            return self.emergency_buy(rx, tx, data, market, keep, spend, returned, &product);
+            return self.emergency_buy(rx, tx, data, market, keep, spend, returned, 
+                &product);
         }
-        else if let ActorMessage::FoundProduct { seller, buyer, product } = result {
-            return self.standard_buy(rx, tx, data, market, seller, keep, spend, returned, &product);
+        else if let ActorMessage::FoundProduct { seller, buyer,
+        product } = result {
+            return self.standard_buy(rx, tx, data, market, seller, keep, spend, 
+                returned, &product);
         }
         else { panic!("Somehow did not get FoundProduct or ProductNotFound."); }
     }
