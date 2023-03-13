@@ -12,7 +12,7 @@ use super::{desires::Desires,
     pop_breakdown_table::PopBreakdownTable, 
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
-    actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction}, 
+    actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
     pop_memory::{PopMemory, Knowledge}, product::ProductTag, buy_result::BuyResult, 
 };
 
@@ -502,6 +502,17 @@ impl Pop {
     /// 
     /// 3. Look at the price given and the quantity they have to offer
     /// and make an offer for that based on their estimates.
+    /// 
+    /// 4. Actively Wait for the response of ActorMessage::SellerAcceptAsIs,
+    /// ActorMessage::OfferAcceptedWithChange, ActorMessage::RejectOffer, or
+    /// ActorMessage::CloseDeal.
+    /// 
+    /// 5. React to the response appropriately.
+    ///   a. If CloseDeal, exit out
+    ///   b. If Rejected, either try again with more or get out and look 
+    ///      elsewhere.
+    ///   c. If Accepted, finish out and accept change, maybe ask for 
+    ///      something else we want?
     pub fn standard_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
@@ -512,8 +523,37 @@ impl Pop {
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
     product: &usize) -> BuyResult {
+        // wait for deal start or preemptive close.
+        let result = self.active_wait(rx, tx, data, market, keep, spend, returned, 
+        &vec![
+            ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0),
+                product: 0, price: 0.0, quantity: 0.0 }, 
+            ActorMessage::NotInStock { buyer: ActorInfo::Firm(0), 
+                seller: ActorInfo::Firm(0), product: 0 }]);
+        // if not in stock gtfo
+        if let ActorMessage::NotInStock { .. } = result {
+            return BuyResult::NotSuccessful {reason: OfferResult::OutOfStock };
+        }
+        // if in stock, continue with the deal
+        if let ActorMessage::InStock { buyer: _, seller: _, 
+        product, price, quantity: _ } = result {
+            // get our budget and target
+            let curr_unit_budget = self.memory.product_knowledge.get(&product).expect("Product Not found?")
+                .current_unit_budget();
+            let unit_budget = self.memory.product_knowledge.get(&product).expect("Product Not found?")
+                .unit_budget();
+            // quickly check if the current price is to see if it's overpriced for us.
+            if price > unit_budget * 1.5 {
+                return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
+            }
 
-        BuyResult::NotSuccessful
+            let target = self.memory.product_knowledge.get(&product).expect("Product Not Found")
+                .target_remaining();
+            // get how much we might pay
+            let total_price = target * price;
+            // calculate how much we'll actually be able to get
+        }
+        BuyResult::NotSuccessful { reason: OfferResult::Incomplete }
     }
 
     pub fn emergency_buy(&mut self, 

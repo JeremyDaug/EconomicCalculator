@@ -7,7 +7,7 @@ use crate::{data_manager::DataManager, demographics::Demographics};
 use super::{seller::Seller, 
     buyer::Buyer, 
     firm_job::FirmJob, 
-    market::{Market, MarketHistory}, 
+    market::MarketHistory, 
     actor::Actor, actor_message::{ActorMessage, ActorInfo, ActorType}};
 
 /// Firms are the productive actors of our system.

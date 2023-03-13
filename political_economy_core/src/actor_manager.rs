@@ -52,7 +52,7 @@ impl ActorManager {
             let mut threads = vec![];
             // also get the many to many broadcaster
             let (local_sender, 
-                mut local_reciever) 
+                local_reciever) 
                     = barrage::bounded(1000);
             // for each market
             for market in self.markets.values_mut() {

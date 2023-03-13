@@ -1225,7 +1225,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let test = Desires::new(test_desires);
 
             let mut curr = None;
             let mut results = vec![];
@@ -1267,7 +1267,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 2,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let test = Desires::new(test_desires);
 
             let mut curr = None;
             let mut results = vec![];
@@ -1359,7 +1359,7 @@ mod tests {
                 .expect("Misstepped");
             assert_eq!(result, 100.0);
             // force misstep.
-            test.change_end(None, 5);
+            test.change_end(None, 5).expect("Error Found!");
             assert!(test.add_satisfaction_at_tier(100.0, 2).is_err());
         }
 

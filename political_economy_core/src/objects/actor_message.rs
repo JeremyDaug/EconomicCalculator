@@ -1,7 +1,3 @@
-use std::collections::HashMap;
-
-use super::actor::Actor;
-
 /// Actor Message is a message which can be passed between
 /// two actor threads.
 /// 
@@ -77,6 +73,15 @@ pub enum ActorMessage {
     /// Follow up tells the Buyer to expect more.
     BarterHint { seller: ActorInfo, buyer: ActorInfo, 
         product: usize, quantity: f64, followup: u64 },
+
+    /// From Buyer to seller.
+    /// 
+    /// Buyer Rejects as price, unable to purchase at the current price.
+    /// 
+    /// It is either too expensive in Absolute terms (total budget) or 
+    /// too expensive currently (current budget and can't buy).
+    RejectPurchase { buyer: ActorInfo, seller: ActorInfo, product: usize,
+        price_opinion: OfferResult },
 
     /// The start of a Buy offer from a buyer. Includes buyer, seller, and product 
     /// to make finding easy. It also includes price opinion, the amount requested,
@@ -236,9 +241,9 @@ impl ActorMessage {
 
             ActorMessage::SellOrder { sender: _, product: _, 
                 quantity: _, amv: _ } => false,
-            ActorMessage::BuyOffer { buyer, seller, 
-            product, price_opinion, quantity, 
-            followup } => *seller == me, // sent from buyer to seller
+            ActorMessage::BuyOffer { buyer: _, seller, 
+            product: _, price_opinion: _, quantity: _, 
+            followup: _ } => *seller == me, // sent from buyer to seller
             ActorMessage::BuyOfferFollowup { seller, ..
             } => *seller == me, // buyer to seller
                 
@@ -249,13 +254,18 @@ impl ActorMessage {
             ActorMessage::SellerAcceptOfferAsIs { buyer, .. } => *buyer == me,
             ActorMessage::OfferAcceptedWithChange { buyer, .. } => *buyer == me,
             ActorMessage::ChangeFollowup { buyer, .. } => *buyer == me,
-            ActorMessage::CheckItem { buyer, seller, 
-                proudct } => todo!(),
+
+            ActorMessage::CheckItem { buyer: _, seller, 
+                proudct: _ } => *seller == me,
             ActorMessage::CloseDeal { buyer, seller, 
-                product} => todo!(),
-            
-            ActorMessage::RejectOffer { buyer, seller, product } => todo!(),
-            ActorMessage::FinishDeal { buyer, seller, product } => todo!(), // buyer to seller
+                product: _} => *buyer == me || *seller == me, // Could be sent by either.
+            ActorMessage::RejectOffer { buyer, seller: _, 
+                product: _ } => *buyer == me,  // Buyer Rejects without question.
+            ActorMessage::FinishDeal { buyer, seller, 
+                product: _ } => *buyer == me || *seller == me,
+            ActorMessage::RejectPurchase { buyer: _, seller: _, 
+                product: _, price_opinion: _ } => todo!(), // buyer to seller
+                
         }
     }
 }

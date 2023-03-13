@@ -5,7 +5,7 @@ use crossbeam::thread;
 use itertools::Itertools;
 use rand::{Rng, SeedableRng, thread_rng};
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::STD_PRICE_CHANGE};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{STD_PRICE_CHANGE, SALABILITY_THRESHOLD}};
 use super::{pop::Pop, 
     firm::Firm, 
     actor::Actor, 
@@ -212,7 +212,7 @@ impl Market {
                     ActorMessage::SellOrder { sender, product, 
                     quantity, amv } => self.add_seller_weight(&sender, product,quantity, amv),
 
-                    ActorMessage::DumpProduct { sender, product, amount } => {
+                    ActorMessage::DumpProduct { sender: _, product, amount } => {
                         // product dumped into the environment
                         *self.resources.entry(product).or_insert(0.0) += amount;
                     },
@@ -220,7 +220,7 @@ impl Market {
                     ActorMessage::FindProduct { product, sender} => { 
                         // buyer is looking for product, send back a seller to them.
                         let result = self.find_seller(product, sender);
-                        lcl_sender.send(result);
+                        lcl_sender.send(result).expect("Send Error!");
                     },
                     // Product not found, no reaction needed to that message.
                     ActorMessage::FoundProduct { seller, buyer, 
@@ -253,7 +253,7 @@ impl Market {
                     },
 
                     ActorMessage::BuyOffer { buyer, seller, product, 
-                    price_opinion, quantity, followup } => {
+                    price_opinion, quantity, followup: _ } => {
                         // initial offer info
                         let mut deal = self.find_deal_mut(buyer, seller, product);
                         deal.request_quantity = quantity;
@@ -261,14 +261,14 @@ impl Market {
                         *self.product_demanded.entry(product).or_insert(0.0) += quantity;
                     },
                     ActorMessage::BuyOfferFollowup { buyer, seller, product, 
-                    offer_product, offer_quantity, followup  } => {
+                    offer_product, offer_quantity, followup: _  } => {
                         // add offer part to deal
-                        let mut deal = self.find_deal_mut(buyer, seller, product);
+                        let deal = self.find_deal_mut(buyer, seller, product);
                         deal.offer.insert(offer_product, offer_quantity);
                     },
 
                     ActorMessage::SellerAcceptOfferAsIs { buyer, seller, 
-                    product, offer_result } => {
+                    product, offer_result: _ } => {
                         // finish the deal, but don't delete it just yet.
                         // wait for the
                         self.finish_offered_deal_from_info(buyer, seller, product);
@@ -278,20 +278,23 @@ impl Market {
                     product, quantity, followups } => {
                         // update the requested item if needed. 
                         // (if no change, it will be the same value)
-                        let mut deal = self.find_deal_mut(buyer, seller, product);
-                        deal.request_quantity = quantity;
+                        let deal_idx = self.find_deal(buyer, seller, product);
+                        self.ongoing_deals.get_mut(deal_idx).unwrap()
+                        .request_quantity = quantity;
                         if followups == 0 { // then finish the deal if last.
-                            self.finish_offered_deal(*deal);
+                            self.finish_offered_deal(deal_idx);
                         }
                     },
                     ActorMessage::ChangeFollowup { buyer, seller, 
                     product, return_product, return_quantity, followups } => {
                         // followup from chaneg above, 
                         // note the change and finish if no more followups.
-                        let mut deal = self.find_deal_mut(buyer, seller, product);
-                        *deal.offer.entry(return_product).or_insert(0.0) = return_quantity;
+                        let deal_idx = self.find_deal(buyer, seller, product);
+
+                        *self.ongoing_deals.get_mut(deal_idx).unwrap()
+                        .offer.entry(return_product).or_insert(0.0) = return_quantity;
                         if followups == 0 {
-                            self.finish_offered_deal(*deal);
+                            self.finish_offered_deal(deal_idx);
                         }
                     },
 
@@ -299,9 +302,10 @@ impl Market {
                     product } => {
                         // Seller has rejected the offer outright. 
                         // Record this rejection, then finish.
-                        let mut deal = self.find_deal_mut(buyer, seller, product);
-                        deal.current_result = OfferResult::Rejected;
-                        self.finish_offered_deal(*deal);
+                        let deal_idx = self.find_deal(buyer, seller, product);
+                        self.ongoing_deals.get_mut(deal_idx)
+                            .unwrap().current_result = OfferResult::Rejected;
+                        self.finish_offered_deal(deal_idx);
                     },
 
                     ActorMessage::FinishDeal { buyer, seller, 
@@ -387,16 +391,14 @@ impl Market {
     /// Finds an ongoing deal in our list of deals.
     /// 
     /// Panics if deal was not found.
-    fn find_deal(&self, buyer: ActorInfo, seller: ActorInfo, product: usize) -> &DealRecord {
+    fn find_deal(&self, buyer: ActorInfo, seller: ActorInfo, product: usize) -> usize {
         self.ongoing_deals.iter()
         .filter(|x| x.request_product == product) // narrow to those with that product
-        .find(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
-        .expect("Deal Not Found, PROBLEM!")
+        .find_position(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
+        .expect("Deal Not Found, PROBLEM!").0
     }
 
-    /// Finds an ongoing deal in our list of deals.
-    /// 
-    /// Panics if deal was not found.
+    /// Finds a mutable deal, returns it for simplicity
     fn find_deal_mut(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) -> &mut DealRecord {
         self.ongoing_deals.iter_mut()
         .filter(|x| x.request_product == product) // narrow to those with that product
@@ -449,13 +451,15 @@ impl Market {
     /// 
     /// TODO Test this function
     fn finish_offered_deal_from_info(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) {
-        let deal = self.find_deal(buyer, seller, product).clone();
+        let deal = self.find_deal(buyer, seller, product);
         self.finish_offered_deal(deal);
     }
 
     /// Finishes out a deal, processing the results for market info and price 
     /// adjustments, clear out the deal also, but don't close it out totally just yet.
-    fn finish_offered_deal(&mut self, deal: DealRecord) {
+    fn finish_offered_deal(&mut self, deal_idx: usize) {
+        let deal = self.ongoing_deals.get_mut(deal_idx)
+            .expect("Deal not found?");
         let product = deal.request_product;
         // get the price of the merchandise.
         let product_price = deal.request_quantity * deal.unit_price;
