@@ -263,8 +263,8 @@ impl ActorMessage {
                 product: _ } => *buyer == me,  // Buyer Rejects without question.
             ActorMessage::FinishDeal { buyer, seller, 
                 product: _ } => *buyer == me || *seller == me,
-            ActorMessage::RejectPurchase { buyer: _, seller: _, 
-                product: _, price_opinion: _ } => todo!(), // buyer to seller
+            ActorMessage::RejectPurchase { buyer: _, seller, 
+                product: _, price_opinion: _ } => *seller == me, // buyer to seller
                 
         }
     }

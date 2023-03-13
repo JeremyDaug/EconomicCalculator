@@ -406,7 +406,7 @@ impl Pop {
             if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
                 let product = *self.memory.product_priority
                     .get(curr_buy_idx).expect("Product not found?");
-                self.try_to_buy(rx, tx, data, market, &mut keep, &mut spend, 
+                let buy_result = self.try_to_buy(rx, tx, data, market, &mut keep, &mut spend, 
                     &mut change, &product);
             }
 
@@ -544,11 +544,20 @@ impl Pop {
                 .unit_budget();
             // quickly check if the current price is to see if it's overpriced for us.
             if price > unit_budget * 1.5 {
+                // If overpriced to our original budget, cancel.
+                self.push_message(rx, tx, ActorMessage::RejectPurchase 
+                    { buyer: self.actor_info(), seller, product, 
+                        price_opinion: OfferResult::TooExpensive });
                 return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
             }
-
+            // Since it's within our absolute price range, buy
             let target = self.memory.product_knowledge.get(&product).expect("Product Not Found")
                 .target_remaining();
+            let threshold = price / curr_unit_budget;
+            let offer_result = match threshold {
+                p if p > 1.5 => (),
+                _ => OfferResult::Steal
+            }
             // get how much we might pay
             let total_price = target * price;
             // calculate how much we'll actually be able to get
