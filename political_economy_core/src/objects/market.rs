@@ -548,6 +548,9 @@ pub struct MarketHistory {
     /// The Salability of items in the market. Acts as a modifier to AMV and measures
     /// how likely the currency is to be accepted.
     pub salability: HashMap<usize, f64>,
+    /// Organizes products by their sale priority (Salability Highest to lowest).
+    /// TODO Perhaps change this to take AMV into account in some fashion.
+    pub sale_priority: Vec<usize>,
 }
 
 impl MarketHistory {
@@ -558,21 +561,27 @@ impl MarketHistory {
         // TODO update this to actually take all this information.
         let mut ret = MarketHistory { resources: market.resources.clone(),
             market_prices: market.prices.clone(), 
-            product_offered: HashMap::new(), 
-            product_sold: HashMap::new(),
+            product_offered: market.products_for_sale.clone(), 
+            product_sold: market.product_sold.clone(),
             currencies: HashMap::new(),
             salability: HashMap::new(),
+            sale_priority: vec![],
         };
-        // add in moneys
+        // add in moneys and Salability
         for money in market.salability
         .iter().filter(|x| *x.1 > SALABILITY_THRESHOLD) {
-            ret.currencies.insert(*money.0, *money.1);
+            if *money.1 > SALABILITY_THRESHOLD {
+                ret.currencies.insert(*money.0, *money.1);
+            }
+            ret.salability.insert(money.0, money.1);
         }
         // add in currencies
         for currency in market.state_currencies.iter() {
             let value = ret.currencies.entry(*currency).or_insert(0.0);
             *value = *market.salability.get(currency).unwrap_or(&0.5);
         }
+        // organize Salability
+        for sal in ret.salability.iter().sorted()
         // BREAK OUT!
         ret
     }

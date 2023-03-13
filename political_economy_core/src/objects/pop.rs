@@ -5,8 +5,9 @@
 use std::collections::{VecDeque, HashMap};
 
 use barrage::{Sender, Receiver};
+use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::SHOPPING_TIME_COST};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP}};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
@@ -538,9 +539,11 @@ impl Pop {
         if let ActorMessage::InStock { buyer: _, seller: _, 
         product, price, quantity: _ } = result {
             // get our budget and target
-            let curr_unit_budget = self.memory.product_knowledge.get(&product).expect("Product Not found?")
+            let curr_unit_budget = self.memory.product_knowledge
+            .get(&product).expect("Product Not found?")
                 .current_unit_budget();
-            let unit_budget = self.memory.product_knowledge.get(&product).expect("Product Not found?")
+            let unit_budget = self.memory.product_knowledge
+                .get(&product).expect("Product Not found?")
                 .unit_budget();
             // quickly check if the current price is to see if it's overpriced for us.
             if price > unit_budget * 1.5 {
@@ -548,19 +551,46 @@ impl Pop {
                 self.push_message(rx, tx, ActorMessage::RejectPurchase 
                     { buyer: self.actor_info(), seller, product, 
                         price_opinion: OfferResult::TooExpensive });
+                // and close out.
+                self.push_message(rx, tx, ActorMessage::CloseDeal
+                    { buyer: self.actor_info(), seller, product });
                 return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
             }
             // Since it's within our absolute price range, buy
-            let target = self.memory.product_knowledge.get(&product).expect("Product Not Found")
+            let target = self.memory.product_knowledge.get(&product)
+            .expect("Product Not Found")
                 .target_remaining();
+            let remaining_budget = self.memory.product_knowledge.get(&product)
+            .expect("Product Not Found")
+                .remaining_amv();
+            // get our current price oppinion.
+            // TODO return here to check on this, maybe return to unit_budget.
             let threshold = price / curr_unit_budget;
-            let offer_result = match threshold {
-                p if p > 1.5 => (),
-                _ => OfferResult::Steal
-            }
+            let offer_result = 
+            if threshold > TOO_EXPENSIVE { OfferResult::TooExpensive }
+            else if threshold > EXPENSIVE { OfferResult::Expensive }
+            else if threshold > OVERPRICED { OfferResult::Overpriced }
+            else if threshold > REASONABLE { OfferResult::Reasonable }
+            else if threshold > CHEAP { OfferResult::Cheap }
+            else /* threshold <= STEAL */ { OfferResult::Steal };
             // get how much we might pay
             let total_price = target * price;
-            // calculate how much we'll actually be able to get
+            // cap our target to what we have budgetted
+            let mut budget_ability = total_price.min(remaining_budget);
+            // get our corrected target
+            let mut target = budget_ability / price;
+            if !data.products.get(&product).unwrap()
+            .fractional { // then floor it if the product is not fractional
+                target = target.floor();
+                budget_ability = target * price;
+            }
+            // with our new target, build up the offer
+            let offer = self.create_offer(product,
+                budget_ability, data, market);
+            // With our offer built, send it over
+            // wait for the seller to respond
+            
+
         }
         BuyResult::NotSuccessful { reason: OfferResult::Incomplete }
     }
@@ -587,6 +617,39 @@ impl Pop {
     /// Gets the wealth of the pop on a per-capita basis.
     pub fn per_capita_wealth(&self, history: &MarketHistory) -> f64 {
         self.total_wealth(history) / (self.count() as f64)
+    }
+
+    /// ## Create Offer
+    /// 
+    /// Creates a purchase offer for a product.
+    /// It takes the product we're working with,
+    /// the budget we need to meet, as well as 
+    /// info for the product and market.
+    /// 
+    /// The amount returned is allowed to run over
+    /// but should be as close as possible.
+    /// 
+    /// Returns a hashmap of the offer as well as the final price.
+    fn create_offer(&self, product: usize, 
+    budget_ability: f64, spend: &HashMap<usize, f64>, data: &DataManager, 
+    market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
+        let mut offer = HashMap::new();
+        let mut total = 0.0;
+        // copy over items for sale (minus the product in question) and their prices.
+        let mut available = HashMap::new();
+        let mut prices = HashMap::new();
+        for (product, quantity) in spend.iter()
+        .filter(|x| *x.0 != product) {
+            available.insert(*product, *quantity);
+            let price = market.market_prices.get(product).unwrap();
+            prices.insert(*product, *price);
+        }
+        // With prices and amounts try to buy with currency first.
+        for product in market.currencies.iter().sorted)
+        {
+
+        }
+        (offer, total)
     }
 }
 
