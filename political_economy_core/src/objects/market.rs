@@ -581,7 +581,7 @@ impl MarketHistory {
             let value = ret.currencies.entry(*currency).or_insert(0.0);
             *value = *market.salability.get(currency).unwrap_or(&0.5);
         }
-        // organize Salability
+        // organize Salability highest to lowest
         for sal in ret.salability.iter()
         .sorted_by(|a, b| b.1.partial_cmp(&a.1).unwrap() ) {
             ret.sale_priority.push(*sal.0);

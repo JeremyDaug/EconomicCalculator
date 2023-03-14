@@ -645,9 +645,11 @@ impl Pop {
             prices.insert(*product, *price);
         }
         // With prices and amounts try to buy with currency first.
-        for product in market.currencies.iter()
-        .sorted_by(|a, b| ) {
-
+        for (product, _) in market.currencies.iter()
+        .filter(|x| spend.contains_key(x.0))
+        .sorted_by(|a, b| a.1.partial_cmp(b.1).unwrap()) {
+            // get the price for the currency
+            let curr_price = market.market_prices.get(product).unwrap();
         }
         
         for product in market.sale_priority.iter()
