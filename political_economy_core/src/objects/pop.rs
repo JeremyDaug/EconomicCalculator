@@ -586,7 +586,7 @@ impl Pop {
             }
             // with our new target, build up the offer
             let offer = self.create_offer(product,
-                budget_ability, data, market);
+                budget_ability, spend, data, market);
             // With our offer built, send it over
             // wait for the seller to respond
             
@@ -645,9 +645,14 @@ impl Pop {
             prices.insert(*product, *price);
         }
         // With prices and amounts try to buy with currency first.
-        for product in market.currencies.iter().sorted)
-        {
+        for product in market.currencies.iter()
+        .sorted_by(|a, b| ) {
 
+        }
+        
+        for product in market.sale_priority.iter()
+        .filter(|x| spend.contains_key(x)) {
+            let prod_price = *prices.get(product).unwrap_or(&0.0);
         }
         (offer, total)
     }

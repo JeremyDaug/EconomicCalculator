@@ -569,11 +569,12 @@ impl MarketHistory {
         };
         // add in moneys and Salability
         for money in market.salability
-        .iter().filter(|x| *x.1 > SALABILITY_THRESHOLD) {
-            if *money.1 > SALABILITY_THRESHOLD {
+        .iter() {
+            if *money.1 > SALABILITY_THRESHOLD { // if greater than 0.75 Sal, add to currencies.
                 ret.currencies.insert(*money.0, *money.1);
             }
-            ret.salability.insert(money.0, money.1);
+            // regardless of salability,
+            ret.salability.insert(*money.0, *money.1);
         }
         // add in currencies
         for currency in market.state_currencies.iter() {
@@ -581,7 +582,10 @@ impl MarketHistory {
             *value = *market.salability.get(currency).unwrap_or(&0.5);
         }
         // organize Salability
-        for sal in ret.salability.iter().sorted()
+        for sal in ret.salability.iter()
+        .sorted_by(|a, b| b.1.partial_cmp(&a.1).unwrap() ) {
+            ret.sale_priority.push(*sal.0);
+        }
         // BREAK OUT!
         ret
     }
