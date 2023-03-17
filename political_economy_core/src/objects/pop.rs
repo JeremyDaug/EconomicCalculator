@@ -379,7 +379,7 @@ impl Pop {
                 self.push_message(rx, tx, 
                     ActorMessage::SellOrder { sender: self.actor_info(),
                     product: *id, quantity: *amount, 
-                    amv: *market.market_prices.get(id).unwrap_or(&1.0) });
+                    amv: market.get_product(id).price });
                 // private sellers offer at current estimated market price.
             }
         }
@@ -458,7 +458,7 @@ impl Pop {
             .get(product).expect("Product not found?")
             .current_unit_budget();
         // with budget gotten, check if it's feasable for us to buy (market price < 1.5 budget)
-        let market_price = *market.market_prices.get(product).unwrap_or(&0.0);
+        let market_price = market.get_product_price(product, 0.0);
         if market_price > (price * 1.5) {
             return BuyResult::CancelBuy;
         }
@@ -610,7 +610,7 @@ impl Pop {
     /// gets the total current wealth of the pop in question.
     pub fn total_wealth(&self, history: &MarketHistory) -> f64 {
         self.desires.property.iter()
-        .map(|x| history.market_prices.get(x.0).unwrap_or(&0.0))
+        .map(|x| history.get_product_price(x.0, 0.0))
         .sum()
     }
 
@@ -641,20 +641,21 @@ impl Pop {
         for (product, quantity) in spend.iter()
         .filter(|x| *x.0 != product) {
             available.insert(*product, *quantity);
-            let price = market.market_prices.get(product).unwrap();
-            prices.insert(*product, *price);
+            let price = market.get_product_price(product, 0.0);
+            prices.insert(*product, price);
         }
         // With prices and amounts try to buy with currency first.
-        for (product, _) in market.currencies.iter()
-        .filter(|x| spend.contains_key(x.0))
-        .sorted_by(|a, b| a.1.partial_cmp(b.1).unwrap()) {
+        for product in market.currencies.iter()
+        .filter(|x| spend.contains_key(x))
+        {
             // get the price for the currency
-            let curr_price = market.market_prices.get(product).unwrap();
+            let curr_price = market.get_product(product).price;
+            let prod_avail = available.get(product)
         }
-        
+
         for product in market.sale_priority.iter()
         .filter(|x| spend.contains_key(x)) {
-            let prod_price = *prices.get(product).unwrap_or(&0.0);
+            let prod_price = *prices.get(product).unwrap_or(&&0.0);
         }
         (offer, total)
     }

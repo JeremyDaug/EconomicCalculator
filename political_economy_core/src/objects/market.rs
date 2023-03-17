@@ -354,7 +354,7 @@ impl Market {
     /// Adds seller info, also calculating it's weight in the market selection process.
     fn add_seller_weight(&mut self, sender: &ActorInfo, product: usize, quantity: f64, amv: f64) {
         let list = self.seller_weights.entry(product).or_insert((0.0, vec![]));
-        let market_price = *self.previous_day.market_prices.get(&product).unwrap_or(&0.0);
+        let market_price = self.previous_day.get_product(&product).price;
         let mut weight = 0.0;
         if market_price <= 0.0 && amv <= 0.0 { // TODO 0 or negative amv or market price for product found.
             todo!("Do later, I can't be bothered right now."); 
@@ -531,26 +531,32 @@ impl Market {
 /// access to this data.
 #[derive(Debug, Clone)]
 pub struct MarketHistory {
-    /// The open resources of the market, these are the 'trash' items
-    /// which are available for anyone to pick up, and includes surface
-    /// resources from the environment.
-    pub resources: HashMap<usize, f64>,
-    /// The Market prices in AMV yesterday.
-    pub market_prices: HashMap<usize, f64>,
-    /// How many of each product was offered in the market yesterday.
-    pub product_offered: HashMap<usize, f64>,
-    /// The products sold in this market yesterday.
-    pub product_sold: HashMap<usize, f64>,
-    /// The currencies in the market and their trust rating.
-    /// All values are at above our threshold (currently 0.75) and
-    /// no greater than 1. If any exist here, than we have at least one currency.
-    pub currencies: HashMap<usize, f64>,
-    /// The Salability of items in the market. Acts as a modifier to AMV and measures
-    /// how likely the currency is to be accepted.
-    pub salability: HashMap<usize, f64>,
+    /// The info for each product we store in memory.
+    pub info: HashMap<usize, ProductInfo>,
     /// Organizes products by their sale priority (Salability Highest to lowest).
     /// TODO Perhaps change this to take AMV into account in some fashion.
     pub sale_priority: Vec<usize>,
+    /// The products which are Currencies in our market for whatever reason.
+    /// Sorted by Salability (highest to lowest)
+    pub currencies: Vec<usize>,
+}
+
+/// Market History info for our products, to make getting info more easy.
+#[derive(Debug, Clone, Copy)]
+pub struct ProductInfo {
+    /// How many are available in the environment to grab.
+    pub available: f64,
+    /// Yesterday's price for the item.
+    pub price: f64,
+    /// How many were offered yesterday.
+    pub offered: f64,
+    /// How many were sold yesterday.
+    pub sold: f64,
+    /// The item's Salability Rating.
+    pub salability: f64,
+    /// If the item is a currency. May be true even if Salability isn't
+    /// above threshold.
+    pub is_currency: bool,
 }
 
 impl MarketHistory {
@@ -558,36 +564,54 @@ impl MarketHistory {
     /// Creates a market history of yesterday based on the current market given
     /// to it.
     pub fn create(market: &Market) -> Self {
-        // TODO update this to actually take all this information.
-        let mut ret = MarketHistory { resources: market.resources.clone(),
-            market_prices: market.prices.clone(), 
-            product_offered: market.products_for_sale.clone(), 
-            product_sold: market.product_sold.clone(),
-            currencies: HashMap::new(),
-            salability: HashMap::new(),
+        let mut ret = MarketHistory { info: HashMap::new(),
             sale_priority: vec![],
+            currencies: vec![],
         };
-        // add in moneys and Salability
-        for money in market.salability
-        .iter() {
-            if *money.1 > SALABILITY_THRESHOLD { // if greater than 0.75 Sal, add to currencies.
-                ret.currencies.insert(*money.0, *money.1);
+        // go through each product and copy over it's info from the market.
+        for (product, price) in market.prices.iter() {
+            let avail = market.resources.get(product).unwrap_or(&0.0);
+            let offered = market.products_for_sale.get(product).unwrap_or(&0.0);
+            let sold = market.product_sold.get(product).unwrap_or(&0.0);
+            let sal = market.salability.get(product).unwrap_or(&0.0);
+            let currency = if *sal > SALABILITY_THRESHOLD {
+                true
+            } else if market.state_currencies.contains(product) {
+                true
+            } else { false };
+
+            ret.info.insert(*product, ProductInfo { available: *avail, 
+                price: *price,  offered: *offered, sold: *sold, 
+                salability: *sal, is_currency: currency });
+        }
+
+        // add in those currencies which are dictated to be currencies by the market.
+        for (product, info) in ret.info.iter()
+        .sorted_by(|a, b| {
+            // sort buy salability, highest to lowest
+            // TODO, perhaps have this sort by Salability * AMV Part of TODO Line:537 above.
+            b.1.salability.partial_cmp(&a.1.salability).expect("Bad NAN!")
+        }) {
+            // add to sale priority, for general purposes.
+            ret.sale_priority.push(*product);
+            if info.is_currency { // if it's a currency, also add it to currencies.
+                ret.currencies.push(*product);
             }
-            // regardless of salability,
-            ret.salability.insert(*money.0, *money.1);
         }
-        // add in currencies
-        for currency in market.state_currencies.iter() {
-            let value = ret.currencies.entry(*currency).or_insert(0.0);
-            *value = *market.salability.get(currency).unwrap_or(&0.5);
-        }
-        // organize Salability highest to lowest
-        for sal in ret.salability.iter()
-        .sorted_by(|a, b| b.1.partial_cmp(&a.1).unwrap() ) {
-            ret.sale_priority.push(*sal.0);
-        }
-        // BREAK OUT!
         ret
+    }
+
+    /// Helper function, gets a product from our history.
+    pub fn get_product(&self, product: &usize) -> &ProductInfo {
+        self.info.get(product).expect("Product Not Found!")
+    }
+
+    pub fn get_product_price(&self, product: &usize, default: f64) -> f64 {
+        if let Some(result) = self.info.get(product) {
+            result.price
+        } else {
+            default
+        }
     }
 }
 

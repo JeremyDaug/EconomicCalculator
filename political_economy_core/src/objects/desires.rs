@@ -738,7 +738,7 @@ impl Desires {
         .filter(|x| x.item.is_product()) {
             let product = desire.item.unwrap();
             self.market_satisfaction += 
-                market.market_prices.get(product).unwrap_or(&0.0) * 
+                market.get_product_price(product, 0.0) * 
                 desire.satisfaction;
         }
         self.market_satisfaction
@@ -753,7 +753,8 @@ impl Desires {
     pub fn market_wealth(&mut self, market: &MarketHistory) -> f64 {
         self.property.iter()
         // get the price * the amount owned.
-        .map(|x| x.1 * market.market_prices.get(x.0).unwrap_or(&0.0))
+        .map(|(product, quantity)| 
+            quantity * market.get_product_price(product, 0.0))
         // then add together.
         .sum()
     }
