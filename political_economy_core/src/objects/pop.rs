@@ -537,7 +537,7 @@ impl Pop {
         }
         // if in stock, continue with the deal
         if let ActorMessage::InStock { buyer: _, seller: _, 
-        product, price, quantity: _ } = result {
+        product, price, quantity } = result {
             // get our budget and target
             let curr_unit_budget = self.memory.product_knowledge
             .get(&product).expect("Product Not found?")
@@ -572,21 +572,21 @@ impl Pop {
             else if threshold > OVERPRICED { OfferResult::Overpriced }
             else if threshold > REASONABLE { OfferResult::Reasonable }
             else if threshold > CHEAP { OfferResult::Cheap }
-            else /* threshold <= STEAL */ { OfferResult::Steal };
+            else /* threshold <= CHEAP */ { OfferResult::Steal };
             // get how much we might pay
             let total_price = target * price;
             // cap our target to what we have budgetted
-            let mut budget_ability = total_price.min(remaining_budget);
+            let mut adjusted_target = total_price.min(remaining_budget);
             // get our corrected target
-            let mut target = budget_ability / price;
+            let mut target = adjusted_target / price;
             if !data.products.get(&product).unwrap()
             .fractional { // then floor it if the product is not fractional
                 target = target.floor();
-                budget_ability = target * price;
+                adjusted_target = target * price;
             }
             // with our new target, build up the offer
-            let offer = self.create_offer(product,
-                budget_ability, spend, data, market);
+            let offer = self.create_offer(product, adjusted_target,
+                remaining_budget, spend, data, market);
             // With our offer built, send it over
             // wait for the seller to respond
             
@@ -621,6 +621,13 @@ impl Pop {
 
     /// ## Create Offer
     /// 
+    /// Parameters
+    /// - product is the item we're looking at.
+    /// - target is the target AMV we are trying to meet.
+    /// - spend is what items we can spend
+    /// - data is product data
+    /// - market is market data.
+    /// 
     /// Creates a purchase offer for a product.
     /// It takes the product we're working with,
     /// the budget we need to meet, as well as 
@@ -629,9 +636,11 @@ impl Pop {
     /// The amount returned is allowed to run over
     /// but should be as close as possible.
     /// 
+    /// OVERSPEND_THRESHOLD % or less is considered a valid target.
+    /// 
     /// Returns a hashmap of the offer as well as the final price.
-    fn create_offer(&self, product: usize, 
-    budget_ability: f64, spend: &HashMap<usize, f64>, data: &DataManager, 
+    fn create_offer(&self, product: usize, target: f64,
+    spend: &HashMap<usize, f64>, data: &DataManager, 
     market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
         let mut offer = HashMap::new();
         let mut total = 0.0;
@@ -645,17 +654,35 @@ impl Pop {
             prices.insert(*product, price);
         }
         // With prices and amounts try to buy with currency first.
-        for product in market.currencies.iter()
+        for offer_item in market.currencies.iter()
         .filter(|x| spend.contains_key(x))
         {
             // get the price for the currency
-            let curr_price = market.get_product(product).price;
-            let prod_avail = available.get(product)
+            let offer_prod_price = market.get_product(offer_item).price;
+            let prod_avail = available.get(offer_item).expect("Product not found?");
+            let available_amv = offer_prod_price * prod_avail;
+            // if availible price overshoots, then deal with that.
+            let spend = if available_amv > target {
+                // reduce to a perfect match.
+                let ratio = available_amv / target;
+                let prod_perfect = prod_avail * ratio;
+                // if fractional, perfect, if not do a rounding check
+                if data.products.get(&product).expect("Product not found?")
+                .fractional {
+                    prod_perfect
+                } else { // If rounding up is greater than OVERSPEND_THRESHOLD round down and continue
+                    let prod_ceiling = prod_perfect.ceil();
+                    let ceiling_price = prod_ceiling * offer_prod_price;
+                    
+                }
+            } else { // if still not enough, 
+                prod_avail
+            }
         }
 
-        for product in market.sale_priority.iter()
+        for offer_item in market.sale_priority.iter()
         .filter(|x| spend.contains_key(x)) {
-            let prod_price = *prices.get(product).unwrap_or(&&0.0);
+            let prod_price = *prices.get(offer_item).unwrap_or(&&0.0);
         }
         (offer, total)
     }
