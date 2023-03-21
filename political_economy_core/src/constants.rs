@@ -8,7 +8,8 @@ pub const REST_WANT_ID: usize = 0;
 pub const SHOPPING_TIME_PROC_ID: usize = 0;
 
 
-// These are configuration constants. Could be floated off into aa
+// These are configuration constants. Could be floated off into a
+// configuration file.
 
 /// The standard cost in time for an individual to go shopping.
 pub const SHOPPING_TIME_COST: f64 = 0.2;
@@ -16,6 +17,10 @@ pub const SHOPPING_TIME_COST: f64 = 0.2;
 pub const SALABILITY_THRESHOLD: f64 = 0.75;
 /// The standard price movement step we use.
 pub const STD_PRICE_CHANGE: f64 = 1.0;
+
+/// The target for overspend we want to aim below if at all
+/// possible.
+pub const OVERSPEND_THRESHOLD: f64 = 0.025;
 
 /// Too Expensive Threshold
 pub const TOO_EXPENSIVE: f64 = 1.5;
