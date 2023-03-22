@@ -18,6 +18,158 @@ mod tests {
               species::Species, culture::Culture, ideology::Ideology, pop_memory::PopMemory}, 
               demographics::Demographics};
 
+        pub fn make_test_pop() -> Pop {
+            let mut test = Pop{ 
+                id: 0, 
+                job: 0, 
+                firm: 0, 
+                market: 0, 
+                skill: 0, 
+                lower_skill_level: 0.0, 
+                higher_skill_level: 0.0, 
+                desires: Desires::new(vec![]), 
+                breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
+                is_selling: true,
+                memory: PopMemory::create_empty(),
+                backlog: VecDeque::new()};
+
+            let species_desire_1 = Desire{ 
+                item: DesireItem::Product(0), 
+                start: 0, 
+                end: Some(4), 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 1, 
+                tags: vec![] };
+            let species_desire_2 = Desire{ 
+                item: DesireItem::Product(1), 
+                start: 9, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 1, 
+                tags: vec![] };
+
+            let culture_desire_1 = Desire{ 
+                item: DesireItem::Product(2), 
+                start: 10, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 0, 
+                tags: vec![] };
+            let culture_desire_2 = Desire{ 
+                item: DesireItem::Product(3), 
+                start: 15, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 10, 
+                tags: vec![] };
+
+            let ideology_desire_1 = Desire{ 
+                item: DesireItem::Product(4), 
+                start: 30, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 0, 
+                tags: vec![] };
+            let ideology_desire_2 = Desire{ 
+                item: DesireItem::Product(5), 
+                start: 31, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 0, 
+                tags: vec![] };
+
+            let species = Species::new(0,
+                "Species".into(),
+                "".into(),
+                vec![species_desire_1, species_desire_2],
+                vec![], vec![], 
+                1.0, 0.03,
+                0.02).expect("Messed up new.");
+
+            let culture = Culture::new(0,
+                "Culture".into(),
+                "".into(),
+                1.0, 0.01,
+                0.01,
+                vec![culture_desire_1, culture_desire_2],
+                vec![]).expect("Messed up new.");
+
+            let ideology = Ideology::new(0,
+                "Ideology".into(),
+                "".into(),
+                0.0, 0.0,
+                1.0,
+                vec![ideology_desire_1, ideology_desire_2],
+                vec![]).expect("Messed up new.");
+
+            let mut demos = Demographics{ species: HashMap::new(),
+                 cultures: HashMap::new(), 
+                ideology: HashMap::new() };
+
+            demos.species.insert(species.id, species);
+            demos.cultures.insert(culture.id, culture);
+            demos.ideology.insert(ideology.id, ideology);
+
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: None,
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: None, 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: Some(0),
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: None, 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: None,
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: Some(0), 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: Some(0),
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: Some(0), 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+
+            test.update_desires(demos);
+
+            test
+        }
+
         #[test]
         pub fn update_pop_desires_equivalently() {
             let mut test = Pop{ 
@@ -194,6 +346,41 @@ mod tests {
             .find(|x| x.item == DesireItem::Product(5)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
 
+        }
+    
+        mod create_offer_tests {
+            use std::collections::HashMap;
+
+            use crate::{data_manager::DataManager, objects::market::MarketHistory};
+
+            use super::make_test_pop;
+
+            #[test]
+            pub fn should_return_everything_when_short() {
+                let mut pop = make_test_pop();
+
+                let mut data = DataManager::new();
+
+                data.load_all(&"X".to_string());
+
+                let mut spend: HashMap<usize, f64> = HashMap::new();
+                let mut market = MarketHistory {
+                    info: todo!(),
+                    sale_priority: todo!(),
+                    currencies: todo!(),
+                };
+
+                let (offer, total) = pop.create_offer(5, 5.0, 
+                    &spend, &data, &market);
+            }
+
+            pub fn should_return_exact_when_possible() {
+
+            }
+
+            pub fn should_return_within_limit() {
+
+            }
         }
     }
 

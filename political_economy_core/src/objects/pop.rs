@@ -2,12 +2,12 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::collections::{VecDeque, HashMap};
+use std::{collections::{VecDeque, HashMap}, f32::consts::E};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD}};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
@@ -586,7 +586,7 @@ impl Pop {
             }
             // with our new target, build up the offer
             let offer = self.create_offer(product, adjusted_target,
-                remaining_budget, spend, data, market);
+                spend, data, market);
             // With our offer built, send it over
             // wait for the seller to respond
             
@@ -639,7 +639,9 @@ impl Pop {
     /// OVERSPEND_THRESHOLD % or less is considered a valid target.
     /// 
     /// Returns a hashmap of the offer as well as the final price.
-    fn create_offer(&self, product: usize, target: f64,
+    /// 
+    /// TODO Test the shit out of this. It'll need it.
+    pub fn create_offer(&self, product: usize, target: f64,
     spend: &HashMap<usize, f64>, data: &DataManager, 
     market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
         let mut offer = HashMap::new();
@@ -662,9 +664,9 @@ impl Pop {
             let prod_avail = available.get(offer_item).expect("Product not found?");
             let available_amv = offer_prod_price * prod_avail;
             // if availible price overshoots, then deal with that.
-            let spend = if available_amv > target {
+            let spend = if available_amv > (target - total) {
                 // reduce to a perfect match.
-                let ratio = available_amv / target;
+                let ratio = (target - total) / available_amv;
                 let prod_perfect = prod_avail * ratio;
                 // if fractional, perfect, if not do a rounding check
                 if data.products.get(&product).expect("Product not found?")
@@ -673,17 +675,76 @@ impl Pop {
                 } else { // If rounding up is greater than OVERSPEND_THRESHOLD round down and continue
                     let prod_ceiling = prod_perfect.ceil();
                     let ceiling_price = prod_ceiling * offer_prod_price;
-                    
+                    let ceiling_total = total + ceiling_price;
+                    let ratio = ceiling_total / target;
+                    if ratio < (1.0 + OVERSPEND_THRESHOLD) { 
+                        // TODO add factor to increase or reduce threshold based on pop despiration.
+                        // if current price with cieling is under our threshold
+                        // use that, otherwise, use the next step down.
+                        prod_ceiling
+                    } else {
+                        prod_ceiling - 1.0
+                    }
                 }
             } else { // if still not enough, 
-                prod_avail
+                *prod_avail
+            };
+            // sanity check that our spend product is not zero, if it is, skip.
+            if spend == 0.0 { continue; }
+            // with the amount to spend gotten, add that to our total
+            total += spend * offer_prod_price;
+            // then add that spend amount to our offer
+            offer.insert(product, spend);
+            // if the total is now above our target (implying it's within overspend territory)
+            if total > target {
+                return (offer, total);
             }
         }
 
         for offer_item in market.sale_priority.iter()
-        .filter(|x| spend.contains_key(x)) {
-            let prod_price = *prices.get(offer_item).unwrap_or(&&0.0);
+        .filter(|x| spend.contains_key(x) && !market.currencies.contains(x)) {
+            // get the price for the currency
+            let offer_prod_price = market.get_product(offer_item).price;
+            let prod_avail = available.get(offer_item).expect("Product not found?");
+            let available_amv = offer_prod_price * prod_avail;
+            // if availible price overshoots, then deal with that.
+            let spend = if available_amv > (target - total) {
+                // reduce to a perfect match.
+                let ratio = (target - total) / available_amv;
+                let prod_perfect = prod_avail * ratio;
+                // if fractional, perfect, if not do a rounding check
+                if data.products.get(&product).expect("Product not found?")
+                .fractional {
+                    prod_perfect
+                } else { // If rounding up is greater than OVERSPEND_THRESHOLD round down and continue
+                    let prod_ceiling = prod_perfect.ceil();
+                    let ceiling_price = prod_ceiling * offer_prod_price;
+                    let ceiling_total = total + ceiling_price;
+                    let ratio = ceiling_total / target;
+                    if ratio < (1.0 + OVERSPEND_THRESHOLD) { 
+                        // TODO add factor to increase or reduce threshold based on pop despiration.
+                        // if current price with cieling is under our threshold
+                        // use that, otherwise, use the next step down.
+                        prod_ceiling
+                    } else {
+                        prod_ceiling - 1.0
+                    }
+                }
+            } else { // if still not enough, 
+                *prod_avail
+            };
+            // sanity check that our spend product is not zero, if it is, skip.
+            if spend == 0.0 { continue; }
+            // with the amount to spend gotten, add that to our total
+            total += spend * offer_prod_price;
+            // then add that spend amount to our offer
+            offer.insert(product, spend);
+            // if the total is now above our target (implying it's within overspend territory)
+            if total > target {
+                return (offer, total);
+            }
         }
+        // if we got here, return whatever we got anyway.
         (offer, total)
     }
 }
