@@ -361,7 +361,8 @@ mod tests {
 
                 let mut data = DataManager::new();
 
-                data.load_all(&"X".to_string());
+                // TODO when load_all is updated to take a file, relpace this with the 'default' load.
+                data.load_all(&"X".to_string()).expect("Error loading prefabs");
 
                 let mut spend: HashMap<usize, f64> = HashMap::new();
                 let mut market = MarketHistory {
