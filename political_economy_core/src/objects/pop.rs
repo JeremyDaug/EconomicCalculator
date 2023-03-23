@@ -2,7 +2,7 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::{collections::{VecDeque, HashMap}, f32::consts::E};
+use std::{collections::{VecDeque, HashMap}, f32::consts::E, io::Read};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
@@ -163,6 +163,17 @@ impl Pop {
         }
     }
 
+    /// A shorthand function to recieve the next message from the queue for us.
+    /// It returns it to us instead of putting it in the backlog.
+    pub fn get_next_message(&self, rx: &Receiver<ActorMessage>) -> ActorMessage {
+        loop {
+            let msg = rx.recv().expect("Unexpected Disconnect.");
+            if msg.for_me(self.actor_info()) {
+                return msg;
+            }
+        }
+    }
+
     /// Processes firm messages for standard day work. 
     /// 
     /// Returns true if the workday has ended.
@@ -318,6 +329,32 @@ impl Pop {
                 else {
                     self.process_common_message(rx, tx, data, market, msg, keep, spend, returned);
                 }
+            }
+        }
+    }
+
+    /// Specific wait function.
+    /// 
+    /// Waits on a specific message or messages to be recieved directed for us.
+    /// If it's any other message for us, it's put onto the backlog.
+    /// 
+    /// Meant to be used primarily when we are locked into a state where we 
+    /// shouldn't respond to anything else but what we're focusing on.
+    /// 
+    /// ie
+    /// - Buying State.
+    pub fn specific_wait(&mut self,
+    rx: &Receiver<ActorMessage>,
+    find: &Vec<ActorMessage>,
+    ) -> ActorMessage {
+        loop {
+            let msg = self.get_next_message(rx);
+            if find.iter()
+            .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                return msg;
+            }
+            else {
+                self.backlog.push_back(msg);
             }
         }
     }
@@ -585,11 +622,25 @@ impl Pop {
                 adjusted_target = target * price;
             }
             // with our new target, build up the offer
-            let offer = self.create_offer(product, adjusted_target,
+            let (offer, sent_amv) = self.create_offer(product, adjusted_target,
                 spend, data, market);
             // With our offer built, send it over
+            // send over the start of the offer.
+            let mut offer_len = offer.len();
+            self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller, 
+                product, price_opinion: offer_result, quantity: target,
+                followup: offer_len });
+            for (offer_item, offer_quantity) in offer.iter() {
+                offer_len -= 1;
+                self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller, 
+                    product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
+            }
             // wait for the seller to respond
-            
+            let response = self.specific_wait(rx, &vec![
+                ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
+                    product: 0, offer_result: OfferResult::Cheap },
+                
+            ]);
 
         }
         BuyResult::NotSuccessful { reason: OfferResult::Incomplete }
