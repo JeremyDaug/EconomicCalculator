@@ -357,7 +357,7 @@ mod tests {
 
             #[test]
             pub fn should_return_everything_when_short() {
-                let mut pop = make_test_pop();
+                let pop = make_test_pop();
 
                 let mut data = DataManager::new();
 
@@ -449,12 +449,285 @@ mod tests {
 
             }
 
-            pub fn should_return_exact_when_possible() {
+            #[test]
+            pub fn should_return_exact_when_possible_no_fractional() {
+                let pop = make_test_pop();
 
+                let mut data = DataManager::new();
+
+                // TODO when load_all is updated to take a file, relpace this with the 'default' load.
+                data.load_all(&"X".to_string()).expect("Error loading prefabs");
+
+                // Add items to spend.
+                let mut spend: HashMap<usize, f64> = HashMap::new();
+                spend.insert(2, 10.0);
+                spend.insert(3, 10.0);
+                spend.insert(4, 10.0);
+                spend.insert(5, 10.0);
+                spend.insert(6, 10.0);
+                spend.insert(6, 10.0);
+                spend.insert(7, 10.0);
+
+                let mut market = MarketHistory {
+                    info: HashMap::new(),
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
+                market.info.insert(2, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 100.0,
+                    is_currency: true,
+                });
+                market.info.insert(3, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(4, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(5, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(6, ProductInfo {
+                    available: 0.0,
+                    price: 3.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(7, ProductInfo {
+                    available: 0.0,
+                    price: 100.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.0,
+                    is_currency: false,
+                });
+
+                market.currencies.push(2);
+                market.sale_priority.push(2);
+                market.sale_priority.push(3);
+                market.sale_priority.push(4);
+                market.sale_priority.push(5);
+                market.sale_priority.push(6);
+                market.sale_priority.push(7);
+
+                // it is asking for a unit of 1 unit of 7, which has an AMV of 45.0.
+                let (offer, total) = pop.create_offer(7, 55.0, 
+                    &spend, &data, &market);
+
+                assert_eq!(total, 55.0);
+                assert_eq!(*offer.get(&2).unwrap(), 10.0);
+                assert_eq!(*offer.get(&3).unwrap(), 10.0);
+                assert_eq!(*offer.get(&4).unwrap(), 10.0);
+                assert_eq!(*offer.get(&5).unwrap(), 10.0);
+                assert_eq!(*offer.get(&6).unwrap(), 5.0);
             }
 
-            pub fn should_return_within_limit() {
+            #[test]
+            pub fn should_return_exact_when_possible_with_fractional() {
+                let pop = make_test_pop();
 
+                let mut data = DataManager::new();
+
+                // TODO when load_all is updated to take a file, relpace this with the 'default' load.
+                data.load_all(&"X".to_string()).expect("Error loading prefabs");
+                // make 6 fractional.
+                data.products.get_mut(&6).unwrap().fractional = true;
+
+                // Add items to spend.
+                let mut spend: HashMap<usize, f64> = HashMap::new();
+                spend.insert(2, 10.0);
+                spend.insert(3, 10.0);
+                spend.insert(4, 10.0);
+                spend.insert(5, 10.0);
+                spend.insert(6, 10.0);
+                spend.insert(6, 10.0);
+                spend.insert(7, 10.0);
+
+                let mut market = MarketHistory {
+                    info: HashMap::new(),
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
+                market.info.insert(2, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 100.0,
+                    is_currency: true,
+                });
+                market.info.insert(3, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(4, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(5, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(6, ProductInfo {
+                    available: 0.0,
+                    price: 2.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(7, ProductInfo {
+                    available: 0.0,
+                    price: 5.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.0,
+                    is_currency: false,
+                });
+
+                market.currencies.push(2);
+                market.sale_priority.push(2);
+                market.sale_priority.push(3);
+                market.sale_priority.push(4);
+                market.sale_priority.push(5);
+                market.sale_priority.push(6);
+                market.sale_priority.push(7);
+
+                // it is asking for a unit of 1 unit of 7, which has an AMV of 45.0.
+                let (offer, total) = pop.create_offer(7, 47.0, 
+                    &spend, &data, &market);
+
+                assert_eq!(total, 47.0);
+                assert_eq!(*offer.get(&2).unwrap(), 10.0);
+                assert_eq!(*offer.get(&3).unwrap(), 10.0);
+                assert_eq!(*offer.get(&4).unwrap(), 10.0);
+                assert_eq!(*offer.get(&5).unwrap(), 10.0);
+                assert_eq!(*offer.get(&6).unwrap(), 3.5);
+            }
+
+            #[test]
+            pub fn should_return_within_limit() {
+                let pop = make_test_pop();
+
+                let mut data = DataManager::new();
+
+                // TODO when load_all is updated to take a file, relpace this with the 'default' load.
+                data.load_all(&"X".to_string()).expect("Error loading prefabs");
+
+                // Add items to spend.
+                let mut spend: HashMap<usize, f64> = HashMap::new();
+                spend.insert(2, 10.0);
+                spend.insert(3, 10.0);
+                spend.insert(4, 10.0);
+                spend.insert(5, 10.0);
+                spend.insert(6, 10.0);
+                spend.insert(6, 10.0);
+                spend.insert(7, 10.0);
+
+                let mut market = MarketHistory {
+                    info: HashMap::new(),
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
+                market.info.insert(2, ProductInfo {
+                    available: 0.0,
+                    price: 2.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 100.0,
+                    is_currency: true,
+                });
+                market.info.insert(3, ProductInfo {
+                    available: 0.0,
+                    price: 3.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(4, ProductInfo {
+                    available: 0.0,
+                    price: 4.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(5, ProductInfo {
+                    available: 0.0,
+                    price: 15.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(6, ProductInfo {
+                    available: 0.0,
+                    price: 3.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 1.0,
+                    is_currency: false,
+                });
+                market.info.insert(7, ProductInfo {
+                    available: 0.0,
+                    price: 100.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.0,
+                    is_currency: false,
+                });
+
+                market.currencies.push(2);
+                market.sale_priority.push(2);
+                market.sale_priority.push(3);
+                market.sale_priority.push(4);
+                market.sale_priority.push(5);
+                market.sale_priority.push(6);
+                market.sale_priority.push(7);
+
+                // it is asking for a unit of 1 unit of 7, which has an AMV of 45.0.
+                let (offer, total) = pop.create_offer(7, 100.0, 
+                    &spend, &data, &market);
+
+                assert_eq!(total, 102.0);
+                assert_eq!(*offer.get(&2).unwrap(), 10.0);
+                assert_eq!(*offer.get(&3).unwrap(), 10.0);
+                assert_eq!(*offer.get(&4).unwrap(), 10.0);
+                assert!(offer.get(&5).is_none());
+                assert_eq!(*offer.get(&6).unwrap(), 4.0);
             }
         }
     }

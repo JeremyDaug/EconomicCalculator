@@ -664,12 +664,12 @@ impl Pop {
             let prod_avail = available.get(offer_item).expect("Product not found?");
             let available_amv = offer_prod_price * prod_avail;
             // if availible price overshoots, then deal with that.
-            let spend = if available_amv > (target - total) {
+            let spend = if available_amv >= (target - total) {
                 // reduce to a perfect match.
                 let ratio = (target - total) / available_amv;
                 let prod_perfect = prod_avail * ratio;
                 // if fractional, perfect, if not do a rounding check
-                if data.products.get(&product).expect("Product not found?")
+                if data.products.get(&offer_item).expect("Product not found?")
                 .fractional {
                     prod_perfect
                 } else { // If rounding up is greater than OVERSPEND_THRESHOLD round down and continue
@@ -714,7 +714,7 @@ impl Pop {
                 let ratio = (target - total) / available_amv;
                 let prod_perfect = prod_avail * ratio;
                 // if fractional, perfect, if not do a rounding check
-                if data.products.get(&product).expect("Product not found?")
+                if data.products.get(&offer_item).expect("Product not found?")
                 .fractional {
                     prod_perfect
                 } else { // If rounding up is greater than OVERSPEND_THRESHOLD round down and continue
