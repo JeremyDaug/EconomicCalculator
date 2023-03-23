@@ -650,14 +650,14 @@ impl Pop {
         let mut available = HashMap::new();
         let mut prices = HashMap::new();
         for (product, quantity) in spend.iter()
-        .filter(|x| *x.0 != product) {
+        .filter(|(a, b)| **a != product) {
             available.insert(*product, *quantity);
             let price = market.get_product_price(product, 0.0);
             prices.insert(*product, price);
         }
         // With prices and amounts try to buy with currency first.
         for offer_item in market.currencies.iter()
-        .filter(|x| spend.contains_key(x))
+        .filter(|x| available.contains_key(x))
         {
             // get the price for the currency
             let offer_prod_price = market.get_product(offer_item).price;
@@ -694,7 +694,7 @@ impl Pop {
             // with the amount to spend gotten, add that to our total
             total += spend * offer_prod_price;
             // then add that spend amount to our offer
-            offer.insert(product, spend);
+            offer.insert(*offer_item, spend);
             // if the total is now above our target (implying it's within overspend territory)
             if total > target {
                 return (offer, total);
@@ -702,10 +702,11 @@ impl Pop {
         }
 
         for offer_item in market.sale_priority.iter()
-        .filter(|x| spend.contains_key(x) && !market.currencies.contains(x)) {
+        .filter(|x| available.contains_key(x) && !market.currencies.contains(x)) {
             // get the price for the currency
             let offer_prod_price = market.get_product(offer_item).price;
-            let prod_avail = available.get(offer_item).expect("Product not found?");
+            let prod_avail = available.get(offer_item).expect("Product not found?")
+                - offer.get(offer_item).unwrap_or(&0.0);
             let available_amv = offer_prod_price * prod_avail;
             // if availible price overshoots, then deal with that.
             let spend = if available_amv > (target - total) {
@@ -731,14 +732,14 @@ impl Pop {
                     }
                 }
             } else { // if still not enough, 
-                *prod_avail
+                prod_avail
             };
             // sanity check that our spend product is not zero, if it is, skip.
             if spend == 0.0 { continue; }
             // with the amount to spend gotten, add that to our total
             total += spend * offer_prod_price;
             // then add that spend amount to our offer
-            offer.insert(product, spend);
+            offer.insert(*offer_item, spend);
             // if the total is now above our target (implying it's within overspend territory)
             if total > target {
                 return (offer, total);
