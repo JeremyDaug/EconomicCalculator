@@ -348,6 +348,90 @@ mod tests {
 
         }
     
+        mod msg_tests {
+            use std::thread;
+
+            use crate::objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller};
+
+            use super::make_test_pop;
+
+            #[test]
+            pub fn should_consume_msgs_with_msg_catchup() {
+                let mut test = make_test_pop();
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+
+                // push a bunch of stuff to get it blocked.
+                let msg = ActorMessage::WantSplash { sender: ActorInfo::Firm(0), 
+                    want: 0, amount: 1.0 };
+                loop {
+                    let result = 
+                    tx.try_send(msg);
+                    if let Err(_) = result {
+                        break;
+                    }
+                }
+                
+                let handler = thread::spawn(move || {
+                    test.msg_catchup(&passed_rx);
+                    test
+                });
+
+                // wait for the handler to get everything.
+                let mut test = handler.join().unwrap();
+                // check that our messages are still there in the queue (we didn't read them out.
+                let mut in_queue = 0;
+                loop {
+                    let result = rx.try_recv().unwrap();
+                    if let None = result {
+                        break;
+                    } else {
+                        in_queue += 1;
+                    }
+                }
+                assert_eq!(in_queue, 10);
+                // check that the test has added the msg to the backlog.
+                assert_eq!(test.backlog.len(), 10);
+                if let ActorMessage::WantSplash { .. } 
+                    = test.backlog.pop_front().unwrap() {}
+                else { assert!(false); }
+            }
+
+            #[test]
+            pub fn should_push_msg_safely() {
+                let mut test = make_test_pop();
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                // push a bunch of stuff to get it blocked.
+                loop {
+                    let result = tx.try_send(ActorMessage::AllFinished);
+                    if let Err(msg) = result {
+                        break;
+                    }
+                }
+                let msg = ActorMessage::BuyOffer { 
+                    buyer: test.actor_info(), seller: ActorInfo::Firm(0), 
+                    product: 0, price_opinion: OfferResult::Cheap, 
+                    quantity: 0.0, followup: 0 };
+                let passed_msg = msg.clone();
+
+                let handler = thread::spawn(move || {
+                    test.push_message(&passed_rx, &passed_tx, passed_msg);
+                    test
+                });
+                // assert blocked.
+                assert!(!handler.is_finished());
+                // consume messages and get check that our message was sent.
+                // TODO come back here after testing msg_catchup
+            }
+        }
+
         mod create_offer_tests {
             use std::collections::HashMap;
 

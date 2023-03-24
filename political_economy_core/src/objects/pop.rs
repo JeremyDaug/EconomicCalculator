@@ -636,6 +636,9 @@ impl Pop {
                     product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
             }
             // wait for the seller to respond
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // TODO !!!!!!!!!!! PICK UP HERE AFTER TESTING! !!!!!!!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             let response = self.specific_wait(rx, &vec![
                 ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
                     product: 0, offer_result: OfferResult::Cheap },
