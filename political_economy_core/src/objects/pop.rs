@@ -2,19 +2,18 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::{collections::{VecDeque, HashMap}, f32::consts::E, io::Read};
+use std::{collections::{VecDeque, HashMap}};
 
 use barrage::{Sender, Receiver};
-use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID}};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
-    pop_memory::{PopMemory, Knowledge}, product::ProductTag, buy_result::BuyResult, 
+    pop_memory::PopMemory, product::ProductTag, buy_result::BuyResult, 
 };
 
 /// Pops are the data storage for a population group.
@@ -157,7 +156,7 @@ impl Pop {
                     self.backlog.push_back(msg); // if it's for us, push it to the backlog.
                 }
             }
-            else if result.is_none() { // if no messsage in queue, we've caught up so break out.
+            else { // if no messsage in queue, we've caught up so break out.
                 return;
             }
         }
@@ -177,21 +176,23 @@ impl Pop {
     /// Processes firm messages for standard day work. 
     /// 
     /// Returns true if the workday has ended.
-    fn process_firm_message(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
+    pub fn process_firm_message(&mut self, 
+    rx: &Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
-    sender: ActorInfo, 
-    reciever: ActorInfo, 
+    firm: ActorInfo, 
     action: FirmEmployeeAction) -> bool {
         match action {
             FirmEmployeeAction::WorkDayEnded => return true, // work day over, we can move on.
             FirmEmployeeAction::RequestTime => {
-                // just send time over and call it there.
-                self.push_message(rx, tx, ActorMessage::SendProduct { sender: reciever,
-                    reciever: sender, 
-                    product: 0, 
+                // send over our work time
+                self.push_message(rx, tx, ActorMessage::SendProduct { sender: self.actor_info(),
+                    reciever: firm, 
+                    product: TIME_ID, 
                     amount: self.memory.work_time
                     });
+                // and remove that time from our property as well
+                self.desires.property.entry(TIME_ID)
+                .and_modify(|x| *x -= self.memory.work_time );
             },
             FirmEmployeeAction::RequestEverything => {
                 // loop over everything and send it to the firm.
@@ -202,8 +203,8 @@ impl Pop {
                 for (product, amount) in to_move {
                     self.push_message(rx, tx, 
                     ActorMessage::SendProduct { 
-                        sender: reciever, 
-                        reciever: sender, 
+                        sender: self.actor_info(), 
+                        reciever: firm, 
                         product,
                         amount 
                     });
@@ -218,8 +219,8 @@ impl Pop {
                 for (want, amount) in to_move {
                     self.push_message(rx, tx, 
                     ActorMessage::SendWant { 
-                        sender: reciever, 
-                        reciever: sender, 
+                        sender: self.actor_info(), 
+                        reciever: firm, 
                         want,
                         amount 
                     });
@@ -228,8 +229,8 @@ impl Pop {
                 }
                 // Tell the firm we've sent everything to them and they can continue on.
                 self.push_message(rx, tx, ActorMessage::EmployeeToFirm { 
-                    sender: reciever, 
-                    reciever: sender, 
+                    sender: self.actor_info(), 
+                    reciever: firm, 
                     action: FirmEmployeeAction::RequestSent });
             },
             FirmEmployeeAction::RequestItem { product } => {
@@ -240,8 +241,8 @@ impl Pop {
                     None => 0.0,
                 };
                 self.push_message(rx, tx, 
-                ActorMessage::SendProduct { sender: reciever, 
-                    reciever: sender, 
+                ActorMessage::SendProduct { sender: self.actor_info(), 
+                    reciever: firm, 
                     product, 
                     amount 
                 }); // no need to send more
@@ -286,7 +287,7 @@ impl Pop {
                 },
                 ActorMessage::FirmToEmployee { sender, 
                 reciever, action } => {
-                    if self.process_firm_message(rx, tx, sender, reciever, action) {
+                    if self.process_firm_message(rx, tx, sender, action) {
                         break;
                     }
                 },
@@ -874,7 +875,8 @@ impl Actor for Pop {
     demos: &Demographics,
     history: &MarketHistory) {
         // before we even begin, add in the time we have for the day.
-        self.desires.add_property(0, &((self.breakdown_table.total as f64) * 24.0 * self.breakdown_table.average_productivity()));
+        self.desires.add_property(TIME_ID, &((self.breakdown_table.total as f64) * 
+            24.0 * self.breakdown_table.average_productivity()));
 
         // started up, so wait for the first message.
         match rx.recv().expect("Channel Broke.") {

@@ -349,7 +349,7 @@ mod tests {
         }
     
         mod msg_tests {
-            use std::thread;
+            use std::{thread, time::Duration};
 
             use crate::objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller};
 
@@ -446,16 +446,15 @@ mod tests {
             #[test]
             pub fn should_push_msg_safely() {
                 let mut test = make_test_pop();
-
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
                 let passed_tx = tx.clone();
-
                 // push a bunch of stuff to get it blocked.
-                let msg = ActorMessage::CheckItem { buyer: ActorInfo::Firm(0), seller: test.actor_info(), proudct: 0 };
+                let buffered_msg = ActorMessage::CheckItem { buyer: ActorInfo::Firm(0), 
+                    seller: test.actor_info(), proudct: 0 };
                 loop {
-                    let result = tx.try_send(msg);
+                    let result = tx.try_send(buffered_msg);
                     if let Err(_) = result {
                         break;
                     }
@@ -465,7 +464,7 @@ mod tests {
                     product: 0, price_opinion: OfferResult::Cheap, 
                     quantity: 0.0, followup: 0 };
                 let passed_msg = msg.clone();
-
+                // kick off the thread. and pass the buy offer msg
                 let handler = thread::spawn(move || {
                     test.push_message(&passed_rx, &passed_tx, passed_msg);
                     test
@@ -473,14 +472,144 @@ mod tests {
                 // assert blocked.
                 assert!(!handler.is_finished());
                 // consume a message and check that our message was sent.
-                if let ActorMessage::AllFinished = rx.recv().unwrap() {
+                if let ActorMessage::CheckItem { .. } = rx.recv().unwrap() {
+                    thread::sleep(Duration::from_millis(100));
                     assert!(handler.is_finished());
-                } else {
+                } else { // if we didn't get the msg we orignially sent, we have a problem.
                     assert!(false);
                 }
                 
                 // wrap up the test thread and check that it's backlog has captured our msgs
                 let test = handler.join().unwrap();
+                assert_eq!(test.backlog.len(), 10);
+                for idx in test.backlog.iter() {
+                    if let ActorMessage::CheckItem { .. } = idx {}
+                    else {
+                        assert!(false);
+                    }
+                }
+                // then check that the reciever got the message sent by the actor
+                // get all the messages, in order
+                let mut log = vec![];
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        log.push(msg);
+                    } else { break; }
+                }
+                // assert correct length and last is as expected
+                assert_eq!(log.len(), 10);
+                if let ActorMessage::BuyOffer { .. } = log.last().unwrap() {
+                    assert!(true);
+                } else { assert!(false); }
+            }
+
+            #[test]
+            pub fn should_get_next_message_for_pop_and_not_others() {
+                let mut test = make_test_pop();
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // push a bunch of stuff to get it blocked.
+                let undesired_msg = ActorMessage::CheckItem { buyer: ActorInfo::Firm(0), 
+                    seller: ActorInfo::Firm(0), proudct: 0 };
+                let desired_msg = ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
+                    seller: test.actor_info(), product: 0, price_opinion: OfferResult::Cheap, 
+                    quantity: 10.0, followup: 0 };
+                // add msgs.
+                tx.send(undesired_msg).expect("Failed to send.");
+                tx.send(undesired_msg).expect("Failed to send.");
+                tx.send(desired_msg).expect("Failed to send.");
+                tx.send(undesired_msg).expect("Failed to send.");
+
+                // kick off the thread. and pass the buy offer msg
+                let result = test.get_next_message(&passed_rx);
+                if let ActorMessage::BuyOffer { .. } = result {
+                    assert!(true);
+                } else { assert!(false) };
+            }
+        }
+
+        mod process_firm_message {
+            use crossbeam::deque::Worker;
+
+            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, seller::Seller}, constants::TIME_ID};
+
+            use super::make_test_pop;
+
+            #[test]
+            pub fn should_return_true_when_workdayended_recieved() {
+                let mut test = make_test_pop();
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup the sender (firm who sent it)
+                let sender = ActorInfo::Firm(10);
+                let firm_action = FirmEmployeeAction::WorkDayEnded;
+
+                assert!(test.process_firm_message(&passed_rx, &passed_tx, 
+                    sender, firm_action));
+                
+                // ensure no messages sent or recieved.
+                let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
+                assert!(rx_msg.is_none());
+            }
+
+            #[test]
+            pub fn should_return_false_and_send_its_time_out() {
+                let mut test = make_test_pop();
+                // add the pop's time to work from memory
+                let work_time = 10.0;
+                test.memory.work_time = work_time;
+                test.desires.property.insert(TIME_ID, 20.0);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup the sender (firm who sent it)
+                let firm = ActorInfo::Firm(10);
+                let firm_action = FirmEmployeeAction::RequestTime;
+
+                assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
+                    firm, firm_action));
+                
+                // ensure time sent.
+                let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
+                if let Some(msg) = rx_msg {
+                    if let ActorMessage::SendProduct { sender, reciever, 
+                    product, amount } = msg {
+                        assert_eq!(sender, test.actor_info());
+                        assert_eq!(reciever, firm);
+                        assert_eq!(product, TIME_ID);
+                        assert_eq!(amount, work_time);
+                    }
+                    else { assert!(false); }
+                } else { assert!(false); }
+                // ensure nothing else sent
+                let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
+                assert!(rx_msg.is_none());
+                // check that the pop has reduced it's time appropriately.
+                assert_eq!(*test.desires.property.get(&TIME_ID).unwrap(), 10.0);
+            }
+
+            #[test]
+            pub fn should_send_everything_when_everything_requested() {
+                let mut test = make_test_pop();
+                // add the pop's time to work from memory
+                let work_time = 10.0;
+                test.memory.work_time = work_time;
+                test.desires.property.insert(TIME_ID, 20.0);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup the sender (firm who sent it)
+                let firm = ActorInfo::Firm(10);
+                let firm_action = FirmEmployeeAction::RequestTime;
+
+                assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
+                    firm, firm_action));
             }
         }
 
