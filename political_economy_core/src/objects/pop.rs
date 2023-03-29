@@ -229,8 +229,8 @@ impl Pop {
                 }
                 // Tell the firm we've sent everything to them and they can continue on.
                 self.push_message(rx, tx, ActorMessage::EmployeeToFirm { 
-                    sender: self.actor_info(), 
-                    reciever: firm, 
+                    employee: self.actor_info(), 
+                    firm, 
                     action: FirmEmployeeAction::RequestSent });
             },
             FirmEmployeeAction::RequestItem { product } => {
@@ -285,8 +285,8 @@ impl Pop {
                         *self.desires.property.entry(product)
                         .or_insert(0.0) = amount;
                 },
-                ActorMessage::FirmToEmployee { sender, 
-                reciever: _, action } => {
+                ActorMessage::FirmToEmployee { firm: sender, 
+                employee: _, action } => {
                     if self.process_firm_message(rx, tx, sender, action) {
                         break;
                     }

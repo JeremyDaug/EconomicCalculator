@@ -166,10 +166,10 @@ pub enum ActorMessage {
     /// something. Primarily used to demark the start of the work day,
     /// but can also be used to send messages like hirings, firings, and
     /// job changes (promotions, demotions, transfers).
-    FirmToEmployee { sender: ActorInfo, reciever: ActorInfo,
+    FirmToEmployee { firm: ActorInfo, employee: ActorInfo,
         action: FirmEmployeeAction },
     /// A message from an employee to a firm.
-    EmployeeToFirm { sender: ActorInfo, reciever: ActorInfo,
+    EmployeeToFirm { employee: ActorInfo, firm: ActorInfo,
         action: FirmEmployeeAction },
     
     
@@ -234,10 +234,10 @@ impl ActorMessage {
                 product: _, amount: _ } => false, // dupms product onto market
             ActorMessage::WantSplash { sender: _, want: _, 
                 amount: _ } => true, // dumps want into market, hits everyone.
-            ActorMessage::FirmToEmployee { sender: _, reciever, 
-                action: _ } => *reciever == me, // reciever 
-            ActorMessage::EmployeeToFirm { sender: _, reciever, 
-                action: _ } => *reciever == me, // firm can recieve
+            ActorMessage::FirmToEmployee { firm: _, employee, 
+                action: _ } => *employee == me, // reciever 
+            ActorMessage::EmployeeToFirm { employee: _, firm, 
+                action: _ } => *firm == me, // firm can recieve
 
             ActorMessage::SellOrder { sender: _, product: _, 
                 quantity: _, amv: _ } => false,

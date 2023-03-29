@@ -2,7 +2,7 @@ use barrage::{Receiver, Sender};
 
 use crate::{demographics::Demographics, data_manager::DataManager};
 
-use super::{seller::Seller, actor_message::{ActorType, ActorInfo, self, ActorMessage}, buyer::Buyer, actor::Actor, market::MarketHistory};
+use super::{seller::Seller, actor_message::{ActorType, ActorInfo, ActorMessage}, buyer::Buyer, actor::Actor, market::MarketHistory};
 
 
 
@@ -57,6 +57,6 @@ impl Actor for State {
         // Send finished to keep things running, then gtfo.
         sender.send(ActorMessage::Finished { 
             sender: self.actor_info() 
-        });
+        }).expect("Failed to send");
     }
 }

@@ -20,7 +20,7 @@ mod tests {
 
         pub fn make_test_pop() -> Pop {
             let mut test = Pop{ 
-                id: 0, 
+                id: 10, 
                 job: 0, 
                 firm: 0, 
                 market: 0, 
@@ -629,7 +629,7 @@ mod tests {
                         assert!(reciever == firm);
                         assert!(sender == test.actor_info());
                         rec_wants.insert(want, amount);
-                    } else if let ActorMessage::EmployeeToFirm { sender, reciever, 
+                    } else if let ActorMessage::EmployeeToFirm { employee: sender, firm: reciever, 
                     action } = msg {
                         assert!(reciever == firm);
                         assert!(sender == test.actor_info());
@@ -729,13 +729,86 @@ mod tests {
                 // assert it's not done.
                 assert!(!handler.is_finished());
                 // push the FirmToEmployee message with work_day_ended
-                tx.send(ActorMessage::FirmToEmployee{ sender: pop_info, 
-                    reciever: firm, action: FirmEmployeeAction::WorkDayEnded })
+                tx.send(ActorMessage::FirmToEmployee{ firm, 
+                    employee: pop_info, action: FirmEmployeeAction::WorkDayEnded })
                     .expect("Failed to send?");
                 thread::sleep(Duration::from_millis(100));
 
                 assert!(handler.is_finished());
                 handler.join().unwrap();
+            }
+
+            #[test]
+            pub fn should_add_want_splash_recieved() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm which is talknig
+                let firm = ActorInfo::Firm(10);
+                
+                let handler = thread::spawn(move || {
+                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test
+                });
+
+                // assert it's not done.
+                assert!(!handler.is_finished());
+
+                // send the want splash
+                tx.send(ActorMessage::WantSplash { sender: firm, want: 0, amount: 10.0 })
+                    .expect("Failed to send.");
+                thread::sleep(Duration::from_millis(100));
+
+                // end it
+                tx.send(ActorMessage::FirmToEmployee{ firm, 
+                    employee: pop_info, action: FirmEmployeeAction::WorkDayEnded })
+                    .expect("Failed to send?");
+                thread::sleep(Duration::from_millis(100));
+                assert!(handler.is_finished());
+                let test = handler.join().unwrap();
+                
+                // check that the want was recieved
+                assert_eq!(*test.desires.want_store.get(&0).unwrap(), 10.0);
+            }
+
+            #[test]
+            pub fn should_add_sent_products_recieved() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm which is talknig
+                let firm = ActorInfo::Firm(10);
+                
+                let handler = thread::spawn(move || {
+                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test
+                });
+
+                // assert it's not done.
+                assert!(!handler.is_finished());
+
+                // send the want splash
+                tx.send(ActorMessage::SendProduct { sender: firm, reciever: pop_info, 
+                    product: 10, amount: 10.0 })
+                    .expect("Failed to send.");
+                thread::sleep(Duration::from_millis(100));
+
+                // end it
+                tx.send(ActorMessage::FirmToEmployee{ firm, 
+                    employee: pop_info, action: FirmEmployeeAction::WorkDayEnded })
+                    .expect("Failed to send?");
+                thread::sleep(Duration::from_millis(100));
+                assert!(handler.is_finished());
+                let test = handler.join().unwrap();
+                
+                // check that the want was recieved
+                assert_eq!(*test.desires.property.get(&10).unwrap(), 10.0);
             }
         }
 
