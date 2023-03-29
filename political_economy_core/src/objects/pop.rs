@@ -208,8 +208,8 @@ impl Pop {
                         product,
                         amount 
                     });
-                    *self.desires.property.get_mut(&product)
-                    .expect("Not found?") = 0.0;
+                    self.desires.property.remove(&product)
+                    .expect("Not found?");
                 }
                 // also send over the wants
                 let mut to_move = HashMap::new();
@@ -224,8 +224,8 @@ impl Pop {
                         want,
                         amount 
                     });
-                    *self.desires.want_store.get_mut(&want)
-                    .expect("Not found?") = 0.0;
+                    self.desires.want_store.remove(&want)
+                    .expect("Not found?");
                 }
                 // Tell the firm we've sent everything to them and they can continue on.
                 self.push_message(rx, tx, ActorMessage::EmployeeToFirm { 
@@ -241,7 +241,7 @@ impl Pop {
                     None => 0.0,
                 };
                 self.push_message(rx, tx, 
-                ActorMessage::SendProduct { sender: self.actor_info(), 
+                ActorMessage::SendProduct { sender: self.actor_info()       , 
                     reciever: firm, 
                     product, 
                     amount 
@@ -261,7 +261,7 @@ impl Pop {
     /// the pop. It also waits for messages from the firm.
     /// 
     /// All other messages are added to the backlog for later.
-    fn work_day_processing(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
+    pub fn work_day_processing(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
         loop {
             // It's working time, so focus on the firm, don't worry about caluclating more
             // just block on recieving until we know we've given/gotten everything we need to
@@ -286,7 +286,7 @@ impl Pop {
                         .or_insert(0.0) = amount;
                 },
                 ActorMessage::FirmToEmployee { sender, 
-                reciever, action } => {
+                reciever: _, action } => {
                     if self.process_firm_message(rx, tx, sender, action) {
                         break;
                     }

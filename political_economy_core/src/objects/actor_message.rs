@@ -271,7 +271,7 @@ impl ActorMessage {
 }
 
 /// The actions which a can be sent between firms and employees
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FirmEmployeeAction {
     /// Work day has finished and gotten what it needs from it's pops, move 
     /// along.

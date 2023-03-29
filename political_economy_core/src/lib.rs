@@ -505,11 +505,10 @@ mod tests {
 
             #[test]
             pub fn should_get_next_message_for_pop_and_not_others() {
-                let mut test = make_test_pop();
+                let test = make_test_pop();
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
-                let passed_tx = tx.clone();
                 // push a bunch of stuff to get it blocked.
                 let undesired_msg = ActorMessage::CheckItem { buyer: ActorInfo::Firm(0), 
                     seller: ActorInfo::Firm(0), proudct: 0 };
@@ -531,7 +530,7 @@ mod tests {
         }
 
         mod process_firm_message {
-            use crossbeam::deque::Worker;
+            use std::collections::HashMap;
 
             use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, seller::Seller}, constants::TIME_ID};
 
@@ -600,16 +599,143 @@ mod tests {
                 let work_time = 10.0;
                 test.memory.work_time = work_time;
                 test.desires.property.insert(TIME_ID, 20.0);
+                test.desires.property.insert(3, 10.0);
+                test.desires.property.insert(5, 10.0);
+                test.desires.want_store.insert(4, 20.0);
+                test.desires.want_store.insert(6, 5.0);
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
                 let passed_tx = tx.clone();
                 // setup the sender (firm who sent it)
                 let firm = ActorInfo::Firm(10);
-                let firm_action = FirmEmployeeAction::RequestTime;
+                let firm_action = FirmEmployeeAction::RequestEverything;
 
                 assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
                     firm, firm_action));
+                // Test should've sent everything they had, so check that all of them were added.
+                let mut rec_prods = HashMap::new();
+                let mut rec_wants = HashMap::new();
+                let mut finisher_recieved = false;
+                while let Some(msg) = rx.try_recv().unwrap() {
+                    if let ActorMessage::SendProduct { sender, reciever,
+                    product, amount } = msg {
+                        assert!(reciever == firm);
+                        assert!(sender == test.actor_info());
+                        rec_prods.insert(product, amount);
+                    }
+                    else if let ActorMessage::SendWant { sender, reciever,
+                    want, amount } = msg {
+                        assert!(reciever == firm);
+                        assert!(sender == test.actor_info());
+                        rec_wants.insert(want, amount);
+                    } else if let ActorMessage::EmployeeToFirm { sender, reciever, 
+                    action } = msg {
+                        assert!(reciever == firm);
+                        assert!(sender == test.actor_info());
+                        assert!(action == FirmEmployeeAction::RequestSent);
+                        // also assert that nothing comes after this msg.
+                        let result = rx.try_recv().unwrap();
+                        assert!(result.is_none());
+                        finisher_recieved = true;
+                    }
+                    else { assert!(false); }
+                }
+                // assert that the items were sent
+                assert_eq!(rec_prods.len(), 3);
+                assert_eq!(rec_wants.len(), 2);
+                assert_eq!(*rec_prods.get(&TIME_ID).unwrap(), 20.0);
+                assert_eq!(*rec_prods.get(&3).unwrap(), 10.0);
+                assert_eq!(*rec_prods.get(&5).unwrap(), 10.0);
+                assert_eq!(*rec_wants.get(&4).unwrap(), 20.0);
+                assert_eq!(*rec_wants.get(&6).unwrap(), 5.0);
+                assert!(finisher_recieved);
+
+                // and assert that those items have been removed from the pop
+                assert!(test.desires.property.is_empty());
+                assert!(test.desires.want_store.is_empty());
+            }
+        
+            #[test]
+            pub fn should_send_requested_item_when_asked() {
+                let mut test = make_test_pop();
+                // add the pop's time to work from memory
+                let work_time = 10.0;
+                test.memory.work_time = work_time;
+                test.desires.property.insert(TIME_ID, 20.0);
+                test.desires.property.insert(3, 10.0);
+                test.desires.property.insert(5, 10.0);
+                test.desires.want_store.insert(4, 20.0);
+                test.desires.want_store.insert(6, 5.0);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup the sender (firm who sent it)
+                let firm = ActorInfo::Firm(10);
+                let firm_action = FirmEmployeeAction::RequestItem { product: 3 };
+
+                assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
+                    firm, firm_action));
+                // Test should've sent everything they had, so check that all of them were added.
+                let mut rec_prods = HashMap::new();
+                while let Some(msg) = rx.try_recv().unwrap() {
+                    if let ActorMessage::SendProduct { sender, reciever,
+                    product, amount } = msg {
+                        assert!(reciever == firm);
+                        assert!(sender == test.actor_info());
+                        rec_prods.insert(product, amount);
+                    }
+                    else { assert!(false); }
+                }
+                // assert that the items were sent
+                assert_eq!(rec_prods.len(), 1);
+                assert_eq!(*rec_prods.get(&3).unwrap(), 10.0);
+
+                // and assert that those items have been removed from the pop
+                assert_eq!(test.desires.property.len(), 2);
+                assert_eq!(*test.desires.property.get(&TIME_ID).unwrap(), 20.0);
+                assert_eq!(*test.desires.property.get(&5).unwrap(), 10.0);
+                assert!(!test.desires.property.contains_key(&3));
+                assert_eq!(test.desires.want_store.len(), 2);
+                assert_eq!(*test.desires.want_store.get(&4).unwrap(), 20.0);
+                assert_eq!(*test.desires.want_store.get(&6).unwrap(), 5.0);
+            }
+        }
+
+        mod work_day_processing {
+            use std::{thread, time::Duration};
+
+            use crate::objects::{actor_message::{FirmEmployeeAction, ActorMessage, ActorInfo}, seller::Seller};
+
+            use super::make_test_pop;
+
+            #[test]
+            pub fn should_stop_when_work_day_ended_recieved() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm which is talknig
+                let firm = ActorInfo::Firm(10);
+                
+                let handler = thread::spawn(move || {
+                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test
+                });
+
+                // assert it's not done.
+                assert!(!handler.is_finished());
+                // push the FirmToEmployee message with work_day_ended
+                tx.send(ActorMessage::FirmToEmployee{ sender: pop_info, 
+                    reciever: firm, action: FirmEmployeeAction::WorkDayEnded })
+                    .expect("Failed to send?");
+                thread::sleep(Duration::from_millis(100));
+
+                assert!(handler.is_finished());
+                handler.join().unwrap();
             }
         }
 
