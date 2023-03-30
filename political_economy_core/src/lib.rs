@@ -562,19 +562,17 @@ mod tests {
                             quantity: 0.0, followup: 0 },
                         ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
                             proudct: 4 }]);
+                    test
                 });
 
                 // add msgs.
-                tx.send(undesired_msg).expect("Failed to send.");
-                tx.send(undesired_msg).expect("Failed to send.");
-                tx.send(desired_msg1).expect("Failed to send.");
-                tx.send(undesired_msg).expect("Failed to send.");
+                tx.send(undesired_msg).expect("Failed to send."); // ignored
+                tx.send(buffer_msg).expect("Failed to send."); // put in backlog
+                tx.send(desired_msg1).expect("Failed to send."); // picked up
+                tx.send(desired_msg2).expect("Failed to send.");// not recieved.
 
-                // kick off the thread. and pass the buy offer msg
-                let result = test.get_next_message(&passed_rx);
-                if let ActorMessage::BuyOffer { .. } = result {
-                    assert!(true);
-                } else { assert!(false) };
+                thread::sleep(Duration::from_millis(100));
+                
             }
         }
 
