@@ -527,6 +527,55 @@ mod tests {
                     assert!(true);
                 } else { assert!(false) };
             }
+        
+            #[test]
+            pub fn should_active_wait_successfully() {
+                // Test skipped due to use of process_common_message
+            }
+
+            #[test]
+            pub fn should_wait_only_on_specific_messages_requested() {
+                // do basic setup.
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let firm = ActorInfo::Firm(0);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                // push a bunch of stuff to get it blocked.
+                let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
+                    seller: ActorInfo::Firm(0), proudct: 0 };
+                let desired_msg1 = ActorMessage::BuyOffer { buyer: firm, 
+                    seller: pop_info, product: 0, price_opinion: OfferResult::Cheap, 
+                    quantity: 10.0, followup: 0 };
+                let desired_msg2 = ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
+                    proudct: 4 };
+                let buffer_msg = ActorMessage::BuyOfferFollowup { buyer: firm, 
+                    seller: pop_info, product: 0, offer_product: 2, 
+                    offer_quantity: 5.0, followup: 0 };
+
+                // get the thread going
+                let handler = thread::spawn(move || {
+                    test.specific_wait(&rx, &vec![
+                        ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
+                            seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
+                            quantity: 0.0, followup: 0 },
+                        ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
+                            proudct: 4 }]);
+                });
+
+                // add msgs.
+                tx.send(undesired_msg).expect("Failed to send.");
+                tx.send(undesired_msg).expect("Failed to send.");
+                tx.send(desired_msg1).expect("Failed to send.");
+                tx.send(undesired_msg).expect("Failed to send.");
+
+                // kick off the thread. and pass the buy offer msg
+                let result = test.get_next_message(&passed_rx);
+                if let ActorMessage::BuyOffer { .. } = result {
+                    assert!(true);
+                } else { assert!(false) };
+            }
         }
 
         mod process_firm_message {
@@ -706,7 +755,7 @@ mod tests {
         mod work_day_processing {
             use std::{thread, time::Duration};
 
-            use crate::objects::{actor_message::{FirmEmployeeAction, ActorMessage, ActorInfo}, seller::Seller};
+            use crate::objects::{actor_message::{FirmEmployeeAction, ActorMessage, ActorInfo, OfferResult::Cheap}, seller::Seller};
 
             use super::make_test_pop;
 
@@ -809,6 +858,58 @@ mod tests {
                 
                 // check that the want was recieved
                 assert_eq!(*test.desires.property.get(&10).unwrap(), 10.0);
+            }
+
+            #[test]
+            pub fn should_add_all_other_msgs_recieved_to_backlog() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm which is talknig
+                let firm = ActorInfo::Firm(10);
+                
+                let handler = thread::spawn(move || {
+                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test
+                });
+
+                // assert it's not done.
+                assert!(!handler.is_finished());
+
+                let msg = ActorMessage::BuyOffer { buyer: firm, 
+                    seller: pop_info, product: 10, 
+                    price_opinion: Cheap, quantity: 10.0, followup: 0 };
+
+                // send the want splash
+                tx.send(msg)
+                    .expect("Failed to send.");
+                thread::sleep(Duration::from_millis(100));
+
+                // end it
+                tx.send(ActorMessage::FirmToEmployee{ firm, 
+                    employee: pop_info, action: FirmEmployeeAction::WorkDayEnded })
+                    .expect("Failed to send?");
+                thread::sleep(Duration::from_millis(100));
+                assert!(handler.is_finished());
+                let mut test = handler.join().unwrap();
+                
+                // check that the want was recieved
+                assert_eq!(test.backlog.len(), 1);
+                if let ActorMessage::BuyOffer { buyer, seller, 
+                product, price_opinion, 
+                quantity, followup } = test.backlog.pop_front().unwrap() {
+                    assert_eq!(buyer, firm);
+                    assert_eq!(seller, pop_info);
+                    assert_eq!(product, 10);
+                    if let Cheap = price_opinion {
+                        // nothing
+                    } else { assert!(false); }
+                    assert_eq!(quantity, 10.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
             }
         }
 
