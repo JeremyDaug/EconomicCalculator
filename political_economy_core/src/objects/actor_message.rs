@@ -176,7 +176,7 @@ pub enum ActorMessage {
 }
 
 /// Used to denote how an offer went and what the buyer felt like for it.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OfferResult {
     /// Neutral result, primarily used for initializing deal results, but also a
     /// placeholder elsewhere.

@@ -351,7 +351,7 @@ mod tests {
         mod msg_tests {
             use std::{thread, time::Duration};
 
-            use crate::objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller};
+            use crate::{objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller}, constants::CHEAP};
 
             use super::make_test_pop;
 
@@ -556,13 +556,13 @@ mod tests {
 
                 // get the thread going
                 let handler = thread::spawn(move || {
-                    test.specific_wait(&rx, &vec![
+                    let result = test.specific_wait(&rx, &vec![
                         ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
                             seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
                             quantity: 0.0, followup: 0 },
                         ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
                             proudct: 4 }]);
-                    test
+                    (test, result)
                 });
 
                 // add msgs.
@@ -572,7 +572,31 @@ mod tests {
                 tx.send(desired_msg2).expect("Failed to send.");// not recieved.
 
                 thread::sleep(Duration::from_millis(100));
-                
+                // get the actor and info back
+                let (mut test, result) = handler.join().unwrap();
+                // ensure that the result was recieved
+                if let ActorMessage::BuyOffer { buyer, seller, 
+                product, price_opinion, 
+                quantity, followup } = result {
+                    assert_eq!(buyer, firm);
+                    assert_eq!(seller, pop_info);
+                    assert_eq!(product, 0);
+                    assert_eq!(price_opinion, OfferResult::Cheap);
+                    assert_eq!(quantity, 10.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
+                assert_eq!(test.backlog.len(), 1);
+                let backlogged = test.backlog.pop_front().unwrap();
+                if let ActorMessage::BuyOfferFollowup { buyer, seller, 
+                product, offer_product, 
+                offer_quantity, followup } = backlogged {
+                    assert_eq!(buyer, firm);
+                    assert_eq!(seller, pop_info);
+                    assert_eq!(product, 0);
+                    assert_eq!(offer_product, 2);
+                    assert_eq!(offer_quantity, 5.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
             }
         }
 

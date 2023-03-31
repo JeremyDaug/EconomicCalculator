@@ -342,12 +342,13 @@ impl Pop {
     /// Meant to be used primarily when we are locked into a state where we 
     /// shouldn't respond to anything else but what we're focusing on.
     /// 
-    /// ie
-    /// - Buying State.
+    /// May be improved by making find work with incomplete ActorMessages or some
+    /// other mechanism that removes the need to created dummies to make it work.
     pub fn specific_wait(&mut self,
     rx: &Receiver<ActorMessage>,
     find: &Vec<ActorMessage>,
     ) -> ActorMessage {
+        // TODO Look into improving Find Parameter so it doesn't need a fully filled out ActorMessage to function.
         loop {
             let msg = self.get_next_message(rx);
             if find.iter()
@@ -385,9 +386,11 @@ impl Pop {
     /// 
     /// Keep and spend are defined/recorded by self.memory rather than calculated, and corrected
     /// as successes or failure comes in.
+    /// 
+    /// ## Not Tested due to complexity.
     fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
-        data: &DataManager,
-        market: &MarketHistory) {
+    data: &DataManager,
+    market: &MarketHistory) {
         // start by splitting property up into keep, and spend;
         let mut keep: HashMap<usize, f64> = HashMap::new();
         let mut spend: HashMap<usize, f64> = HashMap::new();
@@ -533,7 +536,7 @@ impl Pop {
     /// 
     /// So now we enter here to manage our next steps.
     /// 
-    /// 1. Actively wait for the response from the seller. This should be
+    /// 1. Wait for the response from the seller. This should be
     ///    either ActorMessage::InStock or ActorMessage::NotInStock.
     /// 
     /// 2. If Not in stock, break out and fail. If InStock, begin our deal 
@@ -571,15 +574,12 @@ impl Pop {
                 seller: ActorInfo::Firm(0), product: 0 }]);
         // if not in stock gtfo
         if let ActorMessage::NotInStock { .. } = result {
-            return BuyResult::NotSuccessful {reason: OfferResult::OutOfStock };
+            return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
         }
         // if in stock, continue with the deal
         if let ActorMessage::InStock { buyer: _, seller: _, 
         product, price, quantity } = result {
             // get our budget and target
-            let curr_unit_budget = self.memory.product_knowledge
-            .get(&product).expect("Product Not found?")
-                .current_unit_budget();
             let unit_budget = self.memory.product_knowledge
                 .get(&product).expect("Product Not found?")
                 .unit_budget();
@@ -594,10 +594,13 @@ impl Pop {
                     { buyer: self.actor_info(), seller, product });
                 return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
             }
-            // Since it's within our absolute price range, buy
+            let curr_unit_budget = self.memory.product_knowledge
+            .get(&product).expect("Product Not found?")
+                .current_unit_budget();
+            // get our target, capped at the quantity available.
             let target = self.memory.product_knowledge.get(&product)
             .expect("Product Not Found")
-                .target_remaining();
+                .target_remaining().min(quantity);
             let remaining_budget = self.memory.product_knowledge.get(&product)
             .expect("Product Not Found")
                 .remaining_amv();
@@ -613,42 +616,56 @@ impl Pop {
             else /* threshold <= CHEAP */ { OfferResult::Steal };
             // get how much we might pay
             let total_price = target * price;
-            // cap our target to what we have budgetted
+            // cap our target to what we have budgeted
             let mut adjusted_target = total_price.min(remaining_budget);
             // get our corrected target
             let mut target = adjusted_target / price;
             if !data.products.get(&product).unwrap()
-            .fractional { // then floor it if the product is not fractional
+            .fractional { // floor it if the product is not fractional
                 target = target.floor();
                 adjusted_target = target * price;
             }
             // with our new target, build up the offer
+            // TODO consider making the length of the list cost time, so the more items kinds and quantity the more time it costs to purchase.
             let (offer, sent_amv) = self.create_offer(product, adjusted_target,
                 spend, data, market);
             // With our offer built, send it over
             // send over the start of the offer.
-            let mut offer_len = offer.len();
-            self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller, 
-                product, price_opinion: offer_result, quantity: target,
-                followup: offer_len });
-            for (offer_item, offer_quantity) in offer.iter() {
-                offer_len -= 1;
-                self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller, 
-                    product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
-            }
+            self.send_buy_offer(rx, tx, product, seller, &offer, offer_result, target);
             // wait for the seller to respond
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // TODO !!!!!!!!!!! PICK UP HERE AFTER TESTING! !!!!!!!!!!!!!!!!!!!!!!
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
             let response = self.specific_wait(rx, &vec![
                 ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
                     product: 0, offer_result: OfferResult::Cheap },
-                
+                ActorMessage::OfferAcceptedWithChange { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
+                    product: 0, quantity: 0.0, followups: 0 },
+                ActorMessage::RejectOffer { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 },
+                ActorMessage::CloseDeal { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 }
             ]);
 
         }
         BuyResult::NotSuccessful { reason: OfferResult::Incomplete }
     }
+
+    /// Send Buy Offer
+    /// 
+    /// Small helper function to simplify sending our purchase offers.
+    pub fn send_buy_offer(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+    product: usize, seller: ActorInfo, offer: &HashMap<usize, f64>, offer_result: OfferResult, target: f64) {
+        let mut offer_len = offer.len();
+        self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller, 
+            product, price_opinion: offer_result, quantity: target,
+            followup: offer_len });
+        for (offer_item, offer_quantity) in offer.iter() {
+            offer_len -= 1;
+            self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller, 
+                product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
+        }
+    }
+
 
     pub fn emergency_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
@@ -680,7 +697,7 @@ impl Pop {
     /// - product is the item we're looking at.
     /// - target is the target AMV we are trying to meet.
     /// - spend is what items we can spend
-    /// - data is product data
+    /// - data is product data mostly
     /// - market is market data.
     /// 
     /// Creates a purchase offer for a product.
@@ -694,8 +711,6 @@ impl Pop {
     /// OVERSPEND_THRESHOLD % or less is considered a valid target.
     /// 
     /// Returns a hashmap of the offer as well as the final price.
-    /// 
-    /// TODO Test the shit out of this. It'll need it.
     pub fn create_offer(&self, product: usize, target: f64,
     spend: &HashMap<usize, f64>, data: &DataManager, 
     market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
