@@ -349,7 +349,7 @@ mod tests {
         }
     
         mod msg_tests {
-            use std::{thread, time::Duration};
+            use std::{thread, time::Duration, collections::HashMap};
 
             use crate::{objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller}, constants::CHEAP};
 
@@ -597,6 +597,60 @@ mod tests {
                     assert_eq!(offer_quantity, 5.0);
                     assert_eq!(followup, 0);
                 } else { assert!(false); }
+            }
+        
+            #[test]
+            pub fn should_send_offer_correctly() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                // offer setup
+                let mut offer = HashMap::new();
+                offer.insert(10, 10.0);
+                offer.insert(11, 15.0);
+                offer.insert(13, 12.0);
+                offer.insert(5, 1.0);
+                // offer result
+                let offer_result = OfferResult::Cheap;
+                // product being purchased
+                let product = 2;
+                // target to buy
+                let target = 10.0;
+                // seller
+                let firm = ActorInfo::Firm(0);
+
+                test.send_buy_offer(&rx, &tx, product, firm, &offer, offer_result, target);
+
+                // get all the pushed msgs
+                let mut msgs = vec![];
+                while let Ok(Some(msg)) = rx.try_recv() {
+                    msgs.push(msg);
+                }
+
+                let start = msgs.get(0).unwrap();
+                if let ActorMessage::BuyOffer { buyer, seller, 
+                product, price_opinion, 
+                quantity, followup } = start {
+                    assert_eq!(*buyer, pop_info);
+                    assert_eq!(*seller, firm);
+                    assert_eq!(*product, 2);
+                    assert_eq!(*price_opinion, offer_result);
+                    assert_eq!(*quantity, target);
+                    assert_eq!(*followup, 4);
+                } else { assert!(false); }
+
+                let mut idx = 1;
+                while let Some(msg) = msgs.get(idx) {
+                    if let ActorMessage::BuyOfferFollowup { buyer, seller, 
+                        product, offer_product, 
+                        offer_quantity, followup } = msg {
+
+                        } else { assert!(false); }
+                }
             }
         }
 

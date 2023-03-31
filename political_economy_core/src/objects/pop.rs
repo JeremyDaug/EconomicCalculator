@@ -60,6 +60,7 @@ impl Pop {
     /// Does not take sub-groups of species, culture, ideology into account currently.
     /// This will need to be updated when those are implemented.
     pub fn update_desires(&mut self, demos: Demographics) {
+        // TODO when subgroups are added to these items, this will need to be updated to take them into account.
         self.desires.clear_desires();
         // add in each species desires
         for row in self.breakdown_table.species_makeup().iter() {
@@ -169,6 +170,85 @@ impl Pop {
             let msg = rx.recv().expect("Unexpected Disconnect.");
             if msg.for_me(self.actor_info()) {
                 return msg;
+            }
+        }
+    }
+
+    /// Send Buy Offer
+    /// 
+    /// Small helper function to simplify sending our purchase offers.
+    pub fn send_buy_offer(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+    product: usize, seller: ActorInfo, offer: &HashMap<usize, f64>, offer_result: OfferResult, target: f64) {
+        let mut offer_len = offer.len();
+        self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller, 
+            product, price_opinion: offer_result, quantity: target,
+            followup: offer_len });
+        for (offer_item, offer_quantity) in offer.iter() {
+            offer_len -= 1;
+            self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller, 
+                product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
+        }
+    }
+
+    /// Active Wait Function, used whenever we need to wait for a particular 
+    /// result or message. Takes in all the standard stuff for free time, while
+    /// also taking in whatever it's looking to find. If it recieves one of the
+    /// message types requested, it returns it.
+    /// 
+    /// If it gets a message other than what it's looking for, it deals with it
+    /// via the process_common_message. 
+    /// 
+    /// This only returns if it recieves the message it's looking for, it it does 
+    /// not recieve it, it will be stuck in it's loop.
+    pub fn active_wait(&mut self, 
+    rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    data: &DataManager, 
+    market: &MarketHistory, 
+    keep: &mut HashMap<usize, f64>,
+    spend: &mut HashMap<usize, f64>,
+    returned: &mut HashMap<usize, f64>,
+    find: &Vec<ActorMessage>) -> ActorMessage {
+        loop {
+            // catchup on messages for good measure
+            self.msg_catchup(rx);
+            // next deal with the first backlog
+            let popped = self.backlog.pop_front();
+            if let Some(msg) = popped {
+                if find.iter()
+                .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                    return msg;
+                }
+                else {
+                    self.process_common_message(rx, tx, data, market, msg, keep, spend, returned);
+                }
+            }
+        }
+    }
+
+    /// Specific wait function.
+    /// 
+    /// Waits on a specific message or messages to be recieved directed for us.
+    /// If it's any other message for us, it's put onto the backlog.
+    /// 
+    /// Meant to be used primarily when we are locked into a state where we 
+    /// shouldn't respond to anything else but what we're focusing on.
+    /// 
+    /// May be improved by making find work with incomplete ActorMessages or some
+    /// other mechanism that removes the need to created dummies to make it work.
+    pub fn specific_wait(&mut self,
+    rx: &Receiver<ActorMessage>,
+    find: &Vec<ActorMessage>,
+    ) -> ActorMessage {
+        // TODO Look into improving Find Parameter so it doesn't need a fully filled out ActorMessage to function.
+        loop {
+            let msg = self.get_next_message(rx);
+            if find.iter()
+            .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                return msg;
+            }
+            else {
+                self.backlog.push_back(msg);
             }
         }
     }
@@ -294,69 +374,6 @@ impl Pop {
                 _ => { // everything else, push to the backlog for later
                     self.backlog.push_back(msg);
                 },
-            }
-        }
-    }
-
-    /// Active Wait Function, used whenever we need to wait for a particular 
-    /// result or message. Takes in all the standard stuff for free time, while
-    /// also taking in whatever it's looking to find. If it recieves one of the
-    /// message types requested, it returns it.
-    /// 
-    /// If it gets a message other than what it's looking for, it deals with it
-    /// via the process_common_message. 
-    /// 
-    /// This only returns if it recieves the message it's looking for, it it does 
-    /// not recieve it, it will be stuck in it's loop.
-    pub fn active_wait(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, 
-    data: &DataManager, 
-    market: &MarketHistory, 
-    keep: &mut HashMap<usize, f64>,
-    spend: &mut HashMap<usize, f64>,
-    returned: &mut HashMap<usize, f64>,
-    find: &Vec<ActorMessage>) -> ActorMessage {
-        loop {
-            // catchup on messages for good measure
-            self.msg_catchup(rx);
-            // next deal with the first backlog
-            let popped = self.backlog.pop_front();
-            if let Some(msg) = popped {
-                if find.iter()
-                .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
-                    return msg;
-                }
-                else {
-                    self.process_common_message(rx, tx, data, market, msg, keep, spend, returned);
-                }
-            }
-        }
-    }
-
-    /// Specific wait function.
-    /// 
-    /// Waits on a specific message or messages to be recieved directed for us.
-    /// If it's any other message for us, it's put onto the backlog.
-    /// 
-    /// Meant to be used primarily when we are locked into a state where we 
-    /// shouldn't respond to anything else but what we're focusing on.
-    /// 
-    /// May be improved by making find work with incomplete ActorMessages or some
-    /// other mechanism that removes the need to created dummies to make it work.
-    pub fn specific_wait(&mut self,
-    rx: &Receiver<ActorMessage>,
-    find: &Vec<ActorMessage>,
-    ) -> ActorMessage {
-        // TODO Look into improving Find Parameter so it doesn't need a fully filled out ActorMessage to function.
-        loop {
-            let msg = self.get_next_message(rx);
-            if find.iter()
-            .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
-                return msg;
-            }
-            else {
-                self.backlog.push_back(msg);
             }
         }
     }
@@ -648,22 +665,6 @@ impl Pop {
 
         }
         BuyResult::NotSuccessful { reason: OfferResult::Incomplete }
-    }
-
-    /// Send Buy Offer
-    /// 
-    /// Small helper function to simplify sending our purchase offers.
-    pub fn send_buy_offer(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
-    product: usize, seller: ActorInfo, offer: &HashMap<usize, f64>, offer_result: OfferResult, target: f64) {
-        let mut offer_len = offer.len();
-        self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller, 
-            product, price_opinion: offer_result, quantity: target,
-            followup: offer_len });
-        for (offer_item, offer_quantity) in offer.iter() {
-            offer_len -= 1;
-            self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller, 
-                product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
-        }
     }
 
 
