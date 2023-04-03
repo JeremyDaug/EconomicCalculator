@@ -532,18 +532,22 @@ impl Pop {
             ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
         // result is now either FoundProduct or ProductNotFound, deal with it
         // TODO update this to be smarter about doing emergency buy searches.
-        if let ActorMessage::ProductNotFound { product, buyer } 
+        
+        let (result, amv_spent) = if let ActorMessage::ProductNotFound { product, buyer } 
         = result {
             // if product not found, do an emergency search instead.
-            return self.emergency_buy(rx, tx, data, market, keep, spend, returned, 
-                &product);
+            self.emergency_buy(rx, tx, data, market, keep, spend, returned, 
+                &product)
         }
-        else if let ActorMessage::FoundProduct { seller, buyer: _,
-        product } = result {
-            return self.standard_buy(rx, tx, data, market, seller, keep, spend, 
-                returned);
+        else if let ActorMessage::FoundProduct { seller, .. } = result {
+            self.standard_buy(rx, tx, data, market, seller, keep, spend, 
+                returned)
         }
-        else { panic!("Somehow did not get FoundProduct or ProductNotFound."); }
+        else { panic!("Somehow did not get FoundProduct or ProductNotFound."); };
+
+        // TODO deal with the result and amv spent here.
+
+        return result;
     }
 
     /// Standard Buy Function
@@ -662,11 +666,16 @@ impl Pop {
                 // TODO Infowars Expansion results of buying in here or in caller.
                 ActorMessage::SellerAcceptOfferAsIs { .. } => {
                     // offer accepted as is, remove property offered and add what we asked for.
-                    for (id, amount) in offer {
-                        *self.desires.property.entry(product).or_insert(0.0) -= amount;
+                    // also remove from spend
+                    for (id, amount) in offer.iter() {
+                        *self.desires.property.entry(*id).or_insert(0.0) -= amount;
+                        *spend.entry(*id).or_insert(0.0) -= amount;
                     }
                     // get the AMV spent
                     let mut price = 0.0;
+                    for (prod, quant) in offer.iter() {
+                        price += market.get_product_price(&prod, 0.0) * quant;
+                    }
                     return (BuyResult::Successful, price);
                 },
                 ActorMessage::OfferAcceptedWithChange { followups, .. } => {
@@ -687,11 +696,13 @@ impl Pop {
                     // remove the items from property
                     for (product, quant) in offer.iter() {
                         *self.desires.property.entry(*product).or_insert(0.0) -= quant;
+                        // also remove those items from spend
+                        *spend.entry(*product).or_insert(0.0) -= quant;
                     }
 
-                    let mut resulting amv = 0.0;
+                    let mut resulting_amv = 0.0;
 
-                    return (BuyResult::Successful, 0.0);
+                    return (BuyResult::Successful, resulting_amv);
                 },
                 ActorMessage::RejectOffer { .. } => {
                     // offer rejected, don't remove anything and get out.
@@ -716,7 +727,7 @@ impl Pop {
     keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
-    product: &usize) -> BuyResult {
+    product: &usize) -> (BuyResult, f64) {
         todo!("Emergency Buy here!")
     }
 

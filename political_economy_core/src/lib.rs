@@ -1522,11 +1522,13 @@ mod tests {
                 if !handle.is_finished() { assert!(false); }
 
                 // get our data
-                let (test, result) = handle.join().unwrap();
+                let (test, (result, amv)) = handle.join().unwrap();
                 // check the return is correct.
                 if let BuyResult::NotSuccessful { reason } = result {
                     assert_eq!(OfferResult::OutOfStock, reason);
                 } else { assert!(false); }
+                // ensure amv returned is correct
+                assert_eq!(amv, 0.0);
                 // check that nothing was gained or lost.
                 assert!(*test.desires.property.get(&6).unwrap() == 10.0);
                 assert!(test.desires.property.get(&7).is_none());
@@ -1595,12 +1597,11 @@ mod tests {
                     seller: selling_firm, product: 7, offer_result: OfferResult::Cheap })
                     .expect("Disconnected?");
                 thread::sleep(Duration::from_millis(100));
-                // check the 
                 // ensure we closed out
                 if !handle.is_finished() { assert!(false); }
 
                 // get our data
-                let (test, result) = handle.join().unwrap();
+                let (test, (result, amv_returned)) = handle.join().unwrap();
                 // check the return is correct.
                 if let BuyResult::NotSuccessful { reason } = result {
                     assert_eq!(OfferResult::OutOfStock, reason);
