@@ -10,13 +10,13 @@ extern crate lazy_static;
 #[cfg(test)]
 mod tests {
     mod pop_tests {
-        use std::collections::{HashMap, VecDeque};
+        use std::{collections::{HashMap, VecDeque}, ptr::null};
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
              desires::Desires, desire::{Desire, DesireItem},
-              species::Species, culture::Culture, ideology::Ideology, pop_memory::PopMemory}, 
-              demographics::Demographics};
+              species::Species, culture::Culture, ideology::Ideology, pop_memory::{PopMemory, Knowledge}, market::{MarketHistory, ProductInfo}, product::Product}, 
+              demographics::Demographics, data_manager::DataManager};
 
         pub fn make_test_pop() -> Pop {
             let mut test = Pop{ 
@@ -170,6 +170,100 @@ mod tests {
             test
         }
 
+        /// preps a pop's property, the property's data, and market prices of those items.
+        /// 
+        /// ID 6 AMV = 1.0
+        /// ID 7 AMV = 5.0
+        /// 
+        /// Only gives the pop 1 item, product ID 6. 10.0 units. 
+        /// 
+        /// This is for testing buy and sell functions, not offer_calculations.
+        /// 
+        /// Pop should always buy product 7.
+        pub fn prepare_data_for_market_actions(pop: &mut Pop) -> (DataManager, MarketHistory) {
+            let mut data = DataManager::new();
+            // TODO update this when we update Load All
+            data.load_all(&String::from("")).expect("Error on load?");
+            let product = data.products.get_mut(&6).unwrap();
+            product.fractional = true;
+
+            let mut market = MarketHistory {
+                info: HashMap::new(),
+                sale_priority: vec![],
+                currencies: vec![],
+            };
+            market.info.insert(2, ProductInfo {
+                available: 0.0,
+                price: 1.0,
+                offered: 0.0,
+                sold: 0.0,
+                salability: 100.0,
+                is_currency: true,
+            });
+            market.info.insert(3, ProductInfo {
+                available: 0.0,
+                price: 1.0,
+                offered: 0.0,
+                sold: 0.0,
+                salability: 1.0,
+                is_currency: false,
+            });
+            market.info.insert(4, ProductInfo {
+                available: 0.0,
+                price: 1.0,
+                offered: 0.0,
+                sold: 0.0,
+                salability: 1.0,
+                is_currency: false,
+            });
+            market.info.insert(5, ProductInfo {
+                available: 0.0,
+                price: 1.0,
+                offered: 0.0,
+                sold: 0.0,
+                salability: 1.0,
+                is_currency: false,
+            });
+            market.info.insert(6, ProductInfo {
+                available: 0.0,
+                price: 2.0,
+                offered: 0.0,
+                sold: 0.0,
+                salability: 1.0,
+                is_currency: false,
+            });
+            market.info.insert(7, ProductInfo {
+                available: 0.0,
+                price: 5.0,
+                offered: 0.0,
+                sold: 0.0,
+                salability: 0.0,
+                is_currency: false,
+            });
+
+            market.currencies.push(2);
+            market.sale_priority.push(2);
+            market.sale_priority.push(3);
+            market.sale_priority.push(4);
+            market.sale_priority.push(5);
+            market.sale_priority.push(6);
+            market.sale_priority.push(7);
+
+            pop.desires.property.insert(6, 10.0);
+            // also add the pop's desire info
+            pop.memory.product_knowledge.insert(6, Knowledge{ target: 2.0, 
+                achieved: 0.0, 
+                spent: 0.0, 
+                lost: 0.0, 
+                time_budget: 10.0, 
+                amv_budget: 10.0, 
+                time_spent: 0.0, 
+                amv_spent: 0.0, 
+                success_rate: 0.5 });
+
+            (data, market)
+        }
+        
         #[test]
         pub fn update_pop_desires_equivalently() {
             let mut test = Pop{ 
@@ -349,7 +443,7 @@ mod tests {
         }
     
         mod msg_tests {
-            use std::{thread, time::Duration, collections::HashMap};
+            use std::{thread, time::Duration, collections::{HashMap, HashSet}};
 
             use crate::{objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller}, constants::CHEAP};
 
@@ -541,7 +635,6 @@ mod tests {
                 let firm = ActorInfo::Firm(0);
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
-                let passed_rx = rx.clone();
                 // push a bunch of stuff to get it blocked.
                 let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
                     seller: ActorInfo::Firm(0), proudct: 0 };
@@ -623,7 +716,7 @@ mod tests {
                 // seller
                 let firm = ActorInfo::Firm(0);
 
-                test.send_buy_offer(&rx, &tx, product, firm, &offer, offer_result, target);
+                test.send_buy_offer(&passed_rx, &passed_tx, product, firm, &offer, offer_result, target);
 
                 // get all the pushed msgs
                 let mut msgs = vec![];
@@ -644,13 +737,29 @@ mod tests {
                 } else { assert!(false); }
 
                 let mut idx = 1;
+                let mut product_count = HashSet::new();
                 while let Some(msg) = msgs.get(idx) {
                     if let ActorMessage::BuyOfferFollowup { buyer, seller, 
-                        product, offer_product, 
-                        offer_quantity, followup } = msg {
-
-                        } else { assert!(false); }
+                    product, offer_product, 
+                    offer_quantity, followup } = msg {
+                        product_count.insert(*offer_product);
+                        if *offer_product == 10 {
+                            assert_eq!(*offer_quantity, 10.0);
+                        }  else if *offer_product == 11 {
+                            assert_eq!(*offer_quantity, 15.0);
+                        }  else if *offer_product == 13 {
+                            assert_eq!(*offer_quantity, 12.0);
+                        }  else if *offer_product == 5 {
+                            assert_eq!(*offer_quantity, 1.0);
+                        }  else { assert!(false); }
+                        assert_eq!(*product, 2);
+                        assert_eq!(*buyer, pop_info);
+                        assert_eq!(*seller, firm);
+                        assert!(*followup < 4);
+                    } else { assert!(false); }
+                    idx += 1;
                 }
+                assert_eq!(product_count.len(), 4);
             }
         }
 
@@ -1369,6 +1478,136 @@ mod tests {
                 assert_eq!(*offer.get(&4).unwrap(), 10.0);
                 assert!(offer.get(&5).is_none());
                 assert_eq!(*offer.get(&6).unwrap(), 4.0);
+            }
+        }
+    
+        mod standard_buy {
+            use std::{collections::HashMap, thread, time::Duration};
+
+            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult};
+
+            use super::{make_test_pop, prepare_data_for_market_actions};
+
+            #[test]
+            pub fn should_return_not_successful_when_not_in_stock() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm we're talking with
+                let seller = ActorInfo::Firm(1);
+                // setup property split
+                let mut keep = HashMap::new();
+                let mut spend = HashMap::new();
+                let mut returned = HashMap::new();
+
+                // add our property to the spend hashmap.
+                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+
+                let handle = thread::spawn(move || {
+                    let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
+                        seller, &mut keep, &mut spend, &mut returned);
+                    (test, result)
+                });
+                // check that it's running
+                if handle.is_finished() { assert!(false); }
+
+                // send the out of stock message.
+                tx.send(ActorMessage::NotInStock { buyer: pop_info, seller, product: 7 }).expect("Sudden Disconnect?");
+                thread::sleep(Duration::from_millis(100));
+                // ensure we closed out
+                if !handle.is_finished() { assert!(false); }
+
+                // get our data
+                let (test, result) = handle.join().unwrap();
+                // check the return is correct.
+                if let BuyResult::NotSuccessful { reason } = result {
+                    assert_eq!(OfferResult::OutOfStock, reason);
+                } else { assert!(false); }
+                // check that nothing was gained or lost.
+                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
+                assert!(test.desires.property.get(&7).is_none());
+            }
+
+            #[test]
+            pub fn should_return_success_when_able_to_buy_single_offer_no_change() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm we're talking with
+                let selling_firm = ActorInfo::Firm(1);
+                // setup property split
+                let mut keep = HashMap::new();
+                let mut spend = HashMap::new();
+                let mut returned = HashMap::new();
+
+                // add our property to the spend hashmap.
+                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+
+                let handle = thread::spawn(move || {
+                    let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
+                        selling_firm, &mut keep, &mut spend, &mut returned);
+                    (test, result)
+                });
+                // check that it's running
+                if handle.is_finished() { assert!(false); }
+
+                // send the out of stock message.
+                tx.send(ActorMessage::InStock { buyer: pop_info, 
+                    seller: selling_firm, product: 7, price: 5.0, quantity: 100.0 }).expect("Sudden Disconnect?");
+                thread::sleep(Duration::from_millis(100));
+                // should have the first message we sent
+                if let ActorMessage::InStock { .. } = rx.recv().unwrap() {
+                } else { assert!(false); }
+                // it should have sent a buy order of 10.0 units of DI6
+                if let ActorMessage::BuyOffer { buyer, 
+                seller, product, 
+                price_opinion, quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 7);
+                    assert_eq!(price_opinion, OfferResult::Reasonable);
+                    assert_eq!(quantity, 2.0);
+                    assert_eq!(followup, 1);
+                } else { assert!(false); }
+                // then check that the sent the expected amount
+                if let ActorMessage::BuyOfferFollowup { buyer, 
+                seller, product, 
+                offer_product, offer_quantity, 
+                followup } = rx.recv().unwrap() {
+                        assert_eq!(buyer, pop_info);
+                        assert_eq!(seller, selling_firm);
+                        assert_eq!(product, 7);
+                        assert_eq!(offer_product, 6);
+                        assert_eq!(offer_quantity, 10.0);
+                        assert_eq!(followup, 0);
+                    } else { assert!(false); }
+                // with the offer sent correctly, send our acceptance and go forward
+                tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
+                    seller: selling_firm, product: 7, offer_result: OfferResult::Cheap })
+                    .expect("Disconnected?");
+                thread::sleep(Duration::from_millis(100));
+                // check the 
+                // ensure we closed out
+                if !handle.is_finished() { assert!(false); }
+
+                // get our data
+                let (test, result) = handle.join().unwrap();
+                // check the return is correct.
+                if let BuyResult::NotSuccessful { reason } = result {
+                    assert_eq!(OfferResult::OutOfStock, reason);
+                } else { assert!(false); }
+                // check that nothing was gained or lost.
+                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
+                assert!(test.desires.property.get(&7).is_none());
             }
         }
     }

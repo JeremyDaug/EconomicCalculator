@@ -538,10 +538,10 @@ impl Pop {
             return self.emergency_buy(rx, tx, data, market, keep, spend, returned, 
                 &product);
         }
-        else if let ActorMessage::FoundProduct { seller, buyer,
+        else if let ActorMessage::FoundProduct { seller, buyer: _,
         product } = result {
             return self.standard_buy(rx, tx, data, market, seller, keep, spend, 
-                returned, &product);
+                returned);
         }
         else { panic!("Somehow did not get FoundProduct or ProductNotFound."); }
     }
@@ -580,10 +580,10 @@ impl Pop {
     seller: ActorInfo,
     keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
-    returned: &mut HashMap<usize, f64>,
-    product: &usize) -> BuyResult {
+    returned: &mut HashMap<usize, f64>) -> (BuyResult, f64) {
+        // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
-        let result = self.active_wait(rx, tx, data, market, keep, spend, returned, 
+        let result = self.specific_wait(rx, 
         &vec![
             ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0),
                 product: 0, price: 0.0, quantity: 0.0 }, 
@@ -591,7 +591,7 @@ impl Pop {
                 seller: ActorInfo::Firm(0), product: 0 }]);
         // if not in stock gtfo
         if let ActorMessage::NotInStock { .. } = result {
-            return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
+            return (BuyResult::NotSuccessful { reason: OfferResult::OutOfStock }, 0.0);
         }
         // if in stock, continue with the deal
         if let ActorMessage::InStock { buyer: _, seller: _, 
@@ -609,7 +609,7 @@ impl Pop {
                 // and close out.
                 self.push_message(rx, tx, ActorMessage::CloseDeal
                     { buyer: self.actor_info(), seller, product });
-                return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
+                return (BuyResult::NotSuccessful { reason: OfferResult::TooExpensive }, 0.0);
             }
             let curr_unit_budget = self.memory.product_knowledge
             .get(&product).expect("Product Not found?")
@@ -644,16 +644,12 @@ impl Pop {
             }
             // with our new target, build up the offer
             // TODO consider making the length of the list cost time, so the more items kinds and quantity the more time it costs to purchase.
-            let (offer, sent_amv) = self.create_offer(product, adjusted_target,
+            let (mut offer, _sent_amv) = self.create_offer(product, adjusted_target,
                 spend, data, market);
             // With our offer built, send it over
             // send over the start of the offer.
             self.send_buy_offer(rx, tx, product, seller, &offer, offer_result, target);
             // wait for the seller to respond
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            // TODO !!!!!!!!!!! PICK UP HERE AFTER TESTING! !!!!!!!!!!!!!!!!!!!!!!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
             let response = self.specific_wait(rx, &vec![
                 ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
                     product: 0, offer_result: OfferResult::Cheap },
@@ -662,9 +658,53 @@ impl Pop {
                 ActorMessage::RejectOffer { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 },
                 ActorMessage::CloseDeal { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 }
             ]);
+            match response {
+                // TODO Infowars Expansion results of buying in here or in caller.
+                ActorMessage::SellerAcceptOfferAsIs { .. } => {
+                    // offer accepted as is, remove property offered and add what we asked for.
+                    for (id, amount) in offer {
+                        *self.desires.property.entry(product).or_insert(0.0) -= amount;
+                    }
+                    // get the AMV spent
+                    let mut price = 0.0;
+                    return (BuyResult::Successful, price);
+                },
+                ActorMessage::OfferAcceptedWithChange { followups, .. } => {
+                    // Offer accepted, but theer's some change.
+                    // Get the returned items and update the offer
+                    let mut left = followups;
+                    while left > 0 {
+                        if let ActorMessage::ChangeFollowup { return_product, return_quantity, 
+                        followups, .. } = self.specific_wait(rx, 
+                        &vec![ActorMessage::ChangeFollowup { 
+                            buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
+                            product: 0, return_product: 0, return_quantity: 1.0, followups: 0 }]) {
+                            // with the followup message recieved, update our offer
+                            *offer.entry(return_product).or_insert(0.0) -= return_quantity;
+                            left = followups;
+                        }
+                    }
+                    // remove the items from property
+                    for (product, quant) in offer.iter() {
+                        *self.desires.property.entry(*product).or_insert(0.0) -= quant;
+                    }
 
+                    let mut resulting amv = 0.0;
+
+                    return (BuyResult::Successful, 0.0);
+                },
+                ActorMessage::RejectOffer { .. } => {
+                    // offer rejected, don't remove anything and get out.
+                    return (BuyResult::NotSuccessful { reason: OfferResult::Rejected }, 0.0);
+                },
+                ActorMessage::CloseDeal { .. } => {
+                    // Deal was rejected and closed out, gtfo.
+                    return (BuyResult::NotSuccessful { reason: OfferResult::Rejected }, 0.0);
+                },
+                _ => { panic!("Incorrect message recieved from Buy offer?")}
+            }
         }
-        BuyResult::NotSuccessful { reason: OfferResult::Incomplete }
+        panic!("Should never get here!");
     }
 
 
