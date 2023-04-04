@@ -638,17 +638,17 @@ impl Pop {
             // get how much we might pay
             let total_price = target * price;
             // cap our target to what we have budgeted
-            let mut adjusted_target = total_price.min(remaining_budget);
+            let mut adjusted_target_price = total_price.min(remaining_budget);
             // get our corrected target
-            let mut target = adjusted_target / price;
+            let mut target = adjusted_target_price / price;
             if !data.products.get(&product).unwrap()
             .fractional { // floor it if the product is not fractional
                 target = target.floor();
-                adjusted_target = target * price;
+                adjusted_target_price = target * price;
             }
             // with our new target, build up the offer
             // TODO consider making the length of the list cost time, so the more items kinds and quantity the more time it costs to purchase.
-            let (mut offer, _sent_amv) = self.create_offer(product, adjusted_target,
+            let (mut offer, _sent_amv) = self.create_offer(product, adjusted_target_price,
                 spend, data, market);
             // With our offer built, send it over
             // send over the start of the offer.
@@ -666,6 +666,8 @@ impl Pop {
                 // TODO Infowars Expansion results of buying in here or in caller.
                 ActorMessage::SellerAcceptOfferAsIs { .. } => {
                     // offer accepted as is, remove property offered and add what we asked for.
+                    // add what we purchased.
+                    *self.desires.property.entry(product).or_insert(0.0) += target;
                     // also remove from spend
                     for (id, amount) in offer.iter() {
                         *self.desires.property.entry(*id).or_insert(0.0) -= amount;
@@ -680,6 +682,8 @@ impl Pop {
                 },
                 ActorMessage::OfferAcceptedWithChange { followups, .. } => {
                     // Offer accepted, but theer's some change.
+                    // add what we purchased.
+                    *self.desires.property.entry(product).or_insert(0.0) += target;
                     // Get the returned items and update the offer
                     let mut left = followups;
                     while left > 0 {

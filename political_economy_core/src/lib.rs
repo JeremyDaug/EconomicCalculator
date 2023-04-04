@@ -1599,16 +1599,16 @@ mod tests {
                 thread::sleep(Duration::from_millis(100));
                 // ensure we closed out
                 if !handle.is_finished() { assert!(false); }
-
                 // get our data
                 let (test, (result, amv_returned)) = handle.join().unwrap();
                 // check the return is correct.
-                if let BuyResult::NotSuccessful { reason } = result {
-                    assert_eq!(OfferResult::OutOfStock, reason);
+                if let BuyResult::Successful = result {
+                    assert!(true);
                 } else { assert!(false); }
-                // check that nothing was gained or lost.
-                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
-                assert!(test.desires.property.get(&7).is_none());
+                assert!(amv_returned == 10.0);
+                // check that property was exchanged
+                assert!(test.desires.property.get(&6).is_none());
+                assert!(*test.desires.property.get(&7).unwrap() == 2.0);
             }
         }
     }
