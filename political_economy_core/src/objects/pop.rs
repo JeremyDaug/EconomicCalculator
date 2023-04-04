@@ -671,7 +671,14 @@ impl Pop {
                     // also remove from spend
                     for (id, amount) in offer.iter() {
                         *self.desires.property.entry(*id).or_insert(0.0) -= amount;
+                        // if item is now 0 remove it
+                        if *self.desires.property.get(id).unwrap() == 0.0 {
+                            self.desires.property.remove(id);
+                        }
                         *spend.entry(*id).or_insert(0.0) -= amount;
+                        if *spend.get(id).unwrap() == 0.0 {
+                            spend.remove(id);
+                        }
                     }
                     // get the AMV spent
                     let mut price = 0.0;
@@ -700,12 +707,20 @@ impl Pop {
                     // remove the items from property
                     for (product, quant) in offer.iter() {
                         *self.desires.property.entry(*product).or_insert(0.0) -= quant;
+                        if *self.desires.property.get(product).unwrap() == 0.0 {
+                            self.desires.property.remove(product);
+                        }
                         // also remove those items from spend
                         *spend.entry(*product).or_insert(0.0) -= quant;
+                        if *spend.get(product).unwrap() == 0.0 {
+                            spend.remove(product);
+                        }
                     }
 
                     let mut resulting_amv = 0.0;
-
+                    for (prod, quant) in offer.iter() {
+                        resulting_amv += market.get_product_price(&prod, 0.0) * quant;
+                    }
                     return (BuyResult::Successful, resulting_amv);
                 },
                 ActorMessage::RejectOffer { .. } => {
@@ -867,7 +882,7 @@ impl Pop {
             // then add that spend amount to our offer
             offer.insert(*offer_item, spend);
             // if the total is now above our target (implying it's within overspend territory)
-            if total > target {
+            if total >= target {
                 return (offer, total);
             }
         }

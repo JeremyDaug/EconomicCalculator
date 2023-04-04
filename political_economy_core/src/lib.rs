@@ -251,12 +251,12 @@ mod tests {
 
             pop.desires.property.insert(6, 10.0);
             // also add the pop's desire info
-            pop.memory.product_knowledge.insert(6, Knowledge{ target: 2.0, 
+            pop.memory.product_knowledge.insert(7, Knowledge{ target: 2.0, 
                 achieved: 0.0, 
                 spent: 0.0, 
                 lost: 0.0, 
                 time_budget: 10.0, 
-                amv_budget: 10.0, 
+                amv_budget: 11.0, 
                 time_spent: 0.0, 
                 amv_spent: 0.0, 
                 success_rate: 0.5 });
@@ -1563,7 +1563,8 @@ mod tests {
 
                 // send the out of stock message.
                 tx.send(ActorMessage::InStock { buyer: pop_info, 
-                    seller: selling_firm, product: 7, price: 5.0, quantity: 100.0 }).expect("Sudden Disconnect?");
+                    seller: selling_firm, product: 7, price: 5.0, 
+                    quantity: 100.0 }).expect("Sudden Disconnect?");
                 thread::sleep(Duration::from_millis(100));
                 // should have the first message we sent
                 if let ActorMessage::InStock { .. } = rx.recv().unwrap() {
@@ -1585,13 +1586,13 @@ mod tests {
                 seller, product, 
                 offer_product, offer_quantity, 
                 followup } = rx.recv().unwrap() {
-                        assert_eq!(buyer, pop_info);
-                        assert_eq!(seller, selling_firm);
-                        assert_eq!(product, 7);
-                        assert_eq!(offer_product, 6);
-                        assert_eq!(offer_quantity, 10.0);
-                        assert_eq!(followup, 0);
-                    } else { assert!(false); }
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 7);
+                    assert_eq!(offer_product, 6);
+                    assert_eq!(offer_quantity, 10.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
                 // with the offer sent correctly, send our acceptance and go forward
                 tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
                     seller: selling_firm, product: 7, offer_result: OfferResult::Cheap })
