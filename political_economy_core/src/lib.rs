@@ -1590,7 +1590,7 @@ mod tests {
                     assert_eq!(seller, selling_firm);
                     assert_eq!(product, 7);
                     assert_eq!(offer_product, 6);
-                    assert_eq!(offer_quantity, 10.0);
+                    assert_eq!(offer_quantity, 5.0);
                     assert_eq!(followup, 0);
                 } else { assert!(false); }
                 // with the offer sent correctly, send our acceptance and go forward
@@ -1608,8 +1608,179 @@ mod tests {
                 } else { assert!(false); }
                 assert!(amv_returned == 10.0);
                 // check that property was exchanged
-                assert!(test.desires.property.get(&6).is_none());
+                assert!(*test.desires.property.get(&6).unwrap() == 5.0);
                 assert!(*test.desires.property.get(&7).unwrap() == 2.0);
+            }
+
+            #[test]
+            pub fn should_return_success_when_able_to_buy_single_offer_with_change() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm we're talking with
+                let selling_firm = ActorInfo::Firm(1);
+                // setup property split
+                let mut keep = HashMap::new();
+                let mut spend = HashMap::new();
+                let mut returned = HashMap::new();
+
+                // add our property to the spend hashmap.
+                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+
+                let handle = thread::spawn(move || {
+                    let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
+                        selling_firm, &mut keep, &mut spend, &mut returned);
+                    (test, result)
+                });
+                // check that it's running
+                if handle.is_finished() { assert!(false); }
+
+                // send the out of stock message.
+                tx.send(ActorMessage::InStock { buyer: pop_info, 
+                    seller: selling_firm, product: 7, price: 5.0, 
+                    quantity: 100.0 }).expect("Sudden Disconnect?");
+                thread::sleep(Duration::from_millis(100));
+                // should have the first message we sent
+                if let ActorMessage::InStock { .. } = rx.recv().unwrap() {
+                } else { assert!(false); }
+                // it should have sent a buy order of 10.0 units of DI6
+                if let ActorMessage::BuyOffer { buyer, 
+                seller, product, 
+                price_opinion, quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 7);
+                    assert_eq!(price_opinion, OfferResult::Reasonable);
+                    assert_eq!(quantity, 2.0);
+                    assert_eq!(followup, 1);
+                } else { assert!(false); }
+                // then check that the sent the expected amount
+                if let ActorMessage::BuyOfferFollowup { buyer, 
+                seller, product, 
+                offer_product, offer_quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 7);
+                    assert_eq!(offer_product, 6);
+                    assert_eq!(offer_quantity, 5.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
+
+                // with the offer sent correctly, send our acceptance and go forward
+                // the acceptance should include change, it will give back 1 unit of the items offered
+                // and 1 unit of another item to give them more to test.
+                tx.send(ActorMessage::OfferAcceptedWithChange { buyer: pop_info, 
+                    seller: selling_firm, product: 7, quantity: 2.0, followups: 2 })
+                    .expect("Disconnected?");
+                tx.send(ActorMessage::ChangeFollowup { buyer: pop_info, 
+                    seller: selling_firm, product: 7, return_product: 6, 
+                    return_quantity: 1.0, followups: 1 })
+                    .expect("Disconnected?");
+                tx.send(ActorMessage::ChangeFollowup { buyer: pop_info, 
+                    seller: selling_firm, product: 7, return_product: 5, 
+                    return_quantity: 1.0, followups: 0 })
+                    .expect("Disconnected?");
+                thread::sleep(Duration::from_millis(100));
+                // ensure we closed out
+                if !handle.is_finished() { assert!(false); }
+                // get our data
+                let (test, (result, amv_returned)) = handle.join().unwrap();
+                // check the return is correct.
+                if let BuyResult::Successful = result {
+                    assert!(true);
+                } else { assert!(false); }
+                assert!(amv_returned == 7.0);
+                // check that property was exchanged
+                assert!(*test.desires.property.get(&5).unwrap() == 1.0);
+                assert!(*test.desires.property.get(&6).unwrap() == 6.0);
+                assert!(*test.desires.property.get(&7).unwrap() == 2.0);
+            }
+
+            #[test]
+            pub fn should_return_not_successful_when_reject_offer_recieved_after_offer() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm we're talking with
+                let selling_firm = ActorInfo::Firm(1);
+                // setup property split
+                let mut keep = HashMap::new();
+                let mut spend = HashMap::new();
+                let mut returned = HashMap::new();
+
+                // add our property to the spend hashmap.
+                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+
+                let handle = thread::spawn(move || {
+                    let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
+                        selling_firm, &mut keep, &mut spend, &mut returned);
+                    (test, result)
+                });
+                // check that it's running
+                if handle.is_finished() { assert!(false); }
+
+                // send the out of stock message.
+                tx.send(ActorMessage::InStock { buyer: pop_info, 
+                    seller: selling_firm, product: 7, price: 5.0, 
+                    quantity: 100.0 }).expect("Sudden Disconnect?");
+                thread::sleep(Duration::from_millis(100));
+                // should have the first message we sent
+                if let ActorMessage::InStock { .. } = rx.recv().unwrap() {
+                } else { assert!(false); }
+                // it should have sent a buy order of 10.0 units of DI6
+                if let ActorMessage::BuyOffer { buyer, 
+                seller, product, 
+                price_opinion, quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 7);
+                    assert_eq!(price_opinion, OfferResult::Reasonable);
+                    assert_eq!(quantity, 2.0);
+                    assert_eq!(followup, 1);
+                } else { assert!(false); }
+                // then check that the sent the expected amount
+                if let ActorMessage::BuyOfferFollowup { buyer, 
+                seller, product, 
+                offer_product, offer_quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 7);
+                    assert_eq!(offer_product, 6);
+                    assert_eq!(offer_quantity, 5.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
+
+                // with the offer sent correctly, send our acceptance and go forward
+                // the acceptance should include change, it will give back 1 unit of the items offered
+                // and 1 unit of another item to give them more to test.
+                tx.send(ActorMessage::RejectOffer { buyer: pop_info, seller: selling_firm, 
+                product: 7 })
+                    .expect("Disconnected?");
+                thread::sleep(Duration::from_millis(100));
+                // ensure we closed out
+                if !handle.is_finished() { assert!(false); }
+                // get our data
+                let (test, (result, amv_returned)) = handle.join().unwrap();
+                // check the return is correct.
+                if let BuyResult::NotSuccessful { reason } = result {
+                    assert!(true);
+                } else { assert!(false); }
+                assert!(amv_returned == 7.0);
+                // check that property was exchanged
+                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
+                assert!(test.desires.property.get(&7).is_none());
             }
         }
     }

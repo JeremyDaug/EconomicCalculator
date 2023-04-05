@@ -688,6 +688,7 @@ impl Pop {
                     return (BuyResult::Successful, price);
                 },
                 ActorMessage::OfferAcceptedWithChange { followups, .. } => {
+                    // TODO consider adding in a 'reject change' option.
                     // Offer accepted, but theer's some change.
                     // add what we purchased.
                     *self.desires.property.entry(product).or_insert(0.0) += target;
@@ -723,12 +724,8 @@ impl Pop {
                     }
                     return (BuyResult::Successful, resulting_amv);
                 },
-                ActorMessage::RejectOffer { .. } => {
+                ActorMessage::RejectOffer { .. } | ActorMessage::CloseDeal { .. } => {
                     // offer rejected, don't remove anything and get out.
-                    return (BuyResult::NotSuccessful { reason: OfferResult::Rejected }, 0.0);
-                },
-                ActorMessage::CloseDeal { .. } => {
-                    // Deal was rejected and closed out, gtfo.
                     return (BuyResult::NotSuccessful { reason: OfferResult::Rejected }, 0.0);
                 },
                 _ => { panic!("Incorrect message recieved from Buy offer?")}
