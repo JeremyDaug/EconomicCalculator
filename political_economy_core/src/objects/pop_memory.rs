@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::constants;
+
 
 /// A Helper for Pops, recording their data and memories for use in 
 /// various calculations and to remember things which should be known
@@ -102,5 +104,29 @@ impl Knowledge {
             return 0.0;
         }
         self.remaining_amv() / self.target_remaining()
+    }
+
+    /// # Unable to purchase
+    /// 
+    /// This function is called to adjust the self.success_rate
+    /// appropriately when the item in unable to be bought
+    /// either because the buyer refuses the offer, or because the
+    /// seller 
+    /// 
+    /// When done, it reduces the success rate by 10% of current value.
+    pub fn unable_to_purchase(&mut self) {
+        self.success_rate *= constants::UNABLE_TO_PURCHASE_REDUCTION;
+    }
+
+    /// # Cancelled purchase
+    /// 
+    /// Called when a buyer decided to not purchase the item they were
+    /// seeking, typically due to either running out of products to exchange
+    /// or the market price being too high. 
+    /// (Market Price * UNABLE_TO_PURCHASE < current_unit_price)
+    /// 
+    /// Reduces Success Rate by CANCEL_PURCHASE_REDUCTION
+    pub fn cancelled_purchase(&mut self) {
+        self.success_rate *= constants::CANCELLED_PURCHASE_REDUCTION;
     }
 }

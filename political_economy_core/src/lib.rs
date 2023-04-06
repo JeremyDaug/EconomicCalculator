@@ -1481,11 +1481,10 @@ mod tests {
             }
         }
     
+        // TODO Come back here and Test that Product Knowledge is updated correctly for items gotten and spent.
         mod standard_buy {
             use std::{collections::HashMap, thread, time::Duration};
-
             use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult};
-
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]

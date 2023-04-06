@@ -6,7 +6,7 @@ use std::{collections::{VecDeque, HashMap}};
 
 use barrage::{Sender, Receiver};
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self}, objects::pop_memory::Knowledge};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
@@ -484,11 +484,14 @@ impl Pop {
     /// 
     /// Tries to setup a buy deal through normal means.
     /// 
-    /// Starts buy sending the FindProduct request, then actively waits for 
+    /// Starts by sending the FindProduct request, then actively waits for 
     /// a response, consuming and processing messages for itself until it 
     /// recieves ProductFound or ProductNotFound.
     /// 
     /// If the product is found, it will enter the deal state, and try to buy tho item.
+    /// 
+    /// Both the buyer and seller will be locked into the deal state once they 
+    /// send/recieve the ProductFound message.
     /// 
     /// If the product is not found, but the desire is considered high priority
     /// then it will go into an emergency search. 
@@ -508,15 +511,14 @@ impl Pop {
     returned: &mut HashMap<usize, f64>,
     product: &usize) -> BuyResult {
         // get the amount we want to get and the unit price budget.
-        let quantity = self.memory.product_knowledge
-            .get(product).expect("Product not found?")
-            .target_remaining();
-        let price = self.memory.product_knowledge
-            .get(product).expect("Product not found?")
-            .current_unit_budget();
-        // with budget gotten, check if it's feasable for us to buy (market price < 1.5 budget)
+        let mem = self.memory.product_knowledge
+        .get_mut(product).expect("Product not found?");
+        let quantity_target = mem.target_remaining();
+        let price = mem.current_unit_budget();
+        // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
         let market_price = market.get_product_price(product, 0.0);
-        if market_price > (price * 1.5) {
+        if market_price > (price * constants::HARD_BUY_CAP) {
+            mem.cancelled_purchase();
             return BuyResult::CancelBuy;
         }
         // since the current market price is within our budget, try to look for it.
@@ -548,8 +550,10 @@ impl Pop {
         if let BuyResult::NotSuccessful { reason } = result {
             // failed to succeed, only one real reason is possible, so record 
             // the issue and move on..
-            let mut mem = self.memory.product_knowledge.get_mut(product).unwrap();
-            mem.failed_to_purchase();
+            let mem = self.memory.product_knowledge.get_mut(product).unwrap();
+            mem.unable_to_purchase();
+        } else {
+            // we succeeded in the purchase, record the expenditure in AMV
         }
 
         return result;
@@ -673,6 +677,9 @@ impl Pop {
                     // offer accepted as is, remove property offered and add what we asked for.
                     // add what we purchased.
                     *self.desires.property.entry(product).or_insert(0.0) += target;
+                    let mem = self.memory.product_knowledge.get_mut(&product)
+                        .unwrap();
+                    mem.achieved += target;
                     // also remove from spend
                     for (id, amount) in offer.iter() {
                         *self.desires.property.entry(*id).or_insert(0.0) -= amount;
@@ -684,12 +691,21 @@ impl Pop {
                         if *spend.get(id).unwrap() == 0.0 {
                             spend.remove(id);
                         }
+                        // update memory for these products spent
+                        let mem = self.memory
+                        .product_knowledge.get_mut(id).unwrap();
+                        mem.spent += amount;
                     }
                     // get the AMV spent
                     let mut price = 0.0;
                     for (prod, quant) in offer.iter() {
                         price += market.get_product_price(&prod, 0.0) * quant;
                     }
+                    // update the AMV spent on the item in memory.
+                    let mem = self.memory
+                    .product_knowledge.get_mut(&product).unwrap();
+                    mem.amv_spent += price;
+
                     return (BuyResult::Successful, price);
                 },
                 ActorMessage::OfferAcceptedWithChange { followups, .. } => {
@@ -722,11 +738,24 @@ impl Pop {
                             spend.remove(product);
                         }
                     }
+                    // add each item spent to the spend memory and/or to the achieved items gained.
+                    for (prod, quant) in offer.iter() {
+                        let mem = self.memory.product_knowledge.entry(*prod)
+                            .or_insert(Knowledge::new());
+                        if *quant > 0.0 { // if being spent
+                            mem.spent += quant;
+                        } else { // if recieved, add to achieved
+                            mem.achieved += quant;
+                        }
+                    }
 
                     let mut resulting_amv = 0.0;
                     for (prod, quant) in offer.iter() {
                         resulting_amv += market.get_product_price(&prod, 0.0) * quant;
                     }
+                    // add AMV to the product's memory spent
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().amv_spent += resulting_amv;
                     return (BuyResult::Successful, resulting_amv);
                 },
                 ActorMessage::RejectOffer { .. } | ActorMessage::CloseDeal { .. } => {
