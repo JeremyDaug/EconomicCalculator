@@ -238,8 +238,7 @@ impl Pop {
     /// other mechanism that removes the need to created dummies to make it work.
     pub fn specific_wait(&mut self,
     rx: &Receiver<ActorMessage>,
-    find: &Vec<ActorMessage>,
-    ) -> ActorMessage {
+    find: &Vec<ActorMessage>) -> ActorMessage {
         // TODO Look into improving Find Parameter so it doesn't need a fully filled out ActorMessage to function.
         loop {
             let msg = self.get_next_message(rx);
@@ -546,6 +545,12 @@ impl Pop {
         else { panic!("Somehow did not get FoundProduct or ProductNotFound."); };
 
         // TODO deal with the result and amv spent here.
+        if let BuyResult::NotSuccessful { reason } = result {
+            // failed to succeed, only one real reason is possible, so record 
+            // the issue and move on..
+            let mut mem = self.memory.product_knowledge.get_mut(product).unwrap();
+            mem.failed_to_purchase();
+        }
 
         return result;
     }
