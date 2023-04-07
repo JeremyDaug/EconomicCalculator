@@ -7,6 +7,9 @@ pub enum BuyResult {
     /// Did not succeed in purchasing everything desired, try again.
     /// Includes the reason why.
     NotSuccessful { reason: OfferResult },
+    /// The Seller Closed the Deal, we cannot try with them again and must
+    /// look elsewhere.
+    SellerClosed,
     /// The Successful
     Successful
 }

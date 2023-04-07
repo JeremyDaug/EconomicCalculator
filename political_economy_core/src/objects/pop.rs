@@ -513,7 +513,6 @@ impl Pop {
         // get the amount we want to get and the unit price budget.
         let mem = self.memory.product_knowledge
         .get_mut(product).expect("Product not found?");
-        let quantity_target = mem.target_remaining();
         let price = mem.current_unit_budget();
         // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
         let market_price = market.get_product_price(product, 0.0);
@@ -534,15 +533,13 @@ impl Pop {
         // result is now either FoundProduct or ProductNotFound, deal with it
         // TODO update this to be smarter about doing emergency buy searches.
         
-        let (result, amv_spent) = if let ActorMessage::ProductNotFound { product, buyer } 
+        let result = if let ActorMessage::ProductNotFound { product, buyer } 
         = result {
             // if product not found, do an emergency search instead.
-            self.emergency_buy(rx, tx, data, market, keep, spend, returned, 
-                &product)
+            self.emergency_buy(rx, tx, data, market, spend, &product)
         }
         else if let ActorMessage::FoundProduct { seller, .. } = result {
-            self.standard_buy(rx, tx, data, market, seller, keep, spend, 
-                returned)
+            self.standard_buy(rx, tx, data, market, seller, spend)
         }
         else { panic!("Somehow did not get FoundProduct or ProductNotFound."); };
 
@@ -575,25 +572,22 @@ impl Pop {
     /// 3. Look at the price given and the quantity they have to offer
     /// and make an offer for that based on their estimates.
     /// 
-    /// 4. Actively Wait for the response of ActorMessage::SellerAcceptAsIs,
+    /// 4. Specifically wait for the response of ActorMessage::SellerAcceptAsIs,
     /// ActorMessage::OfferAcceptedWithChange, ActorMessage::RejectOffer, or
     /// ActorMessage::CloseDeal.
     /// 
     /// 5. React to the response appropriately.
-    ///   a. If CloseDeal, exit out
-    ///   b. If Rejected, either try again with more or get out and look 
-    ///      elsewhere.
-    ///   c. If Accepted, finish out and accept change, maybe ask for 
-    ///      something else we want?
+    ///   a. If CloseDeal, record failure then exit out with that info.
+    ///   b. If Rejected, Record Failure, then exit out with that info.
+    ///   c. If Accepted, finish out and accept change, record what was
+    ///      spent and recieved back in memory, then exit out with success.
     pub fn standard_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     market: &MarketHistory, 
     seller: ActorInfo,
-    keep: &mut HashMap<usize, f64>,
-    spend: &mut HashMap<usize, f64>,
-    returned: &mut HashMap<usize, f64>) -> (BuyResult, f64) {
+    spend: &mut HashMap<usize, f64>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         let result = self.specific_wait(rx, 
@@ -604,7 +598,7 @@ impl Pop {
                 seller: ActorInfo::Firm(0), product: 0 }]);
         // if not in stock gtfo
         if let ActorMessage::NotInStock { .. } = result {
-            return (BuyResult::NotSuccessful { reason: OfferResult::OutOfStock }, 0.0);
+            return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
         }
         // if in stock, continue with the deal
         if let ActorMessage::InStock { buyer: _, seller: _, 
@@ -622,7 +616,7 @@ impl Pop {
                 // and close out.
                 self.push_message(rx, tx, ActorMessage::CloseDeal
                     { buyer: self.actor_info(), seller, product });
-                return (BuyResult::NotSuccessful { reason: OfferResult::TooExpensive }, 0.0);
+                return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
             }
             let curr_unit_budget = self.memory.product_knowledge
             .get(&product).expect("Product Not found?")
@@ -708,7 +702,7 @@ impl Pop {
                     // update the success rate
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().successful_purchase();
-                    return (BuyResult::Successful, price);
+                    return BuyResult::Successful;
                 },
                 ActorMessage::OfferAcceptedWithChange { followups, .. } => {
                     // TODO consider adding in a 'reject change' option.
@@ -761,15 +755,19 @@ impl Pop {
                     // update the success rate
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().successful_purchase();
-                    return (BuyResult::Successful, resulting_amv);
+                    return BuyResult::Successful;
                 },
-                ActorMessage::RejectOffer { .. } | ActorMessage::CloseDeal { .. } => {
+                ActorMessage::RejectOffer { .. } => {
                     // offer rejected, don't remove anything and get out.
-
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().unable_to_purchase();
-                    return (BuyResult::NotSuccessful { reason: OfferResult::Rejected }, 0.0);
+                    return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
                 },
+                ActorMessage::CloseDeal { .. } => {
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().unable_to_purchase();
+                    return BuyResult::SellerClosed;
+                }
                 _ => { panic!("Incorrect message recieved from Buy offer?")}
             }
         }
@@ -782,10 +780,8 @@ impl Pop {
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     market: &MarketHistory, 
-    keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>,
-    returned: &mut HashMap<usize, f64>,
-    product: &usize) -> (BuyResult, f64) {
+    product: &usize) -> BuyResult {
         todo!("Emergency Buy here!")
     }
 
