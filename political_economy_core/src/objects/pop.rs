@@ -705,7 +705,9 @@ impl Pop {
                     let mem = self.memory
                     .product_knowledge.get_mut(&product).unwrap();
                     mem.amv_spent += price;
-
+                    // update the success rate
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().successful_purchase();
                     return (BuyResult::Successful, price);
                 },
                 ActorMessage::OfferAcceptedWithChange { followups, .. } => {
@@ -756,10 +758,16 @@ impl Pop {
                     // add AMV to the product's memory spent
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().amv_spent += resulting_amv;
+                    // update the success rate
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().successful_purchase();
                     return (BuyResult::Successful, resulting_amv);
                 },
                 ActorMessage::RejectOffer { .. } | ActorMessage::CloseDeal { .. } => {
                     // offer rejected, don't remove anything and get out.
+
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().unable_to_purchase();
                     return (BuyResult::NotSuccessful { reason: OfferResult::Rejected }, 0.0);
                 },
                 _ => { panic!("Incorrect message recieved from Buy offer?")}

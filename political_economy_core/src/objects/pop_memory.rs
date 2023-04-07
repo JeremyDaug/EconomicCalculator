@@ -129,4 +129,16 @@ impl Knowledge {
     pub fn cancelled_purchase(&mut self) {
         self.success_rate *= constants::CANCELLED_PURCHASE_REDUCTION;
     }
+
+    /// # Successful Purchase
+    /// 
+    /// Called by a buyer when the purchase attempt was successful.
+    /// 
+    /// Increases the Success rate by SUCCESSFUL_PURCHASE_INCREASE
+    /// Caps the increase at 1.0.
+    pub fn successful_purchase(&mut self) {
+        self.success_rate *= constants::SUCCESSFUL_PURCHASE_INCREASE;
+        // cap it at 1.0
+        self.success_rate = self.success_rate.min(1.0);
+    }
 }
