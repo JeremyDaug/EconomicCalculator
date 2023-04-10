@@ -76,7 +76,7 @@ impl Knowledge {
             spent: 0.0, lost: 0.0, 
             time_budget: 0.0, amv_budget: 0.0, 
             time_spent: 0.0, 
-            amv_spent: 0.0, success_rate: 0.0
+            amv_spent: 0.0, success_rate: 0.5
     } }
 
     pub fn remaining_amv(&self) -> f64 {

@@ -533,13 +533,13 @@ impl Pop {
         // result is now either FoundProduct or ProductNotFound, deal with it
         // TODO update this to be smarter about doing emergency buy searches.
         
-        let result = if let ActorMessage::ProductNotFound { product, buyer } 
+        let result = if let ActorMessage::ProductNotFound { product, .. } 
         = result {
             // if product not found, do an emergency search instead.
-            self.emergency_buy(rx, tx, data, market, spend, &product)
+            self.emergency_buy(rx, tx, data, market, spend, &product, returned)
         }
         else if let ActorMessage::FoundProduct { seller, .. } = result {
-            self.standard_buy(rx, tx, data, market, seller, spend)
+            self.standard_buy(rx, tx, data, market, seller, spend, returned)
         }
         else { panic!("Somehow did not get FoundProduct or ProductNotFound."); };
 
@@ -559,7 +559,7 @@ impl Pop {
     /// Standard Buy Function
     /// 
     /// This has been reached when we have successfully recieved a 
-    /// FoundProduct message. 
+    /// FoundProduct message. We are therefore in a deal and must focus on it.
     /// 
     /// So now we enter here to manage our next steps.
     /// 
@@ -587,23 +587,24 @@ impl Pop {
     data: &DataManager, 
     market: &MarketHistory, 
     seller: ActorInfo,
-    spend: &mut HashMap<usize, f64>) -> BuyResult {
+    spend: &mut HashMap<usize, f64>,
+    returned: &mut HashMap<usize, f64>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         let result = self.specific_wait(rx, 
-        &vec![
-            ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0),
-                product: 0, price: 0.0, quantity: 0.0 }, 
-            ActorMessage::NotInStock { buyer: ActorInfo::Firm(0), 
-                seller: ActorInfo::Firm(0), product: 0 }]);
-        // if not in stock gtfo
-        if let ActorMessage::NotInStock { .. } = result {
+        &vec![ 
+            ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0, price: 0.0, quantity: 0.0 }, 
+            ActorMessage::NotInStock { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 }]);
+        if let ActorMessage::NotInStock { product, .. } = result { // if not in stock
+            // record our failure
+            self.memory.product_knowledge.get_mut(&product)
+                .unwrap().unable_to_purchase();
             return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
         }
         // if in stock, continue with the deal
         if let ActorMessage::InStock { buyer: _, seller: _, 
         product, price, quantity } = result {
-            // get our budget and target
+            // get our original budget to check against.
             let unit_budget = self.memory.product_knowledge
                 .get(&product).expect("Product Not found?")
                 .unit_budget();
@@ -613,11 +614,13 @@ impl Pop {
                 self.push_message(rx, tx, ActorMessage::RejectPurchase 
                     { buyer: self.actor_info(), seller, product, 
                         price_opinion: OfferResult::TooExpensive });
-                // and close out.
+                // and close out immediately.
                 self.push_message(rx, tx, ActorMessage::CloseDeal
                     { buyer: self.actor_info(), seller, product });
+                // return not successful with Too Expensive as the reason.
                 return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
             }
+            // get our current unit budget
             let curr_unit_budget = self.memory.product_knowledge
             .get(&product).expect("Product Not found?")
                 .current_unit_budget();
@@ -625,10 +628,11 @@ impl Pop {
             let target = self.memory.product_knowledge.get(&product)
             .expect("Product Not Found")
                 .target_remaining().min(quantity);
+            // and our remaining total budget.
             let remaining_budget = self.memory.product_knowledge.get(&product)
             .expect("Product Not Found")
                 .remaining_amv();
-            // get our current price oppinion.
+            // get our current price opinion.
             // TODO return here to check on this, maybe return to unit_budget.
             let threshold = price / curr_unit_budget;
             let offer_result = 
@@ -642,7 +646,7 @@ impl Pop {
             let total_price = target * price;
             // cap our target to what we have budgeted
             let mut adjusted_target_price = total_price.min(remaining_budget);
-            // get our corrected target
+            // get our corrected target the adjusted target price
             let mut target = adjusted_target_price / price;
             if !data.products.get(&product).unwrap()
             .fractional { // floor it if the product is not fractional
@@ -651,12 +655,11 @@ impl Pop {
             }
             // with our new target, build up the offer
             // TODO consider making the length of the list cost time, so the more items kinds and quantity the more time it costs to purchase.
-            let (mut offer, _sent_amv) = self.create_offer(product, adjusted_target_price,
+            let (mut offer, sent_amv) = self.create_offer(product, adjusted_target_price,
                 spend, data, market);
             // With our offer built, send it over
-            // send over the start of the offer.
             self.send_buy_offer(rx, tx, product, seller, &offer, offer_result, target);
-            // wait for the seller to respond
+            // wait for the seller to respond, he either accepts as is, accepts with change, rejects, or closes.
             let response = self.specific_wait(rx, &vec![
                 ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
                     product: 0, offer_result: OfferResult::Cheap },
@@ -668,87 +671,85 @@ impl Pop {
             match response {
                 // TODO Infowars Expansion results of buying in here or in caller.
                 ActorMessage::SellerAcceptOfferAsIs { .. } => {
-                    // offer accepted as is, remove property offered and add what we asked for.
+                    // offer accepted as is,
                     // add what we purchased.
                     *self.desires.property.entry(product).or_insert(0.0) += target;
-                    let mem = self.memory.product_knowledge.get_mut(&product)
-                        .unwrap();
-                    mem.achieved += target;
-                    // also remove from spend
-                    for (id, amount) in offer.iter() {
-                        *self.desires.property.entry(*id).or_insert(0.0) -= amount;
+                    // update our achieved target property.
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().achieved += target;
+                    // for everything we spent
+                    for (offer_prod, amount) in offer.iter() {
+                        // remove it from property.
+                        *self.desires.property.entry(*offer_prod)
+                            .or_insert(0.0) -= amount;
                         // if item is now 0 remove it
-                        if *self.desires.property.get(id).unwrap() == 0.0 {
-                            self.desires.property.remove(id);
+                        if *self.desires.property.get(offer_prod).unwrap() == 0.0 { 
+                            self.desires.property.remove(offer_prod);
                         }
-                        *spend.entry(*id).or_insert(0.0) -= amount;
-                        if *spend.get(id).unwrap() == 0.0 {
-                            spend.remove(id);
+                        // subtract the amount from our spend entry.
+                        *spend.get_mut(offer_prod).unwrap() -= amount; // since we spent it it must be there
+                        if *spend.get(offer_prod).unwrap() == 0.0 { // if we spent all of it, remove it.
+                            spend.remove(offer_prod);
                         }
                         // update memory for these products spent
-                        let mem = self.memory
-                        .product_knowledge.get_mut(id).unwrap();
-                        mem.spent += amount;
+                        self.memory.product_knowledge.entry(*offer_prod)
+                            .or_insert(Knowledge::new()).spent += amount;
                     }
-                    // get the AMV spent
-                    let mut price = 0.0;
-                    for (prod, quant) in offer.iter() {
-                        price += market.get_product_price(&prod, 0.0) * quant;
-                    }
-                    // update the AMV spent on the item in memory.
-                    let mem = self.memory
-                    .product_knowledge.get_mut(&product).unwrap();
-                    mem.amv_spent += price;
+                    // get the AMV total spent in memory.
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().amv_spent += sent_amv;
                     // update the success rate
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().successful_purchase();
+                    // return success
                     return BuyResult::Successful;
                 },
                 ActorMessage::OfferAcceptedWithChange { followups, .. } => {
                     // TODO consider adding in a 'reject change' option.
-                    // Offer accepted, but theer's some change.
-                    // add what we purchased.
-                    *self.desires.property.entry(product).or_insert(0.0) += target;
+                    // Offer accepted, but there's some change.
                     // Get the returned items and update the offer
                     let mut left = followups;
-                    while left > 0 {
+                    while left > 0 { // insert all the change into our offer (subtract what is given back)
                         if let ActorMessage::ChangeFollowup { return_product, return_quantity, 
                         followups, .. } = self.specific_wait(rx, 
-                        &vec![ActorMessage::ChangeFollowup { 
-                            buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
-                            product: 0, return_product: 0, return_quantity: 1.0, followups: 0 }]) {
-                            // with the followup message recieved, update our offer
+                        &vec![
+                        ActorMessage::ChangeFollowup { buyer: ActorInfo::Firm(0), 
+                            seller: ActorInfo::Firm(0), product: 0, return_product: 0, 
+                            return_quantity: 1.0, followups: 0 }]) 
+                        {
+                            // with the followup message recieved, update our offer 
                             *offer.entry(return_product).or_insert(0.0) -= return_quantity;
                             left = followups;
                         }
                     }
-                    // remove the items from property
-                    for (product, quant) in offer.iter() {
-                        *self.desires.property.entry(*product).or_insert(0.0) -= quant;
-                        if *self.desires.property.get(product).unwrap() == 0.0 {
-                            self.desires.property.remove(product);
+                    // with the offer adjusted for change
+                    let mut resulting_amv = 0.0;
+                    for (offer_prod, quant) in offer.iter() {
+                        // remove from property
+                        *self.desires.property.entry(*offer_prod).or_insert(0.0) -= quant;
+                        if *self.desires.property.get(offer_prod).unwrap() == 0.0 {
+                            self.desires.property.remove(offer_prod);
                         }
-                        // also remove those items from spend
-                        *spend.entry(*product).or_insert(0.0) -= quant;
-                        if *spend.get(product).unwrap() == 0.0 {
-                            spend.remove(product);
-                        }
-                    }
-                    // add each item spent to the spend memory and/or to the achieved items gained.
-                    for (prod, quant) in offer.iter() {
-                        let mem = self.memory.product_knowledge.entry(*prod)
+                        // also record whether we spent or recieved the offer item.
+                        let mem = self.memory.product_knowledge.entry(*offer_prod)
                             .or_insert(Knowledge::new());
                         if *quant > 0.0 { // if being spent
-                            mem.spent += quant;
+                            mem.spent += quant; // add to spend
+                            let val = spend.get_mut(offer_prod).unwrap(); // and spend it
+                            *val -= quant;
+                            if *val == 0.0 {
+                                spend.remove(offer_prod).expect("WTFH?");
+                            }
                         } else { // if recieved, add to achieved
-                            mem.achieved += quant;
+                            mem.achieved -= quant;
+                            // and return
+                            *returned.entry(*offer_prod).or_insert(0.0) -= quant;
                         }
+                        // and get it's price for AMV uses later
+                        resulting_amv += market.get_product_price(offer_prod, 0.0) * quant;
                     }
-
-                    let mut resulting_amv = 0.0;
-                    for (prod, quant) in offer.iter() {
-                        resulting_amv += market.get_product_price(&prod, 0.0) * quant;
-                    }
+                    // add what we purchased.
+                    *self.desires.property.entry(product).or_insert(0.0) += target;
                     // add AMV to the product's memory spent
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().amv_spent += resulting_amv;
@@ -781,7 +782,8 @@ impl Pop {
     data: &DataManager, 
     market: &MarketHistory, 
     spend: &mut HashMap<usize, f64>,
-    product: &usize) -> BuyResult {
+    product: &usize,
+    returned: &mut HashMap<usize, f64>) -> BuyResult {
         todo!("Emergency Buy here!")
     }
 

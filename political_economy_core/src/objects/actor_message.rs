@@ -113,6 +113,8 @@ pub enum ActorMessage {
     /// Used to return change to a buyer. via the return_product and return_quantity.
     /// New items may be added here for alternative re-payments, such as paying
     /// back smaller denomination items.
+    /// 
+    /// returned_quantity should be positive in value, even if adding a new item.
     ChangeFollowup { buyer: ActorInfo, seller: ActorInfo, 
         product: usize, return_product: usize, return_quantity: f64,
         followups: usize },
