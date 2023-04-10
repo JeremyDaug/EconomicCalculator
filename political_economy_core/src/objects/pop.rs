@@ -750,6 +750,9 @@ impl Pop {
                     }
                     // add what we purchased.
                     *self.desires.property.entry(product).or_insert(0.0) += target;
+                    // add what we achieved to it's memory
+                    self.memory.product_knowledge.get_mut(&product)
+                        .unwrap().achieved += target;
                     // add AMV to the product's memory spent
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().amv_spent += resulting_amv;

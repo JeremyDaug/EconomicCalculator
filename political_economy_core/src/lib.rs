@@ -1794,6 +1794,12 @@ mod tests {
                 assert!(*test.desires.property.get(&6).unwrap() == 10.0);
                 assert!(test.desires.property.get(&7).is_none());
                 assert_eq!(returned.len(), 0);
+                // check pop memory for the products as well.
+                assert!(test.memory.product_knowledge.get(&5).is_none());
+                assert!(test.memory.product_knowledge.get(&6).is_none());
+                assert!(test.memory.product_knowledge.get(&7).unwrap().achieved == 0.0);
+                assert!(test.memory.product_knowledge.get(&7).unwrap().spent == 0.0);
+                assert!(test.memory.product_knowledge.get(&7).unwrap().success_rate == 0.5 * UNABLE_TO_PURCHASE_REDUCTION);
             }
 
             #[test]
@@ -1874,6 +1880,12 @@ mod tests {
                 assert!(*test.desires.property.get(&6).unwrap() == 10.0);
                 assert!(test.desires.property.get(&7).is_none());
                 assert_eq!(returned.len(), 0);
+                // check pop memory for the products as well.
+                assert!(test.memory.product_knowledge.get(&5).is_none());
+                assert!(test.memory.product_knowledge.get(&6).is_none());
+                assert!(test.memory.product_knowledge.get(&7).unwrap().achieved == 0.0);
+                assert!(test.memory.product_knowledge.get(&7).unwrap().spent == 0.0);
+                assert!(test.memory.product_knowledge.get(&7).unwrap().success_rate == 0.5 * UNABLE_TO_PURCHASE_REDUCTION);
             }
         }
     }
