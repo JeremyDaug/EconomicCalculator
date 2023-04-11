@@ -544,13 +544,11 @@ impl Pop {
         else { panic!("Somehow did not get FoundProduct or ProductNotFound."); };
 
         // TODO deal with the result and amv spent here.
-        if let BuyResult::NotSuccessful { reason } = result {
-            // failed to succeed, only one real reason is possible, so record 
-            // the issue and move on..
-            let mem = self.memory.product_knowledge.get_mut(product).unwrap();
-            mem.unable_to_purchase();
-        } else {
-            // we succeeded in the purchase, record the expenditure in AMV
+        match result {
+            BuyResult::CancelBuy => todo!(),
+            BuyResult::NotSuccessful { reason } => todo!(),
+            BuyResult::SellerClosed => todo!(),
+            BuyResult::Successful => todo!(),
         }
 
         return result;
@@ -581,6 +579,25 @@ impl Pop {
     ///   b. If Rejected, Record Failure, then exit out with that info.
     ///   c. If Accepted, finish out and accept change, record what was
     ///      spent and recieved back in memory, then exit out with success.
+    /// 
+    /// ## Results
+    /// 
+    /// This will handle all parts of a deal once ActorMessage::ProductFound is
+    /// recieved. Exiting out only when it has sent or recieved a close message.
+    /// 
+    /// It also will add or remove anything offered/requested in the deal if it
+    /// goes through, including accepting any change from the seller.
+    /// 
+    /// If there is any new items in change that were not already in spend, it 
+    /// adds them to the returned parameter so that other functions can place
+    /// those items where we wish (either into keep or spend).
+    /// 
+    /// Additionally, it handles updating the pop's memory of the product for
+    /// the day, adding any recieved to that item's achieved and adding to spent
+    /// if spent, as well as updating the target it's AMV spent on it.
+    /// 
+    /// It will not expend time (or at least it currently doesn't. This may
+    /// be changed if time for a deal scales with items exchanged.)
     pub fn standard_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
