@@ -412,14 +412,18 @@ impl Pop {
         let mut spend: HashMap<usize, f64> = HashMap::new();
         let mut change: HashMap<usize, f64> = HashMap::new();
         // get what we remember over
-        for (id, know) in self.memory.product_knowledge.iter() {
-            let mut available = *self.desires.property.get(id).unwrap_or(&0.0);
-            let min = available.min(know.target);
-            if available != min { 
+        for (id, know) in self.memory.product_knowledge.iter_mut() {
+            let available = *self.desires.property.get(id).unwrap_or(&0.0); // get how much we have
+            let capped = available.min(know.target); // cap at our target to keep
+            if available != capped {
                 // if there will be some available leftover after min, then add to spend
-                spend.insert(*id, available - min);
+                spend.insert(*id, available - capped);
             }
-            keep.insert(*id, min);
+            // what we want to keep, add to keep
+            keep.insert(*id, capped);
+            // and record the amount we kept as also being achieved already and record rollover as well
+            know.achieved += capped;
+            know.rollover += capped;
         }
         // repeat for the items which we don't have any memory for so we can offer them up.
         for (id, excess) in self.desires.property
@@ -440,6 +444,7 @@ impl Pop {
                 // private sellers offer at current estimated market price.
             }
         }
+        // TODO Consider waiting here for a shopping day start msg here, if the buyers outpace the sellers too much. This may occur if most sellers are selling pops.
         // enter a loop and work on buying up to our targets and 
         // expending our time while handling any orders coming our way.
         let mut curr_buy_idx = 0;
@@ -529,8 +534,7 @@ impl Pop {
         mem.time_spent += time_cost;
         // since the current market price is within our budget, try to look for it.
         self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
-        // TODO update self.breakdown.total to instead use 
-        // 'working population' instead of total to exclude dependents.
+        // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
         *spend.get_mut(&0).unwrap() -= SHOPPING_TIME_COST * self.breakdown_table.total as f64;
         // with the message sent, wait for the response back while in our standard holding pattern.
         let result = self.active_wait(rx, tx, data, market, keep, spend, returned, 

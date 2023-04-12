@@ -36,6 +36,7 @@ impl PopMemory {
 /// Product knowledge for a pop.
 /// 
 /// Reset at the start of each day.
+/// rollover (which is then set to the target reached by existing owned stock.)
 /// achieved
 /// spent
 /// lost
@@ -44,10 +45,14 @@ impl PopMemory {
 /// 
 /// All other data is updated at the end of the day and retained
 /// between days.
+/// 
+/// TODO make it possible for a pop to reduce shopping trips by buying for multiple days then delaying until more is needed.
 #[derive(Debug, Clone, Copy)]
 pub struct Knowledge {
-    /// The amount targeted to own.
+    /// The amount targeted to own at the end of the day before consumption.
     pub target: f64,
+    /// The amount of the product we kept from yesterday.
+    pub rollover: f64,
     /// The amount we successfully had (bought or otherwise) by
     /// the end of the day.
     pub achieved: f64,
