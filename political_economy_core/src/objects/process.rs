@@ -1,5 +1,7 @@
 use std::{collections::HashMap};
 
+use super::pop::Pop;
+
 #[derive(Debug)]
 pub struct Process {
     pub id: usize,
@@ -159,6 +161,27 @@ impl Process {
         }
         false
     }
+
+    /// # The Do Process Function
+    /// 
+    /// Do process function takes in the products and wants available for
+    /// the process as well as the pop who is doing the process.
+    /// 
+    /// The target parameter is how many iterations it will attepmt to 
+    /// complete, assuming no modifications upward, and hard_cap dictates
+    /// whether it will allow it to push higher with an efficiency boost or
+    /// not.
+    /// 
+    /// TODO Both make and Test this function.
+    pub fn do_process(&self, available_products: &mut HashMap<usize, f64>, 
+        available_wants: &mut HashMap<usize, f64>,
+        pop_info: &Pop, target: Option<f64>, hard_cap: bool) 
+        -> (HashMap<usize, f64>, HashMap<usize, f64>) {
+            let resulting_products = HashMap::new();
+            let resulting_wants = HashMap::new();
+
+            (resulting_products, resulting_wants)
+        }
 }
 
 #[derive(Debug)]

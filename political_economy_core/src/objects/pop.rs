@@ -510,6 +510,8 @@ impl Pop {
     spend: &mut HashMap<usize, f64>,
     returned: &mut HashMap<usize, f64>,
     product: &usize) -> BuyResult {
+        // get time cost for later
+        let time_cost = self.standard_shop_time_cost();
         // get the amount we want to get and the unit price budget.
         let mem = self.memory.product_knowledge
         .get_mut(product).expect("Product not found?");
@@ -517,12 +519,16 @@ impl Pop {
         // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
         let market_price = market.get_product_price(product, 0.0);
         if market_price > (price * constants::HARD_BUY_CAP) {
-            mem.cancelled_purchase();
+            mem.cancelled_purchase(); // if unfeaseable, at current market price, cancel.
             return BuyResult::CancelBuy;
         }
+        // subtract the time from our stock and add it to time spent
+        // TODO Consider updating this to scale not just with population buying but also the 
+        // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
+        *self.desires.property.get_mut(&constants::TIME_ID).unwrap() -= time_cost;
+        mem.time_spent += time_cost;
         // since the current market price is within our budget, try to look for it.
         self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
-        // subtract the time from our stock and add it to time spent
         // TODO update self.breakdown.total to instead use 
         // 'working population' instead of total to exclude dependents.
         *spend.get_mut(&0).unwrap() -= SHOPPING_TIME_COST * self.breakdown_table.total as f64;
@@ -533,7 +539,7 @@ impl Pop {
         // result is now either FoundProduct or ProductNotFound, deal with it
         // TODO update this to be smarter about doing emergency buy searches.
         
-        let result = if let ActorMessage::ProductNotFound { product, .. } 
+        if let ActorMessage::ProductNotFound { product, .. } 
         = result {
             // if product not found, do an emergency search instead.
             self.emergency_buy(rx, tx, data, market, spend, &product, returned)
@@ -541,17 +547,15 @@ impl Pop {
         else if let ActorMessage::FoundProduct { seller, .. } = result {
             self.standard_buy(rx, tx, data, market, seller, spend, returned)
         }
-        else { panic!("Somehow did not get FoundProduct or ProductNotFound."); };
+        else { panic!("Somehow did not get FoundProduct or ProductNotFound."); }
+    }
 
-        // TODO deal with the result and amv spent here.
-        match result {
-            BuyResult::CancelBuy => todo!(),
-            BuyResult::NotSuccessful { reason } => todo!(),
-            BuyResult::SellerClosed => todo!(),
-            BuyResult::Successful => todo!(),
-        }
-
-        return result;
+    /// Gets the standard shopping time cost for this pop.
+    /// 
+    /// This is currently calculated as being equal to 
+    /// SHOPPING_TIME_COST (0.2) * self.total_population
+    pub fn standard_shop_time_cost(&self) -> f64 {
+        constants::SHOPPING_TIME_COST * self.count() as f64
     }
 
     /// Standard Buy Function
