@@ -77,7 +77,7 @@ pub struct Knowledge {
 impl Knowledge {
     pub fn new() -> Self { 
         Self { 
-            target: 0.0, achieved: 0.0, 
+            target: 0.0, rollover: 0.0, achieved: 0.0, 
             spent: 0.0, lost: 0.0, 
             time_budget: 0.0, amv_budget: 0.0, 
             time_spent: 0.0, 
@@ -105,10 +105,11 @@ impl Knowledge {
     /// Gets the current budget per unit of item left to buy.
     /// If no target remaining it returns 0.0.
     pub fn current_unit_budget(&self) -> f64 {
-        if self.target_remaining() == 0.0 {
+        let target = self.target_remaining();
+        if target == 0.0 {
             return 0.0;
         }
-        self.remaining_amv() / self.target_remaining()
+        self.remaining_amv() / target
     }
 
     /// # Unable to purchase

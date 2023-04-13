@@ -220,7 +220,7 @@ impl Pop {
                     return msg;
                 }
                 else {
-                    self.process_common_message(rx, tx, data, market, msg, keep, spend, returned);
+                    self.process_common_msg(rx, tx, data, market, msg, keep, spend, returned);
                 }
             }
         }
@@ -448,41 +448,71 @@ impl Pop {
         // enter a loop and work on buying up to our targets and 
         // expending our time while handling any orders coming our way.
         let mut curr_buy_idx = 0;
+        let shopping_time_cost = self.standard_shop_time_cost();
         loop {
             // if time to spend has been used up, break out.
             // TODO update to use the smalest possble expendable unit of time instead of 0.0.
-            if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
-            // start by clearing out backlog messages for simplicity.
+            if *spend.get(&0).unwrap_or(&0.0) < shopping_time_cost { break; }
+            // catch up with the broadcast queue to help keep the queue clear.
+            // don't actually process, just push anything for us into the backlog.
+            self.msg_catchup(rx);
+            // now clear out the backlog messages
             while let Some(msg) = self.backlog.pop_front() {
-                self.process_common_message(rx, tx, data, market, msg,
+                self.process_common_msg(rx, tx, data, market, msg,
                     &mut keep, &mut spend, &mut change);
                 // if this last processed message ate all our time, then gtfo and move
                 // to the end of day holding pattern.
                 if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
             }
-            // with the backlog cleared out, catch up with the broadcast queue
-            // don't actually process, just push anything for us into the backlog.
-            self.msg_catchup(rx);
-
             // With the backlog caught up, do whatever we need want to do here
-            // try to buy the first thing on our list
+
+            // buy stuff first, and repeat until we have tried buying everything we can.
             if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
                 let product = *self.memory.product_priority
                     .get(curr_buy_idx).expect("Product not found?");
                 let buy_result = self.try_to_buy(rx, tx, data, market, &mut keep, &mut spend, 
                     &mut change, &product);
+                // with our stuff bought, jump back to the top and do more.
+                match buy_result {
+                    BuyResult::CancelBuy => { // if we cancelled
+                        curr_buy_idx += 1; // add to the current buy index and go to the next one.
+                        continue;
+                    },
+                    _ => { // for anything but cancellation from ourselves
+                        // check if we still have time to try again
+                        if self.memory.product_knowledge.get(&product).unwrap().remaining_time() > shopping_time_cost {
+                            continue;
+                        } else { // we need to move on.
+                            curr_buy_idx += 1;
+                            continue;
+                        }
+                    },
+                }
             }
 
+            // with nothing on our list left to buy, check if we have enough to do more
         }
     }
 
     /// Processes common messages from the ActorMessages for current free time.
     /// Function assumes that msg is for us, so be sure to collect just those.
-    fn process_common_message(&mut self, rx: &mut Receiver<ActorMessage>, 
+    fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager, 
     market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
     spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
-        todo!("Processing common messages go here. Do this last so other states and state-chains can be handled properly.")
+        match msg {
+            ActorMessage::FoundProduct { seller, buyer, 
+            product } => todo!(),
+            ActorMessage::SendProduct { sender, reciever, 
+            product, amount } => todo!(),
+            ActorMessage::SendWant { sender, reciever, 
+            want, amount } => todo!(),
+            ActorMessage::WantSplash { sender, want,
+            amount } => todo!(),
+            ActorMessage::FirmToEmployee { firm, employee,
+            action } => todo!(),
+            _ => panic!("Recieved Bad msg.")
+        }
     }
 
     /// ## Try to buy
@@ -532,17 +562,16 @@ impl Pop {
         // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
         *self.desires.property.get_mut(&constants::TIME_ID).unwrap() -= time_cost;
         mem.time_spent += time_cost;
-        // since the current market price is within our budget, try to look for it.
-        self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
         // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
         *spend.get_mut(&0).unwrap() -= SHOPPING_TIME_COST * self.breakdown_table.total as f64;
+        // since the current market price is within our budget, try to look for it.
+        self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
         // with the message sent, wait for the response back while in our standard holding pattern.
         let result = self.active_wait(rx, tx, data, market, keep, spend, returned, 
             &vec![ActorMessage::ProductNotFound { product: 0, buyer: ActorInfo::Firm(0) },
             ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
-        // result is now either FoundProduct or ProductNotFound, deal with it
+        // result is now either FoundProduct or ProductNotFound, deal with it and return the result to the caller
         // TODO update this to be smarter about doing emergency buy searches.
-        
         if let ActorMessage::ProductNotFound { product, .. } 
         = result {
             // if product not found, do an emergency search instead.
