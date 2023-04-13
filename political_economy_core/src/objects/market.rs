@@ -369,23 +369,36 @@ impl Market {
     /// Does the work of finding a seller for a buyer as well as recording 
     /// their demand for future needs.
     pub fn find_seller(&mut self, product: usize, sender: ActorInfo) -> ActorMessage {
-        // if we have any sellers, select one at random
-        if let Some(sellers) = self.seller_weights.get(&product) {
-            // TODO move this outside of here so it can be properly controlled and managed for testing purposes.
-            let mut rng = thread_rng();
-            let select: f64 = rng.gen();
-            let select = select * sellers.0;
-            // iterate over actors until weight is < sum up to that point.
-            let mut sum = 0.0;
-            for actor in sellers.1.iter() {
-                sum += actor.weight;
-                if sum > select {
-                    return ActorMessage::FoundProduct { seller: actor.actor, buyer: sender, product };
+        // if we have any sellers, select one at random,
+        // check that we have any in the first place
+        let sellers = if let Some(sellers) = self.seller_weights.get(&product) {
+            sellers
+        } else { // if no sellers, return not found.
+            return ActorMessage::ProductNotFound { product, buyer: sender };
+        };
+        // with sellers available, check if we have many or one
+        if sellers.1.len() == 1 {
+            let seller = sellers.1.first().unwrap();
+            // sanity check that it's not the sender
+            if seller.actor == sender { // if it is, then return not found, the buyer and seller should never be the same actor.
+                return ActorMessage::ProductNotFound { product, buyer: sender };
+            }
+            return ActorMessage::FoundProduct { product, seller: seller.actor, buyer: sender };
+        } else { // many
+            loop { // loop until we find someone who isn't the buyer (The same buyer should not be in the list twice.)
+                let mut rng = thread_rng();
+                let select: f64 = rng.gen();
+                let select = select * sellers.0;
+                let mut sum = 0.0;
+                for actor in sellers.1.iter() {
+                    sum += actor.weight;
+                    if sum > select {
+                        if actor.actor == sender { break; } // if the selected seller is the sender, try again.
+                        return ActorMessage::FoundProduct { seller: actor.actor, buyer: sender, product };
+                    }
                 }
             }
         }
-        // if no sellers for taht item (get returned None) return ProductNotFound
-        ActorMessage::ProductNotFound { product, buyer: sender }
     }
 
     /// Finds an ongoing deal in our list of deals.

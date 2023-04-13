@@ -502,9 +502,24 @@ impl Pop {
     spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
         match msg {
             ActorMessage::FoundProduct { seller, buyer, 
-            product } => todo!(),
+            product } => {
+                if buyer == self.actor_info() {
+                    panic!("Product Found message with us as the buyer should not be found outside of deal state.");
+                } else if seller == self.actor_info() {
+                    self.buyer_approaches(rx, tx, data, market, keep, spend);
+                } else {
+                    panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
+                }
+            },
             ActorMessage::SendProduct { sender, reciever, 
-            product, amount } => todo!(),
+            product, amount } => {
+                // we're recieving a product, so check if we desire it. if we do, add it to keep and property
+                if let Some(prod_mem) = self.memory.product_knowledge.get_mut(&product) {
+                    
+                } else { // if we have no memory of it, add it to memory and our spend pile
+
+                }
+            },
             ActorMessage::SendWant { sender, reciever, 
             want, amount } => todo!(),
             ActorMessage::WantSplash { sender, want,
@@ -574,8 +589,10 @@ impl Pop {
         // TODO update this to be smarter about doing emergency buy searches.
         if let ActorMessage::ProductNotFound { product, .. } 
         = result {
+            // TODO update to use emergency buy in dire situations here.
             // if product not found, do an emergency search instead.
-            self.emergency_buy(rx, tx, data, market, spend, &product, returned)
+            //self.emergency_buy(rx, tx, data, market, spend, &product, returned)
+            BuyResult::NotSuccessful { reason: OfferResult::OutOfStock }
         }
         else if let ActorMessage::FoundProduct { seller, .. } = result {
             self.standard_buy(rx, tx, data, market, seller, spend, returned)
@@ -832,7 +849,13 @@ impl Pop {
         panic!("Should never get here!");
     }
 
-
+    /// # Emergency Buy
+    /// 
+    /// Emergency buy means that we NEED the product being requested asap.
+    /// 
+    /// This removes the sanctity of all items in keep and offers everything 
+    /// less important than that item (of higher tier)
+    /// TODO Currently not built, should be slightly simpler version of Standard Buy.
     pub fn emergency_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
@@ -982,6 +1005,21 @@ impl Pop {
         }
         // if we got here, return whatever we got anyway.
         (offer, total)
+    }
+
+    /// # Buyer Approaches
+    /// 
+    /// Used when a buyer approaches us as a seller. Used for both emergency 
+    /// buy and standard buy. For Pops the distinction of whether a buyer is
+    /// coming out of an emergency, or from standard purchasing makes no
+    /// difference currently.
+    /// 
+    /// TODO upgrade this to take in the possibility of charity and/or givaways.
+    pub fn buyer_approaches(&mut self, rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, data: &DataManager,
+    market: &MarketHistory, keep: &mut HashMap<usize, f64>, 
+    spend: &mut HashMap<usize, f64>) {
+        todo!("Not yet complete.")
     }
 }
 
