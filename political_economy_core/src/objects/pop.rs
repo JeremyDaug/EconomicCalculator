@@ -1050,15 +1050,34 @@ impl Pop {
             price_opinion: OfferResult::Cheap, quantity: 0.0, followup: 0 }
         ]);
 
-        if let ActorMessage::RejectPurchase { buyer, seller, 
-        product, price_opinion } = result { // if purchase rejected,
+        if let ActorMessage::RejectPurchase { .. } = result { // if purchase rejected,
             // TODO add check item followup option here when check item followup is added.
             // recieve the close deal message to confirm.
-            // then leave.
+            let result = self.specific_wait(rx, &vec![
+                ActorMessage::CloseDeal { buyer: seller, seller: seller, product: 0 }
+            ]);
+            if let ActorMessage::CloseDeal { .. } = result {
+                // Nothing meaningful to do here, return
+                return;
+            }
+            return; // if anything else, for now, return as well.
         } else if let ActorMessage::BuyOffer { buyer, seller, 
         product, price_opinion, quantity,
-        followup } = result {
-
+        followup: mut current_step } = result { // if it's a buy offer, get their offer
+            let mut offer = HashMap::new();
+            while current_step > 0 {
+                // get the next, it should be decreasing, but we'll just do this to maintain our sanity.
+                if let ActorMessage::BuyOfferFollowup { offer_product, offer_quantity,
+                followup, .. } = self.specific_wait(rx, &vec![
+                    ActorMessage::BuyOfferFollowup { buyer: seller, seller: seller, 
+                        product: 0, offer_product: 0, offer_quantity: 0.0, followup: 0 }
+                ]) {
+                    offer.insert(offer_product, offer_quantity);
+                    current_step = followup;
+                }
+            }
+            // with the entirety of the offer gotten, we can check to 
+            // see if it is acceptable.
         }
     }
 }
