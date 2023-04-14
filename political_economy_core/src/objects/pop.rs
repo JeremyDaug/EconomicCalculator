@@ -506,26 +506,38 @@ impl Pop {
                 if buyer == self.actor_info() {
                     panic!("Product Found message with us as the buyer should not be found outside of deal state.");
                 } else if seller == self.actor_info() {
-                    self.buyer_approaches(rx, tx, data, market, keep, spend);
+                    self.buyer_approaches(rx, tx, data, market, keep, spend, product, buyer);
                 } else {
                     panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
                 }
             },
-            ActorMessage::SendProduct { sender, reciever, 
-            product, amount } => {
+            ActorMessage::SendProduct { product, amount, .. } => {
                 // we're recieving a product, so check if we desire it. if we do, add it to keep and property
                 if let Some(prod_mem) = self.memory.product_knowledge.get_mut(&product) {
-                    
+                    prod_mem.achieved += amount;
+                    *self.desires.property.entry(product).or_insert(0.0) += amount;
+                    let remaining_target = prod_mem.target_remaining();
+                    let to_target = remaining_target.min(amount);
+                    let to_spend = amount - to_target;
+                    *spend.entry(product).or_insert(0.0) += to_spend;
+                    *keep.entry(product).or_insert(0.0) += to_target;
                 } else { // if we have no memory of it, add it to memory and our spend pile
-
+                    let prod_mem = self.memory.product_knowledge.entry(product).or_insert(Knowledge::new());
+                    prod_mem.achieved += amount;
+                    *self.desires.property.entry(product).or_insert(0.0) += amount;
+                    *spend.entry(product).or_insert(0.0) += amount;
                 }
             },
-            ActorMessage::SendWant { sender, reciever, 
-            want, amount } => todo!(),
-            ActorMessage::WantSplash { sender, want,
-            amount } => todo!(),
-            ActorMessage::FirmToEmployee { firm, employee,
-            action } => todo!(),
+            ActorMessage::SendWant { want, amount, .. } => {
+                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+            },
+            ActorMessage::WantSplash { want, amount, .. } => {
+                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+            },
+            ActorMessage::FirmToEmployee { firm, employee: _,
+            action } => {
+                self.process_firm_message(rx, tx, firm, action);
+            },
             _ => panic!("Recieved Bad msg.")
         }
     }
@@ -686,6 +698,7 @@ impl Pop {
                     { buyer: self.actor_info(), seller, product, 
                         price_opinion: OfferResult::TooExpensive });
                 // and close out immediately.
+                // TODO consider allowing this to, instead of closing out immediately, try for a different item in our list.
                 self.push_message(rx, tx, ActorMessage::CloseDeal
                     { buyer: self.actor_info(), seller, product });
                 // return not successful with Too Expensive as the reason.
@@ -1018,8 +1031,35 @@ impl Pop {
     pub fn buyer_approaches(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory, keep: &mut HashMap<usize, f64>, 
-    spend: &mut HashMap<usize, f64>) {
-        todo!("Not yet complete.")
+    spend: &mut HashMap<usize, f64>, product: usize, buyer: ActorInfo) {
+        let seller = self.actor_info();
+        let product_price = market.get_product_price(&product, 1.0);
+        // we have recieved a FoundProduct MSG and we're the seller.
+        // send back our available stock (if any)
+        if let Some(quantity) = spend.get_mut(&product) {
+            self.push_message(rx, tx, ActorMessage::InStock { buyer, seller, product, price: product_price, quantity: *quantity });
+        } else { // if we don't have the item, send our OOS message
+            // This currently closes the deal
+            self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
+            return;
+        }
+        // with stock message pushed, we wait for the buy offer or close message from them.
+        let result = self.specific_wait(rx, &vec![
+            ActorMessage::RejectPurchase { buyer: seller, seller: seller, product: 0, price_opinion: OfferResult::Cheap },
+            ActorMessage::BuyOffer { buyer: seller, seller: seller, product: 0, 
+            price_opinion: OfferResult::Cheap, quantity: 0.0, followup: 0 }
+        ]);
+
+        if let ActorMessage::RejectPurchase { buyer, seller, 
+        product, price_opinion } = result { // if purchase rejected,
+            // TODO add check item followup option here when check item followup is added.
+            // recieve the close deal message to confirm.
+            // then leave.
+        } else if let ActorMessage::BuyOffer { buyer, seller, 
+        product, price_opinion, quantity,
+        followup } = result {
+
+        }
     }
 }
 
