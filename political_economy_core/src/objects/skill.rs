@@ -4,7 +4,7 @@ use super::{product::Product, skill_group::SkillGroup, process::{Process, Proces
 
 #[derive(Debug)]
 pub struct Skill {
-    id: usize,
+    pub id: usize,
     pub name: String,
     pub description: String,
     pub labor: usize,
@@ -105,18 +105,6 @@ impl Skill {
                     technology_requirement: None,
                     tertiary_tech: None,
                 })
-    }
-
-    pub fn id(&self) -> usize {
-        self.id
-    }
-
-    pub fn name(&self) -> &str {
-        self.name.as_ref()
-    }
-
-    pub fn description(&self) -> &str {
-        self.description.as_ref()
     }
 
     pub fn set_relation(&mut self, relation: &Skill, rate: f64) {

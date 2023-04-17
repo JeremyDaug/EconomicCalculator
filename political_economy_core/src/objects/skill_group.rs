@@ -31,11 +31,11 @@ impl SkillGroup {
     }
 
     pub fn add_skill(&mut self, skill: &Skill) -> bool {
-        self.skills.insert(skill.id())
+        self.skills.insert(skill.id)
     }
 
     pub fn connect_skill(&mut self, skill: &mut Skill) -> bool {
-        return self.skills.insert(skill.id()) & skill.insert_skill_group(&self);
+        return self.skills.insert(skill.id) & skill.insert_skill_group(&self);
 
     }
 }

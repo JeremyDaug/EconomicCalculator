@@ -206,12 +206,12 @@ impl DataManager {
                 Result::Ok(want) => want
         };
 
-        self.wants.insert(rest.id(), rest);
-        self.wants.insert(food.id(), food);
-        self.wants.insert(shelter.id(), shelter);
-        self.wants.insert(clothing.id(), clothing);
-        self.wants.insert(fashion.id(), fashion);
-        self.wants.insert(wealth.id(), wealth);
+        self.wants.insert(rest.id, rest);
+        self.wants.insert(food.id, food);
+        self.wants.insert(shelter.id, shelter);
+        self.wants.insert(clothing.id, clothing);
+        self.wants.insert(fashion.id, fashion);
+        self.wants.insert(wealth.id, wealth);
 
         Ok(())
     }
@@ -586,32 +586,32 @@ impl DataManager {
         cotton_suit.set_want(wealth,1.0).unwrap();
         cabin.set_want(wealth, 2.0).unwrap();
 
-        self.products.insert(time.id(), time);
-        self.products.insert(shopping_time.id(), shopping_time);
-        self.products.insert(ambrosia_fruit.id(), ambrosia_fruit);
-        self.products.insert(cotton_boll.id(), cotton_boll);
-        self.products.insert(cotton_thread.id(), cotton_thread);
-        self.products.insert(cotton_bolt.id(), cotton_bolt);
-        self.products.insert(cotton_clothes.id(), cotton_clothes);
-        self.products.insert(cotton_suit.id(), cotton_suit);
-        self.products.insert(wood_logs.id(), wood_logs);
-        self.products.insert(wood_gatherer_sticks.id(), wood_gatherer_sticks);
-        self.products.insert(spinning_wheel.id(), spinning_wheel);
-        self.products.insert(wood_loom.id(), wood_loom);
-        self.products.insert(wood_stone_axe.id(), wood_stone_axe);
-        self.products.insert(stone.id(), stone);
-        self.products.insert(hut.id(), hut);
-        self.products.insert(cabin.id(), cabin);
-        self.products.insert(ambrosia_farming.id(), ambrosia_farming);
-        self.products.insert(cotton_farming.id(), cotton_farming);
-        self.products.insert(thread_spinning.id(), thread_spinning);
-        self.products.insert(weaving.id(), weaving);
-        self.products.insert(tailoring.id(), tailoring);
-        self.products.insert(lumbering.id(), lumbering);
-        self.products.insert(tool_making.id(), tool_making);
-        self.products.insert(construction.id(), construction);
-        self.products.insert(building_repair.id(), building_repair);
-        self.products.insert(stone_gathering.id(), stone_gathering);
+        self.products.insert(time.id, time);
+        self.products.insert(shopping_time.id, shopping_time);
+        self.products.insert(ambrosia_fruit.id, ambrosia_fruit);
+        self.products.insert(cotton_boll.id, cotton_boll);
+        self.products.insert(cotton_thread.id, cotton_thread);
+        self.products.insert(cotton_bolt.id, cotton_bolt);
+        self.products.insert(cotton_clothes.id, cotton_clothes);
+        self.products.insert(cotton_suit.id, cotton_suit);
+        self.products.insert(wood_logs.id, wood_logs);
+        self.products.insert(wood_gatherer_sticks.id, wood_gatherer_sticks);
+        self.products.insert(spinning_wheel.id, spinning_wheel);
+        self.products.insert(wood_loom.id, wood_loom);
+        self.products.insert(wood_stone_axe.id, wood_stone_axe);
+        self.products.insert(stone.id, stone);
+        self.products.insert(hut.id, hut);
+        self.products.insert(cabin.id, cabin);
+        self.products.insert(ambrosia_farming.id, ambrosia_farming);
+        self.products.insert(cotton_farming.id, cotton_farming);
+        self.products.insert(thread_spinning.id, thread_spinning);
+        self.products.insert(weaving.id, weaving);
+        self.products.insert(tailoring.id, tailoring);
+        self.products.insert(lumbering.id, lumbering);
+        self.products.insert(tool_making.id, tool_making);
+        self.products.insert(construction.id, construction);
+        self.products.insert(building_repair.id, building_repair);
+        self.products.insert(stone_gathering.id, stone_gathering);
 
         Ok(())
     }
@@ -754,16 +754,16 @@ impl DataManager {
         // construction - building repair
         construction.set_mutual_relation(&mut building_repair, 0.8);
 
-        self.skills.insert(ambrosia_farming.id(), ambrosia_farming);
-        self.skills.insert(cotton_farming.id(), cotton_farming);
-        self.skills.insert(thread_spinning.id(), thread_spinning);
-        self.skills.insert(weaving.id(), weaving);
-        self.skills.insert(tailoring.id(), tailoring);
-        self.skills.insert(lumbering.id(), lumbering);
-        self.skills.insert(tool_making.id(), tool_making);
-        self.skills.insert(construction.id(), construction);
-        self.skills.insert(building_repair.id(), building_repair);
-        self.skills.insert(stone_gathering.id(), stone_gathering);
+        self.skills.insert(ambrosia_farming.id, ambrosia_farming);
+        self.skills.insert(cotton_farming.id, cotton_farming);
+        self.skills.insert(thread_spinning.id, thread_spinning);
+        self.skills.insert(weaving.id, weaving);
+        self.skills.insert(tailoring.id, tailoring);
+        self.skills.insert(lumbering.id, lumbering);
+        self.skills.insert(tool_making.id, tool_making);
+        self.skills.insert(construction.id, construction);
+        self.skills.insert(building_repair.id, building_repair);
+        self.skills.insert(stone_gathering.id, stone_gathering);
 
         Ok(())
     }
@@ -814,7 +814,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(go_shopping.id(), go_shopping);
+        self.processes.insert(go_shopping.id, go_shopping);
         
         // next do labors, they'll be easy.
         // ambrosia farming 1
@@ -822,53 +822,53 @@ impl DataManager {
         let ambrosia = self.skills.get(&0).unwrap();
         let ambrosia_default 
             = ambrosia.build_skill_process(new_id).unwrap();
-        self.processes.insert(ambrosia_default.id(), ambrosia_default);
+        self.processes.insert(ambrosia_default.id, ambrosia_default);
         // cotton farming 2
         let new_id = self.new_process_id();
         let cottoning = self.skills.get(&1).unwrap();
         let cotton_farming 
             = cottoning.build_skill_process(new_id).unwrap();
-        self.processes.insert(cotton_farming.id(), cotton_farming);
+        self.processes.insert(cotton_farming.id, cotton_farming);
         // thread spinning 3
         let new_id = self.new_process_id();
         let spin_skill = self.skills.get(&2).unwrap();
         let spinning = spin_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(spinning.id(), spinning);
+        self.processes.insert(spinning.id, spinning);
         // Weaving 4
         let new_id = self.new_process_id();
         let weave_skill = self.skills.get(&3).unwrap();
         let weaving = weave_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(weaving.id(), weaving);
+        self.processes.insert(weaving.id, weaving);
         // Tailoring 5
         let new_id = self.new_process_id();
         let tailor_skill = self.skills.get(&4).unwrap();
         let tailoring = tailor_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(tailoring.id(), tailoring);
+        self.processes.insert(tailoring.id, tailoring);
         // Lumbering 6
         let new_id = self.new_process_id();
         let lumber_skill = self.skills.get(&5).unwrap();
         let lumbering = lumber_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(lumbering.id(), lumbering);
+        self.processes.insert(lumbering.id, lumbering);
         // Tool Maker 7
         let new_id = self.new_process_id();
         let tool_skill = self.skills.get(&6).unwrap();
         let tool_maker = tool_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(tool_maker.id(), tool_maker);
+        self.processes.insert(tool_maker.id, tool_maker);
         // construction 8
         let new_id = self.new_process_id();
         let construction_skill = self.skills.get(&7).unwrap();
         let construction = construction_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(construction.id(), construction);
+        self.processes.insert(construction.id, construction);
         // building repair 9
         let new_id = self.new_process_id();
         let building_repair_skill = self.skills.get(&8).unwrap();
         let building_repair = building_repair_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(building_repair.id(), building_repair);
+        self.processes.insert(building_repair.id, building_repair);
         // stone gathering 10
         let new_id = self.new_process_id();
         let stone_gathering_skill = self.skills.get(&9).unwrap();
         let stone_gathering = stone_gathering_skill.build_skill_process(new_id).unwrap();
-        self.processes.insert(stone_gathering.id(), stone_gathering);
+        self.processes.insert(stone_gathering.id, stone_gathering);
 
         // ambrosia chain 
         // Ambrosia Farming -> Ambrosia fruit -> Food (no waste involved)
@@ -904,7 +904,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(ambrosia_farming.id(), ambrosia_farming);
+        self.processes.insert(ambrosia_farming.id, ambrosia_farming);
         // eating food
         let food_input = ProcessPart{
             item: PartItem::Product(2),
@@ -932,7 +932,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(ambrosia_consumption.id(), ambrosia_consumption);
+        self.processes.insert(ambrosia_consumption.id, ambrosia_consumption);
 
         // Cotton Chain
         // Cotton Farmer -> Spinner -> weaver -> clothing
@@ -968,7 +968,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(cotton_farming.id(), cotton_farming);
+        self.processes.insert(cotton_farming.id, cotton_farming);
         // Spinning
         let labor_input = ProcessPart{
             item: PartItem::Product(18), // thread spinning
@@ -1009,7 +1009,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(thread_spinning.id(), thread_spinning);
+        self.processes.insert(thread_spinning.id, thread_spinning);
         // Weaver
         let labor_input = ProcessPart{
             item: PartItem::Product(19), // Weaving
@@ -1050,7 +1050,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(weaving.id(), weaving);
+        self.processes.insert(weaving.id, weaving);
         // Clothing
         let labor_input = ProcessPart{
             item: PartItem::Product(20), // Tailoring
@@ -1085,7 +1085,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(clothing.id(), clothing);
+        self.processes.insert(clothing.id, clothing);
         // Suit of clothing
         let labor_input = ProcessPart{
             item: PartItem::Product(20), // Tailoring
@@ -1126,7 +1126,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(clothing.id(), clothing);
+        self.processes.insert(clothing.id, clothing);
         // 
         // Rock Finding
         let labor_input = ProcessPart{
@@ -1155,7 +1155,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(stone_gathering.id(), stone_gathering);
+        self.processes.insert(stone_gathering.id, stone_gathering);
         // hut making
         let labor_input = ProcessPart{
             item: PartItem::Product(building), // construction
@@ -1183,7 +1183,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(hut_construction.id(), hut_construction);
+        self.processes.insert(hut_construction.id, hut_construction);
         // hut repair
         let labor_input = ProcessPart{
             item: PartItem::Product(23), // construction
@@ -1217,7 +1217,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(hut_repair.id(), hut_repair);
+        self.processes.insert(hut_repair.id, hut_repair);
         // wood and wood crafts
         // Wood -> (Gathering Sticks, Spinning Wheels, Looms, Cabins)
         // gather wood
@@ -1253,7 +1253,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(lumbering.id(), lumbering);
+        self.processes.insert(lumbering.id, lumbering);
         // wood -> gathering sticks
         let labor_input = ProcessPart{
             item: PartItem::Product(22), // tool making
@@ -1287,7 +1287,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(hooker_making.id(), hooker_making);
+        self.processes.insert(hooker_making.id, hooker_making);
         // wood -> spinning wheel
         let labor_input = ProcessPart{
             item: PartItem::Product(tooling),
@@ -1321,7 +1321,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(wheel_making.id(), wheel_making);
+        self.processes.insert(wheel_making.id, wheel_making);
         // wood -> looms
         let labor_input = ProcessPart{
             item: PartItem::Product(tooling),
@@ -1355,7 +1355,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(loom_making.id(), loom_making);
+        self.processes.insert(loom_making.id, loom_making);
         // wood -> cabin
         let labor_input = ProcessPart{
             item: PartItem::Product(building),
@@ -1389,7 +1389,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(loom_making.id(), loom_making);
+        self.processes.insert(loom_making.id, loom_making);
         // wood -> cabin repair
         let labor_input = ProcessPart{
             item: PartItem::Product(repair),
@@ -1429,7 +1429,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(cabin_repair.id(), cabin_repair);
+        self.processes.insert(cabin_repair.id, cabin_repair);
         // wood + stone -> axe
         let labor_input = ProcessPart{
             item: PartItem::Product(tooling),
@@ -1469,7 +1469,7 @@ impl DataManager {
             technology_requirement: None,
             tertiary_tech: None,
         };
-        self.processes.insert(axe_making.id(), axe_making);
+        self.processes.insert(axe_making.id, axe_making);
 
         // once all processes are loaded connect the products to the processes
         for process in self.processes.values() {

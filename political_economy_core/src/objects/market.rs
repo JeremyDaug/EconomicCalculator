@@ -1,5 +1,5 @@
 use core::panic;
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, result};
 use barrage::{Sender, Receiver};
 use crossbeam::thread;
 use itertools::Itertools;
@@ -624,6 +624,20 @@ impl MarketHistory {
             result.price
         } else {
             default
+        }
+    }
+
+    /// # Get Product Salability
+    /// 
+    /// A quick function to get the Salability of an item from the market.
+    /// 
+    /// If the item does not have a salability in the market it returns the
+    /// DEFAULT_SALABILITY.
+    pub fn get_product_salability(&self, product: &usize) -> f64 {
+        if let Some(result) = self.info.get(product) {
+            result.salability
+        } else {
+            constants::DEFAULT_SALABILITY
         }
     }
 }

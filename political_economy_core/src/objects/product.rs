@@ -13,7 +13,7 @@ use super::want::Want;
 
 #[derive(Debug)]
 pub struct Product {
-    id: usize,
+    pub id: usize,
     pub name: String,
     pub variant_name: String,
     pub description: String,
@@ -122,7 +122,7 @@ impl Product {
         if eff < 0.0 {
             return Result::Err("Efficiency must be >= 0.");
         }
-        *self.wants.entry(want.id()).or_insert(eff) = eff;
+        *self.wants.entry(want.id).or_insert(eff) = eff;
         Result::Ok(())
     }
 
@@ -131,7 +131,7 @@ impl Product {
         if eff < 0.0 {
             return Result::Err("Efficiency must be >= 0.");
         }
-        *self.wants.entry(want.id()).or_insert(eff) = eff;
+        *self.wants.entry(want.id).or_insert(eff) = eff;
         want.add_ownership_source(&self);
         Result::Ok(())
     }
@@ -149,10 +149,6 @@ impl Product {
             }
         }
         result
-    }
-
-    pub fn id(&self) -> usize {
-        self.id
     }
 
     /// Adds a process to the product. Also adds it to all appropriate subcategories.

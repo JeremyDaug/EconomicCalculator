@@ -19,13 +19,25 @@ pub const SALABILITY_THRESHOLD: f64 = 0.75;
 pub const STD_PRICE_CHANGE: f64 = 1.0;
 
 /// The target for overspend we want to aim below if at all
-/// possible during purchase logic.
+/// possible during the buyer's purchase logic.
 pub const OVERSPEND_THRESHOLD: f64 = 0.025;
+
+/// The amount by which a seller will consider a buyer as overspending and attempt
+/// to return change. Once change removed puts the purchase below this threshold it
+/// returns with that change.
+/// 
+/// If it cannot return between 1.0 and this threshold, then it does the best
+/// it can otherwise.
+pub const BUYER_OVERSPENT_THRESHOLD: f64 = 1.1;
 
 /// The target price in the market a buyer will be unwilling to even attempt
 /// a purchase.
 pub const HARD_BUY_CAP: f64 = 2.0;
 
+/// The Default Salability of products in a market if they don't have one to start.
+pub const DEFAULT_SALABILITY: f64 = 0.05;
+/// The minimum salability an item can have in AMV calculations.
+pub const MIN_SALABILITY: f64 = 0.01;
 
 // Constants used for Product Success rate alterations.
 

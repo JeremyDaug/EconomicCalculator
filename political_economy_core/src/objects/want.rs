@@ -8,7 +8,7 @@ use super::process::{Process, ProcessTag, PartItem};
 #[derive(Debug)]
 pub struct Want {
     /// The unique id of the want
-    id: usize,
+    pub id: usize,
     /// 
     pub name: String,
     pub description: String,
@@ -56,13 +56,9 @@ impl Want {
         true
     }
 
-    pub fn id(&self) -> usize {
-        self.id
-    }
-
     /// adds a product to self.ownership_sources, ensures no duplicates.
     pub fn add_ownership_source(&mut self, product: &super::product::Product) {
-            self.ownership_sources.insert(product.id());
+            self.ownership_sources.insert(product.id);
     }
 
     /// Adds a process to this want if that want is an output of the process

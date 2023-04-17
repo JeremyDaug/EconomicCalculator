@@ -434,13 +434,13 @@ impl DesireItem {
     /// Creates a DesireItem from a Product, getting it's id and returning
     /// a Desire::Product(product.id).
     pub fn from_product(product: &Product) -> DesireItem {
-        DesireItem::Product(product.id())
+        DesireItem::Product(product.id)
     }
 
     /// Creates a DesireItem from a Want, getting it's id and returing
     /// Desire::Product(want.id).
     pub fn from_want(want: &Want) -> DesireItem {
-        DesireItem::Want(want.id())
+        DesireItem::Want(want.id)
     }
 
     /// unwraps the value from a DesireItem, does not destroy the original (?).

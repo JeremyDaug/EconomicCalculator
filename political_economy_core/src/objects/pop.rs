@@ -5,6 +5,7 @@
 use std::{collections::{VecDeque, HashMap}};
 
 use barrage::{Sender, Receiver};
+use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self}, objects::pop_memory::Knowledge};
 
@@ -506,7 +507,7 @@ impl Pop {
                 if buyer == self.actor_info() {
                     panic!("Product Found message with us as the buyer should not be found outside of deal state.");
                 } else if seller == self.actor_info() {
-                    self.buyer_approaches(rx, tx, data, market, keep, spend, product, buyer);
+                    self.standard_sell(rx, tx, data, market, keep, spend, product, buyer);
                 } else {
                     panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
                 }
@@ -849,6 +850,8 @@ impl Pop {
                     // offer rejected, don't remove anything and get out.
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().unable_to_purchase();
+                    self.push_message(rx, tx, ActorMessage::CloseDeal { buyer: self.actor_info(), 
+                        seller, product });
                     return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
                 },
                 ActorMessage::CloseDeal { .. } => {
@@ -1020,15 +1023,17 @@ impl Pop {
         (offer, total)
     }
 
-    /// # Buyer Approaches
+    /// # Standard Sell
     /// 
-    /// Used when a buyer approaches us as a seller. Used for both emergency 
-    /// buy and standard buy. For Pops the distinction of whether a buyer is
-    /// coming out of an emergency, or from standard purchasing makes no
-    /// difference currently.
+    /// Used when a buyer approaches us as a normal seller. It sells the items at
+    /// market value.
+    /// 
+    /// Items it's accepting are rated based on their salability as well as the
+    /// pop's demand for those items. Desired items get their full AMV, while
+    /// undesired items have their price modified by their salability.
     /// 
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
-    pub fn buyer_approaches(&mut self, rx: &mut Receiver<ActorMessage>, 
+    pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory, keep: &mut HashMap<usize, f64>, 
     spend: &mut HashMap<usize, f64>, product: usize, buyer: ActorInfo) {
@@ -1064,7 +1069,11 @@ impl Pop {
         } else if let ActorMessage::BuyOffer { buyer, seller, 
         product, price_opinion, quantity,
         followup: mut current_step } = result { // if it's a buy offer, get their offer
+            // start buy getting the amv price and effective Tier of the item in question.
+            let request_amv = quantity * market.get_product_price(&product, 1.0);
             let mut offer = HashMap::new();
+            let mut offer_item_amv = HashMap::new();
+            let mut offer_amv = 0.0;
             while current_step > 0 {
                 // get the next, it should be decreasing, but we'll just do this to maintain our sanity.
                 if let ActorMessage::BuyOfferFollowup { offer_product, offer_quantity,
@@ -1073,11 +1082,65 @@ impl Pop {
                         product: 0, offer_product: 0, offer_quantity: 0.0, followup: 0 }
                 ]) {
                     offer.insert(offer_product, offer_quantity);
+                    // get the pure AMV value at offer in the product
+                    offer_item_amv.insert(offer_product, market.get_product_price(&product, 1.0));
+                    // get the effective value for us
+                    if let Some(item) = self.memory.product_knowledge.get(&offer_product) {
+                        // some amount would go to our target, record that.
+                        let desired = item.target_remaining().min(offer_quantity);
+                        let undesired = quantity - desired;
+                        let item_price = market.get_product_price(&offer_product, 1.0);
+                        let desired_amv = desired * item_price;
+                        let sal = market.get_product_salability(&offer_product).min(constants::MIN_SALABILITY);
+                        let undesired_amv = sal * item_price * undesired;
+                        offer_item_amv.insert(offer_product, undesired_amv);
+                        offer_amv += desired_amv + undesired_amv;
+                    } else { // if we have no memory of it, then we must treat it by salability
+                        let sal = market.get_product_salability(&offer_product)
+                            .min(constants::MIN_SALABILITY);
+                        let value = offer_quantity * market.get_product_price(&offer_product, 1.0);
+                        offer_item_amv.insert(offer_product, value);
+                        offer_amv += sal * value;
+                    }
                     current_step = followup;
                 }
             }
-            // with the entirety of the offer gotten, we can check to 
-            // see if it is acceptable.
+            // with our offer recieved and it's effective price to us 
+            // calculated, decide our response
+            if request_amv <= offer_amv { // if they are overpaying, check by how much
+                // TODO improve Overspend checking mechanics to be more flexible and dynamic.
+                let overpay = offer_amv / request_amv;
+                if overpay > constants::BUYER_OVERSPENT_THRESHOLD {
+                    // since we've been overpaid, try to return some change to accept the
+                    // deal
+                    for (item, amv) in offer_item_amv.iter().sorted_by(|a,b| {
+                        b.1.total_cmp(a.1)
+                    }) { // walk up the values we want to remove.
+                        
+
+
+
+
+
+
+
+                        
+                    }
+                } else { // within our overspend threshold
+                    self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
+                        buyer, seller, product, offer_result: OfferResult::Reasonable });
+                    return;
+                }
+            } else { // they are underpaying, reject the offer
+                self.push_message(rx, tx, ActorMessage::RejectOffer { buyer, seller, product });
+                // get the message back, it should be a CloseDeal msg.
+                // TODO when the buyers are capable of retrying, this should be updated
+                self.specific_wait(rx, &vec![ // confirm the buyer closes
+                    ActorMessage::CloseDeal { buyer, seller, product }
+                ]);
+                // then get out
+                return;
+            }
         }
     }
 }

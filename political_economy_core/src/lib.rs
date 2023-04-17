@@ -4,6 +4,7 @@ pub mod demographics;
 pub mod runner;
 pub mod actor_manager;
 pub mod constants;
+pub mod helper_types;
 
 extern crate lazy_static;
 
@@ -259,7 +260,8 @@ mod tests {
                 amv_budget: 11.0, 
                 time_spent: 0.0, 
                 amv_spent: 0.0, 
-                success_rate: 0.5 });
+                success_rate: 0.5,
+                rollover: 0.0, });
 
             (data, market)
         }
@@ -4373,8 +4375,8 @@ mod tests {
             let result = test.set_want(&test_want, 1.0);
 
             assert!(result.is_ok());
-            assert!(test.wants.contains_key(&test_want.id()));
-            assert!(!test_want.ownership_sources.contains(&test.id()));
+            assert!(test.wants.contains_key(&test_want.id));
+            assert!(!test_want.ownership_sources.contains(&test.id));
 
             let mut test = Product::new(
                 0,
@@ -4397,8 +4399,8 @@ mod tests {
             let result = test.connect_want(&mut test_want, 1.0);
 
             assert!(result.is_ok());
-            assert!(test.wants.contains_key(&test_want.id()));
-            assert!(test_want.ownership_sources.contains(&test.id()));
+            assert!(test.wants.contains_key(&test_want.id));
+            assert!(test_want.ownership_sources.contains(&test.id));
 
             let mut test = Product::new(
                 0,
@@ -4624,7 +4626,7 @@ mod tests {
             };
 
             let want_output = ProcessPart{
-                item: PartItem::Want(test.id()),
+                item: PartItem::Want(test.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -4656,7 +4658,7 @@ mod tests {
                 Vec::new(),
                 None
             ).expect("Error, should've returned a product!");
-            let tag = ProcessTag::Use(test_product.id());
+            let tag = ProcessTag::Use(test_product.id);
             let mut test_process = Process{
                 id: 0,
                 name: String::from("Test"),
@@ -4672,13 +4674,13 @@ mod tests {
                 tertiary_tech: None,
             };
             let product_input = ProcessPart{
-                item: PartItem::Product(test_product.id()),
+                item: PartItem::Product(test_product.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let want_output = ProcessPart{
-                item: PartItem::Want(test.id()),
+                item: PartItem::Want(test.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -4714,7 +4716,7 @@ mod tests {
                 Vec::new(),
                 None
             ).expect("Error, should've returned a product!");
-            let tag = ProcessTag::Consumption(test_product.id());
+            let tag = ProcessTag::Consumption(test_product.id);
             let mut test_process = Process{
                 id: 0,
                 name: String::from("Test"),
@@ -4730,13 +4732,13 @@ mod tests {
                 tertiary_tech: None,
             };
             let product_input = ProcessPart{
-                item: PartItem::Product(test_product.id()),
+                item: PartItem::Product(test_product.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let want_output = ProcessPart{
-                item: PartItem::Want(test.id()),
+                item: PartItem::Want(test.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -4830,7 +4832,7 @@ mod tests {
 
             assert_eq!(test_want.ownership_sources.len(), 0);
 
-            test_want.ownership_sources.insert(test_product.id());
+            test_want.ownership_sources.insert(test_product.id);
 
             assert_eq!(test_want.ownership_sources.len(), 1);
 
