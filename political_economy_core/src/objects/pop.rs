@@ -855,10 +855,11 @@ impl Pop {
                     return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
                 },
                 ActorMessage::CloseDeal { .. } => {
+                    // Offer hard rejected, 
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().unable_to_purchase();
-                    return BuyResult::SellerClosed;
-                }
+                    return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
+                },
                 _ => { panic!("Incorrect message recieved from Buy offer?")}
             }
         }
@@ -1033,6 +1034,8 @@ impl Pop {
     /// undesired items have their price modified by their salability.
     /// 
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
+    /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry or for the 
+    /// TODO this needs to be tested.
     pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory, keep: &mut HashMap<usize, f64>, 
@@ -1067,7 +1070,7 @@ impl Pop {
             }
             return; // if anything else, for now, return as well.
         } else if let ActorMessage::BuyOffer { buyer, seller, 
-        product, price_opinion, quantity,
+        product, price_opinion: _, quantity,
         followup: mut current_step } = result { // if it's a buy offer, get their offer
             // start buy getting the amv price and effective Tier of the item in question.
             let request_amv = quantity * market.get_product_price(&product, 1.0);
@@ -1111,36 +1114,23 @@ impl Pop {
                 // TODO improve Overspend checking mechanics to be more flexible and dynamic.
                 let overpay = offer_amv / request_amv;
                 if overpay > constants::BUYER_OVERSPENT_THRESHOLD {
-                    // since we've been overpaid, try to return some change to accept the
-                    // deal
-                    for (item, amv) in offer_item_amv.iter().sorted_by(|a,b| {
-                        b.1.total_cmp(a.1)
-                    }) { // walk up the values we want to remove.
-                        
-
-
-
-
-
-
-
-                        
-                    }
+                    // TODO make this actually return change correctly.
+                    self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
+                        buyer, seller, product, offer_result: OfferResult::Reasonable });
+                    return;
                 } else { // within our overspend threshold
                     self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
                         buyer, seller, product, offer_result: OfferResult::Reasonable });
                     return;
                 }
             } else { // they are underpaying, reject the offer
-                self.push_message(rx, tx, ActorMessage::RejectOffer { buyer, seller, product });
-                // get the message back, it should be a CloseDeal msg.
-                // TODO when the buyers are capable of retrying, this should be updated
-                self.specific_wait(rx, &vec![ // confirm the buyer closes
-                    ActorMessage::CloseDeal { buyer, seller, product }
-                ]);
+                //self.push_message(rx, tx, ActorMessage::RejectOffer { buyer, seller, product });
+                self.push_message(rx, tx, ActorMessage::CloseDeal { buyer, seller, product });
+                // TODO when the buyers are capable of retrying, this should be updated to send Reject instead of close and accept retrys if they have excess time to exchange goods.
                 // then get out
                 return;
             }
+            // TODO Add Followup item checks here. Likely just a wait on the check item and a time check.
         }
     }
 }
