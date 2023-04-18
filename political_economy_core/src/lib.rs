@@ -443,7 +443,39 @@ mod tests {
             assert_eq!(desire_test.amount, 10.0);
 
         }
-    
+        
+        mod standard_sell {
+            use std::{collections::HashMap, thread, time::Duration};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
+            use super::{make_test_pop, prepare_data_for_market_actions};
+
+            pub fn should_send_out_of_stock_and_return_when_unable_to_sell_item() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // setup message queu
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm we're talking with
+                let buyer = ActorInfo::Firm(1);
+                // setup property split
+                let mut spend = HashMap::new();
+                let mut keep = HashMap::new();
+
+                spend.insert(6 as usize, 
+                    *test.desires.property.get(&6).unwrap() + 10.0);
+
+                let handle = thread::spawn(move || {
+                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                        &mut keep, &mut spend, 10, buyer);
+                    test
+                }); 
+                // check that it's finished
+                if !handle.is_finished() { assert!(false); }
+            }
+        }
+
         mod msg_tests {
             use std::{thread, time::Duration, collections::{HashMap, HashSet}};
 
