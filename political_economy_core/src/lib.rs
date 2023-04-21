@@ -681,8 +681,8 @@ mod tests {
                 }
 
                 // ensure that the seller hasn't sold anything
-                assert!(*test.desires.property.get(&7).unwrap() == 10.0);
-                assert!(test.desires.property.get(&6).is_none());
+                assert!(*test.desires.property.get(&7).unwrap() == 9.0);
+                assert!(*test.desires.property.get(&6).unwrap() == 6.0);
             }
 
             // TODO When returning change is possible, add test here and update previous test.

@@ -2,7 +2,7 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::{collections::{VecDeque, HashMap}};
+use std::{collections::{VecDeque, HashMap}, hash::Hash};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
@@ -405,7 +405,7 @@ impl Pop {
     /// as successes or failure comes in.
     /// 
     /// ## Not Tested due to complexity.
-    fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
+    pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
     data: &DataManager,
     market: &MarketHistory) {
         // start by splitting property up into keep, and spend;
@@ -463,8 +463,10 @@ impl Pop {
                     &mut keep, &mut spend, &mut change);
                 // if this last processed message ate all our time, then gtfo and move
                 // to the end of day holding pattern.
-                if *spend.get(&0).unwrap_or(&0.0) <= 0.0 { break; }
+                if *spend.get(&0).unwrap_or(&0.0) <= shopping_time_cost { break; }
             }
+            // double check that we are out of time, and gtfo if we are after common_msg processing
+            if *spend.get(&0).unwrap_or(&0.0) <= shopping_time_cost { break; }
             // With the backlog caught up, do whatever we need want to do here
 
             // buy stuff first, and repeat until we have tried buying everything we can.
@@ -490,8 +492,18 @@ impl Pop {
                     },
                 }
             }
-
-            // with nothing on our list left to buy, check if we have enough to do more
+            // we bought our next item, so go back to the top.
+        }
+        // send our day end option
+        self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
+        // with our free time run out enter a holding pattern while waiting for the day to end.
+        loop {
+            let mut returned: HashMap<usize, f64> = HashMap::new();
+            self.active_wait(rx, tx, data, market, &mut keep, &mut spend, 
+                &mut returned, 
+                &vec![
+                    ActorMessage::AllFinished
+                ]);
         }
     }
 
@@ -512,6 +524,7 @@ impl Pop {
                     panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
                 }
             },
+            // TODO add Seller Approaches Logic Here.
             ActorMessage::SendProduct { product, amount, .. } => {
                 // we're recieving a product, so check if we desire it. if we do, add it to keep and property
                 if let Some(prod_mem) = self.memory.product_knowledge.get_mut(&product) {
@@ -1033,13 +1046,15 @@ impl Pop {
     /// pop's demand for those items. Desired items get their full AMV, while
     /// undesired items have their price modified by their salability.
     /// 
+    /// Returns the payment recieved so we can sort it into keep and spend.
+    /// 
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
     /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry or for the 
-    /// TODO this needs to be tested.
+    /// TODO Currently does not do change, accepts offer or rejects, no returning change.
     pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory, keep: &mut HashMap<usize, f64>, 
-    spend: &mut HashMap<usize, f64>, product: usize, buyer: ActorInfo) {
+    spend: &mut HashMap<usize, f64>, product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
         let seller = self.actor_info();
         let product_price = market.get_product_price(&product, 1.0);
         // we have recieved a FoundProduct MSG and we're the seller.
@@ -1050,7 +1065,7 @@ impl Pop {
         } else { // if we don't have the item, send our OOS message
             // This currently closes the deal
             self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
-            return;
+            return HashMap::new();
         }
         // with stock message pushed, we wait for the buy offer or close message from them.
         let result = self.specific_wait(rx, &vec![
@@ -1067,14 +1082,14 @@ impl Pop {
             ]);
             if let ActorMessage::CloseDeal { .. } = result {
                 // Nothing meaningful to do here, return
-                return;
+                return HashMap::new();
             } 
-            return; // if anything else, for now, return as well.
+            return HashMap::new(); // if anything else, for now, return as well.
         } else if let ActorMessage::BuyOffer { buyer, seller, 
-        product, price_opinion: _, quantity,
+        product: requested_product, price_opinion: _, quantity: quantity_requested,
         followup: mut current_step } = result { // if it's a buy offer, get their offer
             // start buy getting the amv price and effective Tier of the item in question.
-            let request_amv = quantity * market.get_product_price(&product, 1.0);
+            let request_amv = quantity_requested * market.get_product_price(&requested_product, 1.0);
             let mut offer = HashMap::new();
             let mut offer_item_amv = HashMap::new();
             let mut offer_amv = 0.0;
@@ -1087,13 +1102,13 @@ impl Pop {
                 ]) {
                     offer.insert(offer_product, offer_quantity);
                     // get the pure AMV value at offer in the product
-                    offer_item_amv.insert(offer_product, market.get_product_price(&product, 1.0));
+                    offer_item_amv.insert(offer_product, market.get_product_price(&offer_product, 1.0));
                     // get the effective value for us
                     // TODO consider replacing this with desire based swaping instead of memory based. 
                     if let Some(item) = self.memory.product_knowledge.get(&offer_product) {
                         // some amount would go to our target, record that.
                         let desired = item.target_remaining().min(offer_quantity);
-                        let undesired = quantity - desired;
+                        let undesired = quantity_requested - desired;
                         let item_price = market.get_product_price(&offer_product, 1.0);
                         let desired_amv = desired * item_price;
                         let sal = market.get_product_salability(&offer_product).min(constants::MIN_SALABILITY);
@@ -1118,22 +1133,27 @@ impl Pop {
                 if overpay > constants::BUYER_OVERSPENT_THRESHOLD {
                     // TODO make this actually return change correctly.
                     self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
-                        buyer, seller, product, offer_result: OfferResult::Reasonable });
-                    return;
+                        buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
+                    // remove the items given from spend and return the offer
+                    *self.desires.property.get_mut(&requested_product).unwrap() -= quantity_requested;
+                    return offer;
                 } else { // within our overspend threshold
                     self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
-                        buyer, seller, product, offer_result: OfferResult::Reasonable });
-                    return;
+                        buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
+                    // remove the items given from spend and return the offer
+                    *self.desires.property.get_mut(&requested_product).unwrap() -= quantity_requested;
+                    return offer;
                 }
             } else { // they are underpaying, reject the offer
                 //self.push_message(rx, tx, ActorMessage::RejectOffer { buyer, seller, product });
-                self.push_message(rx, tx, ActorMessage::CloseDeal { buyer, seller, product });
+                self.push_message(rx, tx, ActorMessage::CloseDeal { buyer, seller, product: requested_product });
                 // TODO when the buyers are capable of retrying, this should be updated to send Reject instead of close and accept retrys if they have excess time to exchange goods.
                 // then get out
-                return;
+                return HashMap::new();
             }
             // TODO Add Followup item checks here. Likely just a wait on the check item and a time check.
         }
+        return HashMap::new();
     }
 }
 
