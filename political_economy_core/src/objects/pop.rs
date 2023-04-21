@@ -1045,7 +1045,8 @@ impl Pop {
         // we have recieved a FoundProduct MSG and we're the seller.
         // send back our available stock (if any)
         if let Some(quantity) = spend.get_mut(&product) {
-            self.push_message(rx, tx, ActorMessage::InStock { buyer, seller, product, price: product_price, quantity: *quantity });
+            self.push_message(rx, tx, ActorMessage::InStock { buyer, seller, product, 
+                price: product_price, quantity: *quantity });
         } else { // if we don't have the item, send our OOS message
             // This currently closes the deal
             self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
@@ -1067,7 +1068,7 @@ impl Pop {
             if let ActorMessage::CloseDeal { .. } = result {
                 // Nothing meaningful to do here, return
                 return;
-            }
+            } 
             return; // if anything else, for now, return as well.
         } else if let ActorMessage::BuyOffer { buyer, seller, 
         product, price_opinion: _, quantity,
@@ -1088,6 +1089,7 @@ impl Pop {
                     // get the pure AMV value at offer in the product
                     offer_item_amv.insert(offer_product, market.get_product_price(&product, 1.0));
                     // get the effective value for us
+                    // TODO consider replacing this with desire based swaping instead of memory based. 
                     if let Some(item) = self.memory.product_knowledge.get(&offer_product) {
                         // some amount would go to our target, record that.
                         let desired = item.target_remaining().min(offer_quantity);
