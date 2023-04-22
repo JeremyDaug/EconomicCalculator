@@ -565,9 +565,9 @@ mod tests {
                 spend.insert(7, 10.0);
 
                 let handle = thread::spawn(move || {
-                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                    let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
                         &mut keep, &mut spend, 7, buyer);
-                    test
+                    (test, result)
                 }); 
                 // wait a second to let it wrap up.
                 thread::sleep(Duration::from_millis(100));
@@ -589,12 +589,12 @@ mod tests {
                     quantity: 1.0, followup: 1 })
                     .expect("Failed to send.");
                 tx.send(ActorMessage::BuyOfferFollowup { buyer, seller: pop_info, 
-                    product: 7, offer_product: 6, offer_quantity: 3.0, 
+                    product: 7, offer_product: 6, offer_quantity: 2.0, 
                     followup: 0 })
                     .expect("Failed to send.");
                 thread::sleep(Duration::from_millis(100));
                 // get the seller back
-                let test = handle.join().unwrap();
+                let (test, returned) = handle.join().unwrap();
 
                 // check that we get back the close deal rejection
                 let mut result = ActorMessage::AllFinished;
@@ -614,6 +614,7 @@ mod tests {
                 // ensure that the seller hasn't sold anything
                 assert!(*test.desires.property.get(&7).unwrap() == 10.0);
                 assert!(test.desires.property.get(&6).is_none());
+                assert_eq!(returned.len(), 0)
             }
 
             #[test]
@@ -621,7 +622,7 @@ mod tests {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);
-                // setup message queu
+                // setup message queue
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
                 let passed_tx = tx.clone();
@@ -635,9 +636,9 @@ mod tests {
                 spend.insert(7, 10.0);
 
                 let handle = thread::spawn(move || {
-                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                    let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
                         &mut keep, &mut spend, 7, buyer);
-                    test
+                    (test, result)
                 }); 
                 // wait a second to let it wrap up.
                 thread::sleep(Duration::from_millis(100));
@@ -645,7 +646,7 @@ mod tests {
                 if handle.is_finished() { assert!(false); }
                 // confirm the message was sent
                 let result = rx.recv().unwrap();
-                if let ActorMessage::InStock { buyer, seller, 
+                if let ActorMessage::InStock { buyer: _, seller, 
                 product, price, quantity } = result {
                     assert_eq!(seller, pop_info);
                     assert_eq!(product, 7);
@@ -664,7 +665,7 @@ mod tests {
                     .expect("Failed to send.");
                 thread::sleep(Duration::from_millis(100));
                 // get the seller back
-                let test = handle.join().unwrap();
+                let (test, returned) = handle.join().unwrap();
 
                 // check that we get back the close deal rejection
                 let mut result = ActorMessage::AllFinished;
@@ -678,11 +679,12 @@ mod tests {
                     assert_eq!(buyer, buyer);
                     assert_eq!(seller, pop_info);
                     assert_eq!(product, 7);
-                }
+                } else { assert!(false); }
 
                 // ensure that the seller hasn't sold anything
                 assert!(*test.desires.property.get(&7).unwrap() == 9.0);
-                assert!(*test.desires.property.get(&6).unwrap() == 6.0);
+                assert!(test.desires.property.get(&6).is_none());
+                assert!(*returned.get(&6).unwrap() == 6.0);
             }
 
             // TODO When returning change is possible, add test here and update previous test.

@@ -871,7 +871,7 @@ impl Pop {
                     // Offer hard rejected, 
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().unable_to_purchase();
-                    return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
+                    return BuyResult::SellerClosed;
                 },
                 _ => { panic!("Incorrect message recieved from Buy offer?")}
             }
@@ -1090,15 +1090,14 @@ impl Pop {
         followup: mut current_step } = result { // if it's a buy offer, get their offer
             // start buy getting the amv price and effective Tier of the item in question.
             let request_amv = quantity_requested * market.get_product_price(&requested_product, 1.0);
-            let mut offer = HashMap::new();
-            let mut offer_item_amv = HashMap::new();
-            let mut offer_amv = 0.0;
+            let mut offer = HashMap::new(); // the offer items
+            let mut offer_item_amv = HashMap::new(); // their market amv
+            let mut offer_amv = 0.0; // the total amv of the offer (adjusted to us)
             while current_step > 0 {
                 // get the next, it should be decreasing, but we'll just do this to maintain our sanity.
                 if let ActorMessage::BuyOfferFollowup { offer_product, offer_quantity,
                 followup, .. } = self.specific_wait(rx, &vec![
-                    ActorMessage::BuyOfferFollowup { buyer: seller, seller: seller, 
-                        product: 0, offer_product: 0, offer_quantity: 0.0, followup: 0 }
+                    ActorMessage::BuyOfferFollowup { buyer: seller, seller: seller, product: 0, offer_product: 0, offer_quantity: 0.0, followup: 0 }
                 ]) {
                     offer.insert(offer_product, offer_quantity);
                     // get the pure AMV value at offer in the product
@@ -1111,15 +1110,12 @@ impl Pop {
                         let undesired = quantity_requested - desired;
                         let item_price = market.get_product_price(&offer_product, 1.0);
                         let desired_amv = desired * item_price;
-                        let sal = market.get_product_salability(&offer_product).min(constants::MIN_SALABILITY);
-                        let undesired_amv = sal * item_price * undesired;
-                        offer_item_amv.insert(offer_product, undesired_amv);
+                        let undesired_amv = market.get_product_salability(&offer_product).min(constants::MIN_SALABILITY) * item_price * undesired;
                         offer_amv += desired_amv + undesired_amv;
                     } else { // if we have no memory of it, then we must treat it by salability
                         let sal = market.get_product_salability(&offer_product)
-                            .min(constants::MIN_SALABILITY);
+                            .max(constants::MIN_SALABILITY);
                         let value = offer_quantity * market.get_product_price(&offer_product, 1.0);
-                        offer_item_amv.insert(offer_product, value);
                         offer_amv += sal * value;
                     }
                     current_step = followup;
