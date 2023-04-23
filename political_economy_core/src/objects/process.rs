@@ -226,11 +226,17 @@ impl Process {
             if let Some(val) = target { // we assume that hard_cap == true for now
                 ratio_available = ratio_available.min(val);
             }
+            // without efficiency gains, our ratio available == possible iteratons.
+            results.iterations = ratio_available;
+            // efficiency is equal to the total possible gain we were able to achieved.
+            results.efficiency = 1.0;
+            // effective iterations is our iterations after applying efficiency gains.
+            results.effective_iterations = ratio_available;
 
             // with our target ratio gotten, create the return results for inputs and outputs
             // TODO fixed items will also need to be taken into account here.
             for process_part in self.process_parts.iter() {
-                let mut in_out_sign = 1;
+                let mut in_out_sign = 1.0;
                 match process_part.part {
                     ProcessSectionTag::Capital => {
                         if let PartItem::Product(id) = process_part.item {
@@ -242,16 +248,16 @@ impl Process {
                         }
                         continue;
                     },
-                    ProcessSectionTag::Input => { in_out_sign = -1; }, // subtract inputs
-                    ProcessSectionTag::Output => { in_out_sign = 1; }, // add outputs
+                    ProcessSectionTag::Input => { in_out_sign = -1.0; }, // subtract inputs
+                    ProcessSectionTag::Output => { in_out_sign = 1.0; }, // add outputs
                 } 
                 // if not capital, add to appropriate input_output
                 match process_part.item {
                     PartItem::Product(id) => {
-                        results.input_output_products.insert(id, process_part.amount * ratio_available);
+                        results.input_output_products.insert(id, in_out_sign * process_part.amount * ratio_available);
                     },
                     PartItem::Want(id) => {
-                        results.input_output_wants.insert(id, process_part.amount * ratio_available);
+                        results.input_output_wants.insert(id, in_out_sign * process_part.amount * ratio_available);
                     },
                 }
             }
@@ -269,13 +275,31 @@ pub struct ProcessOutputs {
     /// inputs and positives are outputs.
     pub input_output_wants: HashMap<usize, f64>,
     /// The capital products which are used.
-    pub capital_products: HashMap<usize, f64>
+    pub capital_products: HashMap<usize, f64>,
+    /// How many iterations the process was able to complete in total.
+    /// 
+    /// IE Iterations * any fixed product in the process == that product in our 
+    /// output tables.
+    pub iterations: f64,
+    /// The efficiency of the process, ie what our total multiplier we had for 
+    /// our processes.
+    pub efficiency: f64,
+    /// How many iterations were were able to effectively do. IE our iterations
+    /// after efficiency gains.
+    /// 
+    /// IE eff_iterations * non-fixed product = our result
+    pub effective_iterations: f64,
 }
 
 impl ProcessOutputs {
     pub fn new() -> ProcessOutputs {
         ProcessOutputs{ input_output_products: HashMap::new(), 
-            input_output_wants: HashMap::new(), capital_products: HashMap::new() }
+            input_output_wants: HashMap::new(), 
+            capital_products: HashMap::new(),
+            iterations: 0.0,
+            efficiency: 1.0,
+            effective_iterations:0.0,
+            }
     }
 }
 
@@ -296,7 +320,7 @@ pub struct ProcessPart {
     pub amount: f64,
     /// the tags for this part of the process.
     pub part_tags: Vec<ProcessPartTag>,
-    /// 
+    /// The part of the process this is involved in, Input/Capital/Output.
     pub part: ProcessSectionTag
 }
 

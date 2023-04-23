@@ -446,7 +446,7 @@ mod tests {
         
         mod standard_sell {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -575,7 +575,7 @@ mod tests {
                 if handle.is_finished() { assert!(false); }
                 // confirm the message was sent
                 let result = rx.recv().unwrap();
-                if let ActorMessage::InStock { buyer, seller, 
+                if let ActorMessage::InStock { buyer: _, seller, 
                 product, price, quantity } = result {
                     assert_eq!(seller, pop_info);
                     assert_eq!(product, 7);
@@ -614,7 +614,7 @@ mod tests {
                 // ensure that the seller hasn't sold anything
                 assert!(*test.desires.property.get(&7).unwrap() == 10.0);
                 assert!(test.desires.property.get(&6).is_none());
-                assert_eq!(returned.len(), 0)
+                assert_eq!(returned.len(), 0);
             }
 
             #[test]
@@ -3799,9 +3799,8 @@ mod tests {
 
             use crate::objects::process::{Process, ProcessPart, ProcessSectionTag, PartItem};
 
-            
             #[test]
-            pub fn should_return_empty_when_product_is_missing() {
+            pub fn should_return_correctly_when_eerything_needed_is_given() {
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -3835,7 +3834,62 @@ mod tests {
                 // build available items
                 let mut avail_products = HashMap::new();
                 avail_products.insert(0, 2.0);
-                // capital product is missing
+                avail_products.insert(1, 2.0);
+                let mut avail_wants = HashMap::new();
+                avail_wants.insert(0, 2.0);
+                
+                let results = test.do_process(&avail_products, &avail_wants, 
+                    &0.0, &0.0, None, false);
+                
+                assert_eq!(results.capital_products.len(), 1);
+                assert!(*results.capital_products.get(&1).unwrap() == 2.0);
+                assert_eq!(results.input_output_products.len(), 2);
+                assert!(*results.input_output_products.get(&0).unwrap() == -2.0);
+                assert!(*results.input_output_products.get(&2).unwrap() == 2.0);
+                assert_eq!(results.input_output_wants.len(), 2);
+                assert!(*results.input_output_products.get(&0).unwrap() == -2.0);
+                assert!(*results.input_output_products.get(&2).unwrap() == 2.0);
+                assert!(results.effective_iterations == 2.0);
+                assert!(results.efficiency == 1.0);
+                assert!(results.iterations == 2.0);
+            }
+
+            #[test]
+            pub fn should_return_empty_when_input_product_is_missing() {
+                let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                    variant_name: String::from_str("").unwrap(), 
+                    description: String::from_str("test").unwrap(), 
+                    minimum_time: 0.0, process_parts: vec![
+                        ProcessPart{ item: PartItem::Product(0), // input product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Want(0), // input want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Capital },
+                        // placeholder for capital want
+                        ProcessPart{ item: PartItem::Product(2), // output product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Want(2), // output want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                    ], 
+                    process_tags: vec![], 
+                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                    technology_requirement: None, tertiary_tech: None };
+                
+                // build available items
+                let mut avail_products = HashMap::new();
+                //avail_products.insert(0, 2.0);
+                avail_products.insert(1, 2.0);
                 let mut avail_wants = HashMap::new();
                 avail_wants.insert(0, 2.0);
                 
@@ -3845,6 +3899,109 @@ mod tests {
                 assert_eq!(results.capital_products.len(), 0);
                 assert_eq!(results.input_output_products.len(), 0);
                 assert_eq!(results.input_output_wants.len(), 0);
+                assert!(results.effective_iterations == 0.0);
+                assert!(results.efficiency == 1.0);
+                assert!(results.iterations == 0.0);
+            }
+
+            #[test]
+            pub fn should_return_empty_when_capital_product_is_missing() {
+                let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                    variant_name: String::from_str("").unwrap(), 
+                    description: String::from_str("test").unwrap(), 
+                    minimum_time: 0.0, process_parts: vec![
+                        ProcessPart{ item: PartItem::Product(0), // input product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Want(0), // input want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Capital },
+                        // placeholder for capital want
+                        ProcessPart{ item: PartItem::Product(2), // output product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Want(2), // output want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                    ], 
+                    process_tags: vec![], 
+                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                    technology_requirement: None, tertiary_tech: None };
+                
+                // build available items
+                let mut avail_products = HashMap::new();
+                avail_products.insert(0, 2.0);
+                //avail_products.insert(1, 2.0);
+                let mut avail_wants = HashMap::new();
+                avail_wants.insert(0, 2.0);
+                
+                let results = test.do_process(&avail_products, &avail_wants, 
+                    &0.0, &0.0, None, false);
+                
+                assert_eq!(results.capital_products.len(), 0);
+                assert_eq!(results.input_output_products.len(), 0);
+                assert_eq!(results.input_output_wants.len(), 0);
+                assert!(results.effective_iterations == 0.0);
+                assert!(results.efficiency == 1.0);
+                assert!(results.iterations == 0.0);
+            }
+
+            #[test]
+            pub fn should_return_empty_when_input_want_is_missing() {
+                let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                    variant_name: String::from_str("").unwrap(), 
+                    description: String::from_str("test").unwrap(), 
+                    minimum_time: 0.0, process_parts: vec![
+                        ProcessPart{ item: PartItem::Product(0), // input product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Want(0), // input want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Capital },
+                        // placeholder for capital want
+                        ProcessPart{ item: PartItem::Product(2), // output product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Want(2), // output want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                    ], 
+                    process_tags: vec![], 
+                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                    technology_requirement: None, tertiary_tech: None };
+                
+                // build available items
+                let mut avail_products = HashMap::new();
+                avail_products.insert(0, 2.0);
+                avail_products.insert(1, 2.0);
+                let mut avail_wants = HashMap::new();
+                //avail_wants.insert(0, 2.0);
+                
+                let results = test.do_process(&avail_products, &avail_wants, 
+                    &0.0, &0.0, None, false);
+                
+                assert_eq!(results.capital_products.len(), 0);
+                assert_eq!(results.input_output_products.len(), 0);
+                assert_eq!(results.input_output_wants.len(), 0);
+                assert!(results.effective_iterations == 0.0);
+                assert!(results.efficiency == 1.0);
+                assert!(results.iterations == 0.0);
             }
         }
 
