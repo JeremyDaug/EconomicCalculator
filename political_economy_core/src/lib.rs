@@ -3794,6 +3794,60 @@ mod tests {
     mod process_tests {
         use crate::objects::{process::{Process, ProcessPart, PartItem, ProcessSectionTag}};
 
+        mod do_process {
+            use std::{str::FromStr, collections::HashMap};
+
+            use crate::objects::process::{Process, ProcessPart, ProcessSectionTag, PartItem};
+
+            
+            #[test]
+            pub fn should_return_empty_when_product_is_missing() {
+                let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                    variant_name: String::from_str("").unwrap(), 
+                    description: String::from_str("test").unwrap(), 
+                    minimum_time: 0.0, process_parts: vec![
+                        ProcessPart{ item: PartItem::Product(0), // input product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Want(0), // input want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Capital },
+                        // placeholder for capital want
+                        ProcessPart{ item: PartItem::Product(2), // output product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Want(2), // output want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                    ], 
+                    process_tags: vec![], 
+                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                    technology_requirement: None, tertiary_tech: None };
+                
+                // build available items
+                let mut avail_products = HashMap::new();
+                avail_products.insert(0, 2.0);
+                // capital product is missing
+                let mut avail_wants = HashMap::new();
+                avail_wants.insert(0, 2.0);
+                
+                let results = test.do_process(&avail_products, &avail_wants, 
+                    &0.0, &0.0, None, false);
+                
+                assert_eq!(results.capital_products.len(), 0);
+                assert_eq!(results.input_output_products.len(), 0);
+                assert_eq!(results.input_output_wants.len(), 0);
+            }
+        }
+
         /// TODO, rework this to be more space efficinet (loop over options rather than write it all out)
         #[test]
         pub fn should_return_correctly_on_input_or_capital_to_output_checking(){

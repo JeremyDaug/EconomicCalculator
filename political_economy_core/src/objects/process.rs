@@ -1,6 +1,6 @@
 use std::{collections::HashMap};
 
-use super::pop::Pop;
+use super::{pop::Pop, pop_breakdown_table::PopBreakdownTable};
 
 #[derive(Debug)]
 pub struct Process {
@@ -172,23 +172,131 @@ impl Process {
     /// whether it will allow it to push higher with an efficiency boost or
     /// not.
     /// 
+    /// ## Returns
+    /// 
+    /// This function returns 3 HashMaps in a Tuple.
+    /// - First is all products consumed or created by the process (inputs/outputs).
+    /// - Second is all wants consumed or created by the process (inputs/outputs).
+    /// - Third is all products used as capital in the process (Used Capital).
+    /// 
     /// TODO Both make and Test this function.
-    pub fn do_process(&self, available_products: &mut HashMap<usize, f64>, 
-        available_wants: &mut HashMap<usize, f64>,
-        pop_info: &Pop, target: Option<f64>, hard_cap: bool) 
-        -> (HashMap<usize, f64>, HashMap<usize, f64>) {
-            let resulting_products = HashMap::new();
-            let resulting_wants = HashMap::new();
+    /// TODO Include logic for process part tags: Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
+    /// TODO pop_skill and other_efficiency_boni are currently not taken into account.
+    /// TODO hard_cap is not taken into account, assumed to always be true currently.
+    /// TODO Currently incapable of dealing with Capital Wants.
+    /// TODO Process.minimum_time is not taken into account.
+    pub fn do_process(&self, available_products: &HashMap<usize, f64>, 
+        available_wants: &HashMap<usize, f64>, _pop_skill: &f64,
+        _other_efficiency_boni: &f64, target: Option<f64>, _hard_cap: bool) 
+        -> ProcessOutputs {
+            let mut results = ProcessOutputs::new();
+            // get how many cycles we can do in total
+            // TODO check and take optional and fixed items into account here.
+            // optional items will need to be ignored if unavailable, but add to the target of all non-fixed items
+            // fixed items ignore any efficiency gains from 
+            let mut ratio_available = f64::INFINITY;
+            for process_part in self.process_parts.iter() {
+                if let ProcessSectionTag::Capital = process_part.part {
+                    // todo add capital want handling here.
+                    if let PartItem::Want(id) = process_part.item {
+                        continue;
+                    }
+                }
+                if let ProcessSectionTag::Output = process_part.part { // if output, ignore
+                    continue;
+                }
+                match process_part.item { // TODO add optional check here.
+                    PartItem::Product(id) => {
+                        // take lower between current ratio available and available_product / cycle_target.
+                        ratio_available = ratio_available
+                            .min(available_products.get(&id).unwrap_or(&0.0) / process_part.amount);
+                    },
+                    PartItem::Want(id) => {
+                        // take lower between current ratio available and available_product / cycle_target.
+                        ratio_available = ratio_available
+                            .min(available_wants.get(&id).unwrap_or(&0.0) / process_part.amount);
+                    },
+                }
+                if ratio_available == 0.0 { // if ratio is 0, gtfo, we can't do anything.
+                    return ProcessOutputs::new();
+                }
+            }
+            // cap our ratio at the target
+            // TODO add check for hard_cap here.
+            if let Some(val) = target { // we assume that hard_cap == true for now
+                ratio_available = ratio_available.min(val);
+            }
 
-            (resulting_products, resulting_wants)
+            // with our target ratio gotten, create the return results for inputs and outputs
+            // TODO fixed items will also need to be taken into account here.
+            for process_part in self.process_parts.iter() {
+                let mut in_out_sign = 1;
+                match process_part.part {
+                    ProcessSectionTag::Capital => {
+                        if let PartItem::Product(id) = process_part.item {
+                            // add used capital products
+                            results.capital_products
+                            .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
+                        } else if let PartItem::Want(id) = process_part.item { 
+                            // TODO add capital want handling here also.
+                        }
+                        continue;
+                    },
+                    ProcessSectionTag::Input => { in_out_sign = -1; }, // subtract inputs
+                    ProcessSectionTag::Output => { in_out_sign = 1; }, // add outputs
+                } 
+                // if not capital, add to appropriate input_output
+                match process_part.item {
+                    PartItem::Product(id) => {
+                        results.input_output_products.insert(id, process_part.amount * ratio_available);
+                    },
+                    PartItem::Want(id) => {
+                        results.input_output_wants.insert(id, process_part.amount * ratio_available);
+                    },
+                }
+            }
+
+            results
         }
 }
 
+/// Helper struct used for process outputs
+pub struct ProcessOutputs {
+    /// The products being input and output by the process. Negative are 
+    /// Inputs and Positives are Outputs.
+    pub input_output_products: HashMap<usize, f64>,
+    /// The wants being input and output by the process. Negatives are
+    /// inputs and positives are outputs.
+    pub input_output_wants: HashMap<usize, f64>,
+    /// The capital products which are used.
+    pub capital_products: HashMap<usize, f64>
+}
+
+impl ProcessOutputs {
+    pub fn new() -> ProcessOutputs {
+        ProcessOutputs{ input_output_products: HashMap::new(), 
+            input_output_wants: HashMap::new(), capital_products: HashMap::new() }
+    }
+}
+
+/// # Process Part
+/// 
+/// Process Part is an input, capital, or output of a process.
+/// 
+/// It contains:
+/// - the item (Product or Want and it's Id)
+/// - the amount
+/// - the tags for this part
+/// - the part of the process it goes to (input/capital/output)
 #[derive(Debug)]
 pub struct ProcessPart {
+    /// The item of this part, may be either a product or a want.
     pub item: PartItem,
+    /// The amount it takes in
     pub amount: f64,
+    /// the tags for this part of the process.
     pub part_tags: Vec<ProcessPartTag>,
+    /// 
     pub part: ProcessSectionTag
 }
 
