@@ -426,7 +426,7 @@ impl Pop {
             know.achieved += capped;
             know.rollover += capped;
         }
-        // repeat for the items which we don't have any memory for so we can offer them up.
+        // repeat for the items which we don't have any memory for so we can offer them up for sale
         for (id, excess) in self.desires.property
         .iter().filter(|x| !keep.contains_key(x.0)) {
             spend.insert(*id, *excess);

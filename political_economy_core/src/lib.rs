@@ -266,6 +266,24 @@ mod tests {
             (data, market)
         }
         
+        mod free_time {
+            use super::{make_test_pop, prepare_data_for_market_actions};
+
+
+            /// This is a test to touch most of the free time stuff just to 
+            /// sanity check it. Doesn't push any messages for 
+            /// common_processing to deal with, just forces it to
+            /// run out of stuff to buy and checks that it acts appropriately.
+            #[test]
+            pub fn should_act_as_expected() {
+                let mut test = make_test_pop();
+                let (data, market) = prepare_data_for_market_actions(&mut test);
+                // clear out memory targets while we're at it, so it should not try to buy anything.
+                test.memory.
+
+            }
+        }
+
         #[test]
         pub fn update_pop_desires_equivalently() {
             let mut test = Pop{ 
