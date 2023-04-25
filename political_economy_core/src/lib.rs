@@ -267,6 +267,10 @@ mod tests {
         }
         
         mod free_time {
+            use std::{thread, time::Duration};
+
+            use crate::objects::{actor_message::ActorMessage, seller::Seller};
+
             use super::{make_test_pop, prepare_data_for_market_actions};
 
 
@@ -277,10 +281,36 @@ mod tests {
             #[test]
             pub fn should_act_as_expected() {
                 let mut test = make_test_pop();
+                let pop_info = test.actor_info();
                 let (data, market) = prepare_data_for_market_actions(&mut test);
-                // clear out memory targets while we're at it, so it should not try to buy anything.
-                test.memory.
+                // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
+                test.is_selling = true;
+                // setup messaging
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
 
+                let handle = thread::spawn(move || {
+                    test.free_time(&mut passed_rx, &passed_tx, &data, &market);
+                    test
+                });
+                thread::sleep(Duration::from_millis(100));
+                // ensure that free time put up their items for sale
+                let msg = rx.recv().expect("Unexpected Close.");
+
+                if let ActorMessage::SellOrder { sender, product, quantity, 
+                amv } = msg {
+                    assert_eq!(sender, pop_info);
+                    assert_eq!(product, 6);
+                    assert!(quantity == 10.0);
+                    assert!(amv == 2.0);
+                } else { assert!(false); }
+
+                tx.send(ActorMessage::ProductNotFound { product: 7, buyer: pop_info })
+                .expect("Unexpected Break.");
+
+                // with the not found message sent, that should be the only 
+                // thing they attempted to buy and should finish up.
             }
         }
 
