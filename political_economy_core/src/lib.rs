@@ -269,7 +269,7 @@ mod tests {
         mod free_time {
             use std::{thread, time::Duration};
 
-            use crate::objects::{actor_message::ActorMessage, seller::Seller};
+            use crate::{objects::{actor_message::ActorMessage, seller::Seller, actor::Actor}, constants::{SHOPPING_TIME_ID, TIME_ID}};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -285,6 +285,8 @@ mod tests {
                 let (data, market) = prepare_data_for_market_actions(&mut test);
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
+                // add a bunch of time for shopping.
+                test.desires.property.insert(TIME_ID, test.standard_shop_time_cost() + 100.0);
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -297,6 +299,7 @@ mod tests {
                 thread::sleep(Duration::from_millis(100));
                 // ensure that free time put up their items for sale
                 let msg = rx.recv().expect("Unexpected Close.");
+                if handle.is_finished() { assert!(false); } // ensure we're not done.
 
                 if let ActorMessage::SellOrder { sender, product, quantity, 
                 amv } = msg {
@@ -308,9 +311,18 @@ mod tests {
 
                 tx.send(ActorMessage::ProductNotFound { product: 7, buyer: pop_info })
                 .expect("Unexpected Break.");
-
+                rx.recv().expect("Not Closed"); // consume our ProductNotFound message
+                thread::sleep(Duration::from_millis(100));
                 // with the not found message sent, that should be the only 
                 // thing they attempted to buy and should finish up.
+                let msg = rx.recv().expect("Unexpected Close");
+                if let ActorMessage::Finished { sender } = msg {
+                    assert_eq!(sender, pop_info);
+                } else { assert!(false); };
+                if !handle.is_finished() { assert!(false); }
+                let test = handle.join().unwrap();
+
+                assert!(*test.desires.property.get(&TIME_ID).unwrap() == 100.0);
             }
         }
 

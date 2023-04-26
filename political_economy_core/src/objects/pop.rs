@@ -461,9 +461,6 @@ impl Pop {
             while let Some(msg) = self.backlog.pop_front() {
                 self.process_common_msg(rx, tx, data, market, msg,
                     &mut keep, &mut spend, &mut change);
-                // if this last processed message ate all our time, then gtfo and move
-                // to the end of day holding pattern.
-                if *spend.get(&0).unwrap_or(&0.0) <= shopping_time_cost { break; }
             }
             // double check that we are out of time, and gtfo if we are after common_msg processing
             if *spend.get(&0).unwrap_or(&0.0) <= shopping_time_cost { break; }
@@ -481,6 +478,11 @@ impl Pop {
                         curr_buy_idx += 1; // add to the current buy index and go to the next one.
                         continue;
                     },
+                    BuyResult::NotSuccessful { reason: OfferResult::OutOfStock } => {
+                        // TODO add path to Emergency Buy Here.
+                        curr_buy_idx += 1;
+                        continue;
+                    },
                     _ => { // for anything but cancellation from ourselves
                         // check if we still have time to try again
                         if self.memory.product_knowledge.get(&product).unwrap().remaining_time() > shopping_time_cost {
@@ -491,7 +493,11 @@ impl Pop {
                         }
                     },
                 }
+            } else { // if we have nothing left to buy.
+                // TODO if another free time action 
+                break;
             }
+
             // we bought our next item, so go back to the top.
         }
         // send our day end option
@@ -569,8 +575,8 @@ impl Pop {
     /// Both the buyer and seller will be locked into the deal state once they 
     /// send/recieve the ProductFound message.
     /// 
-    /// If the product is not found, but the desire is considered high priority
-    /// then it will go into an emergency search. 
+    /// If the product is not found, it will return Not Successful with OutOfStock 
+    /// as the reason.
     /// 
     /// It has 2 options when it starts.
     /// - Standard Search, it asks the market to find a guaranteed seller,
