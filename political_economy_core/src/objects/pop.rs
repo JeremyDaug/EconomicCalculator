@@ -433,7 +433,8 @@ impl Pop {
         }
         // with that done, put our spend stuff up for sale, if we are selling
         if self.is_selling {
-            for (id, amount) in spend.iter() {
+            for (id, amount) in spend.iter()
+            .filter(|x| *x.0 != TIME_ID) {
                 let info = data.products.get(id).expect("Product Not Found!");
                 // if nontransferable, don't offer for sale.
                 if info.tags.contains(&ProductTag::NonTransferrable) { continue; }
@@ -457,9 +458,9 @@ impl Pop {
             // catch up with the broadcast queue to help keep the queue clear.
             // don't actually process, just push anything for us into the backlog.
             self.msg_catchup(rx);
-            // now clear out the backlog messages
+            // now clear out the backlog messages until we find something common shouldn't handle
             while let Some(msg) = self.backlog.pop_front() {
-                self.process_common_msg(rx, tx, data, market, msg,
+                let _result = self.process_common_msg(rx, tx, data, market, msg,
                     &mut keep, &mut spend, &mut change);
             }
             // double check that we are out of time, and gtfo if we are after common_msg processing
@@ -503,22 +504,22 @@ impl Pop {
         // send our day end option
         self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
         // with our free time run out enter a holding pattern while waiting for the day to end.
-        loop {
-            let mut returned: HashMap<usize, f64> = HashMap::new();
-            self.active_wait(rx, tx, data, market, &mut keep, &mut spend, 
-                &mut returned, 
-                &vec![
-                    ActorMessage::AllFinished
-                ]);
-        }
+        let mut returned: HashMap<usize, f64> = HashMap::new();
+        self.active_wait(rx, tx, data, market, &mut keep, &mut spend, 
+            &mut returned, 
+            &vec![
+                ActorMessage::AllFinished
+            ]);
     }
 
     /// Processes common messages from the ActorMessages for current free time.
     /// Function assumes that msg is for us, so be sure to collect just those.
+    /// 
+    /// Returns any messages that we don't handle here. Currently, 
     fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager, 
     market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
-    spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) {
+    spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) -> Option<ActorMessage> {
         match msg {
             ActorMessage::FoundProduct { seller, buyer, 
             product } => {
@@ -529,6 +530,7 @@ impl Pop {
                 } else {
                     panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
                 }
+                return None;
             },
             // TODO add Seller Approaches Logic Here.
             ActorMessage::SendProduct { product, amount, .. } => {
@@ -547,19 +549,24 @@ impl Pop {
                     *self.desires.property.entry(product).or_insert(0.0) += amount;
                     *spend.entry(product).or_insert(0.0) += amount;
                 }
+                return None;
             },
             ActorMessage::SendWant { want, amount, .. } => {
                 *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                return None;
             },
             ActorMessage::WantSplash { want, amount, .. } => {
                 *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                return None;
             },
             ActorMessage::FirmToEmployee { firm, employee: _,
             action } => {
                 self.process_firm_message(rx, tx, firm, action);
+                return None;
             },
-            _ => panic!("Recieved Bad msg.")
+            _ => ()
         }
+        Some(msg)
     }
 
     /// ## Try to buy

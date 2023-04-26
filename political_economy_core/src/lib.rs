@@ -251,6 +251,7 @@ mod tests {
             market.sale_priority.push(7);
 
             pop.desires.property.insert(6, 10.0);
+            pop.memory.product_priority.push(7);
             // also add the pop's desire info
             pop.memory.product_knowledge.insert(7, Knowledge{ target: 2.0, 
                 achieved: 0.0, 
@@ -269,7 +270,7 @@ mod tests {
         mod free_time {
             use std::{thread, time::Duration};
 
-            use crate::{objects::{actor_message::ActorMessage, seller::Seller, actor::Actor}, constants::{SHOPPING_TIME_ID, TIME_ID}};
+            use crate::{objects::{actor_message::ActorMessage, seller::Seller, actor::Actor, pop_memory::Knowledge}, constants::{SHOPPING_TIME_ID, TIME_ID}};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -308,6 +309,14 @@ mod tests {
                     assert!(quantity == 10.0);
                     assert!(amv == 2.0);
                 } else { assert!(false); }
+                thread::sleep(Duration::from_millis(100));
+
+                // wait for the pop to send out it's Find Product Message
+                let msg = rx.recv().expect("Find Product Not recieved.");
+                if let ActorMessage::FindProduct { product, sender } = msg {
+                    assert_eq!(product, 7);
+                    assert_eq!(sender, pop_info);
+                } else { assert!(false); }
 
                 tx.send(ActorMessage::ProductNotFound { product: 7, buyer: pop_info })
                 .expect("Unexpected Break.");
@@ -319,10 +328,95 @@ mod tests {
                 if let ActorMessage::Finished { sender } = msg {
                     assert_eq!(sender, pop_info);
                 } else { assert!(false); };
+                if handle.is_finished() { assert!(false); }
+                // Send our Finished msg to wrap it up.
+                tx.send(ActorMessage::AllFinished).expect("Closed?");
+                thread::sleep(Duration::from_millis(100));
+                // with that send, wrap up.
                 if !handle.is_finished() { assert!(false); }
                 let test = handle.join().unwrap();
 
                 assert!(*test.desires.property.get(&TIME_ID).unwrap() == 100.0);
+            }
+
+            /// This is a test to touch most of the free time stuff just to 
+            /// sanity check it. Doesn't push any messages for 
+            /// common_processing to deal with, just forces it to
+            /// run out of stuff to buy and checks that it acts appropriately.
+            #[test]
+            pub fn should_leave_when_time_has_run_out() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, market) = prepare_data_for_market_actions(&mut test);
+                // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
+                test.is_selling = true;
+                // add a bunch of time for shopping.
+                test.desires.property.insert(TIME_ID, test.standard_shop_time_cost() + 1.0);
+                // add an additional product to the priority list
+                test.memory.product_priority.push(5);
+                // and add desire for that
+                test.memory.product_knowledge.insert(5, Knowledge{ target: 2.0, 
+                    achieved: 0.0, 
+                    spent: 0.0, 
+                    lost: 0.0, 
+                    time_budget: 10.0, 
+                    amv_budget: 11.0, 
+                    time_spent: 0.0, 
+                    amv_spent: 0.0, 
+                    success_rate: 0.5,
+                    rollover: 0.0, });
+                // setup messaging
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                let handle = thread::spawn(move || {
+                    test.free_time(&mut passed_rx, &passed_tx, &data, &market);
+                    test
+                });
+                thread::sleep(Duration::from_millis(100));
+                // ensure that free time put up their items for sale
+                let msg = rx.recv().expect("Unexpected Close.");
+                if handle.is_finished() { assert!(false); } // ensure we're not done.
+
+                if let ActorMessage::SellOrder { sender, product, quantity, 
+                amv } = msg {
+                    assert_eq!(sender, pop_info);
+                    assert_eq!(product, 6);
+                    assert!(quantity == 10.0);
+                    assert!(amv == 2.0);
+                } else { assert!(false); }
+                thread::sleep(Duration::from_millis(100));
+
+                // wait for the pop to send out it's Find Product Message
+                let msg = rx.recv().expect("Find Product Not recieved.");
+                if let ActorMessage::FindProduct { product, sender } = msg {
+                    assert_eq!(product, 7);
+                    assert_eq!(sender, pop_info);
+                } else { assert!(false, "Did not Recieve Find Product msg!"); }
+
+                tx.send(ActorMessage::ProductNotFound { product: 7, buyer: pop_info })
+                .expect("Unexpected Break.");
+                rx.recv().expect("Not Closed"); // consume our ProductNotFound message
+                thread::sleep(Duration::from_millis(100));
+                // with the not found message sent, that should be the only 
+                // thing they attempted to buy and should finish up.
+                let msg = rx.recv().expect("Unexpected Close");
+                if let ActorMessage::Finished { sender } = msg {
+                    assert_eq!(sender, pop_info);
+                } else if let ActorMessage::FindProduct { .. } = msg {
+                    assert!(false, "Enough time to send for next product!");
+                }
+                else { assert!(false, "Did Not Recieve Finished!"); };
+                if handle.is_finished() { assert!(false); }
+                // Send our Finished msg to wrap it up.
+                tx.send(ActorMessage::AllFinished).expect("Closed?");
+                thread::sleep(Duration::from_millis(100));
+                // with that send, wrap up.
+                if !handle.is_finished() { assert!(false); }
+                let test = handle.join().unwrap();
+
+                assert!(*test.desires.property.get(&TIME_ID).unwrap() == 1.0);
             }
         }
 
