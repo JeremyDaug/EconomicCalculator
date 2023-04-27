@@ -15,6 +15,8 @@ use std::{collections::HashMap};
 
 use itertools::Itertools;
 
+use crate::{data_manager::DataManager, constants::UNABLE_TO_PURCHASE_REDUCTION};
+
 use super::{desire::{Desire, DesireItem}, market::{MarketHistory}};
 
 /// The ratio of value between one tier and an adjacent tier.
@@ -773,6 +775,25 @@ impl Desires {
     pub fn total_satisfaction_of_item(&self, item: DesireItem) -> f64 {
         self.desires.iter().filter(|x| x.item == item)
             .map(|x| x.satisfaction).sum()
+    }
+
+    pub(crate) fn consume_and_sift_wants(&mut self, data: &DataManager, 
+    history: &MarketHistory) {
+        // get all our property and wants into untouched, used, and consumed.
+        let mut untouched_products = HashMap::new();
+        let mut used_products = HashMap::new();
+        let mut consumed_products = HashMap::new();
+        let mut untouched_wants = HashMap::new();
+        let mut consumed_wants = HashMap::new();
+
+        // copy over our products into untouched.
+        for (product, quantity) in self.property.iter() {
+            untouched_products.insert(*product, *quantity);
+        }
+        // and copy over wants.
+        for (want, quantity) in self.want_store.iter() {
+            untouched_wants.insert(*want, *quantity);
+        }
     }
 }
 

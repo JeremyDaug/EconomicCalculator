@@ -791,8 +791,8 @@ impl Pop {
                     // for everything we spent
                     for (offer_prod, amount) in offer.iter() {
                         // remove it from property.
-                        *self.desires.property.entry(*offer_prod)
-                            .or_insert(0.0) -= amount;
+                        *self.desires.property.get_mut(offer_prod)
+                            .expect("Product offered was not owned.") -= amount;
                         // if item is now 0 remove it
                         if *self.desires.property.get(offer_prod).unwrap() == 0.0 { 
                             self.desires.property.remove(offer_prod);
