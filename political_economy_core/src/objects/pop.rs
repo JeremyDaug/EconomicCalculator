@@ -1164,6 +1164,20 @@ impl Pop {
         }
         return HashMap::new();
     }
+
+    /// # Consume Goods
+    /// 
+    /// Our end of daily activities. Goes through our goods, consuming them
+    /// and adding to our satisfaction.
+    pub fn consume_goods(&mut self, data: &DataManager, history: &MarketHistory) {
+        // start by clearing out our old satisfaction
+        self.desires.clear_desires();
+        // put our property into the specific product desire slots
+        self.desires.sift_products();
+        // TODO add non-specific satisfaction slots here.
+        // Consume Property to satisfy wants.
+        self.desires.consume_and_sift_wants(data, history);
+    }
 }
 
 impl Buyer for Pop {
@@ -1278,15 +1292,13 @@ impl Actor for Pop {
         // out to buy things, and dealing with recieved sale orders.
         self.free_time(rx, &tx, data, history);
 
-        // Once time has run out, send up a finished message.
-        tx.send(ActorMessage::Finished { 
-            sender: self.actor_info() 
-        }).expect("Channel Closed Unexpectedly!");
-        // Then enter a holding pattern, continuing to consume from the 
-        // message queue, and dealing with sale orders shortly.
-        // When we recieve the AllFinished, we know no more messages will 
-        // come, so stop holding and fall out, possibly recording data as
-        // needed.
+        // With our free time used up and the finish message recieved, begin
+        // following through with our consumption. This will both record
+        // satisfaction, and consume items as needed.
+        self.consume_goods(data, history);
+
+        // With these things consumed, we've done what we can. Process our
+        // results to hopefully improve our situation tomorrow.
     }
 }
 

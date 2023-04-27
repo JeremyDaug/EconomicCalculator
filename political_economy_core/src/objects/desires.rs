@@ -121,7 +121,7 @@ impl Desires {
             Some(val) => val.clone(),
             None => 0.0
         };
-        // loop over the desires for the product.
+        // loop over the desires for the product so long as we have one to add to.
         while let Some(coord) = curr {
             // get the desire we're adding to.
             let desire = self.desires
