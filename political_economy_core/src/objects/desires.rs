@@ -794,6 +794,17 @@ impl Desires {
         for (want, quantity) in self.want_store.iter() {
             untouched_wants.insert(*want, *quantity);
         }
+
+        // with our untouched stuff sorted, begin sifting.
+        let mut curr = self.walk_up_tiers(None);
+        while let Some(coord) = curr {
+            let des = self.desires
+            .get_mut(coord.idx).unwrap();
+            if des.item.is_product() { // if not a want, move onto the next.
+                curr = self.walk_up_tiers(curr);
+                continue; 
+            }
+        }
     }
 }
 
