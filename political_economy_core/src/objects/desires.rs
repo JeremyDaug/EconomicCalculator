@@ -11,13 +11,13 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::HashMap};
+use std::{collections::{HashMap, HashSet}};
 
 use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::UNABLE_TO_PURCHASE_REDUCTION};
 
-use super::{desire::{Desire, DesireItem}, market::{MarketHistory}};
+use super::{desire::{Desire, DesireItem}, market::{MarketHistory}, process::PartItem};
 
 /// The ratio of value between one tier and an adjacent tier.
 /// 
@@ -777,34 +777,298 @@ impl Desires {
             .map(|x| x.satisfaction).sum()
     }
 
-    pub(crate) fn consume_and_sift_wants(&mut self, data: &DataManager, 
+    /// # Consume and Shift Wants
+    /// 
+    /// This is used to satisfy our wants with our property. 
+    /// 
+    /// Currently, it attempts to do this in the following fashion.
+    /// 
+    /// 1. Consume any wants from our store.
+    /// 2. Try to use products which satisfy it by owning it.
+    /// 3. Try to satisfy by using products.
+    /// 4. Try to satisfy by consuming prdoucts.
+    /// 
+    /// TODO Improve this by using product memory to prioritize sources for each want. Rather than following strict ordering.
+    /// TODO Not Tested
+    pub fn consume_and_sift_wants(&mut self, data: &DataManager, 
     history: &MarketHistory) {
         // get all our property and wants into untouched, used, and consumed.
-        let mut untouched_products = HashMap::new();
-        let mut used_products = HashMap::new();
-        let mut consumed_products = HashMap::new();
-        let mut untouched_wants = HashMap::new();
-        let mut consumed_wants = HashMap::new();
-
-        // copy over our products into untouched.
-        for (product, quantity) in self.property.iter() {
-            untouched_products.insert(*product, *quantity);
-        }
-        // and copy over wants.
-        for (want, quantity) in self.want_store.iter() {
-            untouched_wants.insert(*want, *quantity);
+        let mut used_products: HashMap<usize, f64> = HashMap::new();
+        // create our tracker so we can tell when we're done.
+        let mut tracker = HashSet::new();
+        for (idx, desire) in self.desires.iter().enumerate() {
+            // preemptively add products to our tracked set.
+            if let DesireItem::Product(id) = desire.item {
+                tracker.insert(idx);
+            }
         }
 
         // with our untouched stuff sorted, begin sifting.
         let mut curr = self.walk_up_tiers(None);
         while let Some(coord) = curr {
-            let des = self.desires
-            .get_mut(coord.idx).unwrap();
-            if des.item.is_product() { // if not a want, move onto the next.
+            // if tracker has the same number of items as our desires, we've 
+            // cleared out everything we can. Exit.
+            if tracker.len() == self.desires.len() { break; }
+            // if the index is already in our tracker, then we skip as we've 
+            // already done what we can with it
+            if tracker.contains(&coord.idx) { 
                 curr = self.walk_up_tiers(curr);
                 continue; 
             }
+            // since it's not already dealt with, deal with it.
+            // this should never be a product.
+            let mut desire = self.desires
+                .get_mut(coord.idx).unwrap();
+            let want_id = desire.item.unwrap();
+            let mut ext_target = desire.amount;
+            // try for unused wants first
+            if let Some(extant) = self.want_store.get_mut(want_id) {
+                // with existing available to satisfy, push it in to satisfy our current tier.
+                let shift = extant.min(desire.amount);
+                // with our shift amount gotten, remove from property and add to the desire's satisfaction.
+                desire.satisfaction += shift;
+                ext_target -= shift;
+                *self.want_store.get_mut(want_id).unwrap() -= shift;
+                if *self.want_store.get(want_id).unwrap() == 0.0 {
+                    // if now empty, remove it.
+                    self.want_store.remove(want_id);
+                }
+            }
+            if ext_target == 0.0 { // if that did it, go to next desire.
+                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
+                    tracker.insert(coord.idx);
+                }
+                curr = self.walk_up_tiers(curr);
+                continue;
+            }
+            // next try ownership sources
+            let want_info = data.wants.get(want_id).expect("Want not in Data!");
+            for product_id in want_info.ownership_sources.iter() {
+                if let Some(available) = self.property.get_mut(product_id) { // if we have some, get it
+                    let product_info = data.products.get(product_id).expect("Product Not found!");
+                    let eff = product_info.wants.get(want_id).expect("Product Doesn't give want!");
+                    let ratio = ext_target / eff; // how many products we need to match our target.
+                    // get how many we can get 
+                    let reserve = ratio.min(*available);
+                    // move the reserve from property into used
+                    *used_products.entry(*product_id).or_insert(0.0) += reserve;
+                    let entry = self.property.get_mut(product_id).unwrap();
+                    *entry -= reserve;
+                    if *entry == 0.0 {
+                        self.property.remove(product_id);
+                    }
+                    // update our wants
+                    for (want, amount) in product_info.wants.iter() {
+                        if want == want_id { // if it is our want, add to sat and remove from 
+                            desire.satisfaction += amount * reserve;
+                            ext_target -= amount * reserve;
+                        } else { // if not our want, add to the store.
+                            *self.want_store.entry(*want).or_insert(0.0) += amount * reserve;
+                        }
+                    }
+                    // since we added to our satisfaction, check if we're done, if we are, break out of this
+                    if ext_target == 0.0 {
+                        break;
+                    }
+                }
+            }
+            if ext_target == 0.0 { // if that did it, go to next desire.
+                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
+                    tracker.insert(coord.idx);
+                }
+                curr = self.walk_up_tiers(curr);
+                continue;
+            }
+            // if that wasn't good enough, try Use Sources
+            // TODO as part of the prioritization (or as a mid-step) this should prioritize the most efficient options rather than the order given by the want.
+            for use_id in want_info.use_sources.iter() {
+                let use_process = data.processes.get(use_id).expect("Process not found!");
+                // get how many iterations of the process we need to do it.
+                let outputs = use_process.effective_output_of(PartItem::Want(*want_id));
+                let target = ext_target / outputs; // how many iterations we need to meet the desire.
+                // throw our available property into the process to see if anythnig falls out.
+                let results = use_process.do_process(&self.property, 
+                    &self.want_store, &0.0, &0.0, Some(target), true);
+                if results.iterations > 0.0 { // if anything was done, go through the parts and apply the changes.
+                    for (product, quantity) in results.input_output_products.iter() {
+                        // add outputs and subtract inputs (inputs are already negative.)
+                        *self.property.entry(*product).or_insert(0.0) += quantity;
+                        if *self.property.get(product).unwrap() == 0.0 {
+                            self.property.remove(product);
+                        }
+                    }
+                    for (product, quantity) in results.capital_products.iter() {
+                        // shift used capital from property to used.
+                        *self.property.get_mut(product).unwrap() -= quantity;
+                        *used_products.entry(*product).or_insert(0.0) += quantity;
+                        if *self.property.get(product).unwrap() == 0.0 {
+                            self.property.remove(product);
+                        }
+                    }
+                    for (want, quantity) in results.input_output_wants.iter() {
+                        if want == want_id { // if it's our want, add to satisfaction
+                            desire.satisfaction += quantity;
+                        } else { // else, add to our store.
+                            *self.want_store.entry(*want).or_insert(0.0) += quantity;
+                        }
+                    }
+                }
+                if ext_target == 0.0 {
+                    break;
+                }
+            }
+            if ext_target == 0.0 { // if that did it, go to next desire.
+                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
+                    tracker.insert(coord.idx);
+                }
+                curr = self.walk_up_tiers(curr);
+                continue;
+            }
+            // last thing to try, consumption
+            // TODO as part of the prioritization (or as a mid-step) this should prioritize the most efficient options rather than the order given by the want.
+            for consumption_id in want_info.consumption_sources.iter() {
+                let use_process = data.processes.get(consumption_id).expect("Process not found!");
+                // get how many iterations of the process we need to do it.
+                let outputs = use_process.effective_output_of(PartItem::Want(*want_id));
+                let target = ext_target / outputs; // how many iterations we need to meet the desire.
+                // throw our available property into the process to see if anythnig falls out.
+                let results = use_process.do_process(&self.property, 
+                    &self.want_store, &0.0, &0.0, Some(target), true);
+                if results.iterations > 0.0 { // if anything was done, go through the parts and apply the changes.
+                    for (product, quantity) in results.input_output_products.iter() {
+                        // add outputs and subtract inputs (inputs are already negative.)
+                        *self.property.entry(*product).or_insert(0.0) += quantity;
+                        if *self.property.get(product).unwrap() == 0.0 {
+                            self.property.remove(product);
+                        }
+                    }
+                    for (product, quantity) in results.capital_products.iter() {
+                        // shift used capital from property to used.
+                        *self.property.get_mut(product).unwrap() -= quantity;
+                        *used_products.entry(*product).or_insert(0.0) += quantity;
+                        if *self.property.get(product).unwrap() == 0.0 {
+                            self.property.remove(product);
+                        }
+                    }
+                    for (want, quantity) in results.input_output_wants.iter() {
+                        if want == want_id { // if it's our want, add to satisfaction
+                            desire.satisfaction += quantity;
+                        } else { // else, add to our store.
+                            *self.want_store.entry(*want).or_insert(0.0) += quantity;
+                        }
+                    }
+                }
+                if ext_target == 0.0 {
+                    break;
+                }
+            }
+            /*
+            if self.shift_want_for_satisfaction(&coord, &mut ext_target, &mut untouched_wants, &mut consumed_wants) {
+                // if we succeeded satisfying our current tier, move on to the next from here.
+                curr = self.walk_up_tiers(curr);
+                continue;
+            }
+            // if we get here we still have more to fulfill than we can fulfil from existing wants.
+            let want_info = data.wants.get(&want_id).expect("Want Not found?");
+            for product in want_info.ownership_sources.iter() {
+                // if we have any of that product, get how much we have
+                if let Some(quantity) = untouched_products.get_mut(&product) {
+                    // get the product's info.
+                    let product_info = data.products
+                    .get(&product).expect("Product not found.");
+                    // get how much of our want the product produces.
+                    let eff = product_info.wants.get(&want_id)
+                        .expect("Want not found in product ownership?");
+                    // get how many of the product we need to reach our target
+                    let ratio = ext_target / eff;
+                    // with how many we'll reserve, get all the wants it can produce over
+                    for (want, eff) in product_info.wants.iter() {
+                        // add all the wants from the prdouct to our want storage
+                        let rat_amount = eff * ratio;
+                        *untouched_wants.entry(*want).or_insert(0.0) += rat_amount;
+                        *self.want_store.entry(*want).or_insert(0.0) += rat_amount;
+                    }
+                    // with the wants added, move the amount reserved out and put it into used.
+                    *untouched_products.get_mut(&product)
+                        .expect("Reserving product we don't have.")
+                        -= ratio;
+                    *used_products.entry(product).or_insert(0.0) += ratio;
+                    // then push our wants back in to satisfaction.
+                    if self.shift_want_for_satisfaction(&coord, &mut ext_target, &mut untouched_wants, &mut consumed_wants) {
+                        // if this successfully satisfied for the tier, jump out
+                        continue;
+                    } // if we didn't get our satisfaction met go to the next product.
+                }
+            }
+            if ext_target == 0.0 {
+                curr = self.walk_up_tiers(curr);
+                continue; 
+            }
+
+            // if we got here, then ownership alone wasn't enough. Try using the items instead.
+            for process_id in want_info.use_sources.iter() {
+                let process = data.processes.get(process_id)
+                    .expect("Process not found");
+                // get the target amount we want.
+                let produces = process.effective_output_of(PartItem::Want(*want_id));
+                let ratio = ext_target / produces;
+                // see how much we can do with it
+                let result = process.do_process(&untouched_products, &untouched_wants, 
+                    &0.0, &0.0, Some(ratio), false);
+                if result.iterations > 0.0 { 
+                    // If the process can go, apply it's changes
+                    for (product, quantity) in result.input_output_products.iter() {
+                        if *quantity > 0.0 { // if being added, put into untouched and property.
+                            
+                        } else { // being subtracted from untouched and property, added to consumed
+                            *untouched_products.get_mut(product)
+                                .expect("Product Not Found") += quantity.clone();
+                            *consumed_products.entry(*product).or_insert(0.0) -= quantity;
+                        }
+                    }
+                    for (product, quantity) in result.capital_products.iter() {
+                        *untouched_products.get_mut(product).unwrap() -= quantity;
+                        *used_products.entry(product).or_insert(0.0) += quantity;
+                    }
+                }*/
+            
+
+            // we got to the end without getting out, get next one
+            curr = self.walk_up_tiers(curr);
         }
+    }
+
+    /// # Want consuming function. 
+    /// 
+    /// Takes the desire we are trying to satisfy, and at what tier.
+    /// 
+    /// It also takes the wants we have available and that have already
+    /// been consumed. We update these as we go.
+    /// 
+    /// We return true if we were able to satisfy the desire 
+    /// 
+    /// TODO Not Tested
+    pub fn shift_want_for_satisfaction(&mut self, desire_coord: &DesireCoord, 
+    ext_target: &mut f64, untouched_wants: &mut HashMap<usize, f64>,
+    consumed_wants: &mut HashMap<usize, f64>) -> bool{
+        // get the desire we're modifying.
+        let mut desire = self.desires.get_mut(desire_coord.idx).unwrap();
+        // get the want we're looking at
+        let want_id = desire.item.unwrap();
+        if let Some(available) = untouched_wants.get_mut(want_id) {
+            // get how much we can or need to shift for this tier
+            let shift = available.min(*ext_target);
+            // then add to consumed and the desire
+            *consumed_wants.entry(*want_id).or_insert(0.0) += shift;
+            desire.satisfaction += shift;
+            // and remove from untouched and our target amount
+            *available -= shift;
+            *ext_target -= shift;
+            if *ext_target == 0.0 {
+                return true; 
+            }
+        }
+        return false;
     }
 }
 

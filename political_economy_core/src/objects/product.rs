@@ -11,28 +11,52 @@ use super::process::ProcessTag;
 // use super::technology::Technology;
 use super::want::Want;
 
+/// # Product
+/// 
+/// On of our foundational data classes. Holds data on items that are (mostly)
+/// real and typically exchangeable in the market as apposed to wants which are
+/// never exchangeable.
 #[derive(Debug)]
 pub struct Product {
+    /// The Unique ID of the product.
     pub id: usize,
+    /// The Product's name, should be unique when combined with Variant Name.
+    /// Should not be empty.
     pub name: String,
+    /// The Product's variant name (may be empty), combined with name should be unique.
     pub variant_name: String,
+    /// A short description of the product.
     pub description: String,
+    /// The unit by which this is measured.
     pub unit_name: String,
+    /// The quality of the item, used for variation info and product construction info.
     pub quality: i32,
+    /// The mass of the product in KG.
     pub mass: f64,
+    /// The physical size of the object (on average) in m^3 (may be changed to some other measure.)
     pub bulk: f64,
+    /// The standard time it takes for the product to fail in days.
     pub mean_time_to_failure: Option<u32>,
+    /// whether the item can be sold in units smaller than 1.0.
     pub fractional: bool,
     // icon
+    /// The tags of the product.
     pub tags: Vec<ProductTag>,
+    /// The wants this product produces by owning it. 
     pub wants: HashMap<usize, f64>,
 
+    /// All processes that this product is involved in.
     pub processes: HashSet<usize>,
+    /// The failure process for this product (if it has one.)
     pub failure_process: Option<usize>,
+    /// The use processes of this product.
     pub use_processes: HashSet<usize>,
+    /// The consumption process of this product.
     pub consumption_processes: HashSet<usize>,
+    /// The maintenance processes of this product.
     pub maintenance_processes: HashSet<usize>,
 
+    /// What (if any) tech is required for this product to be visible to Actors.
     pub tech_required: Option<usize>
 }
 

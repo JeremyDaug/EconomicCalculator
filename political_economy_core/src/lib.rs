@@ -3953,6 +3953,332 @@ mod tests {
 
             use crate::objects::process::{Process, ProcessPart, ProcessSectionTag, PartItem};
 
+            mod do_process_should {
+                use std::{str::FromStr, collections::HashMap};
+
+                use crate::objects::process::{Process, PartItem, ProcessPart, ProcessSectionTag};
+
+                #[test]
+                pub fn return_process_returns_empty_correctly() {
+                    let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                        variant_name: String::from_str("").unwrap(), 
+                        description: String::from_str("test").unwrap(), 
+                        minimum_time: 0.0, process_parts: vec![
+                            ProcessPart{ item: PartItem::Product(0), // input product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Want(0), // input want
+                                amount: 2.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                                amount: 0.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Capital },
+                            // placeholder for capital want
+                            ProcessPart{ item: PartItem::Product(2), // output product
+                                amount: 1.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                            ProcessPart{ item: PartItem::Want(2), // output want
+                                amount: 2.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                        ], 
+                        process_tags: vec![], 
+                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                        technology_requirement: None, tertiary_tech: None };
+
+                    let mut available_products = HashMap::new();
+                    let mut available_wants = HashMap::new();
+                    let result = test.do_process(&available_products, 
+                        &available_wants, &0.0, &0.0, 
+                        None, true);
+                    // check that it's all empty.
+                    assert!(result.iterations == 0.0);
+                    assert!(result.effective_iterations == 0.0);
+                    assert!(result.efficiency == 1.0);
+                    assert_eq!(result.input_output_products.len(), 0);
+                    assert_eq!(result.input_output_wants.len(), 0);
+                    assert_eq!(result.capital_products.len(), 0);
+                }
+
+                #[test]
+                pub fn return_process_returns_single_iteration_correctly() {
+                    let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                        variant_name: String::from_str("").unwrap(), 
+                        description: String::from_str("test").unwrap(), 
+                        minimum_time: 0.0, process_parts: vec![
+                            ProcessPart{ item: PartItem::Product(0), // input product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Want(0), // input want
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                                amount: 0.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Capital },
+                            // placeholder for capital want
+                            ProcessPart{ item: PartItem::Product(2), // output product
+                                amount: 1.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                            ProcessPart{ item: PartItem::Want(2), // output want
+                                amount: 2.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                        ], 
+                        process_tags: vec![], 
+                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                        technology_requirement: None, tertiary_tech: None };
+
+                    // 1 of each item, should allow for only 1 iteration to be done.
+                    let mut available_products = HashMap::new();
+                    available_products.insert(0, 1.0);
+                    available_products.insert(1, 1.0);
+                    available_products.insert(2, 1.0);
+                    let mut available_wants = HashMap::new();
+                    available_wants.insert(0, 1.0);
+                    available_wants.insert(1, 1.0);
+                    available_wants.insert(2, 1.0);
+                    let result = test.do_process(&available_products, 
+                        &available_wants, &0.0, &0.0, 
+                        None, true);
+                    // check that it's all empty.
+                    assert!(result.iterations == 1.0);
+                    assert!(result.effective_iterations == 1.0);
+                    assert!(result.efficiency == 1.0);
+                    assert_eq!(result.input_output_products.len(), 2);
+                    assert!(*result.input_output_products.get(&0).unwrap() == -1.0);
+                    assert!(*result.input_output_products.get(&2).unwrap() == 1.5);
+                    assert_eq!(result.input_output_wants.len(), 2);
+                    assert!(*result.input_output_wants.get(&0).unwrap() == -1.0);
+                    assert!(*result.input_output_wants.get(&2).unwrap() == 2.0);
+                    assert_eq!(result.capital_products.len(), 1);
+                    assert!(*result.capital_products.get(&1).unwrap() == 0.5);
+                }
+
+                #[test]
+                pub fn return_process_returns_multiple_iterations_correctly() {
+                    let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                        variant_name: String::from_str("").unwrap(), 
+                        description: String::from_str("test").unwrap(), 
+                        minimum_time: 0.0, process_parts: vec![
+                            ProcessPart{ item: PartItem::Product(0), // input product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Want(0), // input want
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                                amount: 0.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Capital },
+                            // placeholder for capital want
+                            ProcessPart{ item: PartItem::Product(2), // output product
+                                amount: 1.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                            ProcessPart{ item: PartItem::Want(2), // output want
+                                amount: 2.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                        ], 
+                        process_tags: vec![], 
+                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                        technology_requirement: None, tertiary_tech: None };
+
+                    // 1 of each item, should allow for only 1 iteration to be done.
+                    let mut available_products = HashMap::new();
+                    available_products.insert(0, 1.5);
+                    available_products.insert(1, 4.0);
+                    available_products.insert(2, 4.0);
+                    let mut available_wants = HashMap::new();
+                    available_wants.insert(0, 4.0);
+                    available_wants.insert(1, 4.0);
+                    available_wants.insert(2, 4.0);
+                    let result = test.do_process(&available_products, 
+                        &available_wants, &0.0, &0.0, 
+                        None, true);
+                    // check that it's all empty.
+                    assert!(result.iterations == 1.5);
+                    assert!(result.effective_iterations == 1.5);
+                    assert!(result.efficiency == 1.0);
+                    assert_eq!(result.input_output_products.len(), 2);
+                    assert!(*result.input_output_products.get(&0).unwrap() == -1.5);
+                    assert!(*result.input_output_products.get(&2).unwrap() == 2.25);
+                    assert_eq!(result.input_output_wants.len(), 2);
+                    assert!(*result.input_output_wants.get(&0).unwrap() == -1.5);
+                    assert!(*result.input_output_wants.get(&2).unwrap() == 3.0);
+                    assert_eq!(result.capital_products.len(), 1);
+                    assert!(*result.capital_products.get(&1).unwrap() == 0.75);
+                }
+
+                #[test]
+                pub fn return_process_returns_no_iteration_when_missing_input() {
+                    let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                        variant_name: String::from_str("").unwrap(), 
+                        description: String::from_str("test").unwrap(), 
+                        minimum_time: 0.0, process_parts: vec![
+                            ProcessPart{ item: PartItem::Product(0), // input product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Want(0), // input want
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                                amount: 0.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Capital },
+                            // placeholder for capital want
+                            ProcessPart{ item: PartItem::Product(2), // output product
+                                amount: 1.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                            ProcessPart{ item: PartItem::Want(2), // output want
+                                amount: 2.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                        ], 
+                        process_tags: vec![], 
+                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                        technology_requirement: None, tertiary_tech: None };
+
+                    // 1 of each item, should allow for only 1 iteration to be done.
+                    let mut available_products = HashMap::new();
+                    available_products.insert(0, 0.0);
+                    available_products.insert(1, 1.0);
+                    available_products.insert(2, 1.0);
+                    let mut available_wants = HashMap::new();
+                    available_wants.insert(0, 1.0);
+                    available_wants.insert(1, 1.0);
+                    available_wants.insert(2, 1.0);
+                    let result = test.do_process(&available_products, 
+                        &available_wants, &0.0, &0.0, 
+                        None, true);
+                    // check that it's all empty.
+                    assert!(result.iterations == 0.0);
+                    assert!(result.effective_iterations == 0.0);
+                    assert!(result.efficiency == 1.0);
+                    assert_eq!(result.input_output_products.len(), 0);
+                    assert_eq!(result.input_output_wants.len(), 0);
+                    assert_eq!(result.capital_products.len(), 0);
+                }
+                
+                #[test]
+                pub fn return_process_returns_no_iteration_when_missing_capital() {
+                    let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                        variant_name: String::from_str("").unwrap(), 
+                        description: String::from_str("test").unwrap(), 
+                        minimum_time: 0.0, process_parts: vec![
+                            ProcessPart{ item: PartItem::Product(0), // input product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Want(0), // input want
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                                amount: 0.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Capital },
+                            // placeholder for capital want
+                            ProcessPart{ item: PartItem::Product(2), // output product
+                                amount: 1.5, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                            ProcessPart{ item: PartItem::Want(2), // output want
+                                amount: 2.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                        ], 
+                        process_tags: vec![], 
+                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                        technology_requirement: None, tertiary_tech: None };
+
+                    // 1 of each item, should allow for only 1 iteration to be done.
+                    let mut available_products = HashMap::new();
+                    available_products.insert(0, 1.0);
+                    available_products.insert(1, 0.0);
+                    available_products.insert(2, 1.0);
+                    let mut available_wants = HashMap::new();
+                    available_wants.insert(0, 1.0);
+                    available_wants.insert(1, 1.0);
+                    available_wants.insert(2, 1.0);
+                    let result = test.do_process(&available_products, 
+                        &available_wants, &0.0, &0.0, 
+                        None, true);
+                    // check that it's all empty.
+                    assert!(result.iterations == 0.0);
+                    assert!(result.effective_iterations == 0.0);
+                    assert!(result.efficiency == 1.0);
+                    assert_eq!(result.input_output_products.len(), 0);
+                    assert_eq!(result.input_output_wants.len(), 0);
+                    assert_eq!(result.capital_products.len(), 0);
+                }
+            }
+
+            mod effective_output_of_should {
+                use std::str::FromStr;
+
+                use crate::objects::process::{Process, ProcessPart, PartItem, ProcessSectionTag};
+
+                #[test]
+                pub fn return_correctly_for_input_capital_output_and_unrelated_items() {
+                    let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                        variant_name: String::from_str("").unwrap(), 
+                        description: String::from_str("test").unwrap(), 
+                        minimum_time: 0.0, process_parts: vec![
+                            ProcessPart{ item: PartItem::Product(0), // input product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Want(0), // input want
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Input },
+                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Capital },
+                            // placeholder for capital want
+                            ProcessPart{ item: PartItem::Product(2), // output product
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                            ProcessPart{ item: PartItem::Want(2), // output want
+                                amount: 1.0, 
+                                part_tags: vec![], 
+                                part: ProcessSectionTag::Output },
+                        ], 
+                        process_tags: vec![], 
+                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
+                        technology_requirement: None, tertiary_tech: None };
+
+                    // not in at all
+                    assert!(test.effective_output_of(PartItem::Want(3)) == 0.0);
+                    assert!(test.effective_output_of(PartItem::Product(3)) == 0.0);
+                    // input
+                    assert!(test.effective_output_of(PartItem::Want(0)) == 0.0);
+                    assert!(test.effective_output_of(PartItem::Product(0)) == 0.0);
+                    // capital
+                    // capital want placeholder.
+                    assert!(test.effective_output_of(PartItem::Product(1)) == 0.0);
+                    // output 
+                    assert!(test.effective_output_of(PartItem::Want(2)) == 1.0);
+                    assert!(test.effective_output_of(PartItem::Product(2)) == 1.0);
+                }
+            }
+
             #[test]
             pub fn should_return_correctly_when_eerything_needed_is_given() {
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 

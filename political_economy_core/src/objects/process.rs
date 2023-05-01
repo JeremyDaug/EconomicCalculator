@@ -1,5 +1,7 @@
 use std::{collections::HashMap};
 
+use itertools::Itertools;
+
 use super::{pop::Pop, pop_breakdown_table::PopBreakdownTable};
 
 #[derive(Debug)]
@@ -179,7 +181,6 @@ impl Process {
     /// - Second is all wants consumed or created by the process (inputs/outputs).
     /// - Third is all products used as capital in the process (Used Capital).
     /// 
-    /// TODO Both make and Test this function.
     /// TODO Include logic for process part tags: Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
     /// TODO pop_skill and other_efficiency_boni are currently not taken into account.
     /// TODO hard_cap is not taken into account, assumed to always be true currently.
@@ -264,6 +265,22 @@ impl Process {
 
             results
         }
+
+    /// # Effective Output Of 
+    /// 
+    /// This is a helper function, given an item, it calculates how much of 
+    /// that itmes is produced on average per cycle.
+    /// 
+    /// If it does not produce that item, then it returns 0.0.
+    /// 
+    /// TODO add in logic to handle chance outputs when chance is created.
+    /// TODO when optional inputs are available, return a min and max instead of just 1 value.
+    pub fn effective_output_of(&self, item: PartItem) -> f64 {
+        let outputs = self.process_parts.iter()
+            .filter(|x| x.part.is_output() && x.item == item).collect_vec();
+        // since we don't have chance products yet, just sum them together.
+        outputs.iter().map(|x| x.amount).sum()
+    }
 }
 
 /// Helper struct used for process outputs

@@ -403,6 +403,33 @@ impl Desire {
         copy.amount *=  factor as f64;
         copy
     }
+
+    /// # Past End
+    /// 
+    /// Helper function which checks if the given tier is beyond the last tier 
+    /// that this desire can reach.
+    /// 
+    /// TODO Test This.
+    pub fn past_end(&self, tier: u64) -> bool {
+        if let Some(last) = self.end { // if we have an end, check against that
+            return last < tier;
+        }
+        // if we are infinite, we can never get past the end.
+        if self.is_infinite() {
+            return false;
+        }
+        // if we have no end and are not infinite, then we must have 1 tier, our start.
+        return self.start < tier;
+    }
+
+    /// # Before Start
+    /// 
+    /// Helper function which checks that the given tier is before our first tier.
+    /// 
+    /// TODO Test This.
+    pub fn before_start(&self, tier: u64) -> bool {
+        self.start > tier
+    }
 }
 
 /// The tags a desire can be marked by, modifying how the desire is viewed.
