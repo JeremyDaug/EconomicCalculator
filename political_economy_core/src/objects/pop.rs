@@ -528,7 +528,7 @@ impl Pop {
                 } else if seller == self.actor_info() {
                     // TODO When cha
                     let accepted = self.standard_sell(rx, tx, data, market, keep, spend, product, buyer);
-                    self.sort_new_items(keep, spend, accepted);
+                    self.sort_new_items(keep, spend, &accepted);
                 } else {
                     panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
                 }
@@ -1187,26 +1187,25 @@ impl Pop {
     /// part of a sale (with this pop as the seller).
     /// 
     /// This ONLY sorts the accepted items into keep and spend, nothing else.
-    /// 
-    /// TODO needs to be tested.
-    pub fn sort_new_items(&mut self, keep: &mut HashMap<usize, f64>, 
-    spend: &mut HashMap<usize, f64>, accepted: HashMap<usize, f64>) {
+    pub fn sort_new_items(&self, keep: &mut HashMap<usize, f64>, 
+    spend: &mut HashMap<usize, f64>, accepted: &HashMap<usize, f64>) {
         // Go through the accepted list
         for (product, quantity) in accepted {
             // get the item's target (if we have one)
-            let target = if let Some(know) = self.memory.product_knowledge
+            let target = if let Some(know) = 
+            self.memory.product_knowledge
             .get(&product) {
                 know.target
             } else { 0.0 };
             // add our items to keep, up to that target
-            let to_keep = target.min(quantity);
+            let to_keep = target.min(*quantity);
             if to_keep > 0.0 {
-                *keep.entry(product).or_insert(0.0) += to_keep;
+                *keep.entry(*product).or_insert(0.0) += to_keep;
             }
             // then put the rest into spend.
             let remainder = quantity - to_keep;
             if remainder > 0.0 {
-                *spend.entry(product).or_insert(0.0) += remainder;
+                *spend.entry(*product).or_insert(0.0) += remainder;
             }
         }
     }

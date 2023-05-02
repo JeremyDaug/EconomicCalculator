@@ -598,6 +598,60 @@ mod tests {
 
         }
         
+        mod sort_new_items_should {
+            use std::collections::HashMap;
+            use crate::objects::pop_memory::Knowledge;
+            use super::make_test_pop;
+
+            #[test]
+            pub fn place_items_given_appropriately() {
+                let mut test = make_test_pop();
+                // setup the pop's knowledge for the test.
+                test.memory.product_knowledge.insert(0, Knowledge{
+                    target: 5.0,
+                    rollover: 0.0,
+                    achieved: 0.0,
+                    spent: 0.0,
+                    lost: 0.0,
+                    time_budget: 10.0,
+                    amv_budget: 10.0,
+                    time_spent: 0.0,
+                    amv_spent: 0.0,
+                    success_rate: 0.5,
+                });
+                test.memory.product_knowledge.insert(1, Knowledge{
+                    target: 5.0,
+                    rollover: 0.0,
+                    achieved: 0.0,
+                    spent: 0.0,
+                    lost: 0.0,
+                    time_budget: 10.0,
+                    amv_budget: 10.0,
+                    time_spent: 0.0,
+                    amv_spent: 0.0,
+                    success_rate: 0.5,
+                });
+
+
+                let mut keep = HashMap::new();
+                let mut spend = HashMap::new();
+                let mut accepted = HashMap::new();
+                accepted.insert(0, 4.0);
+                accepted.insert(1, 6.0);
+                accepted.insert(2, 1.0);
+
+                test.sort_new_items(&mut keep, &mut spend, &accepted);
+
+                assert!(*keep.get(&0).unwrap() == 4.0);
+                assert!(*keep.get(&1).unwrap() == 5.0);
+                assert!(keep.get(&2).is_none());
+
+                assert!(spend.get(&0).is_none());
+                assert!(*spend.get(&1).unwrap() == 1.0);
+                assert!(*spend.get(&2).unwrap() == 1.0);
+            }
+        }
+
         mod standard_sell {
             use std::{collections::HashMap, thread, time::Duration};
             use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller}};
