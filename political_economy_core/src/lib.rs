@@ -2661,6 +2661,38 @@ mod tests {
     mod desires_tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
+        mod remove_property_should {
+            use crate::objects::{desires::Desires, desire::{Desire, DesireItem}};
+
+            pub fn correctly_remove_item_from_property_and_satisfaction() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(1), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]});
+                let mut test = Desires::new(test_desires);
+                // add property
+                test.property.insert(0, 10.0);
+                test.property.insert(1, 10.0);
+                // add saturation
+                test.desires.get_mut(1).unwrap()
+                .add_satisfaction(5.0);
+                
+            }
+        }
+
         #[test]
         pub fn total_desire_at_tier() {
             let mut test_desires = vec![];
