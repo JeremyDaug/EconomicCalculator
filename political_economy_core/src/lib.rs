@@ -2661,9 +2661,103 @@ mod tests {
     mod desires_tests {
         use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
+        mod market_satisfaction_should {
+            use std::collections::HashMap;
+
+            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires, market::{MarketHistory, ProductInfo}};
+
+            #[test]
+            pub fn return_correct_market_satisfaction() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 1.0, 
+                    satisfaction: 2.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(1), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 3.0,
+                    step: 2,
+                    tags: vec![]});
+                let mut test = Desires::new(test_desires);
+                let mut product_info = HashMap::new();
+                product_info.insert(0, ProductInfo{
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.5,
+                    is_currency: false,
+                });
+                product_info.insert(1, ProductInfo{
+                    available: 0.0,
+                    price: 5.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.5,
+                    is_currency: false,
+                });
+                let test_market = MarketHistory{
+                    info: product_info,
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
+                let result = test.market_satisfaction(&test_market);
+                assert!(result == 17.0);
+            }
+        }
+
+        mod update_satisfactions_should {
+            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires};
+
+            #[test]
+            pub fn correctly_update_satisfaction() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 1.0, 
+                    satisfaction: 2.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(1), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 6.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(2), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 4.0,
+                    step: 2,
+                    tags: vec![]});
+                let mut test = Desires::new(test_desires);
+                test.update_satisfactions();
+
+                assert_eq!(test.full_tier_satisfaction, 6);
+                assert_eq!(test.highest_tier, 10);
+                assert!(test.quantity_satisfied == 12.0);
+                assert!(test.partial_satisfaction > 3.0 && test.partial_satisfaction < 4.0);
+                assert_eq!(test.hard_satisfaction, 4);
+            }
+        }
+
         mod remove_property_should {
             use crate::objects::{desires::Desires, desire::{Desire, DesireItem}};
 
+            #[test]
             pub fn correctly_remove_item_from_property_and_satisfaction() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
@@ -2689,7 +2783,16 @@ mod tests {
                 // add saturation
                 test.desires.get_mut(1).unwrap()
                 .add_satisfaction(5.0);
-                
+                // subtract 11.0 from 0
+                let over_remove = test.remove_property(0, &11.0);
+                assert!(over_remove == 10.0);
+                assert!(*test.property.get(&0).unwrap() == 0.0);
+                assert!(test.desires.get(0).unwrap().satisfaction == 0.0);
+                // subtract 4.0 from 1
+                let under_remove = test.remove_property(1, &4.0);
+                assert!(under_remove == 4.0) ;
+                assert!(*test.property.get(&1).unwrap() == 6.0);
+                assert!(test.desires.get(1).unwrap().satisfaction == 1.0);
             }
         }
 

@@ -151,8 +151,6 @@ impl Desires {
     /// Removes a number of product units from property, if needed, it also
     /// removes it from satisfaction. Returns how much was successfully 
     /// removed.
-    /// 
-    /// # TODO not tested
     pub fn remove_property(&mut self, product: usize, amount: &f64) -> f64 {
         let item = DesireItem::Product(product);
         let mut target = self.property.get(&product)
@@ -160,7 +158,7 @@ impl Desires {
         let result = target;
         // with the target (minimum between asked and available) remove 
         // from property
-        *self.property.entry(product).or_insert(0.0) -= amount;
+        *self.property.entry(product).or_insert(0.0) -= target;
 
         // now remove from satisfaction.
         let start_tier = 
@@ -672,8 +670,6 @@ impl Desires {
     /// Updates the satisfactions for our desires.
     /// 
     /// Does not calculate satisfaction base on market history.
-    /// 
-    /// TODO this needs tests.
     pub fn update_satisfactions(&mut self) {
         // start with full tier satisfaction and highest tier.
         self.full_tier_satisfaction = u64::MAX;
@@ -723,7 +719,8 @@ impl Desires {
                 skipped += 1;
             }
         }
-        self.hard_satisfaction = self.full_tier_satisfaction - skipped;
+        // The highest full tier we satisfy, minus skipped tiers, +1 to correctly fence post it.
+        self.hard_satisfaction = self.full_tier_satisfaction - skipped + 1;
     }
 
     /// Calculates, sets, and returns the market satisfaction for these 
@@ -732,8 +729,6 @@ impl Desires {
     /// This is an estimate of how much satisfaction we have in terms 
     /// of AMV. This should be treated as a rough estimate of wealth being 
     /// used by the pop to satisfy their desires.
-    /// 
-    /// TODO test this.
     pub fn market_satisfaction(&mut self, market: &MarketHistory) -> f64 {
         self.market_satisfaction = 0.0;
         for desire in self.desires.iter()
