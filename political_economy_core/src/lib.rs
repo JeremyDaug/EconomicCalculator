@@ -2659,7 +2659,188 @@ mod tests {
     }
 
     mod desires_tests {
-        use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
+        use std::collections::HashMap;
+
+        use crate::{objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}, market::{MarketHistory, ProductInfo}}, data_manager::DataManager};
+
+        mod consume_and_sift_wants_should {
+            use std::collections::{HashMap, HashSet};
+
+            use crate::{objects::{desires::Desires, desire::{DesireItem, Desire}, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}, data_manager::DataManager};
+
+            #[test]
+            pub fn correctly_sift_wants_directly() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2, 4 ...
+                    item: DesireItem::Want(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 2.0,
+                    step: 2,
+                    tags: vec![]});
+                let mut test = Desires::new(test_desires);
+                // setup the products, wants, and processes for our items.
+                let mut data = DataManager::new();
+                data.products.insert(0, Product{
+                    id: 0,
+                    name: "T1".to_string(), 
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None});
+                let prod1 = data.products.get_mut(&0).unwrap();
+                prod1.wants.insert(0, 1.0); // product 0 produces want 0 via ownership
+                data.products.insert(0, Product::new(1, 
+                    "T2".to_string(), 
+                    "".to_string(),
+                    "".to_string(), 
+                    "".to_string(), 
+                    0, 
+                    0.0, 
+                    0.0, 
+                    None, 
+                    false, 
+                    vec![], 
+                    None).unwrap());
+                let prod2 = data.products.get_mut(&1).unwrap();
+                prod2.use_processes.insert(0);
+                data.products.insert(0, Product::new(2, 
+                    "T1".to_string(), 
+                    "".to_string(),
+                    "".to_string(), 
+                    "".to_string(), 
+                    0, 
+                    0.0, 
+                    0.0, 
+                    None, 
+                    false, 
+                    vec![], 
+                    None).unwrap());
+                let prod3 = data.products.get_mut(&2).unwrap();
+                prod3.consumption_processes.insert(1);
+                data.wants.insert(0, Want::new(0, "W1".to_string(), "".to_string(), 0.0).unwrap());
+                data.processes.insert(0, Process{ 
+                    id: 0, 
+                    name: "P1".to_string(), 
+                    variant_name: "".to_string(), 
+                    description: "".to_string(), 
+                    minimum_time: 0.0, 
+                    process_parts: vec![
+                        ProcessPart{ item: PartItem::Product(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                    ],
+                    process_tags: vec![], 
+                    skill: None, 
+                    skill_minimum: 0.0, 
+                    skill_maximum: 0.0, 
+                    technology_requirement: None, 
+                    tertiary_tech: None });
+            }
+        }
+
+        mod market_wealth_should {
+            use std::collections::HashMap;
+
+            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires, market::{MarketHistory, ProductInfo}};
+
+            #[test]
+            pub fn return_the_total_amv_of_property() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 1.0, 
+                    satisfaction: 2.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(1), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 3.0,
+                    step: 2,
+                    tags: vec![]});
+                let mut test = Desires::new(test_desires);
+                let mut product_info = HashMap::new();
+                product_info.insert(0, ProductInfo{
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.5,
+                    is_currency: false,
+                });
+                product_info.insert(1, ProductInfo{
+                    available: 0.0,
+                    price: 5.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.5,
+                    is_currency: false,
+                });
+                let test_market = MarketHistory{
+                    info: product_info,
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
+                test.add_property(0, &4.0);
+                test.add_property(1, &5.0);
+                let result = test.market_wealth(&test_market);
+                assert!(result == 29.0);
+            }
+        }
+
+        mod add_property_should {
+            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires};
+
+            #[test]
+            pub fn add_or_insert_products_into_property_and_remove_correctly() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 1.0, 
+                    satisfaction: 2.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(1), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 3.0,
+                    step: 2,
+                    tags: vec![]});
+                let mut test = Desires::new(test_desires);
+                // insert new
+                assert!(test.add_property(0, &10.0) == 0.0);
+                assert!(*test.property.get(&0).unwrap() == 10.0);
+                // insert to existing
+                assert!(test.add_property(0, &10.0) == 0.0);
+                assert!(*test.property.get(&0).unwrap() == 20.0);
+                // remove partial
+                assert!(test.add_property(0, &-10.0) == 0.0);
+                assert!(*test.property.get(&0).unwrap() == 10.0);
+                // remove excess
+                assert!(test.add_property(0, &-15.0) == 5.0);
+                assert!(!test.property.contains_key(&0));
+            }
+        }
 
         mod market_satisfaction_should {
             use std::collections::HashMap;

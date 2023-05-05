@@ -143,9 +143,22 @@ impl Desires {
         // we have either run out of desires to possibly satisfy
     }
 
-    /// Adds a number of units to the property.
-    pub fn add_property(&mut self, product: usize, amount: &f64) {
-        *self.property.entry(product).or_insert(0.0) += amount;
+    /// Adds or subtracts a number of units to the property.
+    /// if the property reaches 0.0, it removes it from property entirely.
+    /// 
+    /// If the amount subtracted results in a negative, it removes and returns 
+    /// the excess back as positive. If no excess, it returns 0.0.
+    /// 
+    /// IE, 5.0 in property, 10.0 subtracted, returns 5.0.
+    pub fn add_property(&mut self, product: usize, amount: &f64) -> f64 {
+        let value = *self.property.entry(product)
+        .and_modify(|x| *x += amount)
+        .or_insert(*amount);
+        if value <= 0.0 {
+            self.property.remove(&product);
+            return -value;
+        }
+        0.0
     }
 
     /// Removes a number of product units from property, if needed, it also
@@ -186,6 +199,7 @@ impl Desires {
             target -= available;
             if target == 0.0 {
                 return result;
+
             }
         }
 
@@ -745,8 +759,6 @@ impl Desires {
     /// everything, not just satisfaction, measured in it's wealth.
     /// 
     /// This is how much they own and how valuable it is in market value.
-    /// 
-    /// TODO Test This.
     pub fn market_wealth(&mut self, market: &MarketHistory) -> f64 {
         self.property.iter()
         // get the price * the amount owned.
@@ -1042,7 +1054,7 @@ impl Desires {
     /// 
     /// We return true if we were able to satisfy the desire 
     /// 
-    /// TODO Not Tested
+    /// FIXME Not Used, currently non-functional due to lifetime issues.
     pub fn shift_want_for_satisfaction(&mut self, desire_coord: &DesireCoord, 
     ext_target: &mut f64, untouched_wants: &mut HashMap<usize, f64>,
     consumed_wants: &mut HashMap<usize, f64>) -> bool{

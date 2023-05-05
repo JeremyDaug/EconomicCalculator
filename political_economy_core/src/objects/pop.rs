@@ -271,8 +271,7 @@ impl Pop {
                     amount: self.memory.work_time
                     });
                 // and remove that time from our property as well
-                self.desires.property.entry(TIME_ID)
-                .and_modify(|x| *x -= self.memory.work_time );
+                self.desires.add_property(TIME_ID, &-self.memory.work_time);
             },
             FirmEmployeeAction::RequestEverything => {
                 // loop over everything and send it to the firm.
@@ -539,7 +538,7 @@ impl Pop {
                 // we're recieving a product, so check if we desire it. if we do, add it to keep and property
                 if let Some(prod_mem) = self.memory.product_knowledge.get_mut(&product) {
                     prod_mem.achieved += amount;
-                    *self.desires.property.entry(product).or_insert(0.0) += amount;
+                    self.desires.add_property(product, &amount);
                     let remaining_target = prod_mem.target_remaining();
                     let to_target = remaining_target.min(amount);
                     let to_spend = amount - to_target;
@@ -548,7 +547,7 @@ impl Pop {
                 } else { // if we have no memory of it, add it to memory and our spend pile
                     let prod_mem = self.memory.product_knowledge.entry(product).or_insert(Knowledge::new());
                     prod_mem.achieved += amount;
-                    *self.desires.property.entry(product).or_insert(0.0) += amount;
+                    self.desires.add_property(product, &amount);
                     *spend.entry(product).or_insert(0.0) += amount;
                 }
                 return None;
@@ -616,7 +615,7 @@ impl Pop {
         // subtract the time from our stock and add it to time spent
         // TODO Consider updating this to scale not just with population buying but also the 
         // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
-        *self.desires.property.get_mut(&constants::TIME_ID).unwrap() -= time_cost;
+        self.desires.add_property(constants::TIME_ID, &-time_cost);
         mem.time_spent += time_cost;
         // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
         *spend.get_mut(&0).unwrap() -= SHOPPING_TIME_COST * self.breakdown_table.total as f64;
@@ -786,19 +785,14 @@ impl Pop {
                 ActorMessage::SellerAcceptOfferAsIs { .. } => {
                     // offer accepted as is,
                     // add what we purchased.
-                    *self.desires.property.entry(product).or_insert(0.0) += target;
+                    self.desires.add_property(product, &target);
                     // update our achieved target property.
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().achieved += target;
                     // for everything we spent
                     for (offer_prod, amount) in offer.iter() {
                         // remove it from property.
-                        *self.desires.property.get_mut(offer_prod)
-                            .expect("Product offered was not owned.") -= amount;
-                        // if item is now 0 remove it
-                        if *self.desires.property.get(offer_prod).unwrap() == 0.0 { 
-                            self.desires.property.remove(offer_prod);
-                        }
+                        self.desires.add_property(*offer_prod, &-amount);
                         // subtract the amount from our spend entry.
                         *spend.get_mut(offer_prod).unwrap() -= amount; // since we spent it it must be there
                         if *spend.get(offer_prod).unwrap() == 0.0 { // if we spent all of it, remove it.
@@ -839,10 +833,7 @@ impl Pop {
                     let mut resulting_amv = 0.0;
                     for (offer_prod, quant) in offer.iter() {
                         // remove from property
-                        *self.desires.property.entry(*offer_prod).or_insert(0.0) -= quant;
-                        if *self.desires.property.get(offer_prod).unwrap() == 0.0 {
-                            self.desires.property.remove(offer_prod);
-                        }
+                        self.desires.add_property(*offer_prod, quant);
                         // also record whether we spent or recieved the offer item.
                         let mem = self.memory.product_knowledge.entry(*offer_prod)
                             .or_insert(Knowledge::new());
@@ -862,7 +853,7 @@ impl Pop {
                         resulting_amv += market.get_product_price(offer_prod, 0.0) * quant;
                     }
                     // add what we purchased.
-                    *self.desires.property.entry(product).or_insert(0.0) += target;
+                    self.desires.add_property(product, &target);
                     // add what we achieved to it's memory
                     self.memory.product_knowledge.get_mut(&product)
                         .unwrap().achieved += target;
@@ -1146,13 +1137,13 @@ impl Pop {
                     self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
                         buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
                     // remove the items given from spend and return the offer
-                    *self.desires.property.get_mut(&requested_product).unwrap() -= quantity_requested;
+                    self.desires.add_property(requested_product, &quantity_requested);
                     return offer;
                 } else { // within our overspend threshold
                     self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
                         buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
                     // remove the items given from spend and return the offer
-                    *self.desires.property.get_mut(&requested_product).unwrap() -= quantity_requested;
+                    self.desires.add_property(requested_product, &quantity_requested);
                     return offer;
                 }
             } else { // they are underpaying, reject the offer
