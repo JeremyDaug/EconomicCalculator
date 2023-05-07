@@ -2676,12 +2676,25 @@ mod tests {
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
-                    satisfaction: 2.0,
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]});
+                // Add a desire to ignore for good measure
+                test_desires.push(Desire{ // 0,2, 4 ...
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
                     step: 2,
                     tags: vec![]});
                 let mut test = Desires::new(test_desires);
+                // add want to be consumed first
+                test.want_store.insert(0, 1.0);
                 // setup the products, wants, and processes for our items.
                 let mut data = DataManager::new();
+                // product 0, used as time, and has ownership want
+                
                 data.products.insert(0, Product{
                     id: 0,
                     name: "T1".to_string(), 
@@ -2703,7 +2716,8 @@ mod tests {
                     tech_required: None});
                 let prod1 = data.products.get_mut(&0).unwrap();
                 prod1.wants.insert(0, 1.0); // product 0 produces want 0 via ownership
-                data.products.insert(0, Product::new(1, 
+                // product 1, has use want
+                data.products.insert(1, Product::new(1, 
                     "T2".to_string(), 
                     "".to_string(),
                     "".to_string(), 
@@ -2717,7 +2731,8 @@ mod tests {
                     None).unwrap());
                 let prod2 = data.products.get_mut(&1).unwrap();
                 prod2.use_processes.insert(0);
-                data.products.insert(0, Product::new(2, 
+                // product 2, has consumption want.
+                data.products.insert(2, Product::new(2, 
                     "T1".to_string(), 
                     "".to_string(),
                     "".to_string(), 
@@ -2731,15 +2746,25 @@ mod tests {
                     None).unwrap());
                 let prod3 = data.products.get_mut(&2).unwrap();
                 prod3.consumption_processes.insert(1);
-                data.wants.insert(0, Want::new(0, "W1".to_string(), "".to_string(), 0.0).unwrap());
+                data.wants.insert(0, Want::new(0, 
+                    "W1".to_string(),
+                    "".to_string(), 
+                    0.0).unwrap());
+                // connect up want data.
+                let want = data.wants.get_mut(&0).unwrap();
+                want.ownership_sources.insert(0);
+                want.use_sources.push(0);
+                want.consumption_sources.push(1);
+                // the use process
                 data.processes.insert(0, Process{ 
                     id: 0, 
-                    name: "P1".to_string(), 
+                    name: "U1".to_string(), 
                     variant_name: "".to_string(), 
                     description: "".to_string(), 
                     minimum_time: 0.0, 
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Product(1), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
                     ],
                     process_tags: vec![], 
                     skill: None, 
@@ -2747,6 +2772,41 @@ mod tests {
                     skill_maximum: 0.0, 
                     technology_requirement: None, 
                     tertiary_tech: None });
+                // the consumption process, outputs the want and a product for testing purposes.
+                data.processes.insert(1, Process{ 
+                    id: 1, 
+                    name: "C1".to_string(), 
+                    variant_name: "".to_string(), 
+                    description: "".to_string(), 
+                    minimum_time: 0.0, 
+                    process_parts: vec![
+                        ProcessPart{ item: PartItem::Product(2), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
+                    ],
+                    process_tags: vec![], 
+                    skill: None, 
+                    skill_minimum: 0.0, 
+                    skill_maximum: 0.0, 
+                    technology_requirement: None, 
+                    tertiary_tech: None });
+                
+                test.add_property(0, &1.0);
+                test.add_property(1, &1.0);
+                test.add_property(2, &1.0);
+
+                test.consume_and_sift_wants(&data);
+                
+                // This should not have consumed product 0, ownership source
+                // not consumed product 1, use source
+                // consumed product 2, consumption source
+                // and want 0 stored should be totally consumed
+                assert!(*test.property.get(&0).unwrap() == 1.0);
+                assert!(*test.property.get(&1).unwrap() == 1.0);
+                assert!(!test.property.contains_key(&2));
+                assert!(*test.property.get(&3).unwrap() == 1.0);
+                assert!(!test.want_store.contains_key(&0));
+                assert!(test.desires.first().unwrap().satisfaction == 4.0);
             }
         }
 
@@ -3803,6 +3863,112 @@ mod tests {
 
     mod desire_tests {
         use crate::objects::desire::{Desire, DesireItem};
+
+        mod before_start_should {
+            use crate::objects::desire::{DesireItem, Desire};
+
+            #[test]
+            pub fn return_false_if_after_start() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 10, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 0,
+                    tags: vec![]};
+
+                assert!(!test.before_start(11));
+            }
+
+            #[test]
+            pub fn return_true_if_before_start() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 10, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 0,
+                    tags: vec![]};
+
+                assert!(test.before_start(4));
+            }
+        }
+
+        mod past_end_should {
+            use crate::objects::desire::{DesireItem, Desire};
+
+            #[test]
+            pub fn return_false_if_nonstretched_desire_is_before_start() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 10, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 0,
+                    tags: vec![]};
+
+                assert!(!test.past_end(4));
+            }
+
+            #[test]
+            pub fn return_true_if_tier_is_after_start_for_non_stretched_desire() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 0,
+                    tags: vec![]};
+
+                assert!(test.past_end(100));
+            }
+
+            #[test]
+            pub fn return_false_if_before_last() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]};
+
+                assert!(!test.past_end(9));
+            }
+
+            #[test]
+            pub fn return_true_if_tier_after_last() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]};
+
+                assert!(test.past_end(100));
+            }
+
+            #[test]
+            pub fn return_false_when_desire_is_infinite() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]};
+
+                assert!(!test.past_end(100));
+            }
+        }
 
         #[test]
         pub fn correctly_add_satisfaction_at_tier() {

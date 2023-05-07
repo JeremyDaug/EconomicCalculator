@@ -408,8 +408,6 @@ impl Desire {
     /// 
     /// Helper function which checks if the given tier is beyond the last tier 
     /// that this desire can reach.
-    /// 
-    /// TODO Test This.
     pub fn past_end(&self, tier: u64) -> bool {
         if let Some(last) = self.end { // if we have an end, check against that
             return last < tier;
@@ -425,8 +423,6 @@ impl Desire {
     /// # Before Start
     /// 
     /// Helper function which checks that the given tier is before our first tier.
-    /// 
-    /// TODO Test This.
     pub fn before_start(&self, tier: u64) -> bool {
         self.start > tier
     }

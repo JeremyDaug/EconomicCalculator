@@ -477,7 +477,7 @@ impl Market {
         // get the price of the merchandise.
         let product_price = deal.request_quantity * deal.unit_price;
         // summarize the price of items offered in current market value.
-        let mut offer_value: f64 = deal.offer.iter()
+        let offer_value: f64 = deal.offer.iter()
         .map(|(prod, quant)| quant * self.prices.get(prod).unwrap_or(&1.0))
         .sum();
         

@@ -833,7 +833,7 @@ impl Pop {
                     let mut resulting_amv = 0.0;
                     for (offer_prod, quant) in offer.iter() {
                         // remove from property
-                        self.desires.add_property(*offer_prod, quant);
+                        self.desires.add_property(*offer_prod, &-quant);
                         // also record whether we spent or recieved the offer item.
                         let mem = self.memory.product_knowledge.entry(*offer_prod)
                             .or_insert(Knowledge::new());
@@ -1137,13 +1137,13 @@ impl Pop {
                     self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
                         buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
                     // remove the items given from spend and return the offer
-                    self.desires.add_property(requested_product, &quantity_requested);
+                    self.desires.add_property(requested_product, &-quantity_requested);
                     return offer;
                 } else { // within our overspend threshold
                     self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
                         buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
                     // remove the items given from spend and return the offer
-                    self.desires.add_property(requested_product, &quantity_requested);
+                    self.desires.add_property(requested_product, &-quantity_requested);
                     return offer;
                 }
             } else { // they are underpaying, reject the offer
@@ -1169,7 +1169,7 @@ impl Pop {
         self.desires.sift_products();
         // TODO add non-specific satisfaction slots here.
         // Consume Property to satisfy wants.
-        self.desires.consume_and_sift_wants(data, history);
+        self.desires.consume_and_sift_wants(data);
     }
 
     /// # Sort New Items

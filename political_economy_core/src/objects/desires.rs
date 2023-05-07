@@ -796,9 +796,7 @@ impl Desires {
     /// 4. Try to satisfy by consuming prdoucts.
     /// 
     /// TODO Improve this by using product memory to prioritize sources for each want. Rather than following strict ordering.
-    /// TODO Not Tested
-    pub fn consume_and_sift_wants(&mut self, data: &DataManager, 
-    history: &MarketHistory) {
+    pub fn consume_and_sift_wants(&mut self, data: &DataManager) {
         // get all our property and wants into untouched, used, and consumed.
         let mut used_products: HashMap<usize, f64> = HashMap::new();
         // create our tracker so we can tell when we're done.
@@ -842,7 +840,8 @@ impl Desires {
                 }
             }
             if ext_target == 0.0 { // if that did it, go to next desire.
-                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
+                if desire.past_end(coord.tier+1) { 
+                    // if this is the last tier, or fully satisfied, add to tracker.
                     tracker.insert(coord.idx);
                 }
                 curr = self.walk_up_tiers(curr);
@@ -969,79 +968,22 @@ impl Desires {
                     break;
                 }
             }
-            /*
-            if self.shift_want_for_satisfaction(&coord, &mut ext_target, &mut untouched_wants, &mut consumed_wants) {
-                // if we succeeded satisfying our current tier, move on to the next from here.
+            if ext_target == 0.0 { // if that did it, go to next desire.
+                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
+                    tracker.insert(coord.idx);
+                }
                 curr = self.walk_up_tiers(curr);
                 continue;
             }
-            // if we get here we still have more to fulfill than we can fulfil from existing wants.
-            let want_info = data.wants.get(&want_id).expect("Want Not found?");
-            for product in want_info.ownership_sources.iter() {
-                // if we have any of that product, get how much we have
-                if let Some(quantity) = untouched_products.get_mut(&product) {
-                    // get the product's info.
-                    let product_info = data.products
-                    .get(&product).expect("Product not found.");
-                    // get how much of our want the product produces.
-                    let eff = product_info.wants.get(&want_id)
-                        .expect("Want not found in product ownership?");
-                    // get how many of the product we need to reach our target
-                    let ratio = ext_target / eff;
-                    // with how many we'll reserve, get all the wants it can produce over
-                    for (want, eff) in product_info.wants.iter() {
-                        // add all the wants from the prdouct to our want storage
-                        let rat_amount = eff * ratio;
-                        *untouched_wants.entry(*want).or_insert(0.0) += rat_amount;
-                        *self.want_store.entry(*want).or_insert(0.0) += rat_amount;
-                    }
-                    // with the wants added, move the amount reserved out and put it into used.
-                    *untouched_products.get_mut(&product)
-                        .expect("Reserving product we don't have.")
-                        -= ratio;
-                    *used_products.entry(product).or_insert(0.0) += ratio;
-                    // then push our wants back in to satisfaction.
-                    if self.shift_want_for_satisfaction(&coord, &mut ext_target, &mut untouched_wants, &mut consumed_wants) {
-                        // if this successfully satisfied for the tier, jump out
-                        continue;
-                    } // if we didn't get our satisfaction met go to the next product.
-                }
-            }
-            if ext_target == 0.0 {
-                curr = self.walk_up_tiers(curr);
-                continue; 
-            }
-
-            // if we got here, then ownership alone wasn't enough. Try using the items instead.
-            for process_id in want_info.use_sources.iter() {
-                let process = data.processes.get(process_id)
-                    .expect("Process not found");
-                // get the target amount we want.
-                let produces = process.effective_output_of(PartItem::Want(*want_id));
-                let ratio = ext_target / produces;
-                // see how much we can do with it
-                let result = process.do_process(&untouched_products, &untouched_wants, 
-                    &0.0, &0.0, Some(ratio), false);
-                if result.iterations > 0.0 { 
-                    // If the process can go, apply it's changes
-                    for (product, quantity) in result.input_output_products.iter() {
-                        if *quantity > 0.0 { // if being added, put into untouched and property.
-                            
-                        } else { // being subtracted from untouched and property, added to consumed
-                            *untouched_products.get_mut(product)
-                                .expect("Product Not Found") += quantity.clone();
-                            *consumed_products.entry(*product).or_insert(0.0) -= quantity;
-                        }
-                    }
-                    for (product, quantity) in result.capital_products.iter() {
-                        *untouched_products.get_mut(product).unwrap() -= quantity;
-                        *used_products.entry(product).or_insert(0.0) += quantity;
-                    }
-                }*/
-            
-
-            // we got to the end without getting out, get next one
+            // we got to the end without getting out, so put this desire into finished.
+            tracker.insert(coord.idx);
+            // get next one
             curr = self.walk_up_tiers(curr);
+        }
+
+        // at the end, add all of our used items back into property.
+        for (item, quantity) in used_products {
+            self.add_property(item, &quantity);
         }
     }
 
