@@ -8,7 +8,7 @@ use barrage::{Sender, Receiver};
 use itertools::Itertools;
 use rand::rngs::ThreadRng;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self}, objects::pop_memory::Knowledge};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self, LOSS_TO_SUCCESS_WEIGHT}, objects::pop_memory::Knowledge};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
@@ -1297,9 +1297,25 @@ impl Pop {
     /// 
     /// With the success rate updated, we then alter our targets, and budgets.
     pub fn adapt_future_plan(&mut self, _data: &DataManager, 
-        _history: &MarketHistory) {
-            todo!()
+    _history: &MarketHistory) {
+        // start by updating our success rate for our buy priorities.
+        for (_, know) in self.memory.product_knowledge.iter_mut() {
+            // get how much we got, achieved includes both what was bought as well as what was given or rolled over from yesterday.
+            let achieved = know.achieved / know.target;
+            // modify achieved down by our loss rate, this may need to be adjusted dynamically as well.
+            // loss pulls down success by 1/4 of it's value currently.
+            let achieved = achieved * (1.0 - know.lost * LOSS_TO_SUCCESS_WEIGHT);
+            // and update the success rate for the knowledge.
+            know.update_success(achieved);
         }
+        // with success updated based on our targets, go through and recalculate budgets and targets.
+        for (prod_id, know) in self.memory.product_knowledge.iter_mut() {
+            // breakup based on the current success rate.
+            if know.success_rate > MAJOR_TARGET_SUCCESS_THRESHOLD {
+
+            }
+        }
+    }
 }
 
 impl Buyer for Pop {
@@ -1402,6 +1418,8 @@ impl Actor for Pop {
             // sell
             false
         };
+
+        // TODO Consider altering these actions to remove from property and only add back in at the end of the day after decay. Would need to think carefully about how best this would be done.
 
         // Wait for our job to poke us, asking/telling us what to give them 
         // and send it all over (will likely get a short lived channel for this)

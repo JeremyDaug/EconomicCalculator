@@ -72,3 +72,9 @@ pub const REASONABLE: f64 = 0.8;
 /// Cheap Threshold
 pub const CHEAP: f64 = 0.5;
 // steal
+
+
+/// ----------- Adapt future plan constants
+
+/// The reducted weight of
+pub const LOSS_TO_SUCCESS_WEIGHT: f64 = 0.25;

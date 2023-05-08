@@ -150,4 +150,13 @@ impl Knowledge {
         // cap it at 1.0
         self.success_rate = self.success_rate.min(1.0);
     }
+
+    /// # Update Success
+    /// 
+    /// Updates the success of our success_rate.
+    /// 
+    /// Equivalent to setting success = (9 * current + new) / 10
+    pub fn update_success(&mut self, achieved: f64) {
+        self.success_rate = (9.0 * self.success_rate + achieved) / 10.0;
+    }
 }
