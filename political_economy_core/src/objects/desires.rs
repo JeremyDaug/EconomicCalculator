@@ -759,7 +759,7 @@ impl Desires {
     /// everything, not just satisfaction, measured in it's wealth.
     /// 
     /// This is how much they own and how valuable it is in market value.
-    pub fn market_wealth(&mut self, market: &MarketHistory) -> f64 {
+    pub fn market_wealth(&self, market: &MarketHistory) -> f64 {
         self.property.iter()
         // get the price * the amount owned.
         .map(|(product, quantity)| 

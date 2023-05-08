@@ -2,10 +2,11 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::{collections::{VecDeque, HashMap}, hash::Hash};
+use std::{collections::{VecDeque, HashMap, HashSet}, hash::Hash};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
+use rand::rngs::ThreadRng;
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self}, objects::pop_memory::Knowledge};
 
@@ -14,7 +15,7 @@ use super::{desires::Desires,
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
-    pop_memory::PopMemory, product::ProductTag, buy_result::BuyResult, 
+    pop_memory::PopMemory, product::ProductTag, buy_result::BuyResult, desire::DesireItem, want::Want, 
 };
 
 /// Pops are the data storage for a population group.
@@ -905,9 +906,7 @@ impl Pop {
 
     /// gets the total current wealth of the pop in question.
     pub fn total_wealth(&self, history: &MarketHistory) -> f64 {
-        self.desires.property.iter()
-        .map(|x| history.get_product_price(x.0, 0.0))
-        .sum()
+        self.desires.market_wealth(history)
     }
 
     /// Gets the wealth of the pop on a per-capita basis.
@@ -1058,8 +1057,8 @@ impl Pop {
     /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry or for the 
     /// TODO Currently does not do change, accepts offer or rejects, no returning change.
     pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, data: &DataManager,
-    market: &MarketHistory, keep: &mut HashMap<usize, f64>, 
+    tx: &Sender<ActorMessage>, _data: &DataManager,
+    market: &MarketHistory, _keep: &mut HashMap<usize, f64>, 
     spend: &mut HashMap<usize, f64>, product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
         let seller = self.actor_info();
         let product_price = market.get_product_price(&product, 1.0);
@@ -1169,7 +1168,10 @@ impl Pop {
         self.desires.sift_products();
         // TODO add non-specific satisfaction slots here.
         // Consume Property to satisfy wants.
+        // TODO This should return products which were used or not used so that the remainder can possibly be maintained.
         self.desires.consume_and_sift_wants(data);
+        // TODO Maintenance would also go here.
+        // TODO should separate maintained products from unmaintained products here.
     }
 
     /// # Sort New Items
@@ -1200,6 +1202,97 @@ impl Pop {
             }
         }
     }
+
+    /// # Decay Goods
+    /// 
+    /// Decay goods goes through all of our current products and wants and
+    /// decays, reduces, or otherwise checks them for failure.
+    /// 
+    /// Any products lost this way are recorded as losses in that product's knowledge.
+    /// 
+    /// TODO, when upgrading to add rolling, add RNG back as a parameter.
+    pub fn decay_goods(&mut self, data: &DataManager) {
+        // start by decaying our wants, wants produced by decay should not decay the same day they are generated.
+        for (want, quantity) in self.desires.want_store.iter_mut() {
+            let want_info = data.wants.get(want).unwrap();
+            if want_info.decay > 0.0 {
+                // if it decays, decay and adjust.
+                *quantity = Want::decay_wants(*quantity, want_info);
+            }
+        }
+        // The change in products gained or lost in from our originals.
+        let mut change: HashMap<usize, f64> = HashMap::new();
+        // go through our products and check them for failure
+        for (product, quantity) in self.desires.property.iter() {
+            // get the product's info
+            let product_info = data.products.get(product)
+                .expect("Product Not Found!");
+            let failure_chance = product_info.failure_chance();
+            if failure_chance > 0.0 && product_info.failure_process.is_some(){
+                // TODO consider adding the RNG to roll for small values of items, rather than assuming fractional failure at all times.
+                // if it has a chance of failure, follow through with the failure.
+                let fail_proc = data.processes
+                    .get(&product_info.failure_process.unwrap()).unwrap();
+                // do the process with a target of failure_chance * quantity
+                let proc_outcome = fail_proc.do_process(&self.desires.property, 
+                    &self.desires.want_store, &0.0, 
+                    &0.0, Some(failure_chance*quantity), true);
+                // Add/delete items and if removed, add to lost
+                for (prod, amount) in proc_outcome.input_output_products.iter() {
+                    if *amount < 0.0 {
+                        self.memory.product_knowledge
+                            .entry(*product)
+                            .and_modify(|x| x.lost -= amount);
+                    }
+                    change.entry(*prod).and_modify(|x| *x += amount)
+                        .or_insert(*amount);
+                }
+                // and add in any wants we got out of it.
+                for (&want, &amount) in proc_outcome.input_output_wants.iter() {
+                    self.desires.want_store.entry(want)
+                        .and_modify(|x| *x += amount).or_insert(amount);
+                }
+            } else if failure_chance > 0.0 {
+                // if fails, but not process, just remove the failing products
+                // TODO add rng rolls here as well.
+                let reduction = quantity * failure_chance;
+                change.entry(*product)
+                    .and_modify(|x| *x -= reduction)
+                    .or_insert(-reduction);
+            }
+        }
+        // with the failures gotten, apply our changes to our property.
+        for (product, quantity) in change {
+            self.desires.add_property(product, &quantity);
+        }
+        // and clear out any empty wants
+        self.desires.want_store.retain(|_, value| {
+            *value != 0.0
+        });
+    }
+
+    /// # Adapt future Plan
+    /// 
+    /// Adapt future plan takes our existing knowledge base and our results
+    /// from todays buying, selling, and consuming to modify our plan for 
+    /// tomorrow.
+    /// 
+    /// Using both our desires and knowledge of what we achieved today
+    /// in particular, we seek to improve our efficiency at achieving our
+    /// desires by altering how much time and/or AMV we budget to them as
+    /// well as alter our buy ordering by swaping Product Knowledge in our
+    /// list and altering our buy targets we want to reach.
+    /// 
+    /// We start by updating how successful we were. The ratio of achieved to
+    /// the target is our current success rate, then apply that to our previous
+    /// success rate. This should be a weighted sum, giving the prior days 
+    /// priority over today.
+    /// 
+    /// With the success rate updated, we then alter our targets, and budgets.
+    pub fn adapt_future_plan(&mut self, _data: &DataManager, 
+        _history: &MarketHistory) {
+            todo!()
+        }
 }
 
 impl Buyer for Pop {
@@ -1314,13 +1407,19 @@ impl Actor for Pop {
         // out to buy things, and dealing with recieved sale orders.
         self.free_time(rx, &tx, data, history);
 
+        // TODO Taxes will either be done here, or in free_time above. Methods of Taxation will need to be looked into for the system.
+
         // With our free time used up and the finish message recieved, begin
         // following through with our consumption. This will both record
         // satisfaction, and consume items as needed.
         self.consume_goods(data, history);
 
+        // with buying, selling, taxation, and consumption completed, 
+        // run decay chances for our goods.
+        self.decay_goods(data);
+
         // With these things consumed, we've done what we can. Process our
-        // results to hopefully improve our situation tomorrow.
+        // results to hopefully improve our situation tomorrow. 
+        self.adapt_future_plan(data, history);
     }
 }
-

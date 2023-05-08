@@ -36,6 +36,9 @@ pub struct Product {
     /// The physical size of the object (on average) in m^3 (may be changed to some other measure.)
     pub bulk: f64,
     /// The standard time it takes for the product to fail in days.
+    /// If None, the product does not decay. 
+    /// else If Some(0), it decays instantly.
+    /// else Some(N), it has a 1/(N+1) chance of failure.
     pub mean_time_to_failure: Option<u32>,
     /// whether the item can be sold in units smaller than 1.0.
     pub fractional: bool,
@@ -48,6 +51,7 @@ pub struct Product {
     /// All processes that this product is involved in.
     pub processes: HashSet<usize>,
     /// The failure process for this product (if it has one.)
+    /// If it has a MTTF, but no Failure Process, it fails into nothing.
     pub failure_process: Option<usize>,
     /// The use processes of this product.
     pub use_processes: HashSet<usize>,
@@ -77,6 +81,23 @@ impl PartialEq for Product {
 }
 
 impl Product {
+    /// # Failure Chance
+    /// 
+    /// Gets the failure chance of the item. Returns 1 / (MTTF + 1),
+    /// if there is no MTTF, it returns 0.0 (IE, no failure chance)
+    pub fn failure_chance(&self) -> f64 {
+        if let Some(mttf) = self.mean_time_to_failure {
+            return 1.0 / (f64::from(mttf) + 1.0);
+        }
+        // if there is no MTTF, it has no chance of failure.
+        0.0
+    }
+
+    /// # Product New Function
+    /// 
+    /// Creates a new empty prdouct. Created to allow for possible sanity 
+    /// checking on what is or isn't a valid product. Typically in relation
+    /// to mass, bulk, and the tags of the product.
     pub fn new(id: usize,
          name: String, 
          variant_name: String, 
@@ -89,10 +110,6 @@ impl Product {
          fractional: bool,
          tags: Vec<ProductTag>,
          tech_required: Option<usize>) -> Option<Self> {
-            if !tags.contains(&ProductTag::Magic) &&
-                (mass < 0.0 || bulk < 0.0) {
-                    return None
-            }
              Some(Self { 
                 id, 
                 name, 

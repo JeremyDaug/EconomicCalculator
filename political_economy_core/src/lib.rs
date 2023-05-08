@@ -267,10 +267,135 @@ mod tests {
             (data, market)
         }
         
+        mod decay_goods_should {
+            use crate::{objects::{want::Want, product::Product, process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
+
+            use super::make_test_pop;
+
+            #[test]
+            pub fn correctly_decay_goods_and_change_storage() {
+                let mut test = make_test_pop();
+                // create fake product, want, and process data for testing.
+                // 3 wants, 1 which decays each day, 1 doesn't decay, 1 only partially decays.
+                // don't need to set want processes, as they aren't used here.
+                let want0 = Want::new(0, 
+                    "daily".to_string(), 
+                    "".to_string(), 
+                    1.0).unwrap();
+                let want1 = Want::new(1, 
+                    "never".to_string(), 
+                    "".to_string(), 
+                    0.0).unwrap();
+                let want2 = Want::new(2, 
+                    "partial".to_string(), 
+                    "".to_string(), 
+                    0.5).unwrap();
+                // 4 products, 1 fails to nothing instantly, 1 fails to nothing 50% of the time,
+                //              1 doesn't fail, 1 fails to another product and a want.
+                let product0 = Product::new(0, 
+                    "Vanish".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    0, 
+                    0.0, 
+                    0.0, 
+                    Some(0), 
+                    false, 
+                    vec![], 
+                    None).unwrap();
+                let product1 = Product::new(1, 
+                    "half".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    0, 
+                    0.0, 
+                    0.0, 
+                    Some(1), 
+                    false, 
+                    vec![], 
+                    None).unwrap();
+                let product2 = Product::new(2, 
+                    "durable".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    0, 
+                    0.0, 
+                    0.0, 
+                    None, 
+                    false, 
+                    vec![], 
+                    None).unwrap();
+                let mut product3 = Product::new(3, 
+                    "rusts".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    "".to_string(), 
+                    0, 
+                    0.0, 
+                    0.0, 
+                    Some(0), 
+                    false, 
+                    vec![], 
+                    None).unwrap();
+                // 1 failure processes, 1 for failure into product and want.
+                let process0 = Process{ 
+                    id: 0, 
+                    name: "Fail".to_string(), 
+                    variant_name: "Fail".to_string(), 
+                    description: "Fail".to_string(), 
+                    minimum_time: 0.0, 
+                    process_parts: vec![
+                        ProcessPart{ item: PartItem::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Product(2), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Want(1), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
+                    ], 
+                    process_tags: vec![
+                        ProcessTag::Failure(3)
+                    ], 
+                    skill: None, 
+                    skill_minimum: 0.0, 
+                    skill_maximum: 0.0, 
+                    technology_requirement: None, 
+                    tertiary_tech: None };
+                product3.add_process(&process0).expect("Failed to add failure process.");
+                let mut data = DataManager::new();
+
+                data.wants.insert(0, want0);
+                data.wants.insert(1, want1);
+                data.wants.insert(2, want2);
+                data.products.insert(0, product0);
+                data.products.insert(1, product1);
+                data.products.insert(2, product2);
+                data.products.insert(3, product3);
+                data.processes.insert(0, process0);
+
+                // update pop's property 1 of each product and want
+                test.desires.want_store.insert(0, 1.0);
+                test.desires.want_store.insert(1, 1.0);
+                test.desires.want_store.insert(2, 1.0);
+                test.desires.add_property(0, &1.0);
+                test.desires.add_property(1, &1.0);
+                test.desires.add_property(2, &1.0);
+                test.desires.add_property(3, &1.0);
+
+                test.decay_goods(&data);
+                assert!(test.desires.want_store.get(&0).is_none());
+                assert!(*test.desires.want_store.get(&1).unwrap() == 2.0);
+                assert!(*test.desires.want_store.get(&2).unwrap() == 0.5);
+                assert!(test.desires.property.get(&0).is_none());
+                assert!(*test.desires.property.get(&1).unwrap() == 0.5);
+                assert!(*test.desires.property.get(&2).unwrap() == 2.0);
+                assert!(test.desires.property.get(&3).is_none());
+            }
+        }
+
         mod free_time {
             use std::{thread, time::Duration};
 
-            use crate::{objects::{actor_message::ActorMessage, seller::Seller, actor::Actor, pop_memory::Knowledge}, constants::{SHOPPING_TIME_ID, TIME_ID}};
+            use crate::{objects::{actor_message::ActorMessage, seller::Seller, pop_memory::Knowledge}, constants::TIME_ID};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -6251,7 +6376,7 @@ mod tests {
                 String::from("Desc"),
                 0.5).expect("Nothing");
 
-            let decay_result = Want::decay_wants(&1000.0, &test);
+            let decay_result = Want::decay_wants(1000.0, &test);
 
             assert_eq!(decay_result, 500.0);
         }

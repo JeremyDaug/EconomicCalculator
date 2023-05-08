@@ -61,7 +61,6 @@ pub const BUY_TARGET_SUCCESS_THRESHOLD: f64 = 0.9;
 /// The Threshold rate of Achieved / Target which is considered a failure 
 /// for the day.
 pub const BUY_TARGET_FAILURE_THRESHOLD: f64 = 0.7;
-
 /// Too Expensive Threshold
 pub const TOO_EXPENSIVE: f64 = 1.5;
 /// Expensive Threshold

@@ -11,7 +11,10 @@ use crate::constants;
 /// work, as well as product knowledge and product priority.
 /// 
 /// Time for purchases are stored in product_knowledge just like
-/// every other product knowledge, though it typ
+/// every other product knowledge, though it type.
+/// 
+/// TODO Expand this to include process targets for want satisfaction.
+/// TODO Expand this to include process targets for product Maintenance.
 #[derive(Debug, Clone)]
 pub struct PopMemory {
     /// If the pop is part of disorganized firm or not.

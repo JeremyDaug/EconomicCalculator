@@ -9,10 +9,14 @@ use super::process::{Process, ProcessTag, PartItem};
 pub struct Want {
     /// The unique id of the want
     pub id: usize,
-    /// 
+    /// The name of the want
     pub name: String,
+    /// A short description of the want.
     pub description: String,
+    /// How much the want decays when not consumed each day.
+    /// 0.0 means it does not decay, 1.0 means it totally decays.
     pub decay: f64,
+    // TODO insert bool or enum to distinguish between wants that are consumed at day's end or just 'used' at day's end, but not consumed.
     /// The products which produce it via owning it.
     pub ownership_sources: HashSet<usize>,
     /// All processes which produce it.
@@ -39,8 +43,8 @@ impl Want {
     }
 
     /// Calculates the decay of a want, based on it's starting value.
-    pub fn decay_wants(start: &f64, want: &Want) -> f64 {
-        start * want.decay
+    pub fn decay_wants(start: f64, want: &Want) -> f64 {
+        start * (1.0 - want.decay)
     }
 
 
