@@ -268,7 +268,7 @@ mod tests {
         }
         
         mod decay_goods_should {
-            use crate::{objects::{want::Want, product::Product, process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
+            use crate::{objects::{want::Want, product::Product, process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}, pop_memory::Knowledge}, data_manager::DataManager};
 
             use super::make_test_pop;
 
@@ -381,14 +381,31 @@ mod tests {
                 test.desires.add_property(2, &1.0);
                 test.desires.add_property(3, &1.0);
 
+                // add knowledge for each.
+                test.memory.product_knowledge.insert(0, Knowledge::new());
+                test.memory.product_knowledge.insert(1, Knowledge::new());
+                test.memory.product_knowledge.insert(2, Knowledge::new());
+                test.memory.product_knowledge.insert(3, Knowledge::new());
+
                 test.decay_goods(&data);
+                // check wants
                 assert!(test.desires.want_store.get(&0).is_none());
                 assert!(*test.desires.want_store.get(&1).unwrap() == 2.0);
                 assert!(*test.desires.want_store.get(&2).unwrap() == 0.5);
+                // check property
                 assert!(test.desires.property.get(&0).is_none());
                 assert!(*test.desires.property.get(&1).unwrap() == 0.5);
                 assert!(*test.desires.property.get(&2).unwrap() == 2.0);
                 assert!(test.desires.property.get(&3).is_none());
+                // check knowledge.
+                assert!(test.memory.product_knowledge.get(&0)
+                    .unwrap().lost == 1.0);
+                assert!(test.memory.product_knowledge.get(&1)
+                    .unwrap().lost == 0.5);
+                assert!(test.memory.product_knowledge.get(&2)
+                    .unwrap().lost == 0.0);
+                assert!(test.memory.product_knowledge.get(&3)
+                    .unwrap().lost == 1.0);
             }
         }
 

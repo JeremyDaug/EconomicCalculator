@@ -1210,7 +1210,7 @@ impl Pop {
     /// 
     /// Any products lost this way are recorded as losses in that product's knowledge.
     /// 
-    /// TODO, when upgrading to add rolling, add RNG back as a parameter.
+    /// TODO when upgrading to add rolling, add RNG back as a parameter.
     pub fn decay_goods(&mut self, data: &DataManager) {
         // start by decaying our wants, wants produced by decay should not decay the same day they are generated.
         for (want, quantity) in self.desires.want_store.iter_mut() {
@@ -1240,6 +1240,8 @@ impl Pop {
                 // Add/delete items and if removed, add to lost
                 for (prod, amount) in proc_outcome.input_output_products.iter() {
                     if *amount < 0.0 {
+                        // Update memory (this should do so safely
+                        // TODO perhaps we should add knowledge for new products here, something to consider for later.
                         self.memory.product_knowledge
                             .entry(*product)
                             .and_modify(|x| x.lost -= amount);
@@ -1259,6 +1261,11 @@ impl Pop {
                 change.entry(*product)
                     .and_modify(|x| *x -= reduction)
                     .or_insert(-reduction);
+                // Update memory (this should do so safely
+                // TODO perhaps we should add knowledge for new products here, something to consider for later.
+                self.memory.product_knowledge
+                    .entry(*product)
+                    .and_modify(|x| x.lost += reduction);
             }
         }
         // with the failures gotten, apply our changes to our property.
