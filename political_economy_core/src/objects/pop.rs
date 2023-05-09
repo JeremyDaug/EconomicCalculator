@@ -8,7 +8,7 @@ use barrage::{Sender, Receiver};
 use itertools::Itertools;
 use rand::rngs::ThreadRng;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self, LOSS_TO_SUCCESS_WEIGHT}, objects::pop_memory::Knowledge};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self, LOSS_TO_SUCCESS_WEIGHT, MAJOR_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_FAILURE_THRESHOLD}, objects::pop_memory::Knowledge};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
@@ -1312,6 +1312,20 @@ impl Pop {
         for (prod_id, know) in self.memory.product_knowledge.iter_mut() {
             // breakup based on the current success rate.
             if know.success_rate > MAJOR_TARGET_SUCCESS_THRESHOLD {
+                // if it's a major success, look at our budgets and try to bring them
+                // down a bit.
+                let excess_time = know.time_budget - know.time_spent;
+                let excess_amv = know.amv_budget - know.amv_spent;
+                let reduction = (1.0 - know.success_rate) * 2.0; // max reduction of 0.5
+                know.time_budget -= reduction * excess_time;
+                know.amv_budget -= reduction * excess_amv;
+                // try to reduce the amount purchased as well.
+                
+            } else if know.success_rate > STANDARD_TARGET_SUCCESS_THRESHOLD {
+
+            } else if know.success_rate > STANDARD_TARGET_FAILURE_THRESHOLD {
+
+            } else {
 
             }
         }

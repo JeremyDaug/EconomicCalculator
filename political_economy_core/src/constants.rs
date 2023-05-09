@@ -76,5 +76,12 @@ pub const CHEAP: f64 = 0.5;
 
 /// ----------- Adapt future plan constants
 
-/// The reducted weight of
+/// The reducted weight of Loss to success rate today.
 pub const LOSS_TO_SUCCESS_WEIGHT: f64 = 0.25;
+/// The threshold value (0.75 - 1.0) for a major success in reaching a target.
+pub const MAJOR_TARGET_SUCCESS_THRESHOLD: f64 = 0.75;
+/// The threshold value (0.5 - 0.75) for normal success in reaching a target.
+pub const STANDARD_TARGET_SUCCESS_THRESHOLD: f64 = 0.5;
+/// The Threshold value (0.25 - 0.5) for normal failure in reaching a target.
+pub const STANDARD_TARGET_FAILURE_THRESHOLD: f64 = 0.25;
+// Major TargetFailure THreshold
