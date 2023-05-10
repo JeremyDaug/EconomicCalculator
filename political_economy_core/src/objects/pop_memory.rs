@@ -64,8 +64,9 @@ pub struct Knowledge {
     /// how much of the item was lost for any reason,
     /// (taxed, failed etc)
     pub lost: f64,
-    /// How much was consumed or otherwise used by the pop
-    pub consumed: f64,
+    /// How much was consumed or otherwise used by the pop during the day, 
+    /// typically in meeting desires.
+    pub used: f64,
     /// How much time we are willing to expend to get our target.
     pub time_budget: f64,
     /// How much AMV we are willing to spend to get our target.
@@ -83,7 +84,7 @@ impl Knowledge {
     pub fn new() -> Self { 
         Self { 
             target: 0.0, rollover: 0.0, achieved: 0.0, 
-            spent: 0.0, lost: 0.0, consumed: 0.0,
+            spent: 0.0, lost: 0.0, used: 0.0,
             time_budget: 0.0, amv_budget: 0.0, 
             time_spent: 0.0, 
             amv_spent: 0.0, success_rate: 0.5

@@ -796,7 +796,8 @@ impl Desires {
     /// 4. Try to satisfy by consuming prdoucts.
     /// 
     /// TODO Improve this by using product memory to prioritize sources for each want. Rather than following strict ordering.
-    pub fn consume_and_sift_wants(&mut self, data: &DataManager) {
+    pub fn consume_and_sift_wants(&mut self, data: &DataManager) -> HashMap<usize, f64> {
+        let mut consumed = HashMap::new();
         // get all our property and wants into untouched, used, and consumed.
         let mut used_products: HashMap<usize, f64> = HashMap::new();
         // create our tracker so we can tell when we're done.
@@ -826,6 +827,7 @@ impl Desires {
                 .get_mut(coord.idx).unwrap();
             let want_id = desire.item.unwrap();
             let mut ext_target = desire.amount;
+
             // try for unused wants first
             if let Some(extant) = self.want_store.get_mut(want_id) {
                 // with existing available to satisfy, push it in to satisfy our current tier.
@@ -847,6 +849,7 @@ impl Desires {
                 curr = self.walk_up_tiers(curr);
                 continue;
             }
+
             // next try ownership sources
             let want_info = data.wants.get(want_id).expect("Want not in Data!");
             for product_id in want_info.ownership_sources.iter() {
@@ -857,7 +860,10 @@ impl Desires {
                     // get how many we can get 
                     let reserve = ratio.min(*available);
                     // move the reserve from property into used
-                    *used_products.entry(*product_id).or_insert(0.0) += reserve;
+                    used_products.entry(*product_id)
+                        .and_modify(|x| *x += reserve).or_insert(reserve);
+                    consumed.entry(*product_id)
+                        .and_modify(|x| *x += reserve).or_insert(reserve);
                     let entry = self.property.get_mut(product_id).unwrap();
                     *entry -= reserve;
                     if *entry == 0.0 {
@@ -898,7 +904,13 @@ impl Desires {
                 if results.iterations > 0.0 { // if anything was done, go through the parts and apply the changes.
                     for (product, quantity) in results.input_output_products.iter() {
                         // add outputs and subtract inputs (inputs are already negative.)
-                        *self.property.entry(*product).or_insert(0.0) += quantity;
+                        self.property.entry(*product)
+                            .and_modify(|x| *x += quantity).or_insert(*quantity);
+                        if *quantity < 0.0 {
+                            // if being consumed, add to our consumed result.
+                            consumed.entry(*product)
+                                .and_modify(|x| *x -= quantity).or_insert(-quantity);
+                        }
                         if *self.property.get(product).unwrap() == 0.0 {
                             self.property.remove(product);
                         }
@@ -906,7 +918,10 @@ impl Desires {
                     for (product, quantity) in results.capital_products.iter() {
                         // shift used capital from property to used.
                         *self.property.get_mut(product).unwrap() -= quantity;
-                        *used_products.entry(*product).or_insert(0.0) += quantity;
+                        used_products.entry(*product)
+                            .and_modify(|x| *x += quantity).or_insert(*quantity);
+                        consumed.entry(*product)
+                            .and_modify(|x| *x += quantity).or_insert(*quantity);
                         if *self.property.get(product).unwrap() == 0.0 {
                             self.property.remove(product);
                         }
@@ -943,7 +958,13 @@ impl Desires {
                 if results.iterations > 0.0 { // if anything was done, go through the parts and apply the changes.
                     for (product, quantity) in results.input_output_products.iter() {
                         // add outputs and subtract inputs (inputs are already negative.)
-                        *self.property.entry(*product).or_insert(0.0) += quantity;
+                        self.property.entry(*product)
+                            .and_modify(|x| *x += quantity).or_insert(*quantity);
+                        if *quantity < 0.0 {
+                            // if negative, add to consumed
+                            consumed.entry(*product)
+                                .and_modify(|x| *x -= quantity).or_insert(-quantity);
+                        }
                         if *self.property.get(product).unwrap() == 0.0 {
                             self.property.remove(product);
                         }
@@ -951,7 +972,10 @@ impl Desires {
                     for (product, quantity) in results.capital_products.iter() {
                         // shift used capital from property to used.
                         *self.property.get_mut(product).unwrap() -= quantity;
-                        *used_products.entry(*product).or_insert(0.0) += quantity;
+                        used_products.entry(*product)
+                            .and_modify(|x| *x += quantity).or_insert(*quantity);
+                        consumed.entry(*product)
+                                .and_modify(|x| *x += quantity).or_insert(*quantity);
                         if *self.property.get(product).unwrap() == 0.0 {
                             self.property.remove(product);
                         }
@@ -985,6 +1009,7 @@ impl Desires {
         for (item, quantity) in used_products {
             self.add_property(item, &quantity);
         }
+        consumed
     }
 
     /// # Want consuming function. 

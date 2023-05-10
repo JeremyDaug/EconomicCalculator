@@ -1169,7 +1169,13 @@ impl Pop {
         // TODO add non-specific satisfaction slots here.
         // Consume Property to satisfy wants.
         // TODO This should return products which were used or not used so that the remainder can possibly be maintained.
-        self.desires.consume_and_sift_wants(data);
+        let used = self.desires.consume_and_sift_wants(data);
+        // track the consumed/used items from above and record that info for our purposes.
+        for (product, quant) in used {
+            if let Some(know) = self.memory.product_knowledge.get_mut(&product) {
+                know.used += quant;
+            }
+        }
         // TODO Maintenance would also go here.
         // TODO should separate maintained products from unmaintained products here.
     }

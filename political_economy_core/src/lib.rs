@@ -257,6 +257,7 @@ mod tests {
                 achieved: 0.0, 
                 spent: 0.0, 
                 lost: 0.0, 
+                used: 0.0,
                 time_budget: 10.0, 
                 amv_budget: 11.0, 
                 time_spent: 0.0, 
@@ -501,6 +502,7 @@ mod tests {
                     achieved: 0.0, 
                     spent: 0.0, 
                     lost: 0.0, 
+                    used: 0.0,
                     time_budget: 10.0, 
                     amv_budget: 11.0, 
                     time_spent: 0.0, 
@@ -754,7 +756,8 @@ mod tests {
                     rollover: 0.0,
                     achieved: 0.0,
                     spent: 0.0,
-                    lost: 0.0,
+                    lost: 0.0, 
+                    used: 0.0,
                     time_budget: 10.0,
                     amv_budget: 10.0,
                     time_spent: 0.0,
@@ -765,7 +768,8 @@ mod tests {
                     target: 5.0,
                     rollover: 0.0,
                     achieved: 0.0,
-                    spent: 0.0,
+                    spent: 0.0, 
+                    used: 0.0,
                     lost: 0.0,
                     time_budget: 10.0,
                     amv_budget: 10.0,
@@ -2801,9 +2805,7 @@ mod tests {
     }
 
     mod desires_tests {
-        use std::collections::HashMap;
-
-        use crate::{objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}, market::{MarketHistory, ProductInfo}}, data_manager::DataManager};
+        use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
 
         mod consume_and_sift_wants_should {
             use std::collections::{HashMap, HashSet};
@@ -2937,7 +2939,7 @@ mod tests {
                 test.add_property(1, &1.0);
                 test.add_property(2, &1.0);
 
-                test.consume_and_sift_wants(&data);
+                let result = test.consume_and_sift_wants(&data);
                 
                 // This should not have consumed product 0, ownership source
                 // not consumed product 1, use source
@@ -2949,6 +2951,11 @@ mod tests {
                 assert!(*test.property.get(&3).unwrap() == 1.0);
                 assert!(!test.want_store.contains_key(&0));
                 assert!(test.desires.first().unwrap().satisfaction == 4.0);
+                // it should have used products 0, 1, and 2.
+                assert!(*result.get(&0).unwrap() == 1.0);
+                assert!(*result.get(&1).unwrap() == 1.0);
+                assert!(*result.get(&2).unwrap() == 1.0);
+                assert!(result.get(&3).is_none());
             }
         }
 
