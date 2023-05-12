@@ -8,7 +8,7 @@ use barrage::{Sender, Receiver};
 use itertools::Itertools;
 use rand::rngs::ThreadRng;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self, LOSS_TO_SUCCESS_WEIGHT, MAJOR_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_FAILURE_THRESHOLD}, objects::pop_memory::Knowledge};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self, LOSS_TO_SUCCESS_WEIGHT, MAJOR_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_FAILURE_THRESHOLD, TARGET_MINIMUM_THRESHOLD}, objects::pop_memory::Knowledge};
 
 use super::{desires::Desires, 
     pop_breakdown_table::PopBreakdownTable, 
@@ -1302,7 +1302,7 @@ impl Pop {
     /// priority over today.
     /// 
     /// With the success rate updated, we then alter our targets, and budgets.
-    pub fn adapt_future_plan(&mut self, _data: &DataManager, 
+    pub fn adapt_future_plan(&mut self, data: &DataManager, 
     _history: &MarketHistory) {
         // start by updating our success rate for our buy priorities.
         for (_, know) in self.memory.product_knowledge.iter_mut() {
@@ -1315,24 +1315,52 @@ impl Pop {
             know.update_success(achieved);
         }
         // with success updated based on our targets, go through and recalculate budgets and targets.
+        // TODO add mechanism to shift product purchase order priority around before testing function!!!!!
+        let mut remove = vec![];
         for (prod_id, know) in self.memory.product_knowledge.iter_mut() {
+            let prod_info = data.products.get(prod_id).unwrap();
             // breakup based on the current success rate.
             if know.success_rate > MAJOR_TARGET_SUCCESS_THRESHOLD {
                 // if it's a major success, look at our budgets and try to bring them
                 // down a bit.
                 let excess_time = know.time_budget - know.time_spent;
                 let excess_amv = know.amv_budget - know.amv_spent;
-                let reduction = (1.0 - know.success_rate) * 2.0; // max reduction of 0.5
+                let reduction = (know.success_rate - MAJOR_TARGET_SUCCESS_THRESHOLD) * 2.0 + 0.25; // 0.25 - 0.75
                 know.time_budget -= reduction * excess_time;
                 know.amv_budget -= reduction * excess_amv;
-                // try to reduce the amount purchased as well.
-                
+                // try to reduce the amount purchased as well without reducing below what we used or lost.
+                let reserve = know.used + know.lost;
+                let excess_target = know.target - know.achieved;
+                know.target -= excess_target * reserve;
             } else if know.success_rate > STANDARD_TARGET_SUCCESS_THRESHOLD {
-
+                // If it's a standard success try to reduce our budget targets, not our targets
+                let excess_time = know.time_budget - know.time_spent;
+                let excess_amv = know.amv_budget - know.amv_spent;
+                let reduction = know.success_rate - STANDARD_TARGET_SUCCESS_THRESHOLD; // 0.0 - 0.25
+                know.time_budget -= reduction * excess_time;
+                know.amv_budget -= reduction * excess_amv;
             } else if know.success_rate > STANDARD_TARGET_FAILURE_THRESHOLD {
-
-            } else {
-
+                // we are below our target, add to our budget a little bit to try and succeed.
+                let increase = (STANDARD_TARGET_SUCCESS_THRESHOLD - know.success_rate) / 2.0; // 0.0 - 0.125
+                // add based on what we spent, not our budget specifically. 
+                // Increasing based on spent ensures the one in which restricted us more goes up more.
+                know.time_budget += increase * know.time_spent;
+                know.amv_budget += increase * know.amv_spent;
+            } else { // Major Target Failure Threshold
+                // we are so far below our target that we may not be capable of buying the item, start weeding it out.
+                // increase our budget
+                let increase = STANDARD_TARGET_FAILURE_THRESHOLD - know.success_rate + 0.125; // 0.125 - 0.375
+                know.time_budget += increase * know.time_spent;
+                know.amv_budget += increase * know.amv_spent;
+                // and decrease our target
+                let reduction = STANDARD_TARGET_FAILURE_THRESHOLD - know.success_rate; // 0.0 - 0.25
+                know.target -= reduction * know.target;
+            }
+            // with success rate and adjustments applied, check to see if we should just remove the item or not.
+            // if below a standard target threshold, mark it for removal entirely.
+            if know.target < TARGET_MINIMUM_THRESHOLD || 
+            (know.target < 1.0 && !prod_info.fractional) {
+                remove.push(prod_id);
             }
         }
     }

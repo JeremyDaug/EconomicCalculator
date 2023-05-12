@@ -85,3 +85,5 @@ pub const STANDARD_TARGET_SUCCESS_THRESHOLD: f64 = 0.5;
 /// The Threshold value (0.25 - 0.5) for normal failure in reaching a target.
 pub const STANDARD_TARGET_FAILURE_THRESHOLD: f64 = 0.25;
 // Major TargetFailure THreshold
+
+pub const TARGET_MINIMUM_THRESHOLD: f64 = 0.1;
