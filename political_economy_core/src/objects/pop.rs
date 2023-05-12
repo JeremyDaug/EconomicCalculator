@@ -1315,7 +1315,7 @@ impl Pop {
             know.update_success(achieved);
         }
         // with success updated based on our targets, go through and recalculate budgets and targets.
-        // TODO add mechanism to shift product purchase order priority around before testing function!!!!!
+        let mut shift = HashMap::new();
         let mut remove = vec![];
         for (prod_id, know) in self.memory.product_knowledge.iter_mut() {
             let prod_info = data.products.get(prod_id).unwrap();
@@ -1332,6 +1332,8 @@ impl Pop {
                 let reserve = know.used + know.lost;
                 let excess_target = know.target - know.achieved;
                 know.target -= excess_target * reserve;
+                // shift the item forward
+                shift.insert(prod_id, -1);
             } else if know.success_rate > STANDARD_TARGET_SUCCESS_THRESHOLD {
                 // If it's a standard success try to reduce our budget targets, not our targets
                 let excess_time = know.time_budget - know.time_spent;
@@ -1339,6 +1341,7 @@ impl Pop {
                 let reduction = know.success_rate - STANDARD_TARGET_SUCCESS_THRESHOLD; // 0.0 - 0.25
                 know.time_budget -= reduction * excess_time;
                 know.amv_budget -= reduction * excess_amv;
+                shift.insert(prod_id, 0);
             } else if know.success_rate > STANDARD_TARGET_FAILURE_THRESHOLD {
                 // we are below our target, add to our budget a little bit to try and succeed.
                 let increase = (STANDARD_TARGET_SUCCESS_THRESHOLD - know.success_rate) / 2.0; // 0.0 - 0.125
@@ -1346,6 +1349,7 @@ impl Pop {
                 // Increasing based on spent ensures the one in which restricted us more goes up more.
                 know.time_budget += increase * know.time_spent;
                 know.amv_budget += increase * know.amv_spent;
+                shift.insert(prod_id, 1);
             } else { // Major Target Failure Threshold
                 // we are so far below our target that we may not be capable of buying the item, start weeding it out.
                 // increase our budget
@@ -1355,6 +1359,7 @@ impl Pop {
                 // and decrease our target
                 let reduction = STANDARD_TARGET_FAILURE_THRESHOLD - know.success_rate; // 0.0 - 0.25
                 know.target -= reduction * know.target;
+                shift.insert(prod_id, 2);
             }
             // with success rate and adjustments applied, check to see if we should just remove the item or not.
             // if below a standard target threshold, mark it for removal entirely.
