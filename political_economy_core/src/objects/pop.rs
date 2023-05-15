@@ -413,6 +413,15 @@ impl Pop {
     pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
     data: &DataManager,
     market: &MarketHistory) {
+        // start by breaking up property. create 4(5) camps
+        // desired, ie those items which we have a pre-existing slot for
+        // undesired, those which we have no known or pre-existing slot for
+        // product_satisfying, the products being used to satisfy specific product desires
+        // (potential addition) abstract_satisfying, the products being used to satisfy abstract product desires.
+        // want_satisfying, the products which will be used/consumed to satisfy a want.
+        // these latter two start empty and are added to as we walk up our desires.
+        // Undesired
+
         // start by splitting property up into keep, and spend;
         let mut keep: HashMap<usize, f64> = HashMap::new();
         let mut spend: HashMap<usize, f64> = HashMap::new();
@@ -457,6 +466,18 @@ impl Pop {
         let mut curr_buy_idx = 0;
         let shopping_time_cost = self.standard_shop_time_cost();
         loop {
+            // check that we have time or exchangeable property remaining
+            //     if none, break out
+            // quickly clear out message queue and backlog, complete any selling here.
+            //     repeat until message queue and backlog are clear (backlog comes first)
+            // enter consumption/purchase phase
+            //     try to consume to meet our desires
+            //         if successful, move on to next loop
+            //         if failed, try to buy to satisfy.
+            //             When buying, try to satisfy with later products we purhase.
+
+
+
             // if time to spend has been used up, break out.
             // TODO update to use the smalest possble expendable unit of time instead of 0.0.
             if *spend.get(&0).unwrap_or(&0.0) < shopping_time_cost { break; }
@@ -1620,4 +1641,31 @@ impl Actor for Pop {
         // results to hopefully improve our situation tomorrow. 
         self.adapt_future_plan(data, history);
     }
+}
+
+/// # Property Breakdown
+/// 
+/// A Helper which is used ot help sort/divide property between
+/// unreserved, reserved, and used for specific, abstract, or want desire.
+/// 
+/// The Total available should be equal to the Unreserved + Reserved + the 
+/// highest between specific, abstract, and want.
+/// 
+/// We only handle shifting from unreserved to the reserves.
+/// When adding to a reserve, we allow each reserve to pull from the others 
+/// (non-destructively) until they are equal. Once they are, they pull out 
+/// of reserve. If none remains in reserve, it removes from unreserved.
+pub struct PropertyBreakdown {
+    /// The total available to us. IE, Unreserved + reserved + max(specific, abstract, want)
+    pub total_available: f64,
+    /// The amount that is unreserved, available to be spent or shifted elsewhere.
+    pub unreserved: f64,
+    /// The amount that has been reserved for our desires, but not yet placed. Anywhere
+    pub reserved: f64,
+    /// The amount that has been reserved for specific product desires.
+    pub specific_reserve: f64,
+    /// The amount that has been reserved to satisfy abstract product desires.
+    pub abstract_reserve: f64,
+    /// The amount that has been reserved to satisfy want desires.
+    pub want_reserve: f64
 }

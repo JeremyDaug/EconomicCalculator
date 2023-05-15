@@ -30,6 +30,18 @@ We wrap up the day by consuming all of our consumption goods and sorting the res
 
 **Note:** During free time we rotate between buying, selling, and 'consuming' in even measure. Selling is always de-prioritized for pops as selling is a crap-shoot for us.
 
+## Additional Buy Logic
+
+When confronted with a desire to satisfy, we try to satisfy it in with a bit of extra logic.
+
+We'll use food for this example and say that bread, rice, and potatoes all satisfy our food want.
+
+If we run into a food desire at say T0, before we begin to blindly grab stuff, we look at our other desires which overlap with this desier. Specifically, we look to see if a product desire or specific product desire would also satisfy our want. If we find one, we try to satisfy that other desire up to either it's satisfaction target or our own. If we reach our own first, we record both, and move on to the next.
+
+So, we have a Food desire (1 food) at T0 - T9, and a Bread desire at T10 and T15 (1 bread satisfies 1 food want). We'll also say that our property includes 1 Bread, 1 Potato, and 1 Rice. 
+
+Our first step takes us to that first food want desire at T0, it want's 1 unit. Before we go trying to buy or reserve anything we look at our other desires and see if they satisfy our want. We see the Bread Desire, which does also satisfy, we side step to try and satisfy that first, which makes us reserve the bread. We record that bread satisfaction, then return to the want, and use that bread to also satisfy our desire.
+
 ## Summary
 
 ```
