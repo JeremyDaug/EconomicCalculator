@@ -43,11 +43,11 @@ pub const MIN_SALABILITY: f64 = 0.01;
 
 /// The correction constant which adjusts the success rate when a product was 
 /// unable to be purchased
-pub const UNABLE_TO_PURCHASE_REDUCTION: f64 = 0.97;
+pub const UNABLE_TO_PURCHASE_REDUCTION: f64 = 0.99;
 /// The Reduction Constant used when a buyer has cancelled a purchase
-pub const CANCELLED_PURCHASE_REDUCTION: f64 = 0.95;
+pub const CANCELLED_PURCHASE_REDUCTION: f64 = 0.98;
 /// The Increase Constant used when a buyer has succeeded at purchasing a product.
-pub const SUCCESSFUL_PURCHASE_INCREASE: f64 = 1.03;
+pub const SUCCESSFUL_PURCHASE_INCREASE: f64 = 1.01;
 /// The Target Reached Bonus for product Success rate. Applied at the end of 
 /// day if the amount of achieved in buying a product during a day is greater
 /// than or equal to BUY_TARGET_SUCCESS_THRESHOLD

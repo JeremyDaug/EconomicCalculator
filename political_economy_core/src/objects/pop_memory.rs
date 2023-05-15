@@ -19,7 +19,8 @@ use crate::constants;
 pub struct PopMemory {
     /// If the pop is part of disorganized firm or not.
     pub is_disorganized: bool,
-    /// how much time the pop is willing to send over,
+    /// how much time the pop is willing to send over, Time sent like this is 
+    /// considered used.
     pub work_time: f64,
     /// The various data for product information. Includes both history
     /// and targets for tomorrow.
@@ -29,7 +30,7 @@ pub struct PopMemory {
 }
 
 impl PopMemory {
-    pub(crate) fn create_empty() -> PopMemory {
+    pub fn create_empty() -> PopMemory {
         PopMemory { is_disorganized: false, work_time: 0.0,
             product_knowledge: HashMap::new(),
             product_priority: vec![]}
@@ -78,16 +79,24 @@ pub struct Knowledge {
     /// How successful we have been in the past in satisfying
     /// our target and explicit desires which seek this item.
     pub success_rate: f64,
+    /// The buy priority for the product. The lower this value, the earlier it
+    /// should be bought.
+    pub buy_priority: u8,
 }
 
 impl Knowledge {
+    /// # New Knowledge
+    /// 
+    /// News up knowledge info with some default starting info.
+    /// 
+    /// Includes a target of 1.0, time budget of 1, and success rate of 0.5.
     pub fn new() -> Self { 
         Self { 
-            target: 0.0, rollover: 0.0, achieved: 0.0, 
+            target: 1.0, rollover: 0.0, achieved: 0.0, 
             spent: 0.0, lost: 0.0, used: 0.0,
-            time_budget: 0.0, amv_budget: 0.0, 
+            time_budget: 1.0, amv_budget: 0.0, 
             time_spent: 0.0, 
-            amv_spent: 0.0, success_rate: 0.5
+            amv_spent: 0.0, success_rate: 0.5, buy_priority: 0
     } }
 
     pub fn remaining_amv(&self) -> f64 {

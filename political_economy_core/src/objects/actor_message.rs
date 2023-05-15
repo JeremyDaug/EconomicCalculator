@@ -42,15 +42,22 @@ pub enum ActorMessage {
         amv: f64 },
 
     /// The find product message, recieved by the market.
-    /// Contains the product id and the amount of the item desired.
+    /// Contains the product id.
     /// Also includes the sender and their type so
     /// a return message can be sent to them.
     FindProduct{ product: usize, sender: ActorInfo },
+    /// The Find Want Message, recieved by the market.
+    /// Contains the want Id, and the sender's info so a response can be 
+    /// sent back.
+    FindWant { want: usize, sender: ActorInfo },
     /// Returned from an attempt to buy an item and unable to
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
     /// be aware that the item is unavailable.
     ProductNotFound { product: usize, buyer: ActorInfo},
+    /// Returned from an attempt to purchase a want satisfier and failed to
+    /// find any which would satisfy at all.
+    WantnotFound {product: usize, buyer: ActorInfo },
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
     /// Gives the product in question, the amount available to purchase, 
@@ -58,6 +65,12 @@ pub enum ActorMessage {
     /// 
     /// Starts the Deal Making Process
     FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize },
+    /// A Message to both buyer and seller that they should meet up
+    /// and try to make a deal.
+    /// Gives the want in question as well as the product they were matched on.
+    /// 
+    /// Starts the deal Making Process.
+    FoundWant {seller: ActorInfo, buyer: ActorInfo, want: usize, product: usize },
 
     /// Return from seller after ActorMessage::CheckItem if they have the item
     /// in stock. returns their price and available stock.
@@ -222,12 +235,17 @@ impl ActorMessage {
             ActorMessage::Finished { sender } => me == *sender,
             ActorMessage::AllFinished => true,
             ActorMessage::FindProduct { .. } => false, // for market, sent by me
+            ActorMessage::FindWant { .. } => false, // for market, sent by me
             ActorMessage::FoundProduct { seller, 
                 buyer, .. } => {
                     *seller == me || *buyer == me
                 }, // from market, created by FindProduct, you're buyer or seller.
+            ActorMessage::FoundWant { seller, buyer, 
+                .. } => *seller == me || *buyer == me, // from market, to buyer or seller
             ActorMessage::ProductNotFound { buyer, 
                 .. } => *buyer == me, // from market to buyer
+            ActorMessage::WantnotFound { 
+                buyer, ..} => *buyer == me, // from market to buy
             ActorMessage::SendProduct { reciever, 
                 .. } => *reciever == me, // sends product to reciever
             ActorMessage::SendWant { reciever, 
@@ -266,7 +284,7 @@ impl ActorMessage {
             ActorMessage::FinishDeal { buyer, seller, 
                 product: _ } => *buyer == me || *seller == me,
             ActorMessage::RejectPurchase { buyer: _, seller, 
-                product: _, price_opinion: _ } => *seller == me, // buyer to seller
+                product: _, price_opinion: _ } => *seller == me,
                 
         }
     }

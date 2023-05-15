@@ -34,6 +34,110 @@ impl Process {
         self.name.clone()
     }
 
+    /// # Inputs
+    /// 
+    /// Gets the process's inputs
+    pub fn inputs(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| x.part.is_input()).collect_vec()
+    }
+
+    /// # Input Products
+    /// 
+    /// Gets the process's input products
+    pub fn input_products(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| x.part.is_input() && x.item.is_product()).collect_vec()
+    }
+
+    /// # Inputs and Capital
+    /// 
+    /// Gets the process's inputs and Capital
+    pub fn inputs_and_capital(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| !x.part.is_output()).collect_vec()
+    }
+
+    /// # Input and Capital Products
+    /// 
+    /// Gets the process's input and capital products
+    pub fn input_and_capital_products(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| !x.part.is_output() && x.item.is_product()).collect_vec()
+    }
+
+    /// # Capital
+    /// 
+    /// Gets the process's capital
+    pub fn capital(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| x.part.is_capital()).collect_vec()
+    }
+
+    /// # Capital Products
+    /// 
+    /// Gets the process's capital products
+    pub fn capital_products(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| x.part.is_capital() && x.item.is_product()).collect_vec()
+    }
+
+    /// # Outputs
+    /// 
+    /// Gets the process's output
+    pub fn outputs(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| x.part.is_output()).collect_vec()
+    }
+
+    /// # Output Products
+    /// 
+    /// Gets the process's output products
+    pub fn output_products(&self) -> Vec<&ProcessPart> {
+        self.process_parts.iter().filter(|x| x.part.is_output() && x.item.is_product()).collect_vec()
+    }
+
+    /// # Maintenance Product
+    /// 
+    /// If this product is a Maintenance process, it get's the product. Otherwise, None.
+    pub fn maintenance_product(&self) -> Option<usize> {
+        for tag in self.process_tags.iter() {
+            if let ProcessTag::Maintenance(id) = tag {
+                return Some(*id);
+            }
+        }
+        None
+    }
+
+    /// # Failure Product
+    /// 
+    /// If this product is a Failure process, it get's the product. Otherwise, None.
+    pub fn failure_product(&self) -> Option<usize> {
+        for tag in self.process_tags.iter() {
+            if let ProcessTag::Failure(id) = tag {
+                return Some(*id);
+            }
+        }
+        None
+    }
+
+    /// # Consumed Product
+    /// 
+    /// If this product is a Consumption process, it get's the product. Otherwise, None.
+    pub fn consumed_product(&self) -> Option<usize> {
+        for tag in self.process_tags.iter() {
+            if let ProcessTag::Consumption(id) = tag {
+                return Some(*id);
+            }
+        }
+        None
+    }
+
+    /// # Used Product
+    /// 
+    /// If this product is a use process, it get's the product. Otherwise, None.
+    pub fn used_product(&self) -> Option<usize> {
+        for tag in self.process_tags.iter() {
+            if let ProcessTag::Use(id) = tag {
+                return Some(*id);
+            }
+        }
+        None
+    }
+
     /// Checks if the Process takes output from the other process as input
     /// 
     /// Returns true if the process this is called on takes any of the outputs of 'other'.

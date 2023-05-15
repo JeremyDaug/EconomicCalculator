@@ -62,6 +62,7 @@ pub struct Product {
 
     /// What (if any) tech is required for this product to be visible to Actors.
     pub tech_required: Option<usize>
+    // TODO Perhaps include exchange time cost, IE how long it takes for a seller to accept/confirm the item.
 }
 
 impl Hash for Product {

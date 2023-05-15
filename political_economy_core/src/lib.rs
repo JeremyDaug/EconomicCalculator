@@ -263,7 +263,8 @@ mod tests {
                 time_spent: 0.0, 
                 amv_spent: 0.0, 
                 success_rate: 0.5,
-                rollover: 0.0, });
+                rollover: 0.0, 
+                buy_priority: 0});
 
             (data, market)
         }
@@ -508,7 +509,8 @@ mod tests {
                     time_spent: 0.0, 
                     amv_spent: 0.0, 
                     success_rate: 0.5,
-                    rollover: 0.0, });
+                    rollover: 0.0,
+                    buy_priority: 0});
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -763,6 +765,7 @@ mod tests {
                     time_spent: 0.0,
                     amv_spent: 0.0,
                     success_rate: 0.5,
+                    buy_priority: 0
                 });
                 test.memory.product_knowledge.insert(1, Knowledge{
                     target: 5.0,
@@ -776,6 +779,7 @@ mod tests {
                     time_spent: 0.0,
                     amv_spent: 0.0,
                     success_rate: 0.5,
+                    buy_priority: 0
                 });
 
 
@@ -4013,6 +4017,86 @@ mod tests {
     mod desire_tests {
         use crate::objects::desire::{Desire, DesireItem};
 
+        mod steps_in_interval_should {
+            use crate::objects::desire::{DesireItem, Desire};
+
+            #[test]
+            pub fn always_return_false_when() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 10, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 0,
+                    tags: vec![]};
+                
+                // start is after end.
+                assert!(!test.steps_in_interval(11, 9));
+            }
+
+            #[test]
+            pub fn act_correctly_with_single_tier_desire() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 10, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 0,
+                    tags: vec![]};
+                
+                // single tier start steps in interval and on end points.
+                assert!(test.steps_in_interval(9, 11));
+                assert!(test.steps_in_interval(10, 11));
+                assert!(test.steps_in_interval(9, 10));
+                assert!(test.steps_in_interval(10, 10));
+                // single tier, steps before/after interval
+                assert!(!test.steps_in_interval(11, 12));
+                assert!(!test.steps_in_interval(8, 9));
+            }
+
+            #[test]
+            pub fn act_correctly_with_stretched_desire() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 10, 
+                    end: Some(20), 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]};
+                
+                // single tier start steps in interval and on end points.
+                assert!(test.steps_in_interval(9, 11)); // start
+                assert!(test.steps_in_interval(19, 21)); // end 
+                assert!(test.steps_in_interval(11, 13)); // middle
+                // single tier, steps before/after interval
+                assert!(!test.steps_in_interval(21, 22)); // after end
+                assert!(!test.steps_in_interval(8, 9)); // before start
+                assert!(!test.steps_in_interval(11, 11)); // in between steps
+            }
+
+            #[test]
+            pub fn act_correctly_with_infinite_desire() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 10, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]};
+                
+                // single tier start steps in interval and on end points.
+                assert!(test.steps_in_interval(9, 11)); // start
+                assert!(test.steps_in_interval(11, 13)); // middle
+                // single tier, steps before/after interval
+                assert!(!test.steps_in_interval(8, 9)); // before start
+                assert!(!test.steps_in_interval(11, 11)); // in between steps
+            }
+        }
+
         mod before_start_should {
             use crate::objects::desire::{DesireItem, Desire};
 
@@ -6122,7 +6206,7 @@ mod tests {
                 None);
 
             assert!(test.is_some());
-            // negative mass err
+            // negative mass fine (for now)
             let test = Product::new(
                 0,
                 String::from("Test"),
@@ -6137,8 +6221,8 @@ mod tests {
                 Vec::new(),
                 None);
 
-            assert!(test.is_none());
-            // negative volume err
+            assert!(test.is_some());
+            // negative volume fine (for now)
             let test = Product::new(
                 0,
                 String::from("Test"),
@@ -6153,7 +6237,7 @@ mod tests {
                 Vec::new(),
                 None);
 
-            assert!(test.is_none());
+            assert!(test.is_some());
             // negative mass + magic good
             let tag = ProductTag::Magic;
             let mut magic_tag = Vec::new();

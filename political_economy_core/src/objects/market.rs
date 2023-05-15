@@ -222,6 +222,11 @@ impl Market {
                         let result = self.find_seller(product, sender);
                         lcl_sender.send(result).expect("Send Error!");
                     },
+                    ActorMessage::FindWant { want, sender } => {
+                        // buyer is looking to satisfy a want, try to find an option for them.
+                        let result = self.find_want_seller(want, sender);
+                        lcl_sender.send(result).expect("Send Error!");
+                    }
                     // Product not found, no reaction needed to that message.
                     ActorMessage::FoundProduct { seller, buyer, 
                         product } => {
@@ -233,6 +238,7 @@ impl Market {
                             HashMap::new(), 
                             OfferResult::Incomplete));
                     },
+
 
                     ActorMessage::InStock { buyer, seller, product, 
                     price, .. } => {
@@ -399,6 +405,18 @@ impl Market {
                 }
             }
         }
+    }
+
+    /// # Find Want Seller
+    /// 
+    /// A helper function which looks at available possible items which satisfy 
+    /// a want. It selects the product at random. If it's available in the market
+    /// and a seller is available, it returns that seller.
+    /// 
+    /// TODO Needs testing!!
+    fn find_want_seller(&self, want: usize, sender: ActorInfo) -> ActorMessage {
+        // TODO Pick up Here!!!!!!!
+        todo!()
     }
 
     /// Finds an ongoing deal in our list of deals.

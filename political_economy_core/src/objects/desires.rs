@@ -1044,6 +1044,31 @@ impl Desires {
         }
         return false;
     }
+
+    /// # Next Stepped on Tier
+    /// 
+    /// Gets the next tier that any of our desires steps on.
+    /// 
+    /// If no desire steps on a tier above the given value, then it returns 
+    /// none.
+    /// TODO Not Tested.
+    pub fn next_stepped_on_tier(&self, end: u64) -> Option<u64> {
+        // ensure that we can reach any from end (ie any end after)
+        let mut next = u64::MAX;
+        for des in self.desires.iter() {
+            let possible = des.get_next_tier_up(end);
+            if let Some(val) = possible {
+                if val < next {
+                    next = val;
+                }
+            }
+        }
+        if next == u64::MAX {
+            None
+        } else {
+            Some(next)
+        }
+    }
 }
 
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.

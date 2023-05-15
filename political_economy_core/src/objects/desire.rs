@@ -170,7 +170,7 @@ impl Desire {
 
     /// Get Next Tier up takes a given tier and gets the next valid tier up.
     /// 
-    /// Returns err if no tier is next. Otherwise, returns the next valid tier.
+    /// Returns None if no tier is next. Otherwise, returns the next valid tier.
     pub fn get_next_tier_up(&self, tier: u64) -> Option<u64> {
         if tier < self.start {
             return Some(self.start);
@@ -425,6 +425,23 @@ impl Desire {
     /// Helper function which checks that the given tier is before our first tier.
     pub fn before_start(&self, tier: u64) -> bool {
         self.start > tier
+    }
+
+    /// # Steps in interval
+    /// 
+    /// Helper function, checks if a desire steps in an interval between 
+    /// start to end (inclusive).
+    /// 
+    /// Returns None if start > end
+    pub fn steps_in_interval(&self, start: u64, end: u64) -> bool {
+        if end < start { return false; }
+        let possible = self.get_next_tier_up(start - 1);
+        if let Some(val) = possible {
+            if start <= val && val <= end {
+                return true;
+            }
+        }
+        false
     }
 }
 

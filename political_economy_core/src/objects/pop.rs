@@ -10,12 +10,12 @@ use rand::rngs::ThreadRng;
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self, LOSS_TO_SUCCESS_WEIGHT, MAJOR_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_FAILURE_THRESHOLD, TARGET_MINIMUM_THRESHOLD}, objects::pop_memory::Knowledge};
 
-use super::{desires::Desires, 
+use super::{desires::{Desires, DesireCoord}, 
     pop_breakdown_table::PopBreakdownTable, 
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
-    pop_memory::PopMemory, product::ProductTag, buy_result::BuyResult, desire::DesireItem, want::Want, 
+    pop_memory::PopMemory, product::ProductTag, buy_result::BuyResult, desire::DesireItem, want::Want, process::{ProcessTag, ProcessPart, PartItem}, 
 };
 
 /// Pops are the data storage for a population group.
@@ -43,6 +43,8 @@ pub struct Pop {
     /// the upper bound of their skill level spread.
     pub higher_skill_level: f64,
     /// The total desires and property of the pop.
+    /// 
+    /// TODO Food For Thought. We include 2 infinite desires in all pops, wealth and Leisure, which act as sinks and help us balance our buy priorities. More thought is needed.
     pub desires: Desires,
     /// A breakdown of the Population's demographics.
     pub breakdown_table: PopBreakdownTable,
@@ -181,10 +183,13 @@ impl Pop {
     /// Small helper function to simplify sending our purchase offers.
     pub fn send_buy_offer(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
     product: usize, seller: ActorInfo, offer: &HashMap<usize, f64>, offer_result: OfferResult, target: f64) {
+        // get the offer length 
         let mut offer_len = offer.len();
+        // send the opener (request item and quantity)
         self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller, 
             product, price_opinion: offer_result, quantity: target,
             followup: offer_len });
+        // then loop over what we're sending to them.
         for (offer_item, offer_quantity) in offer.iter() {
             offer_len -= 1;
             self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller, 
@@ -610,7 +615,7 @@ impl Pop {
         // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
         let market_price = market.get_product_price(product, 0.0);
         if market_price > (price * constants::HARD_BUY_CAP) {
-            mem.cancelled_purchase(); // if unfeaseable, at current market price, cancel.
+            // if unfeaseable, at current market price, cancel.
             return BuyResult::CancelBuy;
         }
         // subtract the time from our stock and add it to time spent
@@ -628,7 +633,7 @@ impl Pop {
             ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
         // result is now either FoundProduct or ProductNotFound, deal with it and return the result to the caller
         // TODO update this to be smarter about doing emergency buy searches.
-        if let ActorMessage::ProductNotFound { product, .. } 
+        if let ActorMessage::ProductNotFound { product: _, .. } 
         = result {
             // TODO update to use emergency buy in dire situations here.
             // if product not found, do an emergency search instead.
@@ -638,7 +643,7 @@ impl Pop {
         else if let ActorMessage::FoundProduct { seller, .. } = result {
             self.standard_buy(rx, tx, data, market, seller, spend, returned)
         }
-        else { panic!("Somehow did not get FoundProduct or ProductNotFound."); }
+        else { unreachable!("Somehow did not get FoundProduct or ProductNotFound."); }
     }
 
     /// Gets the standard shopping time cost for this pop.
@@ -894,13 +899,13 @@ impl Pop {
     /// less important than that item (of higher tier)
     /// TODO Currently not built, should be slightly simpler version of Standard Buy.
     pub fn emergency_buy(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, 
-    data: &DataManager, 
-    market: &MarketHistory, 
-    spend: &mut HashMap<usize, f64>,
-    product: &usize,
-    returned: &mut HashMap<usize, f64>) -> BuyResult {
+    _rx: &mut Receiver<ActorMessage>, 
+    _tx: &Sender<ActorMessage>, 
+    _data: &DataManager, 
+    _market: &MarketHistory, 
+    _spend: &mut HashMap<usize, f64>,
+    _product: &usize,
+    _returned: &mut HashMap<usize, f64>) -> BuyResult {
         todo!("Emergency Buy here!")
     }
 
@@ -943,7 +948,7 @@ impl Pop {
         let mut available = HashMap::new();
         let mut prices = HashMap::new();
         for (product, quantity) in spend.iter()
-        .filter(|(a, b)| **a != product) {
+        .filter(|(a, _)| **a != product) {
             available.insert(*product, *quantity);
             let price = market.get_product_price(product, 0.0);
             prices.insert(*product, price);
@@ -1176,6 +1181,8 @@ impl Pop {
                 know.used += quant;
             }
         }
+        // update our tiers satisfied
+        self.desires.update_satisfactions();
         // TODO Maintenance would also go here.
         // TODO should separate maintained products from unmaintained products here.
     }
@@ -1303,9 +1310,10 @@ impl Pop {
     /// 
     /// With the success rate updated, we then alter our targets, and budgets.
     pub fn adapt_future_plan(&mut self, data: &DataManager, 
-    _history: &MarketHistory) {
-        // start by updating our success rate for our buy priorities.
-        for (_, know) in self.memory.product_knowledge.iter_mut() {
+    history: &MarketHistory) {
+        // with success updated based on our targets, go through and recalculate budgets and targets.
+        for (_prod_id, know) in self.memory.product_knowledge.iter_mut() {
+            // start by updating our success rate for our buy priorities.
             // get how much we got, achieved includes both what was bought as well as what was given or rolled over from yesterday.
             let achieved = know.achieved / know.target;
             // modify achieved down by our loss rate, this may need to be adjusted dynamically as well.
@@ -1313,12 +1321,7 @@ impl Pop {
             let achieved = achieved * (1.0 - know.lost * LOSS_TO_SUCCESS_WEIGHT);
             // and update the success rate for the knowledge.
             know.update_success(achieved);
-        }
-        // with success updated based on our targets, go through and recalculate budgets and targets.
-        let mut shift = HashMap::new();
-        let mut remove = vec![];
-        for (prod_id, know) in self.memory.product_knowledge.iter_mut() {
-            let prod_info = data.products.get(prod_id).unwrap();
+
             // breakup based on the current success rate.
             if know.success_rate > MAJOR_TARGET_SUCCESS_THRESHOLD {
                 // if it's a major success, look at our budgets and try to bring them
@@ -1330,10 +1333,10 @@ impl Pop {
                 know.amv_budget -= reduction * excess_amv;
                 // try to reduce the amount purchased as well without reducing below what we used or lost.
                 let reserve = know.used + know.lost;
-                let excess_target = know.target - know.achieved;
-                know.target -= excess_target * reserve;
-                // shift the item forward
-                shift.insert(prod_id, -1);
+                let excess_target = know.target - reserve;
+                know.target = excess_target * reduction + reserve;
+                // increase the item's priority
+                know.buy_priority = know.buy_priority.saturating_sub(1);
             } else if know.success_rate > STANDARD_TARGET_SUCCESS_THRESHOLD {
                 // If it's a standard success try to reduce our budget targets, not our targets
                 let excess_time = know.time_budget - know.time_spent;
@@ -1341,7 +1344,6 @@ impl Pop {
                 let reduction = know.success_rate - STANDARD_TARGET_SUCCESS_THRESHOLD; // 0.0 - 0.25
                 know.time_budget -= reduction * excess_time;
                 know.amv_budget -= reduction * excess_amv;
-                shift.insert(prod_id, 0);
             } else if know.success_rate > STANDARD_TARGET_FAILURE_THRESHOLD {
                 // we are below our target, add to our budget a little bit to try and succeed.
                 let increase = (STANDARD_TARGET_SUCCESS_THRESHOLD - know.success_rate) / 2.0; // 0.0 - 0.125
@@ -1349,7 +1351,7 @@ impl Pop {
                 // Increasing based on spent ensures the one in which restricted us more goes up more.
                 know.time_budget += increase * know.time_spent;
                 know.amv_budget += increase * know.amv_spent;
-                shift.insert(prod_id, 1);
+                know.buy_priority = know.buy_priority.saturating_add(1);
             } else { // Major Target Failure Threshold
                 // we are so far below our target that we may not be capable of buying the item, start weeding it out.
                 // increase our budget
@@ -1359,15 +1361,133 @@ impl Pop {
                 // and decrease our target
                 let reduction = STANDARD_TARGET_FAILURE_THRESHOLD - know.success_rate; // 0.0 - 0.25
                 know.target -= reduction * know.target;
-                shift.insert(prod_id, 2);
+                know.buy_priority = know.buy_priority.saturating_add(2);
             }
-            // with success rate and adjustments applied, check to see if we should just remove the item or not.
-            // if below a standard target threshold, mark it for removal entirely.
-            if know.target < TARGET_MINIMUM_THRESHOLD || 
-            (know.target < 1.0 && !prod_info.fractional) {
-                remove.push(prod_id);
+            // increase or decrease shift based on how much rollover there is.
+            let rollover_rate = know.rollover / know.target;
+            if rollover_rate > 0.75 { // if high rollover, push back
+                know.buy_priority = know.buy_priority.saturating_add(2);
+            } else if rollover_rate > 0.5 { // if some rollover, push back less
+                know.buy_priority = know.buy_priority.saturating_add(1);
+            } else if rollover_rate > 0.25 { // if only partially rolled over, keep the same
+                // don't do anything with this.
+            } else {
+                know.buy_priority = know.buy_priority.saturating_sub(1);
             }
         }
+        // with calculation based on targets alone, add to targets for unsatisfied desires.
+        let start = self.desires.hard_satisfaction;
+        let mut end = self.desires.highest_tier;
+        // always include at least one tier above our highest if we have one.
+        if let Some(next) = self.desires.next_stepped_on_tier(end) {
+            end = next;
+        }
+        // always cover tiers 0-10 if they aren't already 
+        if end < 11 { end = 11; }
+        // with our start and end tiers, find ones which we step on in this interval 
+        // and which are not totally satisfied. If they meet these criteria, 
+        // add products to try and satisfy that desire.
+        for desire in self.desires.desires.iter_mut() {
+            if !desire.steps_in_interval(start, end) {
+                continue;
+            }
+            // if the range we have steps on that desire, add items which 
+            // desire it to the list or to existing knowledge targets.
+            if desire.is_fully_satisfied() { continue; } // don't add those which are satisfied
+            if let DesireItem::Product(id) = desire.item { // if it's an item, add it here.
+                // TODO when abstract and specific item desires are split, add in check here.
+                self.memory.product_knowledge.entry(id).and_modify(|x| x.target += 1.0)
+                .or_insert({
+                    let mut know = Knowledge::new();
+                    know.target += desire.amount;
+                    // TODO update to use Price Volatility instead of a flat 2x base budget.
+                    know.amv_budget += history.get_product_price(&id, 1.0) * 2.0;
+                    know
+                });
+            } else if let DesireItem::Want(id) = desire.item { // if item is want
+                let want_info = data.wants.get(&id).unwrap();
+                // start with ownership sources
+                for own_product_id in want_info.ownership_sources.iter() {
+                    if let Some(know) = self.memory.product_knowledge
+                    .get_mut(own_product_id) { // if we already target the product
+                        if know.success_rate > 0.5 { // and we generally succeed at getting it
+                            // add full value.
+                            know.target += desire.amount;
+                        } else { // if generally unsuccessful, add only 1.
+                            know.target += 1.0;
+                        }
+                    } else { // if we don't already get it, add it.
+                        // target 1, with 1 hour budget and market price
+                        self.memory.product_knowledge.insert(*own_product_id, {
+                            let mut know = Knowledge::new();
+                            know.amv_budget = history.get_product_price(own_product_id, 1.0) * 2.0;
+                            know });
+                    }
+                }
+
+                // then add in use products required
+                for use_proc_id in want_info.use_sources.iter() {
+                    let process = data.processes.get(use_proc_id).unwrap();
+                    for &part in process.input_and_capital_products().iter() {
+                        // with the product check if we already get it or not.
+                        if let Some(know) = self.memory.product_knowledge
+                        .get_mut(&part.item.unwrap()) {
+                            if know.success_rate > 0.5 { // if likely to be gotten, add full
+                                know.target += desire.amount * part.amount;
+                            } else { // if unlikely, add only what we need (min 1.0 for purchase purposes.)
+                                know.target += part.amount.min(1.0);
+                            }
+                        } else { // if we don't get it, add it
+                            self.memory.product_knowledge.insert(part.item.unwrap(), {
+                                let mut know = Knowledge::new();
+                                know.target = part.amount.min(1.0);
+                                know.amv_budget = history.get_product_price(&part.item.unwrap(), 1.0) * 2.0;
+                                know });
+                        }
+                    }
+                }
+
+                // then add in consumption products required
+                for consumption_proc_id in want_info.consumption_sources.iter() {
+                    let process = data.processes.get(consumption_proc_id).unwrap();
+                    for &part in process.input_and_capital_products().iter() {
+                        // with the product check if we already get it or not.
+                        if let Some(know) = self.memory.product_knowledge
+                        .get_mut(&part.item.unwrap()) {
+                            if know.success_rate > 0.5 { // if likely to be gotten, add full
+                                know.target += desire.amount * part.amount;
+                            } else { // if unlikely, add only what we need (min 1.0 for purchase purposes.)
+                                know.target += part.amount.min(1.0);
+                            }
+                        } else { // if we don't get it, add it
+                            self.memory.product_knowledge.insert(part.item.unwrap(), {
+                                let mut know = Knowledge::new();
+                                know.target = part.amount.min(1.0);
+                                know.amv_budget = history.get_product_price(&part.item.unwrap(), 1.0) * 2.0;
+                                know });
+                        }
+                    }
+                }
+            }
+        }
+
+        // clear out any which seem to be impossible to get (low success and low targets)
+        let mut remove = HashSet::new();
+        for (product, know) in self.memory.product_knowledge.iter() {
+            let ratio = know.achieved / know.target;
+            if know.success_rate < 0.1 && ratio < 0.01 {
+                remove.insert(*product);
+            }
+        }
+        // remove everything marked for removal.
+        self.memory.product_knowledge.retain(|key, _| !remove.contains(key));
+        self.memory.product_priority.retain(|x| !remove.contains(x));
+
+        // finish by resorting our buy priorities.
+        self.memory.product_priority.sort_by(|a, b| {
+            self.memory.product_knowledge.get(a).unwrap().buy_priority
+            .cmp(&self.memory.product_knowledge.get(b).unwrap().buy_priority)
+        });
     }
 }
 
@@ -1452,7 +1572,7 @@ impl Actor for Pop {
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
         self.desires.sift_products();
-        for (key, know) in self.memory.product_knowledge.iter_mut() {
+        for (_product_id, know) in self.memory.product_knowledge.iter_mut() {
             know.achieved = 0.0; // reset knowledge info for the day.
             know.spent = 0.0;
             know.lost = 0.0;
