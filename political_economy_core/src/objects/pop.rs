@@ -412,7 +412,7 @@ impl Pop {
     /// ## Not Tested due to complexity.
     pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
     data: &DataManager,
-    market: &MarketHistory) {
+    market: &MarketHistory) -> HashMap<usize, PropertyBreakdown>{
         // start by breaking up property. create 4(5) camps
         // desired, ie those items which we have a pre-existing slot for
         // undesired, those which we have no known or pre-existing slot for
@@ -421,11 +421,9 @@ impl Pop {
         // want_satisfying, the products which will be used/consumed to satisfy a want.
         // these latter two start empty and are added to as we walk up our desires.
         // Undesired
-
-        // start by splitting property up into keep, and spend;
-        let mut keep: HashMap<usize, f64> = HashMap::new();
-        let mut spend: HashMap<usize, f64> = HashMap::new();
-        let mut change: HashMap<usize, f64> = HashMap::new();
+        
+        let mut records = HashMap::new();
+        /*
         // get what we remember over
         for (id, know) in self.memory.product_knowledge.iter_mut() {
             let available = *self.desires.property.get(id).unwrap_or(&0.0); // get how much we have
@@ -535,7 +533,8 @@ impl Pop {
             &mut returned, 
             &vec![
                 ActorMessage::AllFinished
-            ]);
+            ]); */
+        records
     }
 
     /// Processes common messages from the ActorMessages for current free time.
@@ -1668,4 +1667,148 @@ pub struct PropertyBreakdown {
     pub abstract_reserve: f64,
     /// The amount that has been reserved to satisfy want desires.
     pub want_reserve: f64
+}
+
+impl PropertyBreakdown {
+    /// # New Property Breakdown
+    /// 
+    /// News up a property breakdown given an available value.
+    /// Automatically sets the total and unreserved.
+    pub fn new(available: f64) -> Self { 
+        Self { total_available: available, 
+            unreserved: available, 
+            reserved: 0.0, 
+            specific_reserve: 0.0, 
+            abstract_reserve: 0.0, 
+            want_reserve: 0.0 
+        } 
+    }
+
+
+    /// Adds to both total available and to unreserved
+    /// may be used to subtract, not secure below 0.
+    pub fn add_to_total(&mut self, quantity: f64) {
+        self.total_available += quantity;
+        self.unreserved += quantity;
+    }
+
+    /// Shifts the given quantity from unreserved to reserved.
+    /// 
+    /// If unable to shift all it returns the excess.
+    pub fn shift_to_reserved(&mut self, quantity: f64) -> f64 {
+        let available = self.unreserved.min(quantity);
+        let excess = quantity - available;
+        self.unreserved -= available;
+        self.reserved += available;
+        excess
+    }
+
+    /// Gets the highest of our 3 reserves.
+    pub fn max_spec_reserve(&self) -> f64 {
+        self.specific_reserve
+            .max(self.abstract_reserve)
+            .max(self.want_reserve)
+    }
+
+    /// Shifts the given quantity into specific reserve.
+    /// 
+    /// Pulls from other sub-reserves up to the highest, without subtracting 
+    /// (allowing overlap), then from the reserve, then from the unreserved.
+    pub fn shift_to_specific_reserve(&mut self, quantity: f64) -> f64 {
+        let mut quantity = quantity;
+        let other_max = self.abstract_reserve.max(self.want_reserve);
+        if other_max > self.specific_reserve { 
+            // if we have some from other reserves, get from there first.
+            let shift = (other_max-self.specific_reserve).min(quantity);
+            self.specific_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // not enough from overlap alone, shift from reserve.
+        if self.reserved > 0.0 {
+            // get the smaller between available, and shift target.
+            let shift = self.reserved.min(quantity);
+            // remove from reserve, add to spec reserve, and remove from quantity
+            self.reserved -= shift;
+            self.specific_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // if not enough from reserve, then from unreserved.
+        if self.unreserved > 0.0 {
+            let shift = self.unreserved.min(quantity);
+            self.unreserved -= shift;
+            self.specific_reserve += shift;
+            quantity -= shift;
+        }
+        quantity
+    }
+
+    /// Shifts the given quantity into abstract reserve.
+    /// 
+    /// Pulls from other sub-reserves up to the highest, without subtracting 
+    /// (allowing overlap), then from the reserve, then from the unreserved.
+    pub fn shift_to_abstract_reserve(&mut self, quantity: f64) -> f64 {
+        let mut quantity = quantity;
+        let other_max = self.specific_reserve.max(self.want_reserve);
+        if other_max > self.abstract_reserve { 
+            // if we have some from other reserves, get from there first.
+            let shift = (other_max-self.abstract_reserve).min(quantity);
+            self.abstract_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // not enough from overlap alone, shift from reserve.
+        if self.reserved > 0.0 {
+            // get the smaller between available, and shift target.
+            let shift = self.reserved.min(quantity);
+            // remove from reserve, add to spec reserve, and remove from quantity
+            self.reserved -= shift;
+            self.abstract_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // if not enough from reserve, then from unreserved.
+        if self.unreserved > 0.0 {
+            let shift = self.unreserved.min(quantity);
+            self.unreserved -= shift;
+            self.abstract_reserve += shift;
+            quantity -= shift;
+        }
+        quantity
+    }
+
+    /// Shifts the given quantity into want reserve.
+    /// 
+    /// Pulls from other sub-reserves up to the highest, without subtracting 
+    /// (allowing overlap), then from the reserve, then from the unreserved.
+    pub fn shift_to_want_reserve(&mut self, quantity: f64) -> f64 {
+        let mut quantity = quantity;
+        let other_max = self.specific_reserve.max(self.abstract_reserve);
+        if other_max > self.want_reserve { 
+            // if we have some from other reserves, get from there first.
+            let shift = (other_max-self.want_reserve).min(quantity);
+            self.want_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // not enough from overlap alone, shift from reserve.
+        if self.reserved > 0.0 {
+            // get the smaller between available, and shift target.
+            let shift = self.reserved.min(quantity);
+            // remove from reserve, add to spec reserve, and remove from quantity
+            self.reserved -= shift;
+            self.want_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // if not enough from reserve, then from unreserved.
+        if self.unreserved > 0.0 {
+            let shift = self.unreserved.min(quantity);
+            self.unreserved -= shift;
+            self.want_reserve += shift;
+            quantity -= shift;
+        }
+        quantity
+    }
 }

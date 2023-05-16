@@ -10,6 +10,199 @@ extern crate lazy_static;
 
 #[cfg(test)]
 mod tests {
+    mod PropertyBreakdown_tests {
+
+        mod shift_tests {
+            use crate::objects::pop::PropertyBreakdown;
+
+            #[test]
+            pub fn shift_to_reserved_correctly() {
+                let mut test = PropertyBreakdown::new(10.0);
+
+                let remainder = test.shift_to_reserved(5.0);
+                assert!(test.total_available == 10.0);
+                assert!(test.unreserved == 5.0);
+                assert!(test.reserved == 5.0);
+                assert!(test.specific_reserve == 0.0);
+                assert!(test.abstract_reserve == 0.0);
+                assert!(test.want_reserve == 0.0);
+                assert!(remainder == 0.0);
+
+                let remainder = test.shift_to_reserved(10.0);
+                assert!(test.total_available == 10.0);
+                assert!(test.unreserved == 0.0);
+                assert!(test.reserved == 10.0);
+                assert!(test.specific_reserve == 0.0);
+                assert!(test.abstract_reserve == 0.0);
+                assert!(test.want_reserve == 0.0);
+                assert!(remainder == 5.0);
+            }
+
+            #[test]
+            pub fn get_max_special_reserve_correctly() {
+                let mut test = PropertyBreakdown::new(10.0);
+                let result = test.max_spec_reserve();
+                assert!(result == 0.0);
+
+                test.specific_reserve = 1.0;
+                let result = test.max_spec_reserve();
+                assert!(result == 1.0);
+
+                test.abstract_reserve = 2.0;
+                let result = test.max_spec_reserve();
+                assert!(result == 2.0);
+
+                test.want_reserve = 3.0;
+                let result = test.max_spec_reserve();
+                assert!(result == 3.0);
+            }
+
+            #[test]
+            pub fn shift_to_specific_reserve_correctly() {
+                let mut test = PropertyBreakdown::new(10.0);
+                test.shift_to_reserved(5.0);
+                test.total_available += 5.0;
+                test.abstract_reserve += 5.0;
+
+                // check that it reserves from overlap first.
+                let result = test.shift_to_specific_reserve(2.5);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 5.0);
+                assert!(test.reserved == 5.0);
+                assert!(test.specific_reserve == 2.5);
+                assert!(test.abstract_reserve == 5.0);
+                assert!(test.want_reserve == 0.0);
+
+                // check that it takes from overlap and reserved
+                let result = test.shift_to_specific_reserve(5.0);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 5.0);
+                assert!(test.reserved == 2.5);
+                assert!(test.specific_reserve == 7.5);
+                assert!(test.abstract_reserve == 5.0);
+                assert!(test.want_reserve == 0.0);
+
+                // check that it takes from reserve and unreserved
+                let result = test.shift_to_specific_reserve(5.0);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 2.5);
+                assert!(test.reserved == 0.0);
+                assert!(test.specific_reserve == 12.5);
+                assert!(test.abstract_reserve == 5.0);
+                assert!(test.want_reserve == 0.0);
+
+                // check that it takes from unreserved and returns excess
+                let result = test.shift_to_specific_reserve(5.0);
+                assert!(result == 2.5);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 0.0);
+                assert!(test.reserved == 0.0);
+                assert!(test.specific_reserve == 15.0);
+                assert!(test.abstract_reserve == 5.0);
+                assert!(test.want_reserve == 0.0);
+            }
+
+            #[test]
+            pub fn shift_to_abstract_reserve_correctly() {
+                let mut test = PropertyBreakdown::new(10.0);
+                test.shift_to_reserved(5.0);
+                test.total_available += 5.0;
+                test.specific_reserve += 5.0;
+
+                // check that it reserves from overlap first.
+                let result = test.shift_to_abstract_reserve(2.5);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 5.0);
+                assert!(test.reserved == 5.0);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 2.5);
+                assert!(test.want_reserve == 0.0);
+
+                // check that it takes from overlap and reserved
+                let result = test.shift_to_abstract_reserve(5.0);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 5.0);
+                assert!(test.reserved == 2.5);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 7.5);
+                assert!(test.want_reserve == 0.0);
+
+                // check that it takes from reserve and unreserved
+                let result = test.shift_to_abstract_reserve(5.0);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 2.5);
+                assert!(test.reserved == 0.0);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 12.5);
+                assert!(test.want_reserve == 0.0);
+
+                // check that it takes from unreserved and returns excess
+                let result = test.shift_to_abstract_reserve(5.0);
+                assert!(result == 2.5);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 0.0);
+                assert!(test.reserved == 0.0);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 15.0);
+                assert!(test.want_reserve == 0.0);
+            }
+
+            #[test]
+            pub fn shift_to_want_reserve_correctly() {
+                let mut test = PropertyBreakdown::new(10.0);
+                test.shift_to_reserved(5.0);
+                test.total_available += 5.0;
+                test.specific_reserve += 5.0;
+
+                // check that it reserves from overlap first.
+                let result = test.shift_to_want_reserve(2.5);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 5.0);
+                assert!(test.reserved == 5.0);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 0.0);
+                assert!(test.want_reserve == 2.5);
+
+                // check that it takes from overlap and reserved
+                let result = test.shift_to_want_reserve(5.0);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 5.0);
+                assert!(test.reserved == 2.5);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 0.0);
+                assert!(test.want_reserve == 7.5);
+
+                // check that it takes from reserve and unreserved
+                let result = test.shift_to_want_reserve(5.0);
+                assert!(result == 0.0);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 2.5);
+                assert!(test.reserved == 0.0);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 0.0);
+                assert!(test.want_reserve == 12.5);
+
+                // check that it takes from unreserved and returns excess
+                let result = test.shift_to_want_reserve(5.0);
+                assert!(result == 2.5);
+                assert!(test.total_available == 15.0);
+                assert!(test.unreserved == 0.0);
+                assert!(test.reserved == 0.0);
+                assert!(test.specific_reserve == 5.0);
+                assert!(test.abstract_reserve == 0.0);
+                assert!(test.want_reserve == 15.0);
+            }
+        }
+    }
+
     mod pop_tests {
         use std::{collections::{HashMap, VecDeque}};
 
