@@ -2,8 +2,10 @@
 pub const TIME_ID: usize = 0;
 /// the id for the required Shopping Time product.
 pub const SHOPPING_TIME_ID: usize = 1;
-/// The Id for the required Rest Want product.
+/// The Id for the required Rest Want.
 pub const REST_WANT_ID: usize = 0;
+/// The ID for the Required Wealth Want.
+pub const WEALTH_WANT_ID: usize = 1;
 /// The ID for the process which turns time to Shopping Time.
 pub const SHOPPING_TIME_PROC_ID: usize = 0;
 

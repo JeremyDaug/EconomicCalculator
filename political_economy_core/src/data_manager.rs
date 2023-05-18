@@ -1,12 +1,12 @@
 use core::panic;
 use std::collections::{HashMap, HashSet};
 
-use crate::objects::{want::Want, 
+use crate::{objects::{want::Want, 
     skill_group::SkillGroup,
     skill::Skill, 
     technology::Technology,
     technology_family::TechnologyFamily, 
-    product::Product, 
+    product::{Product, ProductTag}, 
     process_node::ProcessNode, 
     process::{Process, 
         ProcessPart, 
@@ -19,7 +19,7 @@ use crate::objects::{want::Want,
     culture::Culture, 
     pop::Pop, 
     market::Market, 
-    firm::Firm};
+    firm::Firm}, constants::{REST_WANT_ID, WEALTH_WANT_ID, SHOPPING_TIME_ID, TIME_ID}};
 
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
@@ -153,16 +153,25 @@ impl DataManager {
     /// Loads wants from a file into the data manager,
     /// Currently, this just loads pre-existing data.
     pub fn load_wants(&mut self, _file_name: &String) -> Result<(), String> {
-        let rest =  match Want::new(0, 
+        let rest =  match Want::new(REST_WANT_ID, 
             String::from("Rest"), 
             String::from("Rest is the joy of Idle time."), 
             0.1) {
                 Result::Err(_) => panic!(),
                 Result::Ok(want) => want
             };
+        
+        let wealth = match Want::new(
+            WEALTH_WANT_ID,
+            String::from("Wealth"),
+            String::from("Wealth is the amount of things you have built up. Not just money, but things. This is a required item."),
+            0.2) {
+            Result::Err(_) => panic!(),
+            Result::Ok(want) => want
+        };
 
         let food = match Want::new(
-            1,
+            2,
             String::from("Food"),
             String::from("Food is the desire for sustenance, necissary for all living things."),
             0.2) {
@@ -171,7 +180,7 @@ impl DataManager {
             };
 
         let shelter = match Want::new(
-            2,
+            3,
             String::from("Shelter"),
             String::from("Shelter is the protection from the elements, a space where the difficulties of the outside world are lessened and made tolerable."),
             0.2) {
@@ -180,7 +189,7 @@ impl DataManager {
         };
 
         let clothing = match Want::new(
-            3,
+            4,
             String::from("Clothing"),
             String::from("Clothing is the personal protection from the elements, while it does not separate one from the wider world wholly, it does lessen it's toll."),
             0.2) {
@@ -189,18 +198,9 @@ impl DataManager {
         };
 
         let fashion = match Want::new(
-            4,
+            5,
             String::from("Fashion"),
             String::from("Fashion is about presentation, showing your wealth through jewelry, and higher quality clothing."),
-            0.2) {
-                Result::Err(_) => panic!(),
-                Result::Ok(want) => want
-        };
-
-        let wealth = match Want::new(
-            5,
-            String::from("Wealth"),
-            String::from("Wealth is the amount of things you have built up. Not just money, but things. This is a required item."),
             0.2) {
                 Result::Err(_) => panic!(),
                 Result::Ok(want) => want
@@ -228,7 +228,7 @@ impl DataManager {
 
     pub fn load_products(&mut self, _file_name: &String) -> Result<(), String> {
         // Generic Time
-        let time = Product::new(0,
+        let time = Product::new(TIME_ID,
             String::from("Time"),
             String::from(""),
             String::from("Time. Always is short supply."), 
@@ -238,10 +238,10 @@ impl DataManager {
             0.0,
             Some(0),
             true,
-            Vec::new(),
+            vec![ProductTag::NonTransferrable],
             None).unwrap();
         // Shopping Time
-        let shopping_time = Product::new(1,
+        let shopping_time = Product::new(SHOPPING_TIME_ID,
             String::from("Shopping Time"),
             String::from(""),
             String::from("Shopping Time, productive, but sometimes frustrating."), 

@@ -422,39 +422,31 @@ impl Pop {
         // these latter two start empty and are added to as we walk up our desires.
         // Undesired
         
-        let mut records = HashMap::new();
-        /*
-        // get what we remember over
-        for (id, know) in self.memory.product_knowledge.iter_mut() {
-            let available = *self.desires.property.get(id).unwrap_or(&0.0); // get how much we have
-            let capped = available.min(know.target); // cap at our target to keep
-            if available != capped {
-                // if there will be some available leftover after min, then add to spend
-                spend.insert(*id, available - capped);
-            }
-            // what we want to keep, add to keep
-            keep.insert(*id, capped);
-            // and record the amount we kept as also being achieved already and record rollover as well
-            know.achieved += capped;
-            know.rollover += capped;
+        let mut records: HashMap<usize, PropertyBreakdown> = HashMap::new();
+        // get all property the breakdown
+        for (&id, &quantity) in self.desires.property.iter() {
+            records.insert(id, PropertyBreakdown::new(quantity));
         }
-        // repeat for the items which we don't have any memory for so we can offer them up for sale
-        for (id, excess) in self.desires.property
-        .iter().filter(|x| !keep.contains_key(x.0)) {
-            spend.insert(*id, *excess);
+        // reserve up to our target if possible, and record our rollover and achieved.
+        for (id, know) in self.memory.product_knowledge.iter_mut() {
+            let mut record = records.entry(id)
+                .or_insert(PropertyBreakdown::new(0.0));
+            // shift from our current available to reserve, Excess is not used.
+            let _ = record.shift_to_reserved(know.target);
+            know.rollover = record.total_available;
+            know.achieved += record.total_available;
         }
         // with that done, put our spend stuff up for sale, if we are selling
         if self.is_selling {
-            for (id, amount) in spend.iter()
-            .filter(|x| *x.0 != TIME_ID) {
-                let info = data.products.get(id).expect("Product Not Found!");
+            for (&id, &prop_breakdown) in records.iter() {
+                let info = data.products.get(&id).expect("Product Not Found!");
                 // if nontransferable, don't offer for sale.
                 if info.tags.contains(&ProductTag::NonTransferrable) { continue; }
                 // since it can be sold, offer it up.
                 self.push_message(rx, tx, 
                     ActorMessage::SellOrder { sender: self.actor_info(),
-                    product: *id, quantity: *amount, 
-                    amv: market.get_product(id).price });
+                    product: id, quantity: prop_breakdown.unreserved, 
+                    amv: market.get_product(&id).price });
                 // private sellers offer at current estimated market price.
             }
         }
@@ -463,34 +455,32 @@ impl Pop {
         // expending our time while handling any orders coming our way.
         let mut curr_buy_idx = 0;
         let shopping_time_cost = self.standard_shop_time_cost();
+        let mut current_desire = None;
         loop {
-            // check that we have time or exchangeable property remaining
-            //     if none, break out
-            // quickly clear out message queue and backlog, complete any selling here.
-            //     repeat until message queue and backlog are clear (backlog comes first)
+            // stop if we run out of time or unreserved property.
+            if records.get(&TIME_ID).unwrap().available() == 0.0 { break; }
+            if records.iter().map(|x| x.1.unreserved).sum() == 0.0 { break; }
+            // since we have some time and/or property to exchange, then go
+            // through the backlog and message queue and clear them both out.
+            self.msg_catchup(rx);
+            // then clear out the backlog.
+            while let Some(msg) = self.backlog.pop_front() {
+                let _result = self.process_common_msg(rx, tx, data, market, msg,
+                    &mut keep, &mut spend, &mut change);
+            }
+            // stop if we run out of time or unreserved property.
+            if records.get(&TIME_ID).unwrap().available() == 0.0 { break; }
+            if records.iter().map(|x| x.1.unreserved).sum() == 0.0 { break; }
             // enter consumption/purchase phase
             //     try to consume to meet our desires
             //         if successful, move on to next loop
             //         if failed, try to buy to satisfy.
             //             When buying, try to satisfy with later products we purhase.
-
+            current_desire = self.desires.walk_up_tiers(current_desire);
 
 
             // if time to spend has been used up, break out.
             // TODO update to use the smalest possble expendable unit of time instead of 0.0.
-            if *spend.get(&0).unwrap_or(&0.0) < shopping_time_cost { break; }
-            // catch up with the broadcast queue to help keep the queue clear.
-            // don't actually process, just push anything for us into the backlog.
-            self.msg_catchup(rx);
-            // now clear out the backlog messages until we find something common shouldn't handle
-            while let Some(msg) = self.backlog.pop_front() {
-                let _result = self.process_common_msg(rx, tx, data, market, msg,
-                    &mut keep, &mut spend, &mut change);
-            }
-            // double check that we are out of time, and gtfo if we are after common_msg processing
-            if *spend.get(&0).unwrap_or(&0.0) <= shopping_time_cost { break; }
-            // With the backlog caught up, do whatever we need want to do here
-
             // buy stuff first, and repeat until we have tried buying everything we can.
             if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
                 let product = *self.memory.product_priority
@@ -533,7 +523,7 @@ impl Pop {
             &mut returned, 
             &vec![
                 ActorMessage::AllFinished
-            ]); */
+            ]); 
         records
     }
 
@@ -1810,5 +1800,12 @@ impl PropertyBreakdown {
             quantity -= shift;
         }
         quantity
+    }
+
+    /// # Available
+    /// 
+    /// The amount available for trade or explicit use.
+    fn available(&self) -> f64 {
+        self.unreserved + self.reserved
     }
 }
