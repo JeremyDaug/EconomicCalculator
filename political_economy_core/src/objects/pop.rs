@@ -412,7 +412,6 @@ impl Pop {
     data: &DataManager,
     market: &MarketHistory) -> HashMap<usize, PropertyBreakdown>{
         // FIXME This and all functions referenced or reached from here need to be updated and fixed to properly use PropertyBreakdown and the product_knowledge which has been gutted.
-        
         // start by breaking up property. create 4(5) camps
         // desired, ie those items which we have a pre-existing slot for
         // undesired, those which we have no known or pre-existing slot for
@@ -422,14 +421,14 @@ impl Pop {
         // these latter two start empty and are added to as we walk up our desires.
         // Undesired
         
-        let mut records: HashMap<usize, PropertyBreakdown> = HashMap::new();
+        let mut prop_org: HashMap<usize, PropertyBreakdown> = HashMap::new();
         // get all property the breakdown
         for (&id, &quantity) in self.desires.property.iter() {
-            records.insert(id, PropertyBreakdown::new(quantity));
+            prop_org.insert(id, PropertyBreakdown::new(quantity));
         }
         // reserve up to our target if possible, and record our rollover and achieved.
         for (id, know) in self.memory.product_knowledge.iter_mut() {
-            let mut record = records.entry(*id)
+            let mut record = prop_org.entry(*id)
                 .or_insert(PropertyBreakdown::new(0.0));
             // shift from our current available to reserve, Excess is not used.
             let _ = record.shift_to_reserved(know.target);
@@ -438,7 +437,7 @@ impl Pop {
         }
         // with that done, put our spend stuff up for sale, if we are selling
         if self.is_selling {
-            for (&id, &prop_breakdown) in records.iter() {
+            for (&id, &prop_breakdown) in prop_org.iter() {
                 let info = data.products.get(&id).expect("Product Not Found!");
                 // if nontransferable, don't offer for sale.
                 if info.tags.contains(&ProductTag::NonTransferrable) { continue; }
@@ -446,31 +445,30 @@ impl Pop {
                 self.push_message(rx, tx, 
                     ActorMessage::SellOrder { sender: self.actor_info(),
                     product: id, quantity: prop_breakdown.unreserved, 
-                    amv: market.get_product(&id).price });
+                    amv: market.get_product_price(&id, 1.0) });
                 // private sellers offer at current estimated market price.
             }
         }
         // TODO Consider waiting here for a shopping day start msg here, if the buyers outpace the sellers too much. This may occur if most sellers are selling pops.
         // enter a loop and work on buying up to our targets and 
         // expending our time while handling any orders coming our way.
-        let mut curr_buy_idx = 0;
-        let shopping_time_cost = self.standard_shop_time_cost();
+        let shopping_time_cost = self.standard_shop_time_cost(data);
         let mut current_desire_coord = None;
         loop {
             // stop if we run out of time or unreserved property.
-            if records.get(&TIME_ID).unwrap().available() == 0.0 { break; }
-            if records.iter().all(|x| x.1.unreserved == 0.0) { break; }
-            // since we have some time and/or property to exchange, then go
+            if prop_org.get(&TIME_ID).unwrap().available() < shopping_time_cost { break; }
+            if prop_org.iter().all(|x| x.1.unreserved == 0.0) { break; }
+            // since we have some time and property to exchange, then go
             // through the backlog and message queue and clear them both out.
             self.msg_catchup(rx);
             // then clear out the backlog.
             while let Some(msg) = self.backlog.pop_front() {
                 let _result = self.process_common_msg(rx, tx, data, market, msg,
-                    &mut records);
+                    &mut prop_org);
             }
             // stop if we run out of time or unreserved property.
-            if records.get(&TIME_ID).unwrap().available() == 0.0 { break; }
-            if records.iter().all(|x| x.1.unreserved == 0.0) { break; }
+            if prop_org.get(&TIME_ID).unwrap().available() < shopping_time_cost { break; }
+            if prop_org.iter().all(|x| x.1.unreserved == 0.0) { break; }
             // enter consumption/purchase phase
             //     try to consume to meet our desires
             //         if successful, move on to next loop
@@ -496,7 +494,7 @@ impl Pop {
             if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
                 let product = *self.memory.product_priority
                     .get(curr_buy_idx).expect("Product not found?");
-                let buy_result = self.try_to_buy(rx, tx, data, market, &mut records, &product);
+                let buy_result = self.try_to_buy(rx, tx, data, market, &mut prop_org, &product);
                 // with our stuff bought, jump back to the top and do more.
                 match buy_result {
                     BuyResult::CancelBuy => { // if we cancelled
@@ -529,11 +527,11 @@ impl Pop {
         self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
         // with our free time run out enter a holding pattern while waiting for the day to end.
         let mut returned: HashMap<usize, f64> = HashMap::new();
-        self.active_wait(rx, tx, data, market, &mut records, 
+        self.active_wait(rx, tx, data, market, &mut prop_org, 
             &vec![
                 ActorMessage::AllFinished
             ]); 
-        records
+        prop_org
     }
 
     /// Processes common messages from the ActorMessages for current free time.
@@ -543,7 +541,7 @@ impl Pop {
     fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager, 
     market: &MarketHistory, msg: ActorMessage, 
-    records: &mut HashMap<usize, PropertyBreakdown>) -> Option<ActorMessage> {
+    prop_org: &mut HashMap<usize, PropertyBreakdown>) -> Option<ActorMessage> {
         match msg {
             ActorMessage::FoundProduct { seller, buyer, 
             product } => {
@@ -551,17 +549,14 @@ impl Pop {
                     panic!("Product Found message with us as the buyer should not be found outside of deal state.");
                 } else if seller == self.actor_info() {
                     // TODO When cha
-                    let mut accepted = self.standard_sell(rx, tx, data, market, records, product, buyer);
-
-                } else {
-                    panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
-                }
+                    let mut accepted = self.standard_sell(rx, tx, data, market, prop_org, product, buyer);
+                } else { unreachable!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!"); }
                 return None;
             },
             // TODO add Seller Approaches Logic Here.
             ActorMessage::SendProduct { product, amount, .. } => {
                 // We're recieving a product, add to our unreserved amount.
-                records.entry(product)
+                prop_org.entry(product)
                 .and_modify(|x| x.add_to_total(amount))
                 .or_insert(PropertyBreakdown::new(amount));
                 return None;
@@ -613,7 +608,7 @@ impl Pop {
     records: &mut HashMap<usize, PropertyBreakdown>,
     product: &usize) -> BuyResult {
         // get time cost for later
-        let time_cost = self.standard_shop_time_cost();
+        let time_cost = self.standard_shop_time_cost(data);
         // get the amount we want to get and the unit price budget.
         let mem = self.memory.product_knowledge
         .get_mut(product).expect("Product not found?");
@@ -663,7 +658,8 @@ impl Pop {
     /// 
     /// This is currently calculated as being equal to 
     /// SHOPPING_TIME_COST (0.2) * self.total_population
-    pub fn standard_shop_time_cost(&self) -> f64 {
+    pub fn standard_shop_time_cost(&self, data: &DataManager) -> f64 {
+        // TODO Update to get the time cost for Shopping process.
         constants::SHOPPING_TIME_COST * self.count() as f64
     }
 
@@ -1066,19 +1062,25 @@ impl Pop {
     /// Returns the payment recieved so we can sort it into keep and spend.
     /// 
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
-    /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry or for the 
+    /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry and/or the seller to lose time to the deal.
     /// TODO Currently does not do change, accepts offer or rejects, no returning change.
     pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, _data: &DataManager,
     market: &MarketHistory,
-    spend: &mut HashMap<usize, PropertyBreakdown>, product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
+    prop_org: &mut HashMap<usize, PropertyBreakdown>, product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
         let seller = self.actor_info();
         let product_price = market.get_product_price(&product, 1.0);
         // we have recieved a FoundProduct MSG and we're the seller.
         // send back our available stock (if any)
-        if let Some(prop_breakdown) = spend.get_mut(&product) {
-            self.push_message(rx, tx, ActorMessage::InStock { buyer, seller, product, 
-                price: product_price, quantity: prop_breakdown.unreserved });
+        if let Some(prop_breakdown) = prop_org.get(&product) {
+            if prop_breakdown.unreserved > 0.0 { // if any unreserved, respond properly
+                self.push_message(rx, tx, ActorMessage::InStock { buyer, seller, product, 
+                    price: product_price, quantity: prop_breakdown.unreserved });
+            } else { // if no unreserved quantity available, return not in stock.
+                // This currently closes the deal
+                self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
+                return HashMap::new();
+            }
         } else { // if we don't have the item, send our OOS message
             // This currently closes the deal
             self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
@@ -1087,21 +1089,17 @@ impl Pop {
         // with stock message pushed, we wait for the buy offer or close message from them.
         let result = self.specific_wait(rx, &vec![
             ActorMessage::RejectPurchase { buyer: seller, seller: seller, product: 0, price_opinion: OfferResult::Cheap },
-            ActorMessage::BuyOffer { buyer: seller, seller: seller, product: 0, 
-            price_opinion: OfferResult::Cheap, quantity: 0.0, followup: 0 }
+            ActorMessage::BuyOffer { buyer: seller, seller: seller, product: 0, price_opinion: OfferResult::Cheap, quantity: 0.0, followup: 0 }
         ]);
-
+        // Check our result.
         if let ActorMessage::RejectPurchase { .. } = result { // if purchase rejected,
             // TODO add check item followup option here when check item followup is added.
             // recieve the close deal message to confirm.
             let result = self.specific_wait(rx, &vec![
                 ActorMessage::CloseDeal { buyer: seller, seller: seller, product: 0 }
             ]);
-            if let ActorMessage::CloseDeal { .. } = result {
-                // Nothing meaningful to do here, return
-                return HashMap::new();
-            } 
-            return HashMap::new(); // if anything else, for now, return as well.
+            // then leave (close deal has no meaningful info for us. We're just confirming the close.)
+            return HashMap::new();
         } else if let ActorMessage::BuyOffer { buyer, seller, 
         product: requested_product, price_opinion: _, quantity: quantity_requested,
         followup: mut current_step } = result { // if it's a buy offer, get their offer
