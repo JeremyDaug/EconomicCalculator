@@ -478,13 +478,39 @@ impl ProcessSectionTag {
     }
 }
 
+/// # Process Part Tags
+/// 
+/// An enum to store data about process items.
 #[derive(Debug)]
 pub enum ProcessPartTag {
+    /// Used to mark an input or capital as optional.
+    /// The value stored is the throughput gain for all other items.
+    /// Does not effect optional, fixed, or investment parts.
+    /// Input items marked optional are not output, but instead consumed or 
+    /// failed instead.
     Optional(f64),
+    /// Used to mark an input, capital, or output as fixed. it does not get
+    /// effected by any throughput bonuses.
     Fixed,
+    /// Marks an input for a process as being required in totality for the 
+    /// process to start.
     Investment,
+    /// Marks an output as a pollutant, causing it to be thrown into the
+    /// environment directly unless captured.
     Pollutant,
-    Chance(char, usize)
+    /// Marks an output as being a possible output rather than guaranteed.
+    /// Should not be alone, but have alternatives generally.
+    /// The char is the probability group it's in.
+    /// The usize in the weight chance of this item occuring.
+    /// Items which share a group add their weights together.
+    Chance(char, usize),
+    /// Marks an input or captial as gaining efficiency based on
+    /// the quality of the item in question. Should typically be used only for
+    /// Abstract products with valid variations.
+    /// The value included is the throughput gain for the process per level of
+    /// the item's quality.
+    /// This does not effect Optional products, nor is this effected by optional.
+    QualityBased(f64)
 }
 
 #[derive(Debug)]

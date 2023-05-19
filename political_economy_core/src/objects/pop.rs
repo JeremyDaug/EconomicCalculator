@@ -212,9 +212,7 @@ impl Pop {
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     market: &MarketHistory, 
-    keep: &mut HashMap<usize, f64>,
-    spend: &mut HashMap<usize, f64>,
-    returned: &mut HashMap<usize, f64>,
+    record: &mut HashMap<usize, PropertyBreakdown>,
     find: &Vec<ActorMessage>) -> ActorMessage {
         loop {
             // catchup on messages for good measure
@@ -227,7 +225,7 @@ impl Pop {
                     return msg;
                 }
                 else {
-                    self.process_common_msg(rx, tx, data, market, msg, keep, spend, returned);
+                    self.process_common_msg(rx, tx, data, market, msg, record);
                 }
             }
         }
@@ -413,6 +411,8 @@ impl Pop {
     pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
     data: &DataManager,
     market: &MarketHistory) -> HashMap<usize, PropertyBreakdown>{
+        // FIXME This and all functions referenced or reached from here need to be updated and fixed to properly use PropertyBreakdown and the product_knowledge which has been gutted.
+        
         // start by breaking up property. create 4(5) camps
         // desired, ie those items which we have a pre-existing slot for
         // undesired, those which we have no known or pre-existing slot for
@@ -429,7 +429,7 @@ impl Pop {
         }
         // reserve up to our target if possible, and record our rollover and achieved.
         for (id, know) in self.memory.product_knowledge.iter_mut() {
-            let mut record = records.entry(id)
+            let mut record = records.entry(*id)
                 .or_insert(PropertyBreakdown::new(0.0));
             // shift from our current available to reserve, Excess is not used.
             let _ = record.shift_to_reserved(know.target);
@@ -455,29 +455,40 @@ impl Pop {
         // expending our time while handling any orders coming our way.
         let mut curr_buy_idx = 0;
         let shopping_time_cost = self.standard_shop_time_cost();
-        let mut current_desire = None;
+        let mut current_desire_coord = None;
         loop {
             // stop if we run out of time or unreserved property.
             if records.get(&TIME_ID).unwrap().available() == 0.0 { break; }
-            if records.iter().map(|x| x.1.unreserved).sum() == 0.0 { break; }
+            if records.iter().all(|x| x.1.unreserved == 0.0) { break; }
             // since we have some time and/or property to exchange, then go
             // through the backlog and message queue and clear them both out.
             self.msg_catchup(rx);
             // then clear out the backlog.
             while let Some(msg) = self.backlog.pop_front() {
                 let _result = self.process_common_msg(rx, tx, data, market, msg,
-                    &mut keep, &mut spend, &mut change);
+                    &mut records);
             }
             // stop if we run out of time or unreserved property.
             if records.get(&TIME_ID).unwrap().available() == 0.0 { break; }
-            if records.iter().map(|x| x.1.unreserved).sum() == 0.0 { break; }
+            if records.iter().all(|x| x.1.unreserved == 0.0) { break; }
             // enter consumption/purchase phase
             //     try to consume to meet our desires
             //         if successful, move on to next loop
             //         if failed, try to buy to satisfy.
             //             When buying, try to satisfy with later products we purhase.
-            current_desire = self.desires.walk_up_tiers(current_desire);
 
+            // enter consumption / purchase phase.
+            // Get our next desire.
+            current_desire_coord = self.desires.walk_up_tiers(current_desire_coord);
+            if let Some(coords) = current_desire_coord {
+                let curr_desire = self.desires.desires.get(coords.idx).unwrap();
+                match curr_desire.item {
+                    DesireItem::Want(_) => todo!(),
+                    DesireItem::Product(_) => todo!(),
+                }
+            } else { // if no next desire, break out of the loop.
+                break; 
+            }
 
             // if time to spend has been used up, break out.
             // TODO update to use the smalest possble expendable unit of time instead of 0.0.
@@ -485,8 +496,7 @@ impl Pop {
             if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
                 let product = *self.memory.product_priority
                     .get(curr_buy_idx).expect("Product not found?");
-                let buy_result = self.try_to_buy(rx, tx, data, market, &mut keep, &mut spend, 
-                    &mut change, &product);
+                let buy_result = self.try_to_buy(rx, tx, data, market, &mut records, &product);
                 // with our stuff bought, jump back to the top and do more.
                 match buy_result {
                     BuyResult::CancelBuy => { // if we cancelled
@@ -519,8 +529,7 @@ impl Pop {
         self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
         // with our free time run out enter a holding pattern while waiting for the day to end.
         let mut returned: HashMap<usize, f64> = HashMap::new();
-        self.active_wait(rx, tx, data, market, &mut keep, &mut spend, 
-            &mut returned, 
+        self.active_wait(rx, tx, data, market, &mut records, 
             &vec![
                 ActorMessage::AllFinished
             ]); 
@@ -533,8 +542,8 @@ impl Pop {
     /// Returns any messages that we don't handle here. Currently, 
     fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager, 
-    market: &MarketHistory, msg: ActorMessage, keep: &mut HashMap<usize, f64>,
-    spend: &mut HashMap<usize, f64>, returned: &mut HashMap<usize, f64>) -> Option<ActorMessage> {
+    market: &MarketHistory, msg: ActorMessage, 
+    records: &mut HashMap<usize, PropertyBreakdown>) -> Option<ActorMessage> {
         match msg {
             ActorMessage::FoundProduct { seller, buyer, 
             product } => {
@@ -542,8 +551,8 @@ impl Pop {
                     panic!("Product Found message with us as the buyer should not be found outside of deal state.");
                 } else if seller == self.actor_info() {
                     // TODO When cha
-                    let accepted = self.standard_sell(rx, tx, data, market, keep, spend, product, buyer);
-                    self.sort_new_items(keep, spend, &accepted);
+                    let mut accepted = self.standard_sell(rx, tx, data, market, records, product, buyer);
+
                 } else {
                     panic!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!");
                 }
@@ -551,21 +560,10 @@ impl Pop {
             },
             // TODO add Seller Approaches Logic Here.
             ActorMessage::SendProduct { product, amount, .. } => {
-                // we're recieving a product, so check if we desire it. if we do, add it to keep and property
-                if let Some(prod_mem) = self.memory.product_knowledge.get_mut(&product) {
-                    prod_mem.achieved += amount;
-                    self.desires.add_property(product, &amount);
-                    let remaining_target = prod_mem.target_remaining();
-                    let to_target = remaining_target.min(amount);
-                    let to_spend = amount - to_target;
-                    *spend.entry(product).or_insert(0.0) += to_spend;
-                    *keep.entry(product).or_insert(0.0) += to_target;
-                } else { // if we have no memory of it, add it to memory and our spend pile
-                    let prod_mem = self.memory.product_knowledge.entry(product).or_insert(Knowledge::new());
-                    prod_mem.achieved += amount;
-                    self.desires.add_property(product, &amount);
-                    *spend.entry(product).or_insert(0.0) += amount;
-                }
+                // We're recieving a product, add to our unreserved amount.
+                records.entry(product)
+                .and_modify(|x| x.add_to_total(amount))
+                .or_insert(PropertyBreakdown::new(amount));
                 return None;
             },
             ActorMessage::SendWant { want, amount, .. } => {
@@ -612,9 +610,7 @@ impl Pop {
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     market: &MarketHistory, 
-    keep: &mut HashMap<usize, f64>,
-    spend: &mut HashMap<usize, f64>,
-    returned: &mut HashMap<usize, f64>,
+    records: &mut HashMap<usize, PropertyBreakdown>,
     product: &usize) -> BuyResult {
         // get time cost for later
         let time_cost = self.standard_shop_time_cost();
@@ -628,17 +624,24 @@ impl Pop {
             // if unfeaseable, at current market price, cancel.
             return BuyResult::CancelBuy;
         }
-        // subtract the time from our stock and add it to time spent
-        // TODO Consider updating this to scale not just with population buying but also the 
-        // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
-        self.desires.add_property(constants::TIME_ID, &-time_cost);
-        mem.time_spent += time_cost;
-        // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
-        *spend.get_mut(&0).unwrap() -= SHOPPING_TIME_COST * self.breakdown_table.total as f64;
+        // check if we have enough time available to do the purchase.
+        if let Some(record) = records.get_mut(&TIME_ID) {
+            if record.unreserved < time_cost {
+                return BuyResult::NoTime;
+            }
+            // subtract the time from our stock and add it to time spent
+            // TODO Consider updating this to scale not just with population buying but also pop_efficiency gains.
+            // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
+            self.desires.add_property(TIME_ID, &-time_cost);
+            mem.time_spent += time_cost;
+            // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
+            let result = record.expend(time_cost);
+        }
+        
         // since the current market price is within our budget, try to look for it.
         self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
         // with the message sent, wait for the response back while in our standard holding pattern.
-        let result = self.active_wait(rx, tx, data, market, keep, spend, returned, 
+        let result = self.active_wait(rx, tx, data, market, records,
             &vec![ActorMessage::ProductNotFound { product: 0, buyer: ActorInfo::Firm(0) },
             ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
         // result is now either FoundProduct or ProductNotFound, deal with it and return the result to the caller
@@ -651,7 +654,7 @@ impl Pop {
             BuyResult::NotSuccessful { reason: OfferResult::OutOfStock }
         }
         else if let ActorMessage::FoundProduct { seller, .. } = result {
-            self.standard_buy(rx, tx, data, market, seller, spend, returned)
+            self.standard_buy(rx, tx, data, market, seller, records)
         }
         else { unreachable!("Somehow did not get FoundProduct or ProductNotFound."); }
     }
@@ -714,8 +717,7 @@ impl Pop {
     data: &DataManager, 
     market: &MarketHistory, 
     seller: ActorInfo,
-    spend: &mut HashMap<usize, f64>,
-    returned: &mut HashMap<usize, f64>) -> BuyResult {
+    records: &mut HashMap<usize, PropertyBreakdown>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         let result = self.specific_wait(rx, 
@@ -784,7 +786,7 @@ impl Pop {
             // with our new target, build up the offer
             // TODO consider making the length of the list cost time, so the more items kinds and quantity the more time it costs to purchase.
             let (mut offer, sent_amv) = self.create_offer(product, adjusted_target_price,
-                spend, data, market);
+                records, data, market);
             // With our offer built, send it over
             self.send_buy_offer(rx, tx, product, seller, &offer, offer_result, target);
             // wait for the seller to respond, he either accepts as is, accepts with change, rejects, or closes.
@@ -810,10 +812,7 @@ impl Pop {
                         // remove it from property.
                         self.desires.add_property(*offer_prod, &-amount);
                         // subtract the amount from our spend entry.
-                        *spend.get_mut(offer_prod).unwrap() -= amount; // since we spent it it must be there
-                        if *spend.get(offer_prod).unwrap() == 0.0 { // if we spent all of it, remove it.
-                            spend.remove(offer_prod);
-                        }
+                        records.entry(*offer_prod).and_modify(|x| x.unreserved -= amount);
                         // update memory for these products spent
                         self.memory.product_knowledge.entry(*offer_prod)
                             .or_insert(Knowledge::new()).spent += amount;
@@ -855,15 +854,13 @@ impl Pop {
                             .or_insert(Knowledge::new());
                         if *quant > 0.0 { // if being spent
                             mem.spent += quant; // add to spend
-                            let val = spend.get_mut(offer_prod).unwrap(); // and spend it
-                            *val -= quant;
-                            if *val == 0.0 {
-                                spend.remove(offer_prod).expect("WTFH?");
-                            }
+                            records.entry(*offer_prod).and_modify(|x| x.unreserved -= quant);
                         } else { // if recieved, add to achieved
-                            mem.achieved -= quant;
+                            mem.achieved += quant;
                             // and return
-                            *returned.entry(*offer_prod).or_insert(0.0) -= quant;
+                            records.entry(*offer_prod)
+                            .and_modify(|x| x.unreserved += quant)
+                            .or_insert(PropertyBreakdown::new(*quant));
                         }
                         // and get it's price for AMV uses later
                         resulting_amv += market.get_product_price(offer_prod, 0.0) * quant;
@@ -950,14 +947,14 @@ impl Pop {
     /// 
     /// Returns a hashmap of the offer as well as the final price.
     pub fn create_offer(&self, product: usize, target: f64,
-    spend: &HashMap<usize, f64>, data: &DataManager, 
+    records: &HashMap<usize, PropertyBreakdown>, data: &DataManager, 
     market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
         let mut offer = HashMap::new();
         let mut total = 0.0;
         // copy over items for sale (minus the product in question) and their prices.
         let mut available = HashMap::new();
         let mut prices = HashMap::new();
-        for (product, quantity) in spend.iter()
+        for (product, quantity) in records.iter()
         .filter(|(a, _)| **a != product) {
             available.insert(*product, *quantity);
             let price = market.get_product_price(product, 0.0);
@@ -969,7 +966,7 @@ impl Pop {
         {
             // get the price for the currency
             let offer_prod_price = market.get_product(offer_item).price;
-            let prod_avail = available.get(offer_item).expect("Product not found?");
+            let prod_avail = available.get(offer_item).expect("Product not found?").unreserved;
             let available_amv = offer_prod_price * prod_avail;
             // if availible price overshoots, then deal with that.
             let spend = if available_amv >= (target - total) {
@@ -995,7 +992,7 @@ impl Pop {
                     }
                 }
             } else { // if still not enough, 
-                *prod_avail
+                prod_avail
             };
             // sanity check that our spend product is not zero, if it is, skip.
             if spend == 0.0 { continue; }
@@ -1013,7 +1010,7 @@ impl Pop {
         .filter(|x| available.contains_key(x) && !market.currencies.contains(x)) {
             // get the price for the currency
             let offer_prod_price = market.get_product(offer_item).price;
-            let prod_avail = available.get(offer_item).expect("Product not found?")
+            let prod_avail = available.get(offer_item).expect("Product not found?").unreserved
                 - offer.get(offer_item).unwrap_or(&0.0);
             let available_amv = offer_prod_price * prod_avail;
             // if availible price overshoots, then deal with that.
@@ -1073,15 +1070,15 @@ impl Pop {
     /// TODO Currently does not do change, accepts offer or rejects, no returning change.
     pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, _data: &DataManager,
-    market: &MarketHistory, _keep: &mut HashMap<usize, f64>, 
-    spend: &mut HashMap<usize, f64>, product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
+    market: &MarketHistory,
+    spend: &mut HashMap<usize, PropertyBreakdown>, product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
         let seller = self.actor_info();
         let product_price = market.get_product_price(&product, 1.0);
         // we have recieved a FoundProduct MSG and we're the seller.
         // send back our available stock (if any)
-        if let Some(quantity) = spend.get_mut(&product) {
+        if let Some(prop_breakdown) = spend.get_mut(&product) {
             self.push_message(rx, tx, ActorMessage::InStock { buyer, seller, product, 
-                price: product_price, quantity: *quantity });
+                price: product_price, quantity: prop_breakdown.unreserved });
         } else { // if we don't have the item, send our OOS message
             // This currently closes the deal
             self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
@@ -1195,35 +1192,6 @@ impl Pop {
         self.desires.update_satisfactions();
         // TODO Maintenance would also go here.
         // TODO should separate maintained products from unmaintained products here.
-    }
-
-    /// # Sort New Items
-    /// 
-    /// This takes a list of products accepted by the pop, typically in as 
-    /// part of a sale (with this pop as the seller).
-    /// 
-    /// This ONLY sorts the accepted items into keep and spend, nothing else.
-    pub fn sort_new_items(&self, keep: &mut HashMap<usize, f64>, 
-    spend: &mut HashMap<usize, f64>, accepted: &HashMap<usize, f64>) {
-        // Go through the accepted list
-        for (product, quantity) in accepted {
-            // get the item's target (if we have one)
-            let target = if let Some(know) = 
-            self.memory.product_knowledge
-            .get(&product) {
-                know.target
-            } else { 0.0 };
-            // add our items to keep, up to that target
-            let to_keep = target.min(*quantity);
-            if to_keep > 0.0 {
-                *keep.entry(*product).or_insert(0.0) += to_keep;
-            }
-            // then put the rest into spend.
-            let remainder = quantity - to_keep;
-            if remainder > 0.0 {
-                *spend.entry(*product).or_insert(0.0) += remainder;
-            }
-        }
     }
 
     /// # Decay Goods
@@ -1644,6 +1612,7 @@ impl Actor for Pop {
 /// When adding to a reserve, we allow each reserve to pull from the others 
 /// (non-destructively) until they are equal. Once they are, they pull out 
 /// of reserve. If none remains in reserve, it removes from unreserved.
+#[derive(Debug, Copy, Clone)]
 pub struct PropertyBreakdown {
     /// The total available to us. IE, Unreserved + reserved + max(specific, abstract, want)
     pub total_available: f64,
@@ -1807,5 +1776,18 @@ impl PropertyBreakdown {
     /// The amount available for trade or explicit use.
     fn available(&self) -> f64 {
         self.unreserved + self.reserved
+    }
+
+    /// # Expend
+    /// 
+    /// A function to expend the product safely from the unreserved
+    /// amount.
+    /// 
+    /// Returns the excess value which could not be gotten from unreserved.
+    fn expend(&mut self, expense: f64) -> f64 {
+        let available = self.unreserved.min(expense);
+        let excess = expense - available;
+        self.unreserved -= available;
+        excess
     }
 }

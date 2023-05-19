@@ -10,6 +10,8 @@ pub enum BuyResult {
     /// The Seller Closed the Deal, we cannot try with them again and must
     /// look elsewhere.
     SellerClosed,
-    /// The Successful
-    Successful
+    /// Successful in our purchase attempt.
+    Successful,
+    /// Failed because we did not have time to go shopping.
+    NoTime,
 }

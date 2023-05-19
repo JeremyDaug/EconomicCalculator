@@ -462,7 +462,11 @@ pub enum DesireTag{
     Periodic { offset: u64, cycle: u64 },
 }
 
-
+/// # Desire Item Enum
+/// 
+/// Contains data for desires that are sought.
+/// 
+/// TODO This sholud be expanded to accept Abstract Products vs Specific products. Would need an abstract expansion to products.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DesireItem {
     Want(usize),

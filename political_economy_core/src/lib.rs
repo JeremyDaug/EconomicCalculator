@@ -942,6 +942,7 @@ mod tests {
             use crate::objects::pop_memory::Knowledge;
             use super::make_test_pop;
 
+            /*
             #[test]
             pub fn place_items_given_appropriately() {
                 let mut test = make_test_pop();
@@ -978,6 +979,7 @@ mod tests {
 
                 let mut keep = HashMap::new();
                 let mut spend = HashMap::new();
+
                 let mut accepted = HashMap::new();
                 accepted.insert(0, 4.0);
                 accepted.insert(1, 6.0);
@@ -992,12 +994,12 @@ mod tests {
                 assert!(spend.get(&0).is_none());
                 assert!(*spend.get(&1).unwrap() == 1.0);
                 assert!(*spend.get(&2).unwrap() == 1.0);
-            }
+            }*/
         }
 
         mod standard_sell {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, pop::PropertyBreakdown}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -1012,15 +1014,14 @@ mod tests {
                 // setup firm we're talking with
                 let buyer = ActorInfo::Firm(1);
                 // setup property split
-                let mut spend = HashMap::new();
                 let mut keep = HashMap::new();
 
-                spend.insert(6 as usize, 
-                    *test.desires.property.get(&6).unwrap() + 10.0);
+                keep.insert(6, 
+                        PropertyBreakdown::new(*test.desires.property.get(&6).unwrap() + 10.0));
 
                 let handle = thread::spawn(move || {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, &mut spend, 10, buyer);
+                        &mut keep, 10, buyer);
                     test
                 }); 
                 // wait a second to let it wrap up.
@@ -1057,13 +1058,12 @@ mod tests {
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
                 test.desires.property.insert(7, 10.0);
-                let mut spend = HashMap::new();
                 let mut keep = HashMap::new();
-                spend.insert(7, 10.0);
+                keep.insert(7, PropertyBreakdown::new(10.0));
 
                 let handle = thread::spawn(move || {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, &mut spend, 7, buyer);
+                        &mut keep, 7, buyer);
                     test
                 }); 
                 // wait a second to let it wrap up.
@@ -1111,13 +1111,12 @@ mod tests {
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
                 test.desires.property.insert(7, 10.0);
-                let mut spend = HashMap::new();
                 let mut keep = HashMap::new();
-                spend.insert(7, 10.0);
+                keep.insert(7, PropertyBreakdown::new(10.0));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, &mut spend, 7, buyer);
+                        &mut keep, 7, buyer);
                     (test, result)
                 }); 
                 // wait a second to let it wrap up.
@@ -1182,13 +1181,12 @@ mod tests {
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
                 test.desires.property.insert(7, 10.0);
-                let mut spend = HashMap::new();
                 let mut keep = HashMap::new();
-                spend.insert(7, 10.0);
+                keep.insert(7, PropertyBreakdown::new(10.0));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, &mut spend, 7, buyer);
+                        &mut keep, 7, buyer);
                     (test, result)
                 }); 
                 // wait a second to let it wrap up.
@@ -1900,7 +1898,7 @@ mod tests {
         mod create_offer_tests {
             use std::collections::HashMap;
 
-            use crate::{data_manager::DataManager, objects::market::{MarketHistory, ProductInfo}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, pop::PropertyBreakdown}};
 
             use super::make_test_pop;
 
@@ -1914,14 +1912,13 @@ mod tests {
                 data.load_all(&"X".to_string()).expect("Error loading prefabs");
 
                 // Add items to spend.
-                let mut spend: HashMap<usize, f64> = HashMap::new();
-                spend.insert(2, 10.0);
-                spend.insert(3, 10.0);
-                spend.insert(4, 10.0);
-                spend.insert(5, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(7, 10.0);
+                let mut spend = HashMap::new();
+                spend.insert(2, PropertyBreakdown::new(10.0));
+                spend.insert(3, PropertyBreakdown::new(10.0));
+                spend.insert(4, PropertyBreakdown::new(10.0));
+                spend.insert(5, PropertyBreakdown::new(10.0));
+                spend.insert(6, PropertyBreakdown::new(10.0));
+                spend.insert(7, PropertyBreakdown::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2008,14 +2005,13 @@ mod tests {
                 data.load_all(&"X".to_string()).expect("Error loading prefabs");
 
                 // Add items to spend.
-                let mut spend: HashMap<usize, f64> = HashMap::new();
-                spend.insert(2, 10.0);
-                spend.insert(3, 10.0);
-                spend.insert(4, 10.0);
-                spend.insert(5, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(7, 10.0);
+                let mut spend = HashMap::new();
+                spend.insert(2, PropertyBreakdown::new(10.0));
+                spend.insert(3, PropertyBreakdown::new(10.0));
+                spend.insert(4, PropertyBreakdown::new(10.0));
+                spend.insert(5, PropertyBreakdown::new(10.0));
+                spend.insert(6, PropertyBreakdown::new(10.0));
+                spend.insert(7, PropertyBreakdown::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2103,14 +2099,13 @@ mod tests {
                 data.products.get_mut(&6).unwrap().fractional = true;
 
                 // Add items to spend.
-                let mut spend: HashMap<usize, f64> = HashMap::new();
-                spend.insert(2, 10.0);
-                spend.insert(3, 10.0);
-                spend.insert(4, 10.0);
-                spend.insert(5, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(7, 10.0);
+                let mut spend = HashMap::new();
+                spend.insert(2, PropertyBreakdown::new(10.0));
+                spend.insert(3, PropertyBreakdown::new(10.0));
+                spend.insert(4, PropertyBreakdown::new(10.0));
+                spend.insert(5, PropertyBreakdown::new(10.0));
+                spend.insert(6, PropertyBreakdown::new(10.0));
+                spend.insert(7, PropertyBreakdown::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2196,14 +2191,13 @@ mod tests {
                 data.load_all(&"X".to_string()).expect("Error loading prefabs");
 
                 // Add items to spend.
-                let mut spend: HashMap<usize, f64> = HashMap::new();
-                spend.insert(2, 10.0);
-                spend.insert(3, 10.0);
-                spend.insert(4, 10.0);
-                spend.insert(5, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(6, 10.0);
-                spend.insert(7, 10.0);
+                let mut spend = HashMap::new();
+                spend.insert(2, PropertyBreakdown::new(10.0));
+                spend.insert(3, PropertyBreakdown::new(10.0));
+                spend.insert(4, PropertyBreakdown::new(10.0));
+                spend.insert(5, PropertyBreakdown::new(10.0));
+                spend.insert(6, PropertyBreakdown::new(10.0));
+                spend.insert(7, PropertyBreakdown::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2282,7 +2276,7 @@ mod tests {
     
         mod standard_buy {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, pop::PropertyBreakdown}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -2298,14 +2292,13 @@ mod tests {
                 let seller = ActorInfo::Firm(1);
                 // setup property split
                 let mut spend = HashMap::new();
-                let mut returned = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        seller,  &mut spend, &mut returned);
+                        seller,  &mut spend);
                     (test, result)
                 });
                 // check that it's running
@@ -2347,14 +2340,13 @@ mod tests {
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
                 let mut spend = HashMap::new();
-                let mut returned = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend, &mut returned);
+                        selling_firm, &mut spend);
                     (test, result)
                 });
                 // check that it's running
@@ -2430,15 +2422,14 @@ mod tests {
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
                 let mut spend = HashMap::new();
-                let mut returned = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend, &mut returned);
-                    (test, result, returned)
+                        selling_firm, &mut spend);
+                    (test, result, spend)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
@@ -2494,7 +2485,7 @@ mod tests {
                 // ensure we closed out
                 if !handle.is_finished() { assert!(false); }
                 // get our data
-                let (test, result, returned) = handle.join().unwrap();
+                let (test, result, spend) = handle.join().unwrap();
                 // check the return is correct.
                 if let BuyResult::Successful = result {
                     assert!(true);
@@ -2504,7 +2495,7 @@ mod tests {
                 assert!(*test.desires.property.get(&6).unwrap() == 6.0);
                 assert!(*test.desires.property.get(&7).unwrap() == 2.0);
                 // check returned correctly includes items.
-                assert!(*returned.get(&5).unwrap() == 1.0);
+                assert!(spend.get(&5).unwrap().unreserved == 1.0);
                 // check pop memory for the products as well.
                 assert!(test.memory.product_knowledge.get(&5).unwrap().achieved == 1.0);
                 assert!(test.memory.product_knowledge.get(&5).unwrap().spent == 0.0);
@@ -2528,15 +2519,14 @@ mod tests {
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
                 let mut spend = HashMap::new();
-                let mut returned = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend, &mut returned);
-                    (test, result, returned)
+                        selling_firm, &mut spend);
+                    (test, result, spend)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
@@ -2614,15 +2604,14 @@ mod tests {
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
                 let mut spend = HashMap::new();
-                let mut returned = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, *test.desires.property.get(&6).unwrap());
+                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend, &mut returned);
-                    (test, result, returned)
+                        selling_firm, &mut spend);
+                    (test, result, spend)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
