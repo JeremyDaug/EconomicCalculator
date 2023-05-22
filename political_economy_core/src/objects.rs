@@ -14,7 +14,6 @@ pub mod pop;
 pub mod species;
 pub mod desire;
 pub mod culture;
-pub mod desires;
 pub mod pop_breakdown_table;
 pub mod ideology;
 pub mod buyer;
@@ -26,3 +25,8 @@ pub mod institution;
 pub mod state;
 pub mod pop_memory;
 pub mod buy_result;
+pub mod property_info;
+
+// TODO try and fix this snake case issue later.
+#[allow(non_snake_case)]
+pub mod Property;

@@ -13,11 +13,11 @@ mod tests {
     mod propertybreakdown_tests {
 
         mod shift_tests {
-            use crate::objects::desires::PropertyBreakdown;
+            use crate::objects::property_info::PropertyInfo;
 
             #[test]
             pub fn shift_to_reserved_correctly() {
-                let mut test = PropertyBreakdown::new(10.0);
+                let mut test = PropertyInfo::new(10.0);
 
                 let remainder = test.shift_to_reserved(5.0);
                 assert!(test.total_property == 10.0);
@@ -40,7 +40,7 @@ mod tests {
 
             #[test]
             pub fn get_max_special_reserve_correctly() {
-                let mut test = PropertyBreakdown::new(10.0);
+                let mut test = PropertyInfo::new(10.0);
                 let result = test.max_spec_reserve();
                 assert!(result == 0.0);
 
@@ -59,7 +59,7 @@ mod tests {
 
             #[test]
             pub fn shift_to_specific_reserve_correctly() {
-                let mut test = PropertyBreakdown::new(10.0);
+                let mut test = PropertyInfo::new(10.0);
                 test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
                 test.class_reserve += 5.0;
@@ -107,7 +107,7 @@ mod tests {
 
             #[test]
             pub fn shift_to_class_reserve_correctly() {
-                let mut test = PropertyBreakdown::new(10.0);
+                let mut test = PropertyInfo::new(10.0);
                 test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
                 test.specific_reserve += 5.0;
@@ -155,7 +155,7 @@ mod tests {
 
             #[test]
             pub fn shift_to_want_reserve_correctly() {
-                let mut test = PropertyBreakdown::new(10.0);
+                let mut test = PropertyInfo::new(10.0);
                 test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
                 test.specific_reserve += 5.0;
@@ -208,8 +208,8 @@ mod tests {
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
-             desires::{Desires, PropertyBreakdown}, desire::{Desire, DesireItem},
-              species::Species, culture::Culture, ideology::Ideology, pop_memory::{PopMemory, Knowledge}, market::{MarketHistory, ProductInfo}}, 
+             Property::Property, desire::{Desire, DesireItem},
+              species::Species, culture::Culture, ideology::Ideology, pop_memory::{PopMemory, Knowledge}, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo}, 
               demographics::Demographics, data_manager::DataManager};
 
         pub fn make_test_pop() -> Pop {
@@ -221,7 +221,7 @@ mod tests {
                 skill: 0, 
                 lower_skill_level: 0.0, 
                 higher_skill_level: 0.0, 
-                desires: Desires::new(vec![]), 
+                desires: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
                 memory: PopMemory::create_empty(),
@@ -443,7 +443,7 @@ mod tests {
             market.sale_priority.push(6);
             market.sale_priority.push(7);
 
-            pop.desires.property.insert(6, PropertyBreakdown::new(10.0));
+            pop.desires.property.insert(6, PropertyInfo::new(10.0));
             pop.memory.product_priority.push(7);
             // also add the pop's desire info
             pop.memory.product_knowledge.insert(7, Knowledge{ target: 2.0, 
@@ -606,7 +606,7 @@ mod tests {
         mod free_time {
             use std::{thread, time::Duration};
 
-            use crate::{objects::{actor_message::ActorMessage, seller::Seller, pop_memory::Knowledge, desires::PropertyBreakdown}, constants::TIME_ID};
+            use crate::{objects::{actor_message::ActorMessage, seller::Seller, pop_memory::Knowledge, property_info::PropertyInfo}, constants::TIME_ID};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -623,7 +623,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(test.standard_shop_time_cost(&data) + 100.0));
+                test.desires.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 100.0));
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -687,7 +687,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(test.standard_shop_time_cost(&data) + 1.0));
+                test.desires.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 1.0));
                 // add an additional product to the priority list
                 test.memory.product_priority.push(5);
                 // and add desire for that
@@ -767,7 +767,7 @@ mod tests {
                 skill: 0, 
                 lower_skill_level: 0.0, 
                 higher_skill_level: 0.0, 
-                desires: Desires::new(vec![]), 
+                desires: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
                 memory: PopMemory::create_empty(),
@@ -993,7 +993,7 @@ mod tests {
 
         mod standard_sell {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, desires::PropertyBreakdown}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, property_info::PropertyInfo}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -1011,7 +1011,7 @@ mod tests {
                 let mut keep = HashMap::new();
 
                 keep.insert(6, 
-                        PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property + 10.0));
+                        PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property + 10.0));
 
                 let handle = thread::spawn(move || {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
@@ -1051,9 +1051,9 @@ mod tests {
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
-                test.desires.property.insert(7, PropertyBreakdown::new(10.0));
+                test.desires.property.insert(7, PropertyInfo::new(10.0));
                 let mut keep = HashMap::new();
-                keep.insert(7, PropertyBreakdown::new(10.0));
+                keep.insert(7, PropertyInfo::new(10.0));
 
                 let handle = thread::spawn(move || {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
@@ -1104,9 +1104,9 @@ mod tests {
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
-                test.desires.property.insert(7, PropertyBreakdown::new(10.0));
+                test.desires.property.insert(7, PropertyInfo::new(10.0));
                 let mut keep = HashMap::new();
-                keep.insert(7, PropertyBreakdown::new(10.0));
+                keep.insert(7, PropertyInfo::new(10.0));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
@@ -1174,9 +1174,9 @@ mod tests {
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
-                test.desires.property.insert(7, PropertyBreakdown::new(10.0));
+                test.desires.property.insert(7, PropertyInfo::new(10.0));
                 let mut keep = HashMap::new();
-                keep.insert(7, PropertyBreakdown::new(10.0));
+                keep.insert(7, PropertyInfo::new(10.0));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
@@ -1557,7 +1557,7 @@ mod tests {
         mod process_firm_message {
             use std::collections::HashMap;
 
-            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, seller::Seller, desires::PropertyBreakdown}, constants::TIME_ID};
+            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, seller::Seller, property_info::PropertyInfo}, constants::TIME_ID};
 
             use super::make_test_pop;
             use super::prepare_data_for_market_actions;
@@ -1589,7 +1589,7 @@ mod tests {
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(20.0));
+                test.desires.property.insert(TIME_ID, PropertyInfo::new(20.0));
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1627,9 +1627,9 @@ mod tests {
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(20.0));
-                test.desires.property.insert(3, PropertyBreakdown::new(10.0));
-                test.desires.property.insert(5, PropertyBreakdown::new(10.0));
+                test.desires.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.desires.property.insert(3, PropertyInfo::new(10.0));
+                test.desires.property.insert(5, PropertyInfo::new(10.0));
                 test.desires.want_store.insert(4, 20.0);
                 test.desires.want_store.insert(6, 5.0);
                 // setup message queue.
@@ -1692,9 +1692,9 @@ mod tests {
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(20.0));
-                test.desires.property.insert(3, PropertyBreakdown::new(10.0));
-                test.desires.property.insert(5, PropertyBreakdown::new(10.0));
+                test.desires.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.desires.property.insert(3, PropertyInfo::new(10.0));
+                test.desires.property.insert(5, PropertyInfo::new(10.0));
                 test.desires.want_store.insert(4, 20.0);
                 test.desires.want_store.insert(6, 5.0);
                 // setup message queue.
@@ -1901,7 +1901,7 @@ mod tests {
         mod create_offer_tests {
             use std::collections::HashMap;
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, desires::PropertyBreakdown}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo}};
 
             use super::make_test_pop;
 
@@ -1916,12 +1916,12 @@ mod tests {
 
                 // Add items to spend.
                 let mut spend = HashMap::new();
-                spend.insert(2, PropertyBreakdown::new(10.0));
-                spend.insert(3, PropertyBreakdown::new(10.0));
-                spend.insert(4, PropertyBreakdown::new(10.0));
-                spend.insert(5, PropertyBreakdown::new(10.0));
-                spend.insert(6, PropertyBreakdown::new(10.0));
-                spend.insert(7, PropertyBreakdown::new(10.0));
+                spend.insert(2, PropertyInfo::new(10.0));
+                spend.insert(3, PropertyInfo::new(10.0));
+                spend.insert(4, PropertyInfo::new(10.0));
+                spend.insert(5, PropertyInfo::new(10.0));
+                spend.insert(6, PropertyInfo::new(10.0));
+                spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2009,12 +2009,12 @@ mod tests {
 
                 // Add items to spend.
                 let mut spend = HashMap::new();
-                spend.insert(2, PropertyBreakdown::new(10.0));
-                spend.insert(3, PropertyBreakdown::new(10.0));
-                spend.insert(4, PropertyBreakdown::new(10.0));
-                spend.insert(5, PropertyBreakdown::new(10.0));
-                spend.insert(6, PropertyBreakdown::new(10.0));
-                spend.insert(7, PropertyBreakdown::new(10.0));
+                spend.insert(2, PropertyInfo::new(10.0));
+                spend.insert(3, PropertyInfo::new(10.0));
+                spend.insert(4, PropertyInfo::new(10.0));
+                spend.insert(5, PropertyInfo::new(10.0));
+                spend.insert(6, PropertyInfo::new(10.0));
+                spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2103,12 +2103,12 @@ mod tests {
 
                 // Add items to spend.
                 let mut spend = HashMap::new();
-                spend.insert(2, PropertyBreakdown::new(10.0));
-                spend.insert(3, PropertyBreakdown::new(10.0));
-                spend.insert(4, PropertyBreakdown::new(10.0));
-                spend.insert(5, PropertyBreakdown::new(10.0));
-                spend.insert(6, PropertyBreakdown::new(10.0));
-                spend.insert(7, PropertyBreakdown::new(10.0));
+                spend.insert(2, PropertyInfo::new(10.0));
+                spend.insert(3, PropertyInfo::new(10.0));
+                spend.insert(4, PropertyInfo::new(10.0));
+                spend.insert(5, PropertyInfo::new(10.0));
+                spend.insert(6, PropertyInfo::new(10.0));
+                spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2195,12 +2195,12 @@ mod tests {
 
                 // Add items to spend.
                 let mut spend = HashMap::new();
-                spend.insert(2, PropertyBreakdown::new(10.0));
-                spend.insert(3, PropertyBreakdown::new(10.0));
-                spend.insert(4, PropertyBreakdown::new(10.0));
-                spend.insert(5, PropertyBreakdown::new(10.0));
-                spend.insert(6, PropertyBreakdown::new(10.0));
-                spend.insert(7, PropertyBreakdown::new(10.0));
+                spend.insert(2, PropertyInfo::new(10.0));
+                spend.insert(3, PropertyInfo::new(10.0));
+                spend.insert(4, PropertyInfo::new(10.0));
+                spend.insert(5, PropertyInfo::new(10.0));
+                spend.insert(6, PropertyInfo::new(10.0));
+                spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
                     info: HashMap::new(),
@@ -2279,7 +2279,7 @@ mod tests {
     
         mod standard_buy {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, desires::PropertyBreakdown}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -2297,7 +2297,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2345,7 +2345,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2427,7 +2427,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().unreserved));
+                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().unreserved));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2524,7 +2524,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2609,7 +2609,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2994,12 +2994,12 @@ mod tests {
     }
 
     mod desires_tests {
-        use crate::objects::{desires::{Desires, DesireCoord, PropertyBreakdown}, desire::{Desire, DesireItem}};
+        use crate::objects::{Property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo};
 
         mod consume_and_sift_wants_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{desires::Desires, desire::{DesireItem, Desire}, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}, data_manager::DataManager};
+            use crate::{objects::{Property::Property, desire::{DesireItem, Desire}, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}, data_manager::DataManager};
 
             #[test]
             pub fn correctly_sift_wants_directly() {
@@ -3021,7 +3021,7 @@ mod tests {
                     satisfaction: 0.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Desires::new(test_desires);
+                let mut test = Property::new(test_desires);
                 // add want to be consumed first
                 test.want_store.insert(0, 1.0);
                 // setup the products, wants, and processes for our items.
@@ -3152,7 +3152,7 @@ mod tests {
         mod market_wealth_should {
             use std::collections::HashMap;
 
-            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires, market::{MarketHistory, ProductInfo}};
+            use crate::objects::{desire::{Desire, DesireItem}, Property::Property, market::{MarketHistory, ProductInfo}};
 
             #[test]
             pub fn return_the_total_amv_of_property() {
@@ -3173,7 +3173,7 @@ mod tests {
                     satisfaction: 3.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Desires::new(test_desires);
+                let mut test = Property::new(test_desires);
                 let mut product_info = HashMap::new();
                 product_info.insert(0, ProductInfo{
                     available: 0.0,
@@ -3204,7 +3204,7 @@ mod tests {
         }
 
         mod add_property_should {
-            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires};
+            use crate::objects::{desire::{Desire, DesireItem}, Property::Property};
 
             #[test]
             pub fn add_or_insert_products_into_property_and_remove_correctly() {
@@ -3225,7 +3225,7 @@ mod tests {
                     satisfaction: 3.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Desires::new(test_desires);
+                let mut test = Property::new(test_desires);
                 // insert new
                 test.add_property(0, 10.0);
                 assert!(test.property.get(&0).unwrap().total_property == 10.0);
@@ -3244,7 +3244,7 @@ mod tests {
         mod market_satisfaction_should {
             use std::collections::HashMap;
 
-            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires, market::{MarketHistory, ProductInfo}};
+            use crate::objects::{desire::{Desire, DesireItem}, Property::Property, market::{MarketHistory, ProductInfo}};
 
             #[test]
             pub fn return_correct_market_satisfaction() {
@@ -3265,7 +3265,7 @@ mod tests {
                     satisfaction: 3.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Desires::new(test_desires);
+                let mut test = Property::new(test_desires);
                 let mut product_info = HashMap::new();
                 product_info.insert(0, ProductInfo{
                     available: 0.0,
@@ -3294,7 +3294,7 @@ mod tests {
         }
 
         mod update_satisfactions_should {
-            use crate::objects::{desire::{Desire, DesireItem}, desires::Desires};
+            use crate::objects::{desire::{Desire, DesireItem}, Property::Property};
 
             #[test]
             pub fn correctly_update_satisfaction() {
@@ -3323,7 +3323,7 @@ mod tests {
                     satisfaction: 4.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Desires::new(test_desires);
+                let mut test = Property::new(test_desires);
                 test.update_satisfactions();
 
                 assert_eq!(test.full_tier_satisfaction, 6);
@@ -3335,7 +3335,7 @@ mod tests {
         }
 
         mod remove_property_should {
-            use crate::objects::{desires::{Desires, PropertyBreakdown}, desire::{Desire, DesireItem}};
+            use crate::objects::{Property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo};
 
             #[test]
             pub fn correctly_remove_item_from_property_and_satisfaction() {
@@ -3356,10 +3356,10 @@ mod tests {
                     satisfaction: 0.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Desires::new(test_desires);
+                let mut test = Property::new(test_desires);
                 // add property
-                test.property.insert(0, PropertyBreakdown::new(10.0));
-                test.property.insert(1, PropertyBreakdown::new(10.0));
+                test.property.insert(0, PropertyInfo::new(10.0));
+                test.property.insert(1, PropertyInfo::new(10.0));
                 // add saturation
                 test.desires.get_mut(1).unwrap()
                 .add_satisfaction(5.0);
@@ -3395,7 +3395,7 @@ mod tests {
                 satisfaction: 2.0,
                 step: 2,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             assert_eq!(test.total_desire_at_tier(0), 2.0);
             assert_eq!(test.total_desire_at_tier(1), 0.0);
@@ -3422,7 +3422,7 @@ mod tests {
                 satisfaction: 2.0,
                 step: 2,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             assert_eq!(test.total_satisfaction_at_tier(0), 2.0);
             assert_eq!(test.total_satisfaction_at_tier(2), 1.0);
@@ -3448,7 +3448,7 @@ mod tests {
                 satisfaction: 2.0,
                 step: 2,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             assert!(test.satisfied_at_tier(0));
             assert!(!test.satisfied_at_tier(2));
@@ -3474,9 +3474,9 @@ mod tests {
                 satisfaction: 0.0,
                 step: 2,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
-            test.property.insert(0, PropertyBreakdown::new(100.0));
-            test.property.insert(1, PropertyBreakdown::new(100.0));
+            let mut test = Property::new(test_desires);
+            test.property.insert(0, PropertyInfo::new(100.0));
+            test.property.insert(1, PropertyInfo::new(100.0));
 
             test.sift_specific_products();
             assert_eq!(test.desires[1].satisfaction, 5.0);
@@ -3501,8 +3501,8 @@ mod tests {
                 satisfaction: 0.0,
                 step: 2,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
-            test.property.insert(1, PropertyBreakdown::new(100.0));
+            let mut test = Property::new(test_desires);
+            test.property.insert(1, PropertyInfo::new(100.0));
 
             test.sift_product(&1);
             assert_eq!(test.desires[1].satisfaction, 5.0);
@@ -3544,7 +3544,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 1,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
 
             test.desires[0].satisfaction = 2.0;
             test.desires[2].satisfaction = 1.0;
@@ -3593,7 +3593,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
 
             let result = test.out_barter_value(&0, 2.0);
             assert!(result.is_none());
@@ -3653,7 +3653,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
 
             let result1 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0));
             assert_eq!(result1, None);
@@ -3701,7 +3701,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
 
             let result1 = test.get_highest_satisfied_tier();
             assert_eq!(result1, None);
@@ -3749,7 +3749,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             let mut current = DesireCoord{ tier: 3,
                 idx: 3 };
@@ -3803,7 +3803,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             let mut current = DesireCoord{ tier: 3,
                 idx: 3 };
@@ -3863,7 +3863,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
             
             test.desires[0].satisfaction = 0.5;
             let results = test.in_barter_value(&0, 0.5);
@@ -3942,7 +3942,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
 
             let result1 = test.get_lowest_unsatisfied_tier()
                 .expect("Error Found on empty thing.");
@@ -3991,7 +3991,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
 
             let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
                 .expect("Error Found on empty thing.");
@@ -4040,7 +4040,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let mut test = Desires::new(test_desires);
+            let mut test = Property::new(test_desires);
 
             let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
                 .expect("Error Found on empty thing.");
@@ -4089,7 +4089,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 3,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             let mut curr = None;
             let mut results = vec![];
@@ -4131,7 +4131,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 2,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             let mut curr = None;
             let mut results = vec![];
@@ -4180,7 +4180,7 @@ mod tests {
                 satisfaction: 0.0,
                 step: 2,
                 tags: vec![]});
-            let test = Desires::new(test_desires);
+            let test = Property::new(test_desires);
 
             let mut curr = None;
             let mut results = vec![];

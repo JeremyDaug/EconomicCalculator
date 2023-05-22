@@ -104,10 +104,6 @@ impl Knowledge {
         self.time_budget - self.time_spent
     }
 
-    /// The number of units to still buy.
-    pub fn target_remaining(&self) -> f64 {
-        self.target - self.achieved
-    }
 
     /// The AMV budget / the target units to buy.
     pub fn unit_budget(&self) -> f64 {

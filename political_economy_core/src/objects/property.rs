@@ -17,16 +17,16 @@ use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::TIER_RATIO};
 
-use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, pop_memory::Knowledge};
+use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, pop_memory::Knowledge, property_info::PropertyInfo};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
 #[derive(Debug)]
-pub struct Desires {
+pub struct Property {
     /// All of the desires we are storing and looking over.
     pub desires: Vec<Desire>,
     /// The property currently owned bey the actor.
-    pub property: HashMap<usize, PropertyBreakdown>,
+    pub property: HashMap<usize, PropertyInfo>,
     /// The wants stored and not used up yet.
     pub want_store: HashMap<usize, f64>,
     /// The data of our products to help us simplify and consolidate shopping.
@@ -69,7 +69,7 @@ pub struct Desires {
     pub highest_tier: usize,
 }
 
-impl Desires {
+impl Property {
     /// Creates a new desire collection based on a list of desires.
     pub fn new(desires: Vec<Desire>) -> Self {
         let mut shopping_data: HashMap<usize, Knowledge> = HashMap::new();
@@ -78,7 +78,7 @@ impl Desires {
                 shopping_data.insert(product.item.unwrap().clone(), 
                 Knowledge::new());
             }
-        Desires {
+        Property {
             desires,
             property: HashMap::new(),
             want_store: HashMap::new(),
@@ -162,7 +162,7 @@ impl Desires {
             return;
         } else  { // is being added
             let data = self.property.entry(product)
-            .or_insert(PropertyBreakdown::new(0.0));
+            .or_insert(PropertyInfo::new(0.0));
             data.add_property(amount);
         }
     }
@@ -413,11 +413,11 @@ impl Desires {
         // summarize the in values take all things down to tier 0, for simplicity.
         let mut sum_in_value = 0.0;
         for value in in_value {
-            sum_in_value += value.1 * Desires::tier_equivalence(0, value.0);
+            sum_in_value += value.1 * Property::tier_equivalence(0, value.0);
         }
         let mut sum_out_value = 0.0;
         for value in out_value {
-            sum_out_value += value.1 * Desires::tier_equivalence(0, value.0);
+            sum_out_value += value.1 * Property::tier_equivalence(0, value.0);
         }
 
         ValueInOut::new(sum_in_value, sum_out_value)
@@ -478,7 +478,7 @@ impl Desires {
                 if available > 0.0 {
                     // since satisfaction is available, do work
                     // get tier equivalency 
-                    let eqv = Desires::tier_equivalence(tier, step.tier);
+                    let eqv = Property::tier_equivalence(tier, step.tier);
                     // get the smaller between available and amount
                     let min = available.min(amount);
                     // add min times weight to weight
@@ -693,7 +693,7 @@ impl Desires {
                 if diff > 0.0 {
                     // since the current step has missing satisfaction.
                     // get the equivalence ratio.
-                    let equiv = Desires::tier_equivalence(tier, step.tier);
+                    let equiv = Property::tier_equivalence(tier, step.tier);
                     // get the smaller of the two
                     let min = diff.min(amount);
                     // add the min times equivelancy to the weight
@@ -853,7 +853,7 @@ impl Desires {
             let total = self.total_desire_at_tier(tier);
             if total > 0.0 {
                 let sat_at_tier = sat *
-                    Desires::tier_equivalence(self.full_tier_satisfaction, 
+                    Property::tier_equivalence(self.full_tier_satisfaction, 
                         tier);
                 self.partial_satisfaction += sat_at_tier;
             }
@@ -1129,283 +1129,4 @@ pub struct DesireInfo {
     ///   are not being satisfied.
     /// - Decreases if it was unable to buy up to our target for any reason.
     pub success: f64,
-}
-
-
-/// # Property Breakdown
-/// 
-/// A Helper which is used ot help sort/divide property between
-/// unreserved, reserved, and used for specific, abstract, or want desire.
-/// 
-/// The Total Property should be equal to the Unreserved + Reserved + the 
-/// highest between specific, abstract, and want.
-/// 
-/// We only handle shifting from unreserved to the reserves.
-/// When adding to a reserve, we allow each reserve to pull from the others 
-/// (non-destructively) until they are equal. Once they are, they pull out 
-/// of reserve. If none remains in reserve, it removes from unreserved.
-#[derive(Debug, Copy, Clone)]
-pub struct PropertyBreakdown {
-    /// The total available to us. IE, Unreserved + reserved + max(specific, abstract, want)
-    pub total_property: f64,
-    /// The amount that is unreserved, available to be spent or shifted elsewhere.
-    pub unreserved: f64,
-    /// The amount that has been reserved for our desires, but not yet placed. Anywhere
-    pub reserved: f64,
-    /// The amount that has been reserved for specific product desires.
-    pub specific_reserve: f64,
-    /// The amount that has been reserved to satisfy abstract product desires.
-    pub class_reserve: f64,
-    /// The amount that has been reserved to satisfy want desires.
-    pub want_reserve: f64,
-    /// The amount which has been consumed today.
-    pub consumed: f64,
-    /// The amount which was used today, Removed from total_property, meant to be added back in at th end of the day.
-    pub used: f64,
-    /// the amount which was expended as part of a trade.
-    pub spent: f64,
-}
-
-impl PropertyBreakdown {
-    /// # New Property Breakdown
-    /// 
-    /// News up a property breakdown given an available value.
-    /// Automatically sets the total and unreserved.
-    pub fn new(available: f64) -> Self { 
-        Self { total_property: available, 
-            unreserved: available, 
-            reserved: 0.0, 
-            specific_reserve: 0.0, 
-            class_reserve: 0.0, 
-            want_reserve: 0.0,
-            consumed: 0.0,
-            used: 0.0,
-            spent: 0.0, 
-        } 
-    }
-
-    /// # Reset Reserves
-    /// 
-    /// Removes everything from the reserves, adding them back to unreserved.
-    pub fn reset_reserves(&mut self) {
-        self.unreserved = self.total_property;
-        self.reserved = 0.0;
-        self.want_reserve = 0.0;
-        self.class_reserve = 0.0;
-        self.specific_reserve = 0.0;
-    }
-
-    /// # Remove
-    /// 
-    /// Removes a set number of items from the breakdown.
-    /// Removes from Unreserved first, then reserved, then the other reserves.
-    /// 
-    /// Returns any excess for sanity checking.
-    pub fn remove(&mut self, quantity: f64) -> f64 {
-        let mut remainder = quantity;
-        if self.unreserved > 0.0 { // if any unreserved, remove from there first
-            let remove = self.unreserved.min(remainder);
-            self.unreserved -= remove;
-            self.total_property -= remove;
-            remainder -= remove;
-            // if remainder used up, exit out.
-            if remainder == 0.0 { return 0.0; }
-        }
-        // if unreserved is not enough, remove from general reserve
-        if self.reserved > 0.0 {
-            let remove = self.reserved.min(remainder);
-            self.reserved -= remove;
-            self.total_property -= remove;
-            remainder -= remove;
-            if remainder == 0.0 { return 0.0; }
-        }
-        // if unreserved and reserved not enough, remove from specifc reserves
-        if self.max_spec_reserve() > 0.0 {
-            // TODO rework to use clamp?
-            let remove = self.max_spec_reserve().min(remainder);
-            self.class_reserve -= remove;
-            if self.class_reserve.is_sign_negative() { self.class_reserve = 0.0; }
-            self.want_reserve -= remove;
-            if self.want_reserve.is_sign_negative() { self.want_reserve = 0.0; }
-            self.specific_reserve -= remove;
-            if self.specific_reserve.is_sign_negative() { self.specific_reserve = 0.0; }
-            self.total_property -= remove;
-            remainder -= remove;
-        }
-        remainder
-    }
-
-    /// Adds to both total available and to unreserved
-    /// If given negative value, it will not remove anything.
-    pub fn add_property(&mut self, quantity: f64) {
-        if quantity.is_sign_negative() { return; }
-        self.total_property += quantity;
-        self.unreserved += quantity;
-    }
-
-    /// Shifts the given quantity from unreserved to reserved.
-    /// 
-    /// If unable to shift all it returns the excess.
-    pub fn shift_to_reserved(&mut self, quantity: f64) -> f64 {
-        let available = self.unreserved.min(quantity);
-        let excess = quantity - available;
-        self.unreserved -= available;
-        self.reserved += available;
-        excess
-    }
-
-    /// Gets the highest of our 3 reserves.
-    pub fn max_spec_reserve(&self) -> f64 {
-        self.specific_reserve
-            .max(self.class_reserve)
-            .max(self.want_reserve)
-    }
-
-    /// Shifts the given quantity into specific reserve.
-    /// 
-    /// Pulls from other sub-reserves up to the highest, without subtracting 
-    /// (allowing overlap), then from the reserve, then from the unreserved.
-    pub fn shift_to_specific_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
-        let other_max = self.class_reserve.max(self.want_reserve);
-        if other_max > self.specific_reserve { 
-            // if we have some from other reserves, get from there first.
-            let shift = (other_max-self.specific_reserve).min(quantity);
-            self.specific_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.specific_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // if not enough from reserve, then from unreserved.
-        if self.unreserved > 0.0 {
-            let shift = self.unreserved.min(quantity);
-            self.unreserved -= shift;
-            self.specific_reserve += shift;
-            quantity -= shift;
-        }
-        quantity
-    }
-
-    /// Shifts the given quantity into abstract reserve.
-    /// 
-    /// Pulls from other sub-reserves up to the highest, without subtracting 
-    /// (allowing overlap), then from the reserve, then from the unreserved.
-    pub fn shift_to_class_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
-        let other_max = self.specific_reserve.max(self.want_reserve);
-        if other_max > self.class_reserve { 
-            // if we have some from other reserves, get from there first.
-            let shift = (other_max-self.class_reserve).min(quantity);
-            self.class_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.class_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // if not enough from reserve, then from unreserved.
-        if self.unreserved > 0.0 {
-            let shift = self.unreserved.min(quantity);
-            self.unreserved -= shift;
-            self.class_reserve += shift;
-            quantity -= shift;
-        }
-        quantity
-    }
-
-    /// Shifts the given quantity into want reserve.
-    /// 
-    /// Pulls from other sub-reserves up to the highest, without subtracting 
-    /// (allowing overlap), then from the reserve, then from the unreserved.
-    pub fn shift_to_want_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
-        let other_max = self.specific_reserve.max(self.class_reserve);
-        if other_max > self.want_reserve { 
-            // if we have some from other reserves, get from there first.
-            let shift = (other_max-self.want_reserve).min(quantity);
-            self.want_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.want_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // if not enough from reserve, then from unreserved.
-        if self.unreserved > 0.0 {
-            let shift = self.unreserved.min(quantity);
-            self.unreserved -= shift;
-            self.want_reserve += shift;
-            quantity -= shift;
-        }
-        quantity
-    }
-
-    /// # Available
-    /// 
-    /// The amount available for trade or explicit use.
-    pub fn available(&self) -> f64 {
-        self.unreserved + self.reserved
-    }
-
-    /// # Expend
-    /// 
-    /// A function to expend the product safely from the unreserved
-    /// amount.
-    /// 
-    /// Returns the excess value which could not be gotten from unreserved.
-    pub fn expend(&mut self, expense: f64) -> f64 {
-        let available = self.unreserved.min(expense);
-        let excess = expense - available;
-        self.unreserved -= available;
-        excess
-    }
-
-    /// # Safe Remove
-    /// 
-    /// Removes a quantity from Unreserved and Reserved, but not the
-    /// specific reserves.
-    /// 
-    /// Returns the excess which could not be removed.
-    pub fn safe_remove(&mut self, remove: f64) -> f64 {
-        // remove from unreserved first
-        let excess = self.expend(remove);
-        // if no excess, return 0.0.
-        if excess == 0.0 { return 0.0; }
-        // if excess remains, remove from reserve.
-        let reserve_removal = self.reserved.min(excess);
-        self.reserved -= reserve_removal;
-        // get whatever remainder there is, and return it.
-        return excess - reserve_removal;
-    }
-
-    /// # Shift to Used
-    /// 
-    /// Shifts property from the reserves and unreserved pool to used.
-    fn _shift_to_used(&mut self, quantity: f64) {
-        let excess = self.remove(quantity);
-        self.used += quantity - excess;
-    }
 }

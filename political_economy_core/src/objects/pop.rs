@@ -8,12 +8,12 @@ use barrage::{Sender, Receiver};
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}};
 
-use super::{desires::{Desires, PropertyBreakdown}, 
+use super::{Property::Property, 
     pop_breakdown_table::PopBreakdownTable, 
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
-    pop_memory::PopMemory, buy_result::BuyResult, 
+    pop_memory::PopMemory, buy_result::BuyResult, property_info::PropertyInfo, 
 };
 
 /// Pops are the data storage for a population group.
@@ -43,7 +43,7 @@ pub struct Pop {
     /// The total desires and property of the pop.
     /// 
     /// TODO Food For Thought. We include 2 infinite desires in all pops, wealth and Leisure, which act as sinks and help us balance our buy priorities. More thought is needed.
-    pub desires: Desires,
+    pub desires: Property,
     /// A breakdown of the Population's demographics.
     pub breakdown_table: PopBreakdownTable,
     // Mood
@@ -365,7 +365,7 @@ impl Pop {
                     amount } => {
                         self.desires.property.entry(product)
                         .and_modify(|x| x.add_property(amount))
-                        .or_insert(PropertyBreakdown::new(amount));
+                        .or_insert(PropertyInfo::new(amount));
                 },
                 ActorMessage::FirmToEmployee { firm: sender, 
                 employee: _, action } => {
@@ -409,7 +409,7 @@ impl Pop {
     /// ## Not Tested due to complexity.
     pub fn free_time(&mut self, _rx: &mut Receiver<ActorMessage>, _tx: &Sender<ActorMessage>, 
     _data: &DataManager,
-    _market: &MarketHistory) -> HashMap<usize, PropertyBreakdown>{
+    _market: &MarketHistory) -> HashMap<usize, PropertyInfo>{
         todo!("Redo this!")
     }
 
@@ -436,7 +436,7 @@ impl Pop {
                 // We're recieving a product, add to our unreserved amount.
                 self.desires.property.entry(product)
                 .and_modify(|x| x.add_property(amount))
-                .or_insert(PropertyBreakdown::new(amount));
+                .or_insert(PropertyInfo::new(amount));
                 return None;
             },
             ActorMessage::SendWant { want, amount, .. } => {
@@ -483,7 +483,7 @@ impl Pop {
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     market: &MarketHistory, 
-    records: &mut HashMap<usize, PropertyBreakdown>,
+    records: &mut HashMap<usize, PropertyInfo>,
     product: &usize) -> BuyResult {
         // get time cost for later
         let time_cost = self.standard_shop_time_cost(data);
@@ -591,7 +591,7 @@ impl Pop {
     _data: &DataManager, 
     _market: &MarketHistory, 
     _seller: ActorInfo,
-    _records: &mut HashMap<usize, PropertyBreakdown>) -> BuyResult {
+    _records: &mut HashMap<usize, PropertyInfo>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         todo!("Redo")
@@ -646,7 +646,7 @@ impl Pop {
     /// 
     /// Returns a hashmap of the offer as well as the final price.
     pub fn create_offer(&self, product: usize, target: f64,
-    records: &HashMap<usize, PropertyBreakdown>, data: &DataManager, 
+    records: &HashMap<usize, PropertyInfo>, data: &DataManager, 
     market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
         let mut offer = HashMap::new();
         let mut total = 0.0;
