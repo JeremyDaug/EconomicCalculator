@@ -79,9 +79,6 @@ pub struct Knowledge {
     /// How successful we have been in the past in satisfying
     /// our target and explicit desires which seek this item.
     pub success_rate: f64,
-    /// The buy priority for the product. The lower this value, the earlier it
-    /// should be bought.
-    pub buy_priority: u8,
 }
 
 impl Knowledge {
@@ -96,7 +93,7 @@ impl Knowledge {
             spent: 0.0, lost: 0.0, used: 0.0,
             time_budget: 1.0, amv_budget: 0.0, 
             time_spent: 0.0, 
-            amv_spent: 0.0, success_rate: 0.5, buy_priority: 0
+            amv_spent: 0.0, success_rate: 0.5,
     } }
 
     pub fn remaining_amv(&self) -> f64 {

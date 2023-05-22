@@ -11,18 +11,13 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::{HashMap, HashSet}};
+use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
-use crate::{data_manager::DataManager, constants::UNABLE_TO_PURCHASE_REDUCTION};
+use crate::{data_manager::DataManager, constants::TIER_RATIO};
 
-use super::{desire::{Desire, DesireItem}, market::{MarketHistory}, process::PartItem};
-
-/// The ratio of value between one tier and an adjacent tier.
-/// 
-/// IE, a unit at tier 1 is worth 0.9 of an item from tier 0.
-pub const TIER_RATIO: f64 = 0.9;
+use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, pop_memory::Knowledge};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -31,11 +26,20 @@ pub struct Desires {
     /// All of the desires we are storing and looking over.
     pub desires: Vec<Desire>,
     /// The property currently owned bey the actor.
-    pub property: HashMap<usize, f64>,
+    pub property: HashMap<usize, PropertyBreakdown>,
     /// The wants stored and not used up yet.
     pub want_store: HashMap<usize, f64>,
-    /// The data of our succes in shopping.
-    pub shopping_data: HashMap<usize, DesireInfo>,
+    /// The data of our products to help us simplify and consolidate shopping.
+    pub shopping_data: HashMap<usize, Knowledge>,
+    /// The processes we are planning to complete for consumption purposes.
+    /// Includes the number of iterations we intend to do.
+    /// Should be updated with changing property and reservations.
+    pub process_plan: HashMap<usize, f64>,
+    /// The expected inputs and outputs of our process plan.
+    /// Only includes inputs and outputs, not capital for sanity reasons.
+    pub process_expectations: HashMap<usize, f64>,
+    /// The Expected inputs and outputs of our process plan for wants.
+    pub process_want_expectations: HashMap<usize, f64>,
     /// The highest tier to which these desires have been fully
     /// satisfied.
     /// 
@@ -44,12 +48,12 @@ pub struct Desires {
     /// Low values with stuffed desires mark material wealth with
     /// low contentment. High values with sparse desires mark material
     /// poverty but personal contentment.
-    pub full_tier_satisfaction: u64,
+    pub full_tier_satisfaction: usize,
     /// How many tiers, skipping empty ones, which have been filled.
     /// 
     /// A rough measure of total satisfaction. Removes contentment and
     /// emphasizes material satisfaction.
-    pub hard_satisfaction: u64,
+    pub hard_satisfaction: usize,
     /// The sum of desires satisfied, a more accurate, if market insensitive
     /// measure of weath.
     pub quantity_satisfied: f64,
@@ -62,17 +66,17 @@ pub struct Desires {
     /// It's the sum of each product's price, not scaled by tier.
     pub market_satisfaction: f64,
     /// The highest tier of satisfaction reached by any desire.
-    pub highest_tier: u64,
+    pub highest_tier: usize,
 }
 
 impl Desires {
     /// Creates a new desire collection based on a list of desires.
     pub fn new(desires: Vec<Desire>) -> Self {
-        let mut shopping_data: HashMap<usize, DesireInfo> = HashMap::new();
+        let mut shopping_data: HashMap<usize, Knowledge> = HashMap::new();
         for product in desires.iter()
-            .filter(|x| x.item.is_product()) {
+            .filter(|x| x.item.is_specific()) {
                 shopping_data.insert(product.item.unwrap().clone(), 
-                DesireInfo::new());
+                Knowledge::new());
             }
         Desires {
             desires,
@@ -85,27 +89,33 @@ impl Desires {
             partial_satisfaction: 0.0,
             market_satisfaction: 0.0,
             highest_tier: 0,
+            process_plan: HashMap::new(),
+            process_expectations: HashMap::new(),
+            process_want_expectations: HashMap::new()
         }
     }
 
-    /// Goes over the property contained within desires and sifts them into
-    /// the various desires that need them.
+    /// # Sift Specific Products
     /// 
-    /// Clears out old satisfactions first, so only use when a hard recalculation
-    /// is desired.
-    pub fn sift_products(&mut self) {
-        // clear old satisfactions
-        for desire in self.desires.iter_mut() {
-            desire.satisfaction = 0.0;
-        }
-        // Get the keys
-        let keys = self.property.keys()
-            .copied().collect_vec();
-        // iterate over all property and try to add them.
-        for key in keys {
-            // sift that product as much as you can.
-            self.sift_product(&key);
-        }
+    /// Goes over our property and sifts it into the products which have 
+    /// specific desires.
+    /// 
+    /// # Assumptions
+    /// 
+    /// This, like other Sift Functions assume that, 1 all property is either 
+    /// unreserved or reserved. and that the desire satisfaction is currently 
+    /// empty.
+    /// 
+    /// Be sure that this data is cleared or reset before calling this, else
+    /// it may act incorrectly.
+    /// 
+    /// # Notes
+    /// 
+    /// This function does not need external data as it matches for specific 
+    /// products and does not consume anything.
+    pub fn sift_specific_products(&mut self) {
+        // TODO Remove? this
+        todo!("Come back here later.")
     }
 
     /// Sifts a singular product into the various desires that seek it.
@@ -115,12 +125,13 @@ impl Desires {
     /// This will need to be expanded to allow for both specific product 
     /// satisfaction as well as general product satisfaction.
     pub fn sift_product(&mut self, product: &usize) {
+        // TODO update or remove this.
         // get the first step.
         let mut curr = self
             .walk_up_tiers_for_item(&None, &DesireItem::Product(*product));
         // get the available product
         let mut available = match self.property.get(product) {
-            Some(val) => val.clone(),
+            Some(val) => val.unreserved,
             None => 0.0
         };
         // loop over the desires for the product so long as we have one to add to.
@@ -130,8 +141,7 @@ impl Desires {
                 .get_mut(coord.idx)
                 .expect("Desire Not Found");
             // add to it at the current tier.
-            available = desire.add_satisfaction_at_tier(available, coord.tier)
-                .expect("Misstep Somehow Occurred.");
+            available = desire.add_satisfaction_at_tier(available, coord.tier);
             // if none left, break out of the loop
             if available == 0.0 {
                 break;
@@ -143,66 +153,193 @@ impl Desires {
         // we have either run out of desires to possibly satisfy
     }
 
-    /// Adds or subtracts a number of units to the property.
-    /// if the property reaches 0.0, it removes it from property entirely.
+    /// Adds an item to property and nothing else.
     /// 
-    /// If the amount subtracted results in a negative, it removes and returns 
-    /// the excess back as positive. If no excess, it returns 0.0.
-    /// 
-    /// IE, 5.0 in property, 10.0 subtracted, returns 5.0.
-    pub fn add_property(&mut self, product: usize, amount: &f64) -> f64 {
-        let value = *self.property.entry(product)
-        .and_modify(|x| *x += amount)
-        .or_insert(*amount);
-        if value <= 0.0 {
-            self.property.remove(&product);
-            return -value;
+    /// For more, do an add_and_sift
+    /// FIXME fuck this function, make it not shit.
+    pub fn add_property(&mut self, product: usize, amount: f64) {
+        if amount.is_sign_negative() { // if negative, skip
+            return;
+        } else  { // is being added
+            let data = self.property.entry(product)
+            .or_insert(PropertyBreakdown::new(0.0));
+            data.add_property(amount);
         }
-        0.0
     }
 
+    /// # Remove Property
+    /// 
     /// Removes a number of product units from property, if needed, it also
-    /// removes it from satisfaction. Returns how much was successfully 
-    /// removed.
-    pub fn remove_property(&mut self, product: usize, amount: &f64) -> f64 {
-        let item = DesireItem::Product(product);
-        let mut target = self.property.get(&product)
-            .unwrap_or(&0.0).min(*amount);
-        let result = target;
-        // with the target (minimum between asked and available) remove 
-        // from property
-        *self.property.entry(product).or_insert(0.0) -= target;
-
-        // now remove from satisfaction.
-        let start_tier = 
-            self.get_highest_satisfied_tier_for_item(DesireItem::Product(product));
-
-        let mut curr_coord = if start_tier.is_some() {
-            DesireCoord{ tier: start_tier.unwrap(), idx: self.len() }
-        } else {
-            return result;
-        };
-        // remove satisfaction up to our target or we run out of satisfaction to remove.
-        loop {
-            match self.walk_down_tiers_for_item(&curr_coord, &item) {
-                Some(res) => curr_coord = res,
-                None => break,
-            }
-            let mut desire = self.desires.get_mut(curr_coord.idx)
-                .expect("idx Not found?");
-            // get the smaller between the target to remove and the amount 
-            let available = target.min(
-                desire.satisfaction_at_tier(curr_coord.tier)
-                    .expect("Bad Tier?"));
-            // subtract from satisfaction and the target.
-            desire.satisfaction -= available;
-            target -= available;
-            if target == 0.0 {
-                return result;
-
-            }
+    /// removes it from satisfaction and reserves. 
+    /// 
+    /// Returns how much was successfully removed and the tiered value lost.
+    pub fn remove_property(&mut self, product: usize, amount: f64, data: &DataManager) -> (f64, TieredValue) {
+        // get our data if we have any
+        if let Some(prop_data) = self.property.get_mut(&product) {
+            // try to remove from unreserved and reserved first.
+            let excess = prop_data.remove(amount);
+            let first_expense = amount - excess;
+            // if no excess after removing from unreserved and reserve, 
+            if excess == 0.0 { return (amount, TieredValue{ tier: 0, value: 0.0 }); }
+            // if excess remaining remove that from our satisfaction and specialty reserves.
+            let (used, value) = self.remove_satisfaction(product, excess, data);
+            return (used+first_expense, value);
+        } else { // if we don't own it, return zeroes.
+            return (0.0, TieredValue{ tier: 0, value: 0.0 });
         }
+    }
 
+    /// # Remove Satisfaction
+    /// 
+    /// Removes satisfaction dependent on a product, and the amount given.
+    /// 
+    /// Returns the total amount of the product successfully removed and the effective value lost by it's removal.
+    /// 
+    /// ## Note
+    /// 
+    /// Assumes that unreserved and reserved products have alread been removed.
+    /// 
+    /// TODO Test This.
+    pub fn remove_satisfaction(&mut self, product: usize, amount: f64, data: &DataManager) -> (f64, TieredValue) {
+        let _amount_removed = 0.0;
+        let mut value_removed = TieredValue { tier: 0, value: 0.0 };
+        // get which kinds of satisfaction we need to remove from.
+        if let Some(prop_data) = self.property.get_mut(&product) {
+            // get how much we can remove in total.
+            let available = prop_data.max_spec_reserve().min(amount);
+            // get what everything should be at or below
+            let target = prop_data.max_spec_reserve() - available;
+            let mut specific_reduction = prop_data.specific_reserve - target;
+            let mut class_reduction = prop_data.class_reserve - target;
+            let want_reduction = prop_data.want_reserve - target;
+            // then, if value is positive, remove for each
+            if specific_reduction > 0.0 {
+                let mut specific_desire_coord = DesireCoord{ tier: self.highest_tier, idx: self.desires.len() };
+                specific_desire_coord = self.walk_down_tiers_for_item(&specific_desire_coord, &DesireItem::Product(product)).unwrap();
+                while specific_reduction > 0.0 {
+                    // walk down our desires, subtracting from satisfaction and our total reduction
+                    let mut desire = self.desires
+                    .get_mut(specific_desire_coord.idx).unwrap();
+                    let reduce = desire.satisfaction_at_tier(specific_desire_coord.tier).min(specific_reduction);
+                    desire.satisfaction -= reduce;
+                    specific_reduction -= reduce;
+                    // record the reduction 
+                    value_removed.add_value(specific_desire_coord.tier, reduce);
+                    // if no more reduction needed, gtfo
+                    if specific_reduction == 0.0 { break; }
+                    // get next desire, if no next, break out.
+                    let temp = self
+                    .walk_down_tiers_for_item(&specific_desire_coord, 
+                        &DesireItem::Product(product));
+                    specific_desire_coord = if let Some(val) = temp {
+                        val
+                    } else { break; }
+                }
+            }
+            if class_reduction > 0.0 {
+                // if we get in here, there must be a class it applies to.
+                let mut class_desire_coord = DesireCoord{ tier: self.highest_tier, idx: self.desires.len() };
+                let class = data.products.get(&product).unwrap().product_class.unwrap();
+                // get the class desires.
+                class_desire_coord = self.walk_down_tiers_for_item(&class_desire_coord, &DesireItem::Class(class)).unwrap();
+                while class_reduction > 0.0 {
+                    // walk down our desires, subtracting from satisfaction and our total reduction
+                    let mut desire = self.desires
+                    .get_mut(class_desire_coord.idx).unwrap();
+                    let reduce = desire.amount.min(class_reduction);
+                    desire.satisfaction -= reduce;
+                    class_reduction -= reduce;
+                    // record the reduction 
+                    value_removed.add_value(class_desire_coord.tier, reduce);
+                    // if no more reduction needed, gtfo
+                    if class_reduction == 0.0 { break; }
+                    // get next desire, if no next, break out.
+                    let temp = self
+                    .walk_down_tiers_for_item(&class_desire_coord, 
+                        &DesireItem::Class(class));
+                    class_desire_coord = if let Some(val) = temp {
+                        val
+                    } else { break; }
+                }
+            }
+            if want_reduction > 0.0 {
+                // TODO improvement idea, rebuild to our new reduced target, rather than trying to reverse our process
+                // 
+                // for want, we need to go over our processes and check which use this product
+                // go through our processes, get the process, but filter out those which don't 
+                // take what we're removing.
+                let mut valid_processes = HashSet::new();
+                let mut invalid_desires = HashSet::new();
+                for (process, _iterations) in self.process_plan.iter()
+                .map(|(id, iterations)| {
+                    (data.processes.get(id).expect("Process Not Found."), iterations)
+                })
+                .filter(|(process, _iterations)| {
+                    process.accepts_as_input(product, data)
+                }) {
+                    // if the process takes this product, record it.
+                    valid_processes.insert(process.id);
+                }
+                // with the processes that use this item retrieved, walk down the tiers, focusing on wants
+                let mut current_coord = DesireCoord{ tier: self.highest_tier, idx: self.desires.len() };
+                current_coord = self.walk_down_tiers(&current_coord).unwrap();
+                while want_reduction > 0.0 {
+                    // if desire is already marked as invalid, skip.
+                    if invalid_desires.contains(&current_coord.idx) {
+                        current_coord = self.walk_down_tiers(&current_coord).unwrap();
+                        continue;
+                    }
+                    // walk down the desires
+                    let desire = self.desires.get_mut(current_coord.idx).unwrap();
+                    // if the desire is not a want, skip.
+                    if !desire.item.is_want() { 
+                        invalid_desires.insert(current_coord.idx);
+                        current_coord = self.walk_down_tiers(&current_coord).unwrap();
+                        continue;
+                    }
+                    let want = data.wants.get(desire.item.unwrap()).expect("Want not found.");
+                    // check if any of it's process is ours.
+                    let shared_processes = want.process_sources.intersection(&valid_processes)
+                        .collect_vec(); // TODO see if there's a better way to check if the intersection is empty.
+                    if shared_processes.is_empty() {
+                        // if there is no overlapping match, move onto the next.
+                        invalid_desires.insert(current_coord.idx);
+                        current_coord = self.walk_down_tiers(&current_coord).unwrap();
+                        continue;
+                    }
+                    // since this one has at least one of our processes, 
+                    let mut result = HashMap::new();
+                    for (&id, &prop) in self.property.iter() {
+                        result.insert(id, prop.total_property);
+                    }
+                    for proc in shared_processes.iter()
+                    .map(|x| data.processes.get(x).unwrap()) {
+                        // get how many we need to undo this satisfaction
+                        let output = proc.effective_output_of(PartItem::Want(*desire.item.unwrap()));
+                        let ratio = desire.amount / output;
+                        // cap it at how many iterations we need at how many we originally planned.
+                        let _change = proc.do_process(&result, 
+                            &self.want_store, 0.0, 0.0, Some(ratio), true, data);
+                        // remove those iterations (undo reservations, expectations, and the plan)
+                        // if not enough to empty our satisfaction, go to the next process.
+                    }
+                }
+            }
+            self.update_satisfactions();
+            return (available, TieredValue{ tier: 0, value: 0.0 });
+        } else {
+            return (0.0, TieredValue{ tier: 0, value: 0.0 });
+        }
+    }
+
+    /// Helper function, creates a copy of our property as a hashset.
+    /// 
+    /// Uses total property, not some
+    pub fn property_to_hashmap(&self) -> HashMap<usize, f64> {
+        let mut result = HashMap::new();
+        for (&id, &prop) in self.property.iter() {
+            result.insert(id, prop.total_property);
+        }
         result
     }
 
@@ -307,10 +444,10 @@ impl Desires {
     /// for a total loss of roughly 1.61728.
     /// 
     /// The resulting output would be Some(2, 1.61728).
-    pub fn out_barter_value(&self, product: &usize, amount: f64) -> Option<(u64, f64)> {
+    pub fn out_barter_value(&self, product: &usize, amount: f64) -> Option<(usize, f64)> {
         // get those desires with reserves to remove work with.
         let possible = self.desires.iter()
-            .filter(|x| x.item.is_this_product(product) && x.satisfaction != 0.0)
+            .filter(|x| x.item.is_this_specific_product(product) && x.satisfaction != 0.0)
             .collect_vec();
         if possible.len() == 0 {
             return None; // if no possible items to barter, return none.
@@ -337,7 +474,7 @@ impl Desires {
                 curr = step;
                 // get the satisfaction available
                 let desire = self.desires.get(step.idx).expect("Invalid Index.");
-                let available = desire.satisfaction_at_tier(step.tier).expect("Bad Tier found.");
+                let available = desire.satisfaction_at_tier(step.tier);
                 if available > 0.0 {
                     // since satisfaction is available, do work
                     // get tier equivalency 
@@ -356,7 +493,7 @@ impl Desires {
     /// Finds the highest tier for a particular item which has satisfaction
     /// 
     /// Returns None if no satisfaction in any product found.
-    pub fn get_highest_satisfied_tier_for_item(&self, item: DesireItem) -> Option<u64> {
+    pub fn get_highest_satisfied_tier_for_item(&self, item: DesireItem) -> Option<usize> {
         // get those desires which have any satisfaction
         let possible = self.desires.iter()
             .filter(|x| x.item == item && x.satisfaction > 0.0)
@@ -374,7 +511,7 @@ impl Desires {
     /// Finds the highest tier which has any satisfaction.
     /// 
     /// Returns None if no satisfaction in any product found.
-    pub fn get_highest_satisfied_tier(&self) -> Option<u64> {
+    pub fn get_highest_satisfied_tier(&self) -> Option<usize> {
         // get those desires which have any satisfaction
         let possible = self.desires.iter()
             .filter(|x| x.satisfaction > 0.0)
@@ -470,7 +607,7 @@ impl Desires {
     /// Take an item and finds the lowest tier available which can still accept the item.
     /// 
     /// Used primarily to nicely find where to put an item when sifting.
-    pub fn get_lowest_unsatisfied_tier_of_item(&self, item: DesireItem) -> Option<u64> {
+    pub fn get_lowest_unsatisfied_tier_of_item(&self, item: DesireItem) -> Option<usize> {
         // get those desires which contain our item and are not fully satisfied.
         let possible = self.desires.iter()
             .filter(|x| x.item == item && !x.is_fully_satisfied())
@@ -489,7 +626,7 @@ impl Desires {
     /// Finds the lowest unsatisfied tier of all of our desires.
     /// 
     /// If all desires are satisfied, it returns None.
-    pub fn get_lowest_unsatisfied_tier(&self) -> Option<u64> {
+    pub fn get_lowest_unsatisfied_tier(&self) -> Option<usize> {
         // get those desires which contain our item and are not fully satisfied.
         let possible = self.desires.iter()
             .filter(|x| !x.is_fully_satisfied())
@@ -523,10 +660,10 @@ impl Desires {
     /// calculates the weight (1 + 0.5*0.9 &#8773; 1.45).
     /// 
     /// The resulting output would be Some(7, 1.45).
-    pub fn in_barter_value(&self, product: &usize, amount: f64) -> Option<(u64, f64)> {
+    pub fn in_barter_value(&self, product: &usize, amount: f64) -> Option<(usize, f64)> {
         // get those desires which want it an can still be satisfied
         let possible = self.desires.iter()
-            .filter(|x| x.item.is_this_product(&product) && !x.is_fully_satisfied())
+            .filter(|x| x.item.is_this_specific_product(&product) && !x.is_fully_satisfied())
             .collect_vec();
         // if no desires for that item exist, or they are all fully satisfied, return none.
         if possible.len() == 0 {
@@ -552,7 +689,7 @@ impl Desires {
             if let Some(step) = curr {
                 // get the desire and the unsatisfied desire at this step.
                 let desire = self.desires.get(step.idx).expect("Invalid index found.");
-                let diff = desire.amount - desire.satisfaction_at_tier(step.tier).expect("No Value Given.");
+                let diff = desire.amount - desire.satisfaction_at_tier(step.tier);
                 if diff > 0.0 {
                     // since the current step has missing satisfaction.
                     // get the equivalence ratio.
@@ -583,7 +720,7 @@ impl Desires {
     /// - start 10, end 11 = 0.9^-1    1 start = 0.9 end
     /// - start 10, end 12 = 0.9^-2    1 start = 0.81 end
     /// - start 10, end 8 = 0.9^2      1 start = 1.23. end
-    pub fn tier_equivalence(start: u64, end: u64) -> f64 {
+    pub fn tier_equivalence(start: usize, end: usize) -> f64 {
         let start = start as f64;
         let end = end as f64;
         TIER_RATIO.powf(end - start)
@@ -658,24 +795,23 @@ impl Desires {
     }
 
     /// Whether a selected tier is fully satisfied or not.
-    pub fn satisfied_at_tier(&self, tier: u64) -> bool {
+    pub fn satisfied_at_tier(&self, tier: usize) -> bool {
         self.desires.iter()
         .filter(|x| x.steps_on_tier(tier))
-        .all(|x| x.satisfaction_at_tier(tier).expect("Bad Step") == x.amount)
+        .all(|x| x.satisfaction_at_tier(tier) == x.amount)
     }
 
     /// Get's the total satisfaction of all our desires at a specific tier.
     /// If nothing steps on it it return's 0.0.
-    pub fn total_satisfaction_at_tier(&self, tier: u64) -> f64 {
+    pub fn total_satisfaction_at_tier(&self, tier: usize) -> f64 {
         self.desires.iter().filter(|x| x.steps_on_tier(tier))
-            .map(|x| x.satisfaction_at_tier(tier)
-                        .expect("Doesn't Step on tier."))
+            .map(|x| x.satisfaction_at_tier(tier))
             .sum()
     }
 
     /// Gets the total desired items for all desires at a specific tier.
     /// If nothing steps on that tier it returns 0.0.
-    pub fn total_desire_at_tier(&self, tier: u64) -> f64 {
+    pub fn total_desire_at_tier(&self, tier: usize) -> f64 {
         self.desires.iter().filter(|x| x.steps_on_tier(tier))
             .map(|x| x.amount)
             .sum()
@@ -686,15 +822,14 @@ impl Desires {
     /// Does not calculate satisfaction base on market history.
     pub fn update_satisfactions(&mut self) {
         // start with full tier satisfaction and highest tier.
-        self.full_tier_satisfaction = u64::MAX;
+        self.full_tier_satisfaction = usize::MAX;
         self.highest_tier = 0;
         // for each desire
         for desire in self.desires.iter() {
             let tier = desire.satisfaction_up_to_tier().expect("Not Satisfied somehow?");
             if !desire.is_fully_satisfied() {
                 // get it's highest fully satisfied tier
-                let tier = if desire.satisfaction_at_tier(tier)
-                .expect("No satisfaction?") < 1.0 {
+                let tier = if desire.satisfaction_at_tier(tier) < 1.0 {
                     tier - 1
                 } 
                 else { tier };
@@ -746,7 +881,7 @@ impl Desires {
     pub fn market_satisfaction(&mut self, market: &MarketHistory) -> f64 {
         self.market_satisfaction = 0.0;
         for desire in self.desires.iter()
-        .filter(|x| x.item.is_product()) {
+        .filter(|x| x.item.is_specific()) {
             let product = desire.item.unwrap();
             self.market_satisfaction += 
                 market.get_product_price(product, 0.0) * 
@@ -763,7 +898,7 @@ impl Desires {
         self.property.iter()
         // get the price * the amount owned.
         .map(|(product, quantity)| 
-            quantity * market.get_product_price(product, 0.0))
+            quantity.total_property * market.get_product_price(product, 0.0))
         // then add together.
         .sum()
     }
@@ -784,6 +919,30 @@ impl Desires {
             .map(|x| x.satisfaction).sum()
     }
 
+    /// # Sift All 
+    /// 
+    /// Used to sift our property and predict our uses for them.
+    /// 
+    /// Does not consume products, but should record satisfactions for each
+    /// desire, the property use breakdown into each, and get our expected
+    /// consumption and outputs.
+    /// 
+    /// This will allows us to more easily do barter trades and allow pops to 
+    /// deal with exchanges personally going forward. Especially in
+    /// trying to improve their situation by giving up either undesired or
+    /// less immediately desired items.
+    /// 
+    /// ## Notes
+    /// 
+    /// Products reserved in want_reserve can be thought of the products that
+    /// will be used or consumed by the process to satisfy wants.
+    pub fn sift_all(&mut self, _data: &DataManager) {
+        // which desires we have either fully satisfied, or can no longer satisfy.
+        //let finished = HashSet::new();
+        // Reset satisfaction, and property breakdown
+        todo!("Come back here!")
+    }
+
     /// # Consume and Shift Wants
     /// 
     /// This is used to satisfy our wants with our property. 
@@ -796,220 +955,8 @@ impl Desires {
     /// 4. Try to satisfy by consuming prdoucts.
     /// 
     /// TODO Improve this by using product memory to prioritize sources for each want. Rather than following strict ordering.
-    pub fn consume_and_sift_wants(&mut self, data: &DataManager) -> HashMap<usize, f64> {
-        let mut consumed = HashMap::new();
-        // get all our property and wants into untouched, used, and consumed.
-        let mut used_products: HashMap<usize, f64> = HashMap::new();
-        // create our tracker so we can tell when we're done.
-        let mut tracker = HashSet::new();
-        for (idx, desire) in self.desires.iter().enumerate() {
-            // preemptively add products to our tracked set.
-            if let DesireItem::Product(id) = desire.item {
-                tracker.insert(idx);
-            }
-        }
-
-        // with our untouched stuff sorted, begin sifting.
-        let mut curr = self.walk_up_tiers(None);
-        while let Some(coord) = curr {
-            // if tracker has the same number of items as our desires, we've 
-            // cleared out everything we can. Exit.
-            if tracker.len() == self.desires.len() { break; }
-            // if the index is already in our tracker, then we skip as we've 
-            // already done what we can with it
-            if tracker.contains(&coord.idx) { 
-                curr = self.walk_up_tiers(curr);
-                continue; 
-            }
-            // since it's not already dealt with, deal with it.
-            // this should never be a product.
-            let mut desire = self.desires
-                .get_mut(coord.idx).unwrap();
-            let want_id = desire.item.unwrap();
-            let mut ext_target = desire.amount;
-
-            // try for unused wants first
-            if let Some(extant) = self.want_store.get_mut(want_id) {
-                // with existing available to satisfy, push it in to satisfy our current tier.
-                let shift = extant.min(desire.amount);
-                // with our shift amount gotten, remove from property and add to the desire's satisfaction.
-                desire.satisfaction += shift;
-                ext_target -= shift;
-                *self.want_store.get_mut(want_id).unwrap() -= shift;
-                if *self.want_store.get(want_id).unwrap() == 0.0 {
-                    // if now empty, remove it.
-                    self.want_store.remove(want_id);
-                }
-            }
-            if ext_target == 0.0 { // if that did it, go to next desire.
-                if desire.past_end(coord.tier+1) { 
-                    // if this is the last tier, or fully satisfied, add to tracker.
-                    tracker.insert(coord.idx);
-                }
-                curr = self.walk_up_tiers(curr);
-                continue;
-            }
-
-            // next try ownership sources
-            let want_info = data.wants.get(want_id).expect("Want not in Data!");
-            for product_id in want_info.ownership_sources.iter() {
-                if let Some(available) = self.property.get_mut(product_id) { // if we have some, get it
-                    let product_info = data.products.get(product_id).expect("Product Not found!");
-                    let eff = product_info.wants.get(want_id).expect("Product Doesn't give want!");
-                    let ratio = ext_target / eff; // how many products we need to match our target.
-                    // get how many we can get 
-                    let reserve = ratio.min(*available);
-                    // move the reserve from property into used
-                    used_products.entry(*product_id)
-                        .and_modify(|x| *x += reserve).or_insert(reserve);
-                    consumed.entry(*product_id)
-                        .and_modify(|x| *x += reserve).or_insert(reserve);
-                    let entry = self.property.get_mut(product_id).unwrap();
-                    *entry -= reserve;
-                    if *entry == 0.0 {
-                        self.property.remove(product_id);
-                    }
-                    // update our wants
-                    for (want, amount) in product_info.wants.iter() {
-                        if want == want_id { // if it is our want, add to sat and remove from 
-                            desire.satisfaction += amount * reserve;
-                            ext_target -= amount * reserve;
-                        } else { // if not our want, add to the store.
-                            *self.want_store.entry(*want).or_insert(0.0) += amount * reserve;
-                        }
-                    }
-                    // since we added to our satisfaction, check if we're done, if we are, break out of this
-                    if ext_target == 0.0 {
-                        break;
-                    }
-                }
-            }
-            if ext_target == 0.0 { // if that did it, go to next desire.
-                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
-                    tracker.insert(coord.idx);
-                }
-                curr = self.walk_up_tiers(curr);
-                continue;
-            }
-            // if that wasn't good enough, try Use Sources
-            // TODO as part of the prioritization (or as a mid-step) this should prioritize the most efficient options rather than the order given by the want.
-            for use_id in want_info.use_sources.iter() {
-                let use_process = data.processes.get(use_id).expect("Process not found!");
-                // get how many iterations of the process we need to do it.
-                let outputs = use_process.effective_output_of(PartItem::Want(*want_id));
-                let target = ext_target / outputs; // how many iterations we need to meet the desire.
-                // throw our available property into the process to see if anythnig falls out.
-                let results = use_process.do_process(&self.property, 
-                    &self.want_store, &0.0, &0.0, Some(target), true);
-                if results.iterations > 0.0 { // if anything was done, go through the parts and apply the changes.
-                    for (product, quantity) in results.input_output_products.iter() {
-                        // add outputs and subtract inputs (inputs are already negative.)
-                        self.property.entry(*product)
-                            .and_modify(|x| *x += quantity).or_insert(*quantity);
-                        if *quantity < 0.0 {
-                            // if being consumed, add to our consumed result.
-                            consumed.entry(*product)
-                                .and_modify(|x| *x -= quantity).or_insert(-quantity);
-                        }
-                        if *self.property.get(product).unwrap() == 0.0 {
-                            self.property.remove(product);
-                        }
-                    }
-                    for (product, quantity) in results.capital_products.iter() {
-                        // shift used capital from property to used.
-                        *self.property.get_mut(product).unwrap() -= quantity;
-                        used_products.entry(*product)
-                            .and_modify(|x| *x += quantity).or_insert(*quantity);
-                        consumed.entry(*product)
-                            .and_modify(|x| *x += quantity).or_insert(*quantity);
-                        if *self.property.get(product).unwrap() == 0.0 {
-                            self.property.remove(product);
-                        }
-                    }
-                    for (want, quantity) in results.input_output_wants.iter() {
-                        if want == want_id { // if it's our want, add to satisfaction
-                            desire.satisfaction += quantity;
-                        } else { // else, add to our store.
-                            *self.want_store.entry(*want).or_insert(0.0) += quantity;
-                        }
-                    }
-                }
-                if ext_target == 0.0 {
-                    break;
-                }
-            }
-            if ext_target == 0.0 { // if that did it, go to next desire.
-                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
-                    tracker.insert(coord.idx);
-                }
-                curr = self.walk_up_tiers(curr);
-                continue;
-            }
-            // last thing to try, consumption
-            // TODO as part of the prioritization (or as a mid-step) this should prioritize the most efficient options rather than the order given by the want.
-            for consumption_id in want_info.consumption_sources.iter() {
-                let use_process = data.processes.get(consumption_id).expect("Process not found!");
-                // get how many iterations of the process we need to do it.
-                let outputs = use_process.effective_output_of(PartItem::Want(*want_id));
-                let target = ext_target / outputs; // how many iterations we need to meet the desire.
-                // throw our available property into the process to see if anythnig falls out.
-                let results = use_process.do_process(&self.property, 
-                    &self.want_store, &0.0, &0.0, Some(target), true);
-                if results.iterations > 0.0 { // if anything was done, go through the parts and apply the changes.
-                    for (product, quantity) in results.input_output_products.iter() {
-                        // add outputs and subtract inputs (inputs are already negative.)
-                        self.property.entry(*product)
-                            .and_modify(|x| *x += quantity).or_insert(*quantity);
-                        if *quantity < 0.0 {
-                            // if negative, add to consumed
-                            consumed.entry(*product)
-                                .and_modify(|x| *x -= quantity).or_insert(-quantity);
-                        }
-                        if *self.property.get(product).unwrap() == 0.0 {
-                            self.property.remove(product);
-                        }
-                    }
-                    for (product, quantity) in results.capital_products.iter() {
-                        // shift used capital from property to used.
-                        *self.property.get_mut(product).unwrap() -= quantity;
-                        used_products.entry(*product)
-                            .and_modify(|x| *x += quantity).or_insert(*quantity);
-                        consumed.entry(*product)
-                                .and_modify(|x| *x += quantity).or_insert(*quantity);
-                        if *self.property.get(product).unwrap() == 0.0 {
-                            self.property.remove(product);
-                        }
-                    }
-                    for (want, quantity) in results.input_output_wants.iter() {
-                        if want == want_id { // if it's our want, add to satisfaction
-                            desire.satisfaction += quantity;
-                        } else { // else, add to our store.
-                            *self.want_store.entry(*want).or_insert(0.0) += quantity;
-                        }
-                    }
-                }
-                if ext_target == 0.0 {
-                    break;
-                }
-            }
-            if ext_target == 0.0 { // if that did it, go to next desire.
-                if desire.past_end(coord.tier+1) { // if this is the last tier, add to tracker.
-                    tracker.insert(coord.idx);
-                }
-                curr = self.walk_up_tiers(curr);
-                continue;
-            }
-            // we got to the end without getting out, so put this desire into finished.
-            tracker.insert(coord.idx);
-            // get next one
-            curr = self.walk_up_tiers(curr);
-        }
-
-        // at the end, add all of our used items back into property.
-        for (item, quantity) in used_products {
-            self.add_property(item, &quantity);
-        }
-        consumed
+    pub fn consume_and_sift_wants(&mut self, _data: &DataManager) -> HashMap<usize, f64> {
+        todo!("Redo this with new property system.")
     }
 
     /// # Want consuming function. 
@@ -1052,9 +999,9 @@ impl Desires {
     /// If no desire steps on a tier above the given value, then it returns 
     /// none.
     /// TODO Not Tested.
-    pub fn next_stepped_on_tier(&self, end: u64) -> Option<u64> {
+    pub fn next_stepped_on_tier(&self, end: usize) -> Option<usize> {
         // ensure that we can reach any from end (ie any end after)
-        let mut next = u64::MAX;
+        let mut next = usize::MAX;
         for des in self.desires.iter() {
             let possible = des.get_next_tier_up(end);
             if let Some(val) = possible {
@@ -1063,7 +1010,7 @@ impl Desires {
                 }
             }
         }
-        if next == u64::MAX {
+        if next == usize::MAX {
             None
         } else {
             Some(next)
@@ -1074,7 +1021,7 @@ impl Desires {
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.
 #[derive(Debug, Clone, Copy)]
 pub struct DesireCoord {
-    pub tier: u64,
+    pub tier: usize,
     pub idx: usize
 }
 
@@ -1084,6 +1031,44 @@ impl DesireCoord {
     /// Easier when copy and increment are needed.
     fn increment_idx(self) -> Self{
         DesireCoord { tier: self.tier, idx: self.idx + 1}
+    }
+}
+
+/// A simple struct which pairs a value and the tier of that value.
+#[derive(Debug, Clone, Copy)]
+pub struct TieredValue {
+    pub tier: usize,
+    pub value: f64,
+}
+impl TieredValue {
+    /// # Add Value
+    /// 
+    /// Adds a value from the given tier and amount of satisfaction at that 
+    /// tier which we are adding.
+    /// 
+    /// This Maintains the Starting Tier of the Tiered Value.
+    /// TODO come back here.
+    pub fn add_value(&mut self, tier: usize, amount: f64) {
+        let _tier_diff = amount * TieredValue::tier_equivalence(self.tier, tier);
+        todo!("Come back here!")
+    }
+
+    /// Tier Equivalence between two tiers. 
+    /// 
+    /// With the start tier equal to 1, end tiers above it decline by 0.9 per level
+    /// difference. Going down they increase by 1/0.9
+    /// 
+    /// This defines how many units at the end tier is considered equivalent to lose in return
+    /// for 1 unit of the start tier.
+    /// 
+    /// IE
+    /// - start 10, end 11 = 0.9^-1    1 start = 0.9 end
+    /// - start 10, end 12 = 0.9^-2    1 start = 0.81 end
+    /// - start 10, end 8 = 0.9^2      1 start = 1.23. end
+    pub fn tier_equivalence(start: usize, end: usize) -> f64 {
+        let start = start as f64;
+        let end = end as f64;
+        TIER_RATIO.powf(end - start)
     }
 }
 
@@ -1146,27 +1131,281 @@ pub struct DesireInfo {
     pub success: f64,
 }
 
-impl DesireInfo {
-    pub fn new() -> Self {
-        DesireInfo { 
-            target: 0.0, 
-            bought: 0.0, 
-            time_budget: 0.0, 
-            amv_budget: 0.0, 
-            time_returned: 0.0, 
-            amv_returned: 0.0, 
-            success: 0.5 }
+
+/// # Property Breakdown
+/// 
+/// A Helper which is used ot help sort/divide property between
+/// unreserved, reserved, and used for specific, abstract, or want desire.
+/// 
+/// The Total Property should be equal to the Unreserved + Reserved + the 
+/// highest between specific, abstract, and want.
+/// 
+/// We only handle shifting from unreserved to the reserves.
+/// When adding to a reserve, we allow each reserve to pull from the others 
+/// (non-destructively) until they are equal. Once they are, they pull out 
+/// of reserve. If none remains in reserve, it removes from unreserved.
+#[derive(Debug, Copy, Clone)]
+pub struct PropertyBreakdown {
+    /// The total available to us. IE, Unreserved + reserved + max(specific, abstract, want)
+    pub total_property: f64,
+    /// The amount that is unreserved, available to be spent or shifted elsewhere.
+    pub unreserved: f64,
+    /// The amount that has been reserved for our desires, but not yet placed. Anywhere
+    pub reserved: f64,
+    /// The amount that has been reserved for specific product desires.
+    pub specific_reserve: f64,
+    /// The amount that has been reserved to satisfy abstract product desires.
+    pub class_reserve: f64,
+    /// The amount that has been reserved to satisfy want desires.
+    pub want_reserve: f64,
+    /// The amount which has been consumed today.
+    pub consumed: f64,
+    /// The amount which was used today, Removed from total_property, meant to be added back in at th end of the day.
+    pub used: f64,
+    /// the amount which was expended as part of a trade.
+    pub spent: f64,
+}
+
+impl PropertyBreakdown {
+    /// # New Property Breakdown
+    /// 
+    /// News up a property breakdown given an available value.
+    /// Automatically sets the total and unreserved.
+    pub fn new(available: f64) -> Self { 
+        Self { total_property: available, 
+            unreserved: available, 
+            reserved: 0.0, 
+            specific_reserve: 0.0, 
+            class_reserve: 0.0, 
+            want_reserve: 0.0,
+            consumed: 0.0,
+            used: 0.0,
+            spent: 0.0, 
+        } 
     }
 
-    /// Updates the sucess rate of the desire info.
+    /// # Reset Reserves
     /// 
-    /// Returns the new value and sets self.success to it as well.
+    /// Removes everything from the reserves, adding them back to unreserved.
+    pub fn reset_reserves(&mut self) {
+        self.unreserved = self.total_property;
+        self.reserved = 0.0;
+        self.want_reserve = 0.0;
+        self.class_reserve = 0.0;
+        self.specific_reserve = 0.0;
+    }
+
+    /// # Remove
     /// 
-    /// The updated value is calculated as an estimated rolling average equal to
-    /// (old * 9 + new) / 10
-    pub fn update_sucess_rate(&mut self, success: f64) -> f64 {
-        let result = (self.success * 9.0 + success) / 10.0;
-        self.success = result;
-        result
+    /// Removes a set number of items from the breakdown.
+    /// Removes from Unreserved first, then reserved, then the other reserves.
+    /// 
+    /// Returns any excess for sanity checking.
+    pub fn remove(&mut self, quantity: f64) -> f64 {
+        let mut remainder = quantity;
+        if self.unreserved > 0.0 { // if any unreserved, remove from there first
+            let remove = self.unreserved.min(remainder);
+            self.unreserved -= remove;
+            self.total_property -= remove;
+            remainder -= remove;
+            // if remainder used up, exit out.
+            if remainder == 0.0 { return 0.0; }
+        }
+        // if unreserved is not enough, remove from general reserve
+        if self.reserved > 0.0 {
+            let remove = self.reserved.min(remainder);
+            self.reserved -= remove;
+            self.total_property -= remove;
+            remainder -= remove;
+            if remainder == 0.0 { return 0.0; }
+        }
+        // if unreserved and reserved not enough, remove from specifc reserves
+        if self.max_spec_reserve() > 0.0 {
+            // TODO rework to use clamp?
+            let remove = self.max_spec_reserve().min(remainder);
+            self.class_reserve -= remove;
+            if self.class_reserve.is_sign_negative() { self.class_reserve = 0.0; }
+            self.want_reserve -= remove;
+            if self.want_reserve.is_sign_negative() { self.want_reserve = 0.0; }
+            self.specific_reserve -= remove;
+            if self.specific_reserve.is_sign_negative() { self.specific_reserve = 0.0; }
+            self.total_property -= remove;
+            remainder -= remove;
+        }
+        remainder
+    }
+
+    /// Adds to both total available and to unreserved
+    /// If given negative value, it will not remove anything.
+    pub fn add_property(&mut self, quantity: f64) {
+        if quantity.is_sign_negative() { return; }
+        self.total_property += quantity;
+        self.unreserved += quantity;
+    }
+
+    /// Shifts the given quantity from unreserved to reserved.
+    /// 
+    /// If unable to shift all it returns the excess.
+    pub fn shift_to_reserved(&mut self, quantity: f64) -> f64 {
+        let available = self.unreserved.min(quantity);
+        let excess = quantity - available;
+        self.unreserved -= available;
+        self.reserved += available;
+        excess
+    }
+
+    /// Gets the highest of our 3 reserves.
+    pub fn max_spec_reserve(&self) -> f64 {
+        self.specific_reserve
+            .max(self.class_reserve)
+            .max(self.want_reserve)
+    }
+
+    /// Shifts the given quantity into specific reserve.
+    /// 
+    /// Pulls from other sub-reserves up to the highest, without subtracting 
+    /// (allowing overlap), then from the reserve, then from the unreserved.
+    pub fn shift_to_specific_reserve(&mut self, quantity: f64) -> f64 {
+        let mut quantity = quantity;
+        let other_max = self.class_reserve.max(self.want_reserve);
+        if other_max > self.specific_reserve { 
+            // if we have some from other reserves, get from there first.
+            let shift = (other_max-self.specific_reserve).min(quantity);
+            self.specific_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // not enough from overlap alone, shift from reserve.
+        if self.reserved > 0.0 {
+            // get the smaller between available, and shift target.
+            let shift = self.reserved.min(quantity);
+            // remove from reserve, add to spec reserve, and remove from quantity
+            self.reserved -= shift;
+            self.specific_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // if not enough from reserve, then from unreserved.
+        if self.unreserved > 0.0 {
+            let shift = self.unreserved.min(quantity);
+            self.unreserved -= shift;
+            self.specific_reserve += shift;
+            quantity -= shift;
+        }
+        quantity
+    }
+
+    /// Shifts the given quantity into abstract reserve.
+    /// 
+    /// Pulls from other sub-reserves up to the highest, without subtracting 
+    /// (allowing overlap), then from the reserve, then from the unreserved.
+    pub fn shift_to_class_reserve(&mut self, quantity: f64) -> f64 {
+        let mut quantity = quantity;
+        let other_max = self.specific_reserve.max(self.want_reserve);
+        if other_max > self.class_reserve { 
+            // if we have some from other reserves, get from there first.
+            let shift = (other_max-self.class_reserve).min(quantity);
+            self.class_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // not enough from overlap alone, shift from reserve.
+        if self.reserved > 0.0 {
+            // get the smaller between available, and shift target.
+            let shift = self.reserved.min(quantity);
+            // remove from reserve, add to spec reserve, and remove from quantity
+            self.reserved -= shift;
+            self.class_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // if not enough from reserve, then from unreserved.
+        if self.unreserved > 0.0 {
+            let shift = self.unreserved.min(quantity);
+            self.unreserved -= shift;
+            self.class_reserve += shift;
+            quantity -= shift;
+        }
+        quantity
+    }
+
+    /// Shifts the given quantity into want reserve.
+    /// 
+    /// Pulls from other sub-reserves up to the highest, without subtracting 
+    /// (allowing overlap), then from the reserve, then from the unreserved.
+    pub fn shift_to_want_reserve(&mut self, quantity: f64) -> f64 {
+        let mut quantity = quantity;
+        let other_max = self.specific_reserve.max(self.class_reserve);
+        if other_max > self.want_reserve { 
+            // if we have some from other reserves, get from there first.
+            let shift = (other_max-self.want_reserve).min(quantity);
+            self.want_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // not enough from overlap alone, shift from reserve.
+        if self.reserved > 0.0 {
+            // get the smaller between available, and shift target.
+            let shift = self.reserved.min(quantity);
+            // remove from reserve, add to spec reserve, and remove from quantity
+            self.reserved -= shift;
+            self.want_reserve += shift;
+            quantity -= shift;
+            if quantity == 0.0 { return 0.0; }
+        }
+        // if not enough from reserve, then from unreserved.
+        if self.unreserved > 0.0 {
+            let shift = self.unreserved.min(quantity);
+            self.unreserved -= shift;
+            self.want_reserve += shift;
+            quantity -= shift;
+        }
+        quantity
+    }
+
+    /// # Available
+    /// 
+    /// The amount available for trade or explicit use.
+    pub fn available(&self) -> f64 {
+        self.unreserved + self.reserved
+    }
+
+    /// # Expend
+    /// 
+    /// A function to expend the product safely from the unreserved
+    /// amount.
+    /// 
+    /// Returns the excess value which could not be gotten from unreserved.
+    pub fn expend(&mut self, expense: f64) -> f64 {
+        let available = self.unreserved.min(expense);
+        let excess = expense - available;
+        self.unreserved -= available;
+        excess
+    }
+
+    /// # Safe Remove
+    /// 
+    /// Removes a quantity from Unreserved and Reserved, but not the
+    /// specific reserves.
+    /// 
+    /// Returns the excess which could not be removed.
+    pub fn safe_remove(&mut self, remove: f64) -> f64 {
+        // remove from unreserved first
+        let excess = self.expend(remove);
+        // if no excess, return 0.0.
+        if excess == 0.0 { return 0.0; }
+        // if excess remains, remove from reserve.
+        let reserve_removal = self.reserved.min(excess);
+        self.reserved -= reserve_removal;
+        // get whatever remainder there is, and return it.
+        return excess - reserve_removal;
+    }
+
+    /// # Shift to Used
+    /// 
+    /// Shifts property from the reserves and unreserved pool to used.
+    fn _shift_to_used(&mut self, quantity: f64) {
+        let excess = self.remove(quantity);
+        self.used += quantity - excess;
     }
 }

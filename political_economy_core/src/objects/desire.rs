@@ -3,8 +3,6 @@
 use core::fmt;
 use std::error::Error;
 
-use super::{product::Product, want::Want};
-
 /// Desires
 /// 
 /// Desires are things that are desired and used in a the Desires class.
@@ -19,12 +17,12 @@ pub struct Desire {
     /// The item (Product or Want) sought out.
     pub item: DesireItem,
     /// The tier this desire starts at.
-    pub start: u64,
+    pub start: usize,
     /// The last tier which has this desire.
     /// 
     /// If null, then it either has no last tier, or does not have
     /// multiple steps.
-    pub end: Option<u64>,
+    pub end: Option<usize>,
     /// How much it desires at each tier it steps on.
     pub amount: f64,
     /// How much has been satisfied so far.
@@ -36,7 +34,7 @@ pub struct Desire {
     /// where n &#8805; 0
     /// 
     /// This is up to end, if there is one.
-    pub step: u64,
+    pub step: usize,
     /// This defines additional properties of the desire for a pop or 
     /// Demographic.
     /// 
@@ -47,11 +45,11 @@ pub struct Desire {
 
 impl Desire {
     pub fn new(item: DesireItem, 
-        start: u64, 
-        end: Option<u64>, 
+        start: usize, 
+        end: Option<usize>, 
         amount: f64, 
         satisfaction: f64, 
-        step: u64, 
+        step: usize, 
         tags: Vec<DesireTag>) -> Result<Self, DesireError> { 
             // check that the end is a valid step.
             if let Some(val) = end {
@@ -121,21 +119,23 @@ impl Desire {
     /// the excess.
     /// 
     /// If it adds to a tier that the desire doesn't step on it returns an error.
-    pub fn add_satisfaction_at_tier(&mut self, add: f64, tier: u64) -> Result<f64,DesireError> {
-        // check that we stepped on the right tier (error otherwise), and that it is not fully satisfied.
-        if self.satisfaction_at_tier(tier)? == self.amount {
+    pub fn add_satisfaction_at_tier(&mut self, add: f64, tier: usize) -> f64 {
+        // check that we stepped on the right tier, return add, if we don't
+        if self.steps_on_tier(tier) { return add; }
+        // since we do step on it, get our satisfaction at that tier.
+        let sat_at_tier = self.satisfaction_at_tier(tier);
+        if sat_at_tier == self.amount {
             // if it's a correct tier, but the tier is full, return our amount safely.
-            return Ok(add);
+            return add;
         }
         // since there is missing satisfaction, get it
-        let unsatisfied = self.amount - self.satisfaction_at_tier(tier)
-            .expect("Infinite desire given. How'd you get here?");
+        let unsatisfied = self.amount - sat_at_tier;
         // get the smaller between what we can add and what we want to satisfy
         let take = add.min(unsatisfied);
         // add our available up to our satisfaction needed.
         self.satisfaction += take;
         // return the remainder
-        Ok(add-take)
+        add-take
     }
 
     /// Calculates what tier this desire is satisfied to, stopping at the last tier
@@ -147,21 +147,21 @@ impl Desire {
     /// Satisfaction = 100. Highest level satisfied = 100 (not 101).
     /// 
     /// If the satisfaction is 0, it returns None.
-    pub fn satisfaction_up_to_tier(&self) -> Option<u64> {
+    pub fn satisfaction_up_to_tier(&self) -> Option<usize> {
         // sanity check for 0 on tier 0.
         if self.satisfaction == 0.0 {
             return None;
         }
 
         let total_satisfaction = self.total_satisfaction();
-        let satisfied_steps = total_satisfaction.ceil() as u64 - 1;
+        let satisfied_steps = total_satisfaction.ceil() as usize - 1;
 
         if self.is_stretched() {
             if self.is_infinite() {
-                return Some(self.start + satisfied_steps as u64 * self.step);
+                return Some(self.start + satisfied_steps as usize * self.step);
             }
             let cap = std::cmp::min(self.steps() - 1, satisfied_steps);
-            return Some(self.start + cap as u64 * self.step);
+            return Some(self.start + cap as usize * self.step);
         }
 
         // If not stretched, then it can only go up to start.
@@ -171,7 +171,7 @@ impl Desire {
     /// Get Next Tier up takes a given tier and gets the next valid tier up.
     /// 
     /// Returns None if no tier is next. Otherwise, returns the next valid tier.
-    pub fn get_next_tier_up(&self, tier: u64) -> Option<u64> {
+    pub fn get_next_tier_up(&self, tier: usize) -> Option<usize> {
         if tier < self.start {
             return Some(self.start);
         }
@@ -196,7 +196,7 @@ impl Desire {
     }
 
     /// Changes the end and step for the desire. 
-    pub fn change_end(&mut self, end: Option<u64>, step: u64) -> Result<(), DesireError> {
+    pub fn change_end(&mut self, end: Option<usize>, step: usize) -> Result<(), DesireError> {
         // check that the end can be stepped on by the new values
         if end.is_some() && ((end.unwrap() - self.start) % step) != 0 {
             return Err(DesireError::TierMisstep(end.unwrap()));
@@ -213,7 +213,7 @@ impl Desire {
     /// If the desire is infinite, it return 0.
     /// 
     /// If the desire has only 1 tier, then it's 1.
-    pub fn steps(&self) -> u64 {
+    pub fn steps(&self) -> usize {
         if self.end.is_none() {
             if self.step > 0 {
                 return 0;
@@ -238,29 +238,23 @@ impl Desire {
     /// Returns the amount in units requested satisfied at this level.
     /// It caps at 0 and self.amount. 
     /// 
-    /// Returns Err if it doesn't step on a valid tier.
-    pub fn satisfaction_at_tier(&self, tier: u64) -> Result<f64, DesireError> {
+    /// Returns 0.0 if it does not step no the tier.
+    pub fn satisfaction_at_tier(&self, tier: usize) -> f64 {
         // since we know we step on a valid tier, get the total satisfaction
         let total = self.total_satisfaction();
 
         // get how many steps we have taken at this tier (start == tier = 0)
-        let steps = self.steps_to_tier(tier)?;
+        let steps = if let Ok(steps) = self.steps_to_tier(tier) {
+            steps
+        } else { return 0.0; };
 
-
-        let mut at_tier = total - steps as f64;
-        // cap the satisfaction at amount.
-        if at_tier > 1.0 {
-            at_tier = 1.0;
-        }
-        else if at_tier < 0.0 {
-            at_tier = 0.0;
-        }
-
-        Ok(at_tier)
+        // get our tier's satisfaction, clamping between 0.0 and 1.0 (total or part)
+        // and return it times our amount desired per tier.
+        f64::clamp(total - steps as f64, 0.0, 1.0) * self.amount
     }
 
     /// How many steps it takes for this desire to reach the given tier.
-    pub fn steps_to_tier(&self, tier: u64) -> Result<u64, DesireError> {
+    pub fn steps_to_tier(&self, tier: usize) -> Result<usize, DesireError> {
         if !self.steps_on_tier(tier) {
             return Err(DesireError::TierMisstep(tier));
         }
@@ -282,7 +276,7 @@ impl Desire {
     ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
     /// assert_eq!(desire.steps_on_tier(4), true);
     /// ```
-    pub fn steps_on_tier(&self, tier: u64) -> bool {
+    pub fn steps_on_tier(&self, tier: usize) -> bool {
         if tier < self.start {
             return false; // if before the start, we can't step on anything.
         }
@@ -346,7 +340,7 @@ impl Desire {
     /// 
     /// If the tier is between its start and end tier, it returns
     /// the amount * the tiers belowe it's current tier.
-    pub fn total_desire_at_tier(&self, tier: u64) -> Result<f64, DesireError> {
+    pub fn total_desire_at_tier(&self, tier: usize) -> Result<f64, DesireError> {
         // if tier is below starting tier
         if !self.steps_on_tier(tier) {
             return Err(DesireError::TierMisstep(tier));
@@ -374,21 +368,21 @@ impl Desire {
     /// or None.
     /// 
     /// If it is totally satisfied, it returns None.
-    pub fn unsatisfied_to_tier(&self) -> Option<u64> {
+    pub fn unsatisfied_to_tier(&self) -> Option<usize> {
 
         if self.is_fully_satisfied() {
             return None;
         }
 
         let total_satisfaction = self.total_satisfaction();
-        let satisfied_steps = total_satisfaction.floor() as u64;
+        let satisfied_steps = total_satisfaction.floor() as usize;
 
         if self.is_stretched() {
             if self.is_infinite() {
-                return Some(self.start + satisfied_steps as u64 * self.step);
+                return Some(self.start + satisfied_steps as usize * self.step);
             }
             let cap = std::cmp::min(self.steps() - 1, satisfied_steps);
-            return Some(self.start + cap as u64 * self.step);
+            return Some(self.start + cap as usize * self.step);
         }
 
         // If not stretched, then it can only go up to start.
@@ -408,7 +402,7 @@ impl Desire {
     /// 
     /// Helper function which checks if the given tier is beyond the last tier 
     /// that this desire can reach.
-    pub fn past_end(&self, tier: u64) -> bool {
+    pub fn past_end(&self, tier: usize) -> bool {
         if let Some(last) = self.end { // if we have an end, check against that
             return last < tier;
         }
@@ -423,7 +417,7 @@ impl Desire {
     /// # Before Start
     /// 
     /// Helper function which checks that the given tier is before our first tier.
-    pub fn before_start(&self, tier: u64) -> bool {
+    pub fn before_start(&self, tier: usize) -> bool {
         self.start > tier
     }
 
@@ -433,7 +427,7 @@ impl Desire {
     /// start to end (inclusive).
     /// 
     /// Returns None if start > end
-    pub fn steps_in_interval(&self, start: u64, end: u64) -> bool {
+    pub fn steps_in_interval(&self, start: usize, end: usize) -> bool {
         if end < start { return false; }
         let possible = self.get_next_tier_up(start - 1);
         if let Some(val) = possible {
@@ -465,65 +459,64 @@ pub enum DesireTag{
 /// # Desire Item Enum
 /// 
 /// Contains data for desires that are sought.
-/// 
-/// TODO This sholud be expanded to accept Abstract Products vs Specific products. Would need an abstract expansion to products.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DesireItem {
+    /// A desire for a want (Food).
     Want(usize),
-    Product(usize)
+    /// A desire for a class of good (Bread).
+    Class(usize),
+    /// A desire for a specific good (Wonderbread).
+    Product(usize),
 }
 
 /// Defines what 
 impl DesireItem {
-    /// Creates a DesireItem from a Product, getting it's id and returning
-    /// a Desire::Product(product.id).
-    pub fn from_product(product: &Product) -> DesireItem {
-        DesireItem::Product(product.id)
-    }
-
-    /// Creates a DesireItem from a Want, getting it's id and returing
-    /// Desire::Product(want.id).
-    pub fn from_want(want: &Want) -> DesireItem {
-        DesireItem::Want(want.id)
-    }
 
     /// unwraps the value from a DesireItem, does not destroy the original (?).
     pub fn unwrap(&self) -> &usize {
         match self {
             DesireItem::Product(prod) => prod,
-            DesireItem::Want(want) => want
+            DesireItem::Want(want) => want,
+            DesireItem::Class(prod) => prod,
         }
     }
 
     /// Checks if the item is a Want.
     pub fn is_want(&self) -> bool {
         match self {
-            DesireItem::Product(_) => false,
             DesireItem::Want(_) => true,
+            _ => false
         }
     }
 
     /// Checks if the item is a Product.
-    pub fn is_product(&self) -> bool {
+    pub fn is_specific(&self) -> bool {
         match self {
             DesireItem::Product(_) => true,
-            DesireItem::Want(_) => false,
+            _ => false,
+        }
+    }
+
+    pub fn is_class(&self) -> bool {
+        match self {
+            DesireItem::Class(_) => true,
+            _ => false
         }
     }
 
     /// Checks if this is a specific product.
-    pub fn is_this_product(&self, item: &usize) -> bool {
+    pub fn is_this_specific_product(&self, item: &usize) -> bool {
         match self {
             DesireItem::Product(val) => val == item,
-            DesireItem::Want(_) => false
+            _ => false
         }
     }
 
     /// Checks if this is a specific want.
     pub fn is_this_want(&self, item: &usize) -> bool {
         match self {
-            DesireItem::Product(_) => false,
-            DesireItem::Want(val) => val == item
+            DesireItem::Want(val) => val == item,
+            _ => false
         }
     }
 }
@@ -533,7 +526,7 @@ impl DesireItem {
 pub enum DesireError {
     /// An error for a tier mistep, the value contained is where it tried to land
     /// the desire did not have that step.
-    TierMisstep(u64)
+    TierMisstep(usize)
 }
 
 impl fmt::Display for DesireError {

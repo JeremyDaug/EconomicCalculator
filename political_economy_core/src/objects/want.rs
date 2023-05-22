@@ -20,11 +20,11 @@ pub struct Want {
     /// The products which produce it via owning it.
     pub ownership_sources: HashSet<usize>,
     /// All processes which produce it.
-    pub process_sources: Vec<usize>,
+    pub process_sources: HashSet<usize>,
     /// All use processes which produce it.
-    pub use_sources: Vec<usize>,
+    pub use_sources: HashSet<usize>,
     // All consumption processes which produce it.
-    pub consumption_sources: Vec<usize>
+    pub consumption_sources: HashSet<usize>
 }
 
 impl Want {
@@ -36,9 +36,9 @@ impl Want {
         else {
             Result::Ok(Self { id, name, description, decay, 
                 ownership_sources: HashSet::new(), 
-                process_sources: Vec::new(),
-                use_sources: vec![],
-                consumption_sources: vec![]} )
+                process_sources: HashSet::new(),
+                use_sources: HashSet::new(),
+                consumption_sources: HashSet::new()} )
         }
     }
 
@@ -88,16 +88,16 @@ impl Want {
         for tag in process.process_tags.iter() {
             match tag {
                 ProcessTag::Use(_prod) => {
-                    self.use_sources.push(process.id);
+                    self.use_sources.insert(process.id);
                 },
                 ProcessTag::Consumption(_prod) => {
-                    self.consumption_sources.push(process.id);
+                    self.consumption_sources.insert(process.id);
                 },
                 _ => {}
             }
         }
         // always add the process to all since we do output the want.
-        self.process_sources.push(process.id);
+        self.process_sources.insert(process.id);
         Ok(())
     }
 }

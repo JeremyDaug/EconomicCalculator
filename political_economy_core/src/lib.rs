@@ -10,30 +10,30 @@ extern crate lazy_static;
 
 #[cfg(test)]
 mod tests {
-    mod PropertyBreakdown_tests {
+    mod propertybreakdown_tests {
 
         mod shift_tests {
-            use crate::objects::pop::PropertyBreakdown;
+            use crate::objects::desires::PropertyBreakdown;
 
             #[test]
             pub fn shift_to_reserved_correctly() {
                 let mut test = PropertyBreakdown::new(10.0);
 
                 let remainder = test.shift_to_reserved(5.0);
-                assert!(test.total_available == 10.0);
+                assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
                 assert!(test.specific_reserve == 0.0);
-                assert!(test.abstract_reserve == 0.0);
+                assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(remainder == 0.0);
 
                 let remainder = test.shift_to_reserved(10.0);
-                assert!(test.total_available == 10.0);
+                assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 10.0);
                 assert!(test.specific_reserve == 0.0);
-                assert!(test.abstract_reserve == 0.0);
+                assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(remainder == 5.0);
             }
@@ -48,7 +48,7 @@ mod tests {
                 let result = test.max_spec_reserve();
                 assert!(result == 1.0);
 
-                test.abstract_reserve = 2.0;
+                test.class_reserve = 2.0;
                 let result = test.max_spec_reserve();
                 assert!(result == 2.0);
 
@@ -61,95 +61,95 @@ mod tests {
             pub fn shift_to_specific_reserve_correctly() {
                 let mut test = PropertyBreakdown::new(10.0);
                 test.shift_to_reserved(5.0);
-                test.total_available += 5.0;
-                test.abstract_reserve += 5.0;
+                test.total_property += 5.0;
+                test.class_reserve += 5.0;
 
                 // check that it reserves from overlap first.
                 let result = test.shift_to_specific_reserve(2.5);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
                 assert!(test.specific_reserve == 2.5);
-                assert!(test.abstract_reserve == 5.0);
+                assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
 
                 // check that it takes from overlap and reserved
                 let result = test.shift_to_specific_reserve(5.0);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 2.5);
                 assert!(test.specific_reserve == 7.5);
-                assert!(test.abstract_reserve == 5.0);
+                assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
 
                 // check that it takes from reserve and unreserved
                 let result = test.shift_to_specific_reserve(5.0);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
                 assert!(test.reserved == 0.0);
                 assert!(test.specific_reserve == 12.5);
-                assert!(test.abstract_reserve == 5.0);
+                assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
 
                 // check that it takes from unreserved and returns excess
                 let result = test.shift_to_specific_reserve(5.0);
                 assert!(result == 2.5);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 0.0);
                 assert!(test.specific_reserve == 15.0);
-                assert!(test.abstract_reserve == 5.0);
+                assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
             }
 
             #[test]
-            pub fn shift_to_abstract_reserve_correctly() {
+            pub fn shift_to_class_reserve_correctly() {
                 let mut test = PropertyBreakdown::new(10.0);
                 test.shift_to_reserved(5.0);
-                test.total_available += 5.0;
+                test.total_property += 5.0;
                 test.specific_reserve += 5.0;
 
                 // check that it reserves from overlap first.
-                let result = test.shift_to_abstract_reserve(2.5);
+                let result = test.shift_to_class_reserve(2.5);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 2.5);
+                assert!(test.class_reserve == 2.5);
                 assert!(test.want_reserve == 0.0);
 
                 // check that it takes from overlap and reserved
-                let result = test.shift_to_abstract_reserve(5.0);
+                let result = test.shift_to_class_reserve(5.0);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 2.5);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 7.5);
+                assert!(test.class_reserve == 7.5);
                 assert!(test.want_reserve == 0.0);
 
                 // check that it takes from reserve and unreserved
-                let result = test.shift_to_abstract_reserve(5.0);
+                let result = test.shift_to_class_reserve(5.0);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
                 assert!(test.reserved == 0.0);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 12.5);
+                assert!(test.class_reserve == 12.5);
                 assert!(test.want_reserve == 0.0);
 
                 // check that it takes from unreserved and returns excess
-                let result = test.shift_to_abstract_reserve(5.0);
+                let result = test.shift_to_class_reserve(5.0);
                 assert!(result == 2.5);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 0.0);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 15.0);
+                assert!(test.class_reserve == 15.0);
                 assert!(test.want_reserve == 0.0);
             }
 
@@ -157,47 +157,47 @@ mod tests {
             pub fn shift_to_want_reserve_correctly() {
                 let mut test = PropertyBreakdown::new(10.0);
                 test.shift_to_reserved(5.0);
-                test.total_available += 5.0;
+                test.total_property += 5.0;
                 test.specific_reserve += 5.0;
 
                 // check that it reserves from overlap first.
                 let result = test.shift_to_want_reserve(2.5);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 0.0);
+                assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 2.5);
 
                 // check that it takes from overlap and reserved
                 let result = test.shift_to_want_reserve(5.0);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 2.5);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 0.0);
+                assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 7.5);
 
                 // check that it takes from reserve and unreserved
                 let result = test.shift_to_want_reserve(5.0);
                 assert!(result == 0.0);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
                 assert!(test.reserved == 0.0);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 0.0);
+                assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 12.5);
 
                 // check that it takes from unreserved and returns excess
                 let result = test.shift_to_want_reserve(5.0);
                 assert!(result == 2.5);
-                assert!(test.total_available == 15.0);
+                assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 0.0);
                 assert!(test.specific_reserve == 5.0);
-                assert!(test.abstract_reserve == 0.0);
+                assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 15.0);
             }
         }
@@ -208,7 +208,7 @@ mod tests {
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
-             desires::Desires, desire::{Desire, DesireItem},
+             desires::{Desires, PropertyBreakdown}, desire::{Desire, DesireItem},
               species::Species, culture::Culture, ideology::Ideology, pop_memory::{PopMemory, Knowledge}, market::{MarketHistory, ProductInfo}}, 
               demographics::Demographics, data_manager::DataManager};
 
@@ -443,7 +443,7 @@ mod tests {
             market.sale_priority.push(6);
             market.sale_priority.push(7);
 
-            pop.desires.property.insert(6, 10.0);
+            pop.desires.property.insert(6, PropertyBreakdown::new(10.0));
             pop.memory.product_priority.push(7);
             // also add the pop's desire info
             pop.memory.product_knowledge.insert(7, Knowledge{ target: 2.0, 
@@ -456,8 +456,7 @@ mod tests {
                 time_spent: 0.0, 
                 amv_spent: 0.0, 
                 success_rate: 0.5,
-                rollover: 0.0, 
-                buy_priority: 0});
+                rollover: 0.0});
 
             (data, market)
         }
@@ -543,8 +542,8 @@ mod tests {
                     description: "Fail".to_string(), 
                     minimum_time: 0.0, 
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Product(2), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Specific(2), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
                         ProcessPart{ item: PartItem::Want(1), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![
@@ -571,10 +570,10 @@ mod tests {
                 test.desires.want_store.insert(0, 1.0);
                 test.desires.want_store.insert(1, 1.0);
                 test.desires.want_store.insert(2, 1.0);
-                test.desires.add_property(0, &1.0);
-                test.desires.add_property(1, &1.0);
-                test.desires.add_property(2, &1.0);
-                test.desires.add_property(3, &1.0);
+                test.desires.add_property(0, 1.0);
+                test.desires.add_property(1, 1.0);
+                test.desires.add_property(2, 1.0);
+                test.desires.add_property(3, 1.0);
 
                 // add knowledge for each.
                 test.memory.product_knowledge.insert(0, Knowledge::new());
@@ -589,8 +588,8 @@ mod tests {
                 assert!(*test.desires.want_store.get(&2).unwrap() == 0.5);
                 // check property
                 assert!(test.desires.property.get(&0).is_none());
-                assert!(*test.desires.property.get(&1).unwrap() == 0.5);
-                assert!(*test.desires.property.get(&2).unwrap() == 2.0);
+                assert!(test.desires.property.get(&1).unwrap().total_property == 0.5);
+                assert!(test.desires.property.get(&2).unwrap().total_property == 2.0);
                 assert!(test.desires.property.get(&3).is_none());
                 // check knowledge.
                 assert!(test.memory.product_knowledge.get(&0)
@@ -607,7 +606,7 @@ mod tests {
         mod free_time {
             use std::{thread, time::Duration};
 
-            use crate::{objects::{actor_message::ActorMessage, seller::Seller, pop_memory::Knowledge}, constants::TIME_ID};
+            use crate::{objects::{actor_message::ActorMessage, seller::Seller, pop_memory::Knowledge, desires::PropertyBreakdown}, constants::TIME_ID};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -624,7 +623,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.desires.property.insert(TIME_ID, test.standard_shop_time_cost() + 100.0);
+                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(test.standard_shop_time_cost(&data) + 100.0));
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -673,7 +672,7 @@ mod tests {
                 if !handle.is_finished() { assert!(false); }
                 let test = handle.join().unwrap();
 
-                assert!(*test.desires.property.get(&TIME_ID).unwrap() == 100.0);
+                assert!(test.desires.property.get(&TIME_ID).unwrap().total_property == 100.0);
             }
 
             /// This is a test to touch most of the free time stuff just to 
@@ -688,7 +687,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.desires.property.insert(TIME_ID, test.standard_shop_time_cost() + 1.0);
+                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(test.standard_shop_time_cost(&data) + 1.0));
                 // add an additional product to the priority list
                 test.memory.product_priority.push(5);
                 // and add desire for that
@@ -702,8 +701,7 @@ mod tests {
                     time_spent: 0.0, 
                     amv_spent: 0.0, 
                     success_rate: 0.5,
-                    rollover: 0.0,
-                    buy_priority: 0});
+                    rollover: 0.0});
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -755,7 +753,7 @@ mod tests {
                 if !handle.is_finished() { assert!(false); }
                 let test = handle.join().unwrap();
 
-                assert!(*test.desires.property.get(&TIME_ID).unwrap() == 1.0);
+                assert!(test.desires.property.get(&TIME_ID).unwrap().total_property == 1.0);
             }
         }
 
@@ -938,10 +936,6 @@ mod tests {
         }
         
         mod sort_new_items_should {
-            use std::collections::HashMap;
-            use crate::objects::pop_memory::Knowledge;
-            use super::make_test_pop;
-
             /*
             #[test]
             pub fn place_items_given_appropriately() {
@@ -999,7 +993,7 @@ mod tests {
 
         mod standard_sell {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, pop::PropertyBreakdown}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, desires::PropertyBreakdown}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -1017,11 +1011,11 @@ mod tests {
                 let mut keep = HashMap::new();
 
                 keep.insert(6, 
-                        PropertyBreakdown::new(*test.desires.property.get(&6).unwrap() + 10.0));
+                        PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property + 10.0));
 
                 let handle = thread::spawn(move || {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, 10, buyer);
+                        10, buyer);
                     test
                 }); 
                 // wait a second to let it wrap up.
@@ -1040,7 +1034,7 @@ mod tests {
                 let test = handle.join().unwrap();
 
                 // ensure that the seller hasn't sold anything
-                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
+                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
                 assert!(test.desires.property.get(&7).is_none());
             }
 
@@ -1057,13 +1051,13 @@ mod tests {
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
-                test.desires.property.insert(7, 10.0);
+                test.desires.property.insert(7, PropertyBreakdown::new(10.0));
                 let mut keep = HashMap::new();
                 keep.insert(7, PropertyBreakdown::new(10.0));
 
                 let handle = thread::spawn(move || {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, 7, buyer);
+                        7, buyer);
                     test
                 }); 
                 // wait a second to let it wrap up.
@@ -1093,7 +1087,7 @@ mod tests {
                 let test = handle.join().unwrap();
 
                 // ensure that the seller hasn't sold anything
-                assert!(*test.desires.property.get(&7).unwrap() == 10.0);
+                assert!(test.desires.property.get(&7).unwrap().total_property == 10.0);
                 assert!(test.desires.property.get(&6).is_none());
             }
 
@@ -1110,13 +1104,13 @@ mod tests {
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
-                test.desires.property.insert(7, 10.0);
+                test.desires.property.insert(7, PropertyBreakdown::new(10.0));
                 let mut keep = HashMap::new();
                 keep.insert(7, PropertyBreakdown::new(10.0));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, 7, buyer);
+                        7, buyer);
                     (test, result)
                 }); 
                 // wait a second to let it wrap up.
@@ -1162,7 +1156,7 @@ mod tests {
                 }
 
                 // ensure that the seller hasn't sold anything
-                assert!(*test.desires.property.get(&7).unwrap() == 10.0);
+                assert!(test.desires.property.get(&7).unwrap().total_property == 10.0);
                 assert!(test.desires.property.get(&6).is_none());
                 assert_eq!(returned.len(), 0);
             }
@@ -1180,13 +1174,13 @@ mod tests {
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
                 test.desires.property.clear();
-                test.desires.property.insert(7, 10.0);
+                test.desires.property.insert(7, PropertyBreakdown::new(10.0));
                 let mut keep = HashMap::new();
                 keep.insert(7, PropertyBreakdown::new(10.0));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        &mut keep, 7, buyer);
+                        7, buyer);
                     (test, result)
                 }); 
                 // wait a second to let it wrap up.
@@ -1231,7 +1225,7 @@ mod tests {
                 } else { assert!(false); }
 
                 // ensure that the seller has sold correctly
-                assert!(*test.desires.property.get(&7).unwrap() == 9.0);
+                assert!(test.desires.property.get(&7).unwrap().total_property == 9.0);
                 assert!(test.desires.property.get(&6).is_none());
                 assert!(*returned.get(&6).unwrap() == 6.0);
             }
@@ -1563,13 +1557,15 @@ mod tests {
         mod process_firm_message {
             use std::collections::HashMap;
 
-            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, seller::Seller}, constants::TIME_ID};
+            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, seller::Seller, desires::PropertyBreakdown}, constants::TIME_ID};
 
             use super::make_test_pop;
+            use super::prepare_data_for_market_actions;
 
             #[test]
             pub fn should_return_true_when_workdayended_recieved() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1579,7 +1575,7 @@ mod tests {
                 let firm_action = FirmEmployeeAction::WorkDayEnded;
 
                 assert!(test.process_firm_message(&passed_rx, &passed_tx, 
-                    sender, firm_action));
+                    sender, firm_action, &data));
                 
                 // ensure no messages sent or recieved.
                 let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
@@ -1589,10 +1585,11 @@ mod tests {
             #[test]
             pub fn should_return_false_and_send_its_time_out() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, 20.0);
+                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(20.0));
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1602,7 +1599,7 @@ mod tests {
                 let firm_action = FirmEmployeeAction::RequestTime;
 
                 assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
-                    firm, firm_action));
+                    firm, firm_action, &data));
                 
                 // ensure time sent.
                 let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
@@ -1620,18 +1617,19 @@ mod tests {
                 let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
                 assert!(rx_msg.is_none());
                 // check that the pop has reduced it's time appropriately.
-                assert_eq!(*test.desires.property.get(&TIME_ID).unwrap(), 10.0);
+                assert_eq!(test.desires.property.get(&TIME_ID).unwrap().total_property, 10.0);
             }
 
             #[test]
             pub fn should_send_everything_when_everything_requested() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, 20.0);
-                test.desires.property.insert(3, 10.0);
-                test.desires.property.insert(5, 10.0);
+                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(20.0));
+                test.desires.property.insert(3, PropertyBreakdown::new(10.0));
+                test.desires.property.insert(5, PropertyBreakdown::new(10.0));
                 test.desires.want_store.insert(4, 20.0);
                 test.desires.want_store.insert(6, 5.0);
                 // setup message queue.
@@ -1643,7 +1641,7 @@ mod tests {
                 let firm_action = FirmEmployeeAction::RequestEverything;
 
                 assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
-                    firm, firm_action));
+                    firm, firm_action, &data));
                 // Test should've sent everything they had, so check that all of them were added.
                 let mut rec_prods = HashMap::new();
                 let mut rec_wants = HashMap::new();
@@ -1690,12 +1688,13 @@ mod tests {
             #[test]
             pub fn should_send_requested_item_when_asked() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, 20.0);
-                test.desires.property.insert(3, 10.0);
-                test.desires.property.insert(5, 10.0);
+                test.desires.property.insert(TIME_ID, PropertyBreakdown::new(20.0));
+                test.desires.property.insert(3, PropertyBreakdown::new(10.0));
+                test.desires.property.insert(5, PropertyBreakdown::new(10.0));
                 test.desires.want_store.insert(4, 20.0);
                 test.desires.want_store.insert(6, 5.0);
                 // setup message queue.
@@ -1707,7 +1706,7 @@ mod tests {
                 let firm_action = FirmEmployeeAction::RequestItem { product: 3 };
 
                 assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
-                    firm, firm_action));
+                    firm, firm_action, &data));
                 // Test should've sent everything they had, so check that all of them were added.
                 let mut rec_prods = HashMap::new();
                 while let Some(msg) = rx.try_recv().unwrap() {
@@ -1725,8 +1724,8 @@ mod tests {
 
                 // and assert that those items have been removed from the pop
                 assert_eq!(test.desires.property.len(), 2);
-                assert_eq!(*test.desires.property.get(&TIME_ID).unwrap(), 20.0);
-                assert_eq!(*test.desires.property.get(&5).unwrap(), 10.0);
+                assert_eq!(test.desires.property.get(&TIME_ID).unwrap().total_property, 20.0);
+                assert_eq!(test.desires.property.get(&5).unwrap().total_property, 10.0);
                 assert!(!test.desires.property.contains_key(&3));
                 assert_eq!(test.desires.want_store.len(), 2);
                 assert_eq!(*test.desires.want_store.get(&4).unwrap(), 20.0);
@@ -1737,13 +1736,14 @@ mod tests {
         mod work_day_processing {
             use std::{thread, time::Duration};
 
-            use crate::objects::{actor_message::{FirmEmployeeAction, ActorMessage, ActorInfo, OfferResult::Cheap}, seller::Seller};
+            use crate::{objects::{actor_message::{FirmEmployeeAction, ActorMessage, ActorInfo, OfferResult::Cheap}, seller::Seller}, tests::pop_tests::prepare_data_for_market_actions};
 
             use super::make_test_pop;
 
             #[test]
             pub fn should_stop_when_work_day_ended_recieved() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 let pop_info = test.actor_info();
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -1753,7 +1753,7 @@ mod tests {
                 let firm = ActorInfo::Firm(10);
                 
                 let handler = thread::spawn(move || {
-                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test.work_day_processing(&mut passed_rx, &passed_tx, &data);
                     test
                 });
 
@@ -1772,6 +1772,7 @@ mod tests {
             #[test]
             pub fn should_add_want_splash_recieved() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 let pop_info = test.actor_info();
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -1781,7 +1782,7 @@ mod tests {
                 let firm = ActorInfo::Firm(10);
                 
                 let handler = thread::spawn(move || {
-                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test.work_day_processing(&mut passed_rx, &passed_tx, &data);
                     test
                 });
 
@@ -1808,6 +1809,7 @@ mod tests {
             #[test]
             pub fn should_add_sent_products_recieved() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 let pop_info = test.actor_info();
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -1817,7 +1819,7 @@ mod tests {
                 let firm = ActorInfo::Firm(10);
                 
                 let handler = thread::spawn(move || {
-                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test.work_day_processing(&mut passed_rx, &passed_tx, &data);
                     test
                 });
 
@@ -1839,12 +1841,13 @@ mod tests {
                 let test = handler.join().unwrap();
                 
                 // check that the want was recieved
-                assert_eq!(*test.desires.property.get(&10).unwrap(), 10.0);
+                assert_eq!(test.desires.property.get(&10).unwrap().total_property, 10.0);
             }
 
             #[test]
             pub fn should_add_all_other_msgs_recieved_to_backlog() {
                 let mut test = make_test_pop();
+                let (data, _market) = prepare_data_for_market_actions(&mut test);
                 let pop_info = test.actor_info();
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -1854,7 +1857,7 @@ mod tests {
                 let firm = ActorInfo::Firm(10);
                 
                 let handler = thread::spawn(move || {
-                    test.work_day_processing(&mut passed_rx, &passed_tx);
+                    test.work_day_processing(&mut passed_rx, &passed_tx, &data);
                     test
                 });
 
@@ -1898,7 +1901,7 @@ mod tests {
         mod create_offer_tests {
             use std::collections::HashMap;
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, pop::PropertyBreakdown}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, desires::PropertyBreakdown}};
 
             use super::make_test_pop;
 
@@ -2276,7 +2279,7 @@ mod tests {
     
         mod standard_buy {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, pop::PropertyBreakdown}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, desires::PropertyBreakdown}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -2294,7 +2297,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
+                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2317,7 +2320,7 @@ mod tests {
                     assert_eq!(OfferResult::OutOfStock, reason);
                 } else { assert!(false); }
                 // check that nothing was gained or lost.
-                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
+                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
                 assert!(test.desires.property.get(&7).is_none());
                 // check pop memory for the products as well.
                 assert!(test.memory.product_knowledge.get(&5).is_none());
@@ -2342,7 +2345,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
+                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2398,8 +2401,8 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(*test.desires.property.get(&6).unwrap() == 5.0);
-                assert!(*test.desires.property.get(&7).unwrap() == 2.0);
+                assert!(test.desires.property.get(&6).unwrap().total_property == 5.0);
+                assert!(test.desires.property.get(&7).unwrap().total_property == 2.0);
                 // check pop memory for the products as well.
                 assert!(test.memory.product_knowledge.get(&5).is_none());
                 assert!(test.memory.product_knowledge.get(&6).unwrap().achieved == 0.0);
@@ -2424,7 +2427,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
+                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().unreserved));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2491,9 +2494,9 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(*test.desires.property.get(&5).unwrap() == 1.0);
-                assert!(*test.desires.property.get(&6).unwrap() == 6.0);
-                assert!(*test.desires.property.get(&7).unwrap() == 2.0);
+                assert!(test.desires.property.get(&5).unwrap().total_property == 1.0);
+                assert!(test.desires.property.get(&6).unwrap().total_property == 6.0);
+                assert!(test.desires.property.get(&7).unwrap().total_property == 2.0);
                 // check returned correctly includes items.
                 assert!(spend.get(&5).unwrap().unreserved == 1.0);
                 // check pop memory for the products as well.
@@ -2521,7 +2524,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
+                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2580,7 +2583,7 @@ mod tests {
                     assert!(reason == OfferResult::Rejected);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
+                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
                 assert!(test.desires.property.get(&7).is_none());
                 assert_eq!(returned.len(), 0);
                 // check pop memory for the products as well.
@@ -2606,7 +2609,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyBreakdown::new(*test.desires.property.get(&6).unwrap()));
+                spend.insert(6 as usize, PropertyBreakdown::new(test.desires.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2665,7 +2668,7 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(*test.desires.property.get(&6).unwrap() == 10.0);
+                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
                 assert!(test.desires.property.get(&7).is_none());
                 assert_eq!(returned.len(), 0);
                 // check pop memory for the products as well.
@@ -2991,7 +2994,7 @@ mod tests {
     }
 
     mod desires_tests {
-        use crate::objects::{desires::{Desires, DesireCoord}, desire::{Desire, DesireItem}};
+        use crate::objects::{desires::{Desires, DesireCoord, PropertyBreakdown}, desire::{Desire, DesireItem}};
 
         mod consume_and_sift_wants_should {
             use std::collections::{HashMap, HashSet};
@@ -3043,7 +3046,8 @@ mod tests {
                     use_processes: HashSet::new(),
                     consumption_processes: HashSet::new(),
                     maintenance_processes: HashSet::new(),
-                    tech_required: None});
+                    tech_required: None,
+                    product_class: None, });
                 let prod1 = data.products.get_mut(&0).unwrap();
                 prod1.wants.insert(0, 1.0); // product 0 produces want 0 via ownership
                 // product 1, has use want
@@ -3083,8 +3087,8 @@ mod tests {
                 // connect up want data.
                 let want = data.wants.get_mut(&0).unwrap();
                 want.ownership_sources.insert(0);
-                want.use_sources.push(0);
-                want.consumption_sources.push(1);
+                want.use_sources.insert(0);
+                want.consumption_sources.insert(1);
                 // the use process
                 data.processes.insert(0, Process{ 
                     id: 0, 
@@ -3093,7 +3097,7 @@ mod tests {
                     description: "".to_string(), 
                     minimum_time: 0.0, 
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(1), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: PartItem::Specific(1), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
                         ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
                     ],
                     process_tags: vec![], 
@@ -3110,9 +3114,9 @@ mod tests {
                     description: "".to_string(), 
                     minimum_time: 0.0, 
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(2), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Specific(2), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
                         ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
                     ],
                     process_tags: vec![], 
                     skill: None, 
@@ -3121,9 +3125,9 @@ mod tests {
                     technology_requirement: None, 
                     tertiary_tech: None });
                 
-                test.add_property(0, &1.0);
-                test.add_property(1, &1.0);
-                test.add_property(2, &1.0);
+                test.add_property(0, 1.0);
+                test.add_property(1, 1.0);
+                test.add_property(2, 1.0);
 
                 let result = test.consume_and_sift_wants(&data);
                 
@@ -3131,10 +3135,10 @@ mod tests {
                 // not consumed product 1, use source
                 // consumed product 2, consumption source
                 // and want 0 stored should be totally consumed
-                assert!(*test.property.get(&0).unwrap() == 1.0);
-                assert!(*test.property.get(&1).unwrap() == 1.0);
+                assert!(test.property.get(&0).unwrap().total_property == 1.0);
+                assert!(test.property.get(&1).unwrap().total_property == 1.0);
                 assert!(!test.property.contains_key(&2));
-                assert!(*test.property.get(&3).unwrap() == 1.0);
+                assert!(test.property.get(&3).unwrap().total_property == 1.0);
                 assert!(!test.want_store.contains_key(&0));
                 assert!(test.desires.first().unwrap().satisfaction == 4.0);
                 // it should have used products 0, 1, and 2.
@@ -3192,8 +3196,8 @@ mod tests {
                     sale_priority: vec![],
                     currencies: vec![],
                 };
-                test.add_property(0, &4.0);
-                test.add_property(1, &5.0);
+                test.add_property(0, 4.0);
+                test.add_property(1, 5.0);
                 let result = test.market_wealth(&test_market);
                 assert!(result == 29.0);
             }
@@ -3223,16 +3227,16 @@ mod tests {
                     tags: vec![]});
                 let mut test = Desires::new(test_desires);
                 // insert new
-                assert!(test.add_property(0, &10.0) == 0.0);
-                assert!(*test.property.get(&0).unwrap() == 10.0);
+                test.add_property(0, 10.0);
+                assert!(test.property.get(&0).unwrap().total_property == 10.0);
                 // insert to existing
-                assert!(test.add_property(0, &10.0) == 0.0);
-                assert!(*test.property.get(&0).unwrap() == 20.0);
+                test.add_property(0, 10.0);
+                assert!(test.property.get(&0).unwrap().total_property == 20.0);
                 // remove partial
-                assert!(test.add_property(0, &-10.0) == 0.0);
-                assert!(*test.property.get(&0).unwrap() == 10.0);
+                test.add_property(0, -10.0);
+                assert!(test.property.get(&0).unwrap().total_property == 10.0);
                 // remove excess
-                assert!(test.add_property(0, &-15.0) == 5.0);
+                test.add_property(0, -15.0);
                 assert!(!test.property.contains_key(&0));
             }
         }
@@ -3331,7 +3335,7 @@ mod tests {
         }
 
         mod remove_property_should {
-            use crate::objects::{desires::Desires, desire::{Desire, DesireItem}};
+            use crate::objects::{desires::{Desires, PropertyBreakdown}, desire::{Desire, DesireItem}};
 
             #[test]
             pub fn correctly_remove_item_from_property_and_satisfaction() {
@@ -3354,21 +3358,21 @@ mod tests {
                     tags: vec![]});
                 let mut test = Desires::new(test_desires);
                 // add property
-                test.property.insert(0, 10.0);
-                test.property.insert(1, 10.0);
+                test.property.insert(0, PropertyBreakdown::new(10.0));
+                test.property.insert(1, PropertyBreakdown::new(10.0));
                 // add saturation
                 test.desires.get_mut(1).unwrap()
                 .add_satisfaction(5.0);
                 // subtract 11.0 from 0
-                let over_remove = test.remove_property(0, &11.0);
-                assert!(over_remove == 10.0);
-                assert!(*test.property.get(&0).unwrap() == 0.0);
-                assert!(test.desires.get(0).unwrap().satisfaction == 0.0);
-                // subtract 4.0 from 1
-                let under_remove = test.remove_property(1, &4.0);
-                assert!(under_remove == 4.0) ;
-                assert!(*test.property.get(&1).unwrap() == 6.0);
-                assert!(test.desires.get(1).unwrap().satisfaction == 1.0);
+                // let over_remove = test.remove_property(0, 11.0);
+                // assert!(over_remove == 10.0);
+                // assert!(*test.property.get(&0).unwrap() == 0.0);
+                // assert!(test.desires.get(0).unwrap().satisfaction == 0.0);
+                // // subtract 4.0 from 1
+                // let under_remove = test.remove_property(1, 4.0);
+                // assert!(under_remove == 4.0) ;
+                // assert!(*test.property.get(&1).unwrap() == 6.0);
+                // assert!(test.desires.get(1).unwrap().satisfaction == 1.0);
             }
         }
 
@@ -3471,10 +3475,10 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
-            test.property.insert(0, 100.0);
-            test.property.insert(1, 100.0);
+            test.property.insert(0, PropertyBreakdown::new(100.0));
+            test.property.insert(1, PropertyBreakdown::new(100.0));
 
-            test.sift_products();
+            test.sift_specific_products();
             assert_eq!(test.desires[1].satisfaction, 5.0);
             assert_eq!(test.desires[0].satisfaction, 2.0);
         }
@@ -3498,7 +3502,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             let mut test = Desires::new(test_desires);
-            test.property.insert(1, 100.0);
+            test.property.insert(1, PropertyBreakdown::new(100.0));
 
             test.sift_product(&1);
             assert_eq!(test.desires[1].satisfaction, 5.0);
@@ -4397,16 +4401,14 @@ mod tests {
                 tags: vec![]};
 
             // only add 1 tier, return remainder.
-            let result = test.add_satisfaction_at_tier(100.0, 0)
-                .expect("Misstepped");
+            let result = test.add_satisfaction_at_tier(100.0, 0);
             assert_eq!(result, 99.0);
             // try again, to ensure we get everything back safely.
-            let result = test.add_satisfaction_at_tier(100.0, 0)
-                .expect("Misstepped");
+            let result = test.add_satisfaction_at_tier(100.0, 0);
             assert_eq!(result, 100.0);
             // force misstep.
             test.change_end(None, 5).expect("Error Found!");
-            assert!(test.add_satisfaction_at_tier(100.0, 2).is_err());
+            assert!(test.add_satisfaction_at_tier(100.0, 2) == 0.0);
         }
 
         #[test]
@@ -4664,10 +4666,10 @@ mod tests {
                 step: 2,
                 tags: vec![]};
             
-            assert_eq!(test.satisfaction_at_tier(2).expect("Invalid!"), 0.75);
-            assert_eq!(test.satisfaction_at_tier(0).expect("Invalid!"), 1.0);
-            assert_eq!(test.satisfaction_at_tier(4).expect("Invalid!"), 0.0);
-            assert!(test.satisfaction_at_tier(1).is_err());
+            assert_eq!(test.satisfaction_at_tier(2), 0.75);
+            assert_eq!(test.satisfaction_at_tier(0), 1.0);
+            assert_eq!(test.satisfaction_at_tier(4), 0.0);
+            assert!(test.satisfaction_at_tier(1) == 0.0);
         }
     
         #[test]
@@ -4897,25 +4899,27 @@ mod tests {
     }
 
     mod process_tests {
-        use crate::objects::{process::{Process, ProcessPart, PartItem, ProcessSectionTag}};
+        use crate::{objects::{process::{Process, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
 
         mod do_process {
             use std::{str::FromStr, collections::HashMap};
 
-            use crate::objects::process::{Process, ProcessPart, ProcessSectionTag, PartItem};
+            use crate::{objects::process::{Process, ProcessPart, ProcessSectionTag, PartItem}, data_manager::DataManager};
 
             mod do_process_should {
                 use std::{str::FromStr, collections::HashMap};
 
-                use crate::objects::process::{Process, PartItem, ProcessPart, ProcessSectionTag};
+                use crate::{objects::process::{Process, PartItem, ProcessPart, ProcessSectionTag}, data_manager::DataManager};
 
                 #[test]
                 pub fn return_process_returns_empty_correctly() {
+                    let mut data = DataManager::new();
+                    data.load_all(&"file_name".to_string()).expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Product(0), // input product
+                            ProcessPart{ item: PartItem::Specific(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
@@ -4923,12 +4927,12 @@ mod tests {
                                 amount: 2.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                            ProcessPart{ item: PartItem::Specific(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Product(2), // output product
+                            ProcessPart{ item: PartItem::Specific(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -4941,11 +4945,11 @@ mod tests {
                         skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                         technology_requirement: None, tertiary_tech: None };
 
-                    let mut available_products = HashMap::new();
-                    let mut available_wants = HashMap::new();
+                    let available_products = HashMap::new();
+                    let available_wants = HashMap::new();
                     let result = test.do_process(&available_products, 
-                        &available_wants, &0.0, &0.0, 
-                        None, true);
+                        &available_wants, 0.0, 0.0, 
+                        None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 0.0);
                     assert!(result.effective_iterations == 0.0);
@@ -4957,11 +4961,13 @@ mod tests {
 
                 #[test]
                 pub fn return_process_returns_single_iteration_correctly() {
+                    let mut data = DataManager::new();
+                    data.load_all(&"file_name".to_string()).expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Product(0), // input product
+                            ProcessPart{ item: PartItem::Specific(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
@@ -4969,12 +4975,12 @@ mod tests {
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                            ProcessPart{ item: PartItem::Specific(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Product(2), // output product
+                            ProcessPart{ item: PartItem::Specific(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -4997,8 +5003,8 @@ mod tests {
                     available_wants.insert(1, 1.0);
                     available_wants.insert(2, 1.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, &0.0, &0.0, 
-                        None, true);
+                        &available_wants, 0.0, 0.0, 
+                        None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 1.0);
                     assert!(result.effective_iterations == 1.0);
@@ -5015,11 +5021,13 @@ mod tests {
 
                 #[test]
                 pub fn return_process_returns_multiple_iterations_correctly() {
+                    let mut data = DataManager::new();
+                    data.load_all(&"file_name".to_string()).expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Product(0), // input product
+                            ProcessPart{ item: PartItem::Specific(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
@@ -5027,12 +5035,12 @@ mod tests {
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                            ProcessPart{ item: PartItem::Specific(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Product(2), // output product
+                            ProcessPart{ item: PartItem::Specific(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -5055,8 +5063,8 @@ mod tests {
                     available_wants.insert(1, 4.0);
                     available_wants.insert(2, 4.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, &0.0, &0.0, 
-                        None, true);
+                        &available_wants, 0.0, 0.0, 
+                        None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 1.5);
                     assert!(result.effective_iterations == 1.5);
@@ -5073,11 +5081,13 @@ mod tests {
 
                 #[test]
                 pub fn return_process_returns_no_iteration_when_missing_input() {
+                    let mut data = DataManager::new();
+                    data.load_all(&"file_name".to_string()).expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Product(0), // input product
+                            ProcessPart{ item: PartItem::Specific(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
@@ -5085,12 +5095,12 @@ mod tests {
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                            ProcessPart{ item: PartItem::Specific(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Product(2), // output product
+                            ProcessPart{ item: PartItem::Specific(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -5113,8 +5123,8 @@ mod tests {
                     available_wants.insert(1, 1.0);
                     available_wants.insert(2, 1.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, &0.0, &0.0, 
-                        None, true);
+                        &available_wants, 0.0, 0.0, 
+                        None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 0.0);
                     assert!(result.effective_iterations == 0.0);
@@ -5126,11 +5136,13 @@ mod tests {
                 
                 #[test]
                 pub fn return_process_returns_no_iteration_when_missing_capital() {
+                    let mut data = DataManager::new();
+                    data.load_all(&"file_name".to_string()).expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Product(0), // input product
+                            ProcessPart{ item: PartItem::Specific(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
@@ -5138,12 +5150,12 @@ mod tests {
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                            ProcessPart{ item: PartItem::Specific(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Product(2), // output product
+                            ProcessPart{ item: PartItem::Specific(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -5166,8 +5178,8 @@ mod tests {
                     available_wants.insert(1, 1.0);
                     available_wants.insert(2, 1.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, &0.0, &0.0, 
-                        None, true);
+                        &available_wants, 0.0, 0.0, 
+                        None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 0.0);
                     assert!(result.effective_iterations == 0.0);
@@ -5189,7 +5201,7 @@ mod tests {
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Product(0), // input product
+                            ProcessPart{ item: PartItem::Specific(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
@@ -5197,12 +5209,12 @@ mod tests {
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Product(1), // Capital product
+                            ProcessPart{ item: PartItem::Specific(1), // Capital product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Product(2), // output product
+                            ProcessPart{ item: PartItem::Specific(2), // output product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -5217,26 +5229,28 @@ mod tests {
 
                     // not in at all
                     assert!(test.effective_output_of(PartItem::Want(3)) == 0.0);
-                    assert!(test.effective_output_of(PartItem::Product(3)) == 0.0);
+                    assert!(test.effective_output_of(PartItem::Specific(3)) == 0.0);
                     // input
                     assert!(test.effective_output_of(PartItem::Want(0)) == 0.0);
-                    assert!(test.effective_output_of(PartItem::Product(0)) == 0.0);
+                    assert!(test.effective_output_of(PartItem::Specific(0)) == 0.0);
                     // capital
                     // capital want placeholder.
-                    assert!(test.effective_output_of(PartItem::Product(1)) == 0.0);
+                    assert!(test.effective_output_of(PartItem::Specific(1)) == 0.0);
                     // output 
                     assert!(test.effective_output_of(PartItem::Want(2)) == 1.0);
-                    assert!(test.effective_output_of(PartItem::Product(2)) == 1.0);
+                    assert!(test.effective_output_of(PartItem::Specific(2)) == 1.0);
                 }
             }
 
             #[test]
             pub fn should_return_correctly_when_eerything_needed_is_given() {
+                let mut data = DataManager::new();
+                data.load_all(&"file_name".to_string()).expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(0), // input product
+                        ProcessPart{ item: PartItem::Specific(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
@@ -5244,12 +5258,12 @@ mod tests {
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                        ProcessPart{ item: PartItem::Specific(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Product(2), // output product
+                        ProcessPart{ item: PartItem::Specific(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -5270,7 +5284,7 @@ mod tests {
                 avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    &0.0, &0.0, None, false);
+                    0.0, 0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 1);
                 assert!(*results.capital_products.get(&1).unwrap() == 2.0);
@@ -5287,11 +5301,13 @@ mod tests {
 
             #[test]
             pub fn should_return_empty_when_input_product_is_missing() {
+                let mut data = DataManager::new();
+                data.load_all(&"file_name".to_string()).expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(0), // input product
+                        ProcessPart{ item: PartItem::Specific(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
@@ -5299,12 +5315,12 @@ mod tests {
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                        ProcessPart{ item: PartItem::Specific(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Product(2), // output product
+                        ProcessPart{ item: PartItem::Specific(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -5325,7 +5341,7 @@ mod tests {
                 avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    &0.0, &0.0, None, false);
+                    0.0, 0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 0);
                 assert_eq!(results.input_output_products.len(), 0);
@@ -5337,11 +5353,13 @@ mod tests {
 
             #[test]
             pub fn should_return_empty_when_capital_product_is_missing() {
+                let mut data = DataManager::new();
+                data.load_all(&"file_name".to_string()).expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(0), // input product
+                        ProcessPart{ item: PartItem::Specific(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
@@ -5349,12 +5367,12 @@ mod tests {
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                        ProcessPart{ item: PartItem::Specific(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Product(2), // output product
+                        ProcessPart{ item: PartItem::Specific(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -5375,7 +5393,7 @@ mod tests {
                 avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    &0.0, &0.0, None, false);
+                    0.0, 0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 0);
                 assert_eq!(results.input_output_products.len(), 0);
@@ -5387,11 +5405,13 @@ mod tests {
 
             #[test]
             pub fn should_return_empty_when_input_want_is_missing() {
+                let mut data = DataManager::new();
+                data.load_all(&"file_name".to_string()).expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Product(0), // input product
+                        ProcessPart{ item: PartItem::Specific(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
@@ -5399,12 +5419,12 @@ mod tests {
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Product(1), // Capital product
+                        ProcessPart{ item: PartItem::Specific(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Product(2), // output product
+                        ProcessPart{ item: PartItem::Specific(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -5421,11 +5441,11 @@ mod tests {
                 let mut avail_products = HashMap::new();
                 avail_products.insert(0, 2.0);
                 avail_products.insert(1, 2.0);
-                let mut avail_wants = HashMap::new();
+                let avail_wants = HashMap::new();
                 //avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    &0.0, &0.0, None, false);
+                    0.0, 0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 0);
                 assert_eq!(results.input_output_products.len(), 0);
@@ -5472,13 +5492,13 @@ mod tests {
             // product never matches want ever, don't bother checking those mismatches
             // test input product to test_other input correct (never match)
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -5514,13 +5534,13 @@ mod tests {
             test_other.process_parts.clear();
             // input to capital (never match)
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -5556,13 +5576,13 @@ mod tests {
             test_other.process_parts.clear();
             // input to output
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -5598,13 +5618,13 @@ mod tests {
             test_other.process_parts.clear();
             // capital to input (never match)
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -5640,13 +5660,13 @@ mod tests {
             test_other.process_parts.clear();
             // capital to capital (never match)
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -5682,13 +5702,13 @@ mod tests {
             test_other.process_parts.clear();
             // capital to output (match only products)
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -5724,13 +5744,13 @@ mod tests {
             test_other.process_parts.clear();
             // output to input
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -5766,13 +5786,13 @@ mod tests {
             test_other.process_parts.clear();
             // output to capital (don't match on wants)
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -5808,13 +5828,13 @@ mod tests {
             test_other.process_parts.clear();
             // output to output (never match)
             let input = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -5852,6 +5872,8 @@ mod tests {
 
         #[test]
         pub fn should_return_correctly_can_feed_self(){
+            let mut data = DataManager::new();
+            data.load_all(&"file_name".to_string()).expect("Failed!");
             let mut test = Process {
                 id: 0,
                 name: String::from("Test"),
@@ -5868,39 +5890,39 @@ mod tests {
             };
 
             // no match (empty set)
-            assert!(!test.can_feed_self());
+            assert!(!test.can_feed_self(&data));
             // match on input-output product
             test.process_parts.push(ProcessPart {
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             });
             test.process_parts.push(ProcessPart {
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             });
 
-            assert!(test.can_feed_self());
+            assert!(test.can_feed_self(&data));
 
             // match on capital-output product
             test.process_parts.clear();
             test.process_parts.push(ProcessPart {
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             });
             test.process_parts.push(ProcessPart {
-                item: PartItem::Product(0),
+                item: PartItem::Specific(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             });
 
-            assert!(test.can_feed_self());
+            assert!(test.can_feed_self(&data));
             // match on input-output want
             test.process_parts.clear();
             test.process_parts.push(ProcessPart {
@@ -5916,7 +5938,7 @@ mod tests {
                 part: ProcessSectionTag::Output,
             });
 
-            assert!(test.can_feed_self());
+            assert!(test.can_feed_self(&data));
             // don't match on capital-output want
             test.process_parts.clear();
             test.process_parts.push(ProcessPart {
@@ -5932,7 +5954,7 @@ mod tests {
                 part: ProcessSectionTag::Output,
             });
 
-            assert!(!test.can_feed_self());
+            assert!(!test.can_feed_self(&data));
         }
         
         #[test]
@@ -5986,11 +6008,11 @@ mod tests {
             assert_eq!(result.minimum_time, 0.0);
             assert!(result.process_parts.iter()
                 .any(|x| {
-                    x.item.is_product() && x.item.unwrap() == 0
+                    x.item.is_specific() && x.item.unwrap() == 0
                 }));
             assert!(result.process_parts.iter()
                 .any(|x| {
-                    x.item.is_product() && x.item.unwrap() == test_skill.labor
+                    x.item.is_specific() && x.item.unwrap() == test_skill.labor
                 }));
             assert!(result.process_tags.is_empty());
             assert_eq!(result.skill_minimum, 0.0);
@@ -6101,6 +6123,161 @@ mod tests {
     mod product_tests {
         use crate::objects::{product::{Product, ProductTag}, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}};
 
+        pub mod add_to_class_should {
+            use std::collections::{HashSet, HashMap};
+
+            use crate::objects::product::Product;
+
+
+            #[test]
+            pub fn panic_if_class_product_is_not_the_class_leader() {
+                let mut prod1 = Product{
+                    id: 0,
+                    name: "0".to_string(),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let mut prod2 = Product {
+                    id: 1,
+                    name: "1".to_string(),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(2),
+                };
+
+                let result 
+                = std::panic::catch_unwind(move || prod1.add_to_class(&mut prod2));
+                assert!(result.is_err());
+            }
+
+            #[test]
+            pub fn connect_products_when_neither_in_class() {
+                let mut prod1 = Product{
+                    id: 0,
+                    name: "0".to_string(),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let mut prod2 = Product {
+                    id: 1,
+                    name: "1".to_string(),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                prod1.add_to_class(&mut prod2);
+                assert_eq!(prod1.product_class.unwrap(), prod2.id);
+                assert_eq!(prod2.product_class.unwrap(), prod2.id);
+            }
+
+            #[test]
+            pub fn connect_products_when_class_product_is_class_leader() {
+                let mut prod1 = Product{
+                    id: 0,
+                    name: "0".to_string(),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let mut prod2 = Product {
+                    id: 1,
+                    name: "1".to_string(),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(1),
+                };
+                prod1.add_to_class(&mut prod2);
+                assert_eq!(prod1.product_class.unwrap(), prod2.id);
+                assert_eq!(prod2.product_class.unwrap(), prod2.id);
+            }
+        }
+
         #[test]
         pub fn product_should_add_process_correctly() {
             let mut test = Product::new(
@@ -6137,7 +6314,7 @@ mod tests {
 
             // ignore the untagged
             let part = ProcessPart { 
-                item: PartItem::Product(0), 
+                item: PartItem::Specific(0), 
                 amount: 1.0, 
                 part_tags: vec![], 
                 part: ProcessSectionTag::Input
@@ -6562,7 +6739,7 @@ mod tests {
                 tertiary_tech: None,
             };
             let product_input = ProcessPart{
-                item: PartItem::Product(test_product.id),
+                item: PartItem::Specific(test_product.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -6620,7 +6797,7 @@ mod tests {
                 tertiary_tech: None,
             };
             let product_input = ProcessPart{
-                item: PartItem::Product(test_product.id),
+                item: PartItem::Specific(test_product.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,

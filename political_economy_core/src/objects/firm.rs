@@ -121,10 +121,10 @@ impl Actor for Firm {
     /// and close out.
     fn run_market_day(&mut self, 
         sender: Sender<ActorMessage>,
-        reciever: &mut Receiver<ActorMessage>,
-        data: &DataManager,
-        demos: &Demographics,
-        history: &MarketHistory) {
+        _reciever: &mut Receiver<ActorMessage>,
+        _data: &DataManager,
+        _demos: &Demographics,
+        _history: &MarketHistory) {
         sender.send(ActorMessage::Finished { sender: self.actor_info() })
             .expect("Channel Closed Unexpectedly!");
         // TODO idea, Firms hire retailers who handle the details of sales and then report their

@@ -236,7 +236,7 @@ impl Product {
     pub fn add_process<'a>(&mut self, process: &Process) -> Result<(), &'a str> {
         // sanity check the product is used
         if process.process_parts.iter()
-            .all(|x| !(x.item.is_product() && x.item.unwrap() == self.id)) {
+            .all(|x| !(x.item.is_specific() && x.item.unwrap() == self.id)) {
                 return Result::Err("Process does not contain the product.");
         }
         self.processes.insert(process.id());
@@ -276,7 +276,10 @@ impl Product {
     /// Check function, returns true if the other product given shares it's product class
     /// with us.
     pub fn is_classmate_of(&self, other: &Self) -> bool {
-        self.product_class == other.product_class
+        if let (Some(id1), Some(id2)) = (self.product_class, other.product_class) {
+            return id1 == id2;
+        }
+        false
     }
 }
 

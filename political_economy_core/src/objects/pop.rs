@@ -2,20 +2,18 @@
 //! 
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::{collections::{VecDeque, HashMap, HashSet}, hash::Hash};
+use std::{collections::{VecDeque, HashMap}};
 
 use barrage::{Sender, Receiver};
-use itertools::Itertools;
-use rand::rngs::ThreadRng;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{SHOPPING_TIME_COST, EXPENSIVE, TOO_EXPENSIVE, REASONABLE, OVERPRICED, CHEAP, OVERSPEND_THRESHOLD, TIME_ID, self, LOSS_TO_SUCCESS_WEIGHT, MAJOR_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_SUCCESS_THRESHOLD, STANDARD_TARGET_FAILURE_THRESHOLD, TARGET_MINIMUM_THRESHOLD}, objects::pop_memory::Knowledge};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}};
 
-use super::{desires::{Desires, DesireCoord}, 
+use super::{desires::{Desires, PropertyBreakdown}, 
     pop_breakdown_table::PopBreakdownTable, 
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
-    pop_memory::PopMemory, product::ProductTag, buy_result::BuyResult, desire::DesireItem, want::Want, process::{ProcessTag, ProcessPart, PartItem}, 
+    pop_memory::PopMemory, buy_result::BuyResult, 
 };
 
 /// Pops are the data storage for a population group.
@@ -212,7 +210,6 @@ impl Pop {
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     market: &MarketHistory, 
-    record: &mut HashMap<usize, PropertyBreakdown>,
     find: &Vec<ActorMessage>) -> ActorMessage {
         loop {
             // catchup on messages for good measure
@@ -225,7 +222,7 @@ impl Pop {
                     return msg;
                 }
                 else {
-                    self.process_common_msg(rx, tx, data, market, msg, record);
+                    self.process_common_msg(rx, tx, data, market, msg);
                 }
             }
         }
@@ -264,7 +261,8 @@ impl Pop {
     rx: &Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
     firm: ActorInfo, 
-    action: FirmEmployeeAction) -> bool {
+    action: FirmEmployeeAction,
+    data: &DataManager) -> bool {
         match action {
             FirmEmployeeAction::WorkDayEnded => return true, // work day over, we can move on.
             FirmEmployeeAction::RequestTime => {
@@ -275,7 +273,7 @@ impl Pop {
                     amount: self.memory.work_time
                     });
                 // and remove that time from our property as well
-                self.desires.add_property(TIME_ID, &-self.memory.work_time);
+                self.desires.remove_property(TIME_ID, -self.memory.work_time, data);
             },
             FirmEmployeeAction::RequestEverything => {
                 // loop over everything and send it to the firm.
@@ -289,7 +287,7 @@ impl Pop {
                         sender: self.actor_info(), 
                         reciever: firm, 
                         product,
-                        amount 
+                        amount: amount.total_property 
                     });
                     self.desires.property.remove(&product)
                     .expect("Not found?");
@@ -320,7 +318,7 @@ impl Pop {
                 // firm is requesting a specifc item, send it to them, 
                 // if we don't have it, then send the empty anyway.
                 let amount = match self.desires.property.remove(&product) {
-                    Some(amount) => amount,
+                    Some(amount) => amount.total_property,
                     None => 0.0,
                 };
                 self.push_message(rx, tx, 
@@ -344,7 +342,7 @@ impl Pop {
     /// the pop. It also waits for messages from the firm.
     /// 
     /// All other messages are added to the backlog for later.
-    pub fn work_day_processing(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>) {
+    pub fn work_day_processing(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, data: &DataManager) {
         loop {
             // It's working time, so focus on the firm, don't worry about caluclating more
             // just block on recieving until we know we've given/gotten everything we need to
@@ -365,12 +363,13 @@ impl Pop {
                     reciever: _, 
                     product, 
                     amount } => {
-                        *self.desires.property.entry(product)
-                        .or_insert(0.0) = amount;
+                        self.desires.property.entry(product)
+                        .and_modify(|x| x.add_property(amount))
+                        .or_insert(PropertyBreakdown::new(amount));
                 },
                 ActorMessage::FirmToEmployee { firm: sender, 
                 employee: _, action } => {
-                    if self.process_firm_message(rx, tx, sender, action) {
+                    if self.process_firm_message(rx, tx, sender, action, data) {
                         break;
                     }
                 },
@@ -408,130 +407,10 @@ impl Pop {
     /// as successes or failure comes in.
     /// 
     /// ## Not Tested due to complexity.
-    pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
-    data: &DataManager,
-    market: &MarketHistory) -> HashMap<usize, PropertyBreakdown>{
-        // FIXME This and all functions referenced or reached from here need to be updated and fixed to properly use PropertyBreakdown and the product_knowledge which has been gutted.
-        // start by breaking up property. create 4(5) camps
-        // desired, ie those items which we have a pre-existing slot for
-        // undesired, those which we have no known or pre-existing slot for
-        // product_satisfying, the products being used to satisfy specific product desires
-        // (potential addition) abstract_satisfying, the products being used to satisfy abstract product desires.
-        // want_satisfying, the products which will be used/consumed to satisfy a want.
-        // these latter two start empty and are added to as we walk up our desires.
-        // Undesired
-        
-        let mut prop_org: HashMap<usize, PropertyBreakdown> = HashMap::new();
-        // get all property the breakdown
-        for (&id, &quantity) in self.desires.property.iter() {
-            prop_org.insert(id, PropertyBreakdown::new(quantity));
-        }
-        // reserve up to our target if possible, and record our rollover and achieved.
-        for (id, know) in self.memory.product_knowledge.iter_mut() {
-            let mut record = prop_org.entry(*id)
-                .or_insert(PropertyBreakdown::new(0.0));
-            // shift from our current available to reserve, Excess is not used.
-            let _ = record.shift_to_reserved(know.target);
-            know.rollover = record.total_available;
-            know.achieved += record.total_available;
-        }
-        // with that done, put our spend stuff up for sale, if we are selling
-        if self.is_selling {
-            for (&id, &prop_breakdown) in prop_org.iter() {
-                let info = data.products.get(&id).expect("Product Not Found!");
-                // if nontransferable, don't offer for sale.
-                if info.tags.contains(&ProductTag::NonTransferrable) { continue; }
-                // since it can be sold, offer it up.
-                self.push_message(rx, tx, 
-                    ActorMessage::SellOrder { sender: self.actor_info(),
-                    product: id, quantity: prop_breakdown.unreserved, 
-                    amv: market.get_product_price(&id, 1.0) });
-                // private sellers offer at current estimated market price.
-            }
-        }
-        // TODO Consider waiting here for a shopping day start msg here, if the buyers outpace the sellers too much. This may occur if most sellers are selling pops.
-        // enter a loop and work on buying up to our targets and 
-        // expending our time while handling any orders coming our way.
-        let shopping_time_cost = self.standard_shop_time_cost(data);
-        let mut current_desire_coord = None;
-        loop {
-            // stop if we run out of time or unreserved property.
-            if prop_org.get(&TIME_ID).unwrap().available() < shopping_time_cost { break; }
-            if prop_org.iter().all(|x| x.1.unreserved == 0.0) { break; }
-            // since we have some time and property to exchange, then go
-            // through the backlog and message queue and clear them both out.
-            self.msg_catchup(rx);
-            // then clear out the backlog.
-            while let Some(msg) = self.backlog.pop_front() {
-                let _result = self.process_common_msg(rx, tx, data, market, msg,
-                    &mut prop_org);
-            }
-            // stop if we run out of time or unreserved property.
-            if prop_org.get(&TIME_ID).unwrap().available() < shopping_time_cost { break; }
-            if prop_org.iter().all(|x| x.1.unreserved == 0.0) { break; }
-            // enter consumption/purchase phase
-            //     try to consume to meet our desires
-            //         if successful, move on to next loop
-            //         if failed, try to buy to satisfy.
-            //             When buying, try to satisfy with later products we purhase.
-
-            // enter consumption / purchase phase.
-            // Get our next desire.
-            current_desire_coord = self.desires.walk_up_tiers(current_desire_coord);
-            if let Some(coords) = current_desire_coord {
-                let curr_desire = self.desires.desires.get(coords.idx).unwrap();
-                match curr_desire.item {
-                    DesireItem::Want(_) => todo!(),
-                    DesireItem::Product(_) => todo!(),
-                }
-            } else { // if no next desire, break out of the loop.
-                break; 
-            }
-
-            // if time to spend has been used up, break out.
-            // TODO update to use the smalest possble expendable unit of time instead of 0.0.
-            // buy stuff first, and repeat until we have tried buying everything we can.
-            if self.memory.product_priority.len() > curr_buy_idx { // if anything left to buy
-                let product = *self.memory.product_priority
-                    .get(curr_buy_idx).expect("Product not found?");
-                let buy_result = self.try_to_buy(rx, tx, data, market, &mut prop_org, &product);
-                // with our stuff bought, jump back to the top and do more.
-                match buy_result {
-                    BuyResult::CancelBuy => { // if we cancelled
-                        curr_buy_idx += 1; // add to the current buy index and go to the next one.
-                        continue;
-                    },
-                    BuyResult::NotSuccessful { reason: OfferResult::OutOfStock } => {
-                        // TODO add path to Emergency Buy Here.
-                        curr_buy_idx += 1;
-                        continue;
-                    },
-                    _ => { // for anything but cancellation from ourselves
-                        // check if we still have time to try again
-                        if self.memory.product_knowledge.get(&product).unwrap().remaining_time() > shopping_time_cost {
-                            continue;
-                        } else { // we need to move on.
-                            curr_buy_idx += 1;
-                            continue;
-                        }
-                    },
-                }
-            } else { // if we have nothing left to buy.
-                // TODO if another free time action 
-                break;
-            }
-
-            // we bought our next item, so go back to the top.
-        }
-        // send our day end option
-        self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
-        // with our free time run out enter a holding pattern while waiting for the day to end.
-        let mut returned: HashMap<usize, f64> = HashMap::new();
-        self.active_wait(rx, tx, data, market, &mut prop_org, 
-            &vec![
-                ActorMessage::AllFinished
-            ]); 
-        prop_org
+    pub fn free_time(&mut self, _rx: &mut Receiver<ActorMessage>, _tx: &Sender<ActorMessage>, 
+    _data: &DataManager,
+    _market: &MarketHistory) -> HashMap<usize, PropertyBreakdown>{
+        todo!("Redo this!")
     }
 
     /// Processes common messages from the ActorMessages for current free time.
@@ -540,24 +419,23 @@ impl Pop {
     /// Returns any messages that we don't handle here. Currently, 
     fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, data: &DataManager, 
-    market: &MarketHistory, msg: ActorMessage, 
-    prop_org: &mut HashMap<usize, PropertyBreakdown>) -> Option<ActorMessage> {
+    market: &MarketHistory, msg: ActorMessage) -> Option<ActorMessage> {
         match msg {
             ActorMessage::FoundProduct { seller, buyer, 
             product } => {
                 if buyer == self.actor_info() {
                     panic!("Product Found message with us as the buyer should not be found outside of deal state.");
                 } else if seller == self.actor_info() {
-                    // TODO When cha
-                    let mut accepted = self.standard_sell(rx, tx, data, market, prop_org, product, buyer);
+                    // TODO When change is possible, deal with it here.
+                    let _accepted = self.standard_sell(rx, tx, data, market, product, buyer);
                 } else { unreachable!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!"); }
                 return None;
             },
             // TODO add Seller Approaches Logic Here.
             ActorMessage::SendProduct { product, amount, .. } => {
                 // We're recieving a product, add to our unreserved amount.
-                prop_org.entry(product)
-                .and_modify(|x| x.add_to_total(amount))
+                self.desires.property.entry(product)
+                .and_modify(|x| x.add_property(amount))
                 .or_insert(PropertyBreakdown::new(amount));
                 return None;
             },
@@ -571,7 +449,7 @@ impl Pop {
             },
             ActorMessage::FirmToEmployee { firm, employee: _,
             action } => {
-                self.process_firm_message(rx, tx, firm, action);
+                self.process_firm_message(rx, tx, firm, action, data);
                 return None;
             },
             _ => ()
@@ -600,7 +478,7 @@ impl Pop {
     /// who we'll get in touch with and try to make a deal.
     /// - Emergency Search, this occurs when either the product being sought 
     /// is unavailable through sellers and the product sought is important
-    fn try_to_buy(&mut self, 
+    fn _try_to_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
@@ -627,16 +505,16 @@ impl Pop {
             // subtract the time from our stock and add it to time spent
             // TODO Consider updating this to scale not just with population buying but also pop_efficiency gains.
             // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
-            self.desires.add_property(TIME_ID, &-time_cost);
+            self.desires.add_property(TIME_ID, -time_cost);
             mem.time_spent += time_cost;
             // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
-            let result = record.expend(time_cost);
+            let _result = record.expend(time_cost);
         }
         
         // since the current market price is within our budget, try to look for it.
         self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
         // with the message sent, wait for the response back while in our standard holding pattern.
-        let result = self.active_wait(rx, tx, data, market, records,
+        let result = self.active_wait(rx, tx, data, market,
             &vec![ActorMessage::ProductNotFound { product: 0, buyer: ActorInfo::Firm(0) },
             ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
         // result is now either FoundProduct or ProductNotFound, deal with it and return the result to the caller
@@ -658,7 +536,7 @@ impl Pop {
     /// 
     /// This is currently calculated as being equal to 
     /// SHOPPING_TIME_COST (0.2) * self.total_population
-    pub fn standard_shop_time_cost(&self, data: &DataManager) -> f64 {
+    pub fn standard_shop_time_cost(&self, _data: &DataManager) -> f64 {
         // TODO Update to get the time cost for Shopping process.
         constants::SHOPPING_TIME_COST * self.count() as f64
     }
@@ -708,190 +586,15 @@ impl Pop {
     /// It will not expend time (or at least it currently doesn't. This may
     /// be changed if time for a deal scales with items exchanged.)
     pub fn standard_buy(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, 
-    data: &DataManager, 
-    market: &MarketHistory, 
-    seller: ActorInfo,
-    records: &mut HashMap<usize, PropertyBreakdown>) -> BuyResult {
+    _rx: &mut Receiver<ActorMessage>, 
+    _tx: &Sender<ActorMessage>, 
+    _data: &DataManager, 
+    _market: &MarketHistory, 
+    _seller: ActorInfo,
+    _records: &mut HashMap<usize, PropertyBreakdown>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
-        let result = self.specific_wait(rx, 
-        &vec![ 
-            ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0, price: 0.0, quantity: 0.0 }, 
-            ActorMessage::NotInStock { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 }]);
-        if let ActorMessage::NotInStock { product, .. } = result { // if not in stock
-            // record our failure
-            self.memory.product_knowledge.get_mut(&product)
-                .unwrap().unable_to_purchase();
-            return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
-        }
-        // if in stock, continue with the deal
-        if let ActorMessage::InStock { buyer: _, seller: _, 
-        product, price, quantity } = result {
-            // get our original budget to check against.
-            let unit_budget = self.memory.product_knowledge
-                .get(&product).expect("Product Not found?")
-                .unit_budget();
-            // quickly check if the current price is to see if it's overpriced for us.
-            if price > unit_budget * 1.5 {
-                // If overpriced to our original budget, cancel.
-                self.push_message(rx, tx, ActorMessage::RejectPurchase 
-                    { buyer: self.actor_info(), seller, product, 
-                        price_opinion: OfferResult::TooExpensive });
-                // and close out immediately.
-                // TODO consider allowing this to, instead of closing out immediately, try for a different item in our list.
-                self.push_message(rx, tx, ActorMessage::CloseDeal
-                    { buyer: self.actor_info(), seller, product });
-                // return not successful with Too Expensive as the reason.
-                return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
-            }
-            // get our current unit budget
-            let curr_unit_budget = self.memory.product_knowledge
-            .get(&product).expect("Product Not found?")
-                .current_unit_budget();
-            // get our target, capped at the quantity available.
-            let target = self.memory.product_knowledge.get(&product)
-            .expect("Product Not Found")
-                .target_remaining().min(quantity);
-            // and our remaining total budget.
-            let remaining_budget = self.memory.product_knowledge.get(&product)
-            .expect("Product Not Found")
-                .remaining_amv();
-            // get our current price opinion.
-            // TODO return here to check on this, maybe return to unit_budget.
-            let threshold = price / curr_unit_budget;
-            let offer_result = 
-            if threshold > TOO_EXPENSIVE { OfferResult::TooExpensive }
-            else if threshold > EXPENSIVE { OfferResult::Expensive }
-            else if threshold > OVERPRICED { OfferResult::Overpriced }
-            else if threshold > REASONABLE { OfferResult::Reasonable }
-            else if threshold > CHEAP { OfferResult::Cheap }
-            else /* threshold <= CHEAP */ { OfferResult::Steal };
-            // get how much we might pay
-            let total_price = target * price;
-            // cap our target to what we have budgeted
-            let mut adjusted_target_price = total_price.min(remaining_budget);
-            // get our corrected target the adjusted target price
-            let mut target = adjusted_target_price / price;
-            if !data.products.get(&product).unwrap()
-            .fractional { // floor it if the product is not fractional
-                target = target.floor();
-                adjusted_target_price = target * price;
-            }
-            // with our new target, build up the offer
-            // TODO consider making the length of the list cost time, so the more items kinds and quantity the more time it costs to purchase.
-            let (mut offer, sent_amv) = self.create_offer(product, adjusted_target_price,
-                records, data, market);
-            // With our offer built, send it over
-            self.send_buy_offer(rx, tx, product, seller, &offer, offer_result, target);
-            // wait for the seller to respond, he either accepts as is, accepts with change, rejects, or closes.
-            let response = self.specific_wait(rx, &vec![
-                ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
-                    product: 0, offer_result: OfferResult::Cheap },
-                ActorMessage::OfferAcceptedWithChange { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), 
-                    product: 0, quantity: 0.0, followups: 0 },
-                ActorMessage::RejectOffer { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 },
-                ActorMessage::CloseDeal { buyer: ActorInfo::Firm(0), seller: ActorInfo::Firm(0), product: 0 }
-            ]);
-            match response {
-                // TODO Infowars Expansion results of buying in here or in caller.
-                ActorMessage::SellerAcceptOfferAsIs { .. } => {
-                    // offer accepted as is,
-                    // add what we purchased.
-                    self.desires.add_property(product, &target);
-                    // update our achieved target property.
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().achieved += target;
-                    // for everything we spent
-                    for (offer_prod, amount) in offer.iter() {
-                        // remove it from property.
-                        self.desires.add_property(*offer_prod, &-amount);
-                        // subtract the amount from our spend entry.
-                        records.entry(*offer_prod).and_modify(|x| x.unreserved -= amount);
-                        // update memory for these products spent
-                        self.memory.product_knowledge.entry(*offer_prod)
-                            .or_insert(Knowledge::new()).spent += amount;
-                    }
-                    // get the AMV total spent in memory.
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().amv_spent += sent_amv;
-                    // update the success rate
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().successful_purchase();
-                    // return success
-                    return BuyResult::Successful;
-                },
-                ActorMessage::OfferAcceptedWithChange { followups, .. } => {
-                    // TODO consider adding in a 'reject change' option.
-                    // Offer accepted, but there's some change.
-                    // Get the returned items and update the offer
-                    let mut left = followups;
-                    while left > 0 { // insert all the change into our offer (subtract what is given back)
-                        if let ActorMessage::ChangeFollowup { return_product, return_quantity, 
-                        followups, .. } = self.specific_wait(rx, 
-                        &vec![
-                        ActorMessage::ChangeFollowup { buyer: ActorInfo::Firm(0), 
-                            seller: ActorInfo::Firm(0), product: 0, return_product: 0, 
-                            return_quantity: 1.0, followups: 0 }]) 
-                        {
-                            // with the followup message recieved, update our offer 
-                            *offer.entry(return_product).or_insert(0.0) -= return_quantity;
-                            left = followups;
-                        }
-                    }
-                    // with the offer adjusted for change
-                    let mut resulting_amv = 0.0;
-                    for (offer_prod, quant) in offer.iter() {
-                        // remove from property
-                        self.desires.add_property(*offer_prod, &-quant);
-                        // also record whether we spent or recieved the offer item.
-                        let mem = self.memory.product_knowledge.entry(*offer_prod)
-                            .or_insert(Knowledge::new());
-                        if *quant > 0.0 { // if being spent
-                            mem.spent += quant; // add to spend
-                            records.entry(*offer_prod).and_modify(|x| x.unreserved -= quant);
-                        } else { // if recieved, add to achieved
-                            mem.achieved += quant;
-                            // and return
-                            records.entry(*offer_prod)
-                            .and_modify(|x| x.unreserved += quant)
-                            .or_insert(PropertyBreakdown::new(*quant));
-                        }
-                        // and get it's price for AMV uses later
-                        resulting_amv += market.get_product_price(offer_prod, 0.0) * quant;
-                    }
-                    // add what we purchased.
-                    self.desires.add_property(product, &target);
-                    // add what we achieved to it's memory
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().achieved += target;
-                    // add AMV to the product's memory spent
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().amv_spent += resulting_amv;
-                    // update the success rate
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().successful_purchase();
-                    return BuyResult::Successful;
-                },
-                ActorMessage::RejectOffer { .. } => {
-                    // offer rejected, don't remove anything and get out.
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().unable_to_purchase();
-                    self.push_message(rx, tx, ActorMessage::CloseDeal { buyer: self.actor_info(), 
-                        seller, product });
-                    return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
-                },
-                ActorMessage::CloseDeal { .. } => {
-                    // Offer hard rejected, 
-                    self.memory.product_knowledge.get_mut(&product)
-                        .unwrap().unable_to_purchase();
-                    return BuyResult::SellerClosed;
-                },
-                _ => { panic!("Incorrect message recieved from Buy offer?")}
-            }
-        }
-        panic!("Should never get here!");
+        todo!("Redo")
     }
 
     /// # Emergency Buy
@@ -1064,118 +767,22 @@ impl Pop {
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
     /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry and/or the seller to lose time to the deal.
     /// TODO Currently does not do change, accepts offer or rejects, no returning change.
-    pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, _data: &DataManager,
-    market: &MarketHistory,
-    prop_org: &mut HashMap<usize, PropertyBreakdown>, product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
-        let seller = self.actor_info();
-        let product_price = market.get_product_price(&product, 1.0);
-        // we have recieved a FoundProduct MSG and we're the seller.
-        // send back our available stock (if any)
-        if let Some(prop_breakdown) = prop_org.get(&product) {
-            if prop_breakdown.unreserved > 0.0 { // if any unreserved, respond properly
-                self.push_message(rx, tx, ActorMessage::InStock { buyer, seller, product, 
-                    price: product_price, quantity: prop_breakdown.unreserved });
-            } else { // if no unreserved quantity available, return not in stock.
-                // This currently closes the deal
-                self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
-                return HashMap::new();
-            }
-        } else { // if we don't have the item, send our OOS message
-            // This currently closes the deal
-            self.push_message(rx, tx, ActorMessage::NotInStock { buyer, seller, product });
-            return HashMap::new();
-        }
-        // with stock message pushed, we wait for the buy offer or close message from them.
-        let result = self.specific_wait(rx, &vec![
-            ActorMessage::RejectPurchase { buyer: seller, seller: seller, product: 0, price_opinion: OfferResult::Cheap },
-            ActorMessage::BuyOffer { buyer: seller, seller: seller, product: 0, price_opinion: OfferResult::Cheap, quantity: 0.0, followup: 0 }
-        ]);
-        // Check our result.
-        if let ActorMessage::RejectPurchase { .. } = result { // if purchase rejected,
-            // TODO add check item followup option here when check item followup is added.
-            // recieve the close deal message to confirm.
-            let result = self.specific_wait(rx, &vec![
-                ActorMessage::CloseDeal { buyer: seller, seller: seller, product: 0 }
-            ]);
-            // then leave (close deal has no meaningful info for us. We're just confirming the close.)
-            return HashMap::new();
-        } else if let ActorMessage::BuyOffer { buyer, seller, 
-        product: requested_product, price_opinion: _, quantity: quantity_requested,
-        followup: mut current_step } = result { // if it's a buy offer, get their offer
-            // start buy getting the amv price and effective Tier of the item in question.
-            let request_amv = quantity_requested * market.get_product_price(&requested_product, 1.0);
-            let mut offer = HashMap::new(); // the offer items
-            let mut offer_item_amv = HashMap::new(); // their market amv
-            let mut offer_amv = 0.0; // the total amv of the offer (adjusted to us)
-            while current_step > 0 {
-                // get the next, it should be decreasing, but we'll just do this to maintain our sanity.
-                if let ActorMessage::BuyOfferFollowup { offer_product, offer_quantity,
-                followup, .. } = self.specific_wait(rx, &vec![
-                    ActorMessage::BuyOfferFollowup { buyer: seller, seller: seller, product: 0, offer_product: 0, offer_quantity: 0.0, followup: 0 }
-                ]) {
-                    offer.insert(offer_product, offer_quantity);
-                    // get the pure AMV value at offer in the product
-                    offer_item_amv.insert(offer_product, market.get_product_price(&offer_product, 1.0));
-                    // get the effective value for us
-                    // TODO consider replacing this with desire based swaping instead of memory based. 
-                    if let Some(item) = self.memory.product_knowledge.get(&offer_product) {
-                        // some amount would go to our target, record that.
-                        let desired = item.target_remaining().min(offer_quantity);
-                        let undesired = quantity_requested - desired;
-                        let item_price = market.get_product_price(&offer_product, 1.0);
-                        let desired_amv = desired * item_price;
-                        let undesired_amv = market.get_product_salability(&offer_product).min(constants::MIN_SALABILITY) * item_price * undesired;
-                        offer_amv += desired_amv + undesired_amv;
-                    } else { // if we have no memory of it, then we must treat it by salability
-                        let sal = market.get_product_salability(&offer_product)
-                            .max(constants::MIN_SALABILITY);
-                        let value = offer_quantity * market.get_product_price(&offer_product, 1.0);
-                        offer_amv += sal * value;
-                    }
-                    current_step = followup;
-                }
-            }
-            // with our offer recieved and it's effective price to us 
-            // calculated, decide our response
-            if request_amv <= offer_amv { // if they are overpaying, check by how much
-                // TODO improve Overspend checking mechanics to be more flexible and dynamic.
-                let overpay = offer_amv / request_amv;
-                if overpay > constants::BUYER_OVERSPENT_THRESHOLD {
-                    // TODO make this actually return change correctly.
-                    self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
-                        buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
-                    // remove the items given from spend and return the offer
-                    self.desires.add_property(requested_product, &-quantity_requested);
-                    return offer;
-                } else { // within our overspend threshold
-                    self.push_message(rx, tx, ActorMessage::SellerAcceptOfferAsIs { 
-                        buyer, seller, product: requested_product, offer_result: OfferResult::Reasonable });
-                    // remove the items given from spend and return the offer
-                    self.desires.add_property(requested_product, &-quantity_requested);
-                    return offer;
-                }
-            } else { // they are underpaying, reject the offer
-                //self.push_message(rx, tx, ActorMessage::RejectOffer { buyer, seller, product });
-                self.push_message(rx, tx, ActorMessage::CloseDeal { buyer, seller, product: requested_product });
-                // TODO when the buyers are capable of retrying, this should be updated to send Reject instead of close and accept retrys if they have excess time to exchange goods.
-                // then get out
-                return HashMap::new();
-            }
-            // TODO Add Followup item checks here. Likely just a wait on the check item and a time check.
-        }
-        return HashMap::new();
+    pub fn standard_sell(&mut self, _rx: &mut Receiver<ActorMessage>, 
+    _tx: &Sender<ActorMessage>, _data: &DataManager,
+    _market: &MarketHistory,
+    _product: usize, _buyer: ActorInfo) -> HashMap<usize, f64> {
+        todo!("Redo for property update!")
     }
 
     /// # Consume Goods
     /// 
     /// Our end of daily activities. Goes through our goods, consuming them
     /// and adding to our satisfaction.
-    pub fn consume_goods(&mut self, data: &DataManager, history: &MarketHistory) {
+    pub fn consume_goods(&mut self, data: &DataManager, _history: &MarketHistory) {
         // start by clearing out our old satisfaction
         self.desires.clear_desires();
         // put our property into the specific product desire slots
-        self.desires.sift_products();
+        self.desires.sift_specific_products();
         // TODO add non-specific satisfaction slots here.
         // Consume Property to satisfy wants.
         // TODO This should return products which were used or not used so that the remainder can possibly be maintained.
@@ -1200,71 +807,8 @@ impl Pop {
     /// Any products lost this way are recorded as losses in that product's knowledge.
     /// 
     /// TODO when upgrading to add rolling, add RNG back as a parameter.
-    pub fn decay_goods(&mut self, data: &DataManager) {
-        // start by decaying our wants, wants produced by decay should not decay the same day they are generated.
-        for (want, quantity) in self.desires.want_store.iter_mut() {
-            let want_info = data.wants.get(want).unwrap();
-            if want_info.decay > 0.0 {
-                // if it decays, decay and adjust.
-                *quantity = Want::decay_wants(*quantity, want_info);
-            }
-        }
-        // The change in products gained or lost in from our originals.
-        let mut change: HashMap<usize, f64> = HashMap::new();
-        // go through our products and check them for failure
-        for (product, quantity) in self.desires.property.iter() {
-            // get the product's info
-            let product_info = data.products.get(product)
-                .expect("Product Not Found!");
-            let failure_chance = product_info.failure_chance();
-            if failure_chance > 0.0 && product_info.failure_process.is_some(){
-                // TODO consider adding the RNG to roll for small values of items, rather than assuming fractional failure at all times.
-                // if it has a chance of failure, follow through with the failure.
-                let fail_proc = data.processes
-                    .get(&product_info.failure_process.unwrap()).unwrap();
-                // do the process with a target of failure_chance * quantity
-                let proc_outcome = fail_proc.do_process(&self.desires.property, 
-                    &self.desires.want_store, &0.0, 
-                    &0.0, Some(failure_chance*quantity), true);
-                // Add/delete items and if removed, add to lost
-                for (prod, amount) in proc_outcome.input_output_products.iter() {
-                    if *amount < 0.0 {
-                        // Update memory (this should do so safely
-                        // TODO perhaps we should add knowledge for new products here, something to consider for later.
-                        self.memory.product_knowledge
-                            .entry(*product)
-                            .and_modify(|x| x.lost -= amount);
-                    }
-                    change.entry(*prod).and_modify(|x| *x += amount)
-                        .or_insert(*amount);
-                }
-                // and add in any wants we got out of it.
-                for (&want, &amount) in proc_outcome.input_output_wants.iter() {
-                    self.desires.want_store.entry(want)
-                        .and_modify(|x| *x += amount).or_insert(amount);
-                }
-            } else if failure_chance > 0.0 {
-                // if fails, but not process, just remove the failing products
-                // TODO add rng rolls here as well.
-                let reduction = quantity * failure_chance;
-                change.entry(*product)
-                    .and_modify(|x| *x -= reduction)
-                    .or_insert(-reduction);
-                // Update memory (this should do so safely
-                // TODO perhaps we should add knowledge for new products here, something to consider for later.
-                self.memory.product_knowledge
-                    .entry(*product)
-                    .and_modify(|x| x.lost += reduction);
-            }
-        }
-        // with the failures gotten, apply our changes to our property.
-        for (product, quantity) in change {
-            self.desires.add_property(product, &quantity);
-        }
-        // and clear out any empty wants
-        self.desires.want_store.retain(|_, value| {
-            *value != 0.0
-        });
+    pub fn decay_goods(&mut self, _data: &DataManager) {
+        todo!("Redo for property change!")
     }
 
     /// # Adapt future Plan
@@ -1285,185 +829,9 @@ impl Pop {
     /// priority over today.
     /// 
     /// With the success rate updated, we then alter our targets, and budgets.
-    pub fn adapt_future_plan(&mut self, data: &DataManager, 
-    history: &MarketHistory) {
-        // with success updated based on our targets, go through and recalculate budgets and targets.
-        for (_prod_id, know) in self.memory.product_knowledge.iter_mut() {
-            // start by updating our success rate for our buy priorities.
-            // get how much we got, achieved includes both what was bought as well as what was given or rolled over from yesterday.
-            let achieved = know.achieved / know.target;
-            // modify achieved down by our loss rate, this may need to be adjusted dynamically as well.
-            // loss pulls down success by 1/4 of it's value currently.
-            let achieved = achieved * (1.0 - know.lost * LOSS_TO_SUCCESS_WEIGHT);
-            // and update the success rate for the knowledge.
-            know.update_success(achieved);
-
-            // breakup based on the current success rate.
-            if know.success_rate > MAJOR_TARGET_SUCCESS_THRESHOLD {
-                // if it's a major success, look at our budgets and try to bring them
-                // down a bit.
-                let excess_time = know.time_budget - know.time_spent;
-                let excess_amv = know.amv_budget - know.amv_spent;
-                let reduction = (know.success_rate - MAJOR_TARGET_SUCCESS_THRESHOLD) * 2.0 + 0.25; // 0.25 - 0.75
-                know.time_budget -= reduction * excess_time;
-                know.amv_budget -= reduction * excess_amv;
-                // try to reduce the amount purchased as well without reducing below what we used or lost.
-                let reserve = know.used + know.lost;
-                let excess_target = know.target - reserve;
-                know.target = excess_target * reduction + reserve;
-                // increase the item's priority
-                know.buy_priority = know.buy_priority.saturating_sub(1);
-            } else if know.success_rate > STANDARD_TARGET_SUCCESS_THRESHOLD {
-                // If it's a standard success try to reduce our budget targets, not our targets
-                let excess_time = know.time_budget - know.time_spent;
-                let excess_amv = know.amv_budget - know.amv_spent;
-                let reduction = know.success_rate - STANDARD_TARGET_SUCCESS_THRESHOLD; // 0.0 - 0.25
-                know.time_budget -= reduction * excess_time;
-                know.amv_budget -= reduction * excess_amv;
-            } else if know.success_rate > STANDARD_TARGET_FAILURE_THRESHOLD {
-                // we are below our target, add to our budget a little bit to try and succeed.
-                let increase = (STANDARD_TARGET_SUCCESS_THRESHOLD - know.success_rate) / 2.0; // 0.0 - 0.125
-                // add based on what we spent, not our budget specifically. 
-                // Increasing based on spent ensures the one in which restricted us more goes up more.
-                know.time_budget += increase * know.time_spent;
-                know.amv_budget += increase * know.amv_spent;
-                know.buy_priority = know.buy_priority.saturating_add(1);
-            } else { // Major Target Failure Threshold
-                // we are so far below our target that we may not be capable of buying the item, start weeding it out.
-                // increase our budget
-                let increase = STANDARD_TARGET_FAILURE_THRESHOLD - know.success_rate + 0.125; // 0.125 - 0.375
-                know.time_budget += increase * know.time_spent;
-                know.amv_budget += increase * know.amv_spent;
-                // and decrease our target
-                let reduction = STANDARD_TARGET_FAILURE_THRESHOLD - know.success_rate; // 0.0 - 0.25
-                know.target -= reduction * know.target;
-                know.buy_priority = know.buy_priority.saturating_add(2);
-            }
-            // increase or decrease shift based on how much rollover there is.
-            let rollover_rate = know.rollover / know.target;
-            if rollover_rate > 0.75 { // if high rollover, push back
-                know.buy_priority = know.buy_priority.saturating_add(2);
-            } else if rollover_rate > 0.5 { // if some rollover, push back less
-                know.buy_priority = know.buy_priority.saturating_add(1);
-            } else if rollover_rate > 0.25 { // if only partially rolled over, keep the same
-                // don't do anything with this.
-            } else {
-                know.buy_priority = know.buy_priority.saturating_sub(1);
-            }
-        }
-        // with calculation based on targets alone, add to targets for unsatisfied desires.
-        let start = self.desires.hard_satisfaction;
-        let mut end = self.desires.highest_tier;
-        // always include at least one tier above our highest if we have one.
-        if let Some(next) = self.desires.next_stepped_on_tier(end) {
-            end = next;
-        }
-        // always cover tiers 0-10 if they aren't already 
-        if end < 11 { end = 11; }
-        // with our start and end tiers, find ones which we step on in this interval 
-        // and which are not totally satisfied. If they meet these criteria, 
-        // add products to try and satisfy that desire.
-        for desire in self.desires.desires.iter_mut() {
-            if !desire.steps_in_interval(start, end) {
-                continue;
-            }
-            // if the range we have steps on that desire, add items which 
-            // desire it to the list or to existing knowledge targets.
-            if desire.is_fully_satisfied() { continue; } // don't add those which are satisfied
-            if let DesireItem::Product(id) = desire.item { // if it's an item, add it here.
-                // TODO when abstract and specific item desires are split, add in check here.
-                self.memory.product_knowledge.entry(id).and_modify(|x| x.target += 1.0)
-                .or_insert({
-                    let mut know = Knowledge::new();
-                    know.target += desire.amount;
-                    // TODO update to use Price Volatility instead of a flat 2x base budget.
-                    know.amv_budget += history.get_product_price(&id, 1.0) * 2.0;
-                    know
-                });
-            } else if let DesireItem::Want(id) = desire.item { // if item is want
-                let want_info = data.wants.get(&id).unwrap();
-                // start with ownership sources
-                for own_product_id in want_info.ownership_sources.iter() {
-                    if let Some(know) = self.memory.product_knowledge
-                    .get_mut(own_product_id) { // if we already target the product
-                        if know.success_rate > 0.5 { // and we generally succeed at getting it
-                            // add full value.
-                            know.target += desire.amount;
-                        } else { // if generally unsuccessful, add only 1.
-                            know.target += 1.0;
-                        }
-                    } else { // if we don't already get it, add it.
-                        // target 1, with 1 hour budget and market price
-                        self.memory.product_knowledge.insert(*own_product_id, {
-                            let mut know = Knowledge::new();
-                            know.amv_budget = history.get_product_price(own_product_id, 1.0) * 2.0;
-                            know });
-                    }
-                }
-
-                // then add in use products required
-                for use_proc_id in want_info.use_sources.iter() {
-                    let process = data.processes.get(use_proc_id).unwrap();
-                    for &part in process.input_and_capital_products().iter() {
-                        // with the product check if we already get it or not.
-                        if let Some(know) = self.memory.product_knowledge
-                        .get_mut(&part.item.unwrap()) {
-                            if know.success_rate > 0.5 { // if likely to be gotten, add full
-                                know.target += desire.amount * part.amount;
-                            } else { // if unlikely, add only what we need (min 1.0 for purchase purposes.)
-                                know.target += part.amount.min(1.0);
-                            }
-                        } else { // if we don't get it, add it
-                            self.memory.product_knowledge.insert(part.item.unwrap(), {
-                                let mut know = Knowledge::new();
-                                know.target = part.amount.min(1.0);
-                                know.amv_budget = history.get_product_price(&part.item.unwrap(), 1.0) * 2.0;
-                                know });
-                        }
-                    }
-                }
-
-                // then add in consumption products required
-                for consumption_proc_id in want_info.consumption_sources.iter() {
-                    let process = data.processes.get(consumption_proc_id).unwrap();
-                    for &part in process.input_and_capital_products().iter() {
-                        // with the product check if we already get it or not.
-                        if let Some(know) = self.memory.product_knowledge
-                        .get_mut(&part.item.unwrap()) {
-                            if know.success_rate > 0.5 { // if likely to be gotten, add full
-                                know.target += desire.amount * part.amount;
-                            } else { // if unlikely, add only what we need (min 1.0 for purchase purposes.)
-                                know.target += part.amount.min(1.0);
-                            }
-                        } else { // if we don't get it, add it
-                            self.memory.product_knowledge.insert(part.item.unwrap(), {
-                                let mut know = Knowledge::new();
-                                know.target = part.amount.min(1.0);
-                                know.amv_budget = history.get_product_price(&part.item.unwrap(), 1.0) * 2.0;
-                                know });
-                        }
-                    }
-                }
-            }
-        }
-
-        // clear out any which seem to be impossible to get (low success and low targets)
-        let mut remove = HashSet::new();
-        for (product, know) in self.memory.product_knowledge.iter() {
-            let ratio = know.achieved / know.target;
-            if know.success_rate < 0.1 && ratio < 0.01 {
-                remove.insert(*product);
-            }
-        }
-        // remove everything marked for removal.
-        self.memory.product_knowledge.retain(|key, _| !remove.contains(key));
-        self.memory.product_priority.retain(|x| !remove.contains(x));
-
-        // finish by resorting our buy priorities.
-        self.memory.product_priority.sort_by(|a, b| {
-            self.memory.product_knowledge.get(a).unwrap().buy_priority
-            .cmp(&self.memory.product_knowledge.get(b).unwrap().buy_priority)
-        });
+    pub fn adapt_future_plan(&mut self, _data: &DataManager, 
+    _history: &MarketHistory) {
+        todo!("Either Redo or drop after Property Update!")
     }
 }
 
@@ -1534,11 +902,11 @@ impl Actor for Pop {
     tx: Sender<ActorMessage>,
     rx: &mut Receiver<ActorMessage>,
     data: &DataManager,
-    demos: &Demographics,
+    _demos: &Demographics,
     history: &MarketHistory) {
         // before we even begin, add in the time we have for the day.
-        self.desires.add_property(TIME_ID, &((self.breakdown_table.total as f64) * 
-            24.0 * self.breakdown_table.average_productivity()));
+        self.desires.add_property(TIME_ID, (self.breakdown_table.total as f64) * 
+            24.0 * self.breakdown_table.average_productivity());
 
         // started up, so wait for the first message.
         match rx.recv().expect("Channel Broke.") {
@@ -1547,7 +915,7 @@ impl Actor for Pop {
         }
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
-        self.desires.sift_products();
+        self.desires.sift_specific_products();
         for (_product_id, know) in self.memory.product_knowledge.iter_mut() {
             know.achieved = 0.0; // reset knowledge info for the day.
             know.spent = 0.0;
@@ -1573,7 +941,7 @@ impl Actor for Pop {
         // Wait for our job to poke us, asking/telling us what to give them 
         // and send it all over (will likely get a short lived channel for this)
         // then wait for the firm to get back.
-        self.work_day_processing(rx, &tx);
+        self.work_day_processing(rx, &tx, data);
 
         // The firm will return either with a paycheck, paystub if a wage 
         // employee, or if it's a disorganized owner, it's share of everything.
@@ -1595,197 +963,5 @@ impl Actor for Pop {
         // With these things consumed, we've done what we can. Process our
         // results to hopefully improve our situation tomorrow. 
         self.adapt_future_plan(data, history);
-    }
-}
-
-/// # Property Breakdown
-/// 
-/// A Helper which is used ot help sort/divide property between
-/// unreserved, reserved, and used for specific, abstract, or want desire.
-/// 
-/// The Total available should be equal to the Unreserved + Reserved + the 
-/// highest between specific, abstract, and want.
-/// 
-/// We only handle shifting from unreserved to the reserves.
-/// When adding to a reserve, we allow each reserve to pull from the others 
-/// (non-destructively) until they are equal. Once they are, they pull out 
-/// of reserve. If none remains in reserve, it removes from unreserved.
-#[derive(Debug, Copy, Clone)]
-pub struct PropertyBreakdown {
-    /// The total available to us. IE, Unreserved + reserved + max(specific, abstract, want)
-    pub total_available: f64,
-    /// The amount that is unreserved, available to be spent or shifted elsewhere.
-    pub unreserved: f64,
-    /// The amount that has been reserved for our desires, but not yet placed. Anywhere
-    pub reserved: f64,
-    /// The amount that has been reserved for specific product desires.
-    pub specific_reserve: f64,
-    /// The amount that has been reserved to satisfy abstract product desires.
-    pub abstract_reserve: f64,
-    /// The amount that has been reserved to satisfy want desires.
-    pub want_reserve: f64
-}
-
-impl PropertyBreakdown {
-    /// # New Property Breakdown
-    /// 
-    /// News up a property breakdown given an available value.
-    /// Automatically sets the total and unreserved.
-    pub fn new(available: f64) -> Self { 
-        Self { total_available: available, 
-            unreserved: available, 
-            reserved: 0.0, 
-            specific_reserve: 0.0, 
-            abstract_reserve: 0.0, 
-            want_reserve: 0.0 
-        } 
-    }
-
-
-    /// Adds to both total available and to unreserved
-    /// may be used to subtract, not secure below 0.
-    pub fn add_to_total(&mut self, quantity: f64) {
-        self.total_available += quantity;
-        self.unreserved += quantity;
-    }
-
-    /// Shifts the given quantity from unreserved to reserved.
-    /// 
-    /// If unable to shift all it returns the excess.
-    pub fn shift_to_reserved(&mut self, quantity: f64) -> f64 {
-        let available = self.unreserved.min(quantity);
-        let excess = quantity - available;
-        self.unreserved -= available;
-        self.reserved += available;
-        excess
-    }
-
-    /// Gets the highest of our 3 reserves.
-    pub fn max_spec_reserve(&self) -> f64 {
-        self.specific_reserve
-            .max(self.abstract_reserve)
-            .max(self.want_reserve)
-    }
-
-    /// Shifts the given quantity into specific reserve.
-    /// 
-    /// Pulls from other sub-reserves up to the highest, without subtracting 
-    /// (allowing overlap), then from the reserve, then from the unreserved.
-    pub fn shift_to_specific_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
-        let other_max = self.abstract_reserve.max(self.want_reserve);
-        if other_max > self.specific_reserve { 
-            // if we have some from other reserves, get from there first.
-            let shift = (other_max-self.specific_reserve).min(quantity);
-            self.specific_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.specific_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // if not enough from reserve, then from unreserved.
-        if self.unreserved > 0.0 {
-            let shift = self.unreserved.min(quantity);
-            self.unreserved -= shift;
-            self.specific_reserve += shift;
-            quantity -= shift;
-        }
-        quantity
-    }
-
-    /// Shifts the given quantity into abstract reserve.
-    /// 
-    /// Pulls from other sub-reserves up to the highest, without subtracting 
-    /// (allowing overlap), then from the reserve, then from the unreserved.
-    pub fn shift_to_abstract_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
-        let other_max = self.specific_reserve.max(self.want_reserve);
-        if other_max > self.abstract_reserve { 
-            // if we have some from other reserves, get from there first.
-            let shift = (other_max-self.abstract_reserve).min(quantity);
-            self.abstract_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.abstract_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // if not enough from reserve, then from unreserved.
-        if self.unreserved > 0.0 {
-            let shift = self.unreserved.min(quantity);
-            self.unreserved -= shift;
-            self.abstract_reserve += shift;
-            quantity -= shift;
-        }
-        quantity
-    }
-
-    /// Shifts the given quantity into want reserve.
-    /// 
-    /// Pulls from other sub-reserves up to the highest, without subtracting 
-    /// (allowing overlap), then from the reserve, then from the unreserved.
-    pub fn shift_to_want_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
-        let other_max = self.specific_reserve.max(self.abstract_reserve);
-        if other_max > self.want_reserve { 
-            // if we have some from other reserves, get from there first.
-            let shift = (other_max-self.want_reserve).min(quantity);
-            self.want_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.want_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
-        }
-        // if not enough from reserve, then from unreserved.
-        if self.unreserved > 0.0 {
-            let shift = self.unreserved.min(quantity);
-            self.unreserved -= shift;
-            self.want_reserve += shift;
-            quantity -= shift;
-        }
-        quantity
-    }
-
-    /// # Available
-    /// 
-    /// The amount available for trade or explicit use.
-    fn available(&self) -> f64 {
-        self.unreserved + self.reserved
-    }
-
-    /// # Expend
-    /// 
-    /// A function to expend the product safely from the unreserved
-    /// amount.
-    /// 
-    /// Returns the excess value which could not be gotten from unreserved.
-    fn expend(&mut self, expense: f64) -> f64 {
-        let available = self.unreserved.min(expense);
-        let excess = expense - available;
-        self.unreserved -= available;
-        excess
     }
 }

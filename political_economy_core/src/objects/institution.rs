@@ -45,14 +45,14 @@ impl Actor for Institution {
     /// it there.
     fn run_market_day(&mut self, 
         sender: Sender<ActorMessage>,
-        reciever: &mut Receiver<ActorMessage>,
-        data: &DataManager,
-        demos: &Demographics,
-        history: &MarketHistory) {
+        _reciever: &mut Receiver<ActorMessage>,
+        _data: &DataManager,
+        _demos: &Demographics,
+        _history: &MarketHistory) {
         // TODO this function needs to be completed
         // Send finished to keep things running, then gtfo.
         sender.send(ActorMessage::Finished { 
             sender: self.actor_info() 
-        });
+        }).expect("Failure!");
     }
 }

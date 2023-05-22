@@ -80,13 +80,13 @@ impl Skill {
             return Err(format!("Skill '{}' has no Labor.", self.name))
         }
         let input = ProcessPart {
-            item: super::process::PartItem::Product(0),
+            item: super::process::PartItem::Specific(0),
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: super::process::ProcessSectionTag::Input,
         };
         let output = ProcessPart{
-            item: super::process::PartItem::Product(self.labor),
+            item: super::process::PartItem::Specific(self.labor),
             amount: 1.0,
             part_tags: vec![],
             part: super::process::ProcessSectionTag::Output,

@@ -1,9 +1,9 @@
 use core::panic;
-use std::{collections::{HashMap, HashSet}, result};
+use std::collections::{HashMap, HashSet};
 use barrage::{Sender, Receiver};
 use crossbeam::thread;
 use itertools::Itertools;
-use rand::{Rng, SeedableRng, thread_rng};
+use rand::{Rng, thread_rng};
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{STD_PRICE_CHANGE, SALABILITY_THRESHOLD}};
 use super::{pop::Pop, 
@@ -358,15 +358,15 @@ impl Market {
     }
 
     /// Adds seller info, also calculating it's weight in the market selection process.
-    fn add_seller_weight(&mut self, sender: &ActorInfo, product: usize, quantity: f64, amv: f64) {
-        let list = self.seller_weights.entry(product).or_insert((0.0, vec![]));
+    fn add_seller_weight(&mut self, _sender: &ActorInfo, product: usize, quantity: f64, amv: f64) {
+        let _list = self.seller_weights.entry(product).or_insert((0.0, vec![]));
         let market_price = self.previous_day.get_product(&product).price;
-        let mut weight = 0.0;
+        let mut _weight = 0.0;
         if market_price <= 0.0 && amv <= 0.0 { // TODO 0 or negative amv or market price for product found.
             todo!("Do later, I can't be bothered right now."); 
         } else { // Positive market value and price
             // Inversely proportional to market value. AMV = 1/2 => weight == 2
-            weight = (market_price / amv) * 100.0;
+            _weight = (market_price / amv) * 100.0;
         }
         // finish by adding to the total market supply.
         *self.products_for_sale.entry(product).or_default() += quantity;
@@ -414,7 +414,7 @@ impl Market {
     /// and a seller is available, it returns that seller.
     /// 
     /// TODO Needs testing!!
-    fn find_want_seller(&self, want: usize, sender: ActorInfo) -> ActorMessage {
+    fn find_want_seller(&self, _want: usize, _sender: ActorInfo) -> ActorMessage {
         // TODO Pick up Here!!!!!!!
         todo!()
     }
@@ -440,7 +440,7 @@ impl Market {
     /// Finds and removes an ongoing deal, meaning it should be closed out.
     /// 
     /// Panics if deal was not found.
-    fn remove_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) {
+    fn _remove_deal(&mut self, buyer: ActorInfo, seller: ActorInfo, product: usize) {
         let idx = self.ongoing_deals.iter()
         .filter(|x| x.request_product == product) // narrow to those with that product
         .find_position(|x| x.actors.contains(&seller) && x.actors.contains(&buyer))// find one with both buyer and seller
@@ -449,7 +449,7 @@ impl Market {
     }
 
     /// Processes a price opinion recieved and applies that modification to the seller's weight.
-    fn process_price_opinion(&mut self, seller: ActorInfo, 
+    fn _process_price_opinion(&mut self, seller: ActorInfo, 
     product: usize, price_opinion: OfferResult) {
         let weights = self.seller_weights.get_mut(&product)
         .expect("Product not Found, Panic!");

@@ -5,13 +5,20 @@ pub const SHOPPING_TIME_ID: usize = 1;
 /// The Id for the required Rest Want.
 pub const REST_WANT_ID: usize = 0;
 /// The ID for the Required Wealth Want.
-pub const WEALTH_WANT_ID: usize = 1;
+pub const WEALTH_WANT_ID: usize = 2;
 /// The ID for the process which turns time to Shopping Time.
 pub const SHOPPING_TIME_PROC_ID: usize = 0;
+/// The ID for the process which turns time into Liesure.
+pub const RESTING_PROC_ID: usize = 1;
 
 
 // These are configuration constants. Could be floated off into a
 // configuration file.
+
+/// The ratio of value between one tier and an adjacent tier.
+/// 
+/// IE, a unit at tier 1 is worth 0.9 of an item from tier 0.
+pub const TIER_RATIO: f64 = 0.9;
 
 /// The standard cost in time for an individual to go shopping.
 pub const SHOPPING_TIME_COST: f64 = 0.2;

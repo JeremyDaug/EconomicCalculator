@@ -19,7 +19,7 @@ use crate::{objects::{want::Want,
     culture::Culture, 
     pop::Pop, 
     market::Market, 
-    firm::Firm}, constants::{REST_WANT_ID, WEALTH_WANT_ID, SHOPPING_TIME_ID, TIME_ID}};
+    firm::Firm}, constants::{REST_WANT_ID, WEALTH_WANT_ID, SHOPPING_TIME_ID, TIME_ID, SHOPPING_TIME_PROC_ID, RESTING_PROC_ID}};
 
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
@@ -35,6 +35,7 @@ use crate::{objects::{want::Want,
 /// 
 /// - Required Wants
 ///   - ID 0: Rest
+///   - ID 1: Liesure
 ///   - TODO Items
 ///     - Space - How much space is available absolutely.
 ///     - Free Space - How much unused space they have available, not used in storage.
@@ -53,7 +54,8 @@ use crate::{objects::{want::Want,
 ///     - Land (Very Fertile Land)
 ///     - Nothing (void item, may not be needed)
 /// - Required Processes:
-///   - ID 0: Shopping (Time -> Shopping Time)
+///   - ID 0: Shopping (Time -> Shopping Time + Liesure)
+///   - ID 1: Liesure (Time -> Liesure)
 /// - Required Tech:
 ///   - TODO Items
 ///     - Brainstorming (origin tech)
@@ -67,6 +69,10 @@ pub struct DataManager {
     pub technology: HashMap<usize, Technology>,
     pub technology_families: HashMap<usize, TechnologyFamily>,
     pub products: HashMap<usize, Product>,
+    /// The various products, organized by the key, the abstract or generic product,
+    /// and it's variants, the values in the attached vector.
+    pub product_classes: HashMap<usize, Vec<usize>>,
+    // TODO Add in abstract to real product connections here.
     pub skill_groups: HashMap<usize, SkillGroup>,
     pub skills: HashMap<usize, Skill>,
     pub processes: HashMap<usize, Process>,
@@ -119,6 +125,7 @@ impl DataManager {
             technology: HashMap::new(), 
             technology_families: HashMap::new(), 
             products: HashMap::new(), 
+            product_classes: HashMap::new(),
             skill_groups: HashMap::new(),
             skills: HashMap::new(),
             processes: HashMap::new(),
@@ -422,6 +429,7 @@ impl DataManager {
             false,
             Vec::new(),
             None).unwrap();
+        hut.product_class = Some(hut.id);
         // cabin (costs wood, medium efficiency, maintainable)
         let mut cabin = Product::new(15,
             String::from("Cabin"),
@@ -435,6 +443,8 @@ impl DataManager {
             false,
             Vec::new(),
             None).unwrap();
+        cabin.product_class = Some(hut.id);
+        cabin.add_to_class(&mut hut);
         // (labors and Services)
         // Ambrosia Farming
         let ambrosia_farming = Product::new(16,
@@ -789,19 +799,19 @@ impl DataManager {
         // We for test cases, we are ignoring closed loop logic for now.
         // shopping time first, this is a required process by the system.
         let shop_input = ProcessPart{
-            item: PartItem::Product(time),
+            item: PartItem::Specific(time),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Input,
         };
         let shop_output = ProcessPart{
-            item: PartItem::Product(shopping_time),
+            item: PartItem::Specific(shopping_time),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
         };
         let go_shopping = Process{
-            id: 0,
+            id: SHOPPING_TIME_PROC_ID,
             name: String::from("Go Shopping"),
             variant_name: String::new(),
             description: String::from("Shopping takes time."),
@@ -815,7 +825,36 @@ impl DataManager {
             tertiary_tech: None,
         };
         self.processes.insert(go_shopping.id, go_shopping);
-        
+
+        // Next do Resting Process
+        let rest_input = ProcessPart {
+            item: PartItem::Specific(TIME_ID),
+            amount: 1.0,
+            part_tags: vec![],
+            part: ProcessSectionTag::Input,
+        };
+        let rest_output = ProcessPart {
+            item: PartItem::Want(REST_WANT_ID),
+            amount: 1.0,
+            part_tags: vec![],
+            part: ProcessSectionTag::Output,
+        };
+        let resting = Process {
+            id: RESTING_PROC_ID,
+            name: String::from("Resting"),
+            variant_name: String::new(),
+            description: String::from("Chilling Out."),
+            minimum_time: 1.0,
+            process_parts: vec![rest_input, rest_output],
+            process_tags: vec![ProcessTag::Consumption(REST_WANT_ID)],
+            skill: None,
+            skill_minimum: 0.0,
+            skill_maximum: 0.0,
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(resting.id, resting);
+
         // next do labors, they'll be easy.
         // ambrosia farming 1
         let new_id = self.new_process_id(); // 1
@@ -873,19 +912,19 @@ impl DataManager {
         // ambrosia chain 
         // Ambrosia Farming -> Ambrosia fruit -> Food (no waste involved)
         let labor_input = ProcessPart{
-            item: PartItem::Product(fruit_farming),
+            item: PartItem::Specific(fruit_farming),
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let harvester_capital = ProcessPart{
-            item: PartItem::Product(hook),
+            item: PartItem::Specific(hook),
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Optional(0.25)],
             part: ProcessSectionTag::Capital,
         };
         let fruit_output = ProcessPart{
-            item: PartItem::Product(ambrosia_fruit),
+            item: PartItem::Specific(ambrosia_fruit),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -907,7 +946,7 @@ impl DataManager {
         self.processes.insert(ambrosia_farming.id, ambrosia_farming);
         // eating food
         let food_input = ProcessPart{
-            item: PartItem::Product(2),
+            item: PartItem::Specific(2),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Input,
@@ -937,19 +976,19 @@ impl DataManager {
         // Cotton Chain
         // Cotton Farmer -> Spinner -> weaver -> clothing
         let labor_input = ProcessPart{
-            item: PartItem::Product(17),
+            item: PartItem::Specific(17),
             amount: 12.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let harvester_capital = ProcessPart{
-            item: PartItem::Product(9),
+            item: PartItem::Specific(9),
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Optional(1.0)],
             part: ProcessSectionTag::Capital,
         };
         let cotton_output = ProcessPart{
-            item: PartItem::Product(3),
+            item: PartItem::Specific(3),
             amount: 0.5,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -971,25 +1010,25 @@ impl DataManager {
         self.processes.insert(cotton_farming.id, cotton_farming);
         // Spinning
         let labor_input = ProcessPart{
-            item: PartItem::Product(18), // thread spinning
+            item: PartItem::Specific(18), // thread spinning
             amount: 12.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let cotton_input = ProcessPart{
-            item: PartItem::Product(3), // thread spinning
+            item: PartItem::Specific(3), // thread spinning
             amount: 1.0,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let spinner_capital = ProcessPart{
-            item: PartItem::Product(10), // spinning wheel
+            item: PartItem::Specific(10), // spinning wheel
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Optional(1.0)],
             part: ProcessSectionTag::Capital,
         };
         let thread_output = ProcessPart{
-            item: PartItem::Product(4), // thread
+            item: PartItem::Specific(4), // thread
             amount: 8.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1012,25 +1051,25 @@ impl DataManager {
         self.processes.insert(thread_spinning.id, thread_spinning);
         // Weaver
         let labor_input = ProcessPart{
-            item: PartItem::Product(19), // Weaving
+            item: PartItem::Specific(19), // Weaving
             amount: 12.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let thread_input = ProcessPart{
-            item: PartItem::Product(4), // thread
+            item: PartItem::Specific(4), // thread
             amount: 1.0,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let loom_capital = ProcessPart{
-            item: PartItem::Product(11),
+            item: PartItem::Specific(11),
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Optional(3.0)],
             part: ProcessSectionTag::Capital,
         };
         let cloth_output = ProcessPart{
-            item: PartItem::Product(5),
+            item: PartItem::Specific(5),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1053,19 +1092,19 @@ impl DataManager {
         self.processes.insert(weaving.id, weaving);
         // Clothing
         let labor_input = ProcessPart{
-            item: PartItem::Product(20), // Tailoring
+            item: PartItem::Specific(20), // Tailoring
             amount: 12.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let cloth_input = ProcessPart{
-            item: PartItem::Product(5), // cotton bolt
+            item: PartItem::Specific(5), // cotton bolt
             amount: 2.0,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let cloth_output = ProcessPart{
-            item: PartItem::Product(6),
+            item: PartItem::Specific(6),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1088,25 +1127,25 @@ impl DataManager {
         self.processes.insert(clothing.id, clothing);
         // Suit of clothing
         let labor_input = ProcessPart{
-            item: PartItem::Product(20), // Tailoring
+            item: PartItem::Specific(20), // Tailoring
             amount: 36.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let cloth_input = ProcessPart{
-            item: PartItem::Product(5), // cotton bolt
+            item: PartItem::Specific(5), // cotton bolt
             amount: 2.0,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let thread_input = ProcessPart{
-            item: PartItem::Product(4), // cotton thread
+            item: PartItem::Specific(4), // cotton thread
             amount: 0.25,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let cloth_output = ProcessPart{
-            item: PartItem::Product(7),
+            item: PartItem::Specific(7),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1130,13 +1169,13 @@ impl DataManager {
         // 
         // Rock Finding
         let labor_input = ProcessPart{
-            item: PartItem::Product(stoning), // Stone Gathering
+            item: PartItem::Specific(stoning), // Stone Gathering
             amount: 12.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let stone_output = ProcessPart{
-            item: PartItem::Product(stone),
+            item: PartItem::Specific(stone),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1158,13 +1197,13 @@ impl DataManager {
         self.processes.insert(stone_gathering.id, stone_gathering);
         // hut making
         let labor_input = ProcessPart{
-            item: PartItem::Product(building), // construction
+            item: PartItem::Specific(building), // construction
             amount: 240.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let hut_output = ProcessPart{
-            item: PartItem::Product(hut), // hut
+            item: PartItem::Specific(hut), // hut
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1186,19 +1225,19 @@ impl DataManager {
         self.processes.insert(hut_construction.id, hut_construction);
         // hut repair
         let labor_input = ProcessPart{
-            item: PartItem::Product(23), // construction
+            item: PartItem::Specific(23), // construction
             amount: 6.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let hut_input = ProcessPart{
-            item: PartItem::Product(14), // hut
+            item: PartItem::Specific(14), // hut
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Input,
         };
         let hut_output = ProcessPart{
-            item: PartItem::Product(14), // hut
+            item: PartItem::Specific(14), // hut
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1222,19 +1261,19 @@ impl DataManager {
         // Wood -> (Gathering Sticks, Spinning Wheels, Looms, Cabins)
         // gather wood
         let labor_input = ProcessPart{
-            item: PartItem::Product(21), // lumbering
+            item: PartItem::Specific(21), // lumbering
             amount: 12.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let axe_capital = ProcessPart{
-            item: PartItem::Product(12), // axe
+            item: PartItem::Specific(12), // axe
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Optional(5.0)],
             part: ProcessSectionTag::Capital,
         };
         let wood_output = ProcessPart{
-            item: PartItem::Product(14), // wood
+            item: PartItem::Specific(14), // wood
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1256,19 +1295,19 @@ impl DataManager {
         self.processes.insert(lumbering.id, lumbering);
         // wood -> gathering sticks
         let labor_input = ProcessPart{
-            item: PartItem::Product(22), // tool making
+            item: PartItem::Specific(22), // tool making
             amount: 12.0,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let wood_input = ProcessPart{
-            item: PartItem::Product(8), // Wood
+            item: PartItem::Specific(8), // Wood
             amount: 0.1,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let wood_output = ProcessPart{
-            item: PartItem::Product(9), // gathering stick
+            item: PartItem::Specific(9), // gathering stick
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1290,19 +1329,19 @@ impl DataManager {
         self.processes.insert(hooker_making.id, hooker_making);
         // wood -> spinning wheel
         let labor_input = ProcessPart{
-            item: PartItem::Product(tooling),
+            item: PartItem::Specific(tooling),
             amount: 36.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let wood_input = ProcessPart{
-            item: PartItem::Product(wood),
+            item: PartItem::Specific(wood),
             amount: 0.8,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let wood_output = ProcessPart{
-            item: PartItem::Product(spinning_wheel),
+            item: PartItem::Specific(spinning_wheel),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1324,19 +1363,19 @@ impl DataManager {
         self.processes.insert(wheel_making.id, wheel_making);
         // wood -> looms
         let labor_input = ProcessPart{
-            item: PartItem::Product(tooling),
+            item: PartItem::Specific(tooling),
             amount: 48.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let wood_input = ProcessPart{
-            item: PartItem::Product(wood),
+            item: PartItem::Specific(wood),
             amount: 0.5,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let wood_output = ProcessPart{
-            item: PartItem::Product(loom),
+            item: PartItem::Specific(loom),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1358,19 +1397,19 @@ impl DataManager {
         self.processes.insert(loom_making.id, loom_making);
         // wood -> cabin
         let labor_input = ProcessPart{
-            item: PartItem::Product(building),
+            item: PartItem::Specific(building),
             amount: 120.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let wood_input = ProcessPart{
-            item: PartItem::Product(wood),
+            item: PartItem::Specific(wood),
             amount: 10.0,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let wood_output = ProcessPart{
-            item: PartItem::Product(cabin),
+            item: PartItem::Specific(cabin),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1392,25 +1431,25 @@ impl DataManager {
         self.processes.insert(loom_making.id, loom_making);
         // wood -> cabin repair
         let labor_input = ProcessPart{
-            item: PartItem::Product(repair),
+            item: PartItem::Specific(repair),
             amount: 6.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let wood_input = ProcessPart{
-            item: PartItem::Product(wood),
+            item: PartItem::Specific(wood),
             amount: 0.1,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let cabin_input = ProcessPart{
-            item: PartItem::Product(cabin),
+            item: PartItem::Specific(cabin),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Input,
         };
         let cabin_output = ProcessPart{
-            item: PartItem::Product(cabin),
+            item: PartItem::Specific(cabin),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1432,25 +1471,25 @@ impl DataManager {
         self.processes.insert(cabin_repair.id, cabin_repair);
         // wood + stone -> axe
         let labor_input = ProcessPart{
-            item: PartItem::Product(tooling),
+            item: PartItem::Specific(tooling),
             amount: 6.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: ProcessSectionTag::Input,
         };
         let wood_input = ProcessPart{
-            item: PartItem::Product(wood),
+            item: PartItem::Specific(wood),
             amount: 0.1,
             part_tags: vec![],
             part: ProcessSectionTag::Input,
         };
         let stone_input = ProcessPart{
-            item: PartItem::Product(stone),
+            item: PartItem::Specific(stone),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Input,
         };
         let axe_output = ProcessPart{
-            item: PartItem::Product(axe),
+            item: PartItem::Specific(axe),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
@@ -1474,7 +1513,7 @@ impl DataManager {
         // once all processes are loaded connect the products to the processes
         for process in self.processes.values() {
             for part in process.process_parts.iter() {
-                if part.item.is_product() {
+                if part.item.is_specific() {
                     let id = part.item.unwrap();
                     let product = self.products.get_mut(&id).unwrap();
                     product.add_process(process)
@@ -1505,7 +1544,7 @@ impl DataManager {
             // processes share an ID with their node for simplicity.
             let mut new_node = ProcessNode::new(*id);
 
-            new_node.can_feed_self = process.can_feed_self();
+            new_node.can_feed_self = process.can_feed_self(&self);
 
             for (other_id, other_process) in self.processes.iter() {
                 // for our current process, iterate through again
@@ -1759,6 +1798,19 @@ impl DataManager {
         self.load_jobs(_file_name)?;
 
         Ok(())
+    }
+
+    /// # Get Product Class
+    /// 
+    /// Gets the product's class.
+    /// 
+    /// If it has one it returns the class ID. If it does not, it returns None.
+    /// 
+    /// TODO Test This.
+    pub fn get_product_class(&self, product: usize) -> Option<usize> {
+        if let Some(class) = self.products.get(&product).expect("Product Not Found").product_class {
+            Some(class)
+        } else { None }
     }
 }
 
