@@ -61,7 +61,19 @@ pub struct Product {
     pub maintenance_processes: HashSet<usize>,
 
     /// What (if any) tech is required for this product to be visible to Actors.
-    pub tech_required: Option<usize>
+    pub tech_required: Option<usize>,
+
+    /// What (if any) product class this is a part of. The id given is of 
+    /// another product which represents the abstract or generic product 
+    /// this product can take the place of.
+    /// 
+    /// Products which are within the same class should have the same mass
+    /// and bulk unless the product class (and it's children) are marked as
+    /// ProductTag::ConsumerGood. Other properties need not be the same.
+    /// 
+    /// If the ID Given in the option is the same as the product's ID, then
+    /// that product is the Class abstract or generic.
+    pub product_class: Option<usize>,
     // TODO Perhaps include exchange time cost, IE how long it takes for a seller to accept/confirm the item.
     // TODO Include an Abstract Parent option in here. Makes the abstracting process easier.
 }
@@ -83,6 +95,30 @@ impl PartialEq for Product {
 }
 
 impl Product {
+    /// # Add To Class
+    /// 
+    /// Quick helper function which adds the class product passed in
+    /// as our class_product generic.
+    /// 
+    /// Also sets class_product's class_product to itself, if it isn't already
+    /// set to itself.
+    /// 
+    /// ## Panics 
+    /// 
+    /// If class_product's class_product is already set, but to a different
+    /// product (meaning it's not the generic/abstract), we panic to ensure
+    /// information doesn't become mangled.
+    pub fn add_to_class(&mut self, class_product: &mut Self) {
+        self.product_class = Some(class_product.id);
+        if let Some(class) = class_product.product_class {
+            if class != class_product.id {
+                panic!("'class_product' is not the parent of the class!")
+            }
+        } else {
+            class_product.product_class = Some(class_product.id);
+        }
+    }
+
     /// # Failure Chance
     /// 
     /// Gets the failure chance of the item. Returns 1 / (MTTF + 1),
@@ -130,7 +166,8 @@ impl Product {
                 use_processes: HashSet::new(), 
                 consumption_processes: HashSet::new(), 
                 maintenance_processes: HashSet::new(), 
-                tech_required 
+                tech_required,
+                product_class: None
             } )
         }
 
@@ -233,6 +270,14 @@ impl Product {
 
         Result::Ok(())
     }
+
+    /// # Is Classmate Of
+    /// 
+    /// Check function, returns true if the other product given shares it's product class
+    /// with us.
+    pub fn is_classmate_of(&self, other: &Self) -> bool {
+        self.product_class == other.product_class
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -261,8 +306,9 @@ pub enum ProductTag {
     Share{firm: usize},
     /// The item is actually a living creature (placed her for later purposes.)
     Animate,
-    /// The item is a consumer good, making variants is more open ended, but the product
-    /// cannot be used as an input in a process. Only Failure processes are allowed.
+    /// The item is a consumer good, making variants is more open ended, but 
+    /// disallowing interchangeability in processes. IE, A process which takes a
+    /// ConsumerGood cannot exchange it for another good in the same class.
     ConsumerGood,
     /// The item is a military good, this gives it more flexibility in variation, but removes
     /// it as an input or capital processes. The only processes it allows are failure processes.
