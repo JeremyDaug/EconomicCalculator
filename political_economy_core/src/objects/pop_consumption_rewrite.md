@@ -19,7 +19,7 @@ So, currently, a pop's market day goes
    4. Wait for end of day, dealing with any additional messages.
 7. Consume Goods
 8. Decay Goods
-9.  Adapt Plans
+9. Adapt Plans
 
 ## The Change
 

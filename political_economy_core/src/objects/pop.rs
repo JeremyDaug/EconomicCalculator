@@ -13,7 +13,7 @@ use super::{Property::Property,
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
-    pop_memory::PopMemory, buy_result::BuyResult, property_info::PropertyInfo, 
+    buy_result::BuyResult, property_info::PropertyInfo, 
 };
 
 /// Pops are the data storage for a population group.
@@ -43,14 +43,12 @@ pub struct Pop {
     /// The total desires and property of the pop.
     /// 
     /// TODO Food For Thought. We include 2 infinite desires in all pops, wealth and Leisure, which act as sinks and help us balance our buy priorities. More thought is needed.
-    pub desires: Property,
+    pub property: Property,
     /// A breakdown of the Population's demographics.
     pub breakdown_table: PopBreakdownTable,
     // Mood
     /// Whether the pop is selling or not.
     pub is_selling: bool,
-    /// The historical records (or rough estimate thereof).
-    pub memory: PopMemory,
     /// Backlogs of messages, to help keep things clear.
     pub backlog: VecDeque<ActorMessage>,
 }
@@ -63,13 +61,13 @@ impl Pop {
     /// This will need to be updated when those are implemented.
     pub fn update_desires(&mut self, demos: Demographics) {
         // TODO when subgroups are added to these items, this will need to be updated to take them into account.
-        self.desires.clear_desires();
+        self.property.clear_desires();
         // add in each species desires
         for row in self.breakdown_table.species_makeup().iter() {
             let species = demos.species.get(row.0).expect("Species Id Not Found!");
             for desire in species.desires.iter() {
                 let upped_desire = desire.create_multiple(*row.1);
-                self.desires.add_desire(&upped_desire);
+                self.property.add_desire(&upped_desire);
             }
         }
         // placeholder for civilization
@@ -79,7 +77,7 @@ impl Pop {
                 let culture = demos.cultures.get(id).expect("Culture Id Not Found!");
                 for desire in culture.desires.iter() {
                     let upped_desire = desire.create_multiple(*row.1);
-                    self.desires.add_desire(&upped_desire);
+                    self.property.add_desire(&upped_desire);
                 }
             }
         }
@@ -90,7 +88,7 @@ impl Pop {
                 let ideology = demos.ideology.get(id).expect("Ideology Id Not Found!");
                 for desire in ideology.desires.iter() {
                     let upped_desire = desire.create_multiple(*row.1);
-                    self.desires.add_desire(&upped_desire);
+                    self.property.add_desire(&upped_desire);
                 }
             }
         }
@@ -270,15 +268,15 @@ impl Pop {
                 self.push_message(rx, tx, ActorMessage::SendProduct { sender: self.actor_info(),
                     reciever: firm, 
                     product: TIME_ID, 
-                    amount: self.memory.work_time
+                    amount: self.property.work_time
                     });
                 // and remove that time from our property as well
-                self.desires.remove_property(TIME_ID, -self.memory.work_time, data);
+                self.property.remove_property(TIME_ID, -self.property.work_time, data);
             },
             FirmEmployeeAction::RequestEverything => {
                 // loop over everything and send it to the firm.
                 let mut to_move = HashMap::new();
-                for (product, amount) in self.desires.property.iter() {
+                for (product, amount) in self.property.property.iter() {
                     to_move.insert(*product, *amount);
                 }
                 for (product, amount) in to_move {
@@ -289,12 +287,12 @@ impl Pop {
                         product,
                         amount: amount.total_property 
                     });
-                    self.desires.property.remove(&product)
+                    self.property.property.remove(&product)
                     .expect("Not found?");
                 }
                 // also send over the wants
                 let mut to_move = HashMap::new();
-                for (want, amount) in self.desires.want_store.iter() {
+                for (want, amount) in self.property.want_store.iter() {
                     to_move.insert(*want, *amount);
                 }
                 for (want, amount) in to_move {
@@ -305,7 +303,7 @@ impl Pop {
                         want,
                         amount 
                     });
-                    self.desires.want_store.remove(&want)
+                    self.property.want_store.remove(&want)
                     .expect("Not found?");
                 }
                 // Tell the firm we've sent everything to them and they can continue on.
@@ -317,7 +315,7 @@ impl Pop {
             FirmEmployeeAction::RequestItem { product } => {
                 // firm is requesting a specifc item, send it to them, 
                 // if we don't have it, then send the empty anyway.
-                let amount = match self.desires.property.remove(&product) {
+                let amount = match self.property.property.remove(&product) {
                     Some(amount) => amount.total_property,
                     None => 0.0,
                 };
@@ -356,15 +354,15 @@ impl Pop {
             match msg {
                 ActorMessage::WantSplash { sender: _, want, amount } => {
                     // catch any splashed wants for a while.
-                    *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                    *self.property.want_store.entry(want).or_insert(0.0) += amount;
                 },
                 ActorMessage::SendProduct { 
                     sender: _, 
                     reciever: _, 
                     product, 
                     amount } => {
-                        self.desires.property.entry(product)
-                        .and_modify(|x| x.add_property(amount))
+                        self.property.property.entry(product)
+                        .and_modify(|x| {x.add_property(amount);})
                         .or_insert(PropertyInfo::new(amount));
                 },
                 ActorMessage::FirmToEmployee { firm: sender, 
@@ -434,17 +432,17 @@ impl Pop {
             // TODO add Seller Approaches Logic Here.
             ActorMessage::SendProduct { product, amount, .. } => {
                 // We're recieving a product, add to our unreserved amount.
-                self.desires.property.entry(product)
-                .and_modify(|x| x.add_property(amount))
+                self.property.property.entry(product)
+                .and_modify(|x| { x.add_property(amount); })
                 .or_insert(PropertyInfo::new(amount));
                 return None;
             },
             ActorMessage::SendWant { want, amount, .. } => {
-                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                *self.property.want_store.entry(want).or_insert(0.0) += amount;
                 return None;
             },
             ActorMessage::WantSplash { want, amount, .. } => {
-                *self.desires.want_store.entry(want).or_insert(0.0) += amount;
+                *self.property.want_store.entry(want).or_insert(0.0) += amount;
                 return None;
             },
             ActorMessage::FirmToEmployee { firm, employee: _,
@@ -485,12 +483,13 @@ impl Pop {
     market: &MarketHistory, 
     records: &mut HashMap<usize, PropertyInfo>,
     product: &usize) -> BuyResult {
+        // TODO update for property change.
         // get time cost for later
         let time_cost = self.standard_shop_time_cost(data);
         // get the amount we want to get and the unit price budget.
-        let mem = self.memory.product_knowledge
-        .get_mut(product).expect("Product not found?");
-        let price = mem.current_unit_budget();
+        //let mem = self.memory.product_knowledge.get_mut(product).expect("Product not found?");
+        // let price = mem.current_unit_budget();
+        let price = 1.0;
         // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
         let market_price = market.get_product_price(product, 0.0);
         if market_price > (price * constants::HARD_BUY_CAP) {
@@ -505,8 +504,8 @@ impl Pop {
             // subtract the time from our stock and add it to time spent
             // TODO Consider updating this to scale not just with population buying but also pop_efficiency gains.
             // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
-            self.desires.add_property(TIME_ID, -time_cost);
-            mem.time_spent += time_cost;
+            self.property.add_property(TIME_ID, -time_cost, data);
+            //mem.time_spent += time_cost;
             // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
             let _result = record.expend(time_cost);
         }
@@ -617,7 +616,7 @@ impl Pop {
 
     /// gets the total current wealth of the pop in question.
     pub fn total_wealth(&self, history: &MarketHistory) -> f64 {
-        self.desires.market_wealth(history)
+        self.property.market_wealth(history)
     }
 
     /// Gets the wealth of the pop on a per-capita basis.
@@ -778,25 +777,8 @@ impl Pop {
     /// 
     /// Our end of daily activities. Goes through our goods, consuming them
     /// and adding to our satisfaction.
-    pub fn consume_goods(&mut self, data: &DataManager, _history: &MarketHistory) {
-        // start by clearing out our old satisfaction
-        self.desires.clear_desires();
-        // put our property into the specific product desire slots
-        self.desires.sift_specific_products();
-        // TODO add non-specific satisfaction slots here.
-        // Consume Property to satisfy wants.
-        // TODO This should return products which were used or not used so that the remainder can possibly be maintained.
-        let used = self.desires.consume_and_sift_wants(data);
-        // track the consumed/used items from above and record that info for our purposes.
-        for (product, quant) in used {
-            if let Some(know) = self.memory.product_knowledge.get_mut(&product) {
-                know.used += quant;
-            }
-        }
-        // update our tiers satisfied
-        self.desires.update_satisfactions();
-        // TODO Maintenance would also go here.
-        // TODO should separate maintained products from unmaintained products here.
+    pub fn consume_goods(&mut self, _data: &DataManager, _history: &MarketHistory) {
+        todo!("This when we get back to it.")
     }
 
     /// # Decay Goods
@@ -905,8 +887,8 @@ impl Actor for Pop {
     _demos: &Demographics,
     history: &MarketHistory) {
         // before we even begin, add in the time we have for the day.
-        self.desires.add_property(TIME_ID, (self.breakdown_table.total as f64) * 
-            24.0 * self.breakdown_table.average_productivity());
+        self.property.add_property(TIME_ID, (self.breakdown_table.total as f64) * 
+            24.0 * self.breakdown_table.average_productivity(), data);
 
         // started up, so wait for the first message.
         match rx.recv().expect("Channel Broke.") {
@@ -915,15 +897,8 @@ impl Actor for Pop {
         }
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
-        self.desires.sift_specific_products();
-        for (_product_id, know) in self.memory.product_knowledge.iter_mut() {
-            know.achieved = 0.0; // reset knowledge info for the day.
-            know.spent = 0.0;
-            know.lost = 0.0;
-            know.time_spent = 0.0;
-            know.amv_spent = 0.0;
-        }
-        self.is_selling = if self.memory.is_disorganized { 
+        self.property.sift_specific_products();
+        self.is_selling = if self.property.is_disorganized { 
             true
         }
         else {

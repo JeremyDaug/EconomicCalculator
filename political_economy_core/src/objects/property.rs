@@ -17,7 +17,7 @@ use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::TIER_RATIO};
 
-use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, pop_memory::Knowledge, property_info::PropertyInfo};
+use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, property_info::PropertyInfo};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -29,8 +29,19 @@ pub struct Property {
     pub property: HashMap<usize, PropertyInfo>,
     /// The wants stored and not used up yet.
     pub want_store: HashMap<usize, f64>,
-    /// The data of our products to help us simplify and consolidate shopping.
-    pub shopping_data: HashMap<usize, Knowledge>,
+    /// Is Disorganized
+    pub is_disorganized: bool,
+    /// How much time we have worked on average over the past few days.
+    pub work_time: f64,
+    /// How much we were paid 'today' in AMV, Updated with each paycheck.
+    pub todays_wage: f64,
+    /// The divisor of our total paycheck when not paid daily.
+    pub pay_period: usize,
+    /// How much we have been paid directly, in AMV for the past few days.
+    pub wage_estimate: f64,
+    /// How much we have recieved from our employer indirectly, IE, Benefits packages
+    /// Want Splash, etc.
+    pub extra_benefits: f64,
     /// The processes we are planning to complete for consumption purposes.
     /// Includes the number of iterations we intend to do.
     /// Should be updated with changing property and reservations.
@@ -67,22 +78,29 @@ pub struct Property {
     pub market_satisfaction: f64,
     /// The highest tier of satisfaction reached by any desire.
     pub highest_tier: usize,
+    /// A sanity check bool.
+    /// 
+    /// If true, then our property is (hypothetically) correctly sifted.
+    /// Any added or removed property should correctly be added or removed 
+    /// from satisfaction as well as general property.
+    /// 
+    /// If false, then our property is certainly not sifted. Property we have
+    /// may not be correctly placed in satisfaction or our satisfaction
+    /// may be counting on property we no longer have.
+    /// 
+    /// Adding or removing desires, always unsifts our property. We also have
+    /// unsafe add or remove property, which adds or removes property but does
+    /// not sift it into desires.
+    pub is_sifted: bool,
 }
 
 impl Property {
     /// Creates a new desire collection based on a list of desires.
     pub fn new(desires: Vec<Desire>) -> Self {
-        let mut shopping_data: HashMap<usize, Knowledge> = HashMap::new();
-        for product in desires.iter()
-            .filter(|x| x.item.is_specific()) {
-                shopping_data.insert(product.item.unwrap().clone(), 
-                Knowledge::new());
-            }
         Property {
             desires,
             property: HashMap::new(),
             want_store: HashMap::new(),
-            shopping_data,
             full_tier_satisfaction: 0,
             hard_satisfaction: 0,
             quantity_satisfied: 0.0,
@@ -91,7 +109,14 @@ impl Property {
             highest_tier: 0,
             process_plan: HashMap::new(),
             process_expectations: HashMap::new(),
-            process_want_expectations: HashMap::new()
+            process_want_expectations: HashMap::new(),
+            is_disorganized: true,
+            work_time: 0.0,
+            wage_estimate: 0.0,
+            extra_benefits: 0.0,
+            todays_wage: 0.0,
+            pay_period: 1,
+            is_sifted: true
         }
     }
 
@@ -153,18 +178,56 @@ impl Property {
         // we have either run out of desires to possibly satisfy
     }
 
-    /// Adds an item to property and nothing else.
+    /// # Unsafe Add Property
     /// 
-    /// For more, do an add_and_sift
-    /// FIXME fuck this function, make it not shit.
-    pub fn add_property(&mut self, product: usize, amount: f64) {
-        if amount.is_sign_negative() { // if negative, skip
-            return;
-        } else  { // is being added
-            let data = self.property.entry(product)
-            .or_insert(PropertyInfo::new(0.0));
-            data.add_property(amount);
+    /// Adds (or removes) a items from our property unsafely. Removes from
+    /// unreserved first, then reserved, then specific reserves. Adds to
+    /// Unreserved.
+    /// 
+    /// This will break the sift on our poperty.
+    /// 
+    /// If subtracting more property than we have, this will clamp at 0.0.
+    /// 
+    /// TODO test this
+    pub fn unsafe_add_property(&mut self, product: usize, amount: f64) {
+        if amount == 0.0 { return; }
+        self.is_sifted = false;
+        if let Some(property) = self.property.get_mut(&product) {
+            property.add_property(amount);
         }
+    }
+
+    /// # Add Property
+    /// 
+    /// Adds or removes an item to property, returning the value gained (or lost)
+    /// by the addition (or subtraction).
+    /// 
+    /// If property is sifted, it maintains the sifted status.
+    /// 
+    /// ## Note
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if the value being subtracted is greater than our available property.
+    /// 
+    /// TODO Test This
+    pub fn add_property(&mut self, product: usize, amount: f64, data: &DataManager) -> TieredValue {
+        if amount < 0.0 { // if removing property, jump to remove.
+            return self.remove_property(product, -amount, data);
+        }
+        if !self.is_sifted { // if we aren't sifted, don't bother trying to properly sift.
+            self.unsafe_add_property(product, amount);
+            return TieredValue{ tier: 0, value: 0.0 };
+        }
+
+        // put into our property,
+        // then sift the product into our desires
+        // sift into specific desires
+        // then class desires
+        // then wants.
+        // TODO Pick up here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        todo!("Fix this to work correctly.") 
     }
 
     /// # Remove Property
@@ -172,21 +235,16 @@ impl Property {
     /// Removes a number of product units from property, if needed, it also
     /// removes it from satisfaction and reserves. 
     /// 
-    /// Returns how much was successfully removed and the tiered value lost.
-    pub fn remove_property(&mut self, product: usize, amount: f64, data: &DataManager) -> (f64, TieredValue) {
-        // get our data if we have any
-        if let Some(prop_data) = self.property.get_mut(&product) {
-            // try to remove from unreserved and reserved first.
-            let excess = prop_data.remove(amount);
-            let first_expense = amount - excess;
-            // if no excess after removing from unreserved and reserve, 
-            if excess == 0.0 { return (amount, TieredValue{ tier: 0, value: 0.0 }); }
-            // if excess remaining remove that from our satisfaction and specialty reserves.
-            let (used, value) = self.remove_satisfaction(product, excess, data);
-            return (used+first_expense, value);
-        } else { // if we don't own it, return zeroes.
-            return (0.0, TieredValue{ tier: 0, value: 0.0 });
-        }
+    /// Returns the Value lost by this removal.
+    /// 
+    /// If amount given is negative, it instead redirects, calling add property.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if the amount given is greater than our property available.
+    pub fn remove_property(&mut self, _product: usize, _amount: f64, 
+        _data: &DataManager) -> TieredValue {
+        todo!("Not made")
     }
 
     /// # Remove Satisfaction

@@ -209,7 +209,7 @@ mod tests {
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
              Property::Property, desire::{Desire, DesireItem},
-              species::Species, culture::Culture, ideology::Ideology, pop_memory::{PopMemory, Knowledge}, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo}, 
+              species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo}, 
               demographics::Demographics, data_manager::DataManager};
 
         pub fn make_test_pop() -> Pop {
@@ -221,10 +221,9 @@ mod tests {
                 skill: 0, 
                 lower_skill_level: 0.0, 
                 higher_skill_level: 0.0, 
-                desires: Property::new(vec![]), 
+                property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
-                memory: PopMemory::create_empty(),
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
@@ -443,26 +442,14 @@ mod tests {
             market.sale_priority.push(6);
             market.sale_priority.push(7);
 
-            pop.desires.property.insert(6, PropertyInfo::new(10.0));
-            pop.memory.product_priority.push(7);
-            // also add the pop's desire info
-            pop.memory.product_knowledge.insert(7, Knowledge{ target: 2.0, 
-                achieved: 0.0, 
-                spent: 0.0, 
-                lost: 0.0, 
-                used: 0.0,
-                time_budget: 10.0, 
-                amv_budget: 11.0, 
-                time_spent: 0.0, 
-                amv_spent: 0.0, 
-                success_rate: 0.5,
-                rollover: 0.0});
+            pop.property.property.insert(6, PropertyInfo::new(10.0));
+            // TODO fix this info.
 
             (data, market)
         }
         
         mod decay_goods_should {
-            use crate::{objects::{want::Want, product::Product, process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}, pop_memory::Knowledge}, data_manager::DataManager};
+            use crate::{objects::{want::Want, product::Product, process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
 
             use super::make_test_pop;
 
@@ -567,46 +554,36 @@ mod tests {
                 data.processes.insert(0, process0);
 
                 // update pop's property 1 of each product and want
-                test.desires.want_store.insert(0, 1.0);
-                test.desires.want_store.insert(1, 1.0);
-                test.desires.want_store.insert(2, 1.0);
-                test.desires.add_property(0, 1.0);
-                test.desires.add_property(1, 1.0);
-                test.desires.add_property(2, 1.0);
-                test.desires.add_property(3, 1.0);
+                test.property.want_store.insert(0, 1.0);
+                test.property.want_store.insert(1, 1.0);
+                test.property.want_store.insert(2, 1.0);
+                test.property.add_property(0, 1.0, &data);
+                test.property.add_property(1, 1.0, &data);
+                test.property.add_property(2, 1.0, &data);
+                test.property.add_property(3, 1.0, &data);
 
                 // add knowledge for each.
-                test.memory.product_knowledge.insert(0, Knowledge::new());
-                test.memory.product_knowledge.insert(1, Knowledge::new());
-                test.memory.product_knowledge.insert(2, Knowledge::new());
-                test.memory.product_knowledge.insert(3, Knowledge::new());
+                // TODO check this later.
 
                 test.decay_goods(&data);
                 // check wants
-                assert!(test.desires.want_store.get(&0).is_none());
-                assert!(*test.desires.want_store.get(&1).unwrap() == 2.0);
-                assert!(*test.desires.want_store.get(&2).unwrap() == 0.5);
+                assert!(test.property.want_store.get(&0).is_none());
+                assert!(*test.property.want_store.get(&1).unwrap() == 2.0);
+                assert!(*test.property.want_store.get(&2).unwrap() == 0.5);
                 // check property
-                assert!(test.desires.property.get(&0).is_none());
-                assert!(test.desires.property.get(&1).unwrap().total_property == 0.5);
-                assert!(test.desires.property.get(&2).unwrap().total_property == 2.0);
-                assert!(test.desires.property.get(&3).is_none());
+                assert!(test.property.property.get(&0).is_none());
+                assert!(test.property.property.get(&1).unwrap().total_property == 0.5);
+                assert!(test.property.property.get(&2).unwrap().total_property == 2.0);
+                assert!(test.property.property.get(&3).is_none());
                 // check knowledge.
-                assert!(test.memory.product_knowledge.get(&0)
-                    .unwrap().lost == 1.0);
-                assert!(test.memory.product_knowledge.get(&1)
-                    .unwrap().lost == 0.5);
-                assert!(test.memory.product_knowledge.get(&2)
-                    .unwrap().lost == 0.0);
-                assert!(test.memory.product_knowledge.get(&3)
-                    .unwrap().lost == 1.0);
+                // TODO check this later.
             }
         }
 
         mod free_time {
             use std::{thread, time::Duration};
 
-            use crate::{objects::{actor_message::ActorMessage, seller::Seller, pop_memory::Knowledge, property_info::PropertyInfo}, constants::TIME_ID};
+            use crate::{objects::{actor_message::ActorMessage, seller::Seller, property_info::PropertyInfo}, constants::TIME_ID};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -623,7 +600,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.desires.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 100.0));
+                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 100.0));
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -672,7 +649,7 @@ mod tests {
                 if !handle.is_finished() { assert!(false); }
                 let test = handle.join().unwrap();
 
-                assert!(test.desires.property.get(&TIME_ID).unwrap().total_property == 100.0);
+                assert!(test.property.property.get(&TIME_ID).unwrap().total_property == 100.0);
             }
 
             /// This is a test to touch most of the free time stuff just to 
@@ -687,21 +664,8 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.desires.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 1.0));
+                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 1.0));
                 // add an additional product to the priority list
-                test.memory.product_priority.push(5);
-                // and add desire for that
-                test.memory.product_knowledge.insert(5, Knowledge{ target: 2.0, 
-                    achieved: 0.0, 
-                    spent: 0.0, 
-                    lost: 0.0, 
-                    used: 0.0,
-                    time_budget: 10.0, 
-                    amv_budget: 11.0, 
-                    time_spent: 0.0, 
-                    amv_spent: 0.0, 
-                    success_rate: 0.5,
-                    rollover: 0.0});
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -753,7 +717,7 @@ mod tests {
                 if !handle.is_finished() { assert!(false); }
                 let test = handle.join().unwrap();
 
-                assert!(test.desires.property.get(&TIME_ID).unwrap().total_property == 1.0);
+                assert!(test.property.property.get(&TIME_ID).unwrap().total_property == 1.0);
             }
         }
 
@@ -767,10 +731,9 @@ mod tests {
                 skill: 0, 
                 lower_skill_level: 0.0, 
                 higher_skill_level: 0.0, 
-                desires: Property::new(vec![]), 
+                property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
-                memory: PopMemory::create_empty(),
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
@@ -907,29 +870,29 @@ mod tests {
 
             test.update_desires(demos);
 
-            assert_eq!(test.desires.len(), 6);
+            assert_eq!(test.property.len(), 6);
             // species desire 1 x 20
-            let desire_test = test.desires.desires.iter()
+            let desire_test = test.property.desires.iter()
             .find(|x| x.item == DesireItem::Product(0)).expect("Item Not found");
             assert_eq!(desire_test.amount, 20.0);
             // species desire 1 x 20
-            let desire_test = test.desires.desires.iter()
+            let desire_test = test.property.desires.iter()
             .find(|x| x.item == DesireItem::Product(1)).expect("Item Not found");
             assert_eq!(desire_test.amount, 20.0);
             // culture desire 1 x 10
-            let desire_test = test.desires.desires.iter()
+            let desire_test = test.property.desires.iter()
             .find(|x| x.item == DesireItem::Product(2)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
             // culture desire 2 x 10
-            let desire_test = test.desires.desires.iter()
+            let desire_test = test.property.desires.iter()
             .find(|x| x.item == DesireItem::Product(3)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
             // ideology desire 1 x 10
-            let desire_test = test.desires.desires.iter()
+            let desire_test = test.property.desires.iter()
             .find(|x| x.item == DesireItem::Product(4)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
             // ideology desire 1 x 10
-            let desire_test = test.desires.desires.iter()
+            let desire_test = test.property.desires.iter()
             .find(|x| x.item == DesireItem::Product(5)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
 
@@ -1011,7 +974,7 @@ mod tests {
                 let mut keep = HashMap::new();
 
                 keep.insert(6, 
-                        PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property + 10.0));
+                        PropertyInfo::new(test.property.property.get(&6).unwrap().total_property + 10.0));
 
                 let handle = thread::spawn(move || {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
@@ -1034,8 +997,8 @@ mod tests {
                 let test = handle.join().unwrap();
 
                 // ensure that the seller hasn't sold anything
-                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
-                assert!(test.desires.property.get(&7).is_none());
+                assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&7).is_none());
             }
 
             #[test]
@@ -1050,8 +1013,8 @@ mod tests {
                 // setup firm we're talking with
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
-                test.desires.property.clear();
-                test.desires.property.insert(7, PropertyInfo::new(10.0));
+                test.property.property.clear();
+                test.property.property.insert(7, PropertyInfo::new(10.0));
                 let mut keep = HashMap::new();
                 keep.insert(7, PropertyInfo::new(10.0));
 
@@ -1087,8 +1050,8 @@ mod tests {
                 let test = handle.join().unwrap();
 
                 // ensure that the seller hasn't sold anything
-                assert!(test.desires.property.get(&7).unwrap().total_property == 10.0);
-                assert!(test.desires.property.get(&6).is_none());
+                assert!(test.property.property.get(&7).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&6).is_none());
             }
 
             #[test]
@@ -1103,8 +1066,8 @@ mod tests {
                 // setup firm we're talking with
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
-                test.desires.property.clear();
-                test.desires.property.insert(7, PropertyInfo::new(10.0));
+                test.property.property.clear();
+                test.property.property.insert(7, PropertyInfo::new(10.0));
                 let mut keep = HashMap::new();
                 keep.insert(7, PropertyInfo::new(10.0));
 
@@ -1156,8 +1119,8 @@ mod tests {
                 }
 
                 // ensure that the seller hasn't sold anything
-                assert!(test.desires.property.get(&7).unwrap().total_property == 10.0);
-                assert!(test.desires.property.get(&6).is_none());
+                assert!(test.property.property.get(&7).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&6).is_none());
                 assert_eq!(returned.len(), 0);
             }
 
@@ -1173,8 +1136,8 @@ mod tests {
                 // setup firm we're talking with
                 let buyer = ActorInfo::Firm(1);
                 // update the property and spend to have product 7.
-                test.desires.property.clear();
-                test.desires.property.insert(7, PropertyInfo::new(10.0));
+                test.property.property.clear();
+                test.property.property.insert(7, PropertyInfo::new(10.0));
                 let mut keep = HashMap::new();
                 keep.insert(7, PropertyInfo::new(10.0));
 
@@ -1225,8 +1188,8 @@ mod tests {
                 } else { assert!(false); }
 
                 // ensure that the seller has sold correctly
-                assert!(test.desires.property.get(&7).unwrap().total_property == 9.0);
-                assert!(test.desires.property.get(&6).is_none());
+                assert!(test.property.property.get(&7).unwrap().total_property == 9.0);
+                assert!(test.property.property.get(&6).is_none());
                 assert!(*returned.get(&6).unwrap() == 6.0);
             }
 
@@ -1588,8 +1551,8 @@ mod tests {
                 let (data, _market) = prepare_data_for_market_actions(&mut test);
                 // add the pop's time to work from memory
                 let work_time = 10.0;
-                test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.property.work_time = work_time;
+                test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1617,7 +1580,7 @@ mod tests {
                 let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
                 assert!(rx_msg.is_none());
                 // check that the pop has reduced it's time appropriately.
-                assert_eq!(test.desires.property.get(&TIME_ID).unwrap().total_property, 10.0);
+                assert_eq!(test.property.property.get(&TIME_ID).unwrap().total_property, 10.0);
             }
 
             #[test]
@@ -1626,12 +1589,12 @@ mod tests {
                 let (data, _market) = prepare_data_for_market_actions(&mut test);
                 // add the pop's time to work from memory
                 let work_time = 10.0;
-                test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, PropertyInfo::new(20.0));
-                test.desires.property.insert(3, PropertyInfo::new(10.0));
-                test.desires.property.insert(5, PropertyInfo::new(10.0));
-                test.desires.want_store.insert(4, 20.0);
-                test.desires.want_store.insert(6, 5.0);
+                test.property.work_time = work_time;
+                test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.property.property.insert(3, PropertyInfo::new(10.0));
+                test.property.property.insert(5, PropertyInfo::new(10.0));
+                test.property.want_store.insert(4, 20.0);
+                test.property.want_store.insert(6, 5.0);
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1681,8 +1644,8 @@ mod tests {
                 assert!(finisher_recieved);
 
                 // and assert that those items have been removed from the pop
-                assert!(test.desires.property.is_empty());
-                assert!(test.desires.want_store.is_empty());
+                assert!(test.property.property.is_empty());
+                assert!(test.property.want_store.is_empty());
             }
         
             #[test]
@@ -1691,12 +1654,12 @@ mod tests {
                 let (data, _market) = prepare_data_for_market_actions(&mut test);
                 // add the pop's time to work from memory
                 let work_time = 10.0;
-                test.memory.work_time = work_time;
-                test.desires.property.insert(TIME_ID, PropertyInfo::new(20.0));
-                test.desires.property.insert(3, PropertyInfo::new(10.0));
-                test.desires.property.insert(5, PropertyInfo::new(10.0));
-                test.desires.want_store.insert(4, 20.0);
-                test.desires.want_store.insert(6, 5.0);
+                test.property.work_time = work_time;
+                test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.property.property.insert(3, PropertyInfo::new(10.0));
+                test.property.property.insert(5, PropertyInfo::new(10.0));
+                test.property.want_store.insert(4, 20.0);
+                test.property.want_store.insert(6, 5.0);
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1723,13 +1686,13 @@ mod tests {
                 assert_eq!(*rec_prods.get(&3).unwrap(), 10.0);
 
                 // and assert that those items have been removed from the pop
-                assert_eq!(test.desires.property.len(), 2);
-                assert_eq!(test.desires.property.get(&TIME_ID).unwrap().total_property, 20.0);
-                assert_eq!(test.desires.property.get(&5).unwrap().total_property, 10.0);
-                assert!(!test.desires.property.contains_key(&3));
-                assert_eq!(test.desires.want_store.len(), 2);
-                assert_eq!(*test.desires.want_store.get(&4).unwrap(), 20.0);
-                assert_eq!(*test.desires.want_store.get(&6).unwrap(), 5.0);
+                assert_eq!(test.property.property.len(), 2);
+                assert_eq!(test.property.property.get(&TIME_ID).unwrap().total_property, 20.0);
+                assert_eq!(test.property.property.get(&5).unwrap().total_property, 10.0);
+                assert!(!test.property.property.contains_key(&3));
+                assert_eq!(test.property.want_store.len(), 2);
+                assert_eq!(*test.property.want_store.get(&4).unwrap(), 20.0);
+                assert_eq!(*test.property.want_store.get(&6).unwrap(), 5.0);
             }
         }
 
@@ -1803,7 +1766,7 @@ mod tests {
                 let test = handler.join().unwrap();
                 
                 // check that the want was recieved
-                assert_eq!(*test.desires.want_store.get(&0).unwrap(), 10.0);
+                assert_eq!(*test.property.want_store.get(&0).unwrap(), 10.0);
             }
 
             #[test]
@@ -1841,7 +1804,7 @@ mod tests {
                 let test = handler.join().unwrap();
                 
                 // check that the want was recieved
-                assert_eq!(test.desires.property.get(&10).unwrap().total_property, 10.0);
+                assert_eq!(test.property.property.get(&10).unwrap().total_property, 10.0);
             }
 
             #[test]
@@ -2279,7 +2242,7 @@ mod tests {
     
         mod standard_buy {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo}, constants::{UNABLE_TO_PURCHASE_REDUCTION, SUCCESSFUL_PURCHASE_INCREASE}};
+            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -2297,7 +2260,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2320,14 +2283,10 @@ mod tests {
                     assert_eq!(OfferResult::OutOfStock, reason);
                 } else { assert!(false); }
                 // check that nothing was gained or lost.
-                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
-                assert!(test.desires.property.get(&7).is_none());
+                assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&7).is_none());
                 // check pop memory for the products as well.
-                assert!(test.memory.product_knowledge.get(&5).is_none());
-                assert!(test.memory.product_knowledge.get(&6).is_none());
-                assert!(test.memory.product_knowledge.get(&7).unwrap().achieved == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().spent == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().success_rate == 0.5 * UNABLE_TO_PURCHASE_REDUCTION);
+                // TODO check info here.
             }
 
             #[test]
@@ -2345,7 +2304,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2401,15 +2360,10 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(test.desires.property.get(&6).unwrap().total_property == 5.0);
-                assert!(test.desires.property.get(&7).unwrap().total_property == 2.0);
+                assert!(test.property.property.get(&6).unwrap().total_property == 5.0);
+                assert!(test.property.property.get(&7).unwrap().total_property == 2.0);
                 // check pop memory for the products as well.
-                assert!(test.memory.product_knowledge.get(&5).is_none());
-                assert!(test.memory.product_knowledge.get(&6).unwrap().achieved == 0.0);
-                assert!(test.memory.product_knowledge.get(&6).unwrap().spent == 5.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().achieved == 2.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().spent == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().success_rate == 0.5 * SUCCESSFUL_PURCHASE_INCREASE);
+                // TODO Check product movements
             }
 
             #[test]
@@ -2427,7 +2381,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().unreserved));
+                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().unreserved));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2494,19 +2448,13 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(test.desires.property.get(&5).unwrap().total_property == 1.0);
-                assert!(test.desires.property.get(&6).unwrap().total_property == 6.0);
-                assert!(test.desires.property.get(&7).unwrap().total_property == 2.0);
+                assert!(test.property.property.get(&5).unwrap().total_property == 1.0);
+                assert!(test.property.property.get(&6).unwrap().total_property == 6.0);
+                assert!(test.property.property.get(&7).unwrap().total_property == 2.0);
                 // check returned correctly includes items.
                 assert!(spend.get(&5).unwrap().unreserved == 1.0);
                 // check pop memory for the products as well.
-                assert!(test.memory.product_knowledge.get(&5).unwrap().achieved == 1.0);
-                assert!(test.memory.product_knowledge.get(&5).unwrap().spent == 0.0);
-                assert!(test.memory.product_knowledge.get(&6).unwrap().achieved == 0.0);
-                assert!(test.memory.product_knowledge.get(&6).unwrap().spent == 4.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().achieved == 2.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().spent == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().success_rate == 0.5 * SUCCESSFUL_PURCHASE_INCREASE);
+                // TODO check this stuff again.
             }
 
             #[test]
@@ -2524,7 +2472,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2583,15 +2531,11 @@ mod tests {
                     assert!(reason == OfferResult::Rejected);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
-                assert!(test.desires.property.get(&7).is_none());
+                assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&7).is_none());
                 assert_eq!(returned.len(), 0);
                 // check pop memory for the products as well.
-                assert!(test.memory.product_knowledge.get(&5).is_none());
-                assert!(test.memory.product_knowledge.get(&6).is_none());
-                assert!(test.memory.product_knowledge.get(&7).unwrap().achieved == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().spent == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().success_rate == 0.5 * UNABLE_TO_PURCHASE_REDUCTION);
+                // TODO update checks
             }
 
             #[test]
@@ -2609,7 +2553,7 @@ mod tests {
                 let mut spend = HashMap::new();
 
                 // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.desires.property.get(&6).unwrap().total_property));
+                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
@@ -2668,15 +2612,11 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(test.desires.property.get(&6).unwrap().total_property == 10.0);
-                assert!(test.desires.property.get(&7).is_none());
+                assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&7).is_none());
                 assert_eq!(returned.len(), 0);
                 // check pop memory for the products as well.
-                assert!(test.memory.product_knowledge.get(&5).is_none());
-                assert!(test.memory.product_knowledge.get(&6).is_none());
-                assert!(test.memory.product_knowledge.get(&7).unwrap().achieved == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().spent == 0.0);
-                assert!(test.memory.product_knowledge.get(&7).unwrap().success_rate == 0.5 * UNABLE_TO_PURCHASE_REDUCTION);
+                // TODO recheck here
             }
         }
     }
@@ -3125,9 +3065,9 @@ mod tests {
                     technology_requirement: None, 
                     tertiary_tech: None });
                 
-                test.add_property(0, 1.0);
-                test.add_property(1, 1.0);
-                test.add_property(2, 1.0);
+                test.add_property(0, 1.0, &data);
+                test.add_property(1, 1.0, &data);
+                test.add_property(2, 1.0, &data);
 
                 let result = test.consume_and_sift_wants(&data);
                 
@@ -3173,7 +3113,7 @@ mod tests {
                     satisfaction: 3.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Property::new(test_desires);
+                let test = Property::new(test_desires);
                 let mut product_info = HashMap::new();
                 product_info.insert(0, ProductInfo{
                     available: 0.0,
@@ -3196,8 +3136,9 @@ mod tests {
                     sale_priority: vec![],
                     currencies: vec![],
                 };
-                test.add_property(0, 4.0);
-                test.add_property(1, 5.0);
+                // TODO fix this
+                //test.add_property(0, 4.0);
+                //test.add_property(1, 5.0);
                 let result = test.market_wealth(&test_market);
                 assert!(result == 29.0);
             }
@@ -3225,18 +3166,19 @@ mod tests {
                     satisfaction: 3.0,
                     step: 2,
                     tags: vec![]});
-                let mut test = Property::new(test_desires);
+                let test = Property::new(test_desires);
                 // insert new
-                test.add_property(0, 10.0);
+                // TODO fix these.
+                // test.add_property(0, 10.0);
                 assert!(test.property.get(&0).unwrap().total_property == 10.0);
                 // insert to existing
-                test.add_property(0, 10.0);
+                //test.add_property(0, 10.0);
                 assert!(test.property.get(&0).unwrap().total_property == 20.0);
                 // remove partial
-                test.add_property(0, -10.0);
+                //test.add_property(0, -10.0);
                 assert!(test.property.get(&0).unwrap().total_property == 10.0);
                 // remove excess
-                test.add_property(0, -15.0);
+                //test.add_property(0, -15.0);
                 assert!(!test.property.contains_key(&0));
             }
         }
