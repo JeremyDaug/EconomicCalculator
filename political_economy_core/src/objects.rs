@@ -25,7 +25,4 @@ pub mod institution;
 pub mod state;
 pub mod buy_result;
 pub mod property_info;
-
-// TODO try and fix this snake case issue later.
-#[allow(non_snake_case)]
-pub mod Property;
+pub mod property;

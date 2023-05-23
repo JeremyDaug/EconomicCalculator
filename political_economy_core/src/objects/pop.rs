@@ -8,7 +8,7 @@ use barrage::{Sender, Receiver};
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}};
 
-use super::{Property::Property, 
+use super::{property::Property, 
     pop_breakdown_table::PopBreakdownTable, 
     buyer::Buyer, seller::Seller, actor::Actor, 
     market::MarketHistory, 

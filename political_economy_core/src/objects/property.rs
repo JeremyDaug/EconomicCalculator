@@ -221,11 +221,105 @@ impl Property {
         }
 
         // put into our property,
+        self.property.entry(product)
+            .and_modify(|x| { x.add_property(amount); })
+            .or_insert(PropertyInfo::new(amount));
+        // break out amount for each so we can try to satsify them appropriately.
+        let mut specific_amount = amount;
+        let mut class_amount = amount;
+        let mut want_amount = amount;
+        // get class for checking
+        let prod_class = data.get_product_class(product);
+        // and record desires we've already visited and failed to do anything with
+        let mut cleared = HashSet::new();
         // then sift the product into our desires
-        // sift into specific desires
+        let mut current_coord = 
+            Some(DesireCoord { tier: self.hard_satisfaction-1, idx: self.desires.len() });
+        // quickly get all those disers which we already passed up
+        for (idx, desire) in self.desires.iter().enumerate() {
+            if desire.past_end(self.hard_satisfaction) {
+                cleared.insert(idx);
+            }
+        }
+        while let Some(coords) = self.walk_up_tiers(current_coord) {
+            current_coord = Some(coords);
+            if specific_amount == 0.0 && class_amount == 0.0 && want_amount == 0.0 {
+                break; // if we've used all of our amounts, gtfo.
+            }
+            if cleared.len() == self.desires.len() {
+                break; // if we cleared all desires, get out.
+            }
+            if cleared.contains(&coords.idx) {
+                continue; // If the desire is already in skip and go to the next step.
+            }
+            let mut desire = self.desires.get_mut(coords.idx).unwrap();
+            match desire.item {
+                DesireItem::Want(want) => {
+                    // if it's a want, check that this product can satisfy that want.
+
+                    // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                },
+                DesireItem::Class(class) => { // if product class
+                    // check stuff left to spent
+                    if class_amount == 0.0 {
+                        cleared.insert(coords.idx);
+                        continue;
+                    }
+                    if let None = prod_class { // check if we have the class
+                        cleared.insert(coords.idx);
+                        continue;
+                    }
+                    // if we do, then check the classes match.
+                    let prod_class = prod_class.unwrap();
+                    if prod_class != class {
+                        cleared.insert(coords.idx);
+                        continue;
+                    }
+                    // if it is our class and we have some amount to shift left, do so
+                    let remainder = (desire.amount - desire.satisfaction_at_tier(coords.tier))
+                        .min(class_amount);
+                    class_amount -= remainder; // remove from local
+                    self.property.get_mut(&product) // shift to class reserve
+                        .unwrap().shift_to_class_reserve(remainder);
+                    desire.satisfaction += remainder; // add to satisfaction
+                    if let Some(last) = desire.end { // check if last tier
+                        if last == coords.tier {
+                            cleared.insert(coords.idx);
+                            continue;
+                        }
+                    }
+
+                },
+                DesireItem::Product(specific) => { // if specic item.
+                    // if we don't have any more specific amount to spend, record and continue.
+                    if specific_amount == 0.0 {
+                        cleared.insert(coords.idx);
+                        continue;
+                    }
+                    // if product, check that it's our specific product
+                    if product != specific { // if not, add to cleared and continue.
+                        cleared.insert(coords.idx);
+                        continue; 
+                    }
+                    // if it is, try to satisfy.
+                    // get the amount we need to satisfy (capped at our ability to satisfy)
+                    let remainder = (desire.amount - desire.satisfaction_at_tier(coords.tier))
+                        .min(specific_amount);
+                    specific_amount -= remainder; // remove from local
+                    self.property.get_mut(&product) // shift property
+                        .unwrap().shift_to_specific_reserve(remainder);
+                    desire.satisfaction += remainder; // add to satisfaction.
+                    if let Some(last) = desire.end { // check if last tier.
+                        if last == coords.tier {
+                            cleared.insert(coords.idx);
+                            continue;
+                        }
+                    }
+                },
+            }
+        }
         // then class desires
         // then wants.
-        // TODO Pick up here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         todo!("Fix this to work correctly.") 
     }

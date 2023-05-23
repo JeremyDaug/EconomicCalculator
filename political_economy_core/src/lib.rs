@@ -208,7 +208,7 @@ mod tests {
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
-             Property::Property, desire::{Desire, DesireItem},
+             property::Property, desire::{Desire, DesireItem},
               species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo}, 
               demographics::Demographics, data_manager::DataManager};
 
@@ -2934,12 +2934,12 @@ mod tests {
     }
 
     mod desires_tests {
-        use crate::objects::{Property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo};
+        use crate::objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo};
 
         mod consume_and_sift_wants_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{Property::Property, desire::{DesireItem, Desire}, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}, data_manager::DataManager};
+            use crate::{objects::{property::Property, desire::{DesireItem, Desire}, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}, data_manager::DataManager};
 
             #[test]
             pub fn correctly_sift_wants_directly() {
@@ -3092,7 +3092,7 @@ mod tests {
         mod market_wealth_should {
             use std::collections::HashMap;
 
-            use crate::objects::{desire::{Desire, DesireItem}, Property::Property, market::{MarketHistory, ProductInfo}};
+            use crate::objects::{desire::{Desire, DesireItem}, property::Property, market::{MarketHistory, ProductInfo}};
 
             #[test]
             pub fn return_the_total_amv_of_property() {
@@ -3145,7 +3145,7 @@ mod tests {
         }
 
         mod add_property_should {
-            use crate::objects::{desire::{Desire, DesireItem}, Property::Property};
+            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
 
             #[test]
             pub fn add_or_insert_products_into_property_and_remove_correctly() {
@@ -3186,7 +3186,7 @@ mod tests {
         mod market_satisfaction_should {
             use std::collections::HashMap;
 
-            use crate::objects::{desire::{Desire, DesireItem}, Property::Property, market::{MarketHistory, ProductInfo}};
+            use crate::objects::{desire::{Desire, DesireItem}, property::Property, market::{MarketHistory, ProductInfo}};
 
             #[test]
             pub fn return_correct_market_satisfaction() {
@@ -3236,7 +3236,7 @@ mod tests {
         }
 
         mod update_satisfactions_should {
-            use crate::objects::{desire::{Desire, DesireItem}, Property::Property};
+            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
 
             #[test]
             pub fn correctly_update_satisfaction() {
@@ -3277,7 +3277,7 @@ mod tests {
         }
 
         mod remove_property_should {
-            use crate::objects::{Property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo};
+            use crate::objects::{property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo};
 
             #[test]
             pub fn correctly_remove_item_from_property_and_satisfaction() {
