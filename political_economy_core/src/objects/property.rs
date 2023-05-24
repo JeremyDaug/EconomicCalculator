@@ -230,6 +230,25 @@ impl Property {
         let mut want_amount = amount;
         // get class for checking
         let prod_class = data.get_product_class(product);
+        // also extract property into more usable form for updating processes
+        let mut property_sum = HashMap::new();
+        for (&product, info) in self.property.iter() {
+            property_sum.insert(product, info.total_property);
+        }
+        // and pre-emptively remove based on our previously planned processes.
+        for (proc_id, iters) in self.process_plan.iter() {
+            let process = data.processes.get(proc_id).unwrap();
+            let output = process.do_process(&property_sum, 
+                &self.want_store, 0.0, 0.0, Some(*iters), 
+                true, data);
+            for (input, amount) in output.input_output_products.iter()
+            .filter(|(_, &amount)| amount < 0.0) {
+                property_sum.entry(*input).and_modify(|x| *x += amount);
+            }
+            for (capital, amount) in output.capital_products.iter() {
+                property_sum.entry(*capital).and_modify(|x| *x -= amount);
+            }
+        }
         // and record desires we've already visited and failed to do anything with
         let mut cleared = HashSet::new();
         // then sift the product into our desires
@@ -256,7 +275,15 @@ impl Property {
             match desire.item {
                 DesireItem::Want(want) => {
                     // if it's a want, check that this product can satisfy that want.
+                    let want_info = data.wants.get(&want).unwrap();
+                    // start with ownership sources
+                    if want_info.ownership_sources.contains(&product) {
+                        let prod_info = data.products.get(&product).unwrap();
+                        // our product can satisfy this, so reserve what is needed to satisfy.
+                    }
 
+                    //let procs = Vec![];
+                    for proc in want_info.use_sources
                     // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 },
                 DesireItem::Class(class) => { // if product class
