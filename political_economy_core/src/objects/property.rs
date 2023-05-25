@@ -220,7 +220,7 @@ impl Property {
             return TieredValue{ tier: 0, value: 0.0 };
         }
 
-        // put into our property,
+        // put into our property
         self.property.entry(product)
             .and_modify(|x| { x.add_property(amount); })
             .or_insert(PropertyInfo::new(amount));
@@ -235,11 +235,16 @@ impl Property {
         for (&product, info) in self.property.iter() {
             property_sum.insert(product, info.total_property);
         }
+        let mut want_buffer = HashMap::new(); // same with wants
+        for (&want, &amount) in self.want_store.iter() {
+            want_buffer.insert(want, amount);
+        }
         // and pre-emptively remove based on our previously planned processes.
         for (proc_id, iters) in self.process_plan.iter() {
+            // TODO This does not take into account processes that overlap with Optional Goods.
             let process = data.processes.get(proc_id).unwrap();
             let output = process.do_process(&property_sum, 
-                &self.want_store, 0.0, 0.0, Some(*iters), 
+                &want_buffer, 0.0, 0.0, Some(*iters), 
                 true, data);
             for (input, amount) in output.input_output_products.iter()
             .filter(|(_, &amount)| amount < 0.0) {
@@ -248,18 +253,22 @@ impl Property {
             for (capital, amount) in output.capital_products.iter() {
                 property_sum.entry(*capital).and_modify(|x| *x -= amount);
             }
+            for (&want, amount) in output.input_output_wants.iter()
+            .filter(|x| *x.1 < 0.0) {
+                want_buffer.entry(want).and_modify(|x| *x += amount);
+            }
         }
         // and record desires we've already visited and failed to do anything with
         let mut cleared = HashSet::new();
-        // then sift the product into our desires
-        let mut current_coord = 
-            Some(DesireCoord { tier: self.hard_satisfaction-1, idx: self.desires.len() });
         // quickly get all those disers which we already passed up
         for (idx, desire) in self.desires.iter().enumerate() {
             if desire.past_end(self.hard_satisfaction) {
                 cleared.insert(idx);
             }
         }
+        // then sift the product into our desires
+        let mut current_coord = 
+            Some(DesireCoord { tier: self.hard_satisfaction-1, idx: self.desires.len() });
         while let Some(coords) = self.walk_up_tiers(current_coord) {
             current_coord = Some(coords);
             if specific_amount == 0.0 && class_amount == 0.0 && want_amount == 0.0 {
@@ -274,31 +283,61 @@ impl Property {
             let mut desire = self.desires.get_mut(coords.idx).unwrap();
             match desire.item {
                 DesireItem::Want(want) => {
-                    // if it's a want, check that this product can satisfy that want.
+                    if want_amount == 0.0 { // if nothing to expend here, clear
+                        cleared.insert(coords.idx);
+                        continue;
+                    }
+                    // get the want's info to check against it.
                     let want_info = data.wants.get(&want).unwrap();
                     // start with ownership sources
-                    if want_info.ownership_sources.contains(&product) {
+                    if want_info.ownership_sources.contains(&product) { // if our product is an ownership source, check it.
+                        // TODO if the product can satisfy multiple wants via ownership, and we want those things, figure out how to add them here. (temp want excess pool!)
                         let prod_info = data.products.get(&product).unwrap();
-                        // our product can satisfy this, so reserve what is needed to satisfy.
+                         // how much we need to satisfy the tier.
+                        let remaining_satisfaction = desire.amount - desire.satisfaction_at_tier(coords.tier);
+                        let eff = prod_info.wants.get(&want).unwrap(); // want per product owned
+                        let target = remaining_satisfaction / eff; // the target amount to satisfy the current tier
+                        let available = target.min(want_amount); // cap at available want product.
+                        let sat = available * eff; // the satisfaction we actually create.
+                        desire.satisfaction += sat;  // add to satisfaction
+                        want_amount -= available; // remvoe from local
+                        self.property.get_mut(&product)
+                            .unwrap().shift_to_want_reserve(available); // shift property
+                        // remove from local property
+                        property_sum.entry(product).and_modify(|x| *x -= available);
+                        if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
+                            if desire.past_end(coords.tier + 1) {
+                                cleared.insert(coords.idx); // if no next tier, add to cleared.
+                            }
+                            continue;
+                        }
                     }
-
-                    //let procs = Vec![];
-                    for proc in want_info.use_sources
-                    // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // now go for processes.
+                    // start with use processes
+                    for proc in want_info.use_sources.iter() {
+                        let process = data.processes.get(proc).unwrap();
+                        if process.accept_product_as_input(product, data) {
+                            // get how much an iteration will output
+                            let eff = process.effective_output_of(PartItem::Want(want));
+                            let target = desire.amount / eff;
+                            // if the process accepts our product as input, try it.
+                            let results = process.do_process(&property_sum, 
+                                &want_buffer, 0.0, 
+                                0.0, Some(target), 
+                                true, data);
+                            // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        }
+                    }
+                    
                 },
                 DesireItem::Class(class) => { // if product class
-                    // check stuff left to spent
-                    if class_amount == 0.0 {
+                    if class_amount == 0.0 || // if nothing to spend
+                    prod_class.is_none() { // or prod has no class, clear
                         cleared.insert(coords.idx);
                         continue;
                     }
-                    if let None = prod_class { // check if we have the class
-                        cleared.insert(coords.idx);
-                        continue;
-                    }
-                    // if we do, then check the classes match.
                     let prod_class = prod_class.unwrap();
-                    if prod_class != class {
+                    if prod_class != class { // if class doesn't match clear
                         cleared.insert(coords.idx);
                         continue;
                     }
@@ -315,7 +354,6 @@ impl Property {
                             continue;
                         }
                     }
-
                 },
                 DesireItem::Product(specific) => { // if specic item.
                     // if we don't have any more specific amount to spend, record and continue.
@@ -454,7 +492,7 @@ impl Property {
                     (data.processes.get(id).expect("Process Not Found."), iterations)
                 })
                 .filter(|(process, _iterations)| {
-                    process.accepts_as_input(product, data)
+                    process.accept_product_as_input(product, data)
                 }) {
                     // if the process takes this product, record it.
                     valid_processes.insert(process.id);

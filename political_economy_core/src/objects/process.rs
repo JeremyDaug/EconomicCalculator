@@ -464,7 +464,7 @@ impl Process {
     /// returns true if it is, either specifically, or as a member in a class.
     /// 
     /// TODO Test This.
-    pub fn accepts_as_input(&self, product: usize, data: &crate::data_manager::DataManager) -> bool {
+    pub fn accept_product_as_input(&self, product: usize, data: &crate::data_manager::DataManager) -> bool {
         let process_class = data.get_product_class(product);
         // split between having a class and not having a class.
         if let Some(class) = process_class {

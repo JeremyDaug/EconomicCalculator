@@ -437,6 +437,17 @@ impl Desire {
         }
         false
     }
+
+    /// # Satisfied at Tier
+    /// 
+    /// Checks if we are satisfied at a specific tier or not.
+    pub fn satisfied_at_tier(&self, tier: usize) -> bool {
+        if self.satisfaction_at_tier(tier) < self.amount {
+            false
+        } else {
+            true
+        }
+    }
 }
 
 /// The tags a desire can be marked by, modifying how the desire is viewed.
