@@ -325,6 +325,10 @@ impl Property {
                                 &want_buffer, 0.0, 
                                 0.0, Some(target), 
                                 true, data);
+                            if results.iterations == 0.0 {
+                                continue; // of no iterations completed, move on to next
+                            }
+                            
                             // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         }
                     }

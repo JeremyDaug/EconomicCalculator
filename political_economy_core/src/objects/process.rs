@@ -320,6 +320,8 @@ impl Process {
     /// 
     /// TODO Process.minimum_time is not taken into account.
     /// 
+    /// TODO Look into making a companion / better function which generates functions instead. May be faster in long run.
+    /// 
     /// FIXME Does not handle Overlapping or duplicate products at all. Do Not Use Overlapping Classes or Duplicate Products
     pub fn do_process(&self, available_products: &HashMap<usize, f64>, 
         available_wants: &HashMap<usize, f64>, _pop_skill: f64,
