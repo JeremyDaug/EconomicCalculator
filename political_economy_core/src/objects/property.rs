@@ -1368,8 +1368,14 @@ impl TieredValue {
     /// This Maintains the Starting Tier of the Tiered Value.
     /// TODO come back here.
     pub fn add_value(&mut self, tier: usize, amount: f64) {
-        let _tier_diff = amount * TieredValue::tier_equivalence(self.tier, tier);
-        todo!("Come back here!")
+        if self.value == 0.0 { // if amount is already zero, set to the values given.
+            self.tier = tier;
+            self.value = amount;
+            return;
+        }
+        // amount * (0.9^(self.start-tier))
+        let added_val = amount * TieredValue::tier_equivalence(self.tier, tier);
+        self.value += added_val;
     }
 
     /// Tier Equivalence between two tiers. 

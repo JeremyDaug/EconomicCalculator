@@ -4142,6 +4142,76 @@ mod tests {
         }
     }
 
+    mod tiered_value_tests {
+        mod add_value_should {
+            use crate::{objects::property::TieredValue, constants::TIER_RATIO};
+
+            #[test]
+            pub fn set_tier_value_when_zero() {
+                let mut test = TieredValue{tier: 0, value: 0.0};
+                test.add_value(10, 10.0);
+                assert!(test.tier == 10);
+                assert!(test.value == 10.0);
+            }
+
+            #[test]
+            pub fn add_correctly_when_same_tier() {
+                let mut test = TieredValue{tier: 10, value: 10.0};
+                test.add_value(10, 10.0);
+                assert!(test.tier == 10);
+                assert!(test.value == 20.0);
+            }
+
+            #[test]
+            pub fn add_correctly_when_lower_tier() {
+                let mut test = TieredValue{tier: 10, value: 10.0};
+                test.add_value(9, 10.0);
+                assert!(test.tier == 10);
+                assert!(test.value == (10.0+10.0/TIER_RATIO));
+            }
+
+            #[test]
+            pub fn add_correctly_when_higher_tier() {
+                let mut test = TieredValue{tier: 10, value: 10.0};
+                test.add_value(11, 10.0);
+                assert!(test.tier == 10);
+                assert!(test.value == (10.0+TIER_RATIO));
+            }
+        }
+
+        mod tier_equivalence_should {
+            use crate::{objects::property::TieredValue, constants::TIER_RATIO};
+
+            #[test]
+            pub fn return_unit_when_tiers_equal() {
+                let equiv = TieredValue::tier_equivalence(10, 10);
+                assert!{equiv == 1.0};
+            }
+
+            #[test]
+            pub fn return_tier_ratio_when_1_above() {
+                let equiv = TieredValue::tier_equivalence(10, 11);
+                assert!{equiv == TIER_RATIO};
+            }
+
+            #[test]
+            pub fn return_tier_ratio_when_1_below() {
+                let equiv = TieredValue::tier_equivalence(10, 9);
+                assert!{equiv == (1.0/TIER_RATIO)};
+            }
+
+            #[test]
+            pub fn return_tier_ratio_greater_difference() {
+                let start = 10;
+                let diff = 4;
+                let equiv = TieredValue::tier_equivalence(start, start+diff);
+                assert!{equiv == TIER_RATIO.powf(diff as f64)};
+                let equiv = TieredValue::tier_equivalence(start, start-diff);
+                assert!{equiv == TIER_RATIO.powf(-(diff as f64))};
+            }
+        }
+    }
+
     mod desire_tests {
         use crate::objects::desire::{Desire, DesireItem};
 
