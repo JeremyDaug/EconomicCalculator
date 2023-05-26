@@ -1528,6 +1528,7 @@ impl DataManager {
                         // use to a want
                         // add it to the want
                         let id = part.item.unwrap();
+                        dbg!(id);
                         let want = self.wants.get_mut(&id).unwrap();
                         want.add_process_source(process)
                             .expect("Error Occured in processing to want.");

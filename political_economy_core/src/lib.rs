@@ -10,7 +10,7 @@ extern crate lazy_static;
 
 #[cfg(test)]
 mod tests {
-    mod propertybreakdown_tests {
+    mod property_info_tests {
 
         mod shift_tests {
             use crate::objects::property_info::PropertyInfo;
@@ -4175,7 +4175,7 @@ mod tests {
                 let mut test = TieredValue{tier: 10, value: 10.0};
                 test.add_value(11, 10.0);
                 assert!(test.tier == 10);
-                assert!(test.value == (10.0+TIER_RATIO));
+                assert!(test.value == (10.0+10.0*TIER_RATIO));
             }
         }
 
