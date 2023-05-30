@@ -53,18 +53,18 @@ impl Desire {
         tags: Vec<DesireTag>) -> Result<Self, DesireError> { 
             // check that the end is a valid step.
             if let Some(val) = end {
-                if (val - start) % step == 0 {
+                if (val - start) % step != 0 {
                     return Err(DesireError::TierMisstep(val));
                 }
             }
-            Ok( Self { 
-                item, 
-                start, 
-                end, 
-                amount, 
+            Ok( Self {
+                item,
+                start,
+                end,
+                amount,
                 satisfaction,
-                step, 
-                tags 
+                step,
+                tags
             } )
         }
 

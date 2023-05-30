@@ -4,6 +4,8 @@ use itertools::Itertools;
 
 use crate::data_manager::DataManager;
 
+use super::property_info::PropertyInfo;
+
 #[derive(Debug)]
 pub struct Process {
     pub id: usize,
@@ -324,6 +326,165 @@ impl Process {
     /// 
     /// FIXME Does not handle Overlapping or duplicate products at all. Do Not Use Overlapping Classes or Duplicate Products
     pub fn do_process(&self, available_products: &HashMap<usize, f64>, 
+    available_wants: &HashMap<usize, f64>, _pop_skill: f64,
+    _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, data: &DataManager) 
+    -> ProcessOutputs {
+        let mut results = ProcessOutputs::new();
+        // get how many cycles we can do in total
+        // TODO check and take optional and fixed items into account here.
+        // optional items will need to be ignored if unavailable, but add to the target of all non-fixed items
+        // fixed items ignore any efficiency gains from 
+        let mut ratio_available = f64::INFINITY;
+        for process_part in self.process_parts.iter() {
+            if let ProcessSectionTag::Capital = process_part.part {
+                // todo add capital want handling here.
+                if let PartItem::Want(_id) = process_part.item {
+                    continue;
+                }
+            }
+            if let ProcessSectionTag::Output = process_part.part { // if output, ignore
+                continue;
+            }
+            match process_part.item { // TODO add optional check here.
+                PartItem::Specific(id) => {
+                    // take lower between current ratio available and available_product / cycle_target.
+                    ratio_available = ratio_available
+                        .min(available_products.get(&id).unwrap_or(&0.0) / process_part.amount);
+                },
+                PartItem::Want(id) => {
+                    // take lower between current ratio available and available_product / cycle_target.
+                    ratio_available = ratio_available
+                        .min(available_wants.get(&id).unwrap_or(&0.0) / process_part.amount);
+                },
+                PartItem::Class(id) => {
+                    // TODO add quality check here!
+                    // TODO add way to check against repeat products here.
+                    // get all possible items of the class in our products
+                    let class_mates = available_products.iter()
+                    .filter(|(&prod_id, _)| {
+                        let class = data.get_product_class(prod_id);
+                        if let Some(val) = class {
+                            id == val
+                        } else { false }
+                    });
+                    // how many items within the class we have,
+                    let sum: f64 = class_mates.map(|x| x.1).sum();
+                    ratio_available = ratio_available.min(sum / process_part.amount);
+                }
+            }
+            if ratio_available == 0.0 { // if ratio is 0, gtfo, we can't do anything.
+                return ProcessOutputs::new();
+            }
+        }
+        // cap our ratio at the target
+        // TODO add check for hard_cap here.
+        if let Some(val) = target { // we assume that hard_cap == true for now
+            ratio_available = ratio_available.min(val);
+        }
+        // without efficiency gains, our ratio available == possible iteratons.
+        results.iterations = ratio_available;
+        // efficiency is equal to the total possible gain we were able to achieved.
+        results.efficiency = 1.0;
+        // effective iterations is our iterations after applying efficiency gains.
+        results.effective_iterations = ratio_available;
+
+        // with our target ratio gotten, create the return results for inputs and outputs
+        // TODO fixed items will also need to be taken into account here.
+        for process_part in self.process_parts.iter() {
+            let mut _in_out_sign = 1.0;
+            match process_part.part {
+                ProcessSectionTag::Capital => {
+                    if let PartItem::Specific(_id) = process_part.item {
+                        // add used capital products
+                        results.capital_products
+                        .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
+                    } else if let PartItem::Want(_id) = process_part.item { 
+                        // TODO add capital want handling here also.
+                    }
+                    continue;
+                },
+                ProcessSectionTag::Input => { _in_out_sign = -1.0; }, // subtract inputs
+                ProcessSectionTag::Output => { _in_out_sign = 1.0; }, // add outputs
+            } 
+            // if not capital, add to appropriate input_output
+            match process_part.item {
+                PartItem::Specific(id) => {
+                    results.input_output_products.entry(id)
+                    .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
+                    .or_insert(_in_out_sign * process_part.amount * ratio_available);
+                },
+                PartItem::Want(id) => {
+                    results.input_output_wants.entry(id)
+                    .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
+                    .or_insert(_in_out_sign * process_part.amount * ratio_available);
+                },
+                PartItem::Class(id) => { // TODO test this part of the code!
+                    debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
+                    // TODO improve this to deal with overlap and quality management.
+                    // get the plass products
+                    let class_mates = available_products.iter()
+                    .filter(|(&prod_id, _)| {
+                        let class = data.get_product_class(prod_id);
+                        if let Some(val) = class {
+                            id == val
+                        } else { false }
+                    });
+                    // get items up to our needs
+                    let mut target = process_part.amount * ratio_available;
+                    for (&product_id, &quantity) in class_mates {
+                        let remove = quantity.min(target);
+                        results.input_output_products.entry(product_id)
+                        .and_modify(|x| *x -= remove).or_insert(-remove);
+                        target -= remove;
+                        if target == 0.0 { break; }
+                    }
+                },
+            }
+        }
+
+        results
+    }
+
+    /// # The Do Process Function
+    /// 
+    /// Do process function takes in the products and wants available for
+    /// the process as well as the pop who is doing the process.
+    /// 
+    /// The target parameter is how many iterations it will attepmt to 
+    /// complete, assuming no modifications upward, and hard_cap dictates
+    /// whether it will allow it to push higher with an efficiency boost or
+    /// not.
+    /// 
+    /// ## Returns
+    /// 
+    /// This function returns 3 HashMaps in a Tuple.
+    /// - First is all products consumed or created by the process (inputs/outputs).
+    /// - Second is all wants consumed or created by the process (inputs/outputs).
+    /// - Third is all products used as capital in the process (Used Capital).
+    /// 
+    /// ## Notes
+    /// 
+    /// This is the same as do_process, but it takes in a hashmap of PropertyInfo instead of f64s.
+    /// 
+    /// Currently it's missing many parts, it takes no tags into account and does not handle duplicate 
+    /// input/capitals or overlap between specific products and that product's class.
+    /// 
+    /// Use with caution.
+    /// 
+    /// TODO Include logic for process part tags: Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
+    /// 
+    /// TODO pop_skill and other_efficiency_boni are currently not taken into account.
+    /// 
+    /// TODO hard_cap is not taken into account, assumed to always be true currently.
+    /// 
+    /// TODO Currently incapable of dealing with Capital Wants.
+    /// 
+    /// TODO Process.minimum_time is not taken into account.
+    /// 
+    /// TODO Look into making a companion / better function which generates functions instead. May be faster in long run.
+    /// 
+    /// FIXME Does not handle Overlapping or duplicate products at all. Do Not Use Overlapping Classes or Duplicate Products
+    pub fn do_process_with_property(&self, available_products: &HashMap<usize, PropertyInfo>, 
         available_wants: &HashMap<usize, f64>, _pop_skill: f64,
         _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, data: &DataManager) 
         -> ProcessOutputs {
@@ -346,8 +507,12 @@ impl Process {
                 match process_part.item { // TODO add optional check here.
                     PartItem::Specific(id) => {
                         // take lower between current ratio available and available_product / cycle_target.
-                        ratio_available = ratio_available
-                            .min(available_products.get(&id).unwrap_or(&0.0) / process_part.amount);
+                        if let Some(prod_info) = available_products.get(&id) {
+                            ratio_available = ratio_available
+                                .min(prod_info.available_for_want() / process_part.amount);
+                        } else { // if we don't have that item in property, return to 0.0
+                            ratio_available = 0.0;
+                        }
                     },
                     PartItem::Want(id) => {
                         // take lower between current ratio available and available_product / cycle_target.
@@ -366,7 +531,7 @@ impl Process {
                             } else { false }
                         });
                         // how many items within the class we have,
-                        let sum: f64 = class_mates.map(|x| x.1).sum();
+                        let sum: f64 = class_mates.map(|x| x.1.available_for_want()).sum();
                         ratio_available = ratio_available.min(sum / process_part.amount);
                     }
                 }
@@ -385,7 +550,7 @@ impl Process {
             results.efficiency = 1.0;
             // effective iterations is our iterations after applying efficiency gains.
             results.effective_iterations = ratio_available;
-
+    
             // with our target ratio gotten, create the return results for inputs and outputs
             // TODO fixed items will also need to be taken into account here.
             for process_part in self.process_parts.iter() {
@@ -419,7 +584,7 @@ impl Process {
                     PartItem::Class(id) => { // TODO test this part of the code!
                         debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
                         // TODO improve this to deal with overlap and quality management.
-                        // get the plass products
+                        // get the class products
                         let class_mates = available_products.iter()
                         .filter(|(&prod_id, _)| {
                             let class = data.get_product_class(prod_id);
@@ -430,7 +595,7 @@ impl Process {
                         // get items up to our needs
                         let mut target = process_part.amount * ratio_available;
                         for (&product_id, &quantity) in class_mates {
-                            let remove = quantity.min(target);
+                            let remove = quantity.available_for_want().min(target);
                             results.input_output_products.entry(product_id)
                             .and_modify(|x| *x -= remove).or_insert(-remove);
                             target -= remove;
@@ -439,7 +604,7 @@ impl Process {
                     },
                 }
             }
-
+    
             results
         }
 

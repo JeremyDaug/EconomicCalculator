@@ -70,8 +70,6 @@ impl PropertyInfo {
     /// # Reset Reserves
     /// 
     /// Removes everything from the reserves, adding them back to unreserved.
-    /// 
-    /// TODO Test THis
     pub fn reset_reserves(&mut self) {
         self.unreserved = self.total_property;
         self.reserved = 0.0;
@@ -87,31 +85,24 @@ impl PropertyInfo {
     /// If value given is negative, it calls remove.
     /// 
     /// If removal, it returns the excess which could not be removed.
-    /// 
-    /// TODO Test this and remove()
-    pub fn add_property(&mut self, quantity: f64) -> f64 {
-        if quantity.is_sign_negative() { return self.remove(quantity); }
-        self.total_property += quantity;
-        self.unreserved += quantity;
-        return 0.0;
+    pub fn add_property(&mut self, quantity: f64) {
+        if quantity.is_sign_negative() { self.remove(-quantity); }
+        else {
+            self.total_property += quantity;
+            self.unreserved += quantity;
+        }
     }
 
+    /// # Shift To Reserved
+    /// 
     /// Shifts the given quantity from unreserved to reserved.
-    /// 
-    /// If unable to shift all it returns the excess.
-    /// 
-    /// TODO Test This
-    pub fn shift_to_reserved(&mut self, quantity: f64) -> f64 {
+    pub fn shift_to_reserved(&mut self, quantity: f64) {
         let available = self.unreserved.min(quantity);
-        let excess = quantity - available;
         self.unreserved -= available;
         self.reserved += available;
-        excess
     }
 
     /// Gets the highest of our 3 reserves.
-    /// 
-    /// TODO Test This
     pub fn max_spec_reserve(&self) -> f64 {
         self.specific_reserve
             .max(self.class_reserve)
@@ -123,16 +114,16 @@ impl PropertyInfo {
     /// Pulls from other sub-reserves up to the highest, without subtracting 
     /// (allowing overlap), then from the reserve, then from the unreserved.
     /// 
-    /// TODO Test This
-    pub fn shift_to_specific_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
+    /// Shifts based on the absolute value.
+    pub fn shift_to_specific_reserve(&mut self, quantity: f64) {
+        let mut quantity = quantity.abs();
         let other_max = self.class_reserve.max(self.want_reserve);
         if other_max > self.specific_reserve { 
             // if we have some from other reserves, get from there first.
             let shift = (other_max-self.specific_reserve).min(quantity);
             self.specific_reserve += shift;
             quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
+            if quantity == 0.0 { return; }
         }
         // not enough from overlap alone, shift from reserve.
         if self.reserved > 0.0 {
@@ -142,16 +133,14 @@ impl PropertyInfo {
             self.reserved -= shift;
             self.specific_reserve += shift;
             quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
+            if quantity == 0.0 { return; }
         }
         // if not enough from reserve, then from unreserved.
         if self.unreserved > 0.0 {
             let shift = self.unreserved.min(quantity);
             self.unreserved -= shift;
             self.specific_reserve += shift;
-            quantity -= shift;
         }
-        quantity
     }
 
     /// Shifts the given quantity into abstract reserve.
@@ -159,16 +148,16 @@ impl PropertyInfo {
     /// Pulls from other sub-reserves up to the highest, without subtracting 
     /// (allowing overlap), then from the reserve, then from the unreserved.
     /// 
-    /// TODO Test This
-    pub fn shift_to_class_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
+    /// Shifts based on the absolute value.
+    pub fn shift_to_class_reserve(&mut self, quantity: f64) {
+        let mut quantity = quantity.abs();
         let other_max = self.specific_reserve.max(self.want_reserve);
         if other_max > self.class_reserve { 
             // if we have some from other reserves, get from there first.
             let shift = (other_max-self.class_reserve).min(quantity);
             self.class_reserve += shift;
             quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
+            if quantity == 0.0 { return; }
         }
         // not enough from overlap alone, shift from reserve.
         if self.reserved > 0.0 {
@@ -178,16 +167,14 @@ impl PropertyInfo {
             self.reserved -= shift;
             self.class_reserve += shift;
             quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
+            if quantity == 0.0 { return; }
         }
         // if not enough from reserve, then from unreserved.
         if self.unreserved > 0.0 {
             let shift = self.unreserved.min(quantity);
             self.unreserved -= shift;
             self.class_reserve += shift;
-            quantity -= shift;
         }
-        quantity
     }
 
     /// Shifts the given quantity into want reserve.
@@ -195,16 +182,16 @@ impl PropertyInfo {
     /// Pulls from other sub-reserves up to the highest, without subtracting 
     /// (allowing overlap), then from the reserve, then from the unreserved.
     /// 
-    /// TODO Test This
-    pub fn shift_to_want_reserve(&mut self, quantity: f64) -> f64 {
-        let mut quantity = quantity;
+    /// Shifts based on the absolute value.
+    pub fn shift_to_want_reserve(&mut self, quantity: f64) {
+        let mut quantity = quantity.abs();
         let other_max = self.specific_reserve.max(self.class_reserve);
         if other_max > self.want_reserve { 
             // if we have some from other reserves, get from there first.
             let shift = (other_max-self.want_reserve).min(quantity);
             self.want_reserve += shift;
             quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
+            if quantity == 0.0 { return; }
         }
         // not enough from overlap alone, shift from reserve.
         if self.reserved > 0.0 {
@@ -214,24 +201,20 @@ impl PropertyInfo {
             self.reserved -= shift;
             self.want_reserve += shift;
             quantity -= shift;
-            if quantity == 0.0 { return 0.0; }
+            if quantity == 0.0 { return; }
         }
         // if not enough from reserve, then from unreserved.
         if self.unreserved > 0.0 {
             let shift = self.unreserved.min(quantity);
             self.unreserved -= shift;
             self.want_reserve += shift;
-            quantity -= shift;
         }
-        quantity
     }
 
     /// # Available
     /// 
     /// The amount available that has not been specifically reserved,
     /// or used.
-    /// 
-    /// TODO Test THis
     pub fn available(&self) -> f64 {
         self.unreserved + self.reserved
     }
@@ -239,19 +222,11 @@ impl PropertyInfo {
     /// # Expend
     /// 
     /// A function to expend the product safely from the unreserved
-    /// amount.
-    /// 
-    /// Returns the excess value which could not be gotten from unreserved.
-    /// 
-    /// # Panics
-    /// 
-    /// Panics if the amount subtract is greater than the amount unreserved.
-    /// 
-    /// TODO test this!
+    /// amount. Will not reduce property below available unreserved.
     pub fn expend(&mut self, expense: f64) {
-        if expense > self.unreserved { panic!("Tried to subtract too much.") }
         let available = self.unreserved.min(expense);
         self.unreserved -= available;
+        self.total_property -= available
     }
 
     /// # Safe Remove
@@ -259,21 +234,19 @@ impl PropertyInfo {
     /// Removes a quantity from Unreserved and Reserved, but not the
     /// specific reserves.
     /// 
-    /// Returns the excess which could not be removed.
-    /// 
-    /// # Panics
-    /// 
-    /// Panics if the amount subtract is greater than the amount unreserved and reserved.
-    /// 
-    /// TODO Test THis!
+    /// Removes from unreserved first, then reserved.
     pub fn safe_remove(&mut self, remove: f64) {
-        if remove > (self.unreserved + self.reserved) { panic!("Tried to subtract too much.") }
         // remove from unreserved first
-        let available = self.unreserved.min(remove);
-        self.unreserved -= available;
-        let remainder = remove - available;
-        if remainder == 0.0 { return; }
-        self.reserved -= remainder;
+        let unreserved_removal = self.unreserved.min(remove);
+        
+        if unreserved_removal > 0.0 {
+            self.unreserved -= unreserved_removal;
+            self.total_property -= unreserved_removal;
+        }
+        let reserved_removal = self.reserved.min(remove - unreserved_removal);
+        if reserved_removal == 0.0 { return; }
+        self.reserved -= reserved_removal;
+        self.total_property -= reserved_removal;
     }
 
     /// # Remove
@@ -283,12 +256,13 @@ impl PropertyInfo {
     /// 
     /// If value is negative, it instead adds it via self.add_property().
     /// 
-    /// Returns any excess for sanity checking.
+    /// # Note
     /// 
-    /// TODO Test this and add_property()
-    pub fn remove(&mut self, quantity: f64) -> f64 {
+    /// Does not allow property or reserves to enter the negative. Be sure
+    /// that you check it correctly.
+    pub fn remove(&mut self, quantity: f64) {
         if quantity.is_sign_negative() {
-            return self.add_property(quantity);
+            return self.add_property(-quantity);
         }
         let mut remainder = quantity;
         if self.unreserved > 0.0 { // if any unreserved, remove from there first
@@ -297,7 +271,7 @@ impl PropertyInfo {
             self.total_property -= remove;
             remainder -= remove;
             // if remainder used up, exit out.
-            if remainder == 0.0 { return 0.0; }
+            if remainder == 0.0 { return; }
         }
         // if unreserved is not enough, remove from general reserve
         if self.reserved > 0.0 {
@@ -305,7 +279,7 @@ impl PropertyInfo {
             self.reserved -= remove;
             self.total_property -= remove;
             remainder -= remove;
-            if remainder == 0.0 { return 0.0; }
+            if remainder == 0.0 { return; }
         }
         // if unreserved and reserved not enough, remove from specifc reserves
         let max_spec_reserve = self.max_spec_reserve();
@@ -319,9 +293,7 @@ impl PropertyInfo {
             self.specific_reserve -= remove;
             if self.specific_reserve.is_sign_negative() { self.specific_reserve = 0.0; }
             self.total_property -= remove;
-            remainder -= remove;
         }
-        remainder
     }
 
     /// # Shift to Used
@@ -333,7 +305,7 @@ impl PropertyInfo {
     /// 
     /// Panics if the amount being shifted is creater than the total property.
     /// 
-    /// TODO test this!
+    /// TODO test this once we actually use it.
     fn _shift_to_used(&mut self, quantity: f64) {
         // remove from reserves
         self.remove(quantity);
@@ -341,5 +313,27 @@ impl PropertyInfo {
         self.total_property += quantity;
         // add back to property
         self.used += quantity;
+    }
+
+    /// # Available for Specific pool
+    /// 
+    /// How much of our product can be shifted into 
+    /// specific reserve pool.
+    pub fn available_for_specific(&self) -> f64 {
+        self.total_property - self.specific_reserve
+    }
+
+    /// # Available for Class Pool
+    /// 
+    /// How much of our product can be shifted into the class desire pool.
+    pub fn available_for_class(&self) -> f64 {
+        self.total_property - self.class_reserve
+    }
+
+    /// # Available for Want Pool
+    /// 
+    /// How much of our porduct can be shifted into the want pool.
+    pub fn available_for_want(&self) -> f64 {
+        self.total_property - self.want_reserve
     }
 }

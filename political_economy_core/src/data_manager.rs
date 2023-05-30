@@ -623,6 +623,29 @@ impl DataManager {
         self.products.insert(building_repair.id, building_repair);
         self.products.insert(stone_gathering.id, stone_gathering);
 
+        self.update_product_classes()?;
+
+        Ok(())
+    }
+
+    pub fn update_product_classes(&mut self) -> Result<(), String> {
+        // clear out old data for sanity measures
+        self.product_classes.clear();
+        // update and sanity check product classes
+        for (&product_id, data) in self.products.iter() {
+            if let Some(id) = data.product_class {
+                // sanity check that the generic points to itself
+                let other = self.products.get(&id).unwrap();
+                if other.product_class.unwrap() != other.id {
+                    return Err(format!("Product: '{}' is a generic that does not point to itself.", id));
+                }
+                // since it correctly points to itself, add to class group records
+                self.product_classes.entry(other.id)
+                .and_modify(|x| x.push(product_id))
+                .or_insert(vec![product_id]);
+            }
+        }
+
         Ok(())
     }
 
@@ -1528,7 +1551,6 @@ impl DataManager {
                         // use to a want
                         // add it to the want
                         let id = part.item.unwrap();
-                        dbg!(id);
                         let want = self.wants.get_mut(&id).unwrap();
                         want.add_process_source(process)
                             .expect("Error Occured in processing to want.");
