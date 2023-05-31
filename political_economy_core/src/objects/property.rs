@@ -227,33 +227,12 @@ impl Property {
         let mut want_amount = amount;
         // get class for checking
         let prod_class = data.get_product_class(product);
-        // also extract property into more usable form for updating processes
-        let mut property_sum = HashMap::new();
-        for (&product, info) in self.property.iter() {
-            property_sum.insert(product, info.total_property);
-        }
-        let mut want_buffer = HashMap::new(); // same with wants
-        for (&want, &amount) in self.want_store.iter() {
-            want_buffer.insert(want, amount);
-        }
-        // and pre-emptively remove based on our previously planned processes.
-        for (proc_id, iters) in self.process_plan.iter() {
-            // TODO This does not take into account processes that overlap with Optional Goods.
-            let process = data.processes.get(proc_id).unwrap();
-            let output = process.do_process(&property_sum, 
-                &want_buffer, 0.0, 0.0, Some(*iters), 
-                true, data);
-            for (input, amount) in output.input_output_products.iter()
-            .filter(|(_, &amount)| amount < 0.0) {
-                property_sum.entry(*input).and_modify(|x| *x += amount);
-            }
-            for (capital, amount) in output.capital_products.iter() {
-                property_sum.entry(*capital).and_modify(|x| *x -= amount);
-            }
-            for (&want, amount) in output.input_output_wants.iter()
-            .filter(|x| *x.1 < 0.0) {
-                want_buffer.entry(want).and_modify(|x| *x += amount);
-            }
+        // get our wants for the addition.
+        let mut want_buffer = self.want_store.clone(); // same with wants
+        for (&want, &amount) in self.want_expectations.iter() {
+            want_buffer.entry(want)
+            .and_modify(|x| *x += amount)
+            .or_insert(amount);
         }
         // and record desires we've already visited and failed to do anything with
         let mut cleared = HashSet::new();
@@ -288,21 +267,28 @@ impl Property {
                     let want_info = data.wants.get(&want).unwrap();
                     // start with ownership sources
                     if want_info.ownership_sources.contains(&product) { // if our product is an ownership source, check it.
-                        // TODO if the product can satisfy multiple wants via ownership, and we want those things, figure out how to add them here. (temp want excess pool!)
                         let prod_info = data.products.get(&product).unwrap();
                          // how much we need to satisfy the tier.
                         let remaining_satisfaction = desire.amount - desire.satisfaction_at_tier(coords.tier);
                         let eff = prod_info.wants.get(&want).unwrap(); // want per product owned
                         let target = remaining_satisfaction / eff; // the target amount to satisfy the current tier
                         let available = target.min(want_amount); // cap at available want product.
-                        let sat = available * eff; // the satisfaction we actually create.
-                        desire.satisfaction += sat;  // add to satisfaction
+                        // loop over the wants it creates and add them
+                        for (own_want, eff) in prod_info.wants.iter() {
+                            let sat = available * eff;
+                            if *own_want == want  {
+                                desire.satisfaction += sat;
+                            } else {
+                                self.want_expectations.entry(*own_want)
+                                .and_modify(|x| *x += sat)
+                                .or_insert(sat);
+                            }
+                        }
                         want_amount -= available; // remvoe from local
-                        value_gained.add_value(coords.tier, sat);
+                        value_gained.add_value(coords.tier, available * eff);
                         self.property.get_mut(&product)
                             .unwrap().shift_to_want_reserve(available); // shift property
                         // remove from local property
-                        property_sum.entry(product).and_modify(|x| *x -= available);
                         if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
                             if desire.past_end(coords.tier + 1) {
                                 cleared.insert(coords.idx); // if no next tier, add to cleared.
@@ -311,6 +297,7 @@ impl Property {
                         }
                     }
                     // now go for processes.
+                    // TODO when doing these parts, check for whether upper wants can be sacrificed for these.
                     // start with use processes
                     for proc in want_info.use_sources.iter()
                     .filter(|x| {
@@ -1507,6 +1494,7 @@ impl Property {
             }
         }
         self.update_satisfactions();
+        self.is_sifted = true;
     }
 
     /// # Consume and Shift Wants
