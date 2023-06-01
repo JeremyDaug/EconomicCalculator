@@ -246,6 +246,7 @@ impl DataManager {
             Some(0),
             true,
             vec![ProductTag::NonTransferrable],
+            None,
             None).unwrap();
         // Shopping Time
         let shopping_time = Product::new(SHOPPING_TIME_ID,
@@ -577,6 +578,7 @@ impl DataManager {
             Vec::new(),
             None).unwrap();
 
+        // Set Wants
         let mut shelter = self.wants
             .get_mut(&2).unwrap();
         hut.connect_want(&mut shelter, 1.0).unwrap();

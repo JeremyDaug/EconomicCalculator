@@ -17,7 +17,7 @@ use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::TIER_RATIO};
 
-use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, property_info::PropertyInfo};
+use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::{PartItem, ProcessPart}, property_info::PropertyInfo};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -207,6 +207,8 @@ impl Property {
     /// If property is sifted, it maintains the sifted status.
     /// 
     /// TODO Not Tested: calls unsafe when not sifted, sifts correctly and returns the tieredvalue
+    /// 
+    /// TODO currently flawed as it cannot release higher ranking wants to satisfy lower ranking wants
     pub fn add_property(&mut self, product: usize, amount: f64, data: &DataManager) -> TieredValue {
         if amount < 0.0 { // if removing property, jump to remove.
             return self.remove_property(product, -amount, data);
@@ -236,10 +238,72 @@ impl Property {
         }
         // and record desires we've already visited and failed to do anything with
         let mut cleared = HashSet::new();
-        // quickly get all those disers which we already passed up
+        // quickly get all those desires which we already passed up
         for (idx, desire) in self.desires.iter().enumerate() {
             if desire.past_end(self.hard_satisfaction) {
                 cleared.insert(idx);
+            }
+        }
+        // get wants which might use this and we have pre-emptively
+        // TODO check to release higher tier wants would likely be best put here.
+        let prod_info = data.products.get(&product).unwrap();
+        let mut complementary_products = HashSet::new();
+        // uses which we do any of.
+        for proc in prod_info.use_processes.iter()
+        .filter(|x| self.process_plan.contains_key(x)) {
+            let process = data.processes.get(proc).unwrap();
+            // with process data which we have, add inputs and capital products to our adjacent products
+            for part in process.process_parts.iter()
+            .filter(|x| !x.part.is_output() && !x.item.is_want()) { // not output or want
+                if let PartItem::Specific(id) = part.item {
+                    if self.property.contains_key(&id) {
+                        complementary_products.insert(id); // if specific, get just that item
+                    }
+                } else if let PartItem::Class(class_id) = part.item {
+                    // add all items of that class
+                    for id in data.product_classes.get(&class_id)
+                    .unwrap().iter()
+                    .filter(|x| self.property.contains_key(x)) { // get all members of the class, but only add what we have.
+                        complementary_products.insert(*id);
+                    }
+                }
+            }
+        }
+        // do with consumption next
+        for proc in prod_info.consumption_processes.iter()
+        .filter(|x| self.process_plan.contains_key(x)) {
+            let process = data.processes.get(proc).unwrap();
+            // with process data which we have, add inputs and capital products to our adjacent products
+            for part in process.process_parts.iter()
+            .filter(|x| !x.part.is_output() && !x.item.is_want()) { // not output or want
+                if let PartItem::Specific(id) = part.item {
+                    if self.property.contains_key(&id) { // only add what we have.
+                        complementary_products.insert(id); // if specific, get just that item
+                    }
+                } else if let PartItem::Class(class_id) = part.item {
+                    // add all items of that class
+                    for id in data.product_classes.get(&class_id)
+                    .unwrap().iter()
+                    .filter(|x| self.property.contains_key(x)) { // get all members of the class, but only add what we have.
+                        complementary_products.insert(*id);
+                    }
+                }
+            }
+        }
+        // with these products gotten, find any competing processes we do for wants above hard_sat
+        for desire in self.desires.iter()
+        .filter(|x| x.item.is_want() && // is want and steps between current hard sat and highest sat.
+            x.steps_in_interval(self.hard_satisfaction, self.highest_tier)) {
+            // get processes which produce this want
+            let want_info = data.wants.get(desire.item.unwrap()).unwrap();
+            for proc_id in want_info.process_sources.iter()
+            .filter(|x| self.process_plan.contains_key(x)) // get those we can remove from
+            .filter(|x| {
+                let proc_data = data.processes.get(x).unwrap();
+                // if the process takes in any of the complementary products, we're golden
+                complementary_products.iter().any(|x| proc_data.accept_product_as_input(*x, data))
+            }) {
+                // FIXME  Come back here after more testing elsewhere.
             }
         }
         // then sift the product into our desires
@@ -309,7 +373,7 @@ impl Property {
                         let eff = process.effective_output_of(PartItem::Want(want));
                         let target = desire.amount / eff;
                         // if the process accepts our product as input, try it.
-                        let results = process.do_process(&property_sum, 
+                        let results = process.do_process_with_property(&self.property, 
                             &want_buffer, 0.0, 
                             0.0, Some(target), 
                             true, data);
@@ -325,13 +389,11 @@ impl Property {
                         .or_insert(results.iterations);
                         // reserve property used/expended
                         for (&property, &amount) in results.input_output_products.iter()
-                        .filter(|x| *x.1 < 0.0) { // remove inputs
-                            property_sum.entry(property).and_modify(|x| *x += amount);
+                        .filter(|x| *x.1 < 0.0) { // reserve inputs
                             self.property.entry(property) // reserve in property
                             .and_modify(|x| { x.shift_to_want_reserve(-amount); });
                         }
                         for (&property, &amount) in results.capital_products.iter() {
-                            property_sum.entry(property).and_modify(|x| *x -= amount);
                             self.property.entry(property) // reserve in property
                             .and_modify(|x| { x.shift_to_want_reserve(amount); });
                         }
@@ -367,7 +429,7 @@ impl Property {
                         let eff = process.effective_output_of(PartItem::Want(want));
                         let target = desire.amount / eff;
                         // if the process accepts our product as input, try it.
-                        let results = process.do_process(&property_sum, 
+                        let results = process.do_process_with_property(&self.property, 
                             &want_buffer, 0.0, 
                             0.0, Some(target), 
                             true, data);
@@ -384,12 +446,10 @@ impl Property {
                         // reserve property used/expended
                         for (&property, &amount) in results.input_output_products.iter()
                         .filter(|x| *x.1 < 0.0) { // remove inputs
-                            property_sum.entry(property).and_modify(|x| *x += amount);
                             self.property.entry(property) // reserve in property
                             .and_modify(|x| { x.shift_to_want_reserve(-amount); });
                         }
                         for (&property, &amount) in results.capital_products.iter() {
-                            property_sum.entry(property).and_modify(|x| *x -= amount);
                             self.property.entry(property) // reserve in property
                             .and_modify(|x| { x.shift_to_want_reserve(amount); });
                         }

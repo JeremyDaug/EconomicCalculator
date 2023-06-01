@@ -137,17 +137,18 @@ impl Product {
     /// checking on what is or isn't a valid product. Typically in relation
     /// to mass, bulk, and the tags of the product.
     pub fn new(id: usize,
-         name: String, 
-         variant_name: String, 
-         description: String, 
-         unit_name: String, 
-         quality: i32, 
-         mass: f64, 
-         bulk: f64, 
-         mean_time_to_failure: Option<u32>, 
-         fractional: bool,
-         tags: Vec<ProductTag>,
-         tech_required: Option<usize>) -> Option<Self> {
+        name: String, 
+        variant_name: String, 
+        description: String, 
+        unit_name: String, 
+        quality: i32, 
+        mass: f64, 
+        bulk: f64, 
+        mean_time_to_failure: Option<u32>, 
+        fractional: bool,
+        tags: Vec<ProductTag>,
+        tech_required: Option<usize>,
+        product_class: Option<usize>) -> Option<Self> {
              Some(Self { 
                 id, 
                 name, 
