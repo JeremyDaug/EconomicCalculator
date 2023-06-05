@@ -260,6 +260,7 @@ impl DataManager {
             Some(0),
             true,
             Vec::new(),
+            None,
             None).unwrap();
         // Ambrosia Fruit (food source)
         let ambrosia_fruit = Product::new(2,
@@ -273,6 +274,7 @@ impl DataManager {
             Some(10),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // cotton boll
         let cotton_boll = Product::new(3,
@@ -286,6 +288,7 @@ impl DataManager {
             Some(4),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // cotton thread
         let cotton_thread = Product::new(4,
@@ -299,6 +302,7 @@ impl DataManager {
             Some(8),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // cotton bolt
         let cotton_bolt = Product::new(5,
@@ -312,6 +316,7 @@ impl DataManager {
             None,
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // cotton clothes
         let mut cotton_clothes = Product::new(6,
@@ -325,7 +330,8 @@ impl DataManager {
             Some(30),
             false,
             Vec::new(),
-            None).unwrap();
+            None,
+            Some(6)).unwrap();
         // cotton suit
         let mut cotton_suit = Product::new(7,
             String::from("Suit"),
@@ -338,7 +344,8 @@ impl DataManager {
             Some(50),
             false,
             Vec::new(),
-            None).unwrap();
+            None,
+            Some(6)).unwrap();
         // wood logs
         let wood_logs = Product::new(8,
             String::from("Wood Logs"),
@@ -351,6 +358,7 @@ impl DataManager {
             None,
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // wood gatherer stick
         let wood_gatherer_sticks = Product::new(9,
@@ -364,6 +372,7 @@ impl DataManager {
             Some(15),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // wood spinning wheel
         let spinning_wheel = Product::new(10,
@@ -377,6 +386,7 @@ impl DataManager {
             Some(60),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // wood loom
         let wood_loom = Product::new(11,
@@ -390,6 +400,7 @@ impl DataManager {
             Some(30),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // wood-stone axe
         let wood_stone_axe = Product::new(12,
@@ -403,6 +414,7 @@ impl DataManager {
             Some(10),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // Stone
         let stone = Product::new(13,
@@ -416,6 +428,7 @@ impl DataManager {
             None,
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // hut (no resource, low efficiency, un-maintainable)
         let mut hut = Product::new(14,
@@ -429,6 +442,7 @@ impl DataManager {
             Some(15),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         hut.product_class = Some(hut.id);
         // cabin (costs wood, medium efficiency, maintainable)
@@ -443,6 +457,7 @@ impl DataManager {
             Some(60),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         cabin.product_class = Some(hut.id);
         cabin.add_to_class(&mut hut);
@@ -459,6 +474,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // Cotton Farming
         let cotton_farming = Product::new(17,
@@ -472,6 +488,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // Thread Spinning
         let thread_spinning = Product::new(18,
@@ -485,6 +502,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // Weaving
         let weaving = Product::new(19,
@@ -498,6 +516,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // Tailoring
         let tailoring = Product::new(20,
@@ -511,6 +530,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // lumbering
         let lumbering = Product::new(21,
@@ -524,6 +544,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // tool making
         let tool_making = Product::new(22,
@@ -537,6 +558,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // construction
         let construction = Product::new(23,
@@ -550,6 +572,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // building repair
         let building_repair = Product::new(24,
@@ -563,6 +586,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
         // stone gathering
         let stone_gathering = Product::new(25,
@@ -576,6 +600,7 @@ impl DataManager {
             Some(0),
             false,
             Vec::new(),
+            None,
             None).unwrap();
 
         // Set Wants

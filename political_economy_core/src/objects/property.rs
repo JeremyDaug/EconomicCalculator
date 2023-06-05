@@ -301,14 +301,18 @@ impl Property {
             .filter(|x| {
                 let proc_data = data.processes.get(x).unwrap();
                 // if the process takes in any of the complementary products, we're golden
-                complementary_products.iter().any(|x| proc_data.accept_product_as_input(*x, data))
+                complementary_products.iter().any(|x| proc_data.uses_product(*x, data))
             }) {
                 // FIXME  Come back here after more testing elsewhere.
             }
         }
         // then sift the product into our desires
         let mut current_coord = 
-            Some(DesireCoord { tier: self.hard_satisfaction-1, idx: self.desires.len() });
+            if self.hard_satisfaction == 0 {
+                None
+            } else {
+                Some(DesireCoord { tier: self.hard_satisfaction-1, idx: self.desires.len() })
+            };
         while let Some(coords) = self.walk_up_tiers(current_coord) {
             current_coord = Some(coords);
             if specific_amount == 0.0 && class_amount == 0.0 && want_amount == 0.0 {
@@ -366,7 +370,7 @@ impl Property {
                     for proc in want_info.use_sources.iter()
                     .filter(|x| {
                         let process = data.processes.get(x).unwrap();
-                        process.accept_product_as_input(product, data) 
+                        process.uses_product(product, data) 
                     }) {
                         let process = data.processes.get(proc).unwrap();
                         // get how much an iteration will output
@@ -422,7 +426,7 @@ impl Property {
                     for proc in want_info.consumption_sources.iter()
                     .filter(|x| {
                         let process = data.processes.get(x).unwrap();
-                        process.accept_product_as_input(product, data) 
+                        process.uses_product(product, data) 
                     }) {
                         let process = data.processes.get(proc).unwrap();
                         // get how much an iteration will output
@@ -467,13 +471,11 @@ impl Property {
                             cleared.insert(coords.idx); // if no next tier, add to cleared.
                         }
                         continue;
-                    }
-                    if want_amount == 0.0 { // if out out of wants
-                        if desire.past_end(coords.tier + 1) {
-                            cleared.insert(coords.idx); // if no next tier, add to cleared.
-                        }
+                    } else { // if not satisfied still, and we got here, we can never satisfy. clear and continue
+                        cleared.insert(coords.idx);
                         continue;
                     }
+                    
                 },
                 DesireItem::Class(class) => { // if product class
                     if class_amount == 0.0 || // if nothing to spend
@@ -637,7 +639,7 @@ impl Property {
                     (data.processes.get(id).expect("Process Not Found."), iterations)
                 })
                 .filter(|(process, _iterations)| {
-                    process.accept_product_as_input(product, data)
+                    process.uses_product(product, data)
                 }) {
                     // if the process takes this product, record it.
                     valid_processes.insert(process.id);

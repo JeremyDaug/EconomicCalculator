@@ -429,13 +429,19 @@ impl Desire {
     /// Returns None if start > end
     pub fn steps_in_interval(&self, start: usize, end: usize) -> bool {
         if end < start { return false; }
-        let possible = self.get_next_tier_up(start - 1);
-        if let Some(val) = possible {
-            if start <= val && val <= end {
+        if start == 0 { // if start is 0
+            // check for 0 start
+            if self.start == start {
                 return true;
+            } else if let Some(val) = self.get_next_tier_up(start) {
+                return val <= end;
+            } else { return false; }
+        } else {
+            if let Some(val) = self.get_next_tier_up(start - 1) {
+                return start <= val && val <= end;
             }
+            false
         }
-        false
     }
 
     /// # Satisfied at Tier

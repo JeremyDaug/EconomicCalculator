@@ -168,7 +168,7 @@ impl Product {
                 consumption_processes: HashSet::new(), 
                 maintenance_processes: HashSet::new(), 
                 tech_required,
-                product_class: None
+                product_class
             } )
         }
 

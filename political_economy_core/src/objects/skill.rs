@@ -54,6 +54,7 @@ impl Skill {
             Some(0),
             true,
             vec![super::product::ProductTag::Service],
+            None,
             None)
     }
 
