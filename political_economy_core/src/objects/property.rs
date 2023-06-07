@@ -51,8 +51,9 @@ pub struct Property {
     pub product_expectations: HashMap<usize, f64>,
     /// The Expected inputs and outputs of our process plan for wants.
     pub want_expectations: HashMap<usize, f64>,
-    /// The highest tier to which these desires have been fully
-    /// satisfied.
+    /// The lowest tier that any satisfaction remains unsatisfied. 
+    /// 
+    /// IE, a desire is unsatisfied, it returns tier 0.
     /// 
     /// A rough measure of contentment. 
     /// 
@@ -532,6 +533,7 @@ impl Property {
                 },
             }
         }
+        self.update_satisfactions();
 
         value_gained
     }
@@ -1190,7 +1192,7 @@ impl Property {
         self.highest_tier = 0;
         // for each desire
         for desire in self.desires.iter() {
-            let tier = desire.satisfaction_up_to_tier().expect("Not Satisfied somehow?");
+            let tier = desire.satisfaction_up_to_tier().unwrap_or(0);
             if !desire.is_fully_satisfied() {
                 // get it's highest fully satisfied tier
                 let tier = if desire.satisfaction_at_tier(tier) < 1.0 {
@@ -1199,6 +1201,7 @@ impl Property {
                 else { tier };
                 // and set result to the smaller between the current and
                 // the new tier.
+                // FIXME rework this to take into account no satisfaction what-so-ever.
                 self.full_tier_satisfaction = self.full_tier_satisfaction.min(tier);
             }
             // always check against the highest tier

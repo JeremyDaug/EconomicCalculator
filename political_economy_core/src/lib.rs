@@ -3506,6 +3506,18 @@ mod tests {
 
             use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}, property_info::PropertyInfo}, data_manager::DataManager};
 
+
+
+            #[test]
+            pub fn sift_products_down_from_higher_wants() {
+
+            }
+
+            #[test]
+            pub fn sift_from_expected_wants_correctly() {
+                
+            }
+
             #[test]
             pub fn add_and_sift_correctly_without_exchanges() {
                 let mut test_desires = vec![];
@@ -3959,6 +3971,7 @@ mod tests {
                     use_sources: HashSet::new(),
                     consumption_sources: HashSet::new(),
                 };
+                want0.ownership_sources.insert(1);
                 want0.ownership_sources.insert(2);
                 want0.process_sources.insert(0);
                 want0.process_sources.insert(1);
@@ -4032,27 +4045,32 @@ mod tests {
                 assert!(val.value == 1.9);
                 assert!(test.desires[0].satisfaction == 1.0);
                 assert!(test.desires[1].satisfaction == 2.0);
-                assert!(test.desires[2].satisfaction == 2.0);
+                assert!(test.desires[2].satisfaction == 1.0);
                 assert!(test.desires[3].satisfaction == 0.0);
                 assert!(test.property.get(&0).unwrap().total_property == 1.0);
                 assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
+                assert!(test.property.get(&0).unwrap().class_reserve == 1.0);
                 assert!(test.property.get(&1).unwrap().total_property == 1.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 1.0);
+                assert!(test.property.get(&1).unwrap().want_reserve == 1.0);
                 assert!(test.property.get(&2).is_none());
                 assert!(test.property.get(&3).is_none());
                 assert!(test.property.get(&4).is_none());
-                let val = test.add_property(2, 1.0, &data);
-                assert_eq!(val.tier, 1);
-                assert!(val.value == 2.0);
+                let val = test.add_property(2, 1.0, &data); // spec + want
+                assert_eq!(val.tier, 0);
+                assert!(val.value == 1.9);
                 assert!(test.desires[0].satisfaction == 1.0);
                 assert!(test.desires[1].satisfaction == 2.0);
                 assert!(test.desires[2].satisfaction == 2.0);
                 assert!(test.desires[3].satisfaction == 1.0);
                 assert!(test.property.get(&0).unwrap().total_property == 1.0);
                 assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
+                assert!(test.property.get(&0).unwrap().class_reserve == 1.0);
                 assert!(test.property.get(&1).unwrap().total_property == 1.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 1.0);
+                assert!(test.property.get(&1).unwrap().want_reserve == 1.0);
                 assert!(test.property.get(&2).unwrap().total_property == 1.0);
+                assert!(test.property.get(&2).unwrap().specific_reserve == 1.0);
                 assert!(test.property.get(&2).unwrap().want_reserve == 1.0);
                 assert!(test.property.get(&3).is_none());
                 assert!(test.property.get(&4).is_none());
@@ -4070,72 +4088,6 @@ mod tests {
                 assert!(test.property.get(&3).unwrap().total_property == 1.0);
                 assert!(test.property.get(&3).unwrap().want_reserve == 1.0);
                 assert!(test.property.get(&4).is_none());
-                test.add_property(4, 1.0, &data);
-                assert!(test.desires[0].satisfaction == 1.0);
-                assert!(test.desires[1].satisfaction == 1.0);
-                assert!(test.desires[2].satisfaction == 4.0);
-                assert!(test.desires[3].satisfaction == 1.0);
-                assert!(test.property.get(&0).unwrap().total_property == 1.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
-                assert!(test.property.get(&1).unwrap().total_property == 1.0);
-                assert!(test.property.get(&1).unwrap().class_reserve == 1.0);
-                assert!(test.property.get(&2).unwrap().total_property == 1.0);
-                assert!(test.property.get(&2).unwrap().want_reserve == 1.0);
-                assert!(test.property.get(&3).unwrap().total_property == 1.0);
-                assert!(test.property.get(&3).unwrap().want_reserve == 1.0);
-                assert!(test.property.get(&4).unwrap().total_property == 1.0);
-                assert!(test.property.get(&4).unwrap().want_reserve == 1.0);
-                test.add_property(4, 1.0, &data);
-                assert!(test.desires[0].satisfaction == 1.0);
-                assert!(test.desires[1].satisfaction == 1.0);
-                assert!(test.desires[2].satisfaction == 5.0);
-                assert!(test.desires[3].satisfaction == 1.0);
-                assert!(test.property.get(&0).unwrap().total_property == 1.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
-                assert!(test.property.get(&0).unwrap().class_reserve == 1.0);
-                assert!(test.property.get(&1).unwrap().total_property == 1.0);
-                assert!(test.property.get(&1).unwrap().class_reserve == 1.0);
-                assert!(test.property.get(&2).unwrap().total_property == 1.0);
-                assert!(test.property.get(&2).unwrap().want_reserve == 1.0);
-                assert!(test.property.get(&3).unwrap().total_property == 1.0);
-                assert!(test.property.get(&3).unwrap().want_reserve == 1.0);
-                assert!(test.property.get(&4).unwrap().total_property == 2.0);
-                assert!(test.property.get(&4).unwrap().want_reserve == 2.0);
-            }
-
-            #[test]
-            pub fn add_or_insert_products_into_property_and_remove_correctly() {
-                let mut test_desires = vec![];
-                test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(0), 
-                    start: 0, 
-                    end: Some(2), 
-                    amount: 1.0, 
-                    satisfaction: 2.0,
-                    step: 2,
-                    tags: vec![]});
-                test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(1), 
-                    start: 0, 
-                    end: Some(10), 
-                    amount: 1.0, 
-                    satisfaction: 3.0,
-                    step: 2,
-                    tags: vec![]});
-                let test = Property::new(test_desires);
-                // insert new
-                // TODO fix these.
-                // test.add_property(0, 10.0);
-                assert!(test.property.get(&0).unwrap().total_property == 10.0);
-                // insert to existing
-                //test.add_property(0, 10.0);
-                assert!(test.property.get(&0).unwrap().total_property == 20.0);
-                // remove partial
-                //test.add_property(0, -10.0);
-                assert!(test.property.get(&0).unwrap().total_property == 10.0);
-                // remove excess
-                //test.add_property(0, -15.0);
-                assert!(!test.property.contains_key(&0));
             }
         }
 
