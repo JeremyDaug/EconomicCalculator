@@ -121,7 +121,7 @@ impl Desire {
     /// If it adds to a tier that the desire doesn't step on it returns an error.
     pub fn add_satisfaction_at_tier(&mut self, add: f64, tier: usize) -> f64 {
         // check that we stepped on the right tier, return add, if we don't
-        if self.steps_on_tier(tier) { return add; }
+        if !self.steps_on_tier(tier) { return add; }
         // since we do step on it, get our satisfaction at that tier.
         let sat_at_tier = self.satisfaction_at_tier(tier);
         if sat_at_tier == self.amount {

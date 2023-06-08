@@ -498,6 +498,7 @@ mod tests {
     }
 
     mod pop_tests {
+        // fix
         use std::{collections::{HashMap, VecDeque}};
 
         use crate::{objects::{pop::Pop, 
@@ -3234,7 +3235,7 @@ mod tests {
     mod property_tests {
         use std::collections::{HashSet, HashMap};
 
-        use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo, want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
+        use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
 
         pub fn _setup_data_manager() -> DataManager {
             let result = DataManager::new();
@@ -3506,16 +3507,247 @@ mod tests {
 
             use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}, property_info::PropertyInfo}, data_manager::DataManager};
 
-
-
             #[test]
             pub fn sift_products_down_from_higher_wants() {
-
+                todo!("sift_products_down_from_higher_wants")
             }
 
             #[test]
             pub fn sift_from_expected_wants_correctly() {
-                
+                todo!("sift_from_expected_wants_correctly")
+            }
+
+            #[test]
+            pub fn call_unsafe_add_property_when_sifted_is_false() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2, ...
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Class(1), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                let mut test = Property::new(test_desires);
+                // make some default data for tests
+                let mut data = DataManager::new();
+                // 5 products, 
+                // 0 for specific
+                // 1 for class
+                // 2 for ownership
+                // 3 for use
+                // 4 for consumption
+                data.products.insert(0, Product{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                data.products.insert(1, Product{
+                    id: 1,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(1),
+                });
+                data.products.insert(2, Product{
+                    id: 2,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                data.products.entry(2)
+                    .and_modify(|x| {
+                        x.wants.insert(0, 1.0);
+                });
+                data.products.insert(3, Product{
+                    id: 3,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                data.products.get_mut(&3).unwrap()
+                .use_processes.insert(0);
+                data.products.insert(4, Product{
+                    id: 4,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                let mut want0 = Want{
+                    id: 0,
+                    name: "".to_string(),
+                    description: "".to_string(),
+                    decay: 0.0,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                want0.ownership_sources.insert(2);
+                want0.process_sources.insert(0);
+                want0.process_sources.insert(1);
+                want0.use_sources.insert(0);
+                want0.consumption_sources.insert(1);
+                data.wants.insert(want0.id, want0);
+                // add processes
+                data.processes.insert(0, Process{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Use(3)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+                data.processes.insert(1, Process{
+                    id: 1,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Consumption(4)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+                data.update_product_classes().expect("Failed to setup product classes.");
+                test.is_sifted = true;
+                // double check that everything is set up.
+                assert!(test.is_sifted);
+                assert!(test.desires[0].satisfaction == 0.0);
+                assert!(test.desires[1].satisfaction == 0.0);
+                assert!(test.desires[2].satisfaction == 0.0);
+                // test satisfaction and reserves for each
+                test.add_property(0, 5.0, &data);
+                assert!(test.desires[0].satisfaction == 5.0);
+                assert!(test.desires[1].satisfaction == 0.0);
+                assert!(test.desires[2].satisfaction == 0.0);
+                assert!(test.property.get(&0).unwrap().total_property == 5.0);
+                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&1).is_none());
+                assert!(test.property.get(&2).is_none());
+                assert!(test.property.get(&3).is_none());
+                assert!(test.property.get(&4).is_none());
+                test.is_sifted = false;
+                test.add_property(0, 10.0, &data);
+                assert!(test.desires[0].satisfaction == 5.0);
+                assert!(test.desires[1].satisfaction == 0.0);
+                assert!(test.desires[2].satisfaction == 0.0);
+                assert!(test.property.get(&0).unwrap().total_property == 15.0);
+                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&1).is_none());
+                assert!(test.property.get(&2).is_none());
+                assert!(test.property.get(&3).is_none());
+                assert!(test.property.get(&4).is_none());
             }
 
             #[test]
@@ -4129,6 +4361,7 @@ mod tests {
         }
 
         mod consume_and_sift_wants_should {
+            // Fix
             use std::collections::{HashMap, HashSet};
 
             use crate::{objects::{property::Property, desire::{DesireItem, Desire}, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}, data_manager::DataManager};
@@ -4423,11 +4656,48 @@ mod tests {
                 let mut test = Property::new(test_desires);
                 test.update_satisfactions();
 
-                assert_eq!(test.full_tier_satisfaction, 6);
+                assert_eq!(test.full_tier_satisfaction.unwrap(), 6);
                 assert_eq!(test.highest_tier, 10);
                 assert!(test.quantity_satisfied == 12.0);
                 assert!(test.partial_satisfaction > 3.0 && test.partial_satisfaction < 4.0);
-                assert_eq!(test.hard_satisfaction, 4);
+                assert_eq!(test.hard_satisfaction.unwrap(), 4);
+            }
+
+            #[test]
+            pub fn set_full_tier_and_hard_sat_to_none_when_at_least_one_desire_unsatisfied() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(1), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 6.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: DesireItem::Product(2), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 4.0,
+                    step: 2,
+                    tags: vec![]});
+                let mut test = Property::new(test_desires);
+                test.update_satisfactions();
+
+                assert!(test.full_tier_satisfaction.is_none());
+                assert_eq!(test.highest_tier, 10);
+                assert!(test.quantity_satisfied == 10.0);
+                assert!(test.partial_satisfaction > 6.0 && test.partial_satisfaction < 7.0);
+                assert!(test.hard_satisfaction.is_none());
             }
         }
 
@@ -4436,6 +4706,7 @@ mod tests {
 
             #[test]
             pub fn correctly_remove_item_from_property_and_satisfaction() {
+                // FIX
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
                     item: DesireItem::Product(0), 
@@ -6293,97 +6564,144 @@ mod tests {
             assert_eq!(result4, 6);
         }
 
-        #[test]
-        pub fn walk_up_tiers_correctly() {
-            let mut test_desires = vec![];
-            test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
-                start: 0, 
-                end: Some(1), 
-                amount: 1.0, 
-                satisfaction: 0.0,
-                step: 1,
-                tags: vec![]});
-            test_desires.push(Desire{ // 0,2,4,6
-                item: DesireItem::Product(0), 
-                start: 0, 
-                end: Some(6), 
-                amount: 1.0, 
-                satisfaction: 0.0,
-                step: 2,
-                tags: vec![]});
-            test_desires.push(Desire{ // 0,3,6,9, ...
-                item: DesireItem::Product(0), 
-                start: 0, 
-                end: None, 
-                amount: 1.0, 
-                satisfaction: 0.0,
-                step: 3,
-                tags: vec![]});
-            let test = Property::new(test_desires);
 
-            let mut curr = None;
-            let mut results = vec![];
-            for _ in 0..11 {
-                let val = test.walk_up_tiers(curr).expect("Err.");
-                results.push((val.tier, val.idx));
-                curr = Some(val);
+        mod walk_up_tiers_should {
+            use crate::objects::{desire::{Desire, DesireItem}, property::{Property, DesireCoord}};
+
+            /// Tests that if the function is given a desirecoord with
+            /// an index > desires.len(), that it simply wraps back around
+            /// to 0.
+            #[test]
+            pub fn safely_accept_overlapped_idxs_from_prev() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,1
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(1), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(6), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,3,6,9, ...
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 3,
+                    tags: vec![]});
+                let test = Property::new(test_desires);
+
+                let curr = Some(DesireCoord{
+                    tier: 0,
+                    idx: 5,
+                });
+                let result = test.walk_up_tiers(curr).expect("Err");
+                
+                assert_eq!(result.tier, 1);
+                assert_eq!(result.idx, 0);
             }
 
-            assert_eq!(results[0], (0,0));
-            assert_eq!(results[1], (0,1));
-            assert_eq!(results[2], (0,2));
-            assert_eq!(results[3], (1,0));
-            assert_eq!(results[4], (2,1));
-            assert_eq!(results[5], (3,2));
-            assert_eq!(results[6], (4,1));
-            assert_eq!(results[7], (6,1));
-            assert_eq!(results[8], (6,2));
-            assert_eq!(results[9], (9,2));
-            assert_eq!(results[10], (12,2));
-        }
+            #[test]
+            pub fn walk_up_tiers_correctly() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,1
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(1), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(6), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,3,6,9, ...
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 3,
+                    tags: vec![]});
+                let test = Property::new(test_desires);
 
-        #[test]
-        pub fn walk_up_tiers_correctly_and_return_none_when_out() {
-            let mut test_desires = vec![];
-            test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
-                start: 0, 
-                end: Some(1), 
-                amount: 1.0, 
-                satisfaction: 0.0,
-                step: 1,
-                tags: vec![]});
-            test_desires.push(Desire{ // 0,2,4,6
-                item: DesireItem::Product(0), 
-                start: 0, 
-                end: Some(6), 
-                amount: 1.0, 
-                satisfaction: 0.0,
-                step: 2,
-                tags: vec![]});
-            let test = Property::new(test_desires);
+                let mut curr = None;
+                let mut results = vec![];
+                for _ in 0..11 {
+                    let val = test.walk_up_tiers(curr).expect("Err.");
+                    results.push((val.tier, val.idx));
+                    curr = Some(val);
+                }
 
-            let mut curr = None;
-            let mut results = vec![];
-            for _ in 0..7 {
-                let val = test.walk_up_tiers(curr);
-                if let Some(value) = val {
-                    results.push(Some((value.tier, value.idx)));
-                    curr = Some(value);
-                } 
-                else { results.push(None); curr = None;}
+                assert_eq!(results[0], (0,0));
+                assert_eq!(results[1], (0,1));
+                assert_eq!(results[2], (0,2));
+                assert_eq!(results[3], (1,0));
+                assert_eq!(results[4], (2,1));
+                assert_eq!(results[5], (3,2));
+                assert_eq!(results[6], (4,1));
+                assert_eq!(results[7], (6,1));
+                assert_eq!(results[8], (6,2));
+                assert_eq!(results[9], (9,2));
+                assert_eq!(results[10], (12,2));
             }
 
-            assert_eq!(results[0].expect("err!"), (0,0));
-            assert_eq!(results[1].expect("err!"), (0,1));
-            assert_eq!(results[2].expect("err!"), (1,0));
-            assert_eq!(results[3].expect("err!"), (2,1));
-            assert_eq!(results[4].expect("err!"), (4,1));
-            assert_eq!(results[5].expect("err!"), (6,1));
-            assert_eq!(results[6], None);
+            #[test]
+            pub fn walk_up_tiers_correctly_and_return_none_when_out() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,1
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(1), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(6), 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 2,
+                    tags: vec![]});
+                let test = Property::new(test_desires);
+
+                let mut curr = None;
+                let mut results = vec![];
+                for _ in 0..7 {
+                    let val = test.walk_up_tiers(curr);
+                    if let Some(value) = val {
+                        results.push(Some((value.tier, value.idx)));
+                        curr = Some(value);
+                    } 
+                    else { results.push(None); curr = None;}
+                }
+
+                assert_eq!(results[0].expect("err!"), (0,0));
+                assert_eq!(results[1].expect("err!"), (0,1));
+                assert_eq!(results[2].expect("err!"), (1,0));
+                assert_eq!(results[3].expect("err!"), (2,1));
+                assert_eq!(results[4].expect("err!"), (4,1));
+                assert_eq!(results[5].expect("err!"), (6,1));
+                assert_eq!(results[6], None);
+            }
         }
-    
+
         #[test]
         pub fn walk_up_tiers_for_item_correctly() {
             let mut test_desires = vec![];
@@ -6709,7 +7027,7 @@ mod tests {
             assert_eq!(result, 100.0);
             // force misstep.
             test.change_end(None, 5).expect("Error Found!");
-            assert!(test.add_satisfaction_at_tier(100.0, 2) == 0.0);
+            assert_eq!(test.add_satisfaction_at_tier(100.0, 2), 100.0);
         }
 
         #[test]
@@ -6967,8 +7285,8 @@ mod tests {
                 step: 2,
                 tags: vec![]};
             
-            assert_eq!(test.satisfaction_at_tier(2), 0.75);
-            assert_eq!(test.satisfaction_at_tier(0), 1.0);
+            assert_eq!(test.satisfaction_at_tier(2), 1.5);
+            assert_eq!(test.satisfaction_at_tier(0), 2.0);
             assert_eq!(test.satisfaction_at_tier(4), 0.0);
             assert!(test.satisfaction_at_tier(1) == 0.0);
         }
@@ -6990,27 +7308,44 @@ mod tests {
             assert!(test.steps_to_tier(1).is_err());
         }
 
-        #[test]
-        pub fn calculate_steps_on_tier_correctly() {
-            let mut test = Desire{ 
-                item: DesireItem::Product(0), 
-                start: 0, 
-                end: Some(10), 
-                amount: 2.0, 
-                satisfaction: 3.5,
-                step: 2,
-                tags: vec![]};
-            
-            assert!(test.steps_on_tier(0));
-            assert!(!test.steps_on_tier(1));
-            assert!(test.steps_on_tier(2));
-            assert!(!test.steps_on_tier(12));
+        mod steps_on_tier_should {
+            use crate::objects::desire::{Desire, DesireItem};
 
-            test.change_end(None, 2).expect("Error!");
-            assert!(test.steps_on_tier(0));
-            assert!(!test.steps_on_tier(1));
-            assert!(test.steps_on_tier(2));
-            assert!(test.steps_on_tier(12));
+            #[test]
+            pub fn calculate_steps_on_tier_correctly() {
+                let mut test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 2.0, 
+                    satisfaction: 3.5,
+                    step: 2,
+                    tags: vec![]};
+                
+                assert!(test.steps_on_tier(0));
+                assert!(!test.steps_on_tier(1));
+                assert!(test.steps_on_tier(2));
+                assert!(!test.steps_on_tier(12));
+
+                test.change_end(None, 2).expect("Error!");
+                assert!(test.steps_on_tier(0));
+                assert!(!test.steps_on_tier(1));
+                assert!(test.steps_on_tier(2));
+                assert!(test.steps_on_tier(12));
+
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]};
+
+                assert!(test.steps_on_tier(0));
+                assert!(test.steps_on_tier(1));
+                assert!(test.steps_on_tier(10));
+            }
         }
 
         #[test]

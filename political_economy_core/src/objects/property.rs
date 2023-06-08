@@ -60,12 +60,12 @@ pub struct Property {
     /// Low values with stuffed desires mark material wealth with
     /// low contentment. High values with sparse desires mark material
     /// poverty but personal contentment.
-    pub full_tier_satisfaction: usize,
+    pub full_tier_satisfaction: Option<usize>,
     /// How many tiers, skipping empty ones, which have been filled.
     /// 
     /// A rough measure of total satisfaction. Removes contentment and
     /// emphasizes material satisfaction.
-    pub hard_satisfaction: usize,
+    pub hard_satisfaction: Option<usize>,
     /// The sum of desires satisfied, a more accurate, if market insensitive
     /// measure of weath.
     pub quantity_satisfied: f64,
@@ -102,8 +102,8 @@ impl Property {
             desires,
             property: HashMap::new(),
             want_store: HashMap::new(),
-            full_tier_satisfaction: 0,
-            hard_satisfaction: 0,
+            full_tier_satisfaction: None,
+            hard_satisfaction: None,
             quantity_satisfied: 0.0,
             partial_satisfaction: 0.0,
             market_satisfaction: 0.0,
@@ -241,7 +241,7 @@ impl Property {
         let mut cleared = HashSet::new();
         // quickly get all those desires which we already passed up
         for (idx, desire) in self.desires.iter().enumerate() {
-            if desire.past_end(self.hard_satisfaction) {
+            if desire.past_end(self.hard_satisfaction.unwrap_or(0)) {
                 cleared.insert(idx);
             }
         }
@@ -294,7 +294,7 @@ impl Property {
         // with these products gotten, find any competing processes we do for wants above hard_sat
         for desire in self.desires.iter()
         .filter(|x| x.item.is_want() && // is want and steps between current hard sat and highest sat.
-            x.steps_in_interval(self.hard_satisfaction, self.highest_tier)) {
+            x.steps_in_interval(self.full_tier_satisfaction.unwrap_or(0), self.highest_tier)) {
             // get processes which produce this want
             let want_info = data.wants.get(desire.item.unwrap()).unwrap();
             for proc_id in want_info.process_sources.iter()
@@ -309,10 +309,10 @@ impl Property {
         }
         // then sift the product into our desires
         let mut current_coord = 
-            if self.hard_satisfaction == 0 {
-                None
+            if self.full_tier_satisfaction.unwrap_or(0) == 0 {
+                None // if full tier sat doesn't exist or is 0, set start to null.
             } else {
-                Some(DesireCoord { tier: self.hard_satisfaction-1, idx: self.desires.len() })
+                Some(DesireCoord { tier: self.full_tier_satisfaction.unwrap()-1, idx: self.desires.len() })
             };
         while let Some(coords) = self.walk_up_tiers(current_coord) {
             current_coord = Some(coords);
@@ -1109,7 +1109,7 @@ impl Property {
         while self.desires.iter().any(|x| {
             x.is_infinite() || matches!(x.end, Some(end) if end > prev.tier)
         }) {
-            if prev.idx == self.desires.len() { 
+            if prev.idx >= self.desires.len() { 
                 prev.idx = 0; 
                 // Could make this smarter, but this will do for now.
                 // if this becomes a problem. rework to be smarter.
@@ -1188,21 +1188,29 @@ impl Property {
     /// Does not calculate satisfaction base on market history.
     pub fn update_satisfactions(&mut self) {
         // start with full tier satisfaction and highest tier.
-        self.full_tier_satisfaction = usize::MAX;
+        self.full_tier_satisfaction = Some(usize::MAX);
         self.highest_tier = 0;
         // for each desire
         for desire in self.desires.iter() {
             let tier = desire.satisfaction_up_to_tier().unwrap_or(0);
-            if !desire.is_fully_satisfied() {
-                // get it's highest fully satisfied tier
+            if !desire.is_fully_satisfied() && self.full_tier_satisfaction.is_some() {
+                // if it's not fully satisfied, and our full_tier_sat is not currently None
                 let tier = if desire.satisfaction_at_tier(tier) < 1.0 {
-                    tier - 1
+                    if tier == 0 { // if not fully satisfied, and tier is 0, return None
+                        None
+                    } else {
+                        Some(tier - 1)
+                    }
                 } 
-                else { tier };
-                // and set result to the smaller between the current and
-                // the new tier.
-                // FIXME rework this to take into account no satisfaction what-so-ever.
-                self.full_tier_satisfaction = self.full_tier_satisfaction.min(tier);
+                else { Some(tier) };
+
+                if let Some(tier) = tier {
+                    // if we have a tier, select the smaller between the current and new.
+                    self.full_tier_satisfaction = Some(self.full_tier_satisfaction.unwrap().min(tier));
+                } else { // if no tier, set to none.
+                    self.full_tier_satisfaction = None;
+                }
+                
             }
             // always check against the highest tier
             self.highest_tier = self.highest_tier.max(tier)
@@ -1214,13 +1222,13 @@ impl Property {
         // partial satisfaction
         self.partial_satisfaction = 0.0;
 
-        for tier in self.full_tier_satisfaction..(self.highest_tier+1) {
+        for tier in self.full_tier_satisfaction.unwrap_or(0)..(self.highest_tier+1) {
             // go from the full_tier to the highest tier, summing as needed.
             let sat = self.total_satisfaction_at_tier(tier);
             let total = self.total_desire_at_tier(tier);
             if total > 0.0 {
                 let sat_at_tier = sat *
-                    Property::tier_equivalence(self.full_tier_satisfaction, 
+                    Property::tier_equivalence(self.full_tier_satisfaction.unwrap_or(0), 
                         tier);
                 self.partial_satisfaction += sat_at_tier;
             }
@@ -1230,13 +1238,17 @@ impl Property {
         let lowest = self.desires.iter()
             .map(|x| x.start).min().expect("Value not found!");
         let mut skipped = 0;
-        for tier in lowest..self.full_tier_satisfaction {
+        for tier in lowest..self.full_tier_satisfaction.unwrap_or(0) {
             if self.desires.iter().filter(|x| x.steps_on_tier(tier)).count() == 0 {
                 skipped += 1;
             }
         }
         // The highest full tier we satisfy, minus skipped tiers, +1 to correctly fence post it.
-        self.hard_satisfaction = self.full_tier_satisfaction - skipped + 1;
+        if let Some(tier) = self.full_tier_satisfaction {
+            self.hard_satisfaction = Some(tier - skipped + 1);
+        } else {
+            self.hard_satisfaction = None;
+        }
     }
 
     /// Calculates, sets, and returns the market satisfaction for these 
