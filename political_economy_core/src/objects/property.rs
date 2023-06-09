@@ -334,6 +334,24 @@ impl Property {
                     }
                     // get the want's info to check against it.
                     let want_info = data.wants.get(&want).unwrap();
+                    // get from expected wants first, if possible.
+                    if self.want_expectations.contains_key(&want) {
+                        // get how much we have
+                        let available = self.want_expectations.get_mut(&want).unwrap();
+                        // get how much we can or need to shift
+                        let shift = available.min(desire.amount - desire.satisfaction_at_tier(coords.tier));
+                        // remove available
+                        *available -= shift;
+                        // add to satisfaction
+                        desire.satisfaction += shift;
+                    }
+                    // check if we need to continue, and/or add to clear.
+                    if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
+                        if desire.past_end(coords.tier + 1) {
+                            cleared.insert(coords.idx); // if no next tier, add to cleared.
+                        }
+                        continue;
+                    }
                     // start with ownership sources
                     if want_info.ownership_sources.contains(&product) { // if our product is an ownership source, check it.
                         let prod_info = data.products.get(&product).unwrap();
