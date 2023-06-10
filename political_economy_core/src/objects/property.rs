@@ -328,10 +328,6 @@ impl Property {
             let mut desire = self.desires.get_mut(coords.idx).unwrap();
             match desire.item {
                 DesireItem::Want(want) => {
-                    if want_amount == 0.0 { // if nothing to expend here, clear
-                        cleared.insert(coords.idx);
-                        continue;
-                    }
                     // get the want's info to check against it.
                     let want_info = data.wants.get(&want).unwrap();
                     // get from expected wants first, if possible.
@@ -430,12 +426,6 @@ impl Property {
                         }
                     }
                     if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
-                        if desire.past_end(coords.tier + 1) {
-                            cleared.insert(coords.idx); // if no next tier, add to cleared.
-                        }
-                        continue;
-                    }
-                    if want_amount == 0.0 { // if out out of wants
                         if desire.past_end(coords.tier + 1) {
                             cleared.insert(coords.idx); // if no next tier, add to cleared.
                         }

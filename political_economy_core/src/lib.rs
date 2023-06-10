@@ -3516,7 +3516,7 @@ mod tests {
             pub fn sift_from_expected_wants_correctly() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: DesireItem::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -3524,7 +3524,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: DesireItem::Want(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
