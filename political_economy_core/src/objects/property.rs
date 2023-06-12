@@ -246,67 +246,10 @@ impl Property {
             }
         }
         // get wants which might use this and we have pre-emptively
-        // TODO check to release higher tier wants would likely be best put here.
+        // TODO check to release higher tier wants would likely be best put here
         let prod_info = data.products.get(&product).unwrap();
-        let mut complementary_products = HashSet::new();
-        // uses which we do any of.
-        for proc in prod_info.use_processes.iter()
-        .filter(|x| self.process_plan.contains_key(x)) {
-            let process = data.processes.get(proc).unwrap();
-            // with process data which we have, add inputs and capital products to our adjacent products
-            for part in process.process_parts.iter()
-            .filter(|x| !x.part.is_output() && !x.item.is_want()) { // not output or want
-                if let PartItem::Specific(id) = part.item {
-                    if self.property.contains_key(&id) {
-                        complementary_products.insert(id); // if specific, get just that item
-                    }
-                } else if let PartItem::Class(class_id) = part.item {
-                    // add all items of that class
-                    for id in data.product_classes.get(&class_id)
-                    .unwrap().iter()
-                    .filter(|x| self.property.contains_key(x)) { // get all members of the class, but only add what we have.
-                        complementary_products.insert(*id);
-                    }
-                }
-            }
-        }
-        // do with consumption next
-        for proc in prod_info.consumption_processes.iter()
-        .filter(|x| self.process_plan.contains_key(x)) {
-            let process = data.processes.get(proc).unwrap();
-            // with process data which we have, add inputs and capital products to our adjacent products
-            for part in process.process_parts.iter()
-            .filter(|x| !x.part.is_output() && !x.item.is_want()) { // not output or want
-                if let PartItem::Specific(id) = part.item {
-                    if self.property.contains_key(&id) { // only add what we have.
-                        complementary_products.insert(id); // if specific, get just that item
-                    }
-                } else if let PartItem::Class(class_id) = part.item {
-                    // add all items of that class
-                    for id in data.product_classes.get(&class_id)
-                    .unwrap().iter()
-                    .filter(|x| self.property.contains_key(x)) { // get all members of the class, but only add what we have.
-                        complementary_products.insert(*id);
-                    }
-                }
-            }
-        }
-        // with these products gotten, find any competing processes we do for wants above hard_sat
-        for desire in self.desires.iter()
-        .filter(|x| x.item.is_want() && // is want and steps between current hard sat and highest sat.
-            x.steps_in_interval(self.full_tier_satisfaction.unwrap_or(0), self.highest_tier)) {
-            // get processes which produce this want
-            let want_info = data.wants.get(desire.item.unwrap()).unwrap();
-            for proc_id in want_info.process_sources.iter()
-            .filter(|x| self.process_plan.contains_key(x)) // get those we can remove from
-            .filter(|x| {
-                let proc_data = data.processes.get(x).unwrap();
-                // if the process takes in any of the complementary products, we're golden
-                complementary_products.iter().any(|x| proc_data.uses_product(*x, data))
-            }) {
-                // FIXME  Come back here after more testing elsewhere.
-            }
-        }
+        // get wants which this can satisfy via processes
+
         // then sift the product into our desires
         let mut current_coord = 
             if self.full_tier_satisfaction.unwrap_or(0) == 0 {
