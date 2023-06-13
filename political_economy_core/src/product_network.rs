@@ -1,30 +1,142 @@
+use std::collections::HashMap;
+
+use crate::data_manager::DataManager;
+
+/// Product Network storage.
+#[derive(Debug)]
+pub struct ProductNetwork {
+    /// map to indices for wants.
+    want_idx: HashMap<usize, usize>,
+    /// Map to indices for products.
+    product_idx: HashMap<usize, usize>,
+    /// The Items in the network, Should be sum of Products and Wants.
+    items: Vec<Node>,
+    /// All of the connections, should hold all processes and 
+    connections: Vec<Connection>,
+}
+
+impl ProductNetwork{
+    pub fn new() -> Self { 
+        Self { 
+            want_idx: HashMap::new(),
+            product_idx: HashMap::new(),
+            items: vec![], 
+            connections: vec![] 
+        } 
+    }
+
+    /// Adds product to our network, returns true if successful, false if it
+    /// already exists in our network.
+    fn add_product(&mut self, id: usize) -> bool {
+        if self.product_idx.contains_key(&id) {
+            // if already contained in network
+            false
+        } else {
+            self.product_idx.insert(id, self.items.len());
+            self.items.push(Node::new(ItemData::Proudct(id)));
+            true
+        }
+    }
+
+    /// Adds want to our network, returns true if successful, false if it
+    /// already exists in our network.
+    fn add_want(&mut self, id: usize) -> bool {
+        if self.want_idx.contains_key(&id) {
+            // if already contained in network
+            false
+        } else {
+            self.want_idx.insert(id, self.items.len());
+            self.items.push(Node::new(ItemData::Want(id)));
+            true
+        }
+    }
+
+    /// # Update Product Network
+    /// 
+    /// Given our current data, it creates a network of
+    /// wants, products, and processes to make navigating
+    /// what feeds to what easier.
+    /// 
+    /// Does not record efficiency or conversion rates, that's what
+    /// the process itself is for.
+    /// 
+    /// Clears out old data as well. Only call after loading all 
+    /// products, wants, and processes.
+    pub fn update_product_network(&mut self, data: &DataManager) {
+        self.connections.clear();
+        self.items.clear();
+        self.product_idx.clear();
+        self.want_idx.clear();
+        for (id, _) in data.wants.iter() {
+            self.add_want(*id);
+        }
+        for (id, _) in data.products.iter() {
+            self.add_product(*id);
+        }
+    }
+}
+
 /// # Node Struct
 /// 
 /// Node for products and wans in our graph.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Node {
+    /// The item in this node.
     item: ItemData,
+    /// Incoming Connections (this is an output)
     incoming: Vec<usize>,
+    /// outgoing connections (this is an input)
     outgoing: Vec<usize>,
+}
+
+impl Node {
+    pub fn new(item: ItemData) -> 
+        Self { 
+            Self { 
+                item, 
+                incoming: vec![], 
+                outgoing: vec![] 
+            } 
+        }
 }
 /// The item infor for a node.
 #[derive(Debug, Copy, Clone)]
 pub enum ItemData {
+    /// The item is a want, with the id attached.
     Want(usize),
+    /// The Item is a product, it's id is stored
     Proudct(usize)
 }
 
 /// the connection's info
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Connection {
-    input_idx: usize,
+    /// The Input Item(s)' index.
+    input_idx: Vec<usize>,
+    /// The type of connection, 
+    /// 
+    /// Process (contains process ID)
+    /// or 
+    /// Ownership (this is the input)
     conn_type: ConnectionType,
-    output_idx: usize
+    /// The index of the output item.
+    output_idx: Vec<usize>
+}
+
+impl Connection {
+    pub fn new(conn_type: ConnectionType) -> Self { 
+        Self { input_idx: vec![], 
+            conn_type, 
+            output_idx: vec![]
+        } 
+    }
 }
 
 /// The type of the connection.
 #[derive(Debug, Copy, Clone)]
 pub enum ConnectionType {
+    /// The process, with process ID
     Process(usize),
+    /// An ownership source connection. Solo Input is the ownership product.
     Ownership,
 }
