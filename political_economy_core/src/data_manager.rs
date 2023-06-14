@@ -659,8 +659,8 @@ impl DataManager {
         // clear out old data for sanity measures
         self.product_classes.clear();
         // update and sanity check product classes
-        for (&product_id, data) in self.products.iter() {
-            if let Some(id) = data.product_class {
+        for (&product_id, prod_data) in self.products.iter() {
+            if let Some(id) = prod_data.product_class {
                 // sanity check that the generic points to itself
                 let other = self.products.get(&id).unwrap();
                 if other.product_class.unwrap() != other.id {

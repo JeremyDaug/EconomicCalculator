@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::data_manager::DataManager;
+use crate::{data_manager::DataManager, objects::process::{PartItem, ProcessSectionTag}};
 
 /// Product Network storage.
 #[derive(Debug)]
@@ -67,12 +67,117 @@ impl ProductNetwork{
         self.items.clear();
         self.product_idx.clear();
         self.want_idx.clear();
+        // add wants
         for (id, _) in data.wants.iter() {
             self.add_want(*id);
         }
+        // and product nodes
         for (id, _) in data.products.iter() {
             self.add_product(*id);
         }
+        // add ownership connections
+        for (id, product) in data.products.iter()
+        .filter(|(_, prod)| prod.wants.len() > 0) {
+            // get the product's idx
+            let prod_id = *self.get_prod_idx(id);
+            // make a connection for the ownership.
+            let mut conn 
+                = Connection::new(ConnectionType::Ownership);
+            // add our product as the input.
+            conn.input_idx.push(prod_id);
+            // get that connection's (eventual) index
+            let conn_idx = self.connections.len();
+            // iterate over the wants it produces
+            for (want, _) in product.wants.iter() {
+                // get that want's index
+                let want_idx = *self.get_want_idx(want);
+                // add that want to the outputs of the connection
+                conn.output_idx.push(want_idx);
+                // get that want's data
+                let want_data = self.get_node_mut(want_idx);
+                // and add the connection as incoming as well
+                want_data.incoming.push(conn_idx);
+            }
+            // lastly, add connection to our data.
+            self.connections.push(conn);
+        }
+        // go through processes
+        for (process_id, process) in data.processes.iter() {
+            let mut conn 
+                = Connection::new(ConnectionType::Process(*process_id));
+            let conn_idx = self.connections.len();
+            for part in process.process_parts.iter() {
+                match part.part {
+                    ProcessSectionTag::Input |
+                    ProcessSectionTag::Capital => {
+                        // if input or capital, than it's an input 
+                        match part.item {
+                            PartItem::Specific(id) => {
+                                let idx = self.get_prod_idx(&id);
+                                conn.input_idx.push(*idx); // add input's idx
+                                let node = self.get_node_mut(*idx);
+                                node.outgoing.push(conn_idx); // add connection as output
+                            },
+                            PartItem::Class(class) => {
+                                let class_group = data.product_classes.get(&class).unwrap();
+                                for id in class_group {
+                                    let idx = self.get_prod_idx(&id);
+                                    conn.input_idx.push(*idx); // add input's idx
+                                    let node = self.get_node_mut(*idx);
+                                    node.outgoing.push(conn_idx); // add connection as output
+                                }
+                            },
+                            PartItem::Want(id) => {
+                                let idx = self.get_want_idx(&id);
+                                conn.input_idx.push(*idx); // add input's idx
+                                let node = self.get_node_mut(*idx);
+                                node.outgoing.push(conn_idx); // add connection as output
+                            },
+                        }
+                    },
+                    ProcessSectionTag::Output => {
+                        match part.item {
+                            PartItem::Specific(id) => {
+                                let idx = self.get_prod_idx(&id);
+                                conn.output_idx.push(*idx); // add output's idx
+                                let node = self.get_node_mut(*idx);
+                                node.incoming.push(conn_idx); // add connection as input
+                            },
+                            PartItem::Class(class) => {
+                                let class_group = data.product_classes.get(&class).unwrap();
+                                for id in class_group {
+                                    let idx = self.get_prod_idx(&id);
+                                    conn.output_idx.push(*idx); // add output's idx
+                                    let node = self.get_node_mut(*idx);
+                                    node.incoming.push(conn_idx); // add connection as input
+                                }
+                            },
+                            PartItem::Want(id) => {
+                                let idx = self.get_want_idx(&id);
+                                conn.output_idx.push(*idx); // add output's idx
+                                let node = self.get_node_mut(*idx);
+                                node.incoming.push(conn_idx); // add connection as input
+                            },
+                        }
+                    },
+                }
+            }
+        }
+    }
+
+    /// get's a product's index in our items.
+    fn get_prod_idx(&self, id: &usize) -> &usize {
+        self.product_idx.get(id).unwrap()
+    }
+
+    /// get's a want's index in our items.
+    fn get_want_idx(&self, id: &usize) -> &usize {
+        self.want_idx.get(id).unwrap() 
+    }
+
+    /// Get's Node, mutable.
+    fn get_node_mut(&mut self, want: usize) -> &mut Node {
+        self.items.get_mut(want).unwrap()
     }
 }
 
