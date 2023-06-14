@@ -246,10 +246,7 @@ impl Property {
             }
         }
         // get wants which might use this and we have pre-emptively
-        // TODO check to release higher tier wants would likely be best put here
-        let prod_info = data.products.get(&product).unwrap();
-        // get wants which this can satisfy via processes
-
+        // TODO Check for which higher ranking wants can be released here.
         // then sift the product into our desires
         let mut current_coord = 
             if self.full_tier_satisfaction.unwrap_or(0) == 0 {
@@ -686,6 +683,8 @@ impl Property {
             }
             return;
         }
+        // unsift our property
+        self.is_sifted = false;
 
         // if it doesn't already exist, duplicate and insert.
         let dup = desire.clone();

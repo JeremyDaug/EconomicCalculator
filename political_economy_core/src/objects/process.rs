@@ -1,4 +1,5 @@
-use std::{collections::{HashMap, HashSet}};
+///! Processes transform Products and Wants into other products and wants.
+use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
@@ -307,12 +308,18 @@ impl Process {
     /// 
     /// ## Notes
     /// 
+    /// Class Items are only valid as Capital or Input, not as output. Class 
+    /// Items are assumed to be 'materially equvialent' meaning that they are
+    /// made of the same materials in the same ratio and have the same mass.
+    /// Note, this is an assumption, not a hard rule, so may be ignored.
+    /// The 'Consumed' tag may help to sidestep this issue.
+    /// 
     /// Currently it's missing many parts, it takes no tags into account and does not handle duplicate 
     /// input/capitals or overlap between specific products and that product's class.
     /// 
     /// Use with caution.
     /// 
-    /// TODO Include logic for process part tags: Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
+    /// TODO Include logic for process part tags: Consumption, Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
     /// 
     /// TODO pop_skill and other_efficiency_boni are currently not taken into account.
     /// 
@@ -466,12 +473,18 @@ impl Process {
     /// 
     /// This is the same as do_process, but it takes in a hashmap of PropertyInfo instead of f64s.
     /// 
+    /// Class Items are only valid as Capital or Input, not as output. Class 
+    /// Items are assumed to be 'materially equvialent' meaning that they are
+    /// made of the same materials in the same ratio and have the same mass.
+    /// Note, this is an assumption, not a hard rule, so may be ignored.
+    /// The 'Consumed' tag may help to sidestep this issue.
+    /// 
     /// Currently it's missing many parts, it takes no tags into account and does not handle duplicate 
     /// input/capitals or overlap between specific products and that product's class.
     /// 
     /// Use with caution.
     /// 
-    /// TODO Include logic for process part tags: Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
+    /// TODO Include logic for process part tags: Consumption, Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
     /// 
     /// TODO pop_skill and other_efficiency_boni are currently not taken into account.
     /// 
@@ -752,30 +765,63 @@ pub enum ProcessPartTag {
     /// Does not effect optional, fixed, or investment parts.
     /// Input items marked optional are not output, but instead consumed or 
     /// failed instead.
+    /// 
+    /// ## Applicable to:
+    /// - Inputs
+    /// - Capital
     Optional(f64),
+    /// Marks an item as Cosumed, rather than destroyed by the process.
+    /// Used particularly for items which don't directly go into the end
+    /// product, but are still used to create the end product. IE, making 
+    /// steel requires using a catalyst to remove the impurities.
+    /// 
+    /// ## Applicable to:
+    /// - Inputs
+    Consumed,
     /// Used to mark an input, capital, or output as fixed. it does not get
     /// effected by any throughput bonuses.
+    /// 
+    /// ## Applicable to:
+    /// - Inputs
+    /// - Capital
+    /// - Outputs
     Fixed,
     /// Marks an input for a process as being required in totality for the 
     /// process to start.
+    /// 
+    /// TODO needs more work and thought put into this.
+    /// 
+    /// ## Applicable to:
+    /// - Inputs
+    /// - Capital
     Investment,
     /// Marks an output as a pollutant, causing it to be thrown into the
     /// environment directly unless captured.
+    /// 
+    /// ## Applicable to:
+    /// - Outputs
     Pollutant,
     /// Marks an output as being a possible output rather than guaranteed.
     /// Should not be alone, but have alternatives generally.
     /// The char is the probability group it's in.
     /// The usize in the weight chance of this item occuring.
     /// Items which share a group add their weights together.
+    /// 
+    /// ## Applicable to:
+    /// - Outputs
     Chance(char, usize),
     /// Marks an input or captial as gaining efficiency based on
     /// the quality of the item in question. Should typically be used only for
-    /// Abstract products with valid variations.
+    /// Class products with valid variations.
     /// 
     /// The value included is the throughput gain for the process per level of
     /// the item's quality.
     /// 
     /// This does not effect Optional products, nor is this effected by optional.
+    /// 
+    /// ## Applicable to:
+    /// - Inputs
+    /// - Capital
     QualityBased(f64)
 }
 
