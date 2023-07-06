@@ -198,7 +198,7 @@ impl Property {
         .or_insert(PropertyInfo::new(amount));
     }
 
-        /// # Add Property
+    /// # Predict Value Gained
     /// 
     /// Adds or removes an item to property, returning the value gained (or lost)
     /// by the addition (or subtraction).
@@ -209,7 +209,7 @@ impl Property {
     /// 
     /// TODO Not Tested: calls unsafe when not sifted, sifts correctly and returns the tieredvalue
     /// 
-    /// TODO currently flawed as it cannot release higher ranking wants to satisfy lower ranking wants
+    /// TODO currently flawed as it cannot test releasing higher ranking wants to satisfy lower ranking wants
     pub fn predict_value_gained(&mut self, product: usize, amount: f64, data: &DataManager) -> TieredValue {
         if amount < 0.0 { // if removing property, jump to remove.
             // TODO swap this for predict value lost.
@@ -277,15 +277,13 @@ impl Property {
                     // get the want's info to check against it.
                     let want_info = data.wants.get(&want).unwrap();
                     // get from expected wants first, if possible.
-                    if self.want_expectations.contains_key(&want) {
+                    if want_buffer.contains_key(&want) {
                         // get how much we have
-                        let available = self.want_expectations.get_mut(&want).unwrap();
+                        let available = want_buffer.get_mut(&want).unwrap();
                         // get how much we can or need to shift
                         let shift = available.min(desire.amount - desire.satisfaction_at_tier(coords.tier));
                         // remove available
                         *available -= shift;
-                        // add to satisfaction
-                        desire.satisfaction += shift;
                     }
                     // check if we need to continue, and/or add to clear.
                     if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
@@ -305,18 +303,18 @@ impl Property {
                         // loop over the wants it creates and add them
                         for (own_want, eff) in prod_info.wants.iter() {
                             let sat = available * eff;
-                            if *own_want == want  {
-                                desire.satisfaction += sat;
+                            if *own_want == want {
                             } else {
-                                self.want_expectations.entry(*own_want)
+                                want_buffer.entry(*own_want)
                                 .and_modify(|x| *x += sat)
                                 .or_insert(sat);
                             }
                         }
                         want_amount -= available; // remvoe from local
                         value_gained.add_value(coords.tier, available * eff);
-                        self.property.get_mut(&product)
-                            .unwrap().shift_to_want_reserve(available); // shift property
+                        // remove from property buff
+                        *property.get_mut(&product)
+                            .unwrap() -= available; 
                         // remove from local property
                         if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
                             if desire.past_end(coords.tier + 1) {
@@ -338,7 +336,7 @@ impl Property {
                         let eff = process.effective_output_of(PartItem::Want(want));
                         let target = desire.amount / eff;
                         // if the process accepts our product as input, try it.
-                        let results = process.do_process_with_property(&self.property, 
+                        let results = process.do_process(&property, 
                             &want_buffer, 0.0, 
                             0.0, Some(target), 
                             true, data);
@@ -347,20 +345,16 @@ impl Property {
                         }
                         // if any iterations, get how much it satisfies.
                         let sat_gained = results.input_output_wants.get(&want).unwrap();
-                        desire.satisfaction += sat_gained; // add satisfaction
                         value_gained.add_value(coords.tier, *sat_gained);
-                        self.process_plan.entry(*proc) // add iterations to plan
-                        .and_modify(|x| *x += results.iterations)
-                        .or_insert(results.iterations);
                         // reserve property used/expended
-                        for (&property, &amount) in results.input_output_products.iter()
-                        .filter(|x| *x.1 < 0.0) { // reserve inputs
-                            self.property.entry(property) // reserve in property
-                            .and_modify(|x| { x.shift_to_want_reserve(-amount); });
+                        for (&id, &amount) in results.input_output_products.iter()
+                        .filter(|x| *x.1 < 0.0) { // remove inputs
+                            property.entry(id) // remove property
+                            .and_modify(|x| { *x += amount; });
                         }
-                        for (&property, &amount) in results.capital_products.iter() {
-                            self.property.entry(property) // reserve in property
-                            .and_modify(|x| { x.shift_to_want_reserve(amount); });
+                        for (&id, &amount) in results.capital_products.iter() {
+                            property.entry(id) // remove property
+                            .and_modify(|x| { *x += amount; });
                         }
                         for (&want, &amount) in results.input_output_wants.iter()
                         .filter(|x| *x.1 < 0.0) { // remove from want buffer.
@@ -388,7 +382,7 @@ impl Property {
                         let eff = process.effective_output_of(PartItem::Want(want));
                         let target = desire.amount / eff;
                         // if the process accepts our product as input, try it.
-                        let results = process.do_process_with_property(&self.property, 
+                        let results = process.do_process(&property, 
                             &want_buffer, 0.0, 
                             0.0, Some(target), 
                             true, data);
@@ -397,20 +391,16 @@ impl Property {
                         }
                         // if any iterations, get how much it satisfies.
                         let sat_gained = results.input_output_wants.get(&want).unwrap();
-                        desire.satisfaction += sat_gained; // add satisfaction
                         value_gained.add_value(coords.tier, *sat_gained);
-                        self.process_plan.entry(*proc) // add iterations to plan
-                        .and_modify(|x| *x += results.iterations)
-                        .or_insert(results.iterations);
                         // reserve property used/expended
-                        for (&property, &amount) in results.input_output_products.iter()
+                        for (&id, &amount) in results.input_output_products.iter()
                         .filter(|x| *x.1 < 0.0) { // remove inputs
-                            self.property.entry(property) // reserve in property
-                            .and_modify(|x| { x.shift_to_want_reserve(-amount); });
+                            property.entry(id)
+                            .and_modify(|x| { *x += amount; });
                         }
-                        for (&property, &amount) in results.capital_products.iter() {
-                            self.property.entry(property) // reserve in property
-                            .and_modify(|x| { x.shift_to_want_reserve(amount); });
+                        for (&id, &amount) in results.capital_products.iter() {
+                            property.entry(id)
+                            .and_modify(|x| { *x += amount; });
                         }
                         for (&want, &amount) in results.input_output_wants.iter()
                         .filter(|x| *x.1 < 0.0) { // remove from want buffer.
@@ -447,9 +437,8 @@ impl Property {
                     let remainder = (desire.amount - desire.satisfaction_at_tier(coords.tier))
                         .min(class_amount);
                     class_amount -= remainder; // remove from local
-                    self.property.get_mut(&product) // shift to class reserve
-                        .unwrap().shift_to_class_reserve(remainder);
-                    desire.satisfaction += remainder; // add to satisfaction
+                    *property.get_mut(&product) // shift to class reserve
+                        .unwrap() -= remainder;
                     value_gained.add_value(coords.tier, remainder);
                     if let Some(last) = desire.end { // check if last tier
                         if last == coords.tier {
@@ -474,9 +463,8 @@ impl Property {
                     let remainder = (desire.amount - desire.satisfaction_at_tier(coords.tier))
                         .min(specific_amount);
                     specific_amount -= remainder; // remove from local
-                    self.property.get_mut(&product) // shift property
-                        .unwrap().shift_to_specific_reserve(remainder);
-                    desire.satisfaction += remainder; // add to satisfaction.
+                    *property.get_mut(&product) // shift property
+                        .unwrap() -= remainder;
                     value_gained.add_value(coords.tier, remainder);
                     if let Some(last) = desire.end { // check if last tier.
                         if last == coords.tier {
@@ -487,7 +475,6 @@ impl Property {
                 },
             }
         }
-        self.update_satisfactions();
 
         value_gained
     }
@@ -504,6 +491,8 @@ impl Property {
     /// TODO Not Tested: calls unsafe when not sifted, sifts correctly and returns the tieredvalue
     /// 
     /// TODO currently flawed as it cannot release higher ranking wants to satisfy lower ranking wants
+    /// 
+    /// 
     pub fn add_property(&mut self, product: usize, amount: f64, data: &DataManager) -> TieredValue {
         if amount < 0.0 { // if removing property, jump to remove.
             return self.remove_property(product, -amount, data);
@@ -789,12 +778,293 @@ impl Property {
     /// 
     /// If amount given is negative, it instead redirects, calling add property.
     /// 
+    /// If the amount being removed is greater than the amount available, it clamps the
+    /// amount removed to what is available.
+    /// 
     /// # Panics
     /// 
     /// Panics if the amount given is greater than our property available.
-    pub fn remove_property(&mut self, _product: usize, _amount: f64, 
-        _data: &DataManager) -> TieredValue {
-        todo!("Not made")
+    pub fn remove_property(&mut self, product: usize, amount: f64, 
+    data: &DataManager) -> TieredValue {
+        if amount < 0.0 { // if negative value, add instead (negate value)
+            return self.add_property(product, -amount, data);
+        }
+        if !self.is_sifted { // if we aren't sifted, don't bother trying to properly sift.
+            self.unsafe_add_property(product, amount);
+            return TieredValue{ tier: 0, value: 0.0 };
+        }
+        // prepare our return value
+        let mut value_gained = TieredValue { tier: 0, value: 0.0 };
+        // get/clamp how much we can actually remove
+        let amount = self.property.get(&product).unwrap().total_property.min(amount);
+        
+
+        { // code from add_property
+            // put into our property
+            self.property.entry(product)
+                .and_modify(|x| { x.add_property(amount); })
+                .or_insert(PropertyInfo::new(amount));
+            // break out amount for each so we can try to satsify them appropriately.
+            let mut specific_amount = amount;
+            let mut class_amount = amount;
+            let mut want_amount = amount;
+            // get class for checking
+            let prod_class = data.get_product_class(product);
+            // get our wants for the addition.
+            let mut want_buffer = self.want_store.clone(); // same with wants
+            for (&want, &amount) in self.want_expectations.iter() {
+                want_buffer.entry(want)
+                .and_modify(|x| *x += amount)
+                .or_insert(amount);
+            }
+            // and record desires we've already visited and failed to do anything with
+            let mut cleared = HashSet::new();
+            // quickly get all those desires which we already passed up
+            for (idx, desire) in self.desires.iter().enumerate() {
+                if desire.past_end(self.hard_satisfaction.unwrap_or(0)) {
+                    cleared.insert(idx);
+                }
+            }
+            // get wants which might use this and we have pre-emptively
+            // TODO Check for which higher ranking wants can be released here.
+            // then sift the product into our desires
+            let mut current_coord = 
+                if self.full_tier_satisfaction.unwrap_or(0) == 0 {
+                    None // if full tier sat doesn't exist or is 0, set start to null.
+                } else {
+                    Some(DesireCoord { tier: self.full_tier_satisfaction.unwrap()-1, idx: self.desires.len() })
+                };
+            while let Some(coords) = self.walk_up_tiers(current_coord) {
+                current_coord = Some(coords);
+                if specific_amount == 0.0 && class_amount == 0.0 && want_amount == 0.0 {
+                    break; // if we've used all of our amounts, gtfo.
+                }
+                if cleared.len() == self.desires.len() {
+                    break; // if we cleared all desires, get out.
+                }
+                if cleared.contains(&coords.idx) {
+                    continue; // If the desire is already in skip and go to the next step.
+                }
+                let mut desire = self.desires.get_mut(coords.idx).unwrap();
+                match desire.item {
+                    DesireItem::Want(want) => {
+                        // get the want's info to check against it.
+                        let want_info = data.wants.get(&want).unwrap();
+                        // get from expected wants first, if possible.
+                        if self.want_expectations.contains_key(&want) {
+                            // get how much we have
+                            let available = self.want_expectations.get_mut(&want).unwrap();
+                            // get how much we can or need to shift
+                            let shift = available.min(desire.amount - desire.satisfaction_at_tier(coords.tier));
+                            // remove available
+                            *available -= shift;
+                            // add to satisfaction
+                            desire.satisfaction += shift;
+                        }
+                        // check if we need to continue, and/or add to clear.
+                        if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
+                            if desire.past_end(coords.tier + 1) {
+                                cleared.insert(coords.idx); // if no next tier, add to cleared.
+                            }
+                            continue;
+                        }
+                        // start with ownership sources
+                        if want_info.ownership_sources.contains(&product) { // if our product is an ownership source, check it.
+                            let prod_info = data.products.get(&product).unwrap();
+                                // how much we need to satisfy the tier.
+                            let remaining_satisfaction = desire.amount - desire.satisfaction_at_tier(coords.tier);
+                            let eff = prod_info.wants.get(&want).unwrap(); // want per product owned
+                            let target = remaining_satisfaction / eff; // the target amount to satisfy the current tier
+                            let available = target.min(want_amount); // cap at available want product.
+                            // loop over the wants it creates and add them
+                            for (own_want, eff) in prod_info.wants.iter() {
+                                let sat = available * eff;
+                                if *own_want == want  {
+                                    desire.satisfaction += sat;
+                                } else {
+                                    self.want_expectations.entry(*own_want)
+                                    .and_modify(|x| *x += sat)
+                                    .or_insert(sat);
+                                }
+                            }
+                            want_amount -= available; // remvoe from local
+                            value_gained.add_value(coords.tier, available * eff);
+                            self.property.get_mut(&product)
+                                .unwrap().shift_to_want_reserve(available); // shift property
+                            // remove from local property
+                            if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
+                                if desire.past_end(coords.tier + 1) {
+                                    cleared.insert(coords.idx); // if no next tier, add to cleared.
+                                }
+                                continue;
+                            }
+                        }
+                        // now go for processes.
+                        // TODO when doing these parts, check for whether upper wants can be sacrificed for these.
+                        // start with use processes
+                        for proc in want_info.use_sources.iter()
+                        .filter(|x| {
+                            let process = data.processes.get(x).unwrap();
+                            process.uses_product(product, data) 
+                        }) {
+                            let process = data.processes.get(proc).unwrap();
+                            // get how much an iteration will output
+                            let eff = process.effective_output_of(PartItem::Want(want));
+                            let target = desire.amount / eff;
+                            // if the process accepts our product as input, try it.
+                            let results = process.do_process_with_property(&self.property, 
+                                &want_buffer, 0.0, 
+                                0.0, Some(target), 
+                                true, data);
+                            if results.iterations == 0.0 {
+                                continue; // of no iterations completed, move on to next
+                            }
+                            // if any iterations, get how much it satisfies.
+                            let sat_gained = results.input_output_wants.get(&want).unwrap();
+                            desire.satisfaction += sat_gained; // add satisfaction
+                            value_gained.add_value(coords.tier, *sat_gained);
+                            self.process_plan.entry(*proc) // add iterations to plan
+                            .and_modify(|x| *x += results.iterations)
+                            .or_insert(results.iterations);
+                            // reserve property used/expended
+                            for (&property, &amount) in results.input_output_products.iter()
+                            .filter(|x| *x.1 < 0.0) { // reserve inputs
+                                self.property.entry(property) // reserve in property
+                                .and_modify(|x| { x.shift_to_want_reserve(-amount); });
+                            }
+                            for (&property, &amount) in results.capital_products.iter() {
+                                self.property.entry(property) // reserve in property
+                                .and_modify(|x| { x.shift_to_want_reserve(amount); });
+                            }
+                            for (&want, &amount) in results.input_output_wants.iter()
+                            .filter(|x| *x.1 < 0.0) { // remove from want buffer.
+                                want_buffer.entry(want)
+                                .and_modify(|x| *x += amount);
+                            }
+                            if desire.satisfied_at_tier(coords.tier) {
+                                break; // if we satisfied this tier, stop trying to satisfy it.
+                            }
+                        }
+                        if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
+                            if desire.past_end(coords.tier + 1) {
+                                cleared.insert(coords.idx); // if no next tier, add to cleared.
+                            }
+                            continue;
+                        }
+                        // if still satisfaction and want to use, try consumption sources
+                        for proc in want_info.consumption_sources.iter()
+                        .filter(|x| {
+                            let process = data.processes.get(x).unwrap();
+                            process.uses_product(product, data) 
+                        }) {
+                            let process = data.processes.get(proc).unwrap();
+                            // get how much an iteration will output
+                            let eff = process.effective_output_of(PartItem::Want(want));
+                            let target = desire.amount / eff;
+                            // if the process accepts our product as input, try it.
+                            let results = process.do_process_with_property(&self.property, 
+                                &want_buffer, 0.0, 
+                                0.0, Some(target), 
+                                true, data);
+                            if results.iterations == 0.0 {
+                                continue; // of no iterations completed, move on to next
+                            }
+                            // if any iterations, get how much it satisfies.
+                            let sat_gained = results.input_output_wants.get(&want).unwrap();
+                            desire.satisfaction += sat_gained; // add satisfaction
+                            value_gained.add_value(coords.tier, *sat_gained);
+                            self.process_plan.entry(*proc) // add iterations to plan
+                            .and_modify(|x| *x += results.iterations)
+                            .or_insert(results.iterations);
+                            // reserve property used/expended
+                            for (&property, &amount) in results.input_output_products.iter()
+                            .filter(|x| *x.1 < 0.0) { // remove inputs
+                                self.property.entry(property) // reserve in property
+                                .and_modify(|x| { x.shift_to_want_reserve(-amount); });
+                            }
+                            for (&property, &amount) in results.capital_products.iter() {
+                                self.property.entry(property) // reserve in property
+                                .and_modify(|x| { x.shift_to_want_reserve(amount); });
+                            }
+                            for (&want, &amount) in results.input_output_wants.iter()
+                            .filter(|x| *x.1 < 0.0) { // remove from want buffer.
+                                want_buffer.entry(want)
+                                .and_modify(|x| *x += amount);
+                            }
+                            if desire.satisfied_at_tier(coords.tier) {
+                                break; // if we satisfied this tier, stop trying to satisfy it.
+                            }
+                        }
+                        if desire.satisfied_at_tier(coords.tier) { // if satisfied at tier, prepare to move to the next
+                            if desire.past_end(coords.tier + 1) {
+                                cleared.insert(coords.idx); // if no next tier, add to cleared.
+                            }
+                            continue;
+                        } else { // if not satisfied still, and we got here, we can never satisfy. clear and continue
+                            cleared.insert(coords.idx);
+                            continue;
+                        }
+                        
+                    },
+                    DesireItem::Class(class) => { // if product class
+                        if class_amount == 0.0 || // if nothing to spend
+                        prod_class.is_none() { // or prod has no class, clear
+                            cleared.insert(coords.idx);
+                            continue;
+                        }
+                        let prod_class = prod_class.unwrap();
+                        if prod_class != class { // if class doesn't match clear
+                            cleared.insert(coords.idx);
+                            continue;
+                        }
+                        // if it is our class and we have some amount to shift left, do so
+                        let remainder = (desire.amount - desire.satisfaction_at_tier(coords.tier))
+                            .min(class_amount);
+                        class_amount -= remainder; // remove from local
+                        self.property.get_mut(&product) // shift to class reserve
+                            .unwrap().shift_to_class_reserve(remainder);
+                        desire.satisfaction += remainder; // add to satisfaction
+                        value_gained.add_value(coords.tier, remainder);
+                        if let Some(last) = desire.end { // check if last tier
+                            if last == coords.tier {
+                                cleared.insert(coords.idx);
+                                continue;
+                            }
+                        }
+                    },
+                    DesireItem::Product(specific) => { // if specic item.
+                        // if we don't have any more specific amount to spend, record and continue.
+                        if specific_amount == 0.0 {
+                            cleared.insert(coords.idx);
+                            continue;
+                        }
+                        // if product, check that it's our specific product
+                        if product != specific { // if not, add to cleared and continue.
+                            cleared.insert(coords.idx);
+                            continue; 
+                        }
+                        // if it is, try to satisfy.
+                        // get the amount we need to satisfy (capped at our ability to satisfy)
+                        let remainder = (desire.amount - desire.satisfaction_at_tier(coords.tier))
+                            .min(specific_amount);
+                        specific_amount -= remainder; // remove from local
+                        self.property.get_mut(&product) // shift property
+                            .unwrap().shift_to_specific_reserve(remainder);
+                        desire.satisfaction += remainder; // add to satisfaction.
+                        value_gained.add_value(coords.tier, remainder);
+                        if let Some(last) = desire.end { // check if last tier.
+                            if last == coords.tier {
+                                cleared.insert(coords.idx);
+                                continue;
+                            }
+                        }
+                    },
+                }
+            }
+            self.update_satisfactions();
+        }
+
+        value_gained
     }
 
     /// # Remove Satisfaction
