@@ -797,43 +797,53 @@ impl Property {
         let mut value_gained = TieredValue { tier: 0, value: 0.0 };
         // get/clamp how much we can actually remove
         let amount = self.property.get(&product).unwrap().total_property.min(amount);
-        
+        // get how much we can remove from each reserve.
+        let mut specific_amount = self.property.get(&product)
+            .unwrap().specific_reserve.min(amount);
+        let mut class_amount = self.property.get(&product)
+            .unwrap().class_reserve.min(amount);
+        let mut want_amount = self.property.get(&product)
+            .unwrap().want_reserve.min(amount);
+        // get the product's class for later (if it has one.)
+        let prod_class = data.get_product_class(product);
+        // get the wants available for replacement/removal
+        let mut want_buffer = self.want_store.clone();
+        for (&want, &amount) in self.want_expectations.iter() {
+            want_buffer.entry(want)
+            .and_modify(|x| *x += amount)
+            .or_insert(amount);
+        }
+        // record desires we guaranteed can't reach
+        let mut cleared = HashSet::new();
+        for (idx, desire) in self.desires.iter().enumerate() {
+            if desire.before_start(self.highest_tier) || // if we'll never touch it,
+            (desire.item.is_class() && prod_class.is_none()) || // or it's a class and we have none
+            (desire.item.is_specific() && desire.item.unwrap() == product) {
+                cleared.insert(idx);
+                continue; 
+            }
+        }
+        // lastly, get the current coordinates for our desire
+        let mut current_coord = 
+            if self.full_tier_satisfaction.unwrap_or(0) == 0 {
+                None
+            } else {
+                Some(DesireCoord { tier: self.full_tier_satisfaction.unwrap()-1, idx:self.desires.len()})
+            };
+        while let Some(coords) = self.walk_down_tiers(current_coord) {
+            current_coord = Some(coords);
+            if specific_amount == 0.0 && class_amount == 0.0 && want_amount == 0.0 {
+                break; // if we've corrected each amount, gtfo.
+            }
+            if cleared.len() == self.desires.len() {
+                break; // if we cleared all desires, gtfo.
+            }
+            if cleared.contains(&coords.idx) {
+                continue; // if this desire
+            }
+        }
 
         { // code from add_property
-            // put into our property
-            self.property.entry(product)
-                .and_modify(|x| { x.add_property(amount); })
-                .or_insert(PropertyInfo::new(amount));
-            // break out amount for each so we can try to satsify them appropriately.
-            let mut specific_amount = amount;
-            let mut class_amount = amount;
-            let mut want_amount = amount;
-            // get class for checking
-            let prod_class = data.get_product_class(product);
-            // get our wants for the addition.
-            let mut want_buffer = self.want_store.clone(); // same with wants
-            for (&want, &amount) in self.want_expectations.iter() {
-                want_buffer.entry(want)
-                .and_modify(|x| *x += amount)
-                .or_insert(amount);
-            }
-            // and record desires we've already visited and failed to do anything with
-            let mut cleared = HashSet::new();
-            // quickly get all those desires which we already passed up
-            for (idx, desire) in self.desires.iter().enumerate() {
-                if desire.past_end(self.hard_satisfaction.unwrap_or(0)) {
-                    cleared.insert(idx);
-                }
-            }
-            // get wants which might use this and we have pre-emptively
-            // TODO Check for which higher ranking wants can be released here.
-            // then sift the product into our desires
-            let mut current_coord = 
-                if self.full_tier_satisfaction.unwrap_or(0) == 0 {
-                    None // if full tier sat doesn't exist or is 0, set start to null.
-                } else {
-                    Some(DesireCoord { tier: self.full_tier_satisfaction.unwrap()-1, idx: self.desires.len() })
-                };
             while let Some(coords) = self.walk_up_tiers(current_coord) {
                 current_coord = Some(coords);
                 if specific_amount == 0.0 && class_amount == 0.0 && want_amount == 0.0 {
