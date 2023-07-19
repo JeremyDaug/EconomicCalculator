@@ -4541,6 +4541,45 @@ mod tests {
             }
         }
 
+        mod total_estimated_value_should {
+            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
+
+            
+
+            #[test]
+            pub fn return_tiered_value_correctly() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2, ...
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Class(1), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![]});
+                let mut test = Property::new(test_desires);
+
+                // 1 point in tier 0
+                test.desires[0].
+            }
+        }
+
         mod preduct_value_gained_should {
             use std::collections::{HashSet, HashMap};
 
@@ -4551,7 +4590,6 @@ mod tests {
                 // Currently Not Implemented, Function is Placeholder
                 assert!(true);
             }
-
 
             #[test]
             pub fn return_0_0_when_data_is_unsifted() {

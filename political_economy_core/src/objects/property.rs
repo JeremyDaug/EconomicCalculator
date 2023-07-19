@@ -1841,7 +1841,7 @@ impl Property {
     /// will be used or consumed by the process to satisfy wants.
     /// 
     /// Resets everything, so this will be pretty heavy on the cpu.
-    pub fn sift_all(&mut self, data: &DataManager) {
+    pub fn sift_all(&mut self, data: &DataManager) -> TieredValue {
         // start by resetting property and satisfactions
         for (_, info) in self.property.iter_mut() {
             info.reset_reserves();
@@ -1868,6 +1868,7 @@ impl Property {
             match desire.item {
                 DesireItem::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
+                    // TODO, this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
                     if self.want_expectations.contains_key(&want) {
                         let expectation = self.want_expectations.get_mut(&want).unwrap();
                         if *expectation > 0.0 { // if positive expectation, use
@@ -2096,6 +2097,7 @@ impl Property {
         }
         self.update_satisfactions();
         self.is_sifted = true;
+        self.total_estimated_value()
     }
 
     /// # Consume and Shift Wants
@@ -2171,6 +2173,31 @@ impl Property {
             Some(next)
         }
     }
+
+    /// # Total Estimated Value
+    /// 
+    /// This function takes the our existing satisfactions and caluclates the effective
+    /// total value of this satisfaction.
+    /// 
+    /// For balance purposes, the value returned is set at our full tier satisfaction.
+    fn total_estimated_value(&self) -> TieredValue {
+        let mut tier = 0;
+        let mut result = TieredValue { tier: 0, value: 0.0};
+        while tier <= self.highest_tier {
+            let val = self.desires.iter()
+            .filter(|x| x.steps_on_tier(tier))
+            .map(|x| x.satisfaction_at_tier(tier))
+            .sum();
+            tier += 1;
+            result.add_value(tier, val);
+        }
+
+        if let Some(tier) = self.full_tier_satisfaction {
+            result.shift_tier(tier)
+        } else {
+            result
+        }
+    }
 }
 
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.
@@ -2230,6 +2257,13 @@ impl TieredValue {
         let start = start as f64;
         let end = end as f64;
         TIER_RATIO.powf(end - start)
+    }
+
+    /// # Shift Tier
+    /// 
+    /// creates a copy of our tiered value, but at a different tier.
+    fn shift_tier(&mut self, tier: usize) -> TieredValue {
+        TieredValue { tier, value: TieredValue::tier_equivalence(self.tier, tier) * self.value}
     }
 }
 
