@@ -4549,7 +4549,7 @@ mod tests {
             #[test]
             pub fn return_tiered_value_correctly() {
                 let mut test_desires = vec![];
-                test_desires.push(Desire{ // 0,2, ...
+                test_desires.push(Desire{ // 0,1, ...
                     item: DesireItem::Product(0), 
                     start: 0, 
                     end: None, 
@@ -4557,7 +4557,7 @@ mod tests {
                     satisfaction: 0.0,
                     step: 1,
                     tags: vec![]});
-                test_desires.push(Desire{ // 0,2,...
+                test_desires.push(Desire{ // 0,1,...
                     item: DesireItem::Class(1), 
                     start: 0, 
                     end: None, 
@@ -4565,7 +4565,7 @@ mod tests {
                     satisfaction: 0.0,
                     step: 1,
                     tags: vec![]});
-                test_desires.push(Desire{ // 0,2,...
+                test_desires.push(Desire{ // 0,1,...
                     item: DesireItem::Want(0), 
                     start: 0, 
                     end: None, 
@@ -4574,9 +4574,43 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 let mut test = Property::new(test_desires);
-
+                test.is_sifted = true;
                 // 1 point in tier 0
-                test.desires[0].
+                test.desires[0].satisfaction += 1.0;
+                test.full_tier_satisfaction = None;
+                let result = test.total_estimated_value();
+                assert_eq!(result.tier, 0);
+                assert_eq!(result.value, 1.0);
+
+                // 2 points it tier 0
+                test.desires[1].satisfaction += 1.0;
+                test.full_tier_satisfaction = None;
+                let result = test.total_estimated_value();
+                assert_eq!(result.tier, 0);
+                assert_eq!(result.value, 2.0);
+
+                // 3 points it tier 0
+                test.desires[2].satisfaction += 1.0;
+                test.full_tier_satisfaction = None;
+                let result = test.total_estimated_value();
+                assert_eq!(result.tier, 0);
+                assert_eq!(result.value, 3.0);
+
+                // 1 points it tier 1
+                test.desires[0].satisfaction += 1.0;
+                test.highest_tier = 1;
+                test.full_tier_satisfaction = Some(0);
+                let result = test.total_estimated_value();
+                assert_eq!(result.tier, 0);
+                assert_eq!(result.value, 3.0 + 0.9);
+                
+                // 1 points it tier 1
+                test.desires[0].satisfaction += 1.0;
+                test.highest_tier = 2;
+                test.full_tier_satisfaction = Some(0);
+                let result = test.total_estimated_value();
+                assert_eq!(result.tier, 0);
+                assert_eq!(result.value, 3.0 + 0.9 + 0.81);
             }
         }
 

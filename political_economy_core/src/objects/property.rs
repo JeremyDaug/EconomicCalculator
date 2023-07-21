@@ -818,7 +818,7 @@ impl Property {
         for (idx, desire) in self.desires.iter().enumerate() {
             if desire.before_start(self.highest_tier) || // if we'll never touch it,
             (desire.item.is_class() && prod_class.is_none()) || // or it's a class and we have none
-            (desire.item.is_specific() && desire.item.unwrap() == product) {
+            (desire.item.is_specific() && desire.item.unwrap() == &product) {
                 cleared.insert(idx);
                 continue; 
             }
@@ -830,7 +830,7 @@ impl Property {
             } else {
                 Some(DesireCoord { tier: self.full_tier_satisfaction.unwrap()-1, idx:self.desires.len()})
             };
-        while let Some(coords) = self.walk_down_tiers(current_coord) {
+        while let Some(coords) = self.walk_down_tiers(&current_coord.unwrap()) {
             current_coord = Some(coords);
             if specific_amount == 0.0 && class_amount == 0.0 && want_amount == 0.0 {
                 break; // if we've corrected each amount, gtfo.
@@ -2180,7 +2180,10 @@ impl Property {
     /// total value of this satisfaction.
     /// 
     /// For balance purposes, the value returned is set at our full tier satisfaction.
-    fn total_estimated_value(&self) -> TieredValue {
+    pub fn total_estimated_value(&self) -> TieredValue {
+        if !self.is_sifted {
+            return TieredValue { tier: 0, value: 0.0 };
+        }
         let mut tier = 0;
         let mut result = TieredValue { tier: 0, value: 0.0};
         while tier <= self.highest_tier {
@@ -2188,8 +2191,8 @@ impl Property {
             .filter(|x| x.steps_on_tier(tier))
             .map(|x| x.satisfaction_at_tier(tier))
             .sum();
-            tier += 1;
             result.add_value(tier, val);
+            tier += 1;
         }
 
         if let Some(tier) = self.full_tier_satisfaction {
