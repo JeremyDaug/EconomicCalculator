@@ -491,8 +491,6 @@ impl Property {
     /// TODO Not Tested: calls unsafe when not sifted, sifts correctly and returns the tieredvalue
     /// 
     /// TODO currently flawed as it cannot release higher ranking wants to satisfy lower ranking wants
-    /// 
-    /// 
     pub fn add_property(&mut self, product: usize, amount: f64, data: &DataManager) -> TieredValue {
         if amount < 0.0 { // if removing property, jump to remove.
             return self.remove_property(product, -amount, data);
@@ -1607,9 +1605,9 @@ impl Property {
     /// for 1 unit of the start tier.
     /// 
     /// IE
-    /// - start 10, end 11 = 0.9^-1    1 start = 0.9 end
-    /// - start 10, end 12 = 0.9^-2    1 start = 0.81 end
-    /// - start 10, end 8 = 0.9^2      1 start = 1.23. end
+    /// - start 10, end 11 = 0.9^1    1 start = 0.9 end
+    /// - start 10, end 12 = 0.9^2    1 start = 0.81 end
+    /// - start 10, end 8 = 0.9^-2      1 start = 1.23. end
     pub fn tier_equivalence(start: usize, end: usize) -> f64 {
         let start = start as f64;
         let end = end as f64;
@@ -1868,7 +1866,7 @@ impl Property {
             match desire.item {
                 DesireItem::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
-                    // TODO, this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
+                    // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
                     if self.want_expectations.contains_key(&want) {
                         let expectation = self.want_expectations.get_mut(&want).unwrap();
                         if *expectation > 0.0 { // if positive expectation, use
@@ -2264,9 +2262,14 @@ impl TieredValue {
 
     /// # Shift Tier
     /// 
-    /// creates a copy of our tiered value, but at a different tier.
-    fn shift_tier(&mut self, tier: usize) -> TieredValue {
-        TieredValue { tier, value: TieredValue::tier_equivalence(self.tier, tier) * self.value}
+    /// Creates a copy of our tiered value, shifted to a different tier.
+    /// 
+    /// When shifting, shifting up increases the value by 1/0.9^(change in tier), 
+    /// shifting down decreases it by 0.9^(change in tier).
+    pub fn shift_tier(&self, tier: usize) -> TieredValue {
+        // when shifting is the inverse ratio to tier equivalence.
+        let value = TieredValue::tier_equivalence(self.tier, tier);
+        TieredValue { tier, value: self.value / value}
     }
 }
 

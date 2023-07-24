@@ -4544,8 +4544,6 @@ mod tests {
         mod total_estimated_value_should {
             use crate::objects::{desire::{Desire, DesireItem}, property::Property};
 
-            
-
             #[test]
             pub fn return_tiered_value_correctly() {
                 let mut test_desires = vec![];
@@ -4604,13 +4602,21 @@ mod tests {
                 assert_eq!(result.tier, 0);
                 assert_eq!(result.value, 3.0 + 0.9);
                 
-                // 1 points it tier 1
+                // 1 points it tier 2
                 test.desires[0].satisfaction += 1.0;
                 test.highest_tier = 2;
                 test.full_tier_satisfaction = Some(0);
                 let result = test.total_estimated_value();
                 assert_eq!(result.tier, 0);
                 assert_eq!(result.value, 3.0 + 0.9 + 0.81);
+
+                // fill tier 1
+                test.desires[1].satisfaction += 1.0;
+                test.desires[2].satisfaction += 1.0;
+                test.full_tier_satisfaction = Some(1);
+                let result = test.total_estimated_value();
+                assert_eq!(result.tier, 1);
+                assert_eq!(result.value, (3.0 + 2.7 + 0.81)/0.9);
             }
         }
 
@@ -5911,6 +5917,7 @@ mod tests {
         }
 
         mod sift_all_should {
+            // TODO update test for lookahead when added.
             use std::collections::{HashMap, HashSet};
 
             use crate::{objects::{property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want}, data_manager::DataManager};
@@ -6128,7 +6135,7 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                test.sift_all(&data);
+                let result = test.sift_all(&data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
@@ -6173,6 +6180,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                // ensure the tiered value is correct to match
+                assert_eq!(result.tier, 35);
+                assert!(0.0 < result.value && result.value < 1.0);
             }
 
             #[test]
@@ -7902,6 +7912,27 @@ mod tests {
                 assert!{equiv == TIER_RATIO.powf(diff as f64)};
                 let equiv = TieredValue::tier_equivalence(start, start-diff);
                 assert!{equiv == TIER_RATIO.powf(-(diff as f64))};
+            }
+        }
+    
+        mod shift_tier_should {
+            use crate::{objects::property::TieredValue, constants::TIER_RATIO};
+
+            /// Tests
+            #[test]
+            pub fn correctly_shift_value_down_on_shifting_down() {
+                let test = TieredValue { tier: 1, value: 1.0 };
+                let result = test.shift_tier(0);
+                assert_eq!(result.tier, 0);
+                assert_eq!(result.value, 1.0 / (1.0 / TIER_RATIO));
+            }
+
+            #[test]
+            pub fn correctly_shift_value_down_on_shifting_up() {
+                let test = TieredValue { tier: 1, value: 1.0 };
+                let result = test.shift_tier(2);
+                assert_eq!(result.tier, 2);
+                assert_eq!(result.value, 1.0 / TIER_RATIO);
             }
         }
     }
