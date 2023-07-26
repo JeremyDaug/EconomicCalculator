@@ -2098,55 +2098,6 @@ impl Property {
         self.total_estimated_value()
     }
 
-    /// # Consume and Shift Wants
-    /// 
-    /// This is used to satisfy our wants with our property. 
-    /// 
-    /// Currently, it attempts to do this in the following fashion.
-    /// 
-    /// 1. Consume any wants from our store.
-    /// 2. Try to use products which satisfy it by owning it.
-    /// 3. Try to satisfy by using products.
-    /// 4. Try to satisfy by consuming prdoucts.
-    /// 
-    /// TODO Improve this by using product memory to prioritize sources for each want. Rather than following strict ordering.
-    pub fn consume_and_sift_wants(&mut self, _data: &DataManager) -> HashMap<usize, f64> {
-        todo!("Redo this with new property system.")
-    }
-
-    /// # Want consuming function. 
-    /// 
-    /// Takes the desire we are trying to satisfy, and at what tier.
-    /// 
-    /// It also takes the wants we have available and that have already
-    /// been consumed. We update these as we go.
-    /// 
-    /// We return true if we were able to satisfy the desire 
-    /// 
-    /// FIXME Not Used, currently non-functional due to lifetime issues.
-    pub fn shift_want_for_satisfaction(&mut self, desire_coord: &DesireCoord, 
-    ext_target: &mut f64, untouched_wants: &mut HashMap<usize, f64>,
-    consumed_wants: &mut HashMap<usize, f64>) -> bool{
-        // get the desire we're modifying.
-        let mut desire = self.desires.get_mut(desire_coord.idx).unwrap();
-        // get the want we're looking at
-        let want_id = desire.item.unwrap();
-        if let Some(available) = untouched_wants.get_mut(want_id) {
-            // get how much we can or need to shift for this tier
-            let shift = available.min(*ext_target);
-            // then add to consumed and the desire
-            *consumed_wants.entry(*want_id).or_insert(0.0) += shift;
-            desire.satisfaction += shift;
-            // and remove from untouched and our target amount
-            *available -= shift;
-            *ext_target -= shift;
-            if *ext_target == 0.0 {
-                return true; 
-            }
-        }
-        return false;
-    }
-
     /// # Next Stepped on Tier
     /// 
     /// Gets the next tier that any of our desires steps on.
