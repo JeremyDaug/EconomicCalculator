@@ -6182,7 +6182,8 @@ mod tests {
                 assert!(prop3.specific_reserve == 0.0);
                 // ensure the tiered value is correct to match
                 assert_eq!(result.tier, 35);
-                assert!(0.0 < result.value && result.value < 1.0);
+                assert!(490.0 < result.value);
+                assert!(result.value < 491.0);
             }
 
             #[test]
@@ -6391,7 +6392,7 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                test.sift_all(&data);
+                let result = test.sift_all(&data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
@@ -6431,6 +6432,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                assert_eq!(result.tier, 35);
+                assert!(453.0 < result.value);
+                assert!(result.value < 454.0);
             }
 
             #[test]
@@ -6639,7 +6643,7 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                test.sift_all(&data);
+                let result = test.sift_all(&data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
@@ -6679,6 +6683,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                assert_eq!(result.tier, 35);
+                assert!(435.0 < result.value);
+                assert!(result.value < 436.0);
             }
 
             #[test]
@@ -6887,7 +6894,7 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                test.sift_all(&data);
+                let result = test.sift_all(&data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
@@ -6927,6 +6934,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                assert_eq!(result.tier, 31);
+                assert!(277.0 < result.value);
+                assert!(result.value < 278.0);
             }
 
             /// sift class desires only, don't even set up specfic
@@ -7019,7 +7029,7 @@ mod tests {
                 test.property.insert(0, PropertyInfo::new(15.0));
                 test.property.insert(1, PropertyInfo::new(15.0));
                 test.property.insert(2, PropertyInfo::new(10.0));
-                test.sift_all(&data);
+                let result = test.sift_all(&data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
@@ -7052,6 +7062,9 @@ mod tests {
                 assert!(prop2.want_reserve == 0.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.specific_reserve == 0.0);
+                assert_eq!(result.tier, 100);
+                assert!(182146.0 < result.value);
+                assert!(result.value < 182147.0);
             }
 
             /// Sifts 1 specific desire only, don't set up wants
@@ -7079,7 +7092,7 @@ mod tests {
                 let mut test = Property::new(test_desires);
                 test.property.insert(0, PropertyInfo::new(15.0));
                 test.property.insert(1, PropertyInfo::new(10.0));
-                test.sift_all(data);
+                let result = test.sift_all(data);
                 // check that the sitfing was done correctly.
                 // 11.0 into desire 0, (tier 50)
                 let desire0 = test.desires.get(0).unwrap();
@@ -7105,11 +7118,14 @@ mod tests {
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.specific_reserve == 0.0);
+                assert_eq!(result.tier, 50);
+                assert!(846.0 < result.value);
+                assert!(result.value < 847.0);
             }
         }
 
         #[test]
-        pub fn calculate_barter_value_differenec_correctly() {
+        pub fn calculate_barter_value_difference_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
                 item: DesireItem::Product(0), 
