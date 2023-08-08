@@ -13,6 +13,7 @@
 
 use std::{collections::{HashMap, HashSet}, ops::{AddAssign, SubAssign, Add, Sub}};
 
+use barrage::new;
 use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::TIER_RATIO};
@@ -29,7 +30,7 @@ pub struct Property {
     pub property: HashMap<usize, PropertyInfo>,
     /// The wants stored and not used up yet.
     pub want_store: HashMap<usize, f64>,
-    /// Is Disorganized
+    /// Whether the pop who owns this property is a disorganized firm or not.
     pub is_disorganized: bool,
     /// How much time we have worked on average over the past few days.
     pub work_time: f64,
@@ -207,6 +208,8 @@ impl Property {
     /// 
     /// If property is sifted, it maintains the sifted status.
     /// 
+    /// Returns the amount that would be gained by the addition.
+    /// 
     /// TODO Not Tested: calls unsafe when not sifted, sifts correctly and returns the tieredvalue
     /// 
     /// TODO currently flawed as it cannot test releasing higher ranking wants to satisfy lower ranking wants
@@ -216,22 +219,43 @@ impl Property {
         }
         let mut clone = self.cheap_clone();
 
-        let after_add = clone.add_property(product, amount, data);
-
-        let result = after_add - self.total_estimated_value();
-
-        result.normalize(2.0)
+        clone.add_property(product, amount, data)
     }
 
+    /// # Predict Value Lost
+    /// 
+    /// Predicts the value lost by removing some amount of a product.
+    /// 
+    /// Returns the difference in value gained.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if the amount to remove is larger than the amount available.
     pub fn predict_value_lost(&self, product: usize, amount: f64, data: &DataManager) -> TieredValue {
         if amount < 0.0 {
             self.predict_value_gained(product, amount, data);
         }
         let mut clone = self.cheap_clone();
 
-        let after_remove = clone.remove_property(product, amount, data);
+        clone.remove_property(product, amount, data)
+    }
 
-        after_remove - self.total_estimated_value()
+    /// # Predict Value Changed
+    /// 
+    /// A consolidation function for predicting the effects of multiple additions 
+    /// and subtractions. It does all of them before returning the total value.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if it tries to subtract more of a product than is available.
+    pub fn predict_value_changed(&self, alterations: &HashMap<usize, f64>, data: &DataManager) -> TieredValue {
+        // create our clone first
+        let mut clone = self.cheap_clone();
+        for (&product, &amount) in alterations.iter() {
+            clone.add_property(product, amount, data);
+        }
+
+        clone.sift_all(data) - self.total_estimated_value()
     }
 
     /// # Add Property
@@ -245,8 +269,8 @@ impl Property {
     /// 
     /// ## Returns
     /// 
-    /// It returns the new value of our satisfaction. Be sure to record the old if you 
-    /// want to compare.
+    /// It returns the value added to our existing estimated value. Be sure to 
+    /// record the old if you want to compare.
     /// 
     /// # Panics
     /// 
@@ -258,21 +282,14 @@ impl Property {
         if amount < 0.0 { // if negative value, add instead (negate value)
             return self.remove_property(product, -amount, data);
         }
+        // get originial value
+        let original_value = self.total_estimated_value();
         // don't bother checking for sifted.
-        let property = self.property.get_mut(&product);
-        // check that we have the property, panic if we don't.
-        let property = if property.is_none() {
-            panic!("Product not in pop's property.")
-        } else {
-            property.unwrap()
-        };
-        if property.total_property < amount {
-            panic!("Pop does not have enough of product to remove all.")
-        }
-        // remove the property up to the maximum available to 
-        property.remove(amount);
+        self.property.entry(product)
+        .and_modify(|x| x.add_property(amount))
+        .or_insert(PropertyInfo::new(amount));
 
-        self.sift_all(data)
+        self.sift_all(data) - original_value
     }
 
     /// # Remove Property
@@ -289,8 +306,7 @@ impl Property {
     /// 
     /// ## Returns
     /// 
-    /// It returns the new value of our satisfaction. Be sure to record the old if you 
-    /// want to compare.
+    /// It returns the difference in value between 
     /// 
     /// # Panics
     /// 
@@ -302,6 +318,8 @@ impl Property {
         if amount < 0.0 { // if negative value, add instead (negate value)
             return self.add_property(product, -amount, data);
         }
+        // get old estimated value
+        let original_value = self.total_estimated_value();
         // don't bother checking for sifted.
         let property = self.property.get_mut(&product);
         // check that we have the property, panic if we don't.
@@ -316,14 +334,15 @@ impl Property {
         // remove the property up to the maximum available to 
         property.remove(amount);
 
-        self.sift_all(data)
+        self.sift_all(data) - original_value
     }
 
     /// # Remove Satisfaction
     /// 
     /// Removes satisfaction dependent on a product, and the amount given.
     /// 
-    /// Returns the total amount of the product successfully removed and the effective value lost by it's removal.
+    /// Returns the total amount of the product successfully removed and 
+    /// the effective value lost by it's removal.
     /// 
     /// ## Note
     /// 
@@ -1291,6 +1310,14 @@ impl Property {
             result.property.entry(id)
             .or_insert(PropertyInfo::new(info.total_property));
         }
+        // copy satisfactions
+        result.full_tier_satisfaction = self.full_tier_satisfaction;
+        result.hard_satisfaction = self.hard_satisfaction;
+        result.quantity_satisfied = self.quantity_satisfied;
+        result.partial_satisfaction = self.partial_satisfaction;
+        result.market_satisfaction = self.market_satisfaction;
+        result.highest_tier = self.highest_tier;
+        result.is_sifted = true;
 
         result
     }
@@ -1317,6 +1344,13 @@ impl DesireCoord {
 pub struct TieredValue {
     pub tier: usize,
     pub value: f64,
+}
+
+impl AddAssign for TieredValue {
+    fn add_assign(&mut self, rhs: Self) {
+        let copy = *self + rhs;
+        *self = copy;
+    }
 }
 
 impl Add for TieredValue {
@@ -1360,7 +1394,40 @@ impl Sub for TieredValue {
     }
 }
 
+impl PartialEq for TieredValue {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tier != other.tier {
+            let correction = other.shift_tier(self.tier);
+            self.tier == correction.tier && self.value == correction.value
+        } else {
+            self.tier == other.tier && self.value == other.value
+        }
+    }
+}
+
 impl TieredValue {
+    /// # Near Eq
+    /// 
+    /// A helper to allow one to quickly tell if two TieredValues are 
+    /// equal to each other within a margin of error (delta).
+    pub fn near_eq(&self, other: &Self, delta: f64) -> bool {
+        // correct the sign if needed.
+        let delta = delta.abs();
+        // correct other's tier if needed to match.
+        let corrected = if self.tier != other.tier {
+            other.shift_tier(self.tier)
+        } else { *other };
+        // get the upper and lower bounds
+        let upper = self.value * (1.0 + delta);
+        let lower = self.value * (1.0 - delta);
+
+        if self.value > 0.0 { // if value is positive
+            lower <= corrected.value && corrected.value <= upper
+        } else { // if negative
+            upper <= corrected.value && corrected.value <= lower
+        }
+    }
+
     /// # Add Value
     /// 
     /// Adds a value from the given tier and amount of satisfaction at that 
@@ -1449,13 +1516,13 @@ impl TieredValue {
                     value *= TIER_RATIO;
                     alteration += 1;
                 }
-                return TieredValue { tier: self.tier + alteration, value };
+                return TieredValue { tier: self.tier + alteration, value:-value };
             } else {
-                while value > 1.0 {
+                while value < 1.0 {
                     value /= TIER_RATIO;
                     alteration += 1;
                 }
-                return TieredValue { tier: self.tier - alteration, value };
+                return TieredValue { tier: self.tier - alteration, value: -value };
             }
         }
     }
