@@ -789,8 +789,8 @@ impl Pop {
     /// Any products lost this way are recorded as losses in that product's knowledge.
     /// 
     /// TODO when upgrading to add rolling, add RNG back as a parameter.
-    pub fn decay_goods(&mut self, _data: &DataManager) {
-        todo!("Redo for property change!")
+    pub fn decay_goods(&mut self, data: &DataManager) {
+        self.property.decay_goods(data);
     }
 
     /// # Adapt future Plan

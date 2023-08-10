@@ -1321,6 +1321,69 @@ impl Property {
 
         result
     }
+
+    /// # Decay Goods
+    /// 
+    /// Goes through the property contained and goes through decay and failure
+    /// effects for each want and good stored.
+    pub fn decay_goods(&mut self, data: &DataManager) {
+        // start by decaying wants 
+        for (want, quant) in self.want_store.iter_mut() {
+            let want_info = data.wants.get(want).unwrap();
+            let decay = want_info.decay;
+            *quant *= decay; // multiply by decay and assign again.
+        }
+        // get a copy of our existing property for processing
+        let original_property = self.property_to_hashmap();
+        let mut property_change = HashMap::new();
+        let mut want_change = HashMap::new();
+        // then decay/fail products
+        for (product, info) in self.property.iter_mut() {
+            let prod_info = data.products.get(product).unwrap();
+            if prod_info.mean_time_to_failure.is_some() {
+                // TODO add in random chance roll here.
+                let failed = prod_info.failure_chance() * info.total_property;
+                // if it has a failure process, use that
+                if let Some(proc_id) = prod_info.failure_process {
+                    let fail_proc = data.processes.get(&proc_id).unwrap();
+                    let results = fail_proc
+                    .do_process(&original_property, 
+                        &self.want_store, 0.0, 
+                        0.0, Some(failed), 
+                        true, data);
+                    for (&product, &amount) in results.input_output_products.iter() {
+                        // add to current property.
+                        property_change.entry(product)
+                        .and_modify(|x| *x += amount)
+                        .or_insert(amount);
+                    }
+                    for (&want, &amount) in results.input_output_wants.iter() {
+                        want_change.entry(want)
+                        .and_modify(|x| *x += amount)
+                        .or_insert(amount);
+                    }
+                } else { // if no process, just shift failed products to lost.
+                    property_change.entry(*product)
+                    .and_modify(|x| *x += failed)
+                    .or_insert(failed);
+                }
+            }
+        }
+        // wrap up by adding/removing what was changed
+        for (&product, &amount) in property_change.iter() {
+            if amount < 0.0 { // if being removed
+                self.property.entry(product)
+                .and_modify(|x| {
+                    x.remove(-amount);
+                    x.lost -= amount;
+                });
+            } else { // if being added
+                self.property.entry(product)
+                .and_modify(|x| x.add_property(amount))
+                .or_insert(PropertyInfo::new(amount));
+            }
+        }
+    }
 }
 
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.

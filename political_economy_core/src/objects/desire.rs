@@ -253,15 +253,24 @@ impl Desire {
         f64::clamp(total - steps as f64, 0.0, 1.0) * self.amount
     }
 
-    /// How many steps it takes for this desire to reach the given tier.
+    /// # Steps To Tier
+    /// 
+    /// Gets how many steps it takes to reach at valid tier.
+    /// 
+    /// If it does not step on that tier, it returns an Err<DesireErr::TierMisstep(tier)>.
     pub fn steps_to_tier(&self, tier: usize) -> Result<usize, DesireError> {
         if !self.steps_on_tier(tier) {
+            // if we don't step on it, return an err with the tier we misstepped on.
             return Err(DesireError::TierMisstep(tier));
         }
-
-        // the current tier reduced by the start tier, divided by the step.
-        // we know it is a whole number, so this MUST be safe.
-        Ok((tier - self.start) / self.step)
+        if self.step == 0 {
+            // if the desire doesn't step at all, return OK(0)
+            Ok(0)
+        } else {
+            // the current tier reduced by the start tier, divided by the step.
+            // we know it is a whole number, so this MUST be safe.
+            Ok((tier - self.start) / self.step)
+        }
     }
 
     /// Checks whether a given value steps on a tier of this desire.

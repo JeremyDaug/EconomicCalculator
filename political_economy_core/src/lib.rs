@@ -3503,6 +3503,208 @@ mod tests {
             result
         }
 
+        mod decay_goods_should {
+            use std::collections::{HashMap, HashSet};
+
+            use crate::{objects::{property::Property, product::Product, want::Want, process::{ProcessTag, Process, ProcessPart, PartItem, ProcessSectionTag}, property_info::PropertyInfo}, data_manager::DataManager};
+
+
+            #[test]
+            pub fn decay_goods_correctly_for_all_failure_types() {
+                let test_desires = vec![];
+                let mut test = Property::new(test_desires);
+                // make some default data for tests
+                let mut data = DataManager::new();
+                // 4 products, 
+                // 0 for never fails
+                // 1 for fails 50% into nothing
+                // 2 for fails 50% through process into P3 and W0
+                // 3 for what 2 fails into
+                data.products.insert(0, Product{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                data.products.insert(1, Product{
+                    id: 1,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1),
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(1),
+                });
+                data.products.insert(2, Product{
+                    id: 2,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(0),
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: Some(1),
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                data.products.insert(3, Product{
+                    id: 3,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: true,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                // wants
+                // 0 doesn't decay (is produced by P2)
+                // 1 decays by 50%
+                // 2 decays by 25%
+                // 3 decays by 100%
+                let want0 = Want{
+                    id: 0,
+                    name: "".to_string(),
+                    description: "".to_string(),
+                    decay: 0.0,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                let want1 = Want{
+                    id: 1,
+                    name: "".to_string(),
+                    description: "".to_string(),
+                    decay: 0.5,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                let want2 = Want{
+                    id: 2,
+                    name: "".to_string(),
+                    description: "".to_string(),
+                    decay: 0.25,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                let want3 = Want{
+                    id: 3,
+                    name: "".to_string(),
+                    description: "".to_string(),
+                    decay: 1.0,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                data.wants.insert(want0.id, want0);
+                data.wants.insert(want1.id, want1);
+                data.wants.insert(want2.id, want2);
+                data.wants.insert(want3.id, want3);
+                // add processes
+                data.processes.insert(0, Process{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart{ item: PartItem::Specific(2), 
+                            amount: 1.0, part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: PartItem::Want(0), 
+                            amount: 1.0, part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                        ProcessPart{ item: PartItem::Specific(3), 
+                            amount: 1.0, part_tags: vec![], 
+                            part: ProcessSectionTag::Output }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Failure(1)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+                test.property.insert(0, PropertyInfo::new(10.0));
+                test.property.insert(1, PropertyInfo::new(10.0));
+                test.property.insert(2, PropertyInfo::new(10.0));
+                test.property.insert(3, PropertyInfo::new(10.0));
+                test.want_store.insert(0, 10.0);
+                test.want_store.insert(1, 10.0);
+                test.want_store.insert(2, 10.0);
+                test.want_store.insert(3, 10.0);
+                test.decay_goods(&data);
+                // check that everything decayed correctly.
+                assert!(test.property[&0].total_property == 10.0);
+                assert!(test.property[&1].total_property == 5.0);
+                assert!(test.property[&2].total_property == 5.0);
+                assert!(test.property[&3].total_property == 15.0);
+                assert!(test.property[&0].lost == 0.0);
+                assert!(test.property[&1].lost == 5.0);
+                assert!(test.property[&2].lost == 5.0);
+                assert!(test.property[&3].lost == 0.0);
+                assert!(test.want_store[&0] == 15.0);
+                assert!(test.want_store[&1] == 5.0);
+                assert!(test.want_store[&2] == 7.5);
+                assert!(test.want_store[&3] == 0.0);
+            }
+        }
+
         mod add_property_should {
             use std::collections::{HashSet, HashMap};
 
@@ -5400,7 +5602,7 @@ mod tests {
                     actual_sum += test.add_property(prod, amount, &data);
                 }
                 // and check against the prediction
-                assert!(prediction == actual_sum);
+                assert!(prediction.near_eq(&actual_sum, 0.001));
             }
         }
 
@@ -6452,7 +6654,7 @@ mod tests {
                 test.property.insert(4, PropertyInfo::new(10.0));
                 // get initial value
                 let initial = test.sift_all(&data);
-                print!("{}", test.print_satisfactions(None, None));
+                //print!("{}", test.print_satisfactions(None, None));
             }
         }
 
@@ -8727,43 +8929,43 @@ mod tests {
                 step: 0,
                 tags: vec![]};
 
-                assert_eq!(test.satisfaction_up_to_tier(), None);
-                test.satisfaction = 0.5;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
-                test.satisfaction = 1.0;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
-                test.satisfaction = 1.5;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
-                // stretched
-                test.change_end(Some(10), 1).expect("Error!");
-                test.satisfaction = 0.0;
-                assert_eq!(test.satisfaction_up_to_tier(), None);
-                test.satisfaction = 0.5;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
-                test.satisfaction = 2.5;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 3);
-                test.satisfaction = 10.0;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 10);
-                test.satisfaction = 11.0;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 10);
+            assert_eq!(test.satisfaction_up_to_tier(), None);
+            test.satisfaction = 0.5;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
+            test.satisfaction = 1.0;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
+            test.satisfaction = 1.5;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
+            // stretched
+            test.change_end(Some(10), 1).expect("Error!");
+            test.satisfaction = 0.0;
+            assert_eq!(test.satisfaction_up_to_tier(), None);
+            test.satisfaction = 0.5;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 1);
+            test.satisfaction = 2.5;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 3);
+            test.satisfaction = 10.0;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 10);
+            test.satisfaction = 11.0;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 10);
 
-                // infinite
-                test.change_end(None, 1).expect("Error!");
-                test.satisfaction = 0.0;
-                assert_eq!(test.satisfaction_up_to_tier(), None);
-                test.satisfaction = 5.0;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 5);
-                test.satisfaction = 5.5;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 6);
-                test.satisfaction = 6.0;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 6);
-                test.satisfaction = 100.6;
-                assert_eq!(test.satisfaction_up_to_tier().unwrap(), 101);
+            // infinite
+            test.change_end(None, 1).expect("Error!");
+            test.satisfaction = 0.0;
+            assert_eq!(test.satisfaction_up_to_tier(), None);
+            test.satisfaction = 5.0;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 5);
+            test.satisfaction = 5.5;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 6);
+            test.satisfaction = 6.0;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 6);
+            test.satisfaction = 100.6;
+            assert_eq!(test.satisfaction_up_to_tier().unwrap(), 101);
 
-                test.change_end(None, 1).expect("Uh Oh!");
-                test.start = 0;
-                test.satisfaction = 0.0;
-                assert_eq!(test.satisfaction_up_to_tier(), None);
+            test.change_end(None, 1).expect("Uh Oh!");
+            test.start = 0;
+            test.satisfaction = 0.0;
+            assert_eq!(test.satisfaction_up_to_tier(), None);
         }
 
         #[test]
@@ -8887,22 +9089,61 @@ mod tests {
             assert_eq!(test.satisfaction_at_tier(4), 0.0);
             assert!(test.satisfaction_at_tier(1) == 0.0);
         }
-    
-        #[test]
-        pub fn calculate_steps_to_tier_correctly() {
-            let test = Desire{ 
-                item: DesireItem::Product(0), 
-                start: 0, 
-                end: None, 
-                amount: 2.0, 
-                satisfaction: 3.5,
-                step: 2,
-                tags: vec![]};
 
-            assert_eq!(test.steps_to_tier(2).expect("Error!"), 1);
-            assert_eq!(test.steps_to_tier(0).expect("Error!"), 0);
-            assert_eq!(test.steps_to_tier(4).expect("Error!"), 2);
-            assert!(test.steps_to_tier(1).is_err());
+        mod steps_to_tier_should {
+            use crate::objects::desire::{Desire, DesireItem};
+
+            
+            #[test]
+            pub fn calculate_steps_to_tier_correctly_for_infinite_desire() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 3.5,
+                    step: 2,
+                    tags: vec![]};
+
+                assert_eq!(test.steps_to_tier(2).expect("Error!"), 1);
+                assert_eq!(test.steps_to_tier(0).expect("Error!"), 0);
+                assert_eq!(test.steps_to_tier(4).expect("Error!"), 2);
+                assert!(test.steps_to_tier(1).is_err());
+            }
+
+            #[test]
+            pub fn calculate_steps_to_tier_correctly_for_stretched_desire() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 2.0, 
+                    satisfaction: 3.5,
+                    step: 2,
+                    tags: vec![]};
+
+                assert_eq!(test.steps_to_tier(2).expect("Error!"), 1);
+                assert_eq!(test.steps_to_tier(0).expect("Error!"), 0);
+                assert!(test.steps_to_tier(4).is_err());
+                assert!(test.steps_to_tier(1).is_err());
+            }
+
+            #[test]
+            pub fn calculate_steps_to_tier_correctly_for_singular_tier_desire() {
+                let test = Desire{ 
+                    item: DesireItem::Product(0), 
+                    start: 1, 
+                    end: None, 
+                    amount: 2.0, 
+                    satisfaction: 3.5,
+                    step: 0,
+                    tags: vec![]};
+
+                assert!(test.steps_to_tier(0).is_err());
+                assert_eq!(test.steps_to_tier(1).expect("Error!"), 0);
+                assert!(test.steps_to_tier(2).is_err());
+            }
+
         }
 
         mod steps_on_tier_should {
