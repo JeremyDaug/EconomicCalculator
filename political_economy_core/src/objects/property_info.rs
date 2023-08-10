@@ -42,6 +42,10 @@ pub struct PropertyInfo {
     pub used: f64,
     /// How much of the item was lost by any means (taxed, decayed, stolen)
     pub lost: f64,
+    /// How much time was spent today to get what we have.
+    pub time_cost: f64,
+    /// How much AMV was spent today to get what we have.
+    pub amv_cost: f64
 }
 
 impl PropertyInfo {
@@ -64,7 +68,17 @@ impl PropertyInfo {
             rollover: 0.0,
             recieved: 0.0,
             lost: 0.0, 
+            time_cost: 0.0,
+            amv_cost: 0.0
         } 
+    }
+
+    /// # Start of Day Reset
+    /// 
+    /// The Reset of our daily record data which need to be 0.0 at the 
+    /// start of the day.
+    pub fn start_of_day_reset() {
+        
     }
 
     /// # Reset Reserves

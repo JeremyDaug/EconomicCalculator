@@ -585,7 +585,7 @@ impl Pop {
     /// It will not expend time (or at least it currently doesn't. This may
     /// be changed if time for a deal scales with items exchanged.)
     pub fn standard_buy(&mut self, 
-    _rx: &mut Receiver<ActorMessage>, 
+    rx: &mut Receiver<ActorMessage>, 
     _tx: &Sender<ActorMessage>, 
     _data: &DataManager, 
     _market: &MarketHistory, 
@@ -593,7 +593,21 @@ impl Pop {
     _records: &mut HashMap<usize, PropertyInfo>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
-        todo!("Redo")
+        let result = self.specific_wait(rx, &vec![
+            ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller: 
+                ActorInfo::Firm(0), product: 0, price: 0.0, quantity: 0.0 },
+            ActorMessage::NotInStock { buyer: ActorInfo::Firm(0), seller: 
+                ActorInfo::Firm(0), product: 0 }
+        ]);
+        if let ActorMessage::NotInStock { .. } = result {
+            // maybe record failure
+            return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
+        } else if let ActorMessage::InStock { buyer: _, seller: _,
+        product, price, quantity } = result {
+            
+        }
+
+        panic!("Standard Buy: This should never be reached, Specific Wait has returned an incorrect MSG.")
     }
 
     /// # Emergency Buy
