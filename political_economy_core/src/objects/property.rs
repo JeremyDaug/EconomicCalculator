@@ -1330,7 +1330,7 @@ impl Property {
         // start by decaying wants 
         for (want, quant) in self.want_store.iter_mut() {
             let want_info = data.wants.get(want).unwrap();
-            let decay = want_info.decay;
+            let decay = 1.0 - want_info.decay;
             *quant *= decay; // multiply by decay and assign again.
         }
         // get a copy of our existing property for processing
@@ -1364,8 +1364,8 @@ impl Property {
                     }
                 } else { // if no process, just shift failed products to lost.
                     property_change.entry(*product)
-                    .and_modify(|x| *x += failed)
-                    .or_insert(failed);
+                    .and_modify(|x| *x -= failed)
+                    .or_insert(-failed);
                 }
             }
         }
@@ -1382,6 +1382,11 @@ impl Property {
                 .and_modify(|x| x.add_property(amount))
                 .or_insert(PropertyInfo::new(amount));
             }
+        }
+        for (&want, &amount) in want_change.iter() {
+            self.want_store.entry(want)
+            .and_modify(|x| *x += amount)
+            .or_insert(amount);
         }
     }
 }

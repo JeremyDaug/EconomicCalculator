@@ -15,6 +15,8 @@ pub struct Want {
     pub description: String,
     /// How much the want decays when not consumed each day.
     /// 0.0 means it does not decay, 1.0 means it totally decays.
+    /// Should not be outside of this range.
+    /// TODO look into allowing outside this range and the effects of this. Probably a totally bad idea.
     pub decay: f64,
     // TODO insert bool or enum to distinguish between wants that are consumed at day's end or just 'used' at day's end, but not consumed.
     /// The products which produce it via owning it.

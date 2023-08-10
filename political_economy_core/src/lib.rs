@@ -743,142 +743,6 @@ mod tests {
 
             (data, market)
         }
-        
-        mod decay_goods_should {
-            use crate::{objects::{want::Want, product::Product, process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
-
-            use super::make_test_pop;
-
-            #[test]
-            pub fn correctly_decay_goods_and_change_storage() {
-                let mut test = make_test_pop();
-                // create fake product, want, and process data for testing.
-                // 3 wants, 1 which decays each day, 1 doesn't decay, 1 only partially decays.
-                // don't need to set want processes, as they aren't used here.
-                let want0 = Want::new(0, 
-                    "daily".to_string(), 
-                    "".to_string(), 
-                    1.0).unwrap();
-                let want1 = Want::new(1, 
-                    "never".to_string(), 
-                    "".to_string(), 
-                    0.0).unwrap();
-                let want2 = Want::new(2, 
-                    "partial".to_string(), 
-                    "".to_string(), 
-                    0.5).unwrap();
-                // 4 products, 1 fails to nothing instantly, 1 fails to nothing 50% of the time,
-                //              1 doesn't fail, 1 fails to another product and a want.
-                let product0 = Product::new(0, 
-                    "Vanish".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    0, 
-                    0.0, 
-                    0.0, 
-                    Some(0), 
-                    false, 
-                    vec![], 
-                    None,
-                    None).unwrap();
-                let product1 = Product::new(1, 
-                    "half".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    0, 
-                    0.0, 
-                    0.0, 
-                    Some(1), 
-                    false, 
-                    vec![], 
-                    None,
-                    None).unwrap();
-                let product2 = Product::new(2, 
-                    "durable".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    0, 
-                    0.0, 
-                    0.0, 
-                    None, 
-                    false, 
-                    vec![], 
-                    None,
-                    None).unwrap();
-                let mut product3 = Product::new(3, 
-                    "rusts".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    "".to_string(), 
-                    0, 
-                    0.0, 
-                    0.0, 
-                    Some(0), 
-                    false, 
-                    vec![], 
-                    None,
-                    None).unwrap();
-                // 1 failure processes, 1 for failure into product and want.
-                let process0 = Process{ 
-                    id: 0, 
-                    name: "Fail".to_string(), 
-                    variant_name: "Fail".to_string(), 
-                    description: "Fail".to_string(), 
-                    minimum_time: 0.0, 
-                    process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(2), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(1), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output },
-                    ], 
-                    process_tags: vec![
-                        ProcessTag::Failure(3)
-                    ], 
-                    skill: None, 
-                    skill_minimum: 0.0, 
-                    skill_maximum: 0.0, 
-                    technology_requirement: None, 
-                    tertiary_tech: None };
-                product3.add_process(&process0).expect("Failed to add failure process.");
-                let mut data = DataManager::new();
-
-                data.wants.insert(0, want0);
-                data.wants.insert(1, want1);
-                data.wants.insert(2, want2);
-                data.products.insert(0, product0);
-                data.products.insert(1, product1);
-                data.products.insert(2, product2);
-                data.products.insert(3, product3);
-                data.processes.insert(0, process0);
-
-                // update pop's property 1 of each product and want
-                test.property.want_store.insert(0, 1.0);
-                test.property.want_store.insert(1, 1.0);
-                test.property.want_store.insert(2, 1.0);
-                test.property.add_property(0, 1.0, &data);
-                test.property.add_property(1, 1.0, &data);
-                test.property.add_property(2, 1.0, &data);
-                test.property.add_property(3, 1.0, &data);
-
-                // add knowledge for each.
-                // TODO check this later.
-
-                test.decay_goods(&data);
-                // check wants
-                assert!(test.property.want_store.get(&0).is_none());
-                assert!(*test.property.want_store.get(&1).unwrap() == 2.0);
-                assert!(*test.property.want_store.get(&2).unwrap() == 0.5);
-                // check property
-                assert!(test.property.property.get(&0).is_none());
-                assert!(test.property.property.get(&1).unwrap().total_property == 0.5);
-                assert!(test.property.property.get(&2).unwrap().total_property == 2.0);
-                assert!(test.property.property.get(&3).is_none());
-                // check knowledge.
-                // TODO check this later.
-            }
-        }
 
         mod free_time {
             use std::{thread, time::Duration};
@@ -3508,7 +3372,6 @@ mod tests {
 
             use crate::{objects::{property::Property, product::Product, want::Want, process::{ProcessTag, Process, ProcessPart, PartItem, ProcessSectionTag}, property_info::PropertyInfo}, data_manager::DataManager};
 
-
             #[test]
             pub fn decay_goods_correctly_for_all_failure_types() {
                 let test_desires = vec![];
@@ -3518,7 +3381,7 @@ mod tests {
                 // 4 products, 
                 // 0 for never fails
                 // 1 for fails 50% into nothing
-                // 2 for fails 50% through process into P3 and W0
+                // 2 for fails 100% through process into P3 and W0
                 // 3 for what 2 fails into
                 data.products.insert(0, Product{
                     id: 0,
@@ -3576,7 +3439,7 @@ mod tests {
                     tags: vec![],
                     wants: HashMap::new(),
                     processes: HashSet::new(),
-                    failure_process: Some(1),
+                    failure_process: Some(0),
                     use_processes: HashSet::new(),
                     consumption_processes: HashSet::new(),
                     maintenance_processes: HashSet::new(),
@@ -3690,18 +3553,18 @@ mod tests {
                 test.want_store.insert(3, 10.0);
                 test.decay_goods(&data);
                 // check that everything decayed correctly.
-                assert!(test.property[&0].total_property == 10.0);
-                assert!(test.property[&1].total_property == 5.0);
-                assert!(test.property[&2].total_property == 5.0);
-                assert!(test.property[&3].total_property == 15.0);
-                assert!(test.property[&0].lost == 0.0);
-                assert!(test.property[&1].lost == 5.0);
-                assert!(test.property[&2].lost == 5.0);
-                assert!(test.property[&3].lost == 0.0);
-                assert!(test.want_store[&0] == 15.0);
-                assert!(test.want_store[&1] == 5.0);
-                assert!(test.want_store[&2] == 7.5);
-                assert!(test.want_store[&3] == 0.0);
+                assert_eq!(test.property[&0].total_property, 10.0);
+                assert_eq!(test.property[&1].total_property, 5.0);
+                assert_eq!(test.property[&2].total_property, 0.0);
+                assert_eq!(test.property[&3].total_property, 20.0);
+                assert_eq!(test.property[&0].lost, 0.0);
+                assert_eq!(test.property[&1].lost, 5.0);
+                assert_eq!(test.property[&2].lost, 10.0);
+                assert_eq!(test.property[&3].lost, 0.0);
+                assert_eq!(test.want_store[&0], 20.0);
+                assert_eq!(test.want_store[&1], 5.0);
+                assert_eq!(test.want_store[&2], 7.5);
+                assert_eq!(test.want_store[&3], 0.0);
             }
         }
 
