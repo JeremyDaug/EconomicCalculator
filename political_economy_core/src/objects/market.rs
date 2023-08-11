@@ -79,9 +79,11 @@ pub struct Market {
     /// which are available for anyone to pick up, and includes surface
     /// resources from the environment.
     pub resources: HashMap<usize, f64>,
-    // Available Notdes.
+    // Available Nodes.
+
     /// The Current market prices in AMV.
     pub prices: HashMap<usize, f64>,
+    // TODO consider adding an estimated value for wants in the market, this would be made by calculating all possible ways to get the good, pricing out each option, then averaging the prices.
     /// The products which are available for sale, and how many of them.
     pub products_for_sale: HashMap<usize, f64>,
     /// how much of each proudct was demanded by buyers generally.

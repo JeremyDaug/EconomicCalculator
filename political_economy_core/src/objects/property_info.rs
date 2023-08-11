@@ -45,7 +45,9 @@ pub struct PropertyInfo {
     /// How much time was spent today to get what we have.
     pub time_cost: f64,
     /// How much AMV was spent today to get what we have.
-    pub amv_cost: f64
+    pub amv_cost: f64,
+    /// How much AMV we typically spend per unit.
+    pub amv_unit_estimate: f64,
 }
 
 impl PropertyInfo {
@@ -63,22 +65,35 @@ impl PropertyInfo {
             consumed: 0.0,
             used: 0.0,
             spent: 0.0,
-            max_target: 0.0,
+            max_target: 1.0,
             min_target: 0.0,
             rollover: 0.0,
             recieved: 0.0,
             lost: 0.0, 
             time_cost: 0.0,
-            amv_cost: 0.0
+            amv_cost: 0.0,
+            amv_unit_estimate: 0.0
         } 
     }
 
-    /// # Start of Day Reset
+    /// # Start of Day
+    /// 
+    /// Does all start of day work needed for property.
     /// 
     /// The Reset of our daily record data which need to be 0.0 at the 
     /// start of the day.
-    pub fn start_of_day_reset() {
-        
+    /// 
+    /// Also sets rollover to the total property right now.
+    pub fn start_of_day(&mut self) {
+        // TODO update amv_unit_estimate
+        self.recieved = 0.0;
+        self.spent = 0.0;
+        self.consumed = 0.0;
+        self.used = 0.0;
+        self.lost = 0.0;
+        self.time_cost = 0.0;
+        self.amv_cost = 0.0;
+        self.rollover = self.total_property;
     }
 
     /// # Reset Reserves
@@ -349,5 +364,12 @@ impl PropertyInfo {
     /// How much of our porduct can be shifted into the want pool.
     pub fn available_for_want(&self) -> f64 {
         self.total_property - self.want_reserve
+    }
+
+    /// # Remaining Target
+    /// 
+    /// How many units we are needed to reach our max target.
+    pub fn remaining_target(&self) -> f64 {
+        self.max_target - self.total_property
     }
 }

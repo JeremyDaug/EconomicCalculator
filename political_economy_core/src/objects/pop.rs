@@ -5,6 +5,7 @@
 use std::{collections::{VecDeque, HashMap}};
 
 use barrage::{Sender, Receiver};
+use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}};
 
@@ -587,8 +588,8 @@ impl Pop {
     pub fn standard_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     _tx: &Sender<ActorMessage>, 
-    _data: &DataManager, 
-    _market: &MarketHistory, 
+    data: &DataManager, 
+    market: &MarketHistory, 
     _seller: ActorInfo,
     _records: &mut HashMap<usize, PropertyInfo>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
@@ -604,7 +605,65 @@ impl Pop {
             return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
         } else if let ActorMessage::InStock { buyer: _, seller: _,
         product, price, quantity } = result {
+            // TODO if we add Want Price Estimates in the Market, update this to use them!!!!!!!
+            // get the the property_info for the product we are buying
+            let product_info = self.property.property
+                .entry(product).or_insert(PropertyInfo::new(0.0));
+            // buy up to the remaining target.
+            let quantity = quantity.min(product_info.remaining_target());
+            // Get how much this purchase would increase our satisfaction by.
+            let gain = self.property.predict_value_gained(product, quantity, data);
+            // get the total AMV price of the purchase
+            let amv_price = quantity * price;
+            // First use any property which we don't have a desire to keep to try and purchase it
+            for (product, info) in self.property.property.iter()
+            .filter(|(_, info)| info.unreserved > 0.0) // get property which isn't reserved.
+            .sorted_by(|a, b| {
+                // sort by amv * sal in descending order.
+                let a_val = market.get_product_price(&a.0, 1.0) *
+                    market.get_product_salability(&a.0);
+                let b_val = market.get_product_price(&b.0, 1.0) *
+                    market.get_product_salability(&b.0);
+                b_val.partial_cmp(&a_val).unwrap_or(std::cmp::Ordering::Equal)
+            }) {
+                // get amv * sal
+                let eff_amv = market.get_product_price(product, 1.0) * market.get_product_salability(product);
+                // add units up to amv_price
+                let perfect_ratio = amv_price / eff_amv;
+                let capped = perfect_ratio.min(info.unreserved);
+                let offer_add = if data.products.get(product).unwrap().fractional {
+                    capped // if fractional, add all of it
+                } else {
+                    capped.floor() // if not, add up to a valid unit.
+                };
+                let capped_amv = eff_amv * capped;
+                // get how much satisfaction this would give us
+                let amv_sat = self.property.satisfaction_from_amv(capped_amv)
+            }
+            //   stop when either we run out of undesired items, or we surpass the AMV target
+            //   get how much this AMV will cost us in hypothetical Satisfaction.
+            // If enough, send the offer, else continue
+            // If continuing, add items from our desired items
+            //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain
+            //     add least desired item to our offer
+            //     if last item caused Sat_lost > Sat_gained
+            //       remove it from the offer
+            //       break out
+            // send offer and wait for response
             
+            // deal with responses
+            
+            // if accepted, complete exchange
+
+            // if outright rejected, leave
+
+            // if accepted with reduced amount
+            //   check that the reduced satisfaction is still higher than satisfaction lost
+            //   if still enough
+            //     accept and complete the exchange
+            //   else 
+            //     Reject and leave
+            // todo if haggling is done, it would be done here.
         }
 
         panic!("Standard Buy: This should never be reached, Specific Wait has returned an incorrect MSG.")
@@ -658,6 +717,8 @@ impl Pop {
     /// OVERSPEND_THRESHOLD % or less is considered a valid target.
     /// 
     /// Returns a hashmap of the offer as well as the final price.
+    /// 
+    /// TODO this will likely need to change with the property update, but does still currently function.
     pub fn create_offer(&self, product: usize, target: f64,
     records: &HashMap<usize, PropertyInfo>, data: &DataManager, 
     market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
