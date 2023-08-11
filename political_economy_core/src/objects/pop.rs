@@ -606,6 +606,9 @@ impl Pop {
         } else if let ActorMessage::InStock { buyer: _, seller: _,
         product, price, quantity } = result {
             // TODO if we add Want Price Estimates in the Market, update this to use them!!!!!!!
+            // setup current offer and current offer amv
+            let mut current_offer = HashMap::new();
+            let mut current_offer_amv = 0.0;
             // get the the property_info for the product we are buying
             let product_info = self.property.property
                 .entry(product).or_insert(PropertyInfo::new(0.0));
@@ -636,9 +639,15 @@ impl Pop {
                 } else {
                     capped.floor() // if not, add up to a valid unit.
                 };
+                // add to the current total offer
+                current_offer.entry(product)
+                    .and_modify(|x| *x += capped)
+                    .or_insert(capped);
+                // add the amv to the offer.
                 let capped_amv = eff_amv * capped;
+                current_offer_amv += capped_amv;
                 // get how much satisfaction this would give us
-                let amv_sat = self.property.satisfaction_from_amv(capped_amv)
+                let amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
             }
             //   stop when either we run out of undesired items, or we surpass the AMV target
             //   get how much this AMV will cost us in hypothetical Satisfaction.

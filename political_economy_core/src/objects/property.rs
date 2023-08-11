@@ -702,6 +702,9 @@ impl Property {
     /// If given none, it selects the first and return that
     /// (lowest tier, first in vector order).
     /// 
+    /// If given a coord who's idx is > self.desires.len(), then
+    /// we still return the next valid step of the next tier.
+    /// 
     /// If there is no next step, it returns None.
     pub fn walk_up_tiers(&self, prev: Option<DesireCoord>) -> Option<DesireCoord> {
         // If no previous given, make it.
@@ -1388,6 +1391,40 @@ impl Property {
             .and_modify(|x| *x += amount)
             .or_insert(amount);
         }
+    }
+
+    pub fn satisfaction_from_amv(&self, amv: f64, market: &MarketHistory) -> TieredValue {
+        let mut result = TieredValue { tier: 0, value: 0.0 };
+        let mut remaining_amv = amv;
+
+        // walk up the desires
+        let mut current_opt = None;
+        while let Some(current) = self.walk_up_tiers(current_opt) {
+            // if setup the current opt for the next
+            current_opt = Some(current);
+            let desire = self.desires.get(current.idx).unwrap();
+            let tier = current.tier;
+            if desire.satisfied_at_tier(tier) {
+                continue; // if already satisfied, skip.
+            }
+            // get how much satisfaction is left to satisfy here.
+            // placeholder catch for wants and classes as we do not have access to their estimate prices
+            // TODO when price for class and want added, update here.
+            if let DesireItem::Want(_) = desire.item {
+                continue;
+            } else if let DesireItem::Class(_) = desire.item {
+                continue;
+            }
+            // get the price per unit.
+            let unit_price = match desire.item {
+                DesireItem::Product(id) => market.get_product_price(&id, 0.0),
+                _ => 0.0,
+            };
+            // get how much we need to satisfy.
+            let units_left = desire.amount - desire.satisfaction_at_tier(tier);
+        }
+
+        result
     }
 }
 
