@@ -83,7 +83,7 @@ pub struct Market {
 
     /// The Current market prices in AMV.
     pub prices: HashMap<usize, f64>,
-    // TODO consider adding an estimated value for wants in the market, this would be made by calculating all possible ways to get the good, pricing out each option, then averaging the prices.
+    // TODO consider adding an estimated value for wants and classes in the market, this would be made by calculating all possible ways to get the good, pricing out each option, then averaging the prices.
     /// The products which are available for sale, and how many of them.
     pub products_for_sale: HashMap<usize, f64>,
     /// how much of each proudct was demanded by buyers generally.
@@ -572,6 +572,7 @@ pub struct MarketHistory {
     /// The products which are Currencies in our market for whatever reason.
     /// Sorted by Salability (highest to lowest)
     pub currencies: Vec<usize>,
+    // TODO add estimate prices for wants and product classes.
 }
 
 /// Market History info for our products, to make getting info more easy.
@@ -592,8 +593,18 @@ pub struct ProductInfo {
     pub is_currency: bool,
 }
 
-impl MarketHistory {
+impl ProductInfo {
+    pub fn new(price: f64) -> Self { 
+            Self { available: 0.0, 
+                price, 
+                offered: 0.0, 
+                sold: 0.0, 
+                salability: 0.5, 
+                is_currency: false } 
+        }
+}
 
+impl MarketHistory {
     /// Creates a market history of yesterday based on the current market given
     /// to it.
     pub fn create(market: &Market) -> Self {

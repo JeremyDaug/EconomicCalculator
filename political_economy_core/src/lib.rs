@@ -3369,6 +3369,114 @@ mod tests {
             result
         }
 
+        mod satisfaction_from_amv_should {
+            use std::collections::{HashMap, HashSet};
+
+            use crate::{objects::{property::Property, product::Product, want::Want, process::{ProcessTag, Process, ProcessPart, PartItem, ProcessSectionTag}, property_info::PropertyInfo, desire::{Desire, DesireItem}, market::{MarketHistory, ProductInfo}}, data_manager::DataManager};
+
+            // TODO when class and want price estimates are added, add tests for them also
+            // TODO when improving the function to predict things more accurately add a unified test to ensure overlap is taken into account.
+            #[test]
+            pub fn predict_satisfaction_gained_from_products() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire::new(DesireItem::Product(0), 
+                    0, 
+                    None, 
+                    1.0, 
+                    0.0, 
+                    1, 
+                    vec![]).unwrap());
+                test_desires.push(Desire::new(DesireItem::Product(1), 
+                    0, 
+                    None, 
+                    1.0, 
+                    0.0, 
+                    1, 
+                    vec![]).unwrap());
+                test_desires.push(Desire::new(DesireItem::Product(2), 
+                    0, 
+                    None, 
+                    1.0, 
+                    0.0, 
+                    1, 
+                    vec![]).unwrap());
+                test_desires.push(Desire::new(DesireItem::Product(3), 
+                    0, 
+                    None, 
+                    1.0, 
+                    0.0, 
+                    1, 
+                    vec![]).unwrap());
+                test_desires.push(Desire::new(DesireItem::Product(4), 
+                    0, 
+                    None, 
+                    1.0, 
+                    0.0, 
+                    1, 
+                    vec![]).unwrap());
+                let mut test = Property::new(test_desires);
+                let mut info = HashMap::new();
+                info.insert(0, ProductInfo::new(1.0));
+                info.insert(1, ProductInfo::new(5.0));
+                info.insert(2, ProductInfo::new(10.0));
+                info.insert(3, ProductInfo::new(20.0));
+                info.insert(4, ProductInfo::new(50.0));
+                let market = MarketHistory { info, 
+                    sale_priority: vec![], 
+                    currencies: vec![] };
+                let result = test.satisfaction_from_amv(1.0, &market); // first
+                assert_eq!(result.tier, 0);
+                assert!(0.999 < result.value);
+                assert!(result.value < 1.001);
+                let result = test.satisfaction_from_amv(6.0, &market); // second
+                assert_eq!(result.tier, 0);
+                assert!(1.999 < result.value);
+                assert!(result.value < 2.001);
+                let result = test.satisfaction_from_amv(11.0, &market); // second + half
+                assert_eq!(result.tier, 0);
+                assert!(2.499 < result.value);
+                assert!(result.value < 2.501);
+                let result = test.satisfaction_from_amv(16.0, &market); // third
+                assert_eq!(result.tier, 0);
+                assert!(2.999 < result.value);
+                assert!(result.value < 3.001);
+                let result = test.satisfaction_from_amv(36.0, &market); // fourth
+                assert_eq!(result.tier, 0);
+                assert!(3.999 < result.value);
+                assert!(result.value < 4.001);
+                let result = test.satisfaction_from_amv(86.0, &market); // 5th
+                assert_eq!(result.tier, 0);
+                assert!(4.999 < result.value);
+                assert!(result.value < 5.001);
+                let result = test.satisfaction_from_amv(87.0, &market); // 6th just for proof
+                assert_eq!(result.tier, 0);
+                assert!(5.899 < result.value);
+                assert!(result.value < 5.901);
+                // add some existing satisfaction and try again
+                test.desires.get_mut(2).unwrap().satisfaction = 1.0;
+                let result = test.satisfaction_from_amv(1.0, &market); // first
+                assert_eq!(result.tier, 0);
+                assert!(0.999 < result.value);
+                assert!(result.value < 1.001);
+                let result = test.satisfaction_from_amv(6.0, &market); // second
+                assert_eq!(result.tier, 0);
+                assert!(1.999 < result.value);
+                assert!(result.value < 2.001);
+                let result = test.satisfaction_from_amv(26.0, &market); // third Skipped, 4th
+                assert_eq!(result.tier, 0);
+                assert!(2.999 < result.value);
+                assert!(result.value < 3.001);
+                let result = test.satisfaction_from_amv(76.0, &market); // 5th
+                assert_eq!(result.tier, 0);
+                assert!(3.999 < result.value);
+                assert!(result.value < 4.001);
+                let result = test.satisfaction_from_amv(77.0, &market); // 6th for extra proof
+                assert_eq!(result.tier, 0);
+                assert!(4.899 < result.value);
+                assert!(result.value < 4.901);
+            }
+        }
+
         mod decay_goods_should {
             use std::collections::{HashMap, HashSet};
 

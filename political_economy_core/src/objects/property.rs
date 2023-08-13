@@ -1393,6 +1393,15 @@ impl Property {
         }
     }
 
+    /// # Satisfaction from AMV
+    /// 
+    /// Gives a very rough estimate of how much Satisfaction AMV will allow
+    /// us to get from the market. It acts by spending the AMV on known prices for
+    /// goods to satisfy.
+    /// 
+    /// Currently, it only works for 
+    /// 
+    /// TODO consider improving this to instead 'virtually' buy then add and sift to get the satisfaction.
     pub fn satisfaction_from_amv(&self, amv: f64, market: &MarketHistory) -> TieredValue {
         let mut result = TieredValue { tier: 0, value: 0.0 };
         let mut remaining_amv = amv;
@@ -1422,8 +1431,17 @@ impl Property {
             };
             // get how much we need to satisfy.
             let units_left = desire.amount - desire.satisfaction_at_tier(tier);
+            // get and cap the cost at remaining AMV
+            let cost = (units_left * unit_price).min(remaining_amv);
+            let units_gained = cost / unit_price;
+            // 'purchase' the item and add the satisfaction to our result
+            remaining_amv -= cost;
+            result += TieredValue { tier, value: units_gained};
+            if remaining_amv == 0.0 {
+                break; // if no remaining amv, gtfo.
+            }
         }
-
+        // nothing left to do, return our result.
         result
     }
 }
