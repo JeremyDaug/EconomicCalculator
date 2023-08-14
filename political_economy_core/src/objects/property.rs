@@ -11,14 +11,13 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::{HashMap, HashSet}, ops::{AddAssign, SubAssign, Add, Sub}};
+use std::{collections::{HashMap, HashSet}, ops::{AddAssign, Add, Sub}};
 
-use barrage::new;
 use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::TIER_RATIO};
 
-use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::{PartItem, ProcessPart}, property_info::PropertyInfo};
+use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, property_info::PropertyInfo};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -1473,6 +1472,15 @@ impl AddAssign for TieredValue {
     fn add_assign(&mut self, rhs: Self) {
         let copy = *self + rhs;
         *self = copy;
+    }
+}
+
+impl PartialOrd for TieredValue {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        // get their tiers equal to each other.
+        let updated_other = other.shift_tier(self.tier);
+        // then compare their values
+        self.value.partial_cmp(&updated_other.value)
     }
 }
 

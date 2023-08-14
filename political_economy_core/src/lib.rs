@@ -500,7 +500,7 @@ mod tests {
 
     mod pop_tests {
         // fix
-        use std::{collections::{HashMap, VecDeque}};
+        use std::collections::{HashMap, VecDeque};
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
@@ -1120,7 +1120,7 @@ mod tests {
 
         mod standard_sell {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, property_info::PropertyInfo}};
+            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, property_info::PropertyInfo};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -1363,7 +1363,7 @@ mod tests {
         mod msg_tests {
             use std::{thread, time::Duration, collections::{HashMap, HashSet}};
 
-            use crate::{objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller}};
+            use crate::objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller};
 
             use super::make_test_pop;
 
@@ -2408,7 +2408,7 @@ mod tests {
     
         mod standard_buy {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::{objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo}};
+            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -3113,7 +3113,7 @@ mod tests {
             // shinies, ownership (Having Gadgets)
             // mysticism, consumption, use, and ownership focused 
             //      (using bread, consuming gadgets, having widgets)
-            let want0 = Want{ 
+            let _want0 = Want{ 
                 id: 0, 
                 name: "Food".to_string(), 
                 description: "".to_string(), 
@@ -3122,7 +3122,7 @@ mod tests {
                 process_sources: HashSet::new(), 
                 use_sources: HashSet::new(), 
                 consumption_sources: HashSet::new() };
-            let want1 = Want{ 
+            let _want1 = Want{ 
                 id: 1, 
                 name: "Rest".to_string(), 
                 description: "".to_string(), 
@@ -3140,7 +3140,7 @@ mod tests {
                 process_sources: HashSet::new(), 
                 use_sources: HashSet::new(), 
                 consumption_sources: HashSet::new() };
-            let want3 = Want{ 
+            let _want3 = Want{ 
                 id: 3, 
                 name: "Mysticism".to_string(), 
                 description: "".to_string(), 
@@ -3155,7 +3155,7 @@ mod tests {
             // widgets used to make rest more restful
             // gadgets used to show your shinies
             // incense to make things mystical
-            let mut time = Product{ id: 0,
+            let mut _time = Product{ id: 0,
                 name: "Time".to_string(),
                 variant_name: "".to_string(),
                 description: "".to_string(),
@@ -3175,7 +3175,7 @@ mod tests {
                 tech_required: None,
                 product_class: None,
             };
-            let mut bread = Product{ id: 1,
+            let mut _bread = Product{ id: 1,
                 name: "Bread".to_string(),
                 variant_name: "".to_string(),
                 description: "".to_string(),
@@ -3195,7 +3195,7 @@ mod tests {
                 tech_required: None,
                 product_class: None,
             };
-            let mut bun = Product{ id: 2,
+            let mut _bun = Product{ id: 2,
                 name: "Bun".to_string(),
                 variant_name: "".to_string(),
                 description: "".to_string(),
@@ -3215,7 +3215,7 @@ mod tests {
                 tech_required: None,
                 product_class: None,
             };
-            let mut widget = Product{ id: 3,
+            let mut _widget = Product{ id: 3,
                 name: "Widget".to_string(),
                 variant_name: "".to_string(),
                 description: "".to_string(),
@@ -3256,7 +3256,7 @@ mod tests {
                 product_class: None,
             };
             gadget.wants.insert(want2.id, 1.0);
-            let mut incense = Product{ id: 5,
+            let mut _incense = Product{ id: 5,
                 name: "Incense".to_string(),
                 variant_name: "".to_string(),
                 description: "".to_string(),
@@ -3279,7 +3279,7 @@ mod tests {
 
             // make processes for each
             // rest 1 hour -> 1 rest want
-            let rest = Process{
+            let _rest = Process{
                 id: 0,
                 name: "resting".to_string(),
                 variant_name: "".to_string(),
@@ -3307,7 +3307,7 @@ mod tests {
                 tertiary_tech: None,
             };
             // eating 1 bread -> 1 food want
-            let eating = Process{ id: 1,
+            let _eating = Process{ id: 1,
                 name: "eating".to_string(),
                 variant_name: "".to_string(),
                 description: "".to_string(),
@@ -3339,7 +3339,7 @@ mod tests {
                 technology_requirement: None,
                 tertiary_tech: None,
             };
-            let proc3 = Process{ id: 2,
+            let _proc3 = Process{ id: 2,
                 name: "resting".to_string(),
                 variant_name: "".to_string(),
                 description: "".to_string(),
@@ -3370,9 +3370,9 @@ mod tests {
         }
 
         mod satisfaction_from_amv_should {
-            use std::collections::{HashMap, HashSet};
+            use std::collections::HashMap;
 
-            use crate::{objects::{property::Property, product::Product, want::Want, process::{ProcessTag, Process, ProcessPart, PartItem, ProcessSectionTag}, property_info::PropertyInfo, desire::{Desire, DesireItem}, market::{MarketHistory, ProductInfo}}, data_manager::DataManager};
+            use crate::objects::{property::Property, desire::{Desire, DesireItem}, market::{MarketHistory, ProductInfo}};
 
             // TODO when class and want price estimates are added, add tests for them also
             // TODO when improving the function to predict things more accurately add a unified test to ensure overlap is taken into account.
@@ -3681,7 +3681,7 @@ mod tests {
         mod add_property_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}, property_info::PropertyInfo}, data_manager::DataManager};
+            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}}, data_manager::DataManager};
 
             #[test]
             pub fn sift_products_down_from_higher_wants() {
@@ -4565,7 +4565,7 @@ mod tests {
         mod preduct_value_gained_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}, property_info::PropertyInfo}, data_manager::DataManager};
+            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}}, data_manager::DataManager};
 
             #[test]
             pub fn sift_products_down_from_higher_wants() {
@@ -5344,7 +5344,7 @@ mod tests {
         mod predict_value_changed_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{process::{ProcessTag, PartItem, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::{Property, TieredValue}, desire::{DesireItem, Desire}, property_info::PropertyInfo}, data_manager::DataManager};
+            use crate::{objects::{process::{ProcessTag, PartItem, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::{Property, TieredValue}, desire::{DesireItem, Desire}}, data_manager::DataManager};
 
             #[test]
             pub fn return_changed_value_correctly() {
@@ -5582,7 +5582,7 @@ mod tests {
         mod predict_value_lost_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{process::{ProcessTag, PartItem, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::Property, desire::{DesireItem, Desire}, property_info::PropertyInfo}, data_manager::DataManager};
+            use crate::{objects::{process::{ProcessTag, PartItem, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::Property, desire::{DesireItem, Desire}}, data_manager::DataManager};
 
             // TODO add additional stress tests.
 
@@ -6626,7 +6626,7 @@ mod tests {
                 test.property.insert(3, PropertyInfo::new(10.0));
                 test.property.insert(4, PropertyInfo::new(10.0));
                 // get initial value
-                let initial = test.sift_all(&data);
+                let _initial = test.sift_all(&data);
                 //print!("{}", test.print_satisfactions(None, None));
             }
         }
@@ -8461,6 +8461,37 @@ mod tests {
 
     mod tiered_value_tests {
 
+        mod partial_cmp_should {
+            use crate::objects::property::TieredValue;
+
+            #[test]
+            pub fn correctly_check_for_ordering() {
+                let a = TieredValue { tier: 5, value: 1.0 }; // baseline
+                let b = TieredValue { tier: 5, value: 2.0 }; // same tier greater than
+                let c = TieredValue { tier: 5, value: 0.5 }; // same tier less than
+
+                let d = TieredValue { tier: 6, value: 1.5 }; // higher tier GT
+                let e = TieredValue { tier: 6, value: 1.0 / 0.9 }; // HT EQ
+                let f = TieredValue { tier: 6, value: 1.0 }; // HT LT
+
+                let g = TieredValue { tier: 4, value: 1.0 }; // LT GT
+                let h = TieredValue { tier: 4, value: 0.9 };// LT EQ
+                let i = TieredValue { tier: 4, value: 0.5 };// LT LT
+
+                assert!(a == a);
+                assert!(a < b);
+                assert!(a > c);
+
+                assert!(a < d);
+                assert!(a == e);
+                assert!(a > f);
+
+                assert!(a < g);
+                assert!(a == h);
+                assert!(a > i);
+            }
+        }
+
         mod normalize_should {
             use crate::objects::property::TieredValue;
 
@@ -9528,7 +9559,7 @@ mod tests {
     }
 
     mod process_tests {
-        use crate::{objects::{process::{Process, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
+        use crate::{objects::process::{Process, ProcessPart, PartItem, ProcessSectionTag}, data_manager::DataManager};
 
         mod uses_product_should {
             use crate::{data_manager::DataManager, objects::{product::Product, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}};

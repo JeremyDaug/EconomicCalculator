@@ -615,9 +615,9 @@ impl Pop {
             // buy up to the remaining target.
             let quantity = quantity.min(product_info.remaining_target());
             // Get how much this purchase would increase our satisfaction by.
-            let gain = self.property.predict_value_gained(product, quantity, data);
+            let sat_gain = self.property.predict_value_gained(product, quantity, data);
             // get the total AMV price of the purchase
-            let amv_price = quantity * price;
+            let purchase_price = quantity * price;
             // First use any property which we don't have a desire to keep to try and purchase it
             for (product, info) in self.property.property.iter()
             .filter(|(_, info)| info.unreserved > 0.0) // get property which isn't reserved.
@@ -630,11 +630,12 @@ impl Pop {
                 b_val.partial_cmp(&a_val).unwrap_or(std::cmp::Ordering::Equal)
             }) {
                 // get amv * sal
-                let eff_amv = market.get_product_price(product, 1.0) * market.get_product_salability(product);
+                let prod_price = market.get_product_price(product, 1.0) * market.get_product_salability(product);
+                let eff_amv = prod_price;
                 // add units up to amv_price
-                let perfect_ratio = amv_price / eff_amv;
+                let perfect_ratio = purchase_price / eff_amv;
                 let capped = perfect_ratio.min(info.unreserved);
-                let offer_add = if data.products.get(product).unwrap().fractional {
+                let mut capped = if data.products.get(product).unwrap().fractional {
                     capped // if fractional, add all of it
                 } else {
                     capped.floor() // if not, add up to a valid unit.
@@ -647,7 +648,23 @@ impl Pop {
                 let capped_amv = eff_amv * capped;
                 current_offer_amv += capped_amv;
                 // get how much satisfaction this would give us
-                let amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
+                let mut amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
+                // if the current total amv_satisfaction lost is > satisfaction gained
+                if amv_sat > sat_gain {
+                    // remove until the former is less than the latter.
+                    while amv_sat > sat_gain {
+                        capped -= 1.0; // reduce units used by 1
+                        current_offer_amv -= prod_price;
+                        current_offer.entry(product)
+                            .and_modify(|x| *x -= 1.0);
+                        amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
+                    }
+                }
+                // stop early when the current_offer_amv > target
+                if current_offer_amv > purchase_price {
+                    // if greater than offer or overshoot satisfaction lost
+                    break;
+                }
             }
             //   stop when either we run out of undesired items, or we surpass the AMV target
             //   get how much this AMV will cost us in hypothetical Satisfaction.
