@@ -585,6 +585,9 @@ impl Pop {
     /// 
     /// It will not expend time (or at least it currently doesn't. This may
     /// be changed if time for a deal scales with items exchanged.)
+    /// 
+    /// TODO will need to be updated when price estimates for wants and classes are added
+    /// TODO Update to take into account storage gained/lost from the exchange also.
     pub fn standard_buy(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     _tx: &Sender<ActorMessage>, 
@@ -604,7 +607,7 @@ impl Pop {
             // maybe record failure
             return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
         } else if let ActorMessage::InStock { buyer: _, seller: _,
-        product, price, quantity } = result {
+        product, price, quantity } = result { // Deal Making Section
             // TODO if we add Want Price Estimates in the Market, update this to use them!!!!!!!
             // setup current offer and current offer amv
             let mut current_offer = HashMap::new();
@@ -618,23 +621,21 @@ impl Pop {
             let sat_gain = self.property.predict_value_gained(product, quantity, data);
             // get the total AMV price of the purchase
             let purchase_price = quantity * price;
-            // First use any property which we don't have a desire to keep to try and purchase it
+            // First use any property which we don't have a desire to keep to try and use them.
             for (product, info) in self.property.property.iter()
             .filter(|(_, info)| info.unreserved > 0.0) // get property which isn't reserved.
             .sorted_by(|a, b| {
-                // sort by amv * sal in descending order.
-                let a_val = market.get_product_price(&a.0, 1.0) *
-                    market.get_product_salability(&a.0);
-                let b_val = market.get_product_price(&b.0, 1.0) *
-                    market.get_product_salability(&b.0);
+                // sort by sal in descending order.
+                // TODO improve to also take practicality of the exchange, ie value density
+                let a_val = market.get_product_salability(&a.0);
+                let b_val = market.get_product_salability(&b.0);
                 b_val.partial_cmp(&a_val).unwrap_or(std::cmp::Ordering::Equal)
             }) {
-                // get amv * sal
-                let prod_price = market.get_product_price(product, 1.0) * market.get_product_salability(product);
-                let eff_amv = prod_price;
-                // add units up to amv_price
-                let perfect_ratio = purchase_price / eff_amv;
-                let capped = perfect_ratio.min(info.unreserved);
+                // get amv for our current product.
+                let eff_amv = market.get_product_price(product, 1.0) * market.get_product_salability(product);
+                // add units up to amv_price, then round up.
+                let perfect_ratio = (purchase_price / eff_amv).ceil();
+                let capped = perfect_ratio.min(info.unreserved); // cap the ratio at what is available.
                 let mut capped = if data.products.get(product).unwrap().fractional {
                     capped // if fractional, add all of it
                 } else {
@@ -654,7 +655,7 @@ impl Pop {
                     // remove until the former is less than the latter.
                     while amv_sat > sat_gain {
                         capped -= 1.0; // reduce units used by 1
-                        current_offer_amv -= prod_price;
+                        current_offer_amv -= eff_amv;
                         current_offer.entry(product)
                             .and_modify(|x| *x -= 1.0);
                         amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
