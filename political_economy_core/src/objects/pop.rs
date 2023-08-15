@@ -1,5 +1,5 @@
 //! The storage unit of population groups.
-//! 
+//!
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
 use std::{collections::{VecDeque, HashMap}};
@@ -9,20 +9,20 @@ use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}};
 
-use super::{property::Property, 
-    pop_breakdown_table::PopBreakdownTable, 
-    buyer::Buyer, seller::Seller, actor::Actor, 
-    market::MarketHistory, 
-    actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, 
-    buy_result::BuyResult, property_info::PropertyInfo, 
+use super::{property::Property,
+    pop_breakdown_table::PopBreakdownTable,
+    buyer::Buyer, seller::Seller, actor::Actor,
+    market::MarketHistory,
+    actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult},
+    buy_result::BuyResult, property_info::PropertyInfo,
 };
 
 /// Pops are the data storage for a population group.
-/// 
+///
 /// Population groups are defines externally by what
 /// market they are in, what firm they work in, and
 /// what their job in that firm is.
-/// 
+///
 /// Internally they are broken appart by the various of the
 /// pop. It breaks them into a table to record details of how many are in each species/culture combo.
 #[derive(Debug)]
@@ -42,7 +42,7 @@ pub struct Pop {
     /// the upper bound of their skill level spread.
     pub higher_skill_level: f64,
     /// The total desires and property of the pop.
-    /// 
+    ///
     /// TODO Food For Thought. We include 2 infinite desires in all pops, wealth and Leisure, which act as sinks and help us balance our buy priorities. More thought is needed.
     pub property: Property,
     /// A breakdown of the Population's demographics.
@@ -57,7 +57,7 @@ pub struct Pop {
 impl Pop {
     /// Takes the current population table, and updates desires to match the population
     /// breakdown. This is a hard reset, so is advised to call only as needed.
-    /// 
+    ///
     /// Does not take sub-groups of species, culture, ideology into account currently.
     /// This will need to be updated when those are implemented.
     pub fn update_desires(&mut self, demos: Demographics) {
@@ -98,7 +98,7 @@ impl Pop {
     }
 
     /// Get's an automatically generated name for the pop group.
-    /// 
+    ///
     /// TODO update to pass in data from elsewhere to get more useful names.
     /// Possibly add in an option no name them specially.
     pub fn id_name(&self) -> String {
@@ -112,14 +112,14 @@ impl Pop {
 
     /// A helper function to push a message to the market.
     /// Safely pushes without blocking.
-    /// 
+    ///
     /// Tries to send, if fails it reads one message, and if it's for us, puts it on the
     /// backlog. Then tries again, until it succeeds or the channel breaks.
-    /// 
+    ///
     /// ## Panics
-    /// 
+    ///
     /// If the send fails due to a disconnect.
-    pub fn push_message(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>, 
+    pub fn push_message(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
     msg: ActorMessage) {
         loop {
             let result = tx.try_send(msg);
@@ -129,7 +129,7 @@ impl Pop {
             else if let Err(msg) = result {
                 match msg { // failed to send, check why
                     // If disconnected, panic, there's nothing more we can do.
-                    barrage::TrySendError::Disconnected(_) => panic!("Unexpected Disconnect"), 
+                    barrage::TrySendError::Disconnected(_) => panic!("Unexpected Disconnect"),
                     barrage::TrySendError::Full(_) => (), // if just full, consume and try again.
                 }
             }
@@ -139,13 +139,13 @@ impl Pop {
         };
     }
 
-    /// A shorthand function. 
-    /// 
+    /// A shorthand function.
+    ///
     /// Quickly consumes all messages from the queue it can, catching up
     /// with the current back of the queue.
-    /// 
+    ///
     /// If it finds something for us, it puts it in the backlog for later consumption.
-    /// 
+    ///
     /// This focuses on keeping the Broadcast Queue open to ensure it doesn't get backed
     /// up too much.
     pub fn msg_catchup(&mut self, rx: &Receiver<ActorMessage>) {
@@ -176,39 +176,39 @@ impl Pop {
     }
 
     /// Send Buy Offer
-    /// 
+    ///
     /// Small helper function to simplify sending our purchase offers.
     pub fn send_buy_offer(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
     product: usize, seller: ActorInfo, offer: &HashMap<usize, f64>, offer_result: OfferResult, target: f64) {
-        // get the offer length 
+        // get the offer length
         let mut offer_len = offer.len();
         // send the opener (request item and quantity)
-        self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller, 
+        self.push_message(rx, tx, ActorMessage::BuyOffer { buyer: self.actor_info(), seller,
             product, price_opinion: offer_result, quantity: target,
             followup: offer_len });
         // then loop over what we're sending to them.
         for (offer_item, offer_quantity) in offer.iter() {
             offer_len -= 1;
-            self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller, 
+            self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller,
                 product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
         }
     }
 
-    /// Active Wait Function, used whenever we need to wait for a particular 
+    /// Active Wait Function, used whenever we need to wait for a particular
     /// result or message. Takes in all the standard stuff for free time, while
     /// also taking in whatever it's looking to find. If it recieves one of the
     /// message types requested, it returns it.
-    /// 
+    ///
     /// If it gets a message other than what it's looking for, it deals with it
-    /// via the process_common_message. 
-    /// 
-    /// This only returns if it recieves the message it's looking for, it it does 
+    /// via the process_common_message.
+    ///
+    /// This only returns if it recieves the message it's looking for, it it does
     /// not recieve it, it will be stuck in it's loop.
-    pub fn active_wait(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, 
-    data: &DataManager, 
-    market: &MarketHistory, 
+    pub fn active_wait(&mut self,
+    rx: &mut Receiver<ActorMessage>,
+    tx: &Sender<ActorMessage>,
+    data: &DataManager,
+    market: &MarketHistory,
     find: &Vec<ActorMessage>) -> ActorMessage {
         loop {
             // catchup on messages for good measure
@@ -228,13 +228,13 @@ impl Pop {
     }
 
     /// Specific wait function.
-    /// 
+    ///
     /// Waits on a specific message or messages to be recieved directed for us.
     /// If it's any other message for us, it's put onto the backlog.
-    /// 
-    /// Meant to be used primarily when we are locked into a state where we 
+    ///
+    /// Meant to be used primarily when we are locked into a state where we
     /// shouldn't respond to anything else but what we're focusing on.
-    /// 
+    ///
     /// May be improved by making find work with incomplete ActorMessages or some
     /// other mechanism that removes the need to created dummies to make it work.
     pub fn specific_wait(&mut self,
@@ -253,13 +253,13 @@ impl Pop {
         }
     }
 
-    /// Processes firm messages for standard day work. 
-    /// 
+    /// Processes firm messages for standard day work.
+    ///
     /// Returns true if the workday has ended.
-    pub fn process_firm_message(&mut self, 
-    rx: &Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, 
-    firm: ActorInfo, 
+    pub fn process_firm_message(&mut self,
+    rx: &Receiver<ActorMessage>,
+    tx: &Sender<ActorMessage>,
+    firm: ActorInfo,
     action: FirmEmployeeAction,
     data: &DataManager) -> bool {
         match action {
@@ -267,8 +267,8 @@ impl Pop {
             FirmEmployeeAction::RequestTime => {
                 // send over our work time
                 self.push_message(rx, tx, ActorMessage::SendProduct { sender: self.actor_info(),
-                    reciever: firm, 
-                    product: TIME_ID, 
+                    reciever: firm,
+                    product: TIME_ID,
                     amount: self.property.work_time
                     });
                 // and remove that time from our property as well
@@ -281,12 +281,12 @@ impl Pop {
                     to_move.insert(*product, *amount);
                 }
                 for (product, amount) in to_move {
-                    self.push_message(rx, tx, 
-                    ActorMessage::SendProduct { 
-                        sender: self.actor_info(), 
-                        reciever: firm, 
+                    self.push_message(rx, tx,
+                    ActorMessage::SendProduct {
+                        sender: self.actor_info(),
+                        reciever: firm,
                         product,
-                        amount: amount.total_property 
+                        amount: amount.total_property
                     });
                     self.property.property.remove(&product)
                     .expect("Not found?");
@@ -297,34 +297,34 @@ impl Pop {
                     to_move.insert(*want, *amount);
                 }
                 for (want, amount) in to_move {
-                    self.push_message(rx, tx, 
-                    ActorMessage::SendWant { 
-                        sender: self.actor_info(), 
-                        reciever: firm, 
+                    self.push_message(rx, tx,
+                    ActorMessage::SendWant {
+                        sender: self.actor_info(),
+                        reciever: firm,
                         want,
-                        amount 
+                        amount
                     });
                     self.property.want_store.remove(&want)
                     .expect("Not found?");
                 }
                 // Tell the firm we've sent everything to them and they can continue on.
-                self.push_message(rx, tx, ActorMessage::EmployeeToFirm { 
-                    employee: self.actor_info(), 
-                    firm, 
+                self.push_message(rx, tx, ActorMessage::EmployeeToFirm {
+                    employee: self.actor_info(),
+                    firm,
                     action: FirmEmployeeAction::RequestSent });
             },
             FirmEmployeeAction::RequestItem { product } => {
-                // firm is requesting a specifc item, send it to them, 
+                // firm is requesting a specifc item, send it to them,
                 // if we don't have it, then send the empty anyway.
                 let amount = match self.property.property.remove(&product) {
                     Some(amount) => amount.total_property,
                     None => 0.0,
                 };
-                self.push_message(rx, tx, 
-                ActorMessage::SendProduct { sender: self.actor_info()       , 
-                    reciever: firm, 
-                    product, 
-                    amount 
+                self.push_message(rx, tx,
+                ActorMessage::SendProduct { sender: self.actor_info()       ,
+                    reciever: firm,
+                    product,
+                    amount
                 }); // no need to send more
             },
             _ => ()
@@ -333,13 +333,13 @@ impl Pop {
     }
 
     /// Work Day Processor.
-    /// 
+    ///
     /// During this function, the pop focuses on completing the work day. They don't act within the
     /// market, instead focusing on reacting to their workplace.
-    /// 
+    ///
     /// Consumes Want Splashes (as they are easy to deal with), SendProduct messages directed towards
     /// the pop. It also waits for messages from the firm.
-    /// 
+    ///
     /// All other messages are added to the backlog for later.
     pub fn work_day_processing(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, data: &DataManager) {
         loop {
@@ -357,16 +357,16 @@ impl Pop {
                     // catch any splashed wants for a while.
                     *self.property.want_store.entry(want).or_insert(0.0) += amount;
                 },
-                ActorMessage::SendProduct { 
-                    sender: _, 
-                    reciever: _, 
-                    product, 
+                ActorMessage::SendProduct {
+                    sender: _,
+                    reciever: _,
+                    product,
                     amount } => {
                         self.property.property.entry(product)
                         .and_modify(|x| {x.add_property(amount);})
                         .or_insert(PropertyInfo::new(amount));
                 },
-                ActorMessage::FirmToEmployee { firm: sender, 
+                ActorMessage::FirmToEmployee { firm: sender,
                 employee: _, action } => {
                     if self.process_firm_message(rx, tx, sender, action, data) {
                         break;
@@ -380,33 +380,33 @@ impl Pop {
     }
 
     /// Goes through the free time that the pop has available to it.
-    /// 
+    ///
     /// Free time is spent primarily on buying stuff and organizing their
     /// property.
-    /// 
-    /// They'll focus most of their early effort on shopping. This means 
+    ///
+    /// They'll focus most of their early effort on shopping. This means
     /// looking at what they target themselves having, then looking at what
-    /// they are missing. Whatever they're missing they'll attempt to buy. Whatever                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+    /// they are missing. Whatever they're missing they'll attempt to buy. Whatever
     /// they've already got, they'll reserve.
-    /// 
-    /// Before they go anywhere, they'll split their property into 3 camps. Keep, Spend, and 
-    /// Spare. 
-    /// 
-    /// Keep is all the stuff they know they'll need and will refuse to give up 
-    /// without external force. 
-    /// 
-    /// Spend are those things they are willing to give up, either having no use for 
+    ///
+    /// Before they go anywhere, they'll split their property into 3 camps. Keep, Spend, and
+    /// Spare.
+    ///
+    /// Keep is all the stuff they know they'll need and will refuse to give up
+    /// without external force.
+    ///
+    /// Spend are those things they are willing to give up, either having no use for
     /// them, or having enough of them to overflow their desires.
-    /// 
+    ///
     /// Spare is the inbetween of the two, things that they want, but would be willing to give
     /// up for other things. Spare goods are those goods which are desired, but have other desires
     /// below them.
-    /// 
+    ///
     /// Keep and spend are defined/recorded by self.memory rather than calculated, and corrected
     /// as successes or failure comes in.
-    /// 
+    ///
     /// ## Not Tested due to complexity.
-    pub fn free_time(&mut self, _rx: &mut Receiver<ActorMessage>, _tx: &Sender<ActorMessage>, 
+    pub fn free_time(&mut self, _rx: &mut Receiver<ActorMessage>, _tx: &Sender<ActorMessage>,
     _data: &DataManager,
     _market: &MarketHistory) -> HashMap<usize, PropertyInfo>{
         todo!("Redo this!")
@@ -414,13 +414,13 @@ impl Pop {
 
     /// Processes common messages from the ActorMessages for current free time.
     /// Function assumes that msg is for us, so be sure to collect just those.
-    /// 
-    /// Returns any messages that we don't handle here. Currently, 
-    fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, data: &DataManager, 
+    ///
+    /// Returns any messages that we don't handle here. Currently,
+    fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>,
+    tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory, msg: ActorMessage) -> Option<ActorMessage> {
         match msg {
-            ActorMessage::FoundProduct { seller, buyer, 
+            ActorMessage::FoundProduct { seller, buyer,
             product } => {
                 if buyer == self.actor_info() {
                     panic!("Product Found message with us as the buyer should not be found outside of deal state.");
@@ -457,31 +457,31 @@ impl Pop {
     }
 
     /// ## Try to buy
-    /// 
+    ///
     /// Tries to setup a buy deal through normal means.
-    /// 
-    /// Starts by sending the FindProduct request, then actively waits for 
-    /// a response, consuming and processing messages for itself until it 
+    ///
+    /// Starts by sending the FindProduct request, then actively waits for
+    /// a response, consuming and processing messages for itself until it
     /// recieves ProductFound or ProductNotFound.
-    /// 
+    ///
     /// If the product is found, it will enter the deal state, and try to buy tho item.
-    /// 
-    /// Both the buyer and seller will be locked into the deal state once they 
+    ///
+    /// Both the buyer and seller will be locked into the deal state once they
     /// send/recieve the ProductFound message.
-    /// 
-    /// If the product is not found, it will return Not Successful with OutOfStock 
+    ///
+    /// If the product is not found, it will return Not Successful with OutOfStock
     /// as the reason.
-    /// 
+    ///
     /// It has 2 options when it starts.
     /// - Standard Search, it asks the market to find a guaranteed seller,
     /// who we'll get in touch with and try to make a deal.
-    /// - Emergency Search, this occurs when either the product being sought 
+    /// - Emergency Search, this occurs when either the product being sought
     /// is unavailable through sellers and the product sought is important
-    fn _try_to_buy(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>, 
-    data: &DataManager, 
-    market: &MarketHistory, 
+    fn _try_to_buy(&mut self,
+    rx: &mut Receiver<ActorMessage>,
+    tx: &Sender<ActorMessage>,
+    data: &DataManager,
+    market: &MarketHistory,
     records: &mut HashMap<usize, PropertyInfo>,
     product: &usize) -> BuyResult {
         // TODO update for property change.
@@ -510,7 +510,7 @@ impl Pop {
             // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
             let _result = record.expend(time_cost);
         }
-        
+
         // since the current market price is within our budget, try to look for it.
         self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
         // with the message sent, wait for the response back while in our standard holding pattern.
@@ -519,7 +519,7 @@ impl Pop {
             ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
         // result is now either FoundProduct or ProductNotFound, deal with it and return the result to the caller
         // TODO update this to be smarter about doing emergency buy searches.
-        if let ActorMessage::ProductNotFound { product: _, .. } 
+        if let ActorMessage::ProductNotFound { product: _, .. }
         = result {
             // TODO update to use emergency buy in dire situations here.
             // if product not found, do an emergency search instead.
@@ -533,8 +533,8 @@ impl Pop {
     }
 
     /// Gets the standard shopping time cost for this pop.
-    /// 
-    /// This is currently calculated as being equal to 
+    ///
+    /// This is currently calculated as being equal to
     /// SHOPPING_TIME_COST (0.2) * self.total_population
     pub fn standard_shop_time_cost(&self, _data: &DataManager) -> f64 {
         // TODO Update to get the time cost for Shopping process.
@@ -542,65 +542,65 @@ impl Pop {
     }
 
     /// Standard Buy Function
-    /// 
-    /// This has been reached when we have successfully recieved a 
+    ///
+    /// This has been reached when we have successfully recieved a
     /// FoundProduct message. We are therefore in a deal and must focus on it.
-    /// 
+    ///
     /// So now we enter here to manage our next steps.
-    /// 
+    ///
     /// 1. Wait for the response from the seller. This should be
     ///    either ActorMessage::InStock or ActorMessage::NotInStock.
-    /// 
-    /// 2. If Not in stock, break out and fail. If InStock, begin our deal 
+    ///
+    /// 2. If Not in stock, break out and fail. If InStock, begin our deal
     /// making in step 3.
-    /// 
+    ///
     /// 3. Look at the price given and the quantity they have to offer
     /// and make an offer for that based on their estimates.
-    /// 
+    ///
     /// 4. Specifically wait for the response of ActorMessage::SellerAcceptAsIs,
     /// ActorMessage::OfferAcceptedWithChange, ActorMessage::RejectOffer, or
     /// ActorMessage::CloseDeal.
-    /// 
+    ///
     /// 5. React to the response appropriately.
     ///   a. If CloseDeal, record failure then exit out with that info.
     ///   b. If Rejected, Record Failure, then exit out with that info.
     ///   c. If Accepted, finish out and accept change, record what was
     ///      spent and recieved back in memory, then exit out with success.
-    /// 
+    ///
     /// ## Results
-    /// 
+    ///
     /// This will handle all parts of a deal once ActorMessage::ProductFound is
     /// recieved. Exiting out only when it has sent or recieved a close message.
-    /// 
+    ///
     /// It also will add or remove anything offered/requested in the deal if it
     /// goes through, including accepting any change from the seller.
-    /// 
-    /// If there is any new items in change that were not already in spend, it 
+    ///
+    /// If there is any new items in change that were not already in spend, it
     /// adds them to the returned parameter so that other functions can place
     /// those items where we wish (either into keep or spend).
-    /// 
+    ///
     /// Additionally, it handles updating the pop's memory of the product for
     /// the day, adding any recieved to that item's achieved and adding to spent
     /// if spent, as well as updating the target it's AMV spent on it.
-    /// 
+    ///
     /// It will not expend time (or at least it currently doesn't. This may
     /// be changed if time for a deal scales with items exchanged.)
-    /// 
+    ///
     /// TODO will need to be updated when price estimates for wants and classes are added
     /// TODO Update to take into account storage gained/lost from the exchange also.
-    pub fn standard_buy(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
-    _tx: &Sender<ActorMessage>, 
-    data: &DataManager, 
-    market: &MarketHistory, 
+    pub fn standard_buy(&mut self,
+    rx: &mut Receiver<ActorMessage>,
+    _tx: &Sender<ActorMessage>,
+    data: &DataManager,
+    market: &MarketHistory,
     _seller: ActorInfo,
     _records: &mut HashMap<usize, PropertyInfo>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         let result = self.specific_wait(rx, &vec![
-            ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller: 
+            ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller:
                 ActorInfo::Firm(0), product: 0, price: 0.0, quantity: 0.0 },
-            ActorMessage::NotInStock { buyer: ActorInfo::Firm(0), seller: 
+            ActorMessage::NotInStock { buyer: ActorInfo::Firm(0), seller:
                 ActorInfo::Firm(0), product: 0 }
         ]);
         if let ActorMessage::NotInStock { .. } = result {
@@ -632,7 +632,7 @@ impl Pop {
                 b_val.partial_cmp(&a_val).unwrap_or(std::cmp::Ordering::Equal)
             }) {
                 // get amv for our current product.
-                let eff_amv = market.get_product_price(product, 1.0) * market.get_product_salability(product);
+                let eff_amv = market.get_product_price(product, 1.0);
                 // add units up to amv_price, then round up.
                 let perfect_ratio = (purchase_price / eff_amv).ceil();
                 let capped = perfect_ratio.min(info.unreserved); // cap the ratio at what is available.
@@ -653,12 +653,23 @@ impl Pop {
                 // if the current total amv_satisfaction lost is > satisfaction gained
                 if amv_sat > sat_gain {
                     // remove until the former is less than the latter.
-                    while amv_sat > sat_gain {
-                        capped -= 1.0; // reduce units used by 1
-                        current_offer_amv -= eff_amv;
+                    while capped > 0.0 {
+                        // remove from offer
+                        current_offer_amv -= capped * eff_amv;
                         current_offer.entry(product)
-                            .and_modify(|x| *x -= 1.0);
+                            .and_modify(|x| *x -= capped);
+                        // reduce by half, round down for good measure.
+                        capped = (capped / 2.0).floor();
+                        // correct offer and amv
+                        current_offer_amv += capped * eff_amv;
+                        current_offer.entry(product)
+                            .and_modify(|x| *x += capped);
+                        // re-get sat lost
                         amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
+                        // check that it's below the target again.
+                        if amv_sat < sat_gain {
+                            break; // if yes, break, else try again.
+                        }
                     }
                 }
                 // stop early when the current_offer_amv > target
@@ -667,19 +678,28 @@ impl Pop {
                     break;
                 }
             }
-            //   stop when either we run out of undesired items, or we surpass the AMV target
-            //   get how much this AMV will cost us in hypothetical Satisfaction.
-            // If enough, send the offer, else continue
-            // If continuing, add items from our desired items
-            //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain
-            //     add least desired item to our offer
-            //     if last item caused Sat_lost > Sat_gained
-            //       remove it from the offer
-            //       break out
-            // send offer and wait for response
-            
+
+            // check that we surpassed the amv target, should not be overpaying in satisfaction.
+            if purchase_price > current_offer_amv { // if still not enough, start pulling from satisfaction
+                // If continuing, add items from our desired items
+                let mut current_opt = self.property.highest_tier;
+                
+
+                //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain
+                //     add least desired item to our offer
+                //     if last item caused Sat_lost > Sat_gained
+                //       remove it from the offer
+                //       break out
+            }
+
+            if purchase_price < current_offer_amv { // if current offer AMV > the purchase price, make the offer.
+                // send offer and wait for response
+            } else {
+                // send rejection and leave.
+            }
+
             // deal with responses
-            
+
             // if accepted, complete exchange
 
             // if outright rejected, leave
@@ -688,7 +708,7 @@ impl Pop {
             //   check that the reduced satisfaction is still higher than satisfaction lost
             //   if still enough
             //     accept and complete the exchange
-            //   else 
+            //   else
             //     Reject and leave
             // todo if haggling is done, it would be done here.
         }
@@ -697,17 +717,17 @@ impl Pop {
     }
 
     /// # Emergency Buy
-    /// 
+    ///
     /// Emergency buy means that we NEED the product being requested asap.
-    /// 
-    /// This removes the sanctity of all items in keep and offers everything 
+    ///
+    /// This removes the sanctity of all items in keep and offers everything
     /// less important than that item (of higher tier)
     /// TODO Currently not built, should be slightly simpler version of Standard Buy.
-    pub fn emergency_buy(&mut self, 
-    _rx: &mut Receiver<ActorMessage>, 
-    _tx: &Sender<ActorMessage>, 
-    _data: &DataManager, 
-    _market: &MarketHistory, 
+    pub fn emergency_buy(&mut self,
+    _rx: &mut Receiver<ActorMessage>,
+    _tx: &Sender<ActorMessage>,
+    _data: &DataManager,
+    _market: &MarketHistory,
     _spend: &mut HashMap<usize, f64>,
     _product: &usize,
     _returned: &mut HashMap<usize, f64>) -> BuyResult {
@@ -725,29 +745,29 @@ impl Pop {
     }
 
     /// ## Create Offer
-    /// 
+    ///
     /// Parameters
     /// - product is the item we're looking at.
     /// - target is the target AMV we are trying to meet.
     /// - spend is what items we can spend
     /// - data is product data mostly
     /// - market is market data.
-    /// 
+    ///
     /// Creates a purchase offer for a product.
     /// It takes the product we're working with,
-    /// the budget we need to meet, as well as 
+    /// the budget we need to meet, as well as
     /// info for the product and market.
-    /// 
+    ///
     /// The amount returned is allowed to run over
     /// but should be as close as possible.
-    /// 
+    ///
     /// OVERSPEND_THRESHOLD % or less is considered a valid target.
-    /// 
+    ///
     /// Returns a hashmap of the offer as well as the final price.
-    /// 
+    ///
     /// TODO this will likely need to change with the property update, but does still currently function.
     pub fn create_offer(&self, product: usize, target: f64,
-    records: &HashMap<usize, PropertyInfo>, data: &DataManager, 
+    records: &HashMap<usize, PropertyInfo>, data: &DataManager,
     market: &MarketHistory) -> (HashMap<usize, f64>, f64) {
         let mut offer = HashMap::new();
         let mut total = 0.0;
@@ -782,7 +802,7 @@ impl Pop {
                     let ceiling_price = prod_ceiling * offer_prod_price;
                     let ceiling_total = total + ceiling_price;
                     let ratio = ceiling_total / target;
-                    if ratio < (1.0 + OVERSPEND_THRESHOLD) { 
+                    if ratio < (1.0 + OVERSPEND_THRESHOLD) {
                         // TODO add factor to increase or reduce threshold based on pop despiration.
                         // if current price with cieling is under our threshold
                         // use that, otherwise, use the next step down.
@@ -791,7 +811,7 @@ impl Pop {
                         prod_ceiling - 1.0
                     }
                 }
-            } else { // if still not enough, 
+            } else { // if still not enough,
                 prod_avail
             };
             // sanity check that our spend product is not zero, if it is, skip.
@@ -827,7 +847,7 @@ impl Pop {
                     let ceiling_price = prod_ceiling * offer_prod_price;
                     let ceiling_total = total + ceiling_price;
                     let ratio = ceiling_total / target;
-                    if ratio < (1.0 + OVERSPEND_THRESHOLD) { 
+                    if ratio < (1.0 + OVERSPEND_THRESHOLD) {
                         // TODO add factor to increase or reduce threshold based on pop despiration.
                         // if current price with cieling is under our threshold
                         // use that, otherwise, use the next step down.
@@ -836,7 +856,7 @@ impl Pop {
                         prod_ceiling - 1.0
                     }
                 }
-            } else { // if still not enough, 
+            } else { // if still not enough,
                 prod_avail
             };
             // sanity check that our spend product is not zero, if it is, skip.
@@ -855,20 +875,20 @@ impl Pop {
     }
 
     /// # Standard Sell
-    /// 
+    ///
     /// Used when a buyer approaches us as a normal seller. It sells the items at
     /// market value.
-    /// 
+    ///
     /// Items it's accepting are rated based on their salability as well as the
     /// pop's demand for those items. Desired items get their full AMV, while
     /// undesired items have their price modified by their salability.
-    /// 
+    ///
     /// Returns the payment recieved so we can sort it into keep and spend.
-    /// 
+    ///
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
     /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry and/or the seller to lose time to the deal.
     /// TODO Currently does not do change, accepts offer or rejects, no returning change.
-    pub fn standard_sell(&mut self, _rx: &mut Receiver<ActorMessage>, 
+    pub fn standard_sell(&mut self, _rx: &mut Receiver<ActorMessage>,
     _tx: &Sender<ActorMessage>, _data: &DataManager,
     _market: &MarketHistory,
     _product: usize, _buyer: ActorInfo) -> HashMap<usize, f64> {
@@ -876,7 +896,7 @@ impl Pop {
     }
 
     /// # Consume Goods
-    /// 
+    ///
     /// Our end of daily activities. Goes through our goods, consuming them
     /// and adding to our satisfaction.
     pub fn consume_goods(&mut self, _data: &DataManager, _history: &MarketHistory) {
@@ -884,36 +904,36 @@ impl Pop {
     }
 
     /// # Decay Goods
-    /// 
+    ///
     /// Decay goods goes through all of our current products and wants and
     /// decays, reduces, or otherwise checks them for failure.
-    /// 
+    ///
     /// Any products lost this way are recorded as losses in that product's knowledge.
-    /// 
+    ///
     /// TODO when upgrading to add rolling, add RNG back as a parameter.
     pub fn decay_goods(&mut self, data: &DataManager) {
         self.property.decay_goods(data);
     }
 
     /// # Adapt future Plan
-    /// 
+    ///
     /// Adapt future plan takes our existing knowledge base and our results
-    /// from todays buying, selling, and consuming to modify our plan for 
+    /// from todays buying, selling, and consuming to modify our plan for
     /// tomorrow.
-    /// 
+    ///
     /// Using both our desires and knowledge of what we achieved today
     /// in particular, we seek to improve our efficiency at achieving our
     /// desires by altering how much time and/or AMV we budget to them as
     /// well as alter our buy ordering by swaping Product Knowledge in our
     /// list and altering our buy targets we want to reach.
-    /// 
+    ///
     /// We start by updating how successful we were. The ratio of achieved to
     /// the target is our current success rate, then apply that to our previous
-    /// success rate. This should be a weighted sum, giving the prior days 
+    /// success rate. This should be a weighted sum, giving the prior days
     /// priority over today.
-    /// 
+    ///
     /// With the success rate updated, we then alter our targets, and budgets.
-    pub fn adapt_future_plan(&mut self, _data: &DataManager, 
+    pub fn adapt_future_plan(&mut self, _data: &DataManager,
     _history: &MarketHistory) {
         todo!("Either Redo or drop after Property Update!")
     }
@@ -938,58 +958,58 @@ impl Seller for Pop {
 
 impl Actor for Pop {
     /// Runs the market day for the pop.
-    /// 
+    ///
     /// Called by the pop's market.
-    /// 
+    ///
     /// Starts by waiting for the market to spin up (to keep things clean)
     /// then it begins pre-calculations. For pops this means looking at their
     /// situation (resources available, demographic habits, Workplace rules)
     /// to decide whether they will offer their goods for exchange, or not.
-    /// 
+    ///
     /// After Precalculation it works for it's job, giving it's time and either
-    /// getting a pay-stub or their paycheck, whichever the job gives. (pay 
+    /// getting a pay-stub or their paycheck, whichever the job gives. (pay
     /// stub is a placeholder for a payment to simplify transfers forward).
-    /// 
+    ///
     /// Once they recieve their pay from work, they enter their normal day,
-    /// rotating between buying what they desire, and completing processes to 
+    /// rotating between buying what they desire, and completing processes to
     /// use/consume products to get wants.
-    /// 
+    ///
     /// If they are putting up things for sale, they will also add selling
     /// into the rotation, though they are much more limited in how they can
     /// handle it.
-    /// 
+    ///
     /// They continue this cycle until they run out of time to use, in which
-    /// case they tell the market they're done and enter a holding pattern, 
+    /// case they tell the market they're done and enter a holding pattern,
     /// waiting for either buying messages or for the market day to end.
-    /// 
+    ///
     /// # Selling Notes
-    /// 
+    ///
     /// If they are offering stuff for exchange, they will send up messages
     /// for barter on everything they are offering.
-    /// 
+    ///
     /// What they offer for exchange are the products which are either
     /// - not desired at all.
     /// - not reserved.
     /// - is excess above the full_tier_satisfied.
-    /// 
+    ///
     /// Products offered for sale have their AMV price set at yesterday's
     /// price, though their sell mechanism is far more fluid.
-    /// 
-    /// Items which have an AMV below the value of their time will be 
+    ///
+    /// Items which have an AMV below the value of their time will be
     /// trashed instead, thrown to the market for anyone to pick up.
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// Panics if it recieves any message before ActorMessage::StartDay
     /// to ensure the broadcast queue is open.
-    fn run_market_day(&mut self, 
+    fn run_market_day(&mut self,
     tx: Sender<ActorMessage>,
     rx: &mut Receiver<ActorMessage>,
     data: &DataManager,
     _demos: &Demographics,
     history: &MarketHistory) {
         // before we even begin, add in the time we have for the day.
-        self.property.add_property(TIME_ID, (self.breakdown_table.total as f64) * 
+        self.property.add_property(TIME_ID, (self.breakdown_table.total as f64) *
             24.0 * self.breakdown_table.average_productivity(), data);
 
         // started up, so wait for the first message.
@@ -1000,14 +1020,14 @@ impl Actor for Pop {
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
         self.property.sift_specific_products();
-        self.is_selling = if self.property.is_disorganized { 
+        self.is_selling = if self.property.is_disorganized {
             true
         }
         else {
-            // TODO add check here. 
-            // Checks would probably be a panic check, (has resources but 
+            // TODO add check here.
+            // Checks would probably be a panic check, (has resources but
             // is starving)
-            // or if they have a bunch of excess resources and a derth of 
+            // or if they have a bunch of excess resources and a derth of
             // support resources (space, security, etc) then they'll also
             // sell
             false
@@ -1015,14 +1035,14 @@ impl Actor for Pop {
 
         // TODO Consider altering these actions to remove from property and only add back in at the end of the day after decay. Would need to think carefully about how best this would be done.
 
-        // Wait for our job to poke us, asking/telling us what to give them 
+        // Wait for our job to poke us, asking/telling us what to give them
         // and send it all over (will likely get a short lived channel for this)
         // then wait for the firm to get back.
         self.work_day_processing(rx, &tx, data);
 
-        // The firm will return either with a paycheck, paystub if a wage 
+        // The firm will return either with a paycheck, paystub if a wage
         // employee, or if it's a disorganized owner, it's share of everything.
-        // Start free time section, roll between processing for wants, going 
+        // Start free time section, roll between processing for wants, going
         // out to buy things, and dealing with recieved sale orders.
         self.free_time(rx, &tx, data, history);
 
@@ -1033,12 +1053,12 @@ impl Actor for Pop {
         // satisfaction, and consume items as needed.
         self.consume_goods(data, history);
 
-        // with buying, selling, taxation, and consumption completed, 
+        // with buying, selling, taxation, and consumption completed,
         // run decay chances for our goods.
         self.decay_goods(data);
 
         // With these things consumed, we've done what we can. Process our
-        // results to hopefully improve our situation tomorrow. 
+        // results to hopefully improve our situation tomorrow.
         self.adapt_future_plan(data, history);
     }
 }
