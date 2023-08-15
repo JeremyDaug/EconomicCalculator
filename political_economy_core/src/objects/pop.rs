@@ -7,7 +7,7 @@ use std::{collections::{VecDeque, HashMap}};
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}, objects::property::DesireCoord};
 
 use super::{property::Property,
     pop_breakdown_table::PopBreakdownTable,
@@ -682,8 +682,22 @@ impl Pop {
             // check that we surpassed the amv target, should not be overpaying in satisfaction.
             if purchase_price > current_offer_amv { // if still not enough, start pulling from satisfaction
                 // If continuing, add items from our desired items
-                let mut current_opt = self.property.highest_tier;
-                
+                // create copy of property for good measure.
+                let mut property_copy = self.property.cheap_clone();
+                property_copy.sift_all(data);
+                let mut prev = DesireCoord { tier: self.property.highest_tier, idx: self.property.desires.len() };
+                while let Some(coord) = self.property.walk_down_tiers(&prev) {
+                    // update previous with current for the next loop.
+                    prev = coord;
+                    // get the desire from the copy.
+                    let current_desire = property_copy.desires.get(coord.idx).unwrap();
+                    if current_desire.satisfaction_at_tier(coord.tier) == 0.0 { // if no satisfaction to take, skip.
+                        continue;
+                    }
+                    // release the desire, record satisfaction lost, and the resources released
+                    // if the satisfaction lost 
+                    // add those new resources to the offer up to the AMV needed
+                }
 
                 //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain
                 //     add least desired item to our offer
