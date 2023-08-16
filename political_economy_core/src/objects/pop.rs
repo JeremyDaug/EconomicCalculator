@@ -7,7 +7,7 @@ use std::{collections::{VecDeque, HashMap}};
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}, objects::property::DesireCoord};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}, objects::property::{DesireCoord, TieredValue}};
 
 use super::{property::Property,
     pop_breakdown_table::PopBreakdownTable,
@@ -684,20 +684,38 @@ impl Pop {
                 // If continuing, add items from our desired items
                 // create copy of property for good measure.
                 let mut property_copy = self.property.cheap_clone();
+                // remove those items which have already been added to the offer
+                for (&&offer_id, &off_amount) in current_offer.iter() {
+                    property_copy.remove_property(offer_id, off_amount, data);
+                }
+
                 property_copy.sift_all(data);
                 let mut prev = DesireCoord { tier: self.property.highest_tier, idx: self.property.desires.len() };
                 while let Some(coord) = self.property.walk_down_tiers(&prev) {
                     // update previous with current for the next loop.
                     prev = coord;
-                    // get the desire from the copy.
+                    // get the desire from the copy.m 
                     let current_desire = property_copy.desires.get(coord.idx).unwrap();
                     if current_desire.satisfaction_at_tier(coord.tier) == 0.0 { // if no satisfaction to take, skip.
                         continue;
                     }
+                    // satisfaction lost is always equal to the current tier and the amount of satisfaction at that tier
+                    let sat_lost = TieredValue { tier: coord.tier, 
+                        value: property_copy.desires.get(coord.idx).unwrap()
+                            .satisfaction_at_tier(coord.tier) };
                     // release the desire, record satisfaction lost, and the resources released
-                    let result = self.property.release_desire_at(&coord, market, data);
-                    // if the satisfaction lost 
+                    let result = property_copy.release_desire_at(&coord, market, data);
                     // add those new resources to the offer up to the AMV needed
+                    let mut val = 0.0;
+                    for (product, &amount) in result.iter() {
+                        current_offer.entry(product)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        val = market.get_product_price(product, 1.0);
+                    }
+                    current_offer_amv += val;
+                    // check that the amv offered is enough or that the satisfaction lost is too much.
+                    if current_offer_amv > purchase_price || 
                 }
 
                 //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain
