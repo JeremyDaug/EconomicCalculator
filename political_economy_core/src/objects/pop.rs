@@ -695,6 +695,7 @@ impl Pop {
                         continue;
                     }
                     // release the desire, record satisfaction lost, and the resources released
+                    let result = self.property.release_desire_at(&coord, market, data);
                     // if the satisfaction lost 
                     // add those new resources to the offer up to the AMV needed
                 }
