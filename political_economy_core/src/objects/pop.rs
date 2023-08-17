@@ -610,7 +610,7 @@ impl Pop {
         product, price, quantity } = result { // Deal Making Section
             // TODO if we add Want Price Estimates in the Market, update this to use them!!!!!!!
             // setup current offer and current offer amv
-            let mut current_offer = HashMap::new();
+            let mut current_offer: HashMap<usize, f64> = HashMap::new();
             let mut current_offer_amv = 0.0;
             // get the the property_info for the product we are buying
             let product_info = self.property.property
@@ -642,7 +642,7 @@ impl Pop {
                     capped.floor() // if not, add up to a valid unit.
                 };
                 // add to the current total offer
-                current_offer.entry(product)
+                current_offer.entry(*product)
                     .and_modify(|x| *x += capped)
                     .or_insert(capped);
                 // add the amv to the offer.
@@ -656,13 +656,13 @@ impl Pop {
                     while capped > 0.0 {
                         // remove from offer
                         current_offer_amv -= capped * eff_amv;
-                        current_offer.entry(product)
+                        current_offer.entry(*product)
                             .and_modify(|x| *x -= capped);
                         // reduce by half, round down for good measure.
                         capped = (capped / 2.0).floor();
                         // correct offer and amv
                         current_offer_amv += capped * eff_amv;
-                        current_offer.entry(product)
+                        current_offer.entry(*product)
                             .and_modify(|x| *x += capped);
                         // re-get sat lost
                         amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
@@ -685,7 +685,7 @@ impl Pop {
                 // create copy of property for good measure.
                 let mut property_copy = self.property.cheap_clone();
                 // remove those items which have already been added to the offer
-                for (&&offer_id, &off_amount) in current_offer.iter() {
+                for (&offer_id, &off_amount) in current_offer.iter() {
                     property_copy.remove_property(offer_id, off_amount, data);
                 }
 
@@ -704,18 +704,18 @@ impl Pop {
                         value: property_copy.desires.get(coord.idx).unwrap()
                             .satisfaction_at_tier(coord.tier) };
                     // release the desire, record satisfaction lost, and the resources released
-                    let result = property_copy.release_desire_at(&coord, market, data);
+                    let released = property_copy.release_desire_at(&coord, market, data);
                     // add those new resources to the offer up to the AMV needed
                     let mut val = 0.0;
-                    for (product, &amount) in result.iter() {
-                        current_offer.entry(product)
+                    for (id, amount) in released.into_iter() {
+                        current_offer.entry(id)
                             .and_modify(|x| *x += amount)
                             .or_insert(amount);
-                        val = market.get_product_price(product, 1.0);
+                        val = market.get_product_price(&id, 1.0);
                     }
                     current_offer_amv += val;
                     // check that the amv offered is enough or that the satisfaction lost is too much.
-                    if current_offer_amv > purchase_price || 
+                    //if current_offer_amv > purchase_price {}
                 }
 
                 //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain

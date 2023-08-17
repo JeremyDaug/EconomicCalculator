@@ -1462,7 +1462,7 @@ impl Property {
     pub fn release_desire_at(&mut self, coord: &DesireCoord, 
     market: &MarketHistory, 
     data: &DataManager) 
-        -> HashMap<usize, f64> {
+    -> HashMap<usize, f64> {
         let mut result = HashMap::new();
 
         if self.desires.len() <=  coord.idx { // if not a valid desire, return nothing
@@ -1474,7 +1474,16 @@ impl Property {
         }
         self.sift_up_to(coord, data);
         // collect released desires and remove them from property.
-        
+
+        for (&id, info) in self.property.iter_mut() {
+            if info.unreserved > 0.0 {
+                let shift = info.unreserved;
+                info.safe_remove(shift);
+                result.entry(id)
+                .and_modify(|x| *x += shift)
+                .or_insert(shift);
+            }
+        }
 
         result
     }
@@ -1489,7 +1498,7 @@ impl Property {
     /// 
     /// In all other ways, it acts like self.silt_all()
     pub fn sift_up_to(&mut self, coord: &DesireCoord, 
-    data: &DataManager) {
+    data: &DataManager) -> TieredValue {
         // start by resetting property and satisfactions
         for (_, info) in self.property.iter_mut() {
             info.reset_reserves();
