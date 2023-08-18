@@ -6938,9 +6938,8 @@ mod tests {
                 assert!(desire0.satisfaction == 25.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire1 = test.desires.get(1).unwrap();
-                assert!(desire1.is_fully_satisfied());
-                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 30);
-                assert!(desire1.satisfaction == 10.0);
+                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 24);
+                assert!(desire1.satisfaction == 8.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire2 = test.desires.get(2).unwrap();
                 assert!(desire2.is_fully_satisfied());
@@ -6959,26 +6958,26 @@ mod tests {
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
-                assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
+                assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
                 assert!(prop1.specific_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
-                assert!(prop2.unreserved == 0.0);
+                assert!(prop2.unreserved == 10.0);
                 assert!(prop2.reserved == 0.0);
-                assert!(prop2.want_reserve == 20.0);
+                assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.specific_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
-                assert!(prop3.unreserved == 5.0);
+                assert!(prop3.unreserved == 15.0);
                 assert!(prop3.reserved == 0.0);
-                assert!(prop3.want_reserve == 10.0);
+                assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
                 // ensure the tiered value is correct to match
-                assert_eq!(result.tier, 35);
-                assert!(490.0 < result.value);
-                assert!(result.value < 491.0);
+                assert_eq!(result.tier, 24);
+                assert!(147.0 < result.value);
+                assert!(result.value < 148.0);
             }
 
             #[test]
@@ -7187,17 +7186,17 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                let result = test.sift_all(&data);
+                let coord = DesireCoord { tier: 25, idx: 10};
+                let result = test.sift_up_to(&coord, &data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
-                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 35);
-                assert!(desire0.satisfaction == 35.0);
+                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 25);
+                assert!(desire0.satisfaction == 25.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire1 = test.desires.get(1).unwrap();
-                assert!(desire1.is_fully_satisfied());
-                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 30);
-                assert!(desire1.satisfaction == 10.0);
+                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 24);
+                assert!(desire1.satisfaction == 8.0);
                 // and check that items were reserved correctly.
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
@@ -7211,25 +7210,25 @@ mod tests {
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
-                assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
+                assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
                 assert!(prop1.specific_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
-                assert!(prop2.unreserved == 0.0);
+                assert!(prop2.unreserved == 10.0);
                 assert!(prop2.reserved == 0.0);
-                assert!(prop2.want_reserve == 20.0);
+                assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.specific_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
-                assert!(prop3.unreserved == 5.0);
+                assert!(prop3.unreserved == 15.0);
                 assert!(prop3.reserved == 0.0);
-                assert!(prop3.want_reserve == 10.0);
+                assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
-                assert_eq!(result.tier, 35);
-                assert!(453.0 < result.value);
-                assert!(result.value < 454.0);
+                assert_eq!(result.tier, 24);
+                assert!(135.0 < result.value);
+                assert!(result.value < 136.0);
             }
 
             #[test]
@@ -7438,12 +7437,13 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                let result = test.sift_all(&data);
+                let coord = DesireCoord { tier: 25, idx: 10};
+                let result = test.sift_up_to(&coord, &data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
-                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 35);
-                assert!(desire0.satisfaction == 35.0);
+                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 25);
+                assert!(desire0.satisfaction == 25.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire1 = test.desires.get(1).unwrap();
                 assert!(desire1.is_fully_satisfied());
@@ -7466,21 +7466,21 @@ mod tests {
                 assert!(prop1.specific_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
-                assert!(prop2.unreserved == 0.0);
+                assert!(prop2.unreserved == 10.0);
                 assert!(prop2.reserved == 0.0);
-                assert!(prop2.want_reserve == 20.0);
+                assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.specific_reserve == 5.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
-                assert!(prop3.unreserved == 5.0);
+                assert!(prop3.unreserved == 15.0);
                 assert!(prop3.reserved == 0.0);
-                assert!(prop3.want_reserve == 10.0);
+                assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
-                assert_eq!(result.tier, 35);
-                assert!(435.0 < result.value);
-                assert!(result.value < 436.0);
+                assert_eq!(result.tier, 25);
+                assert!(146.0 < result.value);
+                assert!(result.value < 147.0);
             }
 
             #[test]
@@ -7689,12 +7689,13 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                let result = test.sift_all(&data);
+                let coord = DesireCoord { tier: 25, idx: 10};
+                let result = test.sift_up_to(&coord, &data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
-                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 31);
-                assert!(desire0.satisfaction == 31.0);
+                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 25);
+                assert!(desire0.satisfaction == 25.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire1 = test.desires.get(1).unwrap();
                 assert!(desire1.is_fully_satisfied());
@@ -7717,21 +7718,21 @@ mod tests {
                 assert!(prop1.specific_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
-                assert!(prop2.unreserved == 0.0);
+                assert!(prop2.unreserved == 6.0);
                 assert!(prop2.reserved == 0.0);
-                assert!(prop2.want_reserve == 20.0);
+                assert!(prop2.want_reserve == 14.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.specific_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
-                assert!(prop3.unreserved == 5.0);
+                assert!(prop3.unreserved == 11.0);
                 assert!(prop3.reserved == 0.0);
-                assert!(prop3.want_reserve == 10.0);
+                assert!(prop3.want_reserve == 4.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
-                assert_eq!(result.tier, 31);
-                assert!(277.0 < result.value);
-                assert!(result.value < 278.0);
+                assert_eq!(result.tier, 25);
+                assert!(143.0 < result.value);
+                assert!(result.value < 144.0);
             }
 
             /// sift class desires only, don't even set up specfic
