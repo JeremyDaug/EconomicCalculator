@@ -7825,12 +7825,13 @@ mod tests {
                 test.property.insert(0, PropertyInfo::new(15.0));
                 test.property.insert(1, PropertyInfo::new(15.0));
                 test.property.insert(2, PropertyInfo::new(10.0));
-                let result = test.sift_all(&data);
+                let coord = DesireCoord { tier: 25, idx: 10};
+                let result = test.sift_up_to(&coord, &data);
                 // check that the sitfing was done correctly.
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
-                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 100);
-                assert!(desire0.satisfaction == 26.0);
+                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 24);
+                assert!(desire0.satisfaction == 7.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire1 = test.desires.get(1).unwrap();
                 assert!(desire1.is_fully_satisfied());
@@ -7839,17 +7840,17 @@ mod tests {
                 // and check that items were reserved correctly.
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
-                assert!(prop0.unreserved == 0.0);
+                assert!(prop0.unreserved == 4.0);
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 0.0);
-                assert!(prop0.class_reserve == 15.0);
+                assert!(prop0.class_reserve == 11.0);
                 assert!(prop0.specific_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 15.0);
-                assert!(prop1.unreserved == 0.0);
+                assert!(prop1.unreserved == 15.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 0.0);
-                assert!(prop1.class_reserve == 15.0);
+                assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.specific_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 10.0);
@@ -7858,9 +7859,9 @@ mod tests {
                 assert!(prop2.want_reserve == 0.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.specific_reserve == 0.0);
-                assert_eq!(result.tier, 100);
-                assert!(182146.0 < result.value);
-                assert!(result.value < 182147.0);
+                assert_eq!(result.tier, 24);
+                assert!(58.0 < result.value);
+                assert!(result.value < 59.0);
             }
 
             /// Sifts 1 specific desire only, don't set up wants
@@ -7888,7 +7889,8 @@ mod tests {
                 let mut test = Property::new(test_desires);
                 test.property.insert(0, PropertyInfo::new(15.0));
                 test.property.insert(1, PropertyInfo::new(10.0));
-                let result = test.sift_all(data);
+                let coord = DesireCoord { tier: 25, idx: 10};
+                let result = test.sift_up_to(&coord, &data);
                 // check that the sitfing was done correctly.
                 // 11.0 into desire 0, (tier 50)
                 let desire0 = test.desires.get(0).unwrap();
