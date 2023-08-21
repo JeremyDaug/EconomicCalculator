@@ -8186,7 +8186,6 @@ mod tests {
             }
         }
 
-
         mod sift_all_should {
             // TODO update test for lookahead when added.
             use std::collections::{HashMap, HashSet};

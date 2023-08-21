@@ -2,7 +2,7 @@
 //!
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::{collections::{VecDeque, HashMap}};
+use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
@@ -619,6 +619,7 @@ impl Pop {
             let quantity = quantity.min(product_info.remaining_target());
             // Get how much this purchase would increase our satisfaction by.
             let sat_gain = self.property.predict_value_gained(product, quantity, data);
+            let sat_lost = TieredValue { tier: 0, value: 0.0 };
             // get the total AMV price of the purchase
             let purchase_price = quantity * price;
             // First use any property which we don't have a desire to keep to try and use them.
@@ -688,22 +689,38 @@ impl Pop {
                 for (&offer_id, &off_amount) in current_offer.iter() {
                     property_copy.remove_property(offer_id, off_amount, data);
                 }
-
                 property_copy.sift_all(data);
+                // also create shortcut current to making GTFOing a bit faster.
+                let mut completed = HashSet::new();
+                let invalid = property_copy.desires
+                    .iter().enumerate()
+                    .filter(|(_, x)| x.satisfaction == 0.0)
+                    .map(|(id, _)| id).collect_vec();
+                for idx in invalid.into_iter() { completed.insert(idx); }
                 let mut prev = DesireCoord { tier: self.property.highest_tier, idx: self.property.desires.len() };
                 while let Some(coord) = self.property.walk_down_tiers(&prev) {
+                    // if no remaining possible desires, gtfo
+                    if completed.len() == property_copy.desires.len() {
+                        break;
+                    }
                     // update previous with current for the next loop.
                     prev = coord;
-                    // get the desire from the copy.m 
+                    // get the desire from the copy.
                     let current_desire = property_copy.desires.get(coord.idx).unwrap();
-                    if current_desire.satisfaction_at_tier(coord.tier) == 0.0 { // if no satisfaction to take, skip.
+                    if current_desire.satisfaction_at_tier(coord.tier) == 0.0 {
+                        // desire was reached early, probably.
                         continue;
                     }
                     // satisfaction lost is always equal to the current tier and the amount of satisfaction at that tier
                     let sat_lost = TieredValue { tier: coord.tier, 
                         value: property_copy.desires.get(coord.idx).unwrap()
                             .satisfaction_at_tier(coord.tier) };
-                    // release the desire, record satisfaction lost, and the resources released
+                    // if the satisfaction lost is too much for us to handle, try the next.
+                    if (sat_lost +  > sat_gain {
+                        completed.insert(coord.idx); // no lower tier will be better.
+                        continue;
+                    }
+                    // release the desire and the resources released
                     let released = property_copy.release_desire_at(&coord, market, data);
                     // add those new resources to the offer up to the AMV needed
                     let mut val = 0.0;
@@ -715,7 +732,9 @@ impl Pop {
                     }
                     current_offer_amv += val;
                     // check that the amv offered is enough or that the satisfaction lost is too much.
-                    //if current_offer_amv > purchase_price {}
+                    if current_offer_amv > purchase_price {
+
+                    }
                 }
 
                 //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain
