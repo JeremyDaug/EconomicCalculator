@@ -7,7 +7,7 @@ use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add};
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}, objects::property::{DesireCoord, TieredValue}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}, objects::{property::{DesireCoord, TieredValue}, desire::DesireItem}};
 
 use super::{property::Property,
     pop_breakdown_table::PopBreakdownTable,
@@ -651,10 +651,14 @@ impl Pop {
                 current_offer_amv += capped_amv;
                 // get how much satisfaction this would give us
                 let mut amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
+                // update the total
+                sat_lost += amv_sat;
                 // if the current total amv_satisfaction lost is > satisfaction gained
-                if amv_sat > sat_gain {
+                if sat_lost > sat_gain {
                     // remove until the former is less than the latter.
                     while capped > 0.0 {
+                        // remove previous amv_sat lost
+                        sat_lost -= amv_sat;
                         // remove from offer
                         current_offer_amv -= capped * eff_amv;
                         current_offer.entry(*product)
@@ -667,8 +671,9 @@ impl Pop {
                             .and_modify(|x| *x += capped);
                         // re-get sat lost
                         amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
+                        sat_lost += amv_sat;
                         // check that it's below the target again.
-                        if amv_sat < sat_gain {
+                        if sat_lost < sat_gain {
                             break; // if yes, break, else try again.
                         }
                     }
@@ -706,22 +711,41 @@ impl Pop {
                     // update previous with current for the next loop.
                     prev = coord;
                     // get the desire from the copy.
-                    let current_desire = property_copy.desires.get(coord.idx).unwrap();
+                    let current_desire = property_copy.desires.get(coord.idx).unwrap().clone();
                     if current_desire.satisfaction_at_tier(coord.tier) == 0.0 {
                         // desire was reached early, probably.
                         continue;
                     }
                     // satisfaction lost is always equal to the current tier and the amount of satisfaction at that tier
-                    let sat_lost = TieredValue { tier: coord.tier, 
+                    let hypo_loss = TieredValue { tier: coord.tier, 
                         value: property_copy.desires.get(coord.idx).unwrap()
                             .satisfaction_at_tier(coord.tier) };
                     // if the satisfaction lost is too much for us to handle, try the next.
-                    if (sat_lost +  > sat_gain {
-                        completed.insert(coord.idx); // no lower tier will be better.
+                    if (hypo_loss + sat_lost) > sat_gain {
+                        // no lower tier will be better as it will always release the same or greater 
+                        // amount of satisfaction, but at a lower tier, thus more expensive.
+                        completed.insert(coord.idx);
                         continue;
                     }
                     // release the desire and the resources released
                     let released = property_copy.release_desire_at(&coord, market, data);
+                    // get those resources which were actually used to satisfy the current desire and amount.
+                    let result = match current_desire.item {
+                        DesireItem::Want(_) => todo!(),
+                        DesireItem::Class(class_id) => {
+                            // go through all items in this class and just remove the first things in the list
+                            // which match.
+                            let
+                        },
+                        DesireItem::Product(prod_id) => {
+                            // specific product, get only those items
+                            let mut actual_release = HashMap::new();
+                            // remove up to the current satisfaction at our current tier.
+                            actual_release.insert(prod_id, released.get(&prod_id).unwrap()
+                            .min(current_desire.satisfaction_at_tier(coord.tier)));
+                            actual_release
+                        },
+                    };
                     // add those new resources to the offer up to the AMV needed
                     let mut val = 0.0;
                     for (id, amount) in released.into_iter() {
