@@ -702,7 +702,8 @@ impl Pop {
                     .filter(|(_, x)| x.satisfaction == 0.0)
                     .map(|(id, _)| id).collect_vec();
                 for idx in invalid.into_iter() { completed.insert(idx); }
-                let mut prev = DesireCoord { tier: self.property.highest_tier, idx: self.property.desires.len() };
+                let mut prev = DesireCoord { tier: self.property.highest_tier, 
+                    idx: self.property.desires.len() };
                 while let Some(coord) = self.property.walk_down_tiers(&prev) {
                     // if no remaining possible desires, gtfo
                     if completed.len() == property_copy.desires.len() {
