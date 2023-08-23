@@ -1309,8 +1309,11 @@ impl Property {
         let mut result = Property::new(self.desires.clone());
         // copy property
         for (&id, info) in self.property.iter() {
-            result.property.entry(id)
-            .or_insert(PropertyInfo::new(info.total_property));
+            result.property.insert(id, PropertyInfo::new(info.total_property));
+        }
+        // copy wants
+        for (&id, &info) in self.want_store.iter() {
+            result.want_store.insert(id, info);
         }
         // copy satisfactions
         result.full_tier_satisfaction = self.full_tier_satisfaction;

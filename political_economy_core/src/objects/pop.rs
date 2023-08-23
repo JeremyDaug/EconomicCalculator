@@ -711,6 +711,9 @@ impl Pop {
                     }
                     // update previous with current for the next loop.
                     prev = coord;
+                    if completed.contains(&coord.idx) {
+                        continue; // if in completed, then skip.
+                    }
                     // get the desire from the copy.
                     let current_desire = property_copy.desires.get(coord.idx).unwrap().clone();
                     if current_desire.satisfaction_at_tier(coord.tier) == 0.0 {
@@ -728,15 +731,46 @@ impl Pop {
                         completed.insert(coord.idx);
                         continue;
                     }
+                    // copy processes for possible want releasing
+                    let mut processes_changed = property_copy.process_plan.clone();
                     // release the desire and the resources released
                     let released = property_copy.release_desire_at(&coord, market, data);
+                    // remove from those changed processes, clearing out 0.0s
+                    for (&id, &amount) in property_copy.process_plan.iter() {
+                        processes_changed.entry(id)
+                        .and_modify(|x| *x -= amount); // subtract the new process plan
+                        if processes_changed[&id] == 0.0 { // if no change, remove entirely.
+                            processes_changed.remove(&id);
+                        }
+                    }
                     // get those resources which were actually used to satisfy the current desire and amount.
                     let result = match current_desire.item {
-                        DesireItem::Want(_) => todo!(),
+                        DesireItem::Want(want_id) => {
+                            // get how much we need to remove
+                            let mut remove = current_desire.satisfaction_at_tier(coord.tier);
+                            // what products are actually going to be removed
+                            let actual_release = HashMap::new();
+
+                            actual_release
+                        },
                         DesireItem::Class(class_id) => {
-                            // go through all items in this class and just remove the first things in the list
-                            // which match.
-                            let
+                            // get how much we need to remove
+                            let mut remove = current_desire.satisfaction_at_tier(coord.tier);
+                            // get all products which satisfy this desire.
+                            let mates = data.product_classes.get(&class_id)
+                                .expect("Class Id Not found.");
+                            // prep both what we are releasing and how much we've released for the counting.
+                            let mut actual_release = HashMap::new();
+                            for (&prod_id, amount) in released.iter() // get what we have available
+                            .filter(|(id, _)| mates.contains(&id)) { // and are members of the class
+                                let shift = amount.min(remove); // how much we can shift up to remaining removal.
+                                remove -= shift; // remove from shift for future purposes
+                                actual_release.insert(prod_id, shift); // add to actual release.
+                                if remove == 0.0 {
+                                    break; // if nothing left to remove, get out of here.
+                                }
+                            }
+                            actual_release
                         },
                         DesireItem::Product(prod_id) => {
                             // specific product, get only those items
