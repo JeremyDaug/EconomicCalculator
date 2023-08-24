@@ -748,6 +748,13 @@ impl Pop {
                         DesireItem::Want(want_id) => {
                             // get how much we need to remove
                             let mut remove = current_desire.satisfaction_at_tier(coord.tier);
+                            // go through each process and try to remove what they need, if we can
+                            for (proc_id, amount) in processes_changed.iter() {
+                                let process = data.processes.get(proc_id).expect("Process not found.");
+                                for input in process.input_products().iter() {
+                                    
+                                }
+                            }
                             // what products are actually going to be removed
                             let actual_release = HashMap::new();
 
