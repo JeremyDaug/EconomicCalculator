@@ -745,18 +745,43 @@ impl Pop {
                     }
                     // get those resources which were actually used to satisfy the current desire and amount.
                     let result = match current_desire.item {
-                        DesireItem::Want(want_id) => {
-                            // get how much we need to remove
-                            let mut remove = current_desire.satisfaction_at_tier(coord.tier);
+                        DesireItem::Want(_) => {
+                            // what products are actually going to be removed
+                            let mut actual_release = HashMap::new();
                             // go through each process and try to remove what they need, if we can
                             for (proc_id, amount) in processes_changed.iter() {
                                 let process = data.processes.get(proc_id).expect("Process not found.");
-                                for input in process.input_products().iter() {
-                                    
+                                // add specific products up to the expectaiton.
+                                for &input in process.input_products().iter() {
+                                    // get how much we are expected to use
+                                    let expectation = input.amount * amount;
+                                    // add to actual_release
+                                    actual_release.insert(input.item.unwrap(), expectation);
+                                }
+                                // do the same for class products, selecting however we can
+                                for &input in process.inputs().iter()
+                                .filter(|x| x.item.is_class()) {
+                                    // get how much it should want.
+                                    let mut expectation = input.amount * amount;
+                                    // get class products
+                                    let class_products = data.product_classes
+                                        .get(&input.item.unwrap()).unwrap();
+                                    // select class members up to our expectation from released products.
+                                    for (product, amount) in released.iter()
+                                    .filter(|(id, _)| class_products.contains(&id)) {
+                                        // get how much is available from release capped at our current expectation
+                                        let mut shift = amount.min(expectation);
+                                        // remove what we're already planning on adding in extra release
+                                        shift -= actual_release.get(product).unwrap_or(&0.0);
+                                        // then add back to actual
+                                        actual_release.entry(*product)
+                                        .and_modify(|x| *x += shift)
+                                        .or_insert(shift);
+                                        // and reduce current expectation
+                                        expectation -= shift;
+                                    }
                                 }
                             }
-                            // what products are actually going to be removed
-                            let actual_release = HashMap::new();
 
                             actual_release
                         },
@@ -788,15 +813,14 @@ impl Pop {
                             actual_release
                         },
                     };
-                    // add those new resources to the offer up to the AMV needed
-                    let mut val = 0.0;
-                    for (id, amount) in released.into_iter() {
+                    // with the products specifically released in result, try adding them to the offer.
+                    let mut amv_released = 0.0;
+                    for (id, amount) in result.into_iter() {
                         current_offer.entry(id)
                             .and_modify(|x| *x += amount)
                             .or_insert(amount);
-                        val = market.get_product_price(&id, 1.0);
+                        amv_released += market.get_product_price(&id, 1.0);
                     }
-                    current_offer_amv += val;
                     // check that the amv offered is enough or that the satisfaction lost is too much.
                     if current_offer_amv > purchase_price {
 
