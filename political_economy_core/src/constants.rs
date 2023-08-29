@@ -70,17 +70,17 @@ pub const BUY_TARGET_SUCCESS_THRESHOLD: f64 = 0.9;
 /// The Threshold rate of Achieved / Target which is considered a failure 
 /// for the day.
 pub const BUY_TARGET_FAILURE_THRESHOLD: f64 = 0.7;
-/// Too Expensive Threshold
-pub const TOO_EXPENSIVE: f64 = 1.5;
-/// Expensive Threshold
-pub const EXPENSIVE: f64 = 1.2;
-/// Overpriced Threshold.
-pub const OVERPRICED: f64 = 1.0;
-/// Reasonable Threashold
-pub const REASONABLE: f64 = 0.8;
-/// Cheap Threshold
-pub const CHEAP: f64 = 0.5;
-// steal
+/// Too Expensive Threshold > 0.95
+pub const TOO_EXPENSIVE: f64 = 0.95;
+/// Expensive Threshold > 0.75
+pub const EXPENSIVE: f64 = 0.75;
+/// Overpriced Threshold 0.6
+pub const OVERPRICED: f64 = 0.6;
+/// Reasonable Threashold  > 0.4
+pub const REASONABLE: f64 = 0.4;
+/// Cheap Threshold > 0.2
+pub const CHEAP: f64 = 0.2;
+// steal < 0.25
 
 
 /// ----------- Adapt future plan constants

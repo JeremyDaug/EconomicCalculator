@@ -11,7 +11,7 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::{HashMap, HashSet}, ops::{AddAssign, Add, Sub, SubAssign}};
+use std::{collections::{HashMap, HashSet}, ops::{AddAssign, Add, Sub, SubAssign, Div}};
 
 use itertools::Itertools;
 
@@ -1790,6 +1790,15 @@ impl DesireCoord {
 pub struct TieredValue {
     pub tier: usize,
     pub value: f64,
+}
+
+impl Div<TieredValue> for TieredValue {
+    type Output = f64;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        let other = rhs.shift_tier(self.tier);
+        self.value / other.value
+    }
 }
 
 impl AddAssign for TieredValue {

@@ -175,9 +175,18 @@ impl Pop {
         }
     }
 
-    /// Send Buy Offer
+    /// # Send Buy Offer
     ///
     /// Small helper function to simplify sending our purchase offers.
+    /// 
+    /// ## Paratemers:
+    /// * `rx`: Main Reciever
+    /// * `tx`: Main Sender
+    /// * `product`: the product we're attempting to buy.
+    /// * `seller`: the person we are making an offer to.
+    /// * `offer`; what all we are offering
+    /// * `offer_result`: what we (the buyer) think of the offer.
+    /// * `target`: how much we are trying to buy with the offer.
     pub fn send_buy_offer(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
     product: usize, seller: ActorInfo, offer: &HashMap<usize, f64>, offer_result: OfferResult, target: f64) {
         // get the offer length
@@ -590,10 +599,10 @@ impl Pop {
     /// TODO Update to take into account storage gained/lost from the exchange also.
     pub fn standard_buy(&mut self,
     rx: &mut Receiver<ActorMessage>,
-    _tx: &Sender<ActorMessage>,
+    tx: &Sender<ActorMessage>,
     data: &DataManager,
     market: &MarketHistory,
-    _seller: ActorInfo,
+    seller: ActorInfo,
     _records: &mut HashMap<usize, PropertyInfo>) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
@@ -606,7 +615,7 @@ impl Pop {
         if let ActorMessage::NotInStock { .. } = result {
             // maybe record failure
             return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
-        } else if let ActorMessage::InStock { buyer: _, seller: _,
+        } else if let ActorMessage::InStock { buyer, seller,
         product, price, quantity } = result { // Deal Making Section
             // TODO if we add Want Price Estimates in the Market, update this to use them!!!!!!!
             // setup current offer and current offer amv
@@ -619,7 +628,7 @@ impl Pop {
             let quantity = quantity.min(product_info.remaining_target());
             // Get how much this purchase would increase our satisfaction by.
             let sat_gain = self.property.predict_value_gained(product, quantity, data);
-            let sat_lost = TieredValue { tier: 0, value: 0.0 };
+            let mut sat_lost = TieredValue { tier: 0, value: 0.0 };
             // get the total AMV price of the purchase
             let purchase_price = quantity * price;
             // First use any property which we don't have a desire to keep to try and use them.
@@ -731,6 +740,7 @@ impl Pop {
                         completed.insert(coord.idx);
                         continue;
                     }
+                    sat_lost += hypo_loss;
                     // copy processes for possible want releasing
                     let mut processes_changed = property_copy.process_plan.clone();
                     // release the desire and the resources released
@@ -821,21 +831,28 @@ impl Pop {
                             .or_insert(amount);
                         amv_released += market.get_product_price(&id, 1.0);
                     }
+                    current_offer_amv += amv_released;
                     // check that the amv offered is enough or that the satisfaction lost is too much.
-                    if current_offer_amv > purchase_price {
-
+                    if current_offer_amv  > purchase_price {
+                        break;
                     }
+                    // if it's not enough, continue onto the next loop.
                 }
-
-                //   loop while offer_AMV < price or Satisfaction_lost < satisfaction_gain
-                //     add least desired item to our offer
-                //     if last item caused Sat_lost > Sat_gained
-                //       remove it from the offer
-                //       break out
             }
-
+            // get an oppinion estimate from how much satisfaction we are giving up vs 
+            let offer_result = Pop::offer_result_selector(sat_gain, sat_lost);
+            // if current_amv_offer is below our target, reduce our buy target appropriately.
+            let final_target = if purchase_price > current_offer_amv {
+                
+            } else {
+                quantity
+            };
+            // after the previous section, we either have enough AMV to try and purchase,
+            // or ran out of options which wouldn't overdraw our satisfaction.
             if purchase_price < current_offer_amv { // if current offer AMV > the purchase price, make the offer.
                 // send offer and wait for response
+                
+                self.send_buy_offer(rx, tx, product, seller, &current_offer, offer_result, final_target)
             } else {
                 // send rejection and leave.
             }
@@ -856,6 +873,16 @@ impl Pop {
         }
 
         panic!("Standard Buy: This should never be reached, Specific Wait has returned an incorrect MSG.")
+    }
+
+    fn offer_result_selector(sat_gain: TieredValue, sat_lost: TieredValue) -> OfferResult {
+        let sat_ratio = sat_lost / sat_gain;
+        if sat_ratio > constants::TOO_EXPENSIVE { OfferResult::TooExpensive }
+            else if sat_ratio > constants::EXPENSIVE { OfferResult::Expensive }
+            else if sat_ratio > constants::OVERPRICED { OfferResult::Overpriced }
+            else if sat_ratio > constants::REASONABLE { OfferResult::Reasonable }
+            else if sat_ratio > constants::CHEAP { OfferResult::Cheap }
+            else { OfferResult::Steal }
     }
 
     /// # Emergency Buy
