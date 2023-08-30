@@ -875,8 +875,28 @@ impl Pop {
             ]);
 
             // if accepted, complete exchange
-
             // if outright rejected, leave
+            match response {
+                ActorMessage::SellerAcceptOfferAsIs { buyer, 
+                seller, 
+                product, 
+                offer_result } => { 
+                    // Accepted as is, remove the offer and add our purchase
+                    self.property.remove_properties(product, amount, data)
+                },
+                ActorMessage::OfferAcceptedWithChange { buyer, 
+                    seller, 
+                    product, 
+                    quantity, 
+                    followups } => {},
+                ActorMessage::RejectOffer { buyer, 
+                    seller, 
+                    product } => {},
+                ActorMessage::CloseDeal { buyer, 
+                    seller, 
+                    product } => {},
+                _ => panic!("Incorrect Response. Impossible to get here.")
+            }
 
             // if accepted with reduced amount
             //   check that the reduced satisfaction is still higher than satisfaction lost

@@ -291,6 +291,30 @@ impl Property {
         self.sift_all(data) - original_value
     }
 
+    /// # Add Products
+    /// 
+    /// Adds or removes a list of products from our property then sifts and
+    /// returns the change in value.
+    /// 
+    /// ## Panics
+    /// 
+    /// Panics if it tries to remove more of a product than we actually have.
+    pub fn add_products(&mut self, products: &HashMap<usize, f64>, data: &DataManager) -> TieredValue {
+        for (&product, &amount) in products.iter() {
+            if amount < 0.0 { // if it's being removed check that we can remove without going below 0.0
+                let available = self.property.get(&product).unwrap_or(&PropertyInfo::new(0.0));
+                if -amount > available.total_property {
+                    panic!("Not enough product within property.")
+                }
+            }
+            let end_result = self.property.entry(product)
+            .and_modify(|x| x.add_property(amount))
+            .or_insert(PropertyInfo::new(amount));
+        }
+
+        TieredValue { tier: 0, value: 0.0 }
+    }
+
     /// # Remove Property
     /// 
     /// Removes a number of product units from property, if needed, it also
