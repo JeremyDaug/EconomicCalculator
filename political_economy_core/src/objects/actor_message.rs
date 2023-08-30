@@ -1,25 +1,25 @@
 /// Actor Message is a message which can be passed between
 /// two actor threads.
-/// 
+///
 /// # Complex Buy Offers
-/// 
+///
 /// Because Messages cannot pass collections safely, instead we pass chains
-/// off messages. there are 4 offer messages. 
-/// 
+/// off messages. there are 4 offer messages.
+///
 /// 1 for singular item offers, so we can have a shorthand.
-/// 
+///
 /// 3 for chains of items to offer, one open, one next, one close.
-/// 
+///
 /// # Future Options
-/// 
+///
 /// TODO
-/// 
+///
 /// May be worth it to break some of these messages out, specifically move most inter-actor
 /// messages or offer messages to another enum and consolidate them into a more common
 /// message type for here. May do that later, not sure.
 #[derive(Debug, Clone, Copy)]
 pub enum ActorMessage {
-    /// The start message so that all actors in a market know 
+    /// The start message so that all actors in a market know
     /// that all other actors are up and running and they can
     /// begin messaging back and forth.
     StartDay,
@@ -36,7 +36,7 @@ pub enum ActorMessage {
 
     // Break for Deal Items
 
-    /// An offer to the market of the specified product, in for the 
+    /// An offer to the market of the specified product, in for the
     /// specified quantity, at the specified amv unit price.
     SellOrder { sender: ActorInfo, product: usize, quantity: f64,
         amv: f64 },
@@ -47,7 +47,7 @@ pub enum ActorMessage {
     /// a return message can be sent to them.
     FindProduct{ product: usize, sender: ActorInfo },
     /// The Find Want Message, recieved by the market.
-    /// Contains the want Id, and the sender's info so a response can be 
+    /// Contains the want Id, and the sender's info so a response can be
     /// sent back.
     FindWant { want: usize, sender: ActorInfo },
     /// Returned from an attempt to buy an item and unable to
@@ -60,15 +60,15 @@ pub enum ActorMessage {
     WantnotFound {product: usize, buyer: ActorInfo },
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
-    /// Gives the product in question, the amount available to purchase, 
+    /// Gives the product in question, the amount available to purchase,
     /// the price / unit being offered, and the time left after finding it.
-    /// 
+    ///
     /// Starts the Deal Making Process
     FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize },
     /// A Message to both buyer and seller that they should meet up
     /// and try to make a deal.
     /// Gives the want in question as well as the product they were matched on.
-    /// 
+    ///
     /// Starts the deal Making Process.
     FoundWant {seller: ActorInfo, buyer: ActorInfo, want: usize, product: usize },
 
@@ -84,19 +84,19 @@ pub enum ActorMessage {
     AskBarterHint { seller: ActorInfo, buyer: ActorInfo},
     /// Seller gives barter hint for the buyer to act on.
     /// Follow up tells the Buyer to expect more.
-    BarterHint { seller: ActorInfo, buyer: ActorInfo, 
+    BarterHint { seller: ActorInfo, buyer: ActorInfo,
         product: usize, quantity: f64, followup: u64 },
 
     /// From Buyer to seller.
-    /// 
+    ///
     /// Buyer Rejects as price, unable to purchase at the current price.
-    /// 
-    /// It is either too expensive in Absolute terms (total budget) or 
+    ///
+    /// It is either too expensive in Absolute terms (total budget) or
     /// too expensive currently (current budget and can't buy).
     RejectPurchase { buyer: ActorInfo, seller: ActorInfo, product: usize,
         price_opinion: OfferResult },
 
-    /// The start of a Buy offer from a buyer. Includes buyer, seller, and product 
+    /// The start of a Buy offer from a buyer. Includes buyer, seller, and product
     /// to make finding easy. It also includes price opinion, the amount requested,
     /// and how many followup messages to expect.
     BuyOffer { buyer: ActorInfo, seller: ActorInfo, product: usize,
@@ -112,52 +112,52 @@ pub enum ActorMessage {
     SellerAcceptOfferAsIs { buyer: ActorInfo, seller: ActorInfo,
         product: usize, offer_result: OfferResult },
 
-    /// The offer has been accepted with changes. 
-    /// 
+    /// The offer has been accepted with changes.
+    ///
     /// Includes buyer, seller, and the product being purchased.
     /// The quantity is what is being given by the buyer. If the value
     /// is the same, then the there is no reduction in items being bought.
-    /// It also has followup, which defines how many followup changes 
+    /// It also has followup, which defines how many followup changes
     /// to expect.
     OfferAcceptedWithChange { buyer: ActorInfo, seller: ActorInfo,
         product: usize, quantity: f64, followups: usize },
     /// A followup message to ActorMessage::OfferAcceptedWithChange.
-    /// 
+    ///
     /// Used to return change to a buyer. via the return_product and return_quantity.
     /// New items may be added here for alternative re-payments, such as paying
     /// back smaller denomination items.
-    /// 
+    ///
     /// returned_quantity should be positive in value, even if adding a new item.
-    ChangeFollowup { buyer: ActorInfo, seller: ActorInfo, 
+    ChangeFollowup { buyer: ActorInfo, seller: ActorInfo,
         product: usize, return_product: usize, return_quantity: f64,
         followups: usize },
 
     /// The seller is rejecting the offer for whatever reason,
-    /// 
+    ///
     /// Most likely to be used if the seller is unwilling to accept the price offered.
-    /// 
-    /// Could hypethetically be used to when unable to reduce the purchase or unable 
+    ///
+    /// Could hypethetically be used to when unable to reduce the purchase or unable
     /// to return enough change to satisfy the seller. Rejecting being less terrible
     /// than overcharging in some cases.
-    RejectOffer { buyer: ActorInfo, seller: ActorInfo, 
+    RejectOffer { buyer: ActorInfo, seller: ActorInfo,
         product: usize },
 
     /// The buyer has recieved the deal (with or without change) and sends out
     /// a confirmation to close the deal for good.
     FinishDeal { buyer: ActorInfo, seller: ActorInfo, product: usize },
-    
+
     /// A Close out Deal Message, sent by buyer or seller as needed.
     /// If sent, both sides should assume that the deal is over, don't try anything
-    /// anymore. 
+    /// anymore.
     CloseDeal { buyer: ActorInfo, seller: ActorInfo,
         product: usize },
 
-    /// Follow up with a different product then last time. 
+    /// Follow up with a different product then last time.
     /// Useful for pops to buy multiple items at the same store, saving time.
     /// Also uses excess time from existing item instead of next item's time.
     CheckItem { buyer: ActorInfo, seller: ActorInfo,
         proudct: usize },
-    
+
 
     /// A message which sends a product from the sender to the reciever.
     /// The sender SHOULD delete their local item and the reciever SHOULD
@@ -177,7 +177,7 @@ pub enum ActorMessage {
     /// a little bit safer.
     WantSplash { sender: ActorInfo,
         want: usize, amount: f64 },
-    /// Sends a message from a firm to an employee pop, making them do 
+    /// Sends a message from a firm to an employee pop, making them do
     /// something. Primarily used to demark the start of the work day,
     /// but can also be used to send messages like hirings, firings, and
     /// job changes (promotions, demotions, transfers).
@@ -186,8 +186,8 @@ pub enum ActorMessage {
     /// A message from an employee to a firm.
     EmployeeToFirm { employee: ActorInfo, firm: ActorInfo,
         action: FirmEmployeeAction },
-    
-    
+
+
 }
 
 /// Used to denote how an offer went and what the buyer felt like for it.
@@ -198,7 +198,7 @@ pub enum OfferResult {
     Incomplete,
     /// Totally Rejected, typically by a seller who's not pleased with the offer
     /// Reduce Weight in selection -3.
-    /// 
+    ///
     /// Currently Not Used
     Rejected,
     /// Rejected for being too expensive, Send buy a Buyer.
@@ -236,37 +236,37 @@ impl ActorMessage {
             ActorMessage::AllFinished => true,
             ActorMessage::FindProduct { .. } => false, // for market, sent by me
             ActorMessage::FindWant { .. } => false, // for market, sent by me
-            ActorMessage::FoundProduct { seller, 
+            ActorMessage::FoundProduct { seller,
                 buyer, .. } => {
                     *seller == me || *buyer == me
                 }, // from market, created by FindProduct, you're buyer or seller.
-            ActorMessage::FoundWant { seller, buyer, 
+            ActorMessage::FoundWant { seller, buyer,
                 .. } => *seller == me || *buyer == me, // from market, to buyer or seller
-            ActorMessage::ProductNotFound { buyer, 
+            ActorMessage::ProductNotFound { buyer,
                 .. } => *buyer == me, // from market to buyer
-            ActorMessage::WantnotFound { 
+            ActorMessage::WantnotFound {
                 buyer, ..} => *buyer == me, // from market to buy
-            ActorMessage::SendProduct { reciever, 
+            ActorMessage::SendProduct { reciever,
                 .. } => *reciever == me, // sends product to reciever
-            ActorMessage::SendWant { reciever, 
+            ActorMessage::SendWant { reciever,
                 .. } => *reciever == me, // sends want to reciever
-            ActorMessage::DumpProduct { sender: _, 
+            ActorMessage::DumpProduct { sender: _,
                 product: _, amount: _ } => false, // dupms product onto market
-            ActorMessage::WantSplash { sender: _, want: _, 
+            ActorMessage::WantSplash { sender: _, want: _,
                 amount: _ } => true, // dumps want into market, hits everyone.
-            ActorMessage::FirmToEmployee { firm: _, employee, 
-                action: _ } => *employee == me, // reciever 
-            ActorMessage::EmployeeToFirm { employee: _, firm, 
+            ActorMessage::FirmToEmployee { firm: _, employee,
+                action: _ } => *employee == me, // reciever
+            ActorMessage::EmployeeToFirm { employee: _, firm,
                 action: _ } => *firm == me, // firm can recieve
 
-            ActorMessage::SellOrder { sender: _, product: _, 
+            ActorMessage::SellOrder { sender: _, product: _,
                 quantity: _, amv: _ } => false,
-            ActorMessage::BuyOffer { buyer: _, seller, 
-            product: _, price_opinion: _, quantity: _, 
+            ActorMessage::BuyOffer { buyer: _, seller,
+            product: _, price_opinion: _, quantity: _,
             followup: _ } => *seller == me, // sent from buyer to seller
             ActorMessage::BuyOfferFollowup { seller, ..
             } => *seller == me, // buyer to seller
-                
+
             ActorMessage::InStock { buyer, .. } => *buyer == me,
             ActorMessage::NotInStock { buyer, .. } => *buyer == me,
             ActorMessage::AskBarterHint { seller,.. } => *seller == me,
@@ -275,17 +275,17 @@ impl ActorMessage {
             ActorMessage::OfferAcceptedWithChange { buyer, .. } => *buyer == me,
             ActorMessage::ChangeFollowup { buyer, .. } => *buyer == me,
 
-            ActorMessage::CheckItem { buyer: _, seller, 
+            ActorMessage::CheckItem { buyer: _, seller,
                 proudct: _ } => *seller == me,
-            ActorMessage::CloseDeal { buyer, seller, 
+            ActorMessage::CloseDeal { buyer, seller,
                 product: _} => *buyer == me || *seller == me, // Could be sent by either.
-            ActorMessage::RejectOffer { buyer, seller: _, 
+            ActorMessage::RejectOffer { buyer, seller: _,
                 product: _ } => *buyer == me,  // Buyer Rejects without question.
-            ActorMessage::FinishDeal { buyer, seller, 
+            ActorMessage::FinishDeal { buyer, seller,
                 product: _ } => *buyer == me || *seller == me,
-            ActorMessage::RejectPurchase { buyer: _, seller, 
+            ActorMessage::RejectPurchase { buyer: _, seller,
                 product: _, price_opinion: _ } => *seller == me,
-                
+
         }
     }
 }
@@ -293,7 +293,7 @@ impl ActorMessage {
 /// The actions which a can be sent between firms and employees
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FirmEmployeeAction {
-    /// Work day has finished and gotten what it needs from it's pops, move 
+    /// Work day has finished and gotten what it needs from it's pops, move
     /// along.
     WorkDayEnded,
     /// Requests time from the firm, simplifies the transfer as it's common.
@@ -304,7 +304,7 @@ pub enum FirmEmployeeAction {
     /// Requests all of a specific item from the pop.
     RequestItem {product: usize},
     /// Used by one to tell the other that they have completed sending the
-    /// requested item(s). Intended primarily to end 
+    /// requested item(s). Intended primarily to end
     /// FirmEmployeeAction::RequestEverything logic.
     RequestSent,
 

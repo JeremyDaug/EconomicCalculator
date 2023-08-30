@@ -842,22 +842,37 @@ impl Pop {
             // get an oppinion estimate from how much satisfaction we are giving up vs 
             let offer_result = Pop::offer_result_selector(sat_gain, sat_lost);
             // if current_amv_offer is below our target, reduce our buy target appropriately.
-            let final_target = if purchase_price > current_offer_amv {
-                
+            // only reduce if the seller is a firm and thus unlikely to accept less.
+            let final_target = if purchase_price > current_offer_amv && seller.is_firm() {
+                let current_purchase_amount = current_offer_amv / price;
+                current_purchase_amount.floor()
             } else {
                 quantity
             };
             // after the previous section, we either have enough AMV to try and purchase,
             // or ran out of options which wouldn't overdraw our satisfaction.
-            if purchase_price < current_offer_amv { // if current offer AMV > the purchase price, make the offer.
-                // send offer and wait for response
-                
-                self.send_buy_offer(rx, tx, product, seller, &current_offer, offer_result, final_target)
-            } else {
-                // send rejection and leave.
-            }
+            // send offer and wait for response
+            self.send_buy_offer(rx, tx, product, seller, &current_offer, offer_result, final_target);
+            // TODO add in possibility of rejection here. For now they will always try, if nothing else.
 
             // deal with responses
+            let response = self.specific_wait(rx, &vec![
+                ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0), 
+                    seller: ActorInfo::Firm(0), 
+                    product: 0, 
+                    offer_result: OfferResult::Cheap },
+                ActorMessage::OfferAcceptedWithChange { buyer: ActorInfo::Firm(0),
+                    seller: ActorInfo::Firm(0), 
+                    product: 0, 
+                    quantity: 0.0, 
+                    followups: 0 },
+                ActorMessage::RejectOffer { buyer: ActorInfo::Firm(0),
+                    seller: ActorInfo::Firm(0), 
+                    product: 0 },
+                ActorMessage::CloseDeal { buyer: ActorInfo::Firm(0),
+                    seller: ActorInfo::Firm(0), 
+                    product: 0 }
+            ]);
 
             // if accepted, complete exchange
 
