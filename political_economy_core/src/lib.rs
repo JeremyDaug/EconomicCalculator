@@ -3679,6 +3679,10 @@ mod tests {
         }
 
         mod add_products_should {
+            use std::collections::{HashSet, HashMap};
+
+            use crate::{objects::{process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}, want::Want, product::Product, property::Property, desire::{DesireItem, Desire}}, data_manager::DataManager};
+
 
             #[test]
             pub fn add_multiple_products_to_property_then_sift() {
@@ -3893,7 +3897,11 @@ mod tests {
                 assert!(test.is_sifted);
                 assert!(test.desires[0].satisfaction == 0.0);
                 assert!(test.desires[1].satisfaction == 0.0);
+                test.add_property(0, 1.0, &data);
+                test.add_property(1, 1.0, &data);
                 test.add_property(2, 1.0, &data);
+                test.add_property(3, 1.0, &data);
+                test.add_property(4, 1.0, &data);
                 // should satisfy 1 of want 0, and 2 of want 1
                 assert!(test.desires[0].satisfaction == 1.0);
                 assert!(test.desires[1].satisfaction == 2.0);

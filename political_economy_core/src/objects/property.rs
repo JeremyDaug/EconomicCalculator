@@ -302,7 +302,8 @@ impl Property {
     pub fn add_products(&mut self, products: &HashMap<usize, f64>, data: &DataManager) -> TieredValue {
         for (&product, &amount) in products.iter() {
             if amount < 0.0 { // if it's being removed check that we can remove without going below 0.0
-                let available = self.property.get(&product).unwrap_or(&PropertyInfo::new(0.0));
+                let default = PropertyInfo::new(0.0);
+                let available = self.property.get(&product).unwrap_or(&default);
                 if -amount > available.total_property {
                     panic!("Not enough product within property.")
                 }

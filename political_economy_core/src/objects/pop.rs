@@ -882,7 +882,7 @@ impl Pop {
                 product, 
                 offer_result } => { 
                     // Accepted as is, remove the offer and add our purchase
-                    self.property.remove_properties(product, amount, data)
+                    //self.property.remove_properties(product, amount, data)
                 },
                 ActorMessage::OfferAcceptedWithChange { buyer, 
                     seller, 
