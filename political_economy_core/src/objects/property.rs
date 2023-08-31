@@ -300,6 +300,7 @@ impl Property {
     /// 
     /// Panics if it tries to remove more of a product than we actually have.
     pub fn add_products(&mut self, products: &HashMap<usize, f64>, data: &DataManager) -> TieredValue {
+        let original_value = self.total_estimated_value();
         for (&product, &amount) in products.iter() {
             if amount < 0.0 { // if it's being removed check that we can remove without going below 0.0
                 let default = PropertyInfo::new(0.0);
@@ -308,12 +309,12 @@ impl Property {
                     panic!("Not enough product within property.")
                 }
             }
-            let end_result = self.property.entry(product)
+            self.property.entry(product)
             .and_modify(|x| x.add_property(amount))
             .or_insert(PropertyInfo::new(amount));
         }
 
-        TieredValue { tier: 0, value: 0.0 }
+        self.sift_all(data) - original_value
     }
 
     /// # Remove Property

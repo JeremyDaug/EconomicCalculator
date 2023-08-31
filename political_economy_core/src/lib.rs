@@ -3897,16 +3897,21 @@ mod tests {
                 assert!(test.is_sifted);
                 assert!(test.desires[0].satisfaction == 0.0);
                 assert!(test.desires[1].satisfaction == 0.0);
-                test.add_property(0, 1.0, &data);
-                test.add_property(1, 1.0, &data);
-                test.add_property(2, 1.0, &data);
-                test.add_property(3, 1.0, &data);
-                test.add_property(4, 1.0, &data);
+                let mut additions = HashMap::new();
+                additions.insert(0, 1.0);
+                additions.insert(1, 1.0);
+                additions.insert(2, 1.0);
+                additions.insert(3, 1.0);
+                additions.insert(4, 1.0);
+                test.add_products(&additions, &data);
                 // should satisfy 1 of want 0, and 2 of want 1
-                assert!(test.desires[0].satisfaction == 1.0);
+                assert!(test.desires[0].satisfaction == 3.0);
                 assert!(test.desires[1].satisfaction == 2.0);
+                assert!(test.property.get(&0).unwrap().total_property == 1.0);
+                assert!(test.property.get(&1).unwrap().total_property == 1.0);
                 assert!(test.property.get(&2).unwrap().total_property == 1.0);
-                assert!(test.property.get(&2).unwrap().want_reserve == 1.0);
+                assert!(test.property.get(&3).unwrap().total_property == 1.0);
+                assert!(test.property.get(&4).unwrap().total_property == 1.0);
             }
         }
 

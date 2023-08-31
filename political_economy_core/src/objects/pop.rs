@@ -882,7 +882,14 @@ impl Pop {
                 product, 
                 offer_result } => { 
                     // Accepted as is, remove the offer and add our purchase
-                    //self.property.remove_properties(product, amount, data)
+                    // invert our current offer so those are subtracted.
+                    let mut resulting_change = HashMap::new();
+                    for (&prod, &quant) in current_offer.iter() {
+                        resulting_change.insert(prod, -quant);
+                    }
+                    // add how much we bought to the resulting_change.
+                    resulting_change.insert(product, final_target);
+                    self.property.add_products(&resulting_change, data);
                 },
                 ActorMessage::OfferAcceptedWithChange { buyer, 
                     seller, 
