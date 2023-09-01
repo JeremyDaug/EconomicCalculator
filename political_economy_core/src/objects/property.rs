@@ -1793,6 +1793,25 @@ impl Property {
         self.is_sifted = true;
         self.total_estimated_value()
     }
+
+    /// # Extra Time
+    /// 
+    /// Extra time extracts all time available from the property.
+    /// 
+    /// Returns time Breakdown of the time available.
+    pub fn extra_time(&self) -> TimeBreakdown {
+        todo!()
+    }
+}
+
+/// # Time Breakdown
+/// 
+/// 
+#[derive(Debug, Clone, Copy)]
+pub struct TimeBreakdown {
+    pub unclaimed: f64,
+    pub soft_reserved: f64,
+    pub hard_reserved: f64
 }
 
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.

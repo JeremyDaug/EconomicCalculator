@@ -448,6 +448,7 @@ impl Pop {
         // with everything reserved begin trying to buy more stuff
         loop {
             // loop until we either run out of 'free time'
+            let time_available = self.property.extra_time();
             break;
         }
 
