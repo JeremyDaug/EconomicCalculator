@@ -1427,7 +1427,7 @@ impl Property {
     /// us to get from the market. It acts by spending the AMV on known prices for
     /// goods to satisfy.
     /// 
-    /// Currently, it only works for 
+    /// Currently, it only works for specific desires, not wants or classes.
     /// 
     /// TODO consider improving this to instead 'virtually' buy then add and sift to get the satisfaction.
     pub fn satisfaction_from_amv(&self, amv: f64, market: &MarketHistory) -> TieredValue {

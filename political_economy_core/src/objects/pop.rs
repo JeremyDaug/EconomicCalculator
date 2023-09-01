@@ -14,7 +14,7 @@ use super::{property::Property,
     buyer::Buyer, seller::Seller, actor::Actor,
     market::MarketHistory,
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult},
-    buy_result::BuyResult, property_info::PropertyInfo,
+    buy_result::BuyResult, property_info::PropertyInfo, product::ProductTag,
 };
 
 /// Pops are the data storage for a population group.
@@ -415,10 +415,47 @@ impl Pop {
     /// as successes or failure comes in.
     ///
     /// ## Not Tested due to complexity.
-    pub fn free_time(&mut self, _rx: &mut Receiver<ActorMessage>, _tx: &Sender<ActorMessage>,
-    _data: &DataManager,
-    _market: &MarketHistory) -> HashMap<usize, PropertyInfo>{
-        todo!("Redo this!")
+    pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+    data: &DataManager,
+    market: &MarketHistory) {
+        // start by organizing our property, reserve everything for our desires.
+        let initial_sat = self.property.sift_all(data);
+
+        // After reserving for desires directly, measure excess wealth in AMV and 'sift' that.
+        let mut surplus = HashMap::new();
+        let mut amv_surplus = 0.0;
+        for (&product, quant) in self.property.property.iter() {
+            let amount = quant.available();
+            surplus.insert(product, amount);
+            amv_surplus += amount * market.get_product_price(&product, 1.0);
+        }
+        let hypothetical_satisfaction = self.property.satisfaction_from_amv(amv_surplus, market);
+
+        // put up our surplus for sale if we desire it
+        if self.is_selling {
+            for (&product, &amount) in surplus.iter()
+            .filter(|(&id, _)| data.products.get(&id).expect("Product Not found!").tags
+            .contains(&ProductTag::NonTransferrable)) { // put everything that is transferrable up for sale.
+                self.push_message(rx, tx, 
+                ActorMessage::SellOrder { sender: self.actor_info(), 
+                    product, 
+                    quantity: amount, 
+                    amv: market.get_product_price(&product, 1.0) });
+                // non-firms offer at the current market price.
+            }
+        }
+
+        // with everything reserved begin trying to buy more stuff
+        loop {
+            // loop until we either run out of 'free time'
+            break;
+        }
+
+        // after we run out of stuff to buy, send finished and leave, consumption comes later
+        self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
+        self.active_wait(rx, tx, data, market, &vec![
+            ActorMessage::AllFinished
+        ]);
     }
 
     /// Processes common messages from the ActorMessages for current free time.
@@ -658,7 +695,7 @@ impl Pop {
                 // add the amv to the offer.
                 let capped_amv = eff_amv * capped;
                 current_offer_amv += capped_amv;
-                // get how much satisfaction this would give us
+                // get how much satisfaction this would give us hypothetically
                 let mut amv_sat = self.property.satisfaction_from_amv(current_offer_amv, market);
                 // update the total
                 sat_lost += amv_sat;
@@ -873,6 +910,14 @@ impl Pop {
                     seller: ActorInfo::Firm(0), 
                     product: 0 }
             ]);
+            // summarize the exchange in full for later use
+            // invert our current offer so those are subtracted.
+            let mut resulting_change = HashMap::new();
+            for (&prod, &quant) in current_offer.iter() {
+                resulting_change.insert(prod, -quant);
+            }
+            // add how much we bought to the resulting_change.
+            resulting_change.insert(product, final_target);
 
             // if accepted, complete exchange
             // if outright rejected, leave
@@ -880,22 +925,21 @@ impl Pop {
                 ActorMessage::SellerAcceptOfferAsIs { buyer, 
                 seller, 
                 product, 
-                offer_result } => { 
-                    // Accepted as is, remove the offer and add our purchase
-                    // invert our current offer so those are subtracted.
-                    let mut resulting_change = HashMap::new();
-                    for (&prod, &quant) in current_offer.iter() {
-                        resulting_change.insert(prod, -quant);
-                    }
-                    // add how much we bought to the resulting_change.
-                    resulting_change.insert(product, final_target);
+                .. } => { 
                     self.property.add_products(&resulting_change, data);
+                    // send back close
+                    self.push_message(rx, tx, ActorMessage::FinishDeal { buyer, seller, product });
+                    // return success
+                    return BuyResult::Successful;
                 },
                 ActorMessage::OfferAcceptedWithChange { buyer, 
-                    seller, 
-                    product, 
-                    quantity, 
-                    followups } => {},
+                seller, 
+                product, 
+                quantity, 
+                followups } => {
+                    // offer is accepted, but there is a change in the exchange, get the change
+                    // TODO come back here after working our way down from free_time()
+                },
                 ActorMessage::RejectOffer { buyer, 
                     seller, 
                     product } => {},
@@ -934,6 +978,7 @@ impl Pop {
     /// This removes the sanctity of all items in keep and offers everything
     /// less important than that item (of higher tier)
     /// TODO Currently not built, should be slightly simpler version of Standard Buy.
+    /// TODO this is on the backburner, 
     pub fn emergency_buy(&mut self,
     _rx: &mut Receiver<ActorMessage>,
     _tx: &Sender<ActorMessage>,
