@@ -93,6 +93,17 @@ impl Process {
         self.process_parts.iter().filter(|x| x.part.is_output() && x.item.is_specific()).collect_vec()
     }
 
+    /// # Outputs Proudct
+    /// 
+    /// Check if this process outputs a particular product in any way shape or form.
+    /// 
+    /// Returns true if any output is the product, false otherwise.
+    pub fn outputs_product(&self, product: usize) -> bool {
+        self.process_parts.iter()
+        .filter(|x| x.part.is_output() && x.item.is_specific())
+        .any(|x| x.item.unwrap() == product)
+    }
+
     /// # Maintenance Product
     /// 
     /// If this product is a Maintenance process, it get's the product. Otherwise, None.
@@ -672,7 +683,7 @@ pub struct ProcessOutputs {
     /// The wants being input and output by the process. Negatives are
     /// inputs and positives are outputs.
     pub input_output_wants: HashMap<usize, f64>,
-    /// The capital products which are used.
+    /// The capital products which are used. The values here are positive.
     pub capital_products: HashMap<usize, f64>,
     /// How many iterations the process was able to complete in total.
     /// 

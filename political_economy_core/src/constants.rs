@@ -1,7 +1,42 @@
 /// The ID for the required time product.
 pub const TIME_ID: usize = 0;
-/// the id for the required Shopping Time product.
+/// # Shopping Time Id
+/// 
+/// The id for the required Shopping Time product.
+/// 
+/// Shopping time is consumed any time someone goes out to actively buy,
+/// sell, or exchange goods.
+/// 
+/// It cannot be traded directly, only consumed by the final user.
+/// 
+/// Current Uses:
+/// - Standard Buying Trip: 0.2 hr cost
+/// 
+/// ## Planned Expansion
+/// 
+/// Eventually, every exchange of goods will come with a handling cost
+/// that scales with the bulk of the good in question. 
+/// Exact rates would need to be determined, but something small for each
+/// would be best, in along the lines of (Mass * [0.01] + Bulk * [0.05]). 
+/// This part may need to be separated later into a 'Handling Time', which 
+/// focuses on this and allows for specialized handling jobs.
+/// 
+/// Selling Cost. This would be similar, but much smaller compared to Standard
+/// Buy trip. Used as a way to limit and encourage those who sell more limited
+/// variety of goods, though this may be just small or insignificant.
+/// 
+/// Auctions and Reverse Auctions are the biggest addition that would be added.
+/// These are bigger events, which have a singular buyer or seller state their
+/// order then sellers or buyers (whichever is opposite) get together to bid on
+/// the order. The one setting it up spends a decent amount of time on it,
+/// while the participants spend less time comparatively.
+/// 
+/// Salesmanning, This is the comparable to the standard buy trip, but with the
+/// person looking to sell rather than buy. Making this comparable to Standard
+/// Buy is reasonable, but making it more expensive may be better to encourage
 pub const SHOPPING_TIME_ID: usize = 1;
+
+
 /// The Id for the required Rest Want.
 pub const REST_WANT_ID: usize = 0;
 /// The ID for the Required Wealth Want.

@@ -7,7 +7,7 @@ use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add};
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self}, objects::{property::{DesireCoord, TieredValue}, desire::DesireItem}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST}, objects::{property::{DesireCoord, TieredValue}, desire::DesireItem}};
 
 use super::{property::Property,
     pop_breakdown_table::PopBreakdownTable,
@@ -446,9 +446,41 @@ impl Pop {
         }
 
         // with everything reserved begin trying to buy more stuff
+        // prepare current desire for first possible purchase.
+        let mut next_desire = if let Some(full_tier) = self.property.full_tier_satisfaction {
+            Some(DesireCoord {
+                tier: full_tier,
+                idx: 0
+            })
+        } else {
+            None
+        };
+        // start our buying loop.
         loop {
-            // loop until we either run out of 'free time'
-            let time_available = self.property.extra_time();
+            // get our current desire unwrapped for later use.
+            let current_desire = next_desire.unwrap();
+            // check that our current desire has any satisfaction to try and satisfy.
+            if self.property.desires.get(current_desire.idx).unwrap()
+            .satisfied_at_tier(current_desire.tier) {
+                // if this desire is already currently satisfied here, move on to the next desire.
+                next_desire = self.property.walk_up_tiers(next_desire);
+                continue;
+            }
+            // get how much available time we have that's free right now.
+            let available_time = self.property.available_shopping_time(data, 
+                self.skill_average(), self.skill);
+            // TODO expand estimated time cost to include the hypothetical cost of exchange and return transport of the good.
+            let estimated_time_cost = SHOPPING_TIME_COST;
+            let time_available = if available_time > estimated_time_cost {
+                // if we have existing, guaranteed unused time, use that for shopping
+                self.property.get_shopping_time(estimated_time_cost, data, market, self.skill_average(), self.skill)
+            }
+            else { // if we don't have time, use alternatives
+                // first try using alternatives which can be used for shopping
+                // then try releasing time and alternatives from satisfaction above our current hard limit.
+                0.0
+            };
+            next_desire = self.property.walk_up_tiers(next_desire);
             break;
         }
 
@@ -457,6 +489,14 @@ impl Pop {
         self.active_wait(rx, tx, data, market, &vec![
             ActorMessage::AllFinished
         ]);
+    }
+
+    /// # Skill Average
+    /// 
+    /// Get's the effective (average) skill for the pop
+    /// ( higher + lower ) / 2.0
+    pub fn skill_average(&self) -> f64 {
+        (self.lower_skill_level + self.higher_skill_level) / 2.0
     }
 
     /// Processes common messages from the ActorMessages for current free time.

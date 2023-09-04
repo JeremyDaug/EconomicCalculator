@@ -671,6 +671,30 @@ impl MarketHistory {
             constants::DEFAULT_SALABILITY
         }
     }
+
+    /// # Get Class Price
+    /// 
+    /// Gets an estimated price of a class of products.
+    /// 
+    /// Updated at the end of each day, weighted based on the availability of
+    /// the various products.
+    /// 
+    /// TODO update this when class prices are added, this is a placeholder.
+    pub fn get_class_price(&self, id: usize, default: f64) -> f64 {
+        1.0
+    }
+
+    /// # Get Want Price
+    /// 
+    /// Gets the estimated price of a want.
+    /// 
+    /// Updated at the end of each day, weighted based on the likelyhood of
+    /// the processes which make it.
+    /// 
+    /// TODO update this when want prices are added, this is a placeholder.
+    pub fn get_want_price(&self, id: usize, arg: f64) -> f64 {
+        1.0
+    }
 }
 
 /// The Ways in which a market can connect to another market directly.

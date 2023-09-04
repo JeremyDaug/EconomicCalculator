@@ -11,11 +11,11 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::{HashMap, HashSet}, ops::{AddAssign, Add, Sub, SubAssign, Div}};
+use std::{collections::{HashMap, HashSet}, ops::{AddAssign, Add, Sub, SubAssign, Div}, hash::Hash};
 
 use itertools::Itertools;
 
-use crate::{data_manager::{DataManager, self}, constants::TIER_RATIO};
+use crate::{data_manager::DataManager, constants::{TIER_RATIO, SHOPPING_TIME_ID}};
 
 use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, property_info::PropertyInfo};
 
@@ -1794,13 +1794,143 @@ impl Property {
         self.total_estimated_value()
     }
 
-    /// # Extra Time
+    /// # Available Shopping Time
     /// 
-    /// Extra time extracts all time available from the property.
+    /// Using only unreserved products, this get's how much shopping time we can get.
     /// 
-    /// Returns time Breakdown of the time available.
-    pub fn extra_time(&self) -> TimeBreakdown {
-        todo!()
+    /// This does not consume anything, merely checks how much we can get.
+    pub fn available_shopping_time(&self, data: &DataManager, _skill_level: f64, _skill: usize) -> f64 {
+        // first extract our available resources
+        let mut available_products = HashMap::new();
+        for (&id, &info) in self.property.iter() {
+            available_products.insert(id, info.available());
+        }
+        // then extract wants which might feed into it.
+        let mut available_wants = HashMap::new();
+        for (&id, &avail) in self.want_store.iter() {
+            available_wants.insert(id, avail);
+        }
+        for (&id, &change) in self.want_expectations.iter()
+        .filter(|x| *x.1 < 0.0) { // remove those we expect to use.
+            available_wants.entry(id)
+            .and_modify(|x| *x += change)
+            .or_insert(change);
+        }
+        // then start counting up how much shopping time we might be able to get.
+        let mut max_available = 0.0;
+        for process in data.products.get(&SHOPPING_TIME_ID).unwrap() // The product
+        .processes.iter() // the process IDs which time is related to
+        .map(|x| data.processes.get(x).unwrap()) // the process info
+        .filter(|x| x.outputs_product(SHOPPING_TIME_ID)) { // the processes which output it.
+            // todo, pass in pop_skill info later. Ignore for now
+            let result = process.do_process(&available_products, 
+                &available_wants, 0.0, 
+                0.0, None, false, data);
+            // check result availability
+            if result.iterations > 0.0 {
+                // if any iterations done, see how much shopping time we got.
+                let output = result.input_output_products.get(&SHOPPING_TIME_ID).unwrap();
+                // add to our output, then remove any change from our available products and wants
+                max_available += output;
+                for (&id, &change) in result.input_output_products.iter() {
+                    available_products.entry(id)
+                    .and_modify(|x| *x += change)
+                    .or_insert(change);
+                }
+                for (&id, &change) in result.capital_products.iter() {
+                    available_products.entry(id)
+                    .and_modify(|x| *x -= change);
+                }
+                for (&id, &change) in result.input_output_wants.iter() {
+                    available_wants.entry(id)
+                    .and_modify(|x| *x += change)
+                    .or_insert(change);
+                }
+            }
+        }
+
+        max_available
+    }
+
+    /// # Get Shopping Time
+    /// 
+    /// As available_shopping_time(), but instead of returning a total estimate it tries to get
+    /// enough shopping time to meet the given target.
+    /// 
+    /// It prioritizes excess Shopping time in our property first, then goes 
+    /// through the various ways to make it in order of market cost of inputs.
+    /// 
+    /// Shopping Time taken from storage and/or products consumed will be removed.
+    /// 
+    /// Items used as capital will be shifted into capital.
+    /// 
+    /// If it is unable to reach the target, it returns what it's able to without 
+    /// touching existing satisfaction.
+    /// 
+    /// ## Note
+    /// 
+    /// Processes are selected in ID order.
+    /// 
+    /// TODO this can likely be repurposed into a more general " get X units of y product function"
+    /// TODO Test This!
+    pub fn get_shopping_time(&mut self, target: f64, data: &DataManager, 
+    market: &MarketHistory, skill_level: f64, skill: usize) -> f64 {
+        // get the final output ready.
+        let mut final_result = 0.0;
+        // first extract from storage any Shopping Time we have available and waiting to use.
+        if let Some(info) = self.property.get_mut(&SHOPPING_TIME_ID) {
+            let shift = info.available().min(target);
+            final_result += info.available().min(target); // add existing to final
+            info.remove(shift); // remove from info
+        }
+        if final_result == target { // if at our target, gtfo.
+            return final_result;
+        }
+        // If here, we need to try and get more from processing things.
+        // first extract our available resources
+        let mut available_products = HashMap::new();
+        for (&id, &info) in self.property.iter() {
+            available_products.insert(id, info.available());
+        }
+        // then extract wants which might feed into it.
+        let mut available_wants = HashMap::new();
+        for (&id, &avail) in self.want_store.iter() {
+            available_wants.insert(id, avail);
+        }
+        for (&id, &change) in self.want_expectations.iter()
+        .filter(|x| *x.1 < 0.0) { // subtract those which we expect to use elsewhere.
+            available_wants.entry(id)
+            .and_modify(|x| *x += change)
+            .or_insert(change);
+        }
+        for process in data.products.get(&SHOPPING_TIME_ID).unwrap() // The product
+        .processes.iter() // the process IDs which time is related to
+        .map(|x| data.processes.get(x).unwrap()) // the process info
+        .filter(|x| x.outputs_product(SHOPPING_TIME_ID))
+        .sorted_by(|a, b| a.id.cmp(&b.id)) {
+            // try to do the process up to our target output.
+            let eff_skill_level = if let Some(skill_id) = process.skill {
+                data.translate_skill(skill, skill_id, skill_level)
+            } else {
+                0.0 // if nothing to translate into, then skill level doesn't matter.
+            };
+            let iter_target = (target - final_result) / // the remaining target
+                process.effective_output_of(PartItem::Specific(SHOPPING_TIME_ID)); // how much an iteration completes
+            let proc_result = process.do_process(&available_products, 
+                &available_wants, eff_skill_level, 0.0, 
+                Some(iter_target), false, data);
+            if proc_result.iterations == 0.0 {
+                continue; // if no successful iterations, skip.
+            }
+            // else remove/reserve property for the output
+            for (&product, &amount) in proc_result.input_output_products.iter() {
+                self.property.entry(product)
+                .and_modify(|x| *x.add_property(amount))
+                .or_insert(amount);
+            }
+
+        }
+        final_result
     }
 }
 
