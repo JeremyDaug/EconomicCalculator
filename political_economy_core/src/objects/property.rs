@@ -1799,7 +1799,11 @@ impl Property {
     /// Using only unreserved products, this get's how much shopping time we can get.
     /// 
     /// This does not consume anything, merely checks how much we can get.
-    pub fn available_shopping_time(&self, data: &DataManager, _skill_level: f64, _skill: usize) -> f64 {
+    /// 
+    /// # Note
+    /// 
+    /// Currently unused as we've chosen a less efficient, but simpler method of dealing with available shopping time.
+    pub fn _available_shopping_time(&self, data: &DataManager, _skill_level: f64, _skill: usize) -> f64 {
         // first extract our available resources
         let mut available_products = HashMap::new();
         for (&id, &info) in self.property.iter() {
@@ -1858,7 +1862,7 @@ impl Property {
     /// enough shopping time to meet the given target.
     /// 
     /// It prioritizes excess Shopping time in our property first, then goes 
-    /// through the various ways to make it in order of market cost of inputs.
+    /// through the various ways to make it in ID order.
     /// 
     /// Shopping Time taken from storage and/or products consumed will be removed.
     /// 
@@ -1882,17 +1886,13 @@ impl Property {
             let shift = info.available().min(target);
             final_result += info.available().min(target); // add existing to final
             info.remove(shift); // remove from info
+            info.spent += shift; // add to spent as well while we're at it.
         }
         if final_result == target { // if at our target, gtfo.
             return final_result;
         }
         // If here, we need to try and get more from processing things.
-        // first extract our available resources
-        let mut available_products = HashMap::new();
-        for (&id, &info) in self.property.iter() {
-            available_products.insert(id, info.available());
-        }
-        // then extract wants which might feed into it.
+        // extract wants which might feed into it.
         let mut available_wants = HashMap::new();
         for (&id, &avail) in self.want_store.iter() {
             available_wants.insert(id, avail);
@@ -1916,19 +1916,29 @@ impl Property {
             };
             let iter_target = (target - final_result) / // the remaining target
                 process.effective_output_of(PartItem::Specific(SHOPPING_TIME_ID)); // how much an iteration completes
-            let proc_result = process.do_process(&available_products, 
-                &available_wants, eff_skill_level, 0.0, 
-                Some(iter_target), false, data);
+            let proc_result = process.do_process_with_property(&self.property, 
+                &available_wants, eff_skill_level, 0.0, Some(iter_target), false, data);
             if proc_result.iterations == 0.0 {
                 continue; // if no successful iterations, skip.
             }
             // else remove/reserve property for the output
             for (&product, &amount) in proc_result.input_output_products.iter() {
-                self.property.entry(product)
-                .and_modify(|x| *x.add_property(amount))
-                .or_insert(amount);
+                if amount > 0.0 { // if adding, then add to property.
+                    self.property.entry(product)
+                        .and_modify(|x| x.add_property(amount))
+                        .or_insert(PropertyInfo::new(amount));
+                } else { // if removing, just remove in total from property. Panic if pulling from reserves just in case.
+                    let temp = self.property.get_mut(&product).unwrap();
+                    if temp.available() < -amount { panic!("Trying to use more of product than we have available."); }
+                    temp.expend(amount);
+                }
             }
-
+            // shift captial goods over
+            for (&product, &amount) in proc_result.capital_products.iter() {
+                // all of this is shifting to captial expended
+                self.property.entry(product)
+                .and_modify(|x| x.shift_to_used(amount));
+            }
         }
         final_result
     }

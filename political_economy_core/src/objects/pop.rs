@@ -2,7 +2,7 @@
 //!
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
-use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add};
+use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
@@ -455,32 +455,24 @@ impl Pop {
         } else {
             None
         };
+        let mut available_shopping_time = 0.0;
         // start our buying loop.
         loop {
-            // get our current desire unwrapped for later use.
-            let current_desire = next_desire.unwrap();
-            // check that our current desire has any satisfaction to try and satisfy.
-            if self.property.desires.get(current_desire.idx).unwrap()
-            .satisfied_at_tier(current_desire.tier) {
-                // if this desire is already currently satisfied here, move on to the next desire.
-                next_desire = self.property.walk_up_tiers(next_desire);
-                continue;
+            // if there is no next desire we have nothing more we wish to buy.
+            if let None = next_desire {
+                break;
             }
-            // get how much available time we have that's free right now.
-            let available_time = self.property.available_shopping_time(data, 
-                self.skill_average(), self.skill);
-            // TODO expand estimated time cost to include the hypothetical cost of exchange and return transport of the good.
-            let estimated_time_cost = SHOPPING_TIME_COST;
-            let time_available = if available_time > estimated_time_cost {
-                // if we have existing, guaranteed unused time, use that for shopping
-                self.property.get_shopping_time(estimated_time_cost, data, market, self.skill_average(), self.skill)
-            }
-            else { // if we don't have time, use alternatives
-                // first try using alternatives which can be used for shopping
-                // then try releasing time and alternatives from satisfaction above our current hard limit.
-                0.0
-            };
+            // start by unwrapping our desire target
+            let curr_desire = next_desire.unwrap();
+            // preemptively get the next desire
             next_desire = self.property.walk_up_tiers(next_desire);
+            // then sift up to this desire point to free up excess resources.
+            self.property.sift_up_to(&curr_desire, data);
+            // extract out our time for shopping time out. Get up to 2 shopping trips worth available at for ease.
+            // TODO update to take more dynamic time payment into account.
+            available_shopping_time += self.property.get_shopping_time(SHOPPING_TIME_COST - available_shopping_time, 
+                data, market, self.skill_average(), self.skill);
+
             break;
         }
 

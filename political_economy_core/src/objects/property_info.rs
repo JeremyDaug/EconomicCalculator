@@ -335,7 +335,7 @@ impl PropertyInfo {
     /// Panics if the amount being shifted is creater than the total property.
     /// 
     /// TODO test this once we actually use it.
-    fn _shift_to_used(&mut self, quantity: f64) {
+    pub fn shift_to_used(&mut self, quantity: f64) {
         // remove from reserves
         self.remove(quantity);
         // add back to total property

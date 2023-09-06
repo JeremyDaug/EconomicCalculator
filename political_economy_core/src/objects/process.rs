@@ -463,7 +463,7 @@ impl Process {
         results
     }
 
-    /// # The Do Process With Property Function
+    /// # The Do Process With Property
     /// 
     /// Do process function takes in the products and wants available for
     /// the process as well as the pop who is doing the process.
@@ -475,10 +475,8 @@ impl Process {
     /// 
     /// ## Returns
     /// 
-    /// This function returns 3 HashMaps in a Tuple.
-    /// - First is all products consumed or created by the process (inputs/outputs).
-    /// - Second is all wants consumed or created by the process (inputs/outputs).
-    /// - Third is all products used as capital in the process (Used Capital).
+    /// Returns a ProcessOutputs item, which contains all changes the process would make if applied
+    /// as well as some useful information about the process in general.
     /// 
     /// ## Notes
     /// 
