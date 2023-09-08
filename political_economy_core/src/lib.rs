@@ -8423,6 +8423,185 @@ mod tests {
             }
         }
 
+        // TODO Get Shopping Time will likely be reworked into a generic get X product, which will get and produce a generic item. This will likely also have a get X want partner.
+        mod get_shopping_time_should {
+            use std::collections::{HashMap, HashSet};
+
+            use crate::{objects::{property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want}, data_manager::DataManager};
+
+            #[test]
+            pub fn exit_early_when_product_already_exists() {
+                // data needed, but not set up for this test.
+                let mut data = DataManager::new();
+                // wants 0
+                let mut want0 = Want{
+                    id: 0,
+                    name: "Leisure".to_string(),
+                    description: "".to_string(),
+                    decay: 0.0,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                want0.process_sources.insert(0);
+                want0.process_sources.insert(1);
+                want0.use_sources.insert(0);
+                want0.consumption_sources.insert(1);
+                data.wants.insert(0, want0);
+                // products
+                // time
+                data.products.insert(0, Product{
+                    id: 0,
+                    name: "Time".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(0),
+                });
+                data.products.insert(1, Product{
+                    id: 1,
+                    name: "Shopping Time".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(0),
+                });
+                data.products.insert(3, Product{
+                    id: 3,
+                    name: "Extra".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                // products use 1 + 2 = want 0
+                data.processes.insert(0, Process{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: PartItem::Specific(1), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: PartItem::Specific(2), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Capital
+                        },
+                        ProcessPart { 
+                            item: PartItem::Want(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output
+                        }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Use(2)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+                // products consume 2 + 3 = want 0
+                data.processes.insert(1, Process{
+                    id: 1,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: PartItem::Specific(2), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: PartItem::Specific(3), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: PartItem::Want(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output
+                        }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Consumption(2)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+
+                data.update_product_classes().expect("Could not function");
+                let test_desires = vec![
+                    Desire::new(DesireItem::Want(0),
+                        1,
+                        None,
+                        1.0,
+                        0.0,
+                        1,
+                        vec![]).unwrap(),
+                ];
+                let mut test = Property::new(test_desires);
+                // get total result and see if it 
+            }
+        }
+
         mod sift_all_should {
             // TODO update test for lookahead when added.
             use std::collections::{HashMap, HashSet};

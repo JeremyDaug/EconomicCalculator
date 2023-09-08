@@ -327,8 +327,9 @@ impl PropertyInfo {
 
     /// # Shift to Used
     /// 
-    /// Shift to used is meant to 'expend' but not consume property. It takes
-    /// removes as would be expected, 
+    /// Shift to used is meant to 'expend' but not consume property. It
+    /// removes from it from all possible noraml piles, adds it to used, but
+    /// does not remove it from total_property.
     /// 
     /// # Panics
     /// 
@@ -340,7 +341,7 @@ impl PropertyInfo {
         self.remove(quantity);
         // add back to total property
         self.total_property += quantity;
-        // add back to property
+        // add to used
         self.used += quantity;
     }
 

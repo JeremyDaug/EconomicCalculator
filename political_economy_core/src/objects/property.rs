@@ -1876,9 +1876,9 @@ impl Property {
     /// Processes are selected in ID order.
     /// 
     /// TODO this can likely be repurposed into a more general " get X units of y product function"
-    /// TODO Test This!
+    /// TODO Improve to prioritize by market cost of the process. Eventually.
     pub fn get_shopping_time(&mut self, target: f64, data: &DataManager, 
-    market: &MarketHistory, skill_level: f64, skill: usize) -> f64 {
+    _market: &MarketHistory, skill_level: f64, skill: usize) -> f64 {
         // get the final output ready.
         let mut final_result = 0.0;
         // first extract from storage any Shopping Time we have available and waiting to use.
@@ -1923,21 +1923,32 @@ impl Property {
             }
             // else remove/reserve property for the output
             for (&product, &amount) in proc_result.input_output_products.iter() {
-                if amount > 0.0 { // if adding, then add to property.
+                if product == SHOPPING_TIME_ID {
+                    // if our product, add to the final result, don't add to property.
+                    final_result += amount;
+                } else if amount > 0.0 { // if adding, then add to property.
                     self.property.entry(product)
                         .and_modify(|x| x.add_property(amount))
                         .or_insert(PropertyInfo::new(amount));
                 } else { // if removing, just remove in total from property. Panic if pulling from reserves just in case.
                     let temp = self.property.get_mut(&product).unwrap();
-                    if temp.available() < -amount { panic!("Trying to use more of product than we have available."); }
+                    debug_assert!(temp.available() > -amount, "Trying to use more of product than we have available.");
                     temp.expend(amount);
                 }
             }
-            // shift captial goods over
+            // shift captial goods
             for (&product, &amount) in proc_result.capital_products.iter() {
                 // all of this is shifting to captial expended
                 self.property.entry(product)
-                .and_modify(|x| x.shift_to_used(amount));
+                    .and_modify(|x| x.shift_to_used(amount));
+            }
+            // add/remove consumed/expended wants
+            for (&want, &amount) in proc_result.input_output_wants.iter() {
+                // wants consumed here are definitely safe, probably.
+                let test = self.want_store.entry(want)
+                    .and_modify(|x| *x += amount)
+                    .or_insert(amount);
+                debug_assert!(*test > 0.0, "Want was made negative.");
             }
         }
         final_result
