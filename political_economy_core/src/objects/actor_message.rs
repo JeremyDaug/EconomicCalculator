@@ -46,6 +46,18 @@ pub enum ActorMessage {
     /// Also includes the sender and their type so
     /// a return message can be sent to them.
     FindProduct{ product: usize, sender: ActorInfo },
+    /// # Find Class
+    /// 
+    /// Takes a class Id and looks for a product which is a member of that
+    /// class.
+    /// 
+    /// Sent by a potential buyer.
+    /// 
+    /// If successful, the market returns FoundProduct, for a semi-randomly
+    /// selected product of that class.
+    /// 
+    /// If not successful, it returns ClassNotFound.
+    FindClass { class: usize, sender: ActorInfo },
     /// The Find Want Message, recieved by the market.
     /// Contains the want Id, and the sender's info so a response can be
     /// sent back.
@@ -54,10 +66,15 @@ pub enum ActorMessage {
     /// find said item at all.
     /// Returns all of the information from the Find Product so the buyer can
     /// be aware that the item is unavailable.
-    ProductNotFound { product: usize, buyer: ActorInfo},
+    ProductNotFound { product: usize, buyer: ActorInfo },
+    /// # Class Not Found
+    /// 
+    /// Sent by the market if it recieved a FindClass msg, but found no products
+    /// in the market which are for sale and satisfy that class.
+    ClassNotFound { product: usize, buyer: ActorInfo },
     /// Returned from an attempt to purchase a want satisfier and failed to
     /// find any which would satisfy at all.
-    WantnotFound {product: usize, buyer: ActorInfo },
+    WantnotFound { want: usize, buyer: ActorInfo },
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
     /// Gives the product in question, the amount available to purchase,
@@ -65,12 +82,13 @@ pub enum ActorMessage {
     ///
     /// Starts the Deal Making Process
     FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize },
-    /// A Message to both buyer and seller that they should meet up
-    /// and try to make a deal.
-    /// Gives the want in question as well as the product they were matched on.
-    ///
-    /// Starts the deal Making Process.
-    FoundWant {seller: ActorInfo, buyer: ActorInfo, want: usize, product: usize },
+    /// # Found Want
+    /// 
+    /// Send by the market when, with the products available, it has a valid 
+    /// option. It returns the process the market views as most likely to succeed.
+    /// 
+    /// This allows a buyer to purchase multiple possible goods.
+    FoundWant {buyer: ActorInfo, want: usize, prcocess: usize },
 
     /// Return from seller after ActorMessage::CheckItem if they have the item
     /// in stock. returns their price and available stock.
@@ -235,15 +253,18 @@ impl ActorMessage {
             ActorMessage::Finished { sender } => me == *sender,
             ActorMessage::AllFinished => true,
             ActorMessage::FindProduct { .. } => false, // for market, sent by me
+            ActorMessage::FindClass { .. } => false, // for market, sent by me,
             ActorMessage::FindWant { .. } => false, // for market, sent by me
             ActorMessage::FoundProduct { seller,
                 buyer, .. } => {
                     *seller == me || *buyer == me
                 }, // from market, created by FindProduct, you're buyer or seller.
-            ActorMessage::FoundWant { seller, buyer,
-                .. } => *seller == me || *buyer == me, // from market, to buyer or seller
+            ActorMessage::FoundWant { buyer,
+                .. } => *buyer == me, // from market, to buyer or seller
             ActorMessage::ProductNotFound { buyer,
                 .. } => *buyer == me, // from market to buyer
+            ActorMessage::ClassNotFound { 
+                buyer, .. } => *buyer == me, // from market to buyer
             ActorMessage::WantnotFound {
                 buyer, ..} => *buyer == me, // from market to buy
             ActorMessage::SendProduct { reciever,

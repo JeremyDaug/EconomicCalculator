@@ -1875,7 +1875,7 @@ impl Property {
     /// 
     /// Processes are selected in ID order.
     /// 
-    /// TODO this can likely be repurposed into a more general " get X units of y product function"
+    /// TODO this can likely be repurposed into a more general "get X units of y product function"
     /// TODO Improve to prioritize by market cost of the process. Eventually.
     pub fn get_shopping_time(&mut self, target: f64, data: &DataManager, 
     _market: &MarketHistory, skill_level: f64, skill: usize) -> f64 {
@@ -1906,8 +1906,8 @@ impl Property {
         for process in data.products.get(&SHOPPING_TIME_ID).unwrap() // The product
         .processes.iter() // the process IDs which time is related to
         .map(|x| data.processes.get(x).unwrap()) // the process info
-        .filter(|x| x.outputs_product(SHOPPING_TIME_ID))
-        .sorted_by(|a, b| a.id.cmp(&b.id)) {
+        .filter(|x| x.outputs_product(SHOPPING_TIME_ID)) // the processes which output it.
+        .sorted_by(|a, b| a.id.cmp(&b.id)) { // ID order.
             // try to do the process up to our target output.
             let eff_skill_level = if let Some(skill_id) = process.skill {
                 data.translate_skill(skill, skill_id, skill_level)
@@ -1926,14 +1926,17 @@ impl Property {
                 if product == SHOPPING_TIME_ID {
                     // if our product, add to the final result, don't add to property.
                     final_result += amount;
+                    // add our time to expenditures.
+                    self.property.entry(SHOPPING_TIME_ID)
+                        .and_modify(|x| x.spent += amount);
                 } else if amount > 0.0 { // if adding, then add to property.
                     self.property.entry(product)
                         .and_modify(|x| x.add_property(amount))
                         .or_insert(PropertyInfo::new(amount));
                 } else { // if removing, just remove in total from property. Panic if pulling from reserves just in case.
                     let temp = self.property.get_mut(&product).unwrap();
-                    debug_assert!(temp.available() > -amount, "Trying to use more of product than we have available.");
-                    temp.expend(amount);
+                    debug_assert!(temp.available() >= -amount, "Trying to use more of product than we have available.");
+                    temp.expend(-amount);
                 }
             }
             // shift captial goods

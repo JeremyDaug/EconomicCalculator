@@ -531,7 +531,7 @@ impl Process {
                     // take lower between current ratio available and available_product / cycle_target.
                     if let Some(prod_info) = available_products.get(&id) {
                         ratio_available = ratio_available
-                            .min(prod_info.available_for_want() / process_part.amount);
+                            .min(prod_info.available() / process_part.amount);
                     } else { // if we don't have that item in property, return to 0.0
                         ratio_available = 0.0;
                     }

@@ -8427,14 +8427,13 @@ mod tests {
         mod get_shopping_time_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want}, data_manager::DataManager};
+            use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want, market::MarketHistory}, data_manager::DataManager};
 
             #[test]
             pub fn exit_early_when_product_already_exists() {
-                // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
-                let mut want0 = Want{
+                let mut want0 = Want {
                     id: 0,
                     name: "Leisure".to_string(),
                     description: "".to_string(),
@@ -8445,9 +8444,7 @@ mod tests {
                     consumption_sources: HashSet::new(),
                 };
                 want0.process_sources.insert(0);
-                want0.process_sources.insert(1);
                 want0.use_sources.insert(0);
-                want0.consumption_sources.insert(1);
                 data.wants.insert(0, want0);
                 // products
                 // time
@@ -8493,9 +8490,105 @@ mod tests {
                     tech_required: None,
                     product_class: Some(0),
                 });
-                data.products.insert(3, Product{
-                    id: 3,
-                    name: "Extra".to_string(),
+                // products use 0 + 1 = want 0
+                data.processes.insert(0, Process{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: PartItem::Specific(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: PartItem::Specific(1), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: PartItem::Want(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output
+                        }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Use(1)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+                let market = MarketHistory {
+                    info: HashMap::new(),
+                    sale_priority: vec!(),
+                    currencies: vec!(),
+                };
+
+                data.update_product_classes().expect("Could not function");
+                let test_desires = vec![
+                    Desire::new(DesireItem::Want(0),
+                        1,
+                        None,
+                        1.0,
+                        0.0,
+                        1,
+                        vec![]).unwrap(),
+                ];
+                let mut test = Property::new(test_desires);
+                // add the products to our property.
+                test.property.insert(0, PropertyInfo::new(3.0));
+                test.property.insert(1, PropertyInfo::new(5.0));
+                // get total result and see if it gets out with existing property.
+                let result1 = test.get_shopping_time(2.5, &data, 
+                    &market, 0.0, 0);
+                assert_eq!(result1, 2.5); // should get back our full target
+                assert_eq!(test.property.get(&1)
+                    .unwrap().total_property, 2.5); // should still have 2.5 remaining
+                // and sanity check that the other is untouched
+                assert_eq!(test.property.get(&0)
+                    .unwrap().total_property, 3.0);
+                
+                // if it was remove, do it again, testing that it only returns what is
+                // available.
+                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0);
+                assert_eq!(capped_result, 2.5); // should get back our what is available, nothing more.
+                assert_eq!(test.property.get(&1)
+                    .unwrap().total_property, 0.0); // should still have 2.5 remaining
+                // and sanity check that the other is untouched
+                assert_eq!(test.property.get(&0)
+                    .unwrap().total_property, 3.0);
+            }
+
+            #[test]
+            pub fn do_processes_to_generate_more_product() {
+                let mut data = DataManager::new();
+                // wants 0
+                let mut want0 = Want{
+                    id: 0,
+                    name: "Leisure".to_string(),
+                    description: "".to_string(),
+                    decay: 0.0,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                want0.process_sources.insert(0);
+                want0.use_sources.insert(0);
+                data.wants.insert(0, want0);
+                // products
+                // time
+                data.products.insert(0, Product{
+                    id: 0,
+                    name: "Time".to_string(),
                     variant_name: "".to_string(),
                     description: "".to_string(),
                     unit_name: "".to_string(),
@@ -8512,9 +8605,31 @@ mod tests {
                     consumption_processes: HashSet::new(),
                     maintenance_processes: HashSet::new(),
                     tech_required: None,
-                    product_class: None,
+                    product_class: Some(0),
                 });
-                // products use 1 + 2 = want 0
+                // shopping time.
+                data.products.insert(1, Product{
+                    id: 1,
+                    name: "Shopping Time".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(0),
+                });
+                // products use 0 + 1 = product 1
                 data.processes.insert(0, Process{
                     id: 0,
                     name: "".to_string(),
@@ -8523,62 +8638,20 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
+                            item: PartItem::Specific(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
                             item: PartItem::Specific(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
-                            part: ProcessSectionTag::Input
-                        },
-                        ProcessPart { 
-                            item: PartItem::Specific(2), 
-                            amount: 1.0, 
-                            part_tags: vec![], 
-                            part: ProcessSectionTag::Capital
-                        },
-                        ProcessPart { 
-                            item: PartItem::Want(0), 
-                            amount: 1.0, 
-                            part_tags: vec![], 
                             part: ProcessSectionTag::Output
                         }
                     ],
                     process_tags: vec![
-                        ProcessTag::Use(2)
-                    ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
-                    technology_requirement: None,
-                    tertiary_tech: None,
-                });
-                // products consume 2 + 3 = want 0
-                data.processes.insert(1, Process{
-                    id: 1,
-                    name: "".to_string(),
-                    variant_name: "".to_string(),
-                    description: "".to_string(),
-                    minimum_time: 0.0,
-                    process_parts: vec![
-                        ProcessPart { 
-                            item: PartItem::Specific(2), 
-                            amount: 1.0, 
-                            part_tags: vec![], 
-                            part: ProcessSectionTag::Input
-                        },
-                        ProcessPart { 
-                            item: PartItem::Specific(3), 
-                            amount: 1.0, 
-                            part_tags: vec![], 
-                            part: ProcessSectionTag::Input
-                        },
-                        ProcessPart { 
-                            item: PartItem::Want(0), 
-                            amount: 1.0, 
-                            part_tags: vec![], 
-                            part: ProcessSectionTag::Output
-                        }
-                    ],
-                    process_tags: vec![
-                        ProcessTag::Consumption(2)
+                        ProcessTag::Use(0)
                     ],
                     skill: None,
                     skill_minimum: 0.0,
@@ -8587,9 +8660,19 @@ mod tests {
                     tertiary_tech: None,
                 });
 
+                data.products.get_mut(&0).unwrap()
+                    .processes.insert(0);
+                data.products.get_mut(&1).unwrap()
+                    .processes.insert(0);
+                let market = MarketHistory {
+                    info: HashMap::new(),
+                    sale_priority: vec!(),
+                    currencies: vec!(),
+                };
+
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(DesireItem::Product(0),
                         1,
                         None,
                         1.0,
@@ -8598,7 +8681,23 @@ mod tests {
                         vec![]).unwrap(),
                 ];
                 let mut test = Property::new(test_desires);
-                // get total result and see if it 
+                // add the products to our property.
+                test.property.insert(0, PropertyInfo::new(5.0));
+                // lock up 3 P0 into desires.
+                test.sift_up_to(&DesireCoord { tier: 2, idx: 1 }, &data);
+                //test.property.insert(1, PropertyInfo::new(5.0));
+                // get total result and see if it gets out with existing property.
+                let result1 = test.get_shopping_time(2.0, &data, 
+                    &market, 0.0, 0);
+                assert_eq!(result1, 2.0); // should get back our full target
+                // of the 5 started, 2 are sifted, 2 is consumed for shopping time.
+                assert_eq!(test.property[&0].total_property, 3.0);
+                
+                // do it again, overdrawing and being limited correctly.
+                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0);
+                assert_eq!(capped_result, 1.0); // should get back our what is available, nothing more.
+                // 2 were reserved, so 2 should remain.
+                assert_eq!(test.property[&0].total_property, 2.0);
             }
         }
 
@@ -12110,6 +12209,8 @@ mod tests {
                 assert!(*result.capital_products.get(&1).unwrap() == 0.75);
             }
 
+            /// Only checks against reserved wants, not all possible reserves.
+            /// Add those later, should we feel like it.
             #[test]
             pub fn return_process_correctly_restricts_based_on_property_reservations() {
                 let mut data = DataManager::new();

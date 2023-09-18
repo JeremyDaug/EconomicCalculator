@@ -7,7 +7,7 @@ use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current};
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST}, objects::{property::{DesireCoord, TieredValue}, desire::DesireItem}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST, SHOPPING_TIME_ID}, objects::{property::{DesireCoord, TieredValue}, desire::DesireItem}};
 
 use super::{property::Property,
     pop_breakdown_table::PopBreakdownTable,
@@ -464,15 +464,56 @@ impl Pop {
             }
             // start by unwrapping our desire target
             let curr_desire = next_desire.unwrap();
+            // get our current desire target
+            let target = &self.property.desires.get(curr_desire.idx)
+                .unwrap().item;
+            let mut multiple_buys = vec![];
+            // get how many items we need to buy for this desire.
+            let buy_targets = match target {
+                DesireItem::Want(id) => { // for wants, we need to get the product inputs.
+                    // if it's a want, go to the most common satisfaction 
+                    // of that want in the market.
+                    self.push_message(rx, tx, 
+                        ActorMessage::FindWant { want: *id, sender: self.actor_info() });
+                    // get the process the market suggests then 
+                    let result = self.active_wait(rx, tx, data, market, 
+                        &vec![ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, prcocess: 0 }]);
+                    if let ActorMessage::FoundWant { buyer, want, prcocess } = result {
+                        // get the process
+                        let process_info = data.processes.get(&want).unwrap();
+                        let needs = process_info.inputs_and_capital();
+                        // get what needs to be gotten
+                        for part in needs.iter()
+                         {
+                            multiple_buys.push(&part.item);
+                        }
+                        1.0 * needs.len() as f64
+                    } else {
+                        0.0
+                    }
+                },
+                DesireItem::Class(_) => 1.0, // for class, any item of the class will be good enough.
+                DesireItem::Product(_) => 1.0, // for specific product
+            };
             // preemptively get the next desire
             next_desire = self.property.walk_up_tiers(next_desire);
             // then sift up to this desire point to free up excess resources.
             self.property.sift_up_to(&curr_desire, data);
-            // extract out our time for shopping time out. Get up to 2 shopping trips worth available at for ease.
+            // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
-            available_shopping_time += self.property.get_shopping_time(SHOPPING_TIME_COST - available_shopping_time, 
+            available_shopping_time += self.property.get_shopping_time(SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
                 data, market, self.skill_average(), self.skill);
-
+            // check that it's enough time to go out buying
+            if SHOPPING_TIME_COST > available_shopping_time {
+                // if we don't have enough time to go shopping, break out, we won't
+                // resolve that problem here.
+                // return the time to our property and gtfo.
+                self.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
+                break;
+            }
+            if multiple_buys.len() > 0 {
+                
+            }
             break;
         }
 
@@ -556,7 +597,7 @@ impl Pop {
     /// who we'll get in touch with and try to make a deal.
     /// - Emergency Search, this occurs when either the product being sought
     /// is unavailable through sellers and the product sought is important
-    fn _try_to_buy(&mut self,
+    fn try_to_buy(&mut self,
     rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>,
     data: &DataManager,
