@@ -463,13 +463,13 @@ impl Pop {
                 break;
             }
             // start by unwrapping our desire target
-            let curr_desire = next_desire.unwrap();
+            let curr_desire_coord = next_desire.unwrap();
             // get our current desire target
-            let target = &self.property.desires.get(curr_desire.idx)
-                .unwrap().item;
+            let current_desire_item = &self.property.desires
+                .get(curr_desire_coord.idx).unwrap().item;
             let mut multiple_buys = vec![];
             // get how many items we need to buy for this desire.
-            let buy_targets = match target {
+            let buy_targets = match current_desire_item {
                 DesireItem::Want(id) => { // for wants, we need to get the product inputs.
                     // if it's a want, go to the most common satisfaction 
                     // of that want in the market.
@@ -477,8 +477,11 @@ impl Pop {
                         ActorMessage::FindWant { want: *id, sender: self.actor_info() });
                     // get the process the market suggests then 
                     let result = self.active_wait(rx, tx, data, market, 
-                        &vec![ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, prcocess: 0 }]);
-                    if let ActorMessage::FoundWant { buyer, want, prcocess } = result {
+                        &vec![
+                            ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, prcocess: 0 },
+                            ActorMessage::WantNotFound { want: 0, buyer: ActorInfo::Firm(0) }
+                        ]);
+                    if let ActorMessage::FoundWant { buyer: _, want, prcocess: _ } = result {
                         // get the process
                         let process_info = data.processes.get(&want).unwrap();
                         let needs = process_info.inputs_and_capital();
@@ -488,7 +491,11 @@ impl Pop {
                             multiple_buys.push(&part.item);
                         }
                         1.0 * needs.len() as f64
-                    } else {
+                    } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
+                        // if the want is not found in the market, then move on to the next desire
+                        0.0
+                    }
+                    else {
                         0.0
                     }
                 },
@@ -498,7 +505,7 @@ impl Pop {
             // preemptively get the next desire
             next_desire = self.property.walk_up_tiers(next_desire);
             // then sift up to this desire point to free up excess resources.
-            self.property.sift_up_to(&curr_desire, data);
+            self.property.sift_up_to(&curr_desire_coord, data);
             // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
             available_shopping_time += self.property.get_shopping_time(SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
@@ -512,6 +519,8 @@ impl Pop {
                 break;
             }
             if multiple_buys.len() > 0 {
+                
+            } else {
                 
             }
             break;

@@ -74,7 +74,7 @@ pub enum ActorMessage {
     ClassNotFound { product: usize, buyer: ActorInfo },
     /// Returned from an attempt to purchase a want satisfier and failed to
     /// find any which would satisfy at all.
-    WantnotFound { want: usize, buyer: ActorInfo },
+    WantNotFound { want: usize, buyer: ActorInfo },
     /// A message to both buyer and seller that they should
     /// meet up and try to make a deal.
     /// Gives the product in question, the amount available to purchase,
@@ -265,7 +265,7 @@ impl ActorMessage {
                 .. } => *buyer == me, // from market to buyer
             ActorMessage::ClassNotFound { 
                 buyer, .. } => *buyer == me, // from market to buyer
-            ActorMessage::WantnotFound {
+            ActorMessage::WantNotFound {
                 buyer, ..} => *buyer == me, // from market to buy
             ActorMessage::SendProduct { reciever,
                 .. } => *reciever == me, // sends product to reciever
