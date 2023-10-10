@@ -454,26 +454,23 @@ impl Pop {
                 idx: 0
             })
         } else { // if no full tier, just start at the bottom.
-            Some(DesireCoord {
-                tier: 0,
-                idx: 0
-            })
+            Some(self.property.first_desire())
         };
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // start our buying loop.
-        loop {
-            // if there is no next desire we have nothing more we wish to buy.
+        loop { // Should have our current desire coords in next_desire
             if let None = next_desire {
+                // if there is no next desire we have nothing more we wish to buy.
                 break;
             }
             // start by unwrapping our desire target
             let curr_desire_coord = next_desire.unwrap();
             let curr_desire = self.property.desires
                 .get(curr_desire_coord.idx).unwrap();
-            // if we can't do anything
-            if !curr_desire.steps_on_tier(curr_desire_coord.tier) ||
-            curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
+            // if the current desire is already satisfied move on
+            if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
+                // this loop should never 
                 // get the next, and continue.
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
@@ -545,6 +542,130 @@ impl Pop {
         self.active_wait(rx, tx, data, market, &vec![
             ActorMessage::AllFinished
         ]);
+    }
+
+    /// # Shopping Loop
+    /// 
+    /// Shopping loop function is a helper for free time and adjacent fns.
+    /// 
+    /// It starts at the first tier with unsatisfied desires within. Satisfied
+    /// desires are skipped.
+    /// 
+    /// It gets the item and plans how much of it it wants to try and buy 
+    /// based on it's type.
+    /// - if it's a class or specific product, it aims for a single shopping 
+    ///   trip for the whole order.
+    /// - if it's a want it selects a random process suggested by the market 
+    ///   to get it, and tries to set up as many trips as products in it's 
+    ///   list.
+    /// 
+    /// How much of each item it will buy is dependent on how much the desire 
+    /// might need. It aims for at least a few tiers of the desire so that it
+    /// can save time. It aims for either maxing out the desire, or halfway to 
+    /// the highest tier + 1. This will need to be explored and tested. Maybe
+    /// remember how high we got yesterday and aim for that +1.
+    /// 
+    /// With the number of buys it needs and targets, it extracts time for 
+    /// shopping, then it spends it on shopping trips.
+    /// 
+    /// It goes out for it's desired buys. Regardless of success or failure,
+    /// it tries to buy each of it's things. AFter buying everything, it 
+    /// sifts it's goods again,
+    pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+        data: &DataManager,
+        market: &MarketHistory) {
+        // with everything reserved begin trying to buy more stuff
+        // prepare current desire for first possible purchase.
+        let mut next_desire = if let Some(full_tier) = self.property.full_tier_satisfaction {
+            Some(DesireCoord { // if a full tier exists, start at the one above it.
+                tier: full_tier+1,
+                idx: 0
+            })
+        } else { // if no full tier, just start at the bottom.
+            Some(self.property.first_desire())
+        };
+        // also initialize shopping time, none should exist prior to here.
+        let mut available_shopping_time = 0.0;
+        // start our buying loop.
+        loop { // Should have our current desire coords in next_desire
+            if let None = next_desire {
+                // if there is no next desire we have nothing more we wish to buy.
+                break;
+            }
+            // start by unwrapping our desire target
+            let curr_desire_coord = next_desire.unwrap();
+            let curr_desire = self.property.desires
+                .get(curr_desire_coord.idx).unwrap();
+            debug_assert!(curr_desire.steps_on_tier(curr_desire_coord.tier), 
+                "Shopping Loop Misstepped!"); // sanity check misstepping, it should never happen, but we want to double check.
+            // if the current desire is already satisfied move on
+            if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
+                // this loop should never misstep.
+                // get the next, and continue.
+                next_desire = self.property.walk_up_tiers(next_desire);
+                continue;
+            }
+            
+            // get our current desire target
+            let current_desire_item = &curr_desire.item;
+            let mut multiple_buys = vec![];
+            // get how many items we need to buy for this desire.
+            let buy_targets = match current_desire_item {
+                DesireItem::Want(id) => { // for wants, we need to get the product inputs.
+                    // if it's a want, go to the most common satisfaction 
+                    // of that want in the market.
+                    self.push_message(rx, tx, 
+                        ActorMessage::FindWant { want: *id, sender: self.actor_info() });
+                    // get the process the market suggests then 
+                    let result = self.active_wait(rx, tx, data, market, 
+                        &vec![
+                            ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, prcocess: 0 },
+                            ActorMessage::WantNotFound { want: 0, buyer: ActorInfo::Firm(0) }
+                        ]);
+                    if let ActorMessage::FoundWant { buyer: _, want, prcocess: _ } = result {
+                        // get the process
+                        let process_info = data.processes.get(&want).unwrap();
+                        let needs = process_info.inputs_and_capital();
+                        // get what needs to be gotten
+                        for part in needs.iter()
+                         {
+                            multiple_buys.push(&part.item);
+                        }
+                        1.0 * needs.len() as f64
+                    } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
+                        // if the want is not found in the market, then move on to the next desire
+                        0.0
+                    }
+                    else {
+                        0.0
+                    }
+                },
+                DesireItem::Class(_) => 1.0, // for class, any item of the class will be good enough.
+                DesireItem::Product(_) => 1.0, // for specific product
+            };
+            // preemptively get the next desire
+            next_desire = self.property.walk_up_tiers(next_desire);
+            // then sift up to this desire point to free up excess resources.
+            self.property.sift_up_to(&curr_desire_coord, data);
+            // get a trip of time worth 
+            // TODO update to take more dynamic time payment into account.
+            available_shopping_time += self.property.get_shopping_time(SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
+                data, market, self.skill_average(), self.skill);
+            // check that it's enough time to go out buying
+            if SHOPPING_TIME_COST > available_shopping_time {
+                // if we don't have enough time to go shopping, break out, we won't
+                // resolve that problem here.
+                // return the time to our property and gtfo.
+                self.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
+                break;
+            }
+            if multiple_buys.len() > 0 {
+                
+            } else {
+                
+            }
+            break;
+        }
     }
 
     /// # Skill Average

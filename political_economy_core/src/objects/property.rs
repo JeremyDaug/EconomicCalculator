@@ -1961,6 +1961,40 @@ impl Property {
         }
         final_result
     }
+
+    /// # First Desire
+    /// 
+    /// Gets the Desire Coords of the first desire, IE the desire with the 
+    /// lowest starting tier, then lowest index.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if property has no desires. All pops should have at least
+    /// some desires. Those which truly have no desires are not people, but
+    /// objects.
+    pub fn first_desire(&self) -> DesireCoord {
+        if self.desires.len() == 0 {
+            panic!("No Desires in pop!")
+        }
+        let mut result = DesireCoord{ tier: usize::MAX, idx: usize::MAX };
+        // check all desires
+        for (idx, desire) in self.desires.iter()
+        .enumerate() {
+            // if the desire is at or below our current best, update.
+            if result.tier >= desire.start {
+                if result.tier > desire.start {
+                    // if desire is totally below our best, update
+                    result.tier = desire.start;
+                    result.idx = idx;
+                }
+                // no need to check lowest idx, as we are going in 
+                // idx order already.
+            }
+            // if our tier is zero, then we can breakout early.
+            if result.tier == 0 { break; }
+        }
+        result
+    }
 }
 
 /// # Time Breakdown
