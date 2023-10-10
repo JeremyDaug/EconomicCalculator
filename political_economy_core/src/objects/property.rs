@@ -51,9 +51,9 @@ pub struct Property {
     pub product_expectations: HashMap<usize, f64>,
     /// The Expected inputs and outputs of our process plan for wants.
     pub want_expectations: HashMap<usize, f64>,
-    /// The lowest tier that any satisfaction remains unsatisfied. 
+    /// The highest tier of satisfaction which is fully satisfied.
     /// 
-    /// IE, a desire is unsatisfied, it returns tier 0.
+    /// No tier is fully satisfied, then it returns None.
     /// 
     /// A rough measure of contentment. 
     /// 
@@ -62,6 +62,11 @@ pub struct Property {
     /// poverty but personal contentment.
     pub full_tier_satisfaction: Option<usize>,
     /// How many tiers, skipping empty ones, which have been filled.
+    /// 
+    /// If full_tier_satisfaction is None, then this will be also.
+    /// 
+    /// If all tiers between 0 and full_tier_satisfaction are filled
+    /// then this would be full_tier_satisfaction + 1
     /// 
     /// A rough measure of total satisfaction. Removes contentment and
     /// emphasizes material satisfaction.

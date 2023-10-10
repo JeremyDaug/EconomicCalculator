@@ -445,16 +445,21 @@ impl Pop {
             }
         }
 
+        // TODO redo this stuff and sanity check it.
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
         let mut next_desire = if let Some(full_tier) = self.property.full_tier_satisfaction {
-            Some(DesireCoord {
-                tier: full_tier,
+            Some(DesireCoord { // if a full tier exists, start at the one above it.
+                tier: full_tier+1,
                 idx: 0
             })
-        } else {
-            None
+        } else { // if no full tier, just start at the bottom.
+            Some(DesireCoord {
+                tier: 0,
+                idx: 0
+            })
         };
+        // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // start our buying loop.
         loop {
@@ -464,9 +469,18 @@ impl Pop {
             }
             // start by unwrapping our desire target
             let curr_desire_coord = next_desire.unwrap();
+            let curr_desire = self.property.desires
+                .get(curr_desire_coord.idx).unwrap();
+            // if we can't do anything
+            if !curr_desire.steps_on_tier(curr_desire_coord.tier) ||
+            curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
+                // get the next, and continue.
+                next_desire = self.property.walk_up_tiers(next_desire);
+                continue;
+            }
+            
             // get our current desire target
-            let current_desire_item = &self.property.desires
-                .get(curr_desire_coord.idx).unwrap().item;
+            let current_desire_item = &curr_desire.item;
             let mut multiple_buys = vec![];
             // get how many items we need to buy for this desire.
             let buy_targets = match current_desire_item {
