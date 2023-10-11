@@ -2001,7 +2001,13 @@ impl Property {
     /// Helper function, gets the first desire (lowest tier then lowest index)
     /// which has unsatisfied space. The tier is not the start, but the 
     /// unsatisfied tier.
-    pub fn get_first_unsatisfied_desire(&self) -> DesireCoord {
+    /// 
+    /// TODO needs to check for the possibility that all desires are satisfied.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if we have no desires.
+    pub fn get_first_unsatisfied_desire(&self) -> Option<DesireCoord> {
         if self.desires.len() == 0 {
             panic!("No Desires in pop!")
         }
@@ -2029,7 +2035,11 @@ impl Property {
                 }
             }
         }
-        result
+        if result.tier == usize::MAX {
+            None
+        } else {
+            Some(result)
+        }
     }
 }
 

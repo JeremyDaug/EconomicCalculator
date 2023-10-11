@@ -3762,13 +3762,53 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 let mut test = Property::new(test_desires);
-                let result = test.get_first_unsatisfied_desire();
+                let result = test.get_first_unsatisfied_desire().unwrap();
                 assert_eq!(result.idx, 1);
                 assert_eq!(result.tier, 10);
                 test.desires[1].satisfaction += 4.0;
-                let result = test.get_first_unsatisfied_desire();
+                let result = test.get_first_unsatisfied_desire().unwrap();
                 assert_eq!(result.idx, 2);
                 assert_eq!(result.tier, 12);
+            }
+
+            #[test]
+            pub fn return_none_when_all_desires_are_fully_satisfied() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(0), 
+                    start: 4, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 1.0,
+                    step: 0,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(1), 
+                    start: 7, 
+                    end: Some(13), 
+                    amount: 1.0, 
+                    satisfaction: 1.0,
+                    step: 0,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(1), 
+                    start: 2, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 1.0,
+                    step: 0,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(1), 
+                    start: 1, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 1.0,
+                    step: 0,
+                    tags: vec![]});
+                let mut test = Property::new(test_desires);
+                let result = test.get_first_unsatisfied_desire();
+                assert!(result.is_none());
             }
         }
 

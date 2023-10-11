@@ -456,7 +456,7 @@ impl Pop {
         } else { // if no full tier, just start at the bottom.
             Some(self.property.first_desire())
         };
-        let mut next_desire = Some(self.property.get_first_unsatisfied_desire());
+        let mut next_desire = self.property.get_first_unsatisfied_desire();
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // start our buying loop.
@@ -577,14 +577,7 @@ impl Pop {
         market: &MarketHistory) {
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
-        let mut next_desire = if let Some(full_tier) = self.property.full_tier_satisfaction {
-            Some(DesireCoord { // if a full tier exists, start at the one above it.
-                tier: full_tier+1,
-                idx: 0
-            })
-        } else { // if no full tier, just start at the bottom.
-            Some(self.property.first_desire())
-        };
+        let mut next_desire = self.property.get_first_unsatisfied_desire();
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // start our buying loop.
