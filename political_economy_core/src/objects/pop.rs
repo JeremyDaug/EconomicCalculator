@@ -456,6 +456,7 @@ impl Pop {
         } else { // if no full tier, just start at the bottom.
             Some(self.property.first_desire())
         };
+        let mut next_desire = Some(self.property.get_first_unsatisfied_desire());
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // start our buying loop.

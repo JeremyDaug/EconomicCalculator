@@ -1995,6 +1995,42 @@ impl Property {
         }
         result
     }
+
+    /// # Get First Unsatisfied Desire
+    /// 
+    /// Helper function, gets the first desire (lowest tier then lowest index)
+    /// which has unsatisfied space. The tier is not the start, but the 
+    /// unsatisfied tier.
+    pub fn get_first_unsatisfied_desire(&self) -> DesireCoord {
+        if self.desires.len() == 0 {
+            panic!("No Desires in pop!")
+        }
+        let mut result = DesireCoord {
+            tier: usize::MAX,
+            idx: usize::MAX,
+        };
+        // check all desires
+        for (idx, desire) in self.desires.iter()
+        .enumerate()
+        .filter(|(_, x)| !x.is_fully_satisfied()) {
+            let unsat_tier = desire.satisfaction_up_to_tier();
+            if let Some(tier) = unsat_tier {
+                if desire.satisfied_at_tier(tier) {
+                    let next_tier = desire.get_next_tier_up(tier).unwrap_or(usize::MAX);
+                    if next_tier < result.tier {
+                        result.idx = idx;
+                        result.tier = next_tier;
+                    }
+                } else {
+                    if tier < result.tier {
+                        result.idx = idx;
+                        result.tier = tier;
+                    }
+                }
+            }
+        }
+        result
+    }
 }
 
 /// # Time Breakdown

@@ -3723,6 +3723,55 @@ mod tests {
             }
         }
 
+        mod get_first_unsatisfied_desire_should {
+            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
+            
+            #[test]
+            pub fn find_the_lowest_and_first_unsatisfied_desire() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(0), 
+                    start: 4, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 1.0,
+                    step: 0,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(1), 
+                    start: 7, 
+                    end: Some(13), 
+                    amount: 1.0, 
+                    satisfaction: 3.5,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(1), 
+                    start: 2, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 10.0,
+                    step: 1,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,...
+                    item: DesireItem::Want(1), 
+                    start: 1, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 21.0,
+                    step: 1,
+                    tags: vec![]});
+                let mut test = Property::new(test_desires);
+                let result = test.get_first_unsatisfied_desire();
+                assert_eq!(result.idx, 1);
+                assert_eq!(result.tier, 10);
+                test.desires[1].satisfaction += 4.0;
+                let result = test.get_first_unsatisfied_desire();
+                assert_eq!(result.idx, 2);
+                assert_eq!(result.tier, 12);
+            }
+        }
+
         mod add_products_should {
             use std::collections::{HashSet, HashMap};
 
