@@ -448,28 +448,15 @@ impl Pop {
         // TODO redo this stuff and sanity check it.
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
-        let mut next_desire = if let Some(full_tier) = self.property.full_tier_satisfaction {
-            Some(DesireCoord { // if a full tier exists, start at the one above it.
-                tier: full_tier+1,
-                idx: 0
-            })
-        } else { // if no full tier, just start at the bottom.
-            Some(self.property.first_desire())
-        };
         let mut next_desire = self.property.get_first_unsatisfied_desire();
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // start our buying loop.
-        loop { // Should have our current desire coords in next_desire
-            if let None = next_desire {
-                // if there is no next desire we have nothing more we wish to buy.
-                break;
-            }
-            // start by unwrapping our desire target
-            let curr_desire_coord = next_desire.unwrap();
+        while let Some(curr_desire_coord) = next_desire { // Should have our current desire coords in next_desire
+            // start by getting our desire
             let curr_desire = self.property.desires
                 .get(curr_desire_coord.idx).unwrap();
-            // if the current desire is already satisfied move on
+            // if the current desire is already satisfied for wahtever reason move on
             if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
                 // this loop should never 
                 // get the next, and continue.
@@ -505,10 +492,10 @@ impl Pop {
                         1.0 * needs.len() as f64
                     } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
                         // if the want is not found in the market, then move on to the next desire
+                        // debug record anytime we get this here later.
                         0.0
-                    }
-                    else {
-                        0.0
+                    } else {
+                        panic!("Should not be here.")
                     }
                 },
                 DesireItem::Class(_) => 1.0, // for class, any item of the class will be good enough.
