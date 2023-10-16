@@ -1882,8 +1882,9 @@ impl Property {
     /// 
     /// TODO this can likely be repurposed into a more general "get X units of y product function"
     /// TODO Improve to prioritize by market cost of the process. Eventually.
+    /// TODO Improve this to only take from satisfaction above a certain point, not more.
     pub fn get_shopping_time(&mut self, target: f64, data: &DataManager, 
-    _market: &MarketHistory, skill_level: f64, skill: usize) -> f64 {
+    _market: &MarketHistory, skill_level: f64, skill: usize, _cutoff: Option<DesireCoord>) -> f64 {
         // get the final output ready.
         let mut final_result = 0.0;
         // first extract from storage any Shopping Time we have available and waiting to use.

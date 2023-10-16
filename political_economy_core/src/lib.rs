@@ -8682,7 +8682,7 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(5.0));
                 // get total result and see if it gets out with existing property.
                 let result1 = test.get_shopping_time(2.5, &data, 
-                    &market, 0.0, 0);
+                    &market, 0.0, 0, None);
                 assert_eq!(result1, 2.5); // should get back our full target
                 assert_eq!(test.property.get(&1)
                     .unwrap().total_property, 2.5); // should still have 2.5 remaining
@@ -8692,7 +8692,7 @@ mod tests {
                 
                 // if it was remove, do it again, testing that it only returns what is
                 // available.
-                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0);
+                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0, None);
                 assert_eq!(capped_result, 2.5); // should get back our what is available, nothing more.
                 assert_eq!(test.property.get(&1)
                     .unwrap().total_property, 0.0); // should still have 2.5 remaining
@@ -8822,13 +8822,13 @@ mod tests {
                 //test.property.insert(1, PropertyInfo::new(5.0));
                 // get total result and see if it gets out with existing property.
                 let result1 = test.get_shopping_time(2.0, &data, 
-                    &market, 0.0, 0);
+                    &market, 0.0, 0, None);
                 assert_eq!(result1, 2.0); // should get back our full target
                 // of the 5 started, 2 are sifted, 2 is consumed for shopping time.
                 assert_eq!(test.property[&0].total_property, 3.0);
                 
                 // do it again, overdrawing and being limited correctly.
-                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0);
+                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0, None);
                 assert_eq!(capped_result, 1.0); // should get back our what is available, nothing more.
                 // 2 were reserved, so 2 should remain.
                 assert_eq!(test.property[&0].total_property, 2.0);

@@ -494,21 +494,20 @@ impl Pop {
                         // if the want is not found in the market, then move on to the next desire
                         // debug record anytime we get this here later.
                         0.0
-                    } else {
-                        panic!("Should not be here.")
-                    }
+                    } else { panic!("Should not be here.") }
                 },
                 DesireItem::Class(_) => 1.0, // for class, any item of the class will be good enough.
-                DesireItem::Product(_) => 1.0, // for specific product
+                DesireItem::Product(_) => 1.0, // for specific product. only one item will be needed.
             };
             // preemptively get the next desire
-            next_desire = self.property.walk_up_tiers(next_desire);
+            // next_desire = self.property.walk_up_tiers(next_desire);
             // then sift up to this desire point to free up excess resources.
-            self.property.sift_up_to(&curr_desire_coord, data);
+            // self.property.sift_up_to(&curr_desire_coord, data);
             // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
-            available_shopping_time += self.property.get_shopping_time(SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
-                data, market, self.skill_average(), self.skill);
+            available_shopping_time += self.property.get_shopping_time(
+                SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
+                data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
             // check that it's enough time to go out buying
             if SHOPPING_TIME_COST > available_shopping_time {
                 // if we don't have enough time to go shopping, break out, we won't
@@ -562,26 +561,20 @@ impl Pop {
     pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
         data: &DataManager,
         market: &MarketHistory) {
+                // TODO redo this stuff and sanity check it.
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
         let mut next_desire = self.property.get_first_unsatisfied_desire();
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // start our buying loop.
-        loop { // Should have our current desire coords in next_desire
-            if let None = next_desire {
-                // if there is no next desire we have nothing more we wish to buy.
-                break;
-            }
-            // start by unwrapping our desire target
-            let curr_desire_coord = next_desire.unwrap();
+        while let Some(curr_desire_coord) = next_desire { // Should have our current desire coords in next_desire
+            // start by getting our desire
             let curr_desire = self.property.desires
                 .get(curr_desire_coord.idx).unwrap();
-            debug_assert!(curr_desire.steps_on_tier(curr_desire_coord.tier), 
-                "Shopping Loop Misstepped!"); // sanity check misstepping, it should never happen, but we want to double check.
-            // if the current desire is already satisfied move on
+            // if the current desire is already satisfied for wahtever reason move on
             if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
-                // this loop should never misstep.
+                // this loop should never 
                 // get the next, and continue.
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
@@ -615,23 +608,22 @@ impl Pop {
                         1.0 * needs.len() as f64
                     } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
                         // if the want is not found in the market, then move on to the next desire
+                        // debug record anytime we get this here later.
                         0.0
-                    }
-                    else {
-                        0.0
-                    }
+                    } else { panic!("Should not be here.") }
                 },
                 DesireItem::Class(_) => 1.0, // for class, any item of the class will be good enough.
-                DesireItem::Product(_) => 1.0, // for specific product
+                DesireItem::Product(_) => 1.0, // for specific product. only one item will be needed.
             };
             // preemptively get the next desire
-            next_desire = self.property.walk_up_tiers(next_desire);
+            // next_desire = self.property.walk_up_tiers(next_desire);
             // then sift up to this desire point to free up excess resources.
-            self.property.sift_up_to(&curr_desire_coord, data);
+            // self.property.sift_up_to(&curr_desire_coord, data);
             // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
-            available_shopping_time += self.property.get_shopping_time(SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
-                data, market, self.skill_average(), self.skill);
+            available_shopping_time += self.property.get_shopping_time(
+                SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
+                data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
             // check that it's enough time to go out buying
             if SHOPPING_TIME_COST > available_shopping_time {
                 // if we don't have enough time to go shopping, break out, we won't
