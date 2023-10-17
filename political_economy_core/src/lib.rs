@@ -2423,14 +2423,9 @@ mod tests {
                 // setup firm we're talking with
                 let seller = ActorInfo::Firm(1);
                 // setup property split
-                let mut spend = HashMap::new();
-
-                // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
-
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        seller,  &mut spend);
+                        seller);
                     (test, result)
                 });
                 // check that it's running
@@ -2467,14 +2462,10 @@ mod tests {
                 // setup firm we're talking with
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
-                let mut spend = HashMap::new();
-
-                // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend);
+                        selling_firm);
                     (test, result)
                 });
                 // check that it's running
@@ -2544,15 +2535,11 @@ mod tests {
                 // setup firm we're talking with
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
-                let mut spend = HashMap::new();
-
-                // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().unreserved));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend);
-                    (test, result, spend)
+                        selling_firm);
+                    (test, result)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
@@ -2608,7 +2595,7 @@ mod tests {
                 // ensure we closed out
                 if !handle.is_finished() { assert!(false); }
                 // get our data
-                let (test, result, spend) = handle.join().unwrap();
+                let (test, result) = handle.join().unwrap();
                 // check the return is correct.
                 if let BuyResult::Successful = result {
                     assert!(true);
@@ -2618,7 +2605,7 @@ mod tests {
                 assert!(test.property.property.get(&6).unwrap().total_property == 6.0);
                 assert!(test.property.property.get(&7).unwrap().total_property == 2.0);
                 // check returned correctly includes items.
-                assert!(spend.get(&5).unwrap().unreserved == 1.0);
+                assert!(test.property.property.get(&5).unwrap().unreserved == 1.0);
                 // check pop memory for the products as well.
                 // TODO check this stuff again.
             }
@@ -2635,15 +2622,11 @@ mod tests {
                 // setup firm we're talking with
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
-                let mut spend = HashMap::new();
-
-                // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend);
-                    (test, result, spend)
+                        selling_firm);
+                    (test, result)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
@@ -2691,7 +2674,7 @@ mod tests {
                 // ensure we closed out
                 if !handle.is_finished() { assert!(false); }
                 // get our data
-                let (test, result, returned) = handle.join().unwrap();
+                let (test, result) = handle.join().unwrap();
                 // check the return is correct.
                 if let BuyResult::NotSuccessful { reason } = result {
                     assert!(reason == OfferResult::Rejected);
@@ -2699,7 +2682,6 @@ mod tests {
                 // check that property was exchanged
                 assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
                 assert!(test.property.property.get(&7).is_none());
-                assert_eq!(returned.len(), 0);
                 // check pop memory for the products as well.
                 // TODO update checks
             }
@@ -2716,15 +2698,11 @@ mod tests {
                 // setup firm we're talking with
                 let selling_firm = ActorInfo::Firm(1);
                 // setup property split
-                let mut spend = HashMap::new();
-
-                // add our property to the spend hashmap.
-                spend.insert(6 as usize, PropertyInfo::new(test.property.property.get(&6).unwrap().total_property));
 
                 let handle = thread::spawn(move || {
                     let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm, &mut spend);
-                    (test, result, spend)
+                        selling_firm);
+                    (test, result)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
@@ -2772,7 +2750,7 @@ mod tests {
                 // ensure we closed out
                 if !handle.is_finished() { assert!(false); }
                 // get our data
-                let (test, result, returned) = handle.join().unwrap();
+                let (test, result) = handle.join().unwrap();
                 // check the return is correct.
                 if let BuyResult::SellerClosed = result {
                     assert!(true);
@@ -2780,7 +2758,6 @@ mod tests {
                 // check that property was exchanged
                 assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
                 assert!(test.property.property.get(&7).is_none());
-                assert_eq!(returned.len(), 0);
                 // check pop memory for the products as well.
                 // TODO recheck here
             }

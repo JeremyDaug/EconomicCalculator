@@ -503,7 +503,7 @@ impl Pop {
         while let Some(curr_desire_coord) = next_desire { // Should have our current desire coords in next_desire
             // start by getting our desire
             let curr_desire = self.property.desires
-                .get(curr_desire_coord.idx).unwrap();
+                .get(curr_desire_coord.idx).unwrap().clone();
             // if the current desire is already satisfied for wahtever reason move on
             if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
                 // this loop should never 
@@ -571,6 +571,8 @@ impl Pop {
             } else {
                 // Do the buy
                 let result = self.try_to_buy(rx, tx, data, market, current_desire_item, buy_targets);
+                // react to the result and subtract from our shopping time.
+                // TODO ^^
                 match result {
                     BuyResult::CancelBuy => todo!(),
                     BuyResult::NotSuccessful { reason } => todo!(),
@@ -650,12 +652,15 @@ impl Pop {
     ///
     /// If the product is not found, it will return Not Successful with OutOfStock
     /// as the reason.
+    /// 
+    /// This does not spend shopping time, instead letting the caller deal
+    /// with the time expenditure.
     ///
     /// It has 2 options when it starts.
     /// - Standard Search, it asks the market to find a guaranteed seller,
     /// who we'll get in touch with and try to make a deal.
     /// - Emergency Search, this occurs when either the product being sought
-    /// is unavailable through sellers and the product sought is important
+    /// is unavailable through sellers and the product sought is important.
     fn try_to_buy(&mut self,
     rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>,
@@ -691,7 +696,7 @@ impl Pop {
                 BuyResult::NotSuccessful { reason: OfferResult::OutOfStock }
             }
             else if let ActorMessage::FoundProduct { seller, .. } = result {
-                self.standard_buy(rx, tx, data, market, seller, records)
+                self.standard_buy(rx, tx, data, market, seller)
             }
             else { unreachable!("Somehow did not get FoundProduct or ProductNotFound."); }
         }
@@ -761,8 +766,7 @@ impl Pop {
     tx: &Sender<ActorMessage>,
     data: &DataManager,
     market: &MarketHistory,
-    seller: ActorInfo,
-    _records: &mut HashMap<usize, PropertyInfo>) -> BuyResult {
+    seller: ActorInfo) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         let result = self.specific_wait(rx, &vec![
@@ -783,8 +787,12 @@ impl Pop {
             // get the the property_info for the product we are buying
             let product_info = self.property.property
                 .entry(product).or_insert(PropertyInfo::new(0.0));
-            // buy up to the remaining target.
-            let quantity = quantity.min(product_info.remaining_target());
+            // buy up to the remaining target or +1, if no remaining target.
+            let quantity = if product_info.remaining_target() > 0.0 {
+                quantity.min(product_info.remaining_target()) 
+            } else { // if no remaining target, just get 1 unit capped at stock available.
+                quantity.min(1.0)
+            };
             // Get how much this purchase would increase our satisfaction by.
             let sat_gain = self.property.predict_value_gained(product, quantity, data);
             let mut sat_lost = TieredValue { tier: 0, value: 0.0 };
@@ -800,11 +808,12 @@ impl Pop {
                 let b_val = market.get_product_salability(&b.0);
                 b_val.partial_cmp(&a_val).unwrap_or(std::cmp::Ordering::Equal)
             }) {
-                // get amv for our current product.
+                // get amv for the current product being given up.
                 let eff_amv = market.get_product_price(product, 1.0);
                 // add units up to amv_price, then round up.
                 let perfect_ratio = (purchase_price / eff_amv).ceil();
                 let capped = perfect_ratio.min(info.unreserved); // cap the ratio at what is available.
+                // TODO Fractional Good Rework: are reworked, also rework this.
                 let mut capped = if data.products.get(product).unwrap().fractional {
                     capped // if fractional, add all of it
                 } else {
@@ -843,18 +852,22 @@ impl Pop {
                         // check that it's below the target again.
                         if sat_lost < sat_gain {
                             break; // if yes, break, else try again.
+                            // Note, this will always be reached eventually as 
+                            // it will eventually remove the total value of the
+                            // item added, which is (definitionally) lower than
+                            // the original sat gain.
                         }
                     }
                 }
                 // stop early when the current_offer_amv > target
                 if current_offer_amv > purchase_price {
-                    // if greater than offer or overshoot satisfaction lost
                     break;
                 }
             }
 
             // check that we surpassed the amv target, should not be overpaying in satisfaction.
-            if purchase_price > current_offer_amv { // if still not enough, start pulling from satisfaction
+            if purchase_price > current_offer_amv { 
+                // if still not enough, start pulling from satisfaction
                 // If continuing, add items from our desired items
                 // create copy of property for good measure.
                 let mut property_copy = self.property.cheap_clone();
@@ -865,18 +878,17 @@ impl Pop {
                 property_copy.sift_all(data);
                 // also create shortcut current to making GTFOing a bit faster.
                 let mut completed = HashSet::new();
-                let invalid = property_copy.desires
+                let invalid = property_copy.desires // get our desires
                     .iter().enumerate()
-                    .filter(|(_, x)| x.satisfaction == 0.0)
-                    .map(|(id, _)| id).collect_vec();
-                for idx in invalid.into_iter() { completed.insert(idx); }
+                    .filter(|(_, x)| x.satisfaction == 0.0) // skip those which are already empty
+                    .map(|(id, _)| id).collect_vec(); // and collect those desire's idxs into a list
+                for idx in invalid.into_iter() { completed.insert(idx); } // put them into the completed hashset.
+                // start our loop, walking down our desires
                 let mut prev = DesireCoord { tier: self.property.highest_tier, 
                     idx: self.property.desires.len() };
                 while let Some(coord) = self.property.walk_down_tiers(&prev) {
                     // if no remaining possible desires, gtfo
-                    if completed.len() == property_copy.desires.len() {
-                        break;
-                    }
+                    if completed.len() == property_copy.desires.len() { break; }
                     // update previous with current for the next loop.
                     prev = coord;
                     if completed.contains(&coord.idx) {
@@ -899,6 +911,7 @@ impl Pop {
                         completed.insert(coord.idx);
                         continue;
                     }
+                    // if a valid loss, add to sat lost
                     sat_lost += hypo_loss;
                     // copy processes for possible want releasing
                     let mut processes_changed = property_copy.process_plan.clone();
@@ -915,23 +928,22 @@ impl Pop {
                     // get those resources which were actually used to satisfy the current desire and amount.
                     let result = match current_desire.item {
                         DesireItem::Want(_) => {
-                            // what products are actually going to be removed
-                            let mut actual_release = HashMap::new();
+                            let mut actual_released_products = HashMap::new();
                             // go through each process and try to remove what they need, if we can
-                            for (proc_id, amount) in processes_changed.iter() {
+                            for (proc_id, iterations) in processes_changed.iter() {
                                 let process = data.processes.get(proc_id).expect("Process not found.");
-                                // add specific products up to the expectaiton.
+                                // add specific products up to the expectation.
                                 for &input in process.input_products().iter() {
                                     // get how much we are expected to use
-                                    let expectation = input.amount * amount;
+                                    let expectation = input.amount * iterations;
                                     // add to actual_release
-                                    actual_release.insert(input.item.unwrap(), expectation);
+                                    actual_released_products.insert(input.item.unwrap(), expectation);
                                 }
-                                // do the same for class products, selecting however we can
+                                // do the same for class products, selecting whatever we can
                                 for &input in process.inputs().iter()
                                 .filter(|x| x.item.is_class()) {
                                     // get how much it should want.
-                                    let mut expectation = input.amount * amount;
+                                    let mut expectation = input.amount * iterations;
                                     // get class products
                                     let class_products = data.product_classes
                                         .get(&input.item.unwrap()).unwrap();
@@ -941,9 +953,9 @@ impl Pop {
                                         // get how much is available from release capped at our current expectation
                                         let mut shift = amount.min(expectation);
                                         // remove what we're already planning on adding in extra release
-                                        shift -= actual_release.get(product).unwrap_or(&0.0);
+                                        shift -= actual_released_products.get(product).unwrap_or(&0.0);
                                         // then add back to actual
-                                        actual_release.entry(*product)
+                                        actual_released_products.entry(*product)
                                         .and_modify(|x| *x += shift)
                                         .or_insert(shift);
                                         // and reduce current expectation
@@ -952,7 +964,7 @@ impl Pop {
                                 }
                             }
 
-                            actual_release
+                            actual_released_products
                         },
                         DesireItem::Class(class_id) => {
                             // get how much we need to remove
