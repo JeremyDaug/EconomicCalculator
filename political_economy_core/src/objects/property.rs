@@ -1883,6 +1883,7 @@ impl Property {
     /// TODO this can likely be repurposed into a more general "get X units of y product function"
     /// TODO Improve to prioritize by market cost of the process. Eventually.
     /// TODO Improve this to only take from satisfaction above a certain point, not more.
+    /// TODO Sift Improvement: When Sift has been improved to function non-destructively, this can be upgraded to take from satisfaction as well.
     pub fn get_shopping_time(&mut self, target: f64, data: &DataManager, 
     _market: &MarketHistory, skill_level: f64, skill: usize, _cutoff: Option<DesireCoord>) -> f64 {
         // get the final output ready.

@@ -139,6 +139,8 @@ impl Pop {
         };
     }
 
+    /// # Message Catchup
+    /// 
     /// A shorthand function.
     ///
     /// Quickly consumes all messages from the queue it can, catching up
@@ -203,6 +205,8 @@ impl Pop {
         }
     }
 
+    /// # Active Wait
+    /// 
     /// Active Wait Function, used whenever we need to wait for a particular
     /// result or message. Takes in all the standard stuff for free time, while
     /// also taking in whatever it's looking to find. If it recieves one of the
@@ -213,6 +217,9 @@ impl Pop {
     ///
     /// This only returns if it recieves the message it's looking for, it it does
     /// not recieve it, it will be stuck in it's loop.
+    /// 
+    /// It ignores the data of the message, only looking at the message type
+    /// and that it is for us. 
     pub fn active_wait(&mut self,
     rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>,
@@ -445,6 +452,47 @@ impl Pop {
             }
         }
 
+        self.shopping_loop(rx, tx, data, market);
+
+        // after we run out of stuff to buy, send finished and leave, consumption comes later
+        self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
+        self.active_wait(rx, tx, data, market, &vec![
+            ActorMessage::AllFinished
+        ]);
+    }
+
+    /// # Shopping Loop
+    /// 
+    /// Shopping loop function is a helper for free time and adjacent fns.
+    /// 
+    /// It starts at the first tier with unsatisfied desires within. Satisfied
+    /// desires are skipped.
+    /// 
+    /// It gets the item and plans how much of it it wants to try and buy 
+    /// based on it's type.
+    /// - if it's a class or specific product, it aims for a single shopping 
+    ///   trip for the whole order.
+    /// - if it's a want it selects a random process suggested by the market 
+    ///   to get it, and tries to set up as many trips as products in it's 
+    ///   list.
+    /// 
+    /// How much of each item it will buy is dependent on how much the desire 
+    /// might need. It aims for at least a few tiers of the desire so that it
+    /// can save time. It aims for either maxing out the desire, or halfway to 
+    /// the highest tier + 1. This will need to be explored and tested. Maybe
+    /// remember how high we got yesterday and aim for that +1.
+    /// 
+    /// With the number of buys it needs and targets, it extracts time for 
+    /// shopping, then it spends it on shopping trips.
+    /// 
+    /// It goes out for it's desired buys. Regardless of success or failure,
+    /// it tries to buy each of it's things. AFter buying everything, it 
+    /// sifts it's goods again,
+    /// 
+    /// TODO Sift Improvement Location: When Sifting is upgraded to not be destructive, come back here and upgrade the time extraction.
+    pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+        data: &DataManager,
+        market: &MarketHistory) {
         // TODO redo this stuff and sanity check it.
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
@@ -502,7 +550,8 @@ impl Pop {
             // preemptively get the next desire
             // next_desire = self.property.walk_up_tiers(next_desire);
             // then sift up to this desire point to free up excess resources.
-            // self.property.sift_up_to(&curr_desire_coord, data);
+            // TODO when sifting is improved, drop this.
+            self.property.sift_up_to(&curr_desire_coord, data);
             // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
             available_shopping_time += self.property.get_shopping_time(
@@ -517,127 +566,20 @@ impl Pop {
                 break;
             }
             if multiple_buys.len() > 0 {
-                
-            } else {
-                
-            }
-            break;
-        }
-
-        // after we run out of stuff to buy, send finished and leave, consumption comes later
-        self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
-        self.active_wait(rx, tx, data, market, &vec![
-            ActorMessage::AllFinished
-        ]);
-    }
-
-    /// # Shopping Loop
-    /// 
-    /// Shopping loop function is a helper for free time and adjacent fns.
-    /// 
-    /// It starts at the first tier with unsatisfied desires within. Satisfied
-    /// desires are skipped.
-    /// 
-    /// It gets the item and plans how much of it it wants to try and buy 
-    /// based on it's type.
-    /// - if it's a class or specific product, it aims for a single shopping 
-    ///   trip for the whole order.
-    /// - if it's a want it selects a random process suggested by the market 
-    ///   to get it, and tries to set up as many trips as products in it's 
-    ///   list.
-    /// 
-    /// How much of each item it will buy is dependent on how much the desire 
-    /// might need. It aims for at least a few tiers of the desire so that it
-    /// can save time. It aims for either maxing out the desire, or halfway to 
-    /// the highest tier + 1. This will need to be explored and tested. Maybe
-    /// remember how high we got yesterday and aim for that +1.
-    /// 
-    /// With the number of buys it needs and targets, it extracts time for 
-    /// shopping, then it spends it on shopping trips.
-    /// 
-    /// It goes out for it's desired buys. Regardless of success or failure,
-    /// it tries to buy each of it's things. AFter buying everything, it 
-    /// sifts it's goods again,
-    pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
-        data: &DataManager,
-        market: &MarketHistory) {
-                // TODO redo this stuff and sanity check it.
-        // with everything reserved begin trying to buy more stuff
-        // prepare current desire for first possible purchase.
-        let mut next_desire = self.property.get_first_unsatisfied_desire();
-        // also initialize shopping time, none should exist prior to here.
-        let mut available_shopping_time = 0.0;
-        // start our buying loop.
-        while let Some(curr_desire_coord) = next_desire { // Should have our current desire coords in next_desire
-            // start by getting our desire
-            let curr_desire = self.property.desires
-                .get(curr_desire_coord.idx).unwrap();
-            // if the current desire is already satisfied for wahtever reason move on
-            if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
-                // this loop should never 
-                // get the next, and continue.
-                next_desire = self.property.walk_up_tiers(next_desire);
-                continue;
-            }
-            
-            // get our current desire target
-            let current_desire_item = &curr_desire.item;
-            let mut multiple_buys = vec![];
-            // get how many items we need to buy for this desire.
-            let buy_targets = match current_desire_item {
-                DesireItem::Want(id) => { // for wants, we need to get the product inputs.
-                    // if it's a want, go to the most common satisfaction 
-                    // of that want in the market.
-                    self.push_message(rx, tx, 
-                        ActorMessage::FindWant { want: *id, sender: self.actor_info() });
-                    // get the process the market suggests then 
-                    let result = self.active_wait(rx, tx, data, market, 
-                        &vec![
-                            ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, prcocess: 0 },
-                            ActorMessage::WantNotFound { want: 0, buyer: ActorInfo::Firm(0) }
-                        ]);
-                    if let ActorMessage::FoundWant { buyer: _, want, prcocess: _ } = result {
-                        // get the process
-                        let process_info = data.processes.get(&want).unwrap();
-                        let needs = process_info.inputs_and_capital();
-                        // get what needs to be gotten
-                        for part in needs.iter()
-                         {
-                            multiple_buys.push(&part.item);
-                        }
-                        1.0 * needs.len() as f64
-                    } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
-                        // if the want is not found in the market, then move on to the next desire
-                        // debug record anytime we get this here later.
-                        0.0
-                    } else { panic!("Should not be here.") }
-                },
-                DesireItem::Class(_) => 1.0, // for class, any item of the class will be good enough.
-                DesireItem::Product(_) => 1.0, // for specific product. only one item will be needed.
-            };
-            // preemptively get the next desire
-            // next_desire = self.property.walk_up_tiers(next_desire);
-            // then sift up to this desire point to free up excess resources.
-            // self.property.sift_up_to(&curr_desire_coord, data);
-            // get a trip of time worth 
-            // TODO update to take more dynamic time payment into account.
-            available_shopping_time += self.property.get_shopping_time(
-                SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
-                data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
-            // check that it's enough time to go out buying
-            if SHOPPING_TIME_COST > available_shopping_time {
-                // if we don't have enough time to go shopping, break out, we won't
-                // resolve that problem here.
-                // return the time to our property and gtfo.
-                self.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
+                // loop over the buys and react to the results of them.
                 break;
-            }
-            if multiple_buys.len() > 0 {
-                
             } else {
-                
+                // Do the buy
+                let result = self.try_to_buy(rx, tx, data, market, current_desire_item, buy_targets);
+                match result {
+                    BuyResult::CancelBuy => todo!(),
+                    BuyResult::NotSuccessful { reason } => todo!(),
+                    BuyResult::SellerClosed => todo!(),
+                    BuyResult::Successful => todo!(),
+                    BuyResult::NoTime => todo!(),
+                }
+                // with result of buy gotten, go to the next loop.
             }
-            break;
         }
     }
 
@@ -719,54 +661,43 @@ impl Pop {
     tx: &Sender<ActorMessage>,
     data: &DataManager,
     market: &MarketHistory,
-    records: &mut HashMap<usize, PropertyInfo>,
-    product: &usize) -> BuyResult {
-        // TODO update for property change.
-        // get time cost for later
-        let time_cost = self.standard_shop_time_cost(data);
-        // get the amount we want to get and the unit price budget.
-        //let mem = self.memory.product_knowledge.get_mut(product).expect("Product not found?");
-        // let price = mem.current_unit_budget();
-        let price = 1.0;
-        // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
-        let market_price = market.get_product_price(product, 0.0);
-        if market_price > (price * constants::HARD_BUY_CAP) {
-            // if unfeaseable, at current market price, cancel.
-            return BuyResult::CancelBuy;
-        }
-        // check if we have enough time available to do the purchase.
-        if let Some(record) = records.get_mut(&TIME_ID) {
-            if record.unreserved < time_cost {
-                return BuyResult::NoTime;
+    item: &DesireItem,
+    target: f64) -> BuyResult {
+        if let DesireItem::Product(product) = item {
+            // get time cost for later
+            let time_cost = self.standard_shop_time_cost(data);
+            // let price = mem.current_unit_budget();
+            let price = 1.0;
+            // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
+            let market_price = market.get_product_price(product, 0.0);
+            if market_price > (price * constants::HARD_BUY_CAP) {
+                // if unfeaseable, at current market price, cancel.
+                return BuyResult::CancelBuy;
             }
-            // subtract the time from our stock and add it to time spent
-            // TODO Consider updating this to scale not just with population buying but also pop_efficiency gains.
-            // TODO cheat and just subtract from time right now, this should subtract from Shopping_time not normal time.
-            self.property.add_property(TIME_ID, -time_cost, data);
-            //mem.time_spent += time_cost;
-            // TODO update self.breakdown.total to instead use 'working population' instead of total to exclude dependents.
-            let _result = record.expend(time_cost);
-        }
 
-        // since the current market price is within our budget, try to look for it.
-        self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
-        // with the message sent, wait for the response back while in our standard holding pattern.
-        let result = self.active_wait(rx, tx, data, market,
-            &vec![ActorMessage::ProductNotFound { product: 0, buyer: ActorInfo::Firm(0) },
-            ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
-        // result is now either FoundProduct or ProductNotFound, deal with it and return the result to the caller
-        // TODO update this to be smarter about doing emergency buy searches.
-        if let ActorMessage::ProductNotFound { product: _, .. }
-        = result {
-            // TODO update to use emergency buy in dire situations here.
-            // if product not found, do an emergency search instead.
-            //self.emergency_buy(rx, tx, data, market, spend, &product, returned)
-            BuyResult::NotSuccessful { reason: OfferResult::OutOfStock }
+            // since the current market price is within our budget, try to look for it.
+            self.push_message(rx, tx, ActorMessage::FindProduct { product: *product, sender: self.actor_info() });
+            // with the message sent, wait for the response back while in our standard holding pattern.
+            let result = self.active_wait(rx, tx, data, market,
+                &vec![ActorMessage::ProductNotFound { product: 0, buyer: ActorInfo::Firm(0) },
+                ActorMessage::FoundProduct { seller: ActorInfo::Firm(0), buyer: ActorInfo::Firm(0), product: 0 }]);
+            // result is now either FoundProduct or ProductNotFound, deal with it and return the result to the caller
+            // TODO update this to be smarter about doing emergency buy searches.
+            if let ActorMessage::ProductNotFound { product: _, .. }
+            = result {
+                // TODO update to use emergency buy in dire situations here.
+                // if product not found, do an emergency search instead.
+                //self.emergency_buy(rx, tx, data, market, spend, &product, returned)
+                BuyResult::NotSuccessful { reason: OfferResult::OutOfStock }
+            }
+            else if let ActorMessage::FoundProduct { seller, .. } = result {
+                self.standard_buy(rx, tx, data, market, seller, records)
+            }
+            else { unreachable!("Somehow did not get FoundProduct or ProductNotFound."); }
         }
-        else if let ActorMessage::FoundProduct { seller, .. } = result {
-            self.standard_buy(rx, tx, data, market, seller, records)
+        else {
+            BuyResult::NotSuccessful { reason: OfferResult::Incomplete }
         }
-        else { unreachable!("Somehow did not get FoundProduct or ProductNotFound."); }
     }
 
     /// Gets the standard shopping time cost for this pop.

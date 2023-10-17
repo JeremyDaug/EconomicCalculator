@@ -485,6 +485,8 @@ pub enum DesireTag{
 /// # Desire Item Enum
 /// 
 /// Contains data for desires that are sought.
+/// 
+/// Want, Class, or Product
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DesireItem {
     /// A desire for a want (Food).
