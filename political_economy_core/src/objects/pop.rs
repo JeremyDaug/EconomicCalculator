@@ -1072,14 +1072,18 @@ impl Pop {
                 quantity, 
                 followups } => {
                     // offer is accepted, but there is a change in the exchange, get the change
-                    // TODO come back here after working our way down from free_time()
+                    let change = self.retrieve_exchange_return(rx, tx, product, seller, followups);
                 },
                 ActorMessage::RejectOffer { buyer, 
-                    seller, 
-                    product } => {},
+                seller, 
+                product } => {
+                    // TODO add some method of retrying, either recursing, or entering a special rebuy function.
+                },
                 ActorMessage::CloseDeal { buyer, 
-                    seller, 
-                    product } => {},
+                seller, 
+                product } => {
+                    // Deal closed 
+                },
                 _ => panic!("Incorrect Response. Impossible to get here.")
             }
 
@@ -1093,6 +1097,31 @@ impl Pop {
         }
 
         panic!("Standard Buy: This should never be reached, Specific Wait has returned an incorrect MSG.")
+    }
+
+    /// # Retrieve Change
+    /// 
+    /// Like Send Buy offer, this instead rocieves change if
+    /// ActorMessage::OfferAcceptedWithChange was recieved.
+    fn retrieve_exchange_return(&mut self, 
+    rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    product: usize, 
+    seller: ActorInfo,
+    followups: usize) -> HashMap<usize, f64> {
+        let mut result = HashMap::new();
+        for _ in 0..followups {
+            let response = self.specific_wait(rx, &vec![
+                ActorMessage::ChangeFollowup { buyer: ActorInfo::Firm(0), 
+                    seller: ActorInfo::Firm(0), 
+                    product: 0, 
+                    return_product: 0, 
+                    return_quantity: 0.0, 
+                    followups: 0 }
+            ]);
+            // TODO pick up here.
+        }
+        result
     }
 
     fn offer_result_selector(sat_gain: TieredValue, sat_lost: TieredValue) -> OfferResult {
