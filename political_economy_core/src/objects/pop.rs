@@ -2,6 +2,7 @@
 //!
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
+use core::panic;
 use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current};
 
 use barrage::{Sender, Receiver};
@@ -670,7 +671,7 @@ impl Pop {
     target: f64) -> BuyResult {
         if let DesireItem::Product(product) = item {
             // get time cost for later
-            let time_cost = self.standard_shop_time_cost(data);
+            let time_cost = self.standard_shop_time_cost();
             // let price = mem.current_unit_budget();
             let price = 1.0;
             // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
@@ -709,7 +710,7 @@ impl Pop {
     ///
     /// This is currently calculated as being equal to
     /// SHOPPING_TIME_COST (0.2) * self.total_population
-    pub fn standard_shop_time_cost(&self, _data: &DataManager) -> f64 {
+    pub fn standard_shop_time_cost(&self) -> f64 {
         // TODO Update to get the time cost for Shopping process.
         constants::SHOPPING_TIME_COST * self.count() as f64
     }
@@ -1058,41 +1059,63 @@ impl Pop {
             match response {
                 ActorMessage::SellerAcceptOfferAsIs { buyer, 
                 seller, 
-                product, 
-                .. } => { 
-                    self.property.add_products(&resulting_change, data);
+                product,
+                offer_result } => { 
+                    let _gain = self.property.add_products(&resulting_change, data);
+                    self.property.record_exchange(resulting_change);
+                    self.property.record_purchase(product, current_offer_amv, self.standard_shop_time_cost());
                     // send back close
                     self.push_message(rx, tx, ActorMessage::FinishDeal { buyer, seller, product });
-                    // return success
                     return BuyResult::Successful;
                 },
                 ActorMessage::OfferAcceptedWithChange { buyer, 
                 seller, 
                 product, 
-                quantity, 
-                followups } => {
+                followups, 
+                quantity } => {
+                    // TODO This is not tested or checked just yet. Until firms sell logic and change logic is done, it's not going to be touched.
                     // offer is accepted, but there is a change in the exchange, get the change
-                    let change = self.retrieve_exchange_return(rx, tx, product, seller, followups);
+                    for (prod, quant) in self.retrieve_exchange_return(rx, tx, seller, followups) {
+                        // add to resulting change to remove it from our losses
+                        resulting_change.entry(prod)
+                        .and_modify(|x| *x += quant)
+                        .or_insert(quant);
+                        current_offer_amv -= market.get_product_price(&prod, 1.0) * quant;
+                    }
+                    resulting_change.insert(product, quantity);
+                    // update the effective cost and expenditure in satisfaction and amv
+                    let new_cost = market.get_product_price(&product, 1.0) * quantity;
+                    let new_sat_change = self.property.predict_value_changed(&resulting_change, data);
+                    // given new sat decide whether we'll accept or reject the exchange and respond.
+                    if new_sat_change.value < 0.0 { // if it results in a satisfaction decline, reject.
+                        self.push_message(rx, tx, ActorMessage::RejectPurchase { 
+                            buyer: self.actor_info(), 
+                            seller, 
+                            product, 
+                            price_opinion: OfferResult::Rejected });
+                        return BuyResult::CancelBuy;
+                    } else { // if still positive satisfaction change, accept.
+                        self.property.add_products(&resulting_change, data);
+                        self.property.record_exchange(resulting_change);
+                        self.property.record_purchase(product, current_offer_amv, self.standard_shop_time_cost());
+                        self.push_message(rx, tx, ActorMessage::FinishDeal { buyer, seller, product });
+                        return BuyResult::Successful;
+                    }
                 },
                 ActorMessage::RejectOffer { buyer, 
                 seller, 
                 product } => {
                     // TODO add some method of retrying, either recursing, or entering a special rebuy function.
+                    self.property.record_purchase(product, 0.0, self.standard_shop_time_cost());
+                    return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
                 },
-                ActorMessage::CloseDeal { buyer, 
-                seller, 
-                product } => {
+                ActorMessage::CloseDeal { .. } => {
                     // Deal closed 
+                    self.property.record_purchase(product, 0.0, self.standard_shop_time_cost());
+                    return BuyResult::SellerClosed;
                 },
                 _ => panic!("Incorrect Response. Impossible to get here.")
             }
-
-            // if accepted with reduced amount
-            //   check that the reduced satisfaction is still higher than satisfaction lost
-            //   if still enough
-            //     accept and complete the exchange
-            //   else
-            //     Reject and leave
             // todo if haggling is done, it would be done here.
         }
 
@@ -1106,11 +1129,10 @@ impl Pop {
     fn retrieve_exchange_return(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
-    product: usize, 
     seller: ActorInfo,
     followups: usize) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
-        for _ in 0..followups {
+        for _ in (0..followups).rev() {
             let response = self.specific_wait(rx, &vec![
                 ActorMessage::ChangeFollowup { buyer: ActorInfo::Firm(0), 
                     seller: ActorInfo::Firm(0), 
@@ -1120,6 +1142,17 @@ impl Pop {
                     followups: 0 }
             ]);
             // TODO pick up here.
+            if let ActorMessage::ChangeFollowup { buyer, 
+            seller: s, 
+            product, 
+            return_product, 
+            return_quantity, 
+            followups: follows } = response {
+                result.insert(return_product, return_quantity);
+                debug_assert!(buyer == self.actor_info());
+                debug_assert!(s == seller);
+                debug_assert!(follows == followups);
+            } else { panic!("Recieved something we shouldn't have.") }
         }
         result
     }

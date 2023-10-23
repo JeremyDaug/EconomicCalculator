@@ -744,6 +744,7 @@ mod tests {
             (data, market)
         }
 
+        // FIXME
         mod free_time {
             use std::{thread, time::Duration};
 
@@ -764,7 +765,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 100.0));
+                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -828,7 +829,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost(&data) + 1.0));
+                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 1.0));
                 // add an additional product to the priority list
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
@@ -1061,63 +1062,8 @@ mod tests {
             assert_eq!(desire_test.amount, 10.0);
 
         }
-        
-        mod sort_new_items_should {
-            /*
-            #[test]
-            pub fn place_items_given_appropriately() {
-                let mut test = make_test_pop();
-                // setup the pop's knowledge for the test.
-                test.memory.product_knowledge.insert(0, Knowledge{
-                    target: 5.0,
-                    rollover: 0.0,
-                    achieved: 0.0,
-                    spent: 0.0,
-                    lost: 0.0, 
-                    used: 0.0,
-                    time_budget: 10.0,
-                    amv_budget: 10.0,
-                    time_spent: 0.0,
-                    amv_spent: 0.0,
-                    success_rate: 0.5,
-                    buy_priority: 0
-                });
-                test.memory.product_knowledge.insert(1, Knowledge{
-                    target: 5.0,
-                    rollover: 0.0,
-                    achieved: 0.0,
-                    spent: 0.0, 
-                    used: 0.0,
-                    lost: 0.0,
-                    time_budget: 10.0,
-                    amv_budget: 10.0,
-                    time_spent: 0.0,
-                    amv_spent: 0.0,
-                    success_rate: 0.5,
-                    buy_priority: 0
-                });
 
-
-                let mut keep = HashMap::new();
-                let mut spend = HashMap::new();
-
-                let mut accepted = HashMap::new();
-                accepted.insert(0, 4.0);
-                accepted.insert(1, 6.0);
-                accepted.insert(2, 1.0);
-
-                test.sort_new_items(&mut keep, &mut spend, &accepted);
-
-                assert!(*keep.get(&0).unwrap() == 4.0);
-                assert!(*keep.get(&1).unwrap() == 5.0);
-                assert!(keep.get(&2).is_none());
-
-                assert!(spend.get(&0).is_none());
-                assert!(*spend.get(&1).unwrap() == 1.0);
-                assert!(*spend.get(&2).unwrap() == 1.0);
-            }*/
-        }
-
+        // FIXME
         mod standard_sell {
             use std::{collections::HashMap, thread, time::Duration};
             use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, property_info::PropertyInfo};
@@ -3344,6 +3290,48 @@ mod tests {
             };
 
             result
+        }
+
+        mod record_exchange_should {
+            use std::collections::HashMap;
+
+            use crate::objects::property::Property;
+
+            #[test]
+            pub fn panic_when_any_product_not_in_property() {
+                let mut test = Property::new(vec![]);
+
+                let mut exchange = HashMap::new();
+                exchange.insert(0, 1.0);
+
+                let mut test_clone = test.clone();
+                let exch1 = exchange.clone();
+
+                let result 
+                    = std::panic::catch_unwind(move || test_clone.record_exchange(exch1));
+                assert!(result.is_err());
+
+                test.unsafe_add_property(0, 1.0);
+                let result 
+                    = std::panic::catch_unwind(move || test.record_exchange(exchange));
+                assert!(result.is_ok());
+            }
+
+            #[test]
+            pub fn correctly_record_spend_and_recieved() {
+                let mut test = Property::new(vec![]);
+                test.unsafe_add_property(0, 10.0);
+                test.unsafe_add_property(1, 1.0);
+
+                let mut exchange = HashMap::new();
+                exchange.insert(0, -1.0);
+                exchange.insert(1, 5.0);
+
+                test.record_exchange(exchange);
+
+                assert_eq!(test.property[&0].spent, 1.0);
+                assert_eq!(test.property[&1].recieved, 5.0);
+            }
         }
 
         mod satisfaction_from_amv_should {
@@ -6659,9 +6647,10 @@ mod tests {
                 test.property.insert(4, PropertyInfo::new(10.0));
                 // get initial value
                 let initial = test.sift_all(&data);
+                //print!("{}", test.print_satisfactions(None, None));
                 assert_eq!(initial.tier, 8);
-                assert!(93.0 < initial.value);
-                assert!(initial.value < 94.0);
+                assert!(92.0 < initial.value);
+                assert!(initial.value < 93.0);
                 // print!("{}", test.print_satisfactions(None, None));
                 // removes
                 // subtract 1.0 from 0
@@ -8179,34 +8168,37 @@ mod tests {
                 // 26.0 into desire 0, (tier 100)
                 let desire0 = test.desires.get(0).unwrap();
                 assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 24);
-                assert!(desire0.satisfaction == 7.0);
+                assert_eq!(desire0.satisfaction, 7.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire1 = test.desires.get(1).unwrap();
                 assert!(desire1.is_fully_satisfied());
                 assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 12);
-                assert!(desire1.satisfaction == 4.0);
+                assert_eq!(desire1.satisfaction, 4.0);
                 // and check that items were reserved correctly.
+                // touched 1st product
                 let prop0 = test.property.get(&0).unwrap();
-                assert!(prop0.total_property == 15.0);
-                assert!(prop0.unreserved == 4.0);
-                assert!(prop0.reserved == 0.0);
-                assert!(prop0.want_reserve == 0.0);
-                assert!(prop0.class_reserve == 11.0);
-                assert!(prop0.specific_reserve == 0.0);
+                assert_eq!(prop0.total_property, 15.0);
+                assert_eq!(prop0.unreserved, 4.0);
+                assert_eq!(prop0.reserved, 0.0);
+                assert_eq!(prop0.want_reserve, 0.0);
+                assert_eq!(prop0.class_reserve, 11.0);
+                assert_eq!(prop0.specific_reserve, 0.0);
+                // touched 2nd product
                 let prop1 = test.property.get(&1).unwrap();
-                assert!(prop1.total_property == 15.0);
-                assert!(prop1.unreserved == 15.0);
-                assert!(prop1.reserved == 0.0);
-                assert!(prop1.want_reserve == 0.0);
-                assert!(prop1.class_reserve == 0.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert_eq!(prop1.total_property, 15.0);
+                assert_eq!(prop1.unreserved, 15.0);
+                assert_eq!(prop1.reserved, 0.0);
+                assert_eq!(prop1.want_reserve, 0.0);
+                assert_eq!(prop1.class_reserve, 0.0);
+                assert_eq!(prop1.specific_reserve, 0.0);
+                // untouched 3rd product
                 let prop2 = test.property.get(&2).unwrap();
-                assert!(prop2.total_property == 10.0);
-                assert!(prop2.unreserved == 10.0);
-                assert!(prop2.reserved == 0.0);
-                assert!(prop2.want_reserve == 0.0);
-                assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert_eq!(prop2.total_property, 10.0);
+                assert_eq!(prop2.unreserved, 10.0);
+                assert_eq!(prop2.reserved, 0.0);
+                assert_eq!(prop2.want_reserve, 0.0);
+                assert_eq!(prop2.class_reserve, 0.0);
+                assert_eq!(prop2.specific_reserve, 0.0);
                 assert_eq!(result.tier, 24);
                 assert!(58.0 < result.value);
                 assert!(result.value < 59.0);

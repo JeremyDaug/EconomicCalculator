@@ -21,7 +21,7 @@ use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartIt
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Property {
     /// All of the desires we are storing and looking over.
     pub desires: Vec<Desire>,
@@ -84,6 +84,9 @@ pub struct Property {
     pub market_satisfaction: f64,
     /// The highest tier of satisfaction reached by any desire.
     pub highest_tier: usize,
+    /// The satisfaction of our desires in TieredValue format.
+    /// This is set at the same time as other satisfactions
+    pub tiered_satisfaction: TieredValue,
     /// A sanity check bool.
     /// 
     /// If true, then our property is (hypothetically) correctly sifted.
@@ -122,7 +125,8 @@ impl Property {
             extra_benefits: 0.0,
             todays_wage: 0.0,
             pay_period: 1,
-            is_sifted: true
+            is_sifted: true,
+            tiered_satisfaction: TieredValue { tier: 0, value: 0.0 },
         }
     }
 
@@ -827,6 +831,7 @@ impl Property {
         // start with full tier satisfaction and highest tier.
         self.full_tier_satisfaction = Some(usize::MAX);
         self.highest_tier = 0;
+        self.tiered_satisfaction = TieredValue { tier: 0, value: 0.0 };
         // for each desire
         for desire in self.desires.iter() {
             let tier = desire.satisfaction_up_to_tier().unwrap_or(0);
@@ -847,11 +852,12 @@ impl Property {
                 } else { // if no tier, set to none.
                     self.full_tier_satisfaction = None;
                 }
-                
             }
             // always check against the highest tier
-            self.highest_tier = self.highest_tier.max(tier)
+            self.highest_tier = self.highest_tier.max(tier);
         }
+        // update tiered_satisfaction
+        self.tiered_satisfaction = self.total_estimated_value();
         // get quantity satisfied
         self.quantity_satisfied = self.desires.iter()
         .map(|x| x.satisfaction).sum();
@@ -1210,7 +1216,7 @@ impl Property {
         }
         self.update_satisfactions();
         self.is_sifted = true;
-        self.total_estimated_value()
+        self.tiered_satisfaction
     }
 
     /// # Next Stepped on Tier
@@ -1764,7 +1770,7 @@ impl Property {
                     // check if we succeeded or not
                     if shifted == 0.0 || // if shifted nothing
                     !desire.satisfied_at_tier(current.tier) || // or unable to fully satisfy
-                    desire.past_end(current.tier + 1) {
+                    desire.past_end(current.tier + 1) { // or no next tier
                         cleared.insert(current.idx); // add to cleared and gtfo
                     }
                 },
@@ -2041,6 +2047,56 @@ impl Property {
             None
         } else {
             Some(result)
+        }
+    }
+
+    /// # Record Exchange
+    /// 
+    /// Records the results of an exchange in various property data.
+    /// 
+    /// - Positive values are recorded as recieved.
+    /// 
+    /// - Negative vaules are recorded as Spent.
+    /// 
+    /// This does not remove or add products to property, merely updates 
+    /// spent and recieved.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if any item given is not fonud.
+    pub fn record_exchange(&mut self, exchange_results: HashMap<usize, f64>) {
+        for (prod, quant) in exchange_results {
+            if let Some(info) = self.property.get_mut(&prod) {
+                if quant < 0.0 {
+                    info.spent -= quant;
+                } else {
+                    info.recieved += quant;
+                }
+            } else {
+                panic!("Product {} not found in property info.", prod);
+            }
+        }
+    }
+
+    /// # Record Purchase
+    /// 
+    /// Records a purchase that was made.
+    /// 
+    /// Adds amv_expended to amv_cost and time_expended to time_cost.
+    /// 
+    /// Not Tested.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if product given does not currently exist in our property data.
+    pub fn record_purchase(&mut self, product: usize, 
+    amv_expended: f64, 
+    time_expended: f64) {
+        if let Some(info) = self.property.get_mut(&product) {
+            info.amv_cost += amv_expended;
+            info.time_cost += time_expended;
+        } else {
+            panic!("Product {} not found in property info.", product);
         }
     }
 }

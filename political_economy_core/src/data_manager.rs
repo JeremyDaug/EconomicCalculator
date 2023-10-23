@@ -1,6 +1,8 @@
 use core::panic;
 use std::collections::{HashMap, HashSet};
 
+use itertools::Itertools;
+
 use crate::{objects::{want::Want, 
     skill_group::SkillGroup,
     skill::Skill, 
@@ -659,7 +661,8 @@ impl DataManager {
         // clear out old data for sanity measures
         self.product_classes.clear();
         // update and sanity check product classes
-        for (&product_id, prod_data) in self.products.iter() {
+        for (&product_id, prod_data) in self.products.iter()
+        .sorted_by(|a,b| a.0.cmp(b.0)) {
             if let Some(id) = prod_data.product_class {
                 // sanity check that the generic points to itself
                 let other = self.products.get(&id).unwrap();

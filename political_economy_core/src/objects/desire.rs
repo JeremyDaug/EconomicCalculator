@@ -3,6 +3,8 @@
 use core::fmt;
 use std::error::Error;
 
+use super::property::TieredValue;
+
 /// Desires
 /// 
 /// Desires are things that are desired and used in a the Desires class.
