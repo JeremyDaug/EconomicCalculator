@@ -2370,15 +2370,16 @@ mod tests {
                 let seller = ActorInfo::Firm(1);
                 // setup property split
                 let handle = thread::spawn(move || {
-                    let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        seller);
+                    let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, 
+                        &history, seller);
                     (test, result)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
 
                 // send the out of stock message.
-                tx.send(ActorMessage::NotInStock { buyer: pop_info, seller, product: 7 }).expect("Sudden Disconnect?");
+                tx.send(ActorMessage::NotInStock { buyer: pop_info, seller, product: 7 })
+                .expect("Sudden Disconnect?");
                 thread::sleep(Duration::from_millis(100));
                 // ensure we closed out
                 if !handle.is_finished() { assert!(false); }

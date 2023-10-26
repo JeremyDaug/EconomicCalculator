@@ -767,7 +767,7 @@ impl Pop {
     tx: &Sender<ActorMessage>,
     data: &DataManager,
     market: &MarketHistory,
-    seller: ActorInfo) -> BuyResult {
+    _seller: ActorInfo) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         let result = self.specific_wait(rx, &vec![
@@ -779,26 +779,27 @@ impl Pop {
         if let ActorMessage::NotInStock { .. } = result {
             // maybe record failure
             return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
-        } else if let ActorMessage::InStock { buyer, seller,
-        product, price, quantity } = result { // Deal Making Section
+        } else if let ActorMessage::InStock { buyer: _, seller,
+        product: sought_product, price, quantity: stock_available } = result { // Deal Making Section
             // TODO if we add Want Price Estimates in the Market, update this to use them!!!!!!!
             // setup current offer and current offer amv
             let mut current_offer: HashMap<usize, f64> = HashMap::new();
             let mut current_offer_amv = 0.0;
             // get the the property_info for the product we are buying
             let product_info = self.property.property
-                .entry(product).or_insert(PropertyInfo::new(0.0));
+                .entry(sought_product).or_insert(PropertyInfo::new(0.0));
             // buy up to the remaining target or +1, if no remaining target.
-            let quantity = if product_info.remaining_target() > 0.0 {
-                quantity.min(product_info.remaining_target()) 
+            let purchase_quantity = if product_info.remaining_target() > 0.0 {
+                stock_available.min(product_info.remaining_target()) 
             } else { // if no remaining target, just get 1 unit capped at stock available.
-                quantity.min(1.0)
+                stock_available.min(1.0)
             };
             // Get how much this purchase would increase our satisfaction by.
-            let sat_gain = self.property.predict_value_gained(product, quantity, data);
+            let sat_gain = self.property.predict_value_gained(sought_product, 
+                purchase_quantity, data);
             let mut sat_lost = TieredValue { tier: 0, value: 0.0 };
             // get the total AMV price of the purchase
-            let purchase_price = quantity * price;
+            let purchase_price = purchase_quantity * price;
             // First use any property which we don't have a desire to keep to try and use them.
             for (product, info) in self.property.property.iter()
             .filter(|(_, info)| info.unreserved > 0.0) // get property which isn't reserved.
@@ -1019,12 +1020,12 @@ impl Pop {
                 let current_purchase_amount = current_offer_amv / price;
                 current_purchase_amount.floor()
             } else {
-                quantity
+                purchase_quantity
             };
             // after the previous section, we either have enough AMV to try and purchase,
             // or ran out of options which wouldn't overdraw our satisfaction.
             // send offer and wait for response
-            self.send_buy_offer(rx, tx, product, seller, &current_offer, offer_result, final_target);
+            self.send_buy_offer(rx, tx, sought_product, seller, &current_offer, offer_result, final_target);
             // TODO add in possibility of rejection here. For now they will always try, if nothing else.
 
             // deal with responses
@@ -1052,7 +1053,7 @@ impl Pop {
                 resulting_change.insert(prod, -quant);
             }
             // add how much we bought to the resulting_change.
-            resulting_change.insert(product, final_target);
+            resulting_change.insert(sought_product, final_target);
 
             // if accepted, complete exchange
             // if outright rejected, leave
@@ -1111,7 +1112,7 @@ impl Pop {
                 },
                 ActorMessage::CloseDeal { .. } => {
                     // Deal closed 
-                    self.property.record_purchase(product, 0.0, self.standard_shop_time_cost());
+                    self.property.record_purchase(sought_product, 0.0, self.standard_shop_time_cost());
                     return BuyResult::SellerClosed;
                 },
                 _ => panic!("Incorrect Response. Impossible to get here.")
