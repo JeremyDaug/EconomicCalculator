@@ -1840,6 +1840,8 @@ impl DataManager {
     }
 
     /// Placeholder loader for everything Should load by sets later on, rather than all at once.
+    /// 
+    /// Todo when updating any of these, ensure that the current data is saved somewhere so it can be used for tests.
     pub fn load_all(&mut self, _file_name: &String) -> Result<(), String> {
         self.load_wants(_file_name)?;
         self.load_technologies(_file_name)?;

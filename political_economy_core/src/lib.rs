@@ -508,6 +508,22 @@ mod tests {
               species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo}, 
               demographics::Demographics, data_manager::DataManager};
 
+        /// Makes a pop for testing. The pop will have the following info
+        /// 
+        /// 20 pops total --
+        /// 20 pops of the same speciecs
+        /// - Desires
+        ///   - 20 Food 0/1/2/3/4
+        ///   - 20 Shelter 7/9/11/13
+        ///   - 20 Clothing 2/4/6/8
+        /// 10 with a culture
+        /// - Desires
+        ///   - 10 Ambrosia Fruit 10/15/20/25
+        ///   - 10 Cotton Clothes 15/25/35 ...
+        /// 10 with an ideology
+        /// - Desires
+        ///   - 10 Hut 30
+        ///   - 10 Cabin 50
         pub fn make_test_pop() -> Pop {
             let mut test = Pop{ 
                 id: 10, 
@@ -523,7 +539,7 @@ mod tests {
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
-                item: DesireItem::Product(0), 
+                item: DesireItem::Want(2), // food
                 start: 0, 
                 end: Some(4), 
                 amount: 1.0, 
@@ -531,24 +547,32 @@ mod tests {
                 step: 1, 
                 tags: vec![] };
             let species_desire_2 = Desire{ 
-                item: DesireItem::Product(1), 
-                start: 9, 
-                end: None, 
+                item: DesireItem::Want(3), // shelter
+                start: 7, 
+                end: Some(13), 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                step: 1, 
+                step: 2, 
+                tags: vec![] };
+            let species_desire_3 = Desire{ 
+                item: DesireItem::Want(4), //clothing
+                start: 2, 
+                end: Some(8), 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 2, 
                 tags: vec![] };
 
             let culture_desire_1 = Desire{ 
-                item: DesireItem::Product(2), 
+                item: DesireItem::Product(2), // ambrosia fruit
                 start: 10, 
-                end: None, 
+                end: Some(25), 
                 amount: 1.0, 
                 satisfaction: 0.0, 
-                step: 0, 
+                step: 5, 
                 tags: vec![] };
             let culture_desire_2 = Desire{ 
-                item: DesireItem::Product(3), 
+                item: DesireItem::Product(6), // clothes
                 start: 15, 
                 end: None, 
                 amount: 1.0, 
@@ -557,7 +581,7 @@ mod tests {
                 tags: vec![] };
 
             let ideology_desire_1 = Desire{ 
-                item: DesireItem::Product(4), 
+                item: DesireItem::Product(14), // Hut
                 start: 30, 
                 end: None, 
                 amount: 1.0, 
@@ -565,8 +589,8 @@ mod tests {
                 step: 0, 
                 tags: vec![] };
             let ideology_desire_2 = Desire{ 
-                item: DesireItem::Product(5), 
-                start: 31, 
+                item: DesireItem::Product(15), // Cabin
+                start: 50, 
                 end: None, 
                 amount: 1.0, 
                 satisfaction: 0.0, 
@@ -576,7 +600,7 @@ mod tests {
             let species = Species::new(0,
                 "Species".into(),
                 "".into(),
-                vec![species_desire_1, species_desire_2],
+                vec![species_desire_1, species_desire_2, species_desire_3],
                 vec![], vec![], 
                 1.0, 0.03,
                 0.02).expect("Messed up new.");
@@ -661,15 +685,17 @@ mod tests {
 
         /// preps a pop's property, the property's data, and market prices of those items.
         /// 
-        /// ID 6 AMV = 1.0
-        /// ID 7 AMV = 5.0
+        /// Sets all values to 1.0 amv and salability of 0.5 by default.
         /// 
-        /// Only gives the pop 1 item, product ID 6. 10.0 units. 
+        /// Exceptions are:
+        /// - Ambrosia Fruit are set as a currency (Sal 1.0, currency=true)
+        /// - Cotton Clothes are priced at 10.0 amv.
+        /// - Cotton Suit is priced at 20.0 amv.
+        /// - Hut has a price of 100.0 amv.
+        /// - Cabin has a price of 1000.0 amv.
         /// 
         /// This is for testing buy and sell functions, not offer_calculations.
-        /// 
-        /// Pop should always buy product 7.
-        pub fn prepare_data_for_market_actions(pop: &mut Pop) -> (DataManager, MarketHistory) {
+        pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
             let mut data = DataManager::new();
             // TODO update this when we update Load All
             data.load_all(&String::from("")).expect("Error on load?");
@@ -681,64 +707,31 @@ mod tests {
                 sale_priority: vec![],
                 currencies: vec![],
             };
-            market.info.insert(2, ProductInfo {
-                available: 0.0,
-                price: 1.0,
-                offered: 0.0,
-                sold: 0.0,
-                salability: 100.0,
-                is_currency: true,
-            });
-            market.info.insert(3, ProductInfo {
-                available: 0.0,
-                price: 1.0,
-                offered: 0.0,
-                sold: 0.0,
-                salability: 1.0,
-                is_currency: false,
-            });
-            market.info.insert(4, ProductInfo {
-                available: 0.0,
-                price: 1.0,
-                offered: 0.0,
-                sold: 0.0,
-                salability: 1.0,
-                is_currency: false,
-            });
-            market.info.insert(5, ProductInfo {
-                available: 0.0,
-                price: 1.0,
-                offered: 0.0,
-                sold: 0.0,
-                salability: 1.0,
-                is_currency: false,
-            });
-            market.info.insert(6, ProductInfo {
-                available: 0.0,
-                price: 2.0,
-                offered: 0.0,
-                sold: 0.0,
-                salability: 1.0,
-                is_currency: false,
-            });
-            market.info.insert(7, ProductInfo {
-                available: 0.0,
-                price: 5.0,
-                offered: 0.0,
-                sold: 0.0,
-                salability: 0.0,
-                is_currency: false,
-            });
+            // quickly set all prices to 1.0 for ease going forward.
+            for idx in 0..26 {
+                market.info.insert(idx, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.5,
+                    is_currency: false,
+                });
+            }
+            // ambrosia fruit
+            market.info.get_mut(&2).expect("Brok").salability = 1.0;
+            market.info.get_mut(&2).expect("Brok").is_currency = true;
+
+            market.info.get_mut(&6).expect("Brok").price = 10.0;
+            market.info.get_mut(&7).expect("Brok").price = 20.0;
+
+            market.info.get_mut(&14).expect("Brok").price = 100.0;
+            market.info.get_mut(&15).expect("Brok").price = 1000.0;
 
             market.currencies.push(2);
-            market.sale_priority.push(2);
-            market.sale_priority.push(3);
-            market.sale_priority.push(4);
-            market.sale_priority.push(5);
-            market.sale_priority.push(6);
-            market.sale_priority.push(7);
+            // sale priority would go here if used.
 
-            pop.property.property.insert(6, PropertyInfo::new(10.0));
+            // pop.property.property.insert(6, PropertyInfo::new(10.0));
             // TODO fix this info.
 
             (data, market)
@@ -2402,6 +2395,9 @@ mod tests {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);
+                // add in pop's property and sift their desires.
+                test.property.add_products(products, &data);
+
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
