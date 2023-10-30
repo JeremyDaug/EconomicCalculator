@@ -518,7 +518,7 @@ mod tests {
         ///   - 20 Clothing 2/4/6/8
         /// 10 with a culture
         /// - Desires
-        ///   - 10 Ambrosia Fruit 10/15/20/25
+        ///   - 10 Ambrosia Fruit 10/15/20/25/30
         ///   - 10 Cotton Clothes 15/25/35 ...
         /// 10 with an ideology
         /// - Desires
@@ -566,7 +566,7 @@ mod tests {
             let culture_desire_1 = Desire{ 
                 item: DesireItem::Product(2), // ambrosia fruit
                 start: 10, 
-                end: Some(25), 
+                end: Some(30), 
                 amount: 1.0, 
                 satisfaction: 0.0, 
                 step: 5, 
@@ -2394,9 +2394,39 @@ mod tests {
             pub fn should_return_success_when_able_to_buy_single_offer_no_change() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
-                let (data, history) = prepare_data_for_market_actions(&mut test);
+                let (data, mut history) = prepare_data_for_market_actions(&mut test);
                 // add in pop's property and sift their desires.
-                test.property.add_products(products, &data);
+                // we have 20 extra food than we need (20*5=100.0 units)
+                // this covers all food and leave excess for trading
+                // This covers both species food desire and culture ambrosia fruit desire.
+                test.property.add_property(2, 120.0, &data);
+                // they have all the shelter they need via huts
+                // 4 * 20 units
+                // this covers both the shelter desire and the hut desire
+                test.property.add_property(14, 80.0, &data);
+                // the have all clothing needs (2-8) covered with 80 units
+                // clothing culture desire is covered up to tier 85. (30 more than cabin at tier 50)
+                // 20 * 5 units
+                // they have 20.0 extra units available to trade.
+                test.property.add_property(6, 100.0, &data);
+                // missing desires are 10 cabins at tier 50, and the infinite
+                // desire for 10 units of clothes every 10 tiers.
+                // we want to target buying 10 cabins.
+                let val = test.property.property.entry(15)
+                .or_insert(PropertyInfo::new(0.0));
+                val.max_target = 10.0;
+                val.min_target = 0.0;
+
+                // The pop is trying to buy 10 cabins at tier 50
+                // It should always include the 20.0 units of Ambrosia fruit, 
+                // which they have in excess.
+                // They should also include 20.0 sets of clothes, which are available in excess.
+                // Anything else offered would be 
+                // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
+                // 20 ambrosia fruit and 20 cotton clothes.
+                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -2407,48 +2437,60 @@ mod tests {
                 // setup property split
 
                 let handle = thread::spawn(move || {
-                    let result = test.standard_buy(&mut passed_rx, &passed_tx, &data, &history, 
-                        selling_firm);
+                    let result = test.standard_buy(&mut passed_rx, &passed_tx, 
+                        &data, &history, selling_firm);
                     (test, result)
                 });
                 // check that it's running
                 if handle.is_finished() { assert!(false); }
 
-                // send the out of stock message.
+                // send the in stock message.
                 tx.send(ActorMessage::InStock { buyer: pop_info, 
-                    seller: selling_firm, product: 7, price: 5.0, 
+                    seller: selling_firm, product: 15, price: 5.9, 
                     quantity: 100.0 }).expect("Sudden Disconnect?");
                 thread::sleep(Duration::from_millis(100));
                 // should have the first message we sent
                 if let ActorMessage::InStock { .. } = rx.recv().unwrap() {
                 } else { assert!(false); }
-                // it should have sent a buy order of 10.0 units of DI6
+                // it should have sent a buy order of 20.0 units of Ambrosia Fruit and 
+                // 20.0 units of Clothes
                 if let ActorMessage::BuyOffer { buyer, 
                 seller, product, 
                 price_opinion, quantity, 
                 followup } = rx.recv().unwrap() {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
-                    assert_eq!(product, 7);
-                    assert_eq!(price_opinion, OfferResult::Reasonable);
-                    assert_eq!(quantity, 2.0);
-                    assert_eq!(followup, 1);
+                    assert_eq!(product, 15);
+                    assert_eq!(price_opinion, OfferResult::Cheap);
+                    assert_eq!(quantity, 10.0);
+                    assert_eq!(followup, 2);
                 } else { assert!(false); }
-                // then check that the sent the expected amount
+                // then check that the sent the expected food
                 if let ActorMessage::BuyOfferFollowup { buyer, 
                 seller, product, 
                 offer_product, offer_quantity, 
                 followup } = rx.recv().unwrap() {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
-                    assert_eq!(product, 7);
-                    assert_eq!(offer_product, 6);
-                    assert_eq!(offer_quantity, 5.0);
-                    assert_eq!(followup, 0);
+                    assert_eq!(product, 15);
+                    assert!(offer_product == 2 || offer_product == 6);
+                    assert_eq!(offer_quantity, 20.0);
+                    assert_eq!(followup, 1);
                 } else { assert!(false); }
+                if let ActorMessage::BuyOfferFollowup { buyer, 
+                    seller, product, 
+                    offer_product, offer_quantity, 
+                    followup } = rx.recv().unwrap() {
+                        assert_eq!(buyer, pop_info);
+                        assert_eq!(seller, selling_firm);
+                        assert_eq!(product, 15);
+                        assert!(offer_product == 2 || offer_product == 6);
+                        assert_eq!(offer_quantity, 20.0);
+                        assert_eq!(followup, 0);
+                    } else { assert!(false); }
                 // with the offer sent correctly, send our acceptance and go forward
                 tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
-                    seller: selling_firm, product: 7, offer_result: OfferResult::Cheap })
+                    seller: selling_firm, product: 15, offer_result: OfferResult::Cheap })
                     .expect("Disconnected?");
                 thread::sleep(Duration::from_millis(100));
                 // ensure we closed out
@@ -2460,8 +2502,10 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(test.property.property.get(&6).unwrap().total_property == 5.0);
-                assert!(test.property.property.get(&7).unwrap().total_property == 2.0);
+                assert!(test.property.property.get(&15).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&2).unwrap().total_property == 100.0);
+                assert!(test.property.property.get(&6).unwrap().total_property == 80.0);
+                assert!(test.property.property.get(&14).unwrap().total_property == 80.0);
                 // check pop memory for the products as well.
                 // TODO Check product movements
             }
@@ -3020,9 +3064,238 @@ mod tests {
     }
 
     mod property_tests {
-        use std::collections::{HashSet, HashMap};
+        use std::collections::{HashSet, HashMap, VecDeque};
 
-        use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag}}, data_manager::DataManager};
+        use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag}, market::{MarketHistory, ProductInfo}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species}, data_manager::DataManager, demographics::Demographics};
+
+        /// Makes a pop for testing. The pop will have the following info
+        /// 
+        /// 20 pops total --
+        /// 20 pops of the same speciecs
+        /// - Desires
+        ///   - 20 Food 0/1/2/3/4
+        ///   - 20 Shelter 7/9/11/13
+        ///   - 20 Clothing 2/4/6/8
+        /// 10 with a culture
+        /// - Desires
+        ///   - 10 Ambrosia Fruit 10/15/20/25/30
+        ///   - 10 Cotton Clothes 15/25/35 ...
+        /// 10 with an ideology
+        /// - Desires
+        ///   - 10 Hut 30
+        ///   - 10 Cabin 50
+        pub fn make_test_pop() -> Pop {
+            let mut test = Pop{ 
+                id: 10, 
+                job: 0, 
+                firm: 0, 
+                market: 0, 
+                skill: 0, 
+                lower_skill_level: 0.0, 
+                higher_skill_level: 0.0, 
+                property: Property::new(vec![]), 
+                breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
+                is_selling: true,
+                backlog: VecDeque::new()};
+
+            let species_desire_1 = Desire{ 
+                item: DesireItem::Want(2), // food
+                start: 0, 
+                end: Some(4), 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 1, 
+                tags: vec![] };
+            let species_desire_2 = Desire{ 
+                item: DesireItem::Want(3), // shelter
+                start: 7, 
+                end: Some(13), 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 2, 
+                tags: vec![] };
+            let species_desire_3 = Desire{ 
+                item: DesireItem::Want(4), //clothing
+                start: 2, 
+                end: Some(8), 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 2, 
+                tags: vec![] };
+
+            let culture_desire_1 = Desire{ 
+                item: DesireItem::Product(2), // ambrosia fruit
+                start: 10, 
+                end: Some(30), 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 5, 
+                tags: vec![] };
+            let culture_desire_2 = Desire{ 
+                item: DesireItem::Product(6), // clothes
+                start: 15, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 10, 
+                tags: vec![] };
+
+            let ideology_desire_1 = Desire{ 
+                item: DesireItem::Product(14), // Hut
+                start: 30, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 0, 
+                tags: vec![] };
+            let ideology_desire_2 = Desire{ 
+                item: DesireItem::Product(15), // Cabin
+                start: 50, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0, 
+                step: 0, 
+                tags: vec![] };
+
+            let species = Species::new(0,
+                "Species".into(),
+                "".into(),
+                vec![species_desire_1, species_desire_2, species_desire_3],
+                vec![], vec![], 
+                1.0, 0.03,
+                0.02).expect("Messed up new.");
+
+            let culture = Culture::new(0,
+                "Culture".into(),
+                "".into(),
+                1.0, 0.01,
+                0.01,
+                vec![culture_desire_1, culture_desire_2],
+                vec![]).expect("Messed up new.");
+
+            let ideology = Ideology::new(0,
+                "Ideology".into(),
+                "".into(),
+                0.0, 0.0,
+                1.0,
+                vec![ideology_desire_1, ideology_desire_2],
+                vec![]).expect("Messed up new.");
+
+            let mut demos = Demographics{ species: HashMap::new(),
+                 cultures: HashMap::new(), 
+                ideology: HashMap::new() };
+
+            demos.species.insert(species.id, species);
+            demos.cultures.insert(culture.id, culture);
+            demos.ideology.insert(ideology.id, ideology);
+
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: None,
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: None, 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: Some(0),
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: None, 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: None,
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: Some(0), 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+            test.breakdown_table.insert_pops(
+                PBRow{ species: 0, 
+                    species_cohort: None,
+                    species_subtype: None,
+                    culture: Some(0),
+                    culture_generation: None,
+                    culture_class: None,
+                    ideology: Some(0), 
+                    ideology_wave: None, 
+                    ideology_faction: None, 
+                    count: 5 }
+            );
+
+            test.update_desires(demos);
+
+            test
+        }
+
+        /// preps a pop's property, the property's data, and market prices of those items.
+        /// 
+        /// Sets all values to 1.0 amv and salability of 0.5 by default.
+        /// 
+        /// Exceptions are:
+        /// - Ambrosia Fruit are set as a currency (Sal 1.0, currency=true)
+        /// - Cotton Clothes are priced at 10.0 amv.
+        /// - Cotton Suit is priced at 20.0 amv.
+        /// - Hut has a price of 100.0 amv.
+        /// - Cabin has a price of 1000.0 amv.
+        /// 
+        /// This is for testing buy and sell functions, not offer_calculations.
+        pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
+            let mut data = DataManager::new();
+            // TODO update this when we update Load All
+            data.load_all(&String::from("")).expect("Error on load?");
+            let product = data.products.get_mut(&6).unwrap();
+            product.fractional = true;
+
+            let mut market = MarketHistory {
+                info: HashMap::new(),
+                sale_priority: vec![],
+                currencies: vec![],
+            };
+            // quickly set all prices to 1.0 for ease going forward.
+            for idx in 0..26 {
+                market.info.insert(idx, ProductInfo {
+                    available: 0.0,
+                    price: 1.0,
+                    offered: 0.0,
+                    sold: 0.0,
+                    salability: 0.5,
+                    is_currency: false,
+                });
+            }
+            // ambrosia fruit
+            market.info.get_mut(&2).expect("Brok").salability = 1.0;
+            market.info.get_mut(&2).expect("Brok").is_currency = true;
+
+            market.info.get_mut(&6).expect("Brok").price = 10.0;
+            market.info.get_mut(&7).expect("Brok").price = 20.0;
+
+            market.info.get_mut(&14).expect("Brok").price = 100.0;
+            market.info.get_mut(&15).expect("Brok").price = 1000.0;
+
+            market.currencies.push(2);
+            // sale priority would go here if used.
+
+            // pop.property.property.insert(6, PropertyInfo::new(10.0));
+            // TODO fix this info.
+
+            (data, market)
+        }
 
         pub fn _setup_data_manager() -> DataManager {
             let result = DataManager::new();
@@ -4014,7 +4287,54 @@ mod tests {
         mod add_property_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}}, data_manager::DataManager};
+            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}, seller::Seller}, data_manager::DataManager};
+
+            use super::{make_test_pop, prepare_data_for_market_actions};
+
+            #[test]
+            pub fn correctly_sift_test_data() {
+                let mut test = make_test_pop();
+                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                // add in pop's property and sift their desires.
+                // we have 20 extra food than we need (20*5=100.0 units)
+                // this covers all food and leave excess for trading
+                // This covers both species food desire and culture ambrosia fruit desire.
+                test.property.add_property(2, 120.0, &data);
+                // they have all the shelter they need via huts
+                // 4 * 20 units
+                // this covers both the shelter desire and the hut desire
+                test.property.add_property(14, 80.0, &data);
+                // the have all clothing desires covered, 
+                // clothing culture desire is covered up to tier 85.
+                // 20 * 5 units
+                // they have 20.0 extra units available to trade.
+                test.property.add_property(6, 100.0, &data);
+                // missing desires are 10 cabins at tier 50, and the infinite
+                // desire for 10 units of clothes every 10 tiers.
+                // we want to target buying 10 cabins.
+
+                // everything should automatically be sifted
+                assert_eq!(test.property.property[&2].total_property, 120.0);
+                assert_eq!(test.property.property[&2].unreserved, 20.0);
+                assert_eq!(test.property.property[&2].specific_reserve, 50.0);
+                assert_eq!(test.property.property[&2].class_reserve, 0.0);
+                assert_eq!(test.property.property[&2].want_reserve, 100.0);
+
+                assert_eq!(test.property.property[&14].total_property, 80.0);
+                assert_eq!(test.property.property[&14].unreserved, 0.0);
+                assert_eq!(test.property.property[&14].specific_reserve, 10.0);
+                assert_eq!(test.property.property[&14].class_reserve, 0.0);
+                assert_eq!(test.property.property[&14].want_reserve, 80.0);
+
+                assert_eq!(test.property.property[&6].total_property, 100.0);
+                assert_eq!(test.property.property[&6].unreserved, 0.0);
+                assert_eq!(test.property.property[&6].specific_reserve, 100.0);
+                assert_eq!(test.property.property[&6].class_reserve, 0.0);
+                assert_eq!(test.property.property[&6].want_reserve, 80.0);
+
+                // process is planned correctly.
+                assert_eq!(test.property.process_plan[&13], 100.0);
+            }
 
             #[test]
             pub fn sift_products_down_from_higher_wants() {
@@ -9065,6 +9385,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan[&0], 10.0);
+                assert_eq!(test.process_plan[&1], 10.0);
                 // ensure the tiered value is correct to match
                 assert_eq!(result.tier, 35);
                 assert!(490.0 < result.value);
@@ -9317,6 +9640,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan[&0], 10.0);
+                assert_eq!(test.process_plan[&1], 10.0);
                 assert_eq!(result.tier, 35);
                 assert!(453.0 < result.value);
                 assert!(result.value < 454.0);
@@ -9568,6 +9894,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan[&0], 10.0);
+                assert_eq!(test.process_plan[&1], 10.0);
                 assert_eq!(result.tier, 35);
                 assert!(435.0 < result.value);
                 assert!(result.value < 436.0);
@@ -9819,6 +10148,9 @@ mod tests {
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan[&0], 10.0);
+                assert_eq!(test.process_plan[&1], 10.0);
                 assert_eq!(result.tier, 31);
                 assert!(277.0 < result.value);
                 assert!(result.value < 278.0);
@@ -9947,6 +10279,8 @@ mod tests {
                 assert!(prop2.want_reserve == 0.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.specific_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan.len(), 0);
                 assert_eq!(result.tier, 100);
                 assert!(182146.0 < result.value);
                 assert!(result.value < 182147.0);
@@ -10003,6 +10337,8 @@ mod tests {
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.specific_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan.len(), 0);
                 assert_eq!(result.tier, 50);
                 assert!(846.0 < result.value);
                 assert!(result.value < 847.0);

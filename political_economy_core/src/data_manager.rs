@@ -607,23 +607,23 @@ impl DataManager {
 
         // Set Wants
         let mut shelter = self.wants
-            .get_mut(&2).unwrap();
+            .get_mut(&3).unwrap();
         hut.connect_want(&mut shelter, 1.0).unwrap();
         cabin.connect_want(&mut shelter, 1.5).unwrap();
 
         let clothes = self.wants
-            .get_mut(&3).unwrap();
-        cotton_clothes.set_want(&clothes, 1.0).unwrap();
-        cotton_suit.set_want(&clothes,1.5).unwrap();
+            .get_mut(&4).unwrap();
+        cotton_clothes.connect_want(clothes, 1.0).unwrap();
+        cotton_suit.connect_want(clothes,1.5).unwrap();
 
         let fashion = self.wants
             .get_mut(&4).unwrap();
-        cotton_suit.set_want(fashion,1.0).unwrap();
+        cotton_suit.connect_want(fashion,1.0).unwrap();
 
         let wealth = self.wants
             .get_mut(&4).unwrap();
-        cotton_suit.set_want(wealth,1.0).unwrap();
-        cabin.set_want(wealth, 2.0).unwrap();
+        cotton_suit.connect_want(wealth,1.0).unwrap();
+        cabin.connect_want(wealth, 2.0).unwrap();
 
         self.products.insert(time.id, time);
         self.products.insert(shopping_time.id, shopping_time);
@@ -910,7 +910,7 @@ impl DataManager {
 
         // next do labors, they'll be easy.
         // ambrosia farming 1
-        let new_id = self.new_process_id(); // 1
+        let new_id = self.new_process_id(); // 2
         let ambrosia = self.skills.get(&0).unwrap();
         let ambrosia_default 
             = ambrosia.build_skill_process(new_id).unwrap();
@@ -1005,17 +1005,17 @@ impl DataManager {
             part: ProcessSectionTag::Input,
         };
         let food_output = ProcessPart{
-            item: PartItem::Want(1),
+            item: PartItem::Want(2),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
         };
         let ambrosia_consumption = Process{
-            id: self.new_process_id(), // 12
+            id: self.new_process_id(), // 13
             name: String::from("Ambrosia Meal"),
             variant_name: String::new(),
             description: String::from("A meal of Ambrosia, even one fruit is enough to satisfy for a day."),
-            minimum_time: 0.1,
+            minimum_time: 0.0,
             process_parts: vec![food_input, food_output],
             process_tags: vec![ProcessTag::Consumption(2)],
             skill: None,

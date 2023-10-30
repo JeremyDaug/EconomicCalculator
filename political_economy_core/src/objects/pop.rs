@@ -780,7 +780,9 @@ impl Pop {
             // maybe record failure
             return BuyResult::NotSuccessful { reason: OfferResult::OutOfStock };
         } else if let ActorMessage::InStock { buyer: _, seller,
-        product: sought_product, price, quantity: stock_available } = result { // Deal Making Section
+        product: sought_product, 
+        price, 
+        quantity: stock_available } = result { // Deal Making Section
             // TODO if we add Want Price Estimates in the Market, update this to use them!!!!!!!
             // setup current offer and current offer amv
             let mut current_offer: HashMap<usize, f64> = HashMap::new();
@@ -1002,7 +1004,7 @@ impl Pop {
                         current_offer.entry(id)
                             .and_modify(|x| *x += amount)
                             .or_insert(amount);
-                        amv_released += market.get_product_price(&id, 1.0);
+                        amv_released += market.get_product_price(&id, 1.0) * amount;
                     }
                     current_offer_amv += amv_released;
                     // check that the amv offered is enough or that the satisfaction lost is too much.
@@ -1161,11 +1163,11 @@ impl Pop {
     fn offer_result_selector(sat_gain: TieredValue, sat_lost: TieredValue) -> OfferResult {
         let sat_ratio = sat_lost / sat_gain;
         if sat_ratio > constants::TOO_EXPENSIVE { OfferResult::TooExpensive }
-            else if sat_ratio > constants::EXPENSIVE { OfferResult::Expensive }
-            else if sat_ratio > constants::OVERPRICED { OfferResult::Overpriced }
-            else if sat_ratio > constants::REASONABLE { OfferResult::Reasonable }
-            else if sat_ratio > constants::CHEAP { OfferResult::Cheap }
-            else { OfferResult::Steal }
+        else if sat_ratio > constants::EXPENSIVE { OfferResult::Expensive }
+        else if sat_ratio > constants::OVERPRICED { OfferResult::Overpriced }
+        else if sat_ratio > constants::REASONABLE { OfferResult::Reasonable }
+        else if sat_ratio > constants::CHEAP { OfferResult::Cheap }
+        else { OfferResult::Steal }
     }
 
     /// # Emergency Buy

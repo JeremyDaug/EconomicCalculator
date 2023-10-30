@@ -983,7 +983,7 @@ impl Property {
             if cleared.contains(&current.idx) {
                 continue; // if in cleared, move on to the next.
             }
-            let mut desire = self.desires.get_mut(current.idx).unwrap();
+            let desire = self.desires.get_mut(current.idx).unwrap();
             match desire.item {
                 DesireItem::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
@@ -1064,6 +1064,9 @@ impl Property {
                             continue; // if no iterations possible, skip
                         }
                         // we do some iterations, so update stuff
+                        self.process_plan.entry(*proc_id)
+                            .and_modify(|x| *x += outputs.iterations)
+                            .or_insert(outputs.iterations);
                         for (&product, &quant) in outputs.input_output_products.iter() {
                             if quant < 0.0 { // if negative, shift
                                 self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
@@ -1117,6 +1120,9 @@ impl Property {
                             continue; // if no iterations possible, skip
                         }
                         // we do some iterations, so update stuff
+                        self.process_plan.entry(*proc_id)
+                            .and_modify(|x| *x += outputs.iterations)
+                            .or_insert(outputs.iterations);
                         for (&product, &quant) in outputs.input_output_products.iter() {
                             if quant < 0.0 { // if negative, shift
                                 self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
