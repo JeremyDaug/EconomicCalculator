@@ -2478,16 +2478,16 @@ mod tests {
                     assert_eq!(followup, 1);
                 } else { assert!(false); }
                 if let ActorMessage::BuyOfferFollowup { buyer, 
-                    seller, product, 
-                    offer_product, offer_quantity, 
-                    followup } = rx.recv().unwrap() {
-                        assert_eq!(buyer, pop_info);
-                        assert_eq!(seller, selling_firm);
-                        assert_eq!(product, 15);
-                        assert!(offer_product == 2 || offer_product == 6);
-                        assert_eq!(offer_quantity, 20.0);
-                        assert_eq!(followup, 0);
-                    } else { assert!(false); }
+                seller, product, 
+                offer_product, offer_quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 15);
+                    assert!(offer_product == 2 || offer_product == 6);
+                    assert_eq!(offer_quantity, 20.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
                 // with the offer sent correctly, send our acceptance and go forward
                 tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
                     seller: selling_firm, product: 15, offer_result: OfferResult::Cheap })
@@ -2502,12 +2502,150 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(test.property.property.get(&15).unwrap().total_property == 10.0);
                 assert!(test.property.property.get(&2).unwrap().total_property == 100.0);
                 assert!(test.property.property.get(&6).unwrap().total_property == 80.0);
                 assert!(test.property.property.get(&14).unwrap().total_property == 80.0);
-                // check pop memory for the products as well.
-                // TODO Check product movements
+                assert!(test.property.property.get(&15).unwrap().total_property == 10.0);
+                // check records for the products as well.
+                assert_eq!(test.property.property[&2].spent, 20.0);
+                assert_eq!(test.property.property[&2].recieved, 0.0);
+                assert_eq!(test.property.property[&6].spent, 20.0);
+                assert_eq!(test.property.property[&6].recieved, 0.0);
+                assert_eq!(test.property.property[&14].spent, 0.0);
+                assert_eq!(test.property.property[&14].recieved, 0.0);
+                assert_eq!(test.property.property[&15].spent, 0.0);
+                assert_eq!(test.property.property[&15].recieved, 10.0);
+                assert_eq!(test.property.property[&15].amv_cost, 60.0);
+                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+            }
+
+            #[test]
+            pub fn should_correctly_release_class_desire_for_buy_offer() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                // add in pop's property and sift their desires.
+                // we have 20 extra food than we need (20*5=100.0 units)
+                // this covers all food and leave excess for trading
+            // This covers both species food desire and culture ambrosia fruit desire.
+                test.property.add_property(2, 120.0, &data);
+                // they have all the shelter they need via huts
+                // 4 * 20 units
+                // this covers both the shelter desire and the hut desire
+                test.property.add_property(14, 80.0, &data);
+                // the have all clothing needs (2-8) covered with 80 units
+                // clothing culture desire is covered up to tier 85. (30 more than cabin at tier 50)
+                // 20 * 5 units
+                // they have 20.0 extra units available to trade.
+                test.property.add_property(6, 100.0, &data);
+                // missing desires are 10 cabins at tier 50, and the infinite
+                // desire for 10 units of clothes every 10 tiers.
+                // we want to target buying 10 cabins.
+                let val = test.property.property.entry(15)
+                .or_insert(PropertyInfo::new(0.0));
+                val.max_target = 10.0;
+                val.min_target = 0.0;
+
+                // The pop is trying to buy 10 cabins at tier 50
+                // It should always include the 20.0 units of Ambrosia fruit, 
+                // which they have in excess.
+                // They should also include 20.0 sets of clothes, which are available in excess.
+                // Anything else offered would be 
+                // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
+                // 20 ambrosia fruit and 20 cotton clothes.
+                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm we're talking with
+                let selling_firm = ActorInfo::Firm(1);
+                // setup property split
+
+                let handle = thread::spawn(move || {
+                    let result = test.standard_buy(&mut passed_rx, &passed_tx, 
+                        &data, &history, selling_firm);
+                    (test, result)
+                });
+                // check that it's running
+                if handle.is_finished() { assert!(false); }
+
+                // send the in stock message.
+                tx.send(ActorMessage::InStock { buyer: pop_info, 
+                    seller: selling_firm, product: 15, price: 5.9, 
+                    quantity: 100.0 }).expect("Sudden Disconnect?");
+                thread::sleep(Duration::from_millis(100));
+                // should have the first message we sent
+                if let ActorMessage::InStock { .. } = rx.recv().unwrap() {
+                } else { assert!(false); }
+                // it should have sent a buy order of 20.0 units of Ambrosia Fruit and 
+                // 20.0 units of Clothes
+                if let ActorMessage::BuyOffer { buyer, 
+                seller, product, 
+                price_opinion, quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 15);
+                    assert_eq!(price_opinion, OfferResult::Cheap);
+                    assert_eq!(quantity, 10.0);
+                    assert_eq!(followup, 2);
+                } else { assert!(false); }
+                // then check that the sent the expected food
+                if let ActorMessage::BuyOfferFollowup { buyer, 
+                seller, product, 
+                offer_product, offer_quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 15);
+                    assert!(offer_product == 2 || offer_product == 6);
+                    assert_eq!(offer_quantity, 20.0);
+                    assert_eq!(followup, 1);
+                } else { assert!(false); }
+                if let ActorMessage::BuyOfferFollowup { buyer, 
+                seller, product, 
+                offer_product, offer_quantity, 
+                followup } = rx.recv().unwrap() {
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, selling_firm);
+                    assert_eq!(product, 15);
+                    assert!(offer_product == 2 || offer_product == 6);
+                    assert_eq!(offer_quantity, 20.0);
+                    assert_eq!(followup, 0);
+                } else { assert!(false); }
+                // with the offer sent correctly, send our acceptance and go forward
+                tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
+                    seller: selling_firm, product: 15, offer_result: OfferResult::Cheap })
+                    .expect("Disconnected?");
+                thread::sleep(Duration::from_millis(100));
+                // ensure we closed out
+                if !handle.is_finished() { assert!(false); }
+                // get our data
+                let (test, result) = handle.join().unwrap();
+                // check the return is correct.
+                if let BuyResult::Successful = result {
+                    assert!(true);
+                } else { assert!(false); }
+                // check that property was exchanged
+                assert!(test.property.property.get(&2).unwrap().total_property == 100.0);
+                assert!(test.property.property.get(&6).unwrap().total_property == 80.0);
+                assert!(test.property.property.get(&14).unwrap().total_property == 80.0);
+                assert!(test.property.property.get(&15).unwrap().total_property == 10.0);
+                // check records for the products as well.
+                assert_eq!(test.property.property[&2].spent, 20.0);
+                assert_eq!(test.property.property[&2].recieved, 0.0);
+                assert_eq!(test.property.property[&6].spent, 20.0);
+                assert_eq!(test.property.property[&6].recieved, 0.0);
+                assert_eq!(test.property.property[&14].spent, 0.0);
+                assert_eq!(test.property.property[&14].recieved, 0.0);
+                assert_eq!(test.property.property[&15].spent, 0.0);
+                assert_eq!(test.property.property[&15].recieved, 10.0);
+                assert_eq!(test.property.property[&15].amv_cost, 60.0);
+                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]

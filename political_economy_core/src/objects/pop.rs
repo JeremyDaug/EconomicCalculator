@@ -1063,10 +1063,11 @@ impl Pop {
                 ActorMessage::SellerAcceptOfferAsIs { buyer, 
                 seller, 
                 product,
-                offer_result } => { 
+                offer_result: _ } => {
                     let _gain = self.property.add_products(&resulting_change, data);
                     self.property.record_exchange(resulting_change);
-                    self.property.record_purchase(product, current_offer_amv, self.standard_shop_time_cost());
+                    self.property.record_purchase(product, current_offer_amv, 
+                        self.standard_shop_time_cost());
                     // send back close
                     self.push_message(rx, tx, ActorMessage::FinishDeal { buyer, seller, product });
                     return BuyResult::Successful;
