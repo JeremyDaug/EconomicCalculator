@@ -899,7 +899,8 @@ impl Pop {
                         continue; // if in completed, then skip.
                     }
                     // get the desire from the copy.
-                    let current_desire = property_copy.desires.get(coord.idx).unwrap().clone();
+                    let current_desire = property_copy.desires
+                        .get(coord.idx).unwrap().clone();
                     if current_desire.satisfaction_at_tier(coord.tier) == 0.0 {
                         // desire was reached early, probably.
                         continue;
@@ -918,24 +919,29 @@ impl Pop {
                     // if a valid loss, add to sat lost
                     sat_lost += hypo_loss;
                     // copy processes for possible want releasing
-                    let mut processes_changed = property_copy.process_plan.clone();
+                    // let mut processes_changed = property_copy.process_plan.clone();
                     // release the desire and the resources released
-                    let released = property_copy.release_desire_at(&coord, market, data);
+                    // TODO fix seemingly nondetermenistic results.
+                    let released = property_copy
+                        .release_desire_at(&coord, market, data);
                     // remove from those changed processes, clearing out 0.0s
+                    /* DEBUG commented out to use release instead.
                     for (&id, &amount) in property_copy.process_plan.iter() {
                         processes_changed.entry(id)
                         .and_modify(|x| *x -= amount); // subtract the new process plan
                         if processes_changed[&id] == 0.0 { // if no change, remove entirely.
                             processes_changed.remove(&id);
                         }
-                    }
+                    } 
                     // get those resources which were actually used to satisfy the current desire and amount.
                     let result = match current_desire.item {
                         DesireItem::Want(_) => {
-                            let mut actual_released_products = HashMap::new();
+                            // try to remove the released products from our property.
+                            self.property.remove_properties(&released, data);
                             // go through each process and try to remove what they need, if we can
                             for (proc_id, iterations) in processes_changed.iter() {
-                                let process = data.processes.get(proc_id).expect("Process not found.");
+                                let process = data.processes.get(proc_id)
+                                    .expect("Process not found.");
                                 // add specific products up to the expectation.
                                 for &input in process.input_products().iter() {
                                     // get how much we are expected to use
@@ -968,7 +974,7 @@ impl Pop {
                                 }
                             }
 
-                            actual_released_products
+                            released
                         },
                         DesireItem::Class(class_id) => {
                             // get how much we need to remove
@@ -998,9 +1004,19 @@ impl Pop {
                             actual_release
                         },
                     };
+                    */
+                    // get how much we released
+                    let mut amv_released = 0.0;
+                    for (id, amount) in released.iter() {
+                        amv_released += market.get_product_price(id, 1.0);
+                    }
+                    if current_offer_amv + amv_released > purchase_price {
+                        // if greater than our target, begin shifting
+                        
+                    }
                     // with the products specifically released in result, try adding them to the offer.
                     let mut amv_released = 0.0;
-                    for (id, amount) in result.into_iter() {
+                    for (id, amount) in released.into_iter() {
                         current_offer.entry(id)
                             .and_modify(|x| *x += amount)
                             .or_insert(amount);

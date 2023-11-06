@@ -326,6 +326,21 @@ impl Property {
         self.sift_all(data) - original_value
     }
 
+    /// # Remove Properties
+    /// 
+    /// Removes a list of property from property, then sifts the product.
+    /// 
+    /// ## Panics
+    /// 
+    /// If it tries to remove more than what is actually available.
+    pub fn remove_properties(&mut self, products: &HashMap<usize, f64>, data: &DataManager) -> TieredValue {
+        let mut reverse = HashMap::new();
+        for (&prod, val) in products.iter() {
+            reverse.insert(prod, -val);
+        }
+        self.add_products(&reverse, data)
+    }
+
     /// # Remove Property
     /// 
     /// Removes a number of product units from property, if needed, it also
@@ -960,6 +975,8 @@ impl Property {
     /// will be used or consumed by the process to satisfy wants.
     /// 
     /// Resets everything, so this will be pretty heavy on the cpu.
+    /// 
+    /// todo https://github.com/JeremyDaug/EconomicCalculator/issues/64
     pub fn sift_all(&mut self, data: &DataManager) -> TieredValue {
         // start by resetting property and satisfactions
         for (_, info) in self.property.iter_mut() {
@@ -1543,6 +1560,7 @@ impl Property {
     /// If the coord is Invalid it will complete the tier
     /// 
     /// In all other ways, it acts like self.silt_all()
+    /// todo https://github.com/JeremyDaug/EconomicCalculator/issues/64
     pub fn sift_up_to(&mut self, coord: &DesireCoord, 
     data: &DataManager) -> TieredValue {
         // start by resetting property and satisfactions
@@ -1598,7 +1616,7 @@ impl Property {
                     // get our want's info
                     let want_info = data.wants.get(&want).unwrap();
                     // start with ownership sources
-                    for own_source_id in want_info.ownership_sources.iter() {
+                    for own_source_id in want_info.ownership_sources.iter().sorted() {
                         if !self.property.contains_key(own_source_id) {
                             continue; // if don't have it, skip.
                         }
@@ -1637,7 +1655,7 @@ impl Property {
                         continue;
                     }
                     // if uncompleted, go to use processes.
-                    for proc_id in want_info.use_sources.iter() {
+                    for proc_id in want_info.use_sources.iter().sorted() {
                         let process = data.processes.get(proc_id).unwrap();
                         // get how much the process outputs
                         let eff = process.effective_output_of(PartItem::Want(want));
@@ -1656,6 +1674,9 @@ impl Property {
                             continue; // if no iterations possible, skip
                         }
                         // we do some iterations, so update stuff
+                        self.process_plan.entry(*proc_id)
+                            .and_modify(|x| *x += outputs.iterations)
+                            .or_insert(outputs.iterations);
                         for (&product, &quant) in outputs.input_output_products.iter() {
                             if quant < 0.0 { // if negative, shift
                                 self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
@@ -1690,7 +1711,7 @@ impl Property {
                         continue;
                     }
                     // if we get here, then try consumption processes
-                    for proc_id in want_info.consumption_sources.iter() {
+                    for proc_id in want_info.consumption_sources.iter().sorted() {
                         let process = data.processes.get(proc_id).unwrap();
                         // get how much the process outputs
                         let eff = process.effective_output_of(PartItem::Want(want));
@@ -1709,6 +1730,9 @@ impl Property {
                             continue; // if no iterations possible, skip
                         }
                         // we do some iterations, so update stuff
+                        self.process_plan.entry(*proc_id)
+                            .and_modify(|x| *x += outputs.iterations)
+                            .or_insert(outputs.iterations);
                         for (&product, &quant) in outputs.input_output_products.iter() {
                             if quant < 0.0 { // if negative, shift
                                 self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
@@ -1751,7 +1775,7 @@ impl Property {
                     }
                     // since there is some overlap, try to shift that
                     let mut shifted = 0.0;
-                    for product_id in class.iter() { 
+                    for product_id in class.iter().sorted() { 
                         // try each product we have
                         let info_opt = self.property.get_mut(product_id);
                         if info_opt.is_none() {

@@ -525,7 +525,7 @@ mod tests {
         ///   - 10 Hut 30
         ///   - 10 Cabin 50
         pub fn make_test_pop() -> Pop {
-            let mut test = Pop{ 
+            let mut test = Pop { 
                 id: 10, 
                 job: 0, 
                 firm: 0, 
@@ -538,7 +538,7 @@ mod tests {
                 is_selling: true,
                 backlog: VecDeque::new()};
 
-            let species_desire_1 = Desire{ 
+            let species_desire_1 = Desire { 
                 item: DesireItem::Want(2), // food
                 start: 0, 
                 end: Some(4), 
@@ -546,7 +546,7 @@ mod tests {
                 satisfaction: 0.0, 
                 step: 1, 
                 tags: vec![] };
-            let species_desire_2 = Desire{ 
+            let species_desire_2 = Desire { 
                 item: DesireItem::Want(3), // shelter
                 start: 7, 
                 end: Some(13), 
@@ -554,7 +554,7 @@ mod tests {
                 satisfaction: 0.0, 
                 step: 2, 
                 tags: vec![] };
-            let species_desire_3 = Desire{ 
+            let species_desire_3 = Desire { 
                 item: DesireItem::Want(4), //clothing
                 start: 2, 
                 end: Some(8), 
@@ -563,7 +563,7 @@ mod tests {
                 step: 2, 
                 tags: vec![] };
 
-            let culture_desire_1 = Desire{ 
+            let culture_desire_1 = Desire { 
                 item: DesireItem::Product(2), // ambrosia fruit
                 start: 10, 
                 end: Some(30), 
@@ -571,7 +571,7 @@ mod tests {
                 satisfaction: 0.0, 
                 step: 5, 
                 tags: vec![] };
-            let culture_desire_2 = Desire{ 
+            let culture_desire_2 = Desire { 
                 item: DesireItem::Product(6), // clothes
                 start: 15, 
                 end: None, 
@@ -580,7 +580,7 @@ mod tests {
                 step: 10, 
                 tags: vec![] };
 
-            let ideology_desire_1 = Desire{ 
+            let ideology_desire_1 = Desire { 
                 item: DesireItem::Product(14), // Hut
                 start: 30, 
                 end: None, 
@@ -588,7 +588,7 @@ mod tests {
                 satisfaction: 0.0, 
                 step: 0, 
                 tags: vec![] };
-            let ideology_desire_2 = Desire{ 
+            let ideology_desire_2 = Desire { 
                 item: DesireItem::Product(15), // Cabin
                 start: 50, 
                 end: None, 
@@ -2345,7 +2345,7 @@ mod tests {
             }
         }
     
-        mod standard_buy {
+        mod  standard_buy_tests {
             use std::{collections::HashMap, thread, time::Duration};
             use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo, desire::{Desire, DesireItem}};
             use super::{make_test_pop, prepare_data_for_market_actions};
@@ -2519,6 +2519,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
+            // TODO back here, change results in non-deterministic item selection.
             #[test]
             pub fn should_correctly_release_class_desire_for_buy_offer() {
                 let mut test = make_test_pop();
@@ -2663,14 +2664,16 @@ mod tests {
                 // swap out infinite clothes for the want desire instead.
                 // TODO swap here.
                 test.property.desires.get_mut(4).unwrap()
-                    .item = DesireItem::Class(6);
-                // add in pop's property and sift their desires.
-                // we have 20 extra food than we need (20*5=100.0 units)
-                // this covers all food and leave excess for trading
-                // This covers both species food desire and culture ambrosia fruit desire.
-                test.property.add_property(2, 120.0, &data);
+                    .item = DesireItem::Want(2);
+                // Add in pop's property and sift their desires.
+                // We need 100.0 units for species food desire and the overlapping culture desire for ambrosia fruit.
+                // We have an additional 10.0 units of food desire at 15+10n tier.
+                // This adds an extra 40.0 units of food needed below our goal (cabin at tier 50).
+                // we add 20.0 units above this threshold so they can be released and traded.
+                test.property.add_property(2, 160.0, &data);
                 // they have all the shelter they need via huts
                 // 4 * 20 units
+                // We add 20.0 units to keep the expense expected the same.
                 // this covers both the shelter desire and the hut desire
                 test.property.add_property(14, 80.0, &data);
                 // the have all clothing needs (2-8) covered with 80 units
@@ -2678,14 +2681,11 @@ mod tests {
                 // 20 * 5 units
                 // they have 20.0 extra units available to trade.
                 test.property.add_property(6, 100.0, &data);
-                // Also add in some suits to test out class swapping and ensure
-                // class desires are correctly fulfilled and taken from as needed.
-                test.property.add_property(7, 10.0, &data);
                 // missing desires are 10 cabins at tier 50, and the infinite
                 // desire for 10 units of clothes every 10 tiers.
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
-                .or_insert(PropertyInfo::new(0.0));
+                    .or_insert(PropertyInfo::new(0.0));
                 val.max_target = 10.0;
                 val.min_target = 0.0;
 
@@ -7648,9 +7648,9 @@ mod tests {
 
         mod sift_up_to_should {
             // TODO update test for lookahead when added.
-            use std::collections::{HashMap, HashSet};
+            use std::collections::{HashMap, HashSet, VecDeque};
 
-            use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want}, data_manager::DataManager};
+            use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want, market::{ProductInfo, MarketHistory}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species}, data_manager::DataManager, demographics::Demographics};
 
             #[test]
             pub fn shift_want_class_and_specific_desires_correctly() {
@@ -7910,6 +7910,9 @@ mod tests {
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.specific_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan[&0], 10.0);
+                assert!(test.process_plan.get(&2).is_none());
                 // ensure the tiered value is correct to match
                 assert_eq!(result.tier, 24);
                 assert!(147.0 < result.value);
@@ -9123,6 +9126,288 @@ mod tests {
                 assert!(146.0 < result.value);
                 assert!(result.value < 147.0);
             }
+        }
+
+        mod release_desire_at_should {
+            use std::collections::{VecDeque, HashMap};
+
+            use crate::{objects::{pop::Pop, property::{Property, DesireCoord}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::{Desire, DesireItem}, species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}}, demographics::Demographics, data_manager::DataManager};
+
+            /// Makes a pop for testing. The pop will have the following info
+            /// 
+            /// 20 pops total --
+            /// 20 pops of the same speciecs
+            /// - Desires
+            ///   - 20 Food 0/1/2/3/4
+            ///   - 20 Shelter 7/9/11/13
+            ///   - 20 Clothing 2/4/6/8
+            /// 10 with a culture
+            /// - Desires
+            ///   - 10 Ambrosia Fruit 10/15/20/25/30
+            ///   - 10 Cotton Clothes 15/25/35 ...
+            /// 10 with an ideology
+            /// - Desires
+            ///   - 10 Hut 30
+            ///   - 10 Cabin 50
+            pub fn make_test_pop() -> Pop {
+                let mut test = Pop { 
+                    id: 10, 
+                    job: 0, 
+                    firm: 0, 
+                    market: 0, 
+                    skill: 0, 
+                    lower_skill_level: 0.0, 
+                    higher_skill_level: 0.0, 
+                    property: Property::new(vec![]), 
+                    breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
+                    is_selling: true,
+                    backlog: VecDeque::new()};
+
+                let species_desire_1 = Desire { 
+                    item: DesireItem::Want(2), // food
+                    start: 0, 
+                    end: Some(4), 
+                    amount: 1.0, 
+                    satisfaction: 0.0, 
+                    step: 1, 
+                    tags: vec![] };
+                let species_desire_2 = Desire { 
+                    item: DesireItem::Want(3), // shelter
+                    start: 7, 
+                    end: Some(13), 
+                    amount: 1.0, 
+                    satisfaction: 0.0, 
+                    step: 2, 
+                    tags: vec![] };
+                let species_desire_3 = Desire { 
+                    item: DesireItem::Want(4), //clothing
+                    start: 2, 
+                    end: Some(8), 
+                    amount: 1.0, 
+                    satisfaction: 0.0, 
+                    step: 2, 
+                    tags: vec![] };
+
+                let culture_desire_1 = Desire { 
+                    item: DesireItem::Product(2), // ambrosia fruit
+                    start: 10, 
+                    end: Some(30), 
+                    amount: 1.0, 
+                    satisfaction: 0.0, 
+                    step: 5, 
+                    tags: vec![] };
+                let culture_desire_2 = Desire { 
+                    item: DesireItem::Product(6), // clothes
+                    start: 15, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0, 
+                    step: 10, 
+                    tags: vec![] };
+
+                let ideology_desire_1 = Desire { 
+                    item: DesireItem::Product(14), // Hut
+                    start: 30, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0, 
+                    step: 0, 
+                    tags: vec![] };
+                let ideology_desire_2 = Desire { 
+                    item: DesireItem::Product(15), // Cabin
+                    start: 50, 
+                    end: None, 
+                    amount: 1.0, 
+                    satisfaction: 0.0, 
+                    step: 0, 
+                    tags: vec![] };
+
+                let species = Species::new(0,
+                    "Species".into(),
+                    "".into(),
+                    vec![species_desire_1, species_desire_2, species_desire_3],
+                    vec![], vec![], 
+                    1.0, 0.03,
+                    0.02).expect("Messed up new.");
+
+                let culture = Culture::new(0,
+                    "Culture".into(),
+                    "".into(),
+                    1.0, 0.01,
+                    0.01,
+                    vec![culture_desire_1, culture_desire_2],
+                    vec![]).expect("Messed up new.");
+
+                let ideology = Ideology::new(0,
+                    "Ideology".into(),
+                    "".into(),
+                    0.0, 0.0,
+                    1.0,
+                    vec![ideology_desire_1, ideology_desire_2],
+                    vec![]).expect("Messed up new.");
+
+                let mut demos = Demographics{ species: HashMap::new(),
+                    cultures: HashMap::new(), 
+                    ideology: HashMap::new() };
+
+                demos.species.insert(species.id, species);
+                demos.cultures.insert(culture.id, culture);
+                demos.ideology.insert(ideology.id, ideology);
+
+                test.breakdown_table.insert_pops(
+                    PBRow{ species: 0, 
+                        species_cohort: None,
+                        species_subtype: None,
+                        culture: None,
+                        culture_generation: None,
+                        culture_class: None,
+                        ideology: None, 
+                        ideology_wave: None, 
+                        ideology_faction: None, 
+                        count: 5 }
+                );
+                test.breakdown_table.insert_pops(
+                    PBRow{ species: 0, 
+                        species_cohort: None,
+                        species_subtype: None,
+                        culture: Some(0),
+                        culture_generation: None,
+                        culture_class: None,
+                        ideology: None, 
+                        ideology_wave: None, 
+                        ideology_faction: None, 
+                        count: 5 }
+                );
+                test.breakdown_table.insert_pops(
+                    PBRow{ species: 0, 
+                        species_cohort: None,
+                        species_subtype: None,
+                        culture: None,
+                        culture_generation: None,
+                        culture_class: None,
+                        ideology: Some(0), 
+                        ideology_wave: None, 
+                        ideology_faction: None, 
+                        count: 5 }
+                );
+                test.breakdown_table.insert_pops(
+                    PBRow{ species: 0, 
+                        species_cohort: None,
+                        species_subtype: None,
+                        culture: Some(0),
+                        culture_generation: None,
+                        culture_class: None,
+                        ideology: Some(0), 
+                        ideology_wave: None, 
+                        ideology_faction: None, 
+                        count: 5 }
+                );
+
+                test.update_desires(demos);
+
+                test
+            }
+
+            /// preps a pop's property, the property's data, and market prices of those items.
+            /// 
+            /// Sets all values to 1.0 amv and salability of 0.5 by default.
+            /// 
+            /// Exceptions are:
+            /// - Ambrosia Fruit are set as a currency (Sal 1.0, currency=true)
+            /// - Cotton Clothes are priced at 10.0 amv.
+            /// - Cotton Suit is priced at 20.0 amv.
+            /// - Hut has a price of 100.0 amv.
+            /// - Cabin has a price of 1000.0 amv.
+            /// 
+            /// This is for testing buy and sell functions, not offer_calculations.
+            pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
+                let mut data = DataManager::new();
+                // TODO update this when we update Load All
+                data.load_all(&String::from("")).expect("Error on load?");
+                let product = data.products.get_mut(&6).unwrap();
+                product.fractional = true;
+
+                let mut market = MarketHistory {
+                    info: HashMap::new(),
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
+                // quickly set all prices to 1.0 for ease going forward.
+                for idx in 0..26 {
+                    market.info.insert(idx, ProductInfo {
+                        available: 0.0,
+                        price: 1.0,
+                        offered: 0.0,
+                        sold: 0.0,
+                        salability: 0.5,
+                        is_currency: false,
+                    });
+                }
+                // ambrosia fruit
+                market.info.get_mut(&2).expect("Brok").salability = 1.0;
+                market.info.get_mut(&2).expect("Brok").is_currency = true;
+
+                market.info.get_mut(&6).expect("Brok").price = 10.0;
+                market.info.get_mut(&7).expect("Brok").price = 20.0;
+
+                market.info.get_mut(&14).expect("Brok").price = 100.0;
+                market.info.get_mut(&15).expect("Brok").price = 1000.0;
+
+                market.currencies.push(2);
+                // sale priority would go here if used.
+
+                // pop.property.property.insert(6, PropertyInfo::new(10.0));
+                // TODO fix this info.
+
+                (data, market)
+            }
+
+            #[test]
+            pub fn release_selected_desire_and_return_deterministically() {
+                let mut test = make_test_pop();
+                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let mut test = test.property;
+                // swap out infinite clothes for the class desire instead.
+                test.desires.get_mut(4).unwrap()
+                    .item = DesireItem::Class(6);
+                // add in pop's property and sift their desires.
+                // we have 20 extra food than we need (20*5=100.0 units)
+                // this covers all food and leave excess for trading
+                // This covers both species food desire and culture ambrosia fruit desire.
+                test.add_property(2, 120.0, &data);
+                // they have all the shelter they need via huts
+                // 4 * 20 units
+                // this covers both the shelter desire and the hut desire
+                test.add_property(14, 80.0, &data);
+                // the have all clothing needs (2-8) covered with 80 units
+                // clothing culture desire is covered up to tier 85. (30 more than cabin at tier 50)
+                // 20 * 5 units
+                // they have 20.0 extra units available to trade.
+                test.add_property(6, 100.0, &data);
+                // Also add in some suits to test out class swapping and ensure
+                // class desires are correctly fulfilled and taken from as needed.
+                test.add_property(7, 10.0, &data);
+                // The pop is trying to buy 10 cabins at tier 50
+                // It should always include the 20.0 units of Ambrosia fruit, 
+                // which they have in excess.
+                // They should also include 20.0 sets of clothes, which are available in excess.
+                // Anything else offered would be 
+                // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
+                // 20 ambrosia fruit and 20 cotton clothes.
+                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.info.get_mut(&7).unwrap().price = 10.0; // 0.0 likely to exchange.
+                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+
+                // Try to release the highest desire tier, at tier 105, 
+                // the class desire for clothes.
+                // TODO Pick up here for testing!!!!!!
+                let result = test
+                    .release_desire_at(&DesireCoord { tier: 105, idx: 4 }, 
+                        &history, &data);
+                assert_eq!(result[&6], 10.0);
+            }
+
         }
 
         // TODO Get Shopping Time will likely be reworked into a generic get X product, which will get and produce a generic item. This will likely also have a get X want partner.
