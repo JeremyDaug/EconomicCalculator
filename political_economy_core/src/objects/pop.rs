@@ -922,7 +922,7 @@ impl Pop {
                     // let mut processes_changed = property_copy.process_plan.clone();
                     // release the desire and the resources released
                     // TODO fix seemingly nondetermenistic results.
-                    let released = property_copy
+                    let mut released = property_copy
                         .release_desire_at(&coord, market, data);
                     // remove from those changed processes, clearing out 0.0s
                     /* DEBUG commented out to use release instead.
@@ -1008,11 +1008,16 @@ impl Pop {
                     // get how much we released
                     let mut amv_released = 0.0;
                     for (id, amount) in released.iter() {
-                        amv_released += market.get_product_price(id, 1.0);
+                        amv_released += market.get_product_price(id, 1.0) * amount;
                     }
                     if current_offer_amv + amv_released > purchase_price {
-                        // if greater than our target, begin shifting
-                        
+                        // if greater than our target, reduce to the minimum required
+                        let excess = current_offer_amv + amv_released - purchase_price;
+                        let perfect_rat = 1.0 - excess / amv_released;
+                        for (_, amount) in released.iter_mut() {
+                            // divide by the 'prefect' ratio, and round up.
+                            *amount = (*amount * perfect_rat).ceil();
+                        }
                     }
                     // with the products specifically released in result, try adding them to the offer.
                     let mut amv_released = 0.0;
