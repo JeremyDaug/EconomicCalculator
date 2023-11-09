@@ -2345,13 +2345,13 @@ mod tests {
             }
         }
     
-        mod  standard_buy_tests {
+        mod  standard_buy_should {
             use std::{collections::HashMap, thread, time::Duration};
             use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo, desire::{Desire, DesireItem}};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
-            pub fn should_return_not_successful_when_not_in_stock() {
+            pub fn return_not_successful_when_not_in_stock() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);
@@ -2393,7 +2393,7 @@ mod tests {
             }
 
             #[test]
-            pub fn should_return_success_when_able_to_buy_single_offer_no_change() {
+            pub fn return_success_when_able_to_buy_single_offer_no_change() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
@@ -2521,9 +2521,8 @@ mod tests {
                 assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
-            // TODO back here, change results in non-deterministic item selection.
             #[test]
-            pub fn should_correctly_release_class_desire_for_buy_offer() {
+            pub fn correctly_release_class_desire_for_buy_offer() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
@@ -2676,12 +2675,11 @@ mod tests {
             }
 
             #[test]
-            pub fn should_correctly_release_want_desire_for_buy_offer() {
+            pub fn correctly_release_want_desire_for_buy_offer() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
                 // swap out infinite clothes for the want desire instead.
-                // TODO swap here.
                 test.property.desires.get_mut(4).unwrap()
                     .item = DesireItem::Want(2);
                 // Add in pop's property and sift their desires.
@@ -2689,7 +2687,7 @@ mod tests {
                 // We have an additional 10.0 units of food desire at 15+10n tier.
                 // This adds an extra 40.0 units of food needed below our goal (cabin at tier 50).
                 // we add 20.0 units above this threshold so they can be released and traded.
-                test.property.add_property(2, 160.0, &data);
+                test.property.add_property(2, 180.0, &data);
                 // they have all the shelter they need via huts
                 // 4 * 20 units
                 // We add 20.0 units to keep the expense expected the same.
@@ -2753,7 +2751,7 @@ mod tests {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
                     assert_eq!(product, 15);
-                    assert_eq!(price_opinion, OfferResult::Cheap);
+                    assert_eq!(price_opinion, OfferResult::Expensive);
                     assert_eq!(quantity, 10.0);
                     assert_eq!(followup, 2);
                 } else { assert!(false); }
@@ -2765,7 +2763,7 @@ mod tests {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
                     assert_eq!(product, 15);
-                    assert!(offer_product == 2 || offer_product == 6);
+                    assert!(offer_product == 2);
                     assert_eq!(offer_quantity, 20.0);
                     assert_eq!(followup, 1);
                 } else { assert!(false); }
@@ -2776,7 +2774,7 @@ mod tests {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
                     assert_eq!(product, 15);
-                    assert!(offer_product == 2 || offer_product == 6);
+                    assert!(offer_product == 6);
                     assert_eq!(offer_quantity, 20.0);
                     assert_eq!(followup, 0);
                 } else { assert!(false); }
@@ -2794,7 +2792,7 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert!(test.property.property.get(&2).unwrap().total_property == 100.0);
+                assert!(test.property.property.get(&2).unwrap().total_property == 160.0);
                 assert!(test.property.property.get(&6).unwrap().total_property == 80.0);
                 assert!(test.property.property.get(&14).unwrap().total_property == 80.0);
                 assert!(test.property.property.get(&15).unwrap().total_property == 10.0);
@@ -2812,7 +2810,18 @@ mod tests {
             }
 
             #[test]
-            pub fn should_return_success_when_able_to_buy_single_offer_with_change() {
+            pub fn cancel_purchase_when_target_reduced_and_sat_lost_is_greater_than_sat_gain() {
+                // This results when the seller is a firm and the buyer is unable to get enough
+                // AMV and not go over the Satisfaciton Gained. 
+                // It takes the current available AMV, reduces the buy target to something more
+                // reasonable based on that and updates Satisfaction gained.
+                // If this reduction is large enough that they would end up losing satisfaction
+                // in the trade, they will cancel the deal, and return NotSuccessful
+
+            }
+
+            #[test]
+            pub fn should_return_success_when_able_to_buy_single_offer_with_positive_change() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);

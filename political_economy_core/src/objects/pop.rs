@@ -199,7 +199,8 @@ impl Pop {
             product, price_opinion: offer_result, quantity: target,
             followup: offer_len });
         // then loop over what we're sending to them.
-        for (offer_item, offer_quantity) in offer.iter() {
+        for (offer_item, offer_quantity) in offer.iter()
+        .sorted_by(|a, b| a.0.cmp(b.0)) {
             offer_len -= 1;
             self.push_message(rx, tx, ActorMessage::BuyOfferFollowup { buyer: self.actor_info(), seller,
                 product, offer_product: *offer_item, offer_quantity: *offer_quantity, followup: offer_len })
@@ -797,7 +798,7 @@ impl Pop {
                 stock_available.min(1.0)
             };
             // Get how much this purchase would increase our satisfaction by.
-            let sat_gain = self.property.predict_value_gained(sought_product, 
+            let mut sat_gain = self.property.predict_value_gained(sought_product, 
                 purchase_quantity, data);
             let mut sat_lost = TieredValue { tier: 0, value: 0.0 };
             // get the total AMV price of the purchase
@@ -1016,7 +1017,8 @@ impl Pop {
                         let perfect_rat = 1.0 - excess / amv_released;
                         for (_, amount) in released.iter_mut() {
                             // divide by the 'prefect' ratio, and round up.
-                            *amount = (*amount * perfect_rat).ceil();
+                            // todo recheck this to ensure it always end up no greater than the orignial amount and greater than the target.
+                            *amount = (*amount * perfect_rat + 1.0).floor();
                         }
                     }
                     // with the products specifically released in result, try adding them to the offer.
@@ -1035,16 +1037,27 @@ impl Pop {
                     // if it's not enough, continue onto the next loop.
                 }
             }
-            // get an oppinion estimate from how much satisfaction we are giving up vs 
-            let offer_result = Pop::offer_result_selector(sat_gain, sat_lost);
             // if current_amv_offer is below our target, reduce our buy target appropriately.
             // only reduce if the seller is a firm and thus unlikely to accept less.
             let final_target = if purchase_price > current_offer_amv && seller.is_firm() {
                 let current_purchase_amount = current_offer_amv / price;
-                current_purchase_amount.floor()
-            } else {
+                let end_purchase = current_purchase_amount.floor();
+                sat_gain = self.property.predict_value_gained(sought_product, 
+                    end_purchase, data);
+                end_purchase
+            } else { 
+                // if seller isn't a firm, try anayway, they may accept.
                 purchase_quantity
             };
+            // sanity check that our sat_gained is still higher than sat_lost
+            if sat_gain < sat_lost {
+                // if the final target results in a net loss in satisfaction, cancel the buy.
+                self.push_message(rx, tx, ActorMessage::RejectPurchase { buyer: self.actor_info(), 
+                    seller: seller, product: sought_product, price_opinion: OfferResult::TooExpensive });
+                return BuyResult::NotSuccessful { reason: OfferResult::TooExpensive };
+            }
+            // get an opinion estimate from how much satisfaction we are giving up vs 
+            let offer_result = Pop::offer_result_selector(sat_gain, sat_lost);
             // after the previous section, we either have enough AMV to try and purchase,
             // or ran out of options which wouldn't overdraw our satisfaction.
             // send offer and wait for response
@@ -1135,7 +1148,7 @@ impl Pop {
                     return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
                 },
                 ActorMessage::CloseDeal { .. } => {
-                    // Deal closed 
+                    // Deal closed, no reason given by seller.
                     self.property.record_purchase(sought_product, 0.0, self.standard_shop_time_cost());
                     return BuyResult::SellerClosed;
                 },
