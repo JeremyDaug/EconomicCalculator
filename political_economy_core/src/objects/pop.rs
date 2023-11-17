@@ -1162,7 +1162,7 @@ impl Pop {
 
     /// # Retrieve Change
     /// 
-    /// Like Send Buy offer, this instead rocieves change if
+    /// Like Send Buy offer, this instead recieves change if
     /// ActorMessage::OfferAcceptedWithChange was recieved.
     fn retrieve_exchange_return(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
@@ -1170,7 +1170,7 @@ impl Pop {
     seller: ActorInfo,
     followups: usize) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
-        for _ in (0..followups).rev() {
+        for expected_remainder in (0..followups).rev() {
             let response = self.specific_wait(rx, &vec![
                 ActorMessage::ChangeFollowup { buyer: ActorInfo::Firm(0), 
                     seller: ActorInfo::Firm(0), 
@@ -1179,7 +1179,6 @@ impl Pop {
                     return_quantity: 0.0, 
                     followups: 0 }
             ]);
-            // TODO pick up here.
             if let ActorMessage::ChangeFollowup { buyer, 
             seller: s, 
             product, 
@@ -1189,7 +1188,7 @@ impl Pop {
                 result.insert(return_product, return_quantity);
                 debug_assert!(buyer == self.actor_info());
                 debug_assert!(s == seller);
-                debug_assert!(follows == followups);
+                debug_assert!(follows == expected_remainder);
             } else { panic!("Recieved something we shouldn't have.") }
         }
         result
