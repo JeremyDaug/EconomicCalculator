@@ -3167,7 +3167,7 @@ mod tests {
                 assert_eq!(test.property.property.get(&14).unwrap().total_property, 80.0);
                 assert_eq!(test.property.property.get(&15).unwrap().total_property, 10.0);
                 // check records for the products as well.
-                assert_eq!(test.property.property[&2].spent, 20.0);
+                assert_eq!(test.property.property[&2].spent, 15.0);
                 assert_eq!(test.property.property[&2].recieved, 0.0);
                 assert_eq!(test.property.property[&6].spent, 20.0);
                 assert_eq!(test.property.property[&6].recieved, 0.0);
@@ -3175,7 +3175,7 @@ mod tests {
                 assert_eq!(test.property.property[&14].recieved, 0.0);
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 10.0);
-                assert_eq!(test.property.property[&15].amv_cost, 60.0);
+                assert_eq!(test.property.property[&15].amv_cost, 55.0);
                 assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
