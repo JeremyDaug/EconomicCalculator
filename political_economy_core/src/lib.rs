@@ -2347,7 +2347,8 @@ mod tests {
             }
         }
     
-        mod  standard_buy_should {
+        // Completed
+        mod standard_buy_should {
             use std::{collections::HashMap, thread, time::Duration};
             use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo, desire::{Desire, DesireItem}};
             use super::{make_test_pop, prepare_data_for_market_actions};
@@ -3053,12 +3054,11 @@ mod tests {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
-                // alter the infinite desire to bring it closer to our 
                 // add in pop's property and sift their desires.
                 // we have 20 extra food than we need (20*5=100.0 units)
                 // this covers all food and leave excess for trading
                 // This covers both species food desire and culture ambrosia fruit desire.
-                test.property.add_property(2, 100.0, &data);
+                test.property.add_property(2, 120.0, &data);
                 // they have all the shelter they need via huts
                 // 4 * 20 units
                 // this covers both the shelter desire and the hut desire
@@ -3113,17 +3113,23 @@ mod tests {
                 } else { assert!(false); }
                 // it should have sent a buy order of 20.0 units of Ambrosia Fruit and 
                 // 20.0 units of Clothes
+                let msg = rx.recv().unwrap();
                 if let ActorMessage::BuyOffer { buyer, 
                 seller, product, 
                 price_opinion, quantity, 
-                followup } = rx.recv().unwrap() {
+                followup } = msg {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
                     assert_eq!(product, 15);
                     assert_eq!(price_opinion, OfferResult::Cheap);
                     assert_eq!(quantity, 10.0);
                     assert_eq!(followup, 2);
-                } else { assert!(false); }
+                } else if let ActorMessage::RejectPurchase { buyer, 
+                    seller, product, 
+                    price_opinion } = msg {
+                        assert!(false, "Reciveed RejectPurchase instead.")
+                }
+                else { assert!(false, "Did not recieve buy offer."); }
                 // then check that the sent the expected food
                 if let ActorMessage::BuyOfferFollowup { buyer, 
                 seller, product, 
@@ -3165,6 +3171,7 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
+                // TODO check out why it's subtracting instead of adding the change.
                 assert_eq!(test.property.property.get(&2).unwrap().total_property, 105.0);
                 assert_eq!(test.property.property.get(&6).unwrap().total_property, 80.0);
                 assert_eq!(test.property.property.get(&14).unwrap().total_property, 80.0);
@@ -3563,6 +3570,7 @@ mod tests {
             }
         }
     
+        // Completed
         mod try_to_buy_should {
             use std::{collections::HashMap, thread, time::Duration};
 
@@ -3785,13 +3793,19 @@ mod tests {
                 });
 
                 if handle.is_finished() {assert!(false, "Ended Prematurely!"); }
-
+                // check for find product
+                if let ActorMessage::FindProduct { product, sender } = rx.recv().unwrap() {
+                    assert_eq!(product, 15);
+                    assert_eq!(sender, pop_info);
+                } else { assert!(false, "Find Product message was not recived."); }
+                // respond to the find message.
                 tx.send(ActorMessage::FoundProduct { seller: selling_firm, buyer: pop_info, product: 15 })
                     .expect("Unexpected Disconnected.");
                 thread::sleep(Duration::from_millis(100));
                 // should have the first message we sent
                 if let ActorMessage::FoundProduct { .. } = rx.recv().unwrap() {
                 } else { assert!(false, "Found Proudct message not recieved."); }
+
                 tx.send(ActorMessage::InStock { buyer: pop_info, 
                     seller: selling_firm, product: 15, price: 5.9, 
                     quantity: 100.0 }).expect("Sudden Disconnect?");
@@ -3849,21 +3863,21 @@ mod tests {
                     assert!(true);
                 } else { assert!(false, "Did not recieve Successful return."); }
 
-                assert_eq!(test.property.property.get(&2).unwrap().total_property, 120.0);
-                assert_eq!(test.property.property.get(&2).unwrap().spent, 0.0);
+                assert_eq!(test.property.property.get(&2).unwrap().total_property, 100.0);
+                assert_eq!(test.property.property.get(&2).unwrap().spent, 20.0);
                 assert_eq!(test.property.property.get(&2).unwrap().recieved, 0.0);
 
-                assert_eq!(test.property.property.get(&6).unwrap().total_property, 100.0);
-                assert_eq!(test.property.property.get(&6).unwrap().spent, 0.0);
+                assert_eq!(test.property.property.get(&6).unwrap().total_property, 80.0);
+                assert_eq!(test.property.property.get(&6).unwrap().spent, 20.0);
                 assert_eq!(test.property.property.get(&6).unwrap().recieved, 0.0);
 
                 assert_eq!(test.property.property.get(&14).unwrap().total_property, 80.0);
                 assert_eq!(test.property.property.get(&14).unwrap().spent, 0.0);
                 assert_eq!(test.property.property.get(&14).unwrap().recieved, 0.0);
 
-                assert_eq!(test.property.property.get(&15).unwrap().total_property, 0.0);
+                assert_eq!(test.property.property.get(&15).unwrap().total_property, 10.0);
                 assert_eq!(test.property.property.get(&15).unwrap().spent, 0.0);
-                assert_eq!(test.property.property.get(&15).unwrap().recieved, 0.0);
+                assert_eq!(test.property.property.get(&15).unwrap().recieved, 10.0);
             }
         }
     }

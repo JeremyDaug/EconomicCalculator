@@ -1118,7 +1118,7 @@ impl Pop {
                     for (prod, quant) in self.retrieve_exchange_return(rx, tx, seller, followups) {
                         // add to resulting change to remove it from our losses
                         resulting_change.entry(prod)
-                        .and_modify(|x| *x -= quant)
+                        .and_modify(|x| *x += quant)
                         .or_insert(quant);
                         current_offer.entry(prod)
                         .and_modify(|x| *x -= quant)
