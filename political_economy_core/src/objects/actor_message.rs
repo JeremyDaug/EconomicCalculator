@@ -161,7 +161,9 @@ pub enum ActorMessage {
         product: usize },
 
     /// The buyer has recieved the deal (with or without change) and sends out
-    /// a confirmation to close the deal for good.
+    /// a confirmation to close the deal for good. When this is sent, both 
+    /// parties swap products, removing what was given and adding what was 
+    /// accepted.
     FinishDeal { buyer: ActorInfo, seller: ActorInfo, product: usize },
 
     /// A Close out Deal Message, sent by buyer or seller as needed.
@@ -173,6 +175,8 @@ pub enum ActorMessage {
     /// Follow up with a different product then last time.
     /// Useful for pops to buy multiple items at the same store, saving time.
     /// Also uses excess time from existing item instead of next item's time.
+    /// 
+    /// Currently Not used. May be added later.
     CheckItem { buyer: ActorInfo, seller: ActorInfo,
         proudct: usize },
 

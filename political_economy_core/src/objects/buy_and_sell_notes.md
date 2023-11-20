@@ -133,11 +133,13 @@ stateDiagram-v2
 
     SendOfferAcceptance --> BuyerAcceptsAndCloses
     SendAcceptanceAndChange --> BuyerRecalculatesWithChange
+
     SendRejectionOffer --> BuyerDealsWithRejection
 
-    BuyerRecalculatesWithChange --> SendAcceptAndClose: Change is accepted
+    BuyerRecalculatesWithChange --> BuyerAcceptsAndCloses: Change is accepted
+    BuyerRecalculatesWithChange --> SendRejectChangeAndClose: Change is rejected
 
-    SendAcceptAndClose --> [*]: Both Finish out Deal
+    SendRejectChangeAndClose --> [*]: Both Finish out Deal
 
     BuyerDealsWithRejection --> CalculateBuyOffer: Buyer wishes to try again.
     BuyerDealsWithRejection --> SendConfirmRejection: Accepts Rejection

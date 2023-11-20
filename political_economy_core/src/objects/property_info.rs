@@ -47,6 +47,10 @@ pub struct PropertyInfo {
     /// How much AMV was spent today to get what we have.
     pub amv_cost: f64,
     /// How much AMV we typically spend per unit.
+    /// 
+    /// This is updated at the end of the day by the formula
+    /// 
+    /// ( 9*Y + T ) / 10
     pub amv_unit_estimate: f64,
 }
 
@@ -72,7 +76,7 @@ impl PropertyInfo {
             lost: 0.0, 
             time_cost: 0.0,
             amv_cost: 0.0,
-            amv_unit_estimate: 0.0
+            amv_unit_estimate: 1.0
         } 
     }
 

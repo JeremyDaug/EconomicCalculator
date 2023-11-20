@@ -663,7 +663,7 @@ impl Pop {
     /// who we'll get in touch with and try to make a deal.
     /// - Emergency Search, this occurs when either the product being sought
     /// is unavailable through sellers and the product sought is important.
-    fn try_to_buy(&mut self,
+    pub fn try_to_buy(&mut self,
     rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>,
     data: &DataManager,
@@ -672,12 +672,14 @@ impl Pop {
     target: f64) -> BuyResult {
         if let DesireItem::Product(product) = item {
             // get time cost for later
-            let time_cost = self.standard_shop_time_cost();
-            // let price = mem.current_unit_budget();
-            let price = 1.0;
+            //let time_cost = self.standard_shop_time_cost();
+            let price_estimate = self.property.property
+                .entry(*product)
+                .or_insert(PropertyInfo::new(0.0))
+                .amv_unit_estimate;
             // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
             let market_price = market.get_product_price(product, 0.0);
-            if market_price > (price * constants::HARD_BUY_CAP) {
+            if market_price > (price_estimate * constants::HARD_BUY_CAP) {
                 // if unfeaseable, at current market price, cancel.
                 return BuyResult::CancelBuy;
             }
@@ -1116,21 +1118,25 @@ impl Pop {
                     for (prod, quant) in self.retrieve_exchange_return(rx, tx, seller, followups) {
                         // add to resulting change to remove it from our losses
                         resulting_change.entry(prod)
-                        .and_modify(|x| *x += quant)
+                        .and_modify(|x| *x -= quant)
+                        .or_insert(quant);
+                        current_offer.entry(prod)
+                        .and_modify(|x| *x -= quant)
                         .or_insert(quant);
                         current_offer_amv -= market.get_product_price(&prod, 1.0) * quant;
                     }
                     resulting_change.insert(product, quantity);
-                    // update the effective cost and expenditure in satisfaction and amv
-                    let new_cost = market.get_product_price(&product, 1.0) * quantity;
-                    let new_sat_change = self.property.predict_value_changed(&resulting_change, data);
-                    // given new sat decide whether we'll accept or reject the exchange and respond.
-                    if new_sat_change.value < 0.0 { // if it results in a satisfaction decline, reject.
+                    let new_gain = self.property.predict_value_gained(product, quantity, data);
+                    let new_loss = self.property.predict_value_changed(&current_offer, data);
+                    let new_loss = new_loss.shift_tier(50);
+                    if new_gain < new_loss { // if it results in a satisfaction decline, reject.
                         self.push_message(rx, tx, ActorMessage::RejectPurchase { 
                             buyer: self.actor_info(), 
                             seller, 
                             product, 
                             price_opinion: OfferResult::Rejected });
+                        // record expended time trying to buy the target
+                        self.property.record_purchase(sought_product, 0.0, self.standard_shop_time_cost());
                         return BuyResult::CancelBuy;
                     } else { // if still positive satisfaction change, accept.
                         self.property.add_products(&resulting_change, data);
