@@ -492,9 +492,9 @@ impl Pop {
     /// sifts it's goods again,
     /// 
     /// TODO Sift Improvement Location: When Sifting is upgraded to not be destructive, come back here and upgrade the time extraction.
-    pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
-        data: &DataManager,
-        market: &MarketHistory) {
+    pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>,
+        tx: &Sender<ActorMessage>,
+        data: &DataManager, market: &MarketHistory) {
         // TODO redo this stuff and sanity check it.
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
