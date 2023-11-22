@@ -3889,8 +3889,15 @@ mod tests {
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
-            pub fn correctly_deal_with_a_standard_specific_buy() 
-            {
+            pub fn correctly_stop_when_unable_to_satisfy_desires() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                
+            }
+
+            #[test]
+            pub fn correctly_deal_with_a_standard_specific_buy() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
@@ -3937,8 +3944,8 @@ mod tests {
 
                 // setup property split
                 let handle = thread::spawn(move || {
-                    let result = test.shopping_loop(&mut passed_rx, &mut passed_tx, 
-                        &data, &history);
+                    let result = test.try_to_buy(&mut passed_rx, &passed_tx, &data, 
+                        &history, &DesireItem::Product(15), 10.0);
                     (test, result)
                 });
 
@@ -4029,7 +4036,6 @@ mod tests {
                 assert_eq!(test.property.property.get(&15).unwrap().spent, 0.0);
                 assert_eq!(test.property.property.get(&15).unwrap().recieved, 10.0);
             }
- 
         }
     }
 
@@ -12618,6 +12624,63 @@ mod tests {
 
     mod desire_tests {
         use crate::objects::desire::{Desire, DesireItem};
+
+        mod missing_satisfaction_should {
+            use crate::objects::desire::{Desire, DesireItem};
+
+            #[test]
+            pub fn return_missing_satisfaction_to_reach_tiers() {
+                let step_1_no_sat = Desire {
+                    item: DesireItem::Product(0),
+                    start: 0,
+                    end: None,
+                    amount: 2.0,
+                    satisfaction: 0.0,
+                    step: 1,
+                    tags: vec![],
+                };
+                let step_5_no_sat = Desire {
+                    item: DesireItem::Product(0),
+                    start: 0,
+                    end: None,
+                    amount: 2.0,
+                    satisfaction: 0.0,
+                    step: 5,
+                    tags: vec![],
+                };
+                let step_1_some_sat = Desire {
+                    item: DesireItem::Product(0),
+                    start: 0,
+                    end: None,
+                    amount: 2.0,
+                    satisfaction: 15.4,
+                    step: 1,
+                    tags: vec![],
+                };
+                let step_5_some_sat = Desire {
+                    item: DesireItem::Product(0),
+                    start: 0,
+                    end: None,
+                    amount: 2.0,
+                    satisfaction: 6.32,
+                    step: 5,
+                    tags: vec![],
+                };
+
+                let val = step_1_no_sat.missing_satisfaction(5);
+                assert_eq!(val, 12.0, "step 1 no satisfaction");
+                let val = step_5_no_sat.missing_satisfaction(10);
+                assert_eq!(val, 6.0, "Step 5, no Satisfaction");
+                let val = step_1_some_sat.missing_satisfaction(10);
+                assert_eq!(val, 6.6, "Step 1, some Satisfaction, above sat");
+                let val = step_1_some_sat.missing_satisfaction(3);
+                assert_eq!(val, 0.0, "Step 1, some Satisfaction, below sat");
+                let val = step_5_some_sat.missing_satisfaction(15);
+                assert_eq!(val, (8.0 - 6.32), "step 5, some sat, above sat");
+                let val = step_5_some_sat.missing_satisfaction(10);
+                assert_eq!(val, 0.0, "step 5, some sat, below sat");
+            }
+        }
 
         mod steps_in_interval_should {
             use crate::objects::desire::{DesireItem, Desire};

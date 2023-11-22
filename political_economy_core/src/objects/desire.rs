@@ -465,6 +465,17 @@ impl Desire {
             true
         }
     }
+
+    /// # Missing Satisfaction
+    /// 
+    /// Calculates how much satisfaction we need to satisfy the given tier.
+    /// 
+    /// If already oversatisfied, return 0.
+    pub fn missing_satisfaction(&self, tier: usize) -> f64 {
+        let steps = self.steps_to_tier(tier).expect("Doesn't step on Tier!");
+        let total_needed = ((steps+1) as f64) * self.amount;
+        (total_needed - self.satisfaction).max(0.0)
+    }
 }
 
 /// The tags a desire can be marked by, modifying how the desire is viewed.

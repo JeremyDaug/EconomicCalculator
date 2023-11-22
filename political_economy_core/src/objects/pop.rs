@@ -513,6 +513,8 @@ impl Pop {
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
             }
+            // see how much extra we need to get to satisfy the desire at this tier (should never be 0)
+            let remaining_sat = curr_desire.missing_satisfaction(curr_desire_coord.tier);
             
             // get our current desire target
             let current_desire_item = &curr_desire.item;
@@ -537,16 +539,27 @@ impl Pop {
                         // get what needs to be gotten
                         for part in needs.iter()
                          {
-                            multiple_buys.push(&part.item);
+                            multiple_buys.push((&part.item, part.amount));
                         }
                         1.0 * needs.len() as f64
                     } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
                         // if the want is not found in the market, then move on to the next desire
-                        // debug record anytime we get this here later.
                         0.0
                     } else { panic!("Should not be here.") }
                 },
-                DesireItem::Class(_) => 1.0, // for class, any item of the class will be good enough.
+                DesireItem::Class(id) => { // for class, any item of the class will be good enough.
+                    self.push_message(rx, tx,
+                    ActorMessage::FindClass { class: *id, 
+                        sender: self.actor_info() });
+                    let result = self.active_wait(rx, tx, data, market,
+                        &vec![
+                            ActorMessage::FoundClass { buyer: ActorInfo::Firm(0), 
+                                product: 0 },
+                            ActorMessage::ClassNotFound { product: 0, 
+                                buyer: ActorInfo::Firm(0) }
+                        ]);
+                    1.0
+                },
                 DesireItem::Product(_) => 1.0, // for specific product. only one item will be needed.
             };
             // preemptively get the next desire
@@ -1431,6 +1444,16 @@ impl Pop {
     pub fn adapt_future_plan(&mut self, _data: &DataManager,
     _history: &MarketHistory) {
         todo!("Either Redo or drop after Property Update!")
+    }
+
+    /// # Product Initialization
+    /// 
+    /// Initializes a product for use. It sets up the product with no amount
+    /// a max target of 1.0, and no other information.
+    /// 
+    /// If product alread exists, it skips making it again.
+    pub fn add_target(&mut self, product: usize, target: f64) {
+        self.property.add_target(product, target);
     }
 }
 

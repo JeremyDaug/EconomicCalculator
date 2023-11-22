@@ -2129,6 +2129,18 @@ impl Property {
             panic!("Product {} not found in property info.", product);
         }
     }
+
+    /// # Add Target
+    /// 
+    /// Adds to the target of a product. If product doesn't currently exist in
+    /// property, it adds it with the target set.
+    pub fn add_target(&mut self, product: usize, target: f64) {
+        if !self.property.contains_key(&product) {
+            let mut insert = PropertyInfo::new(0.0);
+            insert.max_target = target;
+            self.property.insert(product, insert);
+        }
+    }
 }
 
 /// # Time Breakdown

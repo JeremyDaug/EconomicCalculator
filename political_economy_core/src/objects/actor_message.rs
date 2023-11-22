@@ -53,8 +53,8 @@ pub enum ActorMessage {
     /// 
     /// Sent by a potential buyer.
     /// 
-    /// If successful, the market returns FoundProduct, for a semi-randomly
-    /// selected product of that class.
+    /// If successful, the market returns FoundClass, which contains a product
+    /// within that class.
     /// 
     /// If not successful, it returns ClassNotFound.
     FindClass { class: usize, sender: ActorInfo },
@@ -82,6 +82,11 @@ pub enum ActorMessage {
     ///
     /// Starts the Deal Making Process
     FoundProduct{ seller: ActorInfo, buyer: ActorInfo, product: usize },
+    /// # Found Class
+    /// 
+    /// Sent by the market if a product within that class is found in the 
+    /// market. It returns a valid product to purchase, selected semi-randomly.
+    FoundClass{ buyer: ActorInfo, product: usize },
     /// # Found Want
     /// 
     /// Send by the market when, with the products available, it has a valid 
