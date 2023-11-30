@@ -465,10 +465,9 @@ impl Pop {
 
     /// # Shopping Loop
     /// 
-    /// Shopping loop function is a helper for free time and adjacent fns.
+    /// Shopping loop function is a helper for free time and adjacent functions.
     /// 
-    /// It starts at the first tier with unsatisfied desires within. Satisfied
-    /// desires are skipped.
+    /// It simply walks up it's desires, buying as it can.
     /// 
     /// It gets the item and plans how much of it it wants to try and buy 
     /// based on it's type.
@@ -478,11 +477,7 @@ impl Pop {
     ///   to get it, and tries to set up as many trips as products in it's 
     ///   list.
     /// 
-    /// How much of each item it will buy is dependent on how much the desire 
-    /// might need. It aims for at least a few tiers of the desire so that it
-    /// can save time. It aims for either maxing out the desire, or halfway to 
-    /// the highest tier + 1. This will need to be explored and tested. Maybe
-    /// remember how high we got yesterday and aim for that +1.
+    /// Currently, this does not set target amounts, only the targeted products.
     /// 
     /// With the number of buys it needs and targets, it extracts time for 
     /// shopping, then it spends it on shopping trips.
@@ -492,10 +487,11 @@ impl Pop {
     /// sifts it's goods again,
     /// 
     /// TODO Sift Improvement Location: When Sifting is upgraded to not be destructive, come back here and upgrade the time extraction.
+    /// TODO consider adding a 'grocery list' prebuy option which gets the most consistently bought items to improve efficiency and reduce the number of times it needs to go out and buy.
+    /// TODO Once possible, allow this to buy multiple items at the same store before moving on to the next.
     pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>,
         tx: &Sender<ActorMessage>,
         data: &DataManager, market: &MarketHistory) {
-        // TODO redo this stuff and sanity check it.
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
         let mut next_desire = self.property.get_first_unsatisfied_desire();
@@ -513,19 +509,17 @@ impl Pop {
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
             }
-            // see how much extra we need to get to satisfy the desire at this tier (should never be 0)
-            let remaining_sat = curr_desire.missing_satisfaction(curr_desire_coord.tier);
             
             // get our current desire target
-            let current_desire_item = &curr_desire.item;
+            let mut current_desire_item = curr_desire.item;
             let mut multiple_buys = vec![];
             // get how many items we need to buy for this desire.
-            let buy_targets = match current_desire_item {
+            let _distinct_items = match current_desire_item {
                 DesireItem::Want(id) => { // for wants, we need to get the product inputs.
                     // if it's a want, go to the most common satisfaction 
                     // of that want in the market.
                     self.push_message(rx, tx, 
-                        ActorMessage::FindWant { want: *id, sender: self.actor_info() });
+                        ActorMessage::FindWant { want: id, sender: self.actor_info() });
                     // get the process the market suggests then 
                     let result = self.active_wait(rx, tx, data, market, 
                         &vec![
@@ -549,7 +543,7 @@ impl Pop {
                 },
                 DesireItem::Class(id) => { // for class, any item of the class will be good enough.
                     self.push_message(rx, tx,
-                    ActorMessage::FindClass { class: *id, 
+                    ActorMessage::FindClass { class: id, 
                         sender: self.actor_info() });
                     let result = self.active_wait(rx, tx, data, market,
                         &vec![
@@ -558,7 +552,12 @@ impl Pop {
                             ActorMessage::ClassNotFound { product: 0, 
                                 buyer: ActorInfo::Firm(0) }
                         ]);
-                    1.0
+                    if let ActorMessage::FoundClass { buyer, product } = result {
+                        current_desire_item = DesireItem::Product(product.clone());
+                        1.0
+                    } else if let ActorMessage::ClassNotFound { product, buyer } = result {
+                        0.0
+                    } else { unreachable!("Should not reach here!"); }
                 },
                 DesireItem::Product(_) => 1.0, // for specific product. only one item will be needed.
             };
@@ -570,7 +569,7 @@ impl Pop {
             // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
             available_shopping_time += self.property.get_shopping_time(
-                SHOPPING_TIME_COST * buy_targets - available_shopping_time, 
+                SHOPPING_TIME_COST * _distinct_items - available_shopping_time, 
                 data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
             // check that it's enough time to go out buying
             if SHOPPING_TIME_COST > available_shopping_time {
@@ -585,7 +584,7 @@ impl Pop {
                 break;
             } else {
                 // Do the buy
-                let result = self.try_to_buy(rx, tx, data, market, current_desire_item, buy_targets);
+                let result = self.try_to_buy(rx, tx, data, market, &current_desire_item);
                 // react to the result and subtract from our shopping time.
                 // TODO ^^
                 match result {
@@ -681,11 +680,10 @@ impl Pop {
     tx: &Sender<ActorMessage>,
     data: &DataManager,
     market: &MarketHistory,
-    item: &DesireItem,
-    target: f64) -> BuyResult {
+    item: &DesireItem) -> BuyResult {
         if let DesireItem::Product(product) = item {
             // get time cost for later
-            //let time_cost = self.standard_shop_time_cost();
+            // let time_cost = self.standard_shop_time_cost();
             let price_estimate = self.property.property
                 .entry(*product)
                 .or_insert(PropertyInfo::new(0.0))
