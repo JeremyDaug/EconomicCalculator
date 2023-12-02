@@ -17,7 +17,7 @@ use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::{TIER_RATIO, SHOPPING_TIME_ID}};
 
-use super::{desire::{Desire, DesireItem}, market::MarketHistory, process::PartItem, property_info::PropertyInfo};
+use super::{desire::Desire, market::MarketHistory, property_info::PropertyInfo, item::Item};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -163,7 +163,7 @@ impl Property {
         // TODO update or remove this.
         // get the first step.
         let mut curr = self
-            .walk_up_tiers_for_item(&None, &DesireItem::Product(*product));
+            .walk_up_tiers_for_item(&None, &Item::Product(*product));
         // get the available product
         let mut available = match self.property.get(product) {
             Some(val) => val.unreserved,
@@ -183,7 +183,7 @@ impl Property {
             }
             // since do have more available, get the next
             curr = self
-            .walk_up_tiers_for_item(&curr, &DesireItem::Product(*product));
+            .walk_up_tiers_for_item(&curr, &Item::Product(*product));
         }
         // we have either run out of desires to possibly satisfy
     }
@@ -407,13 +407,13 @@ impl Property {
             let available = prop_data.max_spec_reserve().min(amount);
             // get what everything should be at or below
             let target = prop_data.max_spec_reserve() - available;
-            let mut specific_reduction = prop_data.specific_reserve - target;
+            let mut specific_reduction = prop_data.product_reserve - target;
             let mut class_reduction = prop_data.class_reserve - target;
             let want_reduction = prop_data.want_reserve - target;
             // then, if value is positive, remove for each
             if specific_reduction > 0.0 {
                 let mut specific_desire_coord = DesireCoord{ tier: self.highest_tier, idx: self.desires.len() };
-                specific_desire_coord = self.walk_down_tiers_for_item(&specific_desire_coord, &DesireItem::Product(product)).unwrap();
+                specific_desire_coord = self.walk_down_tiers_for_item(&specific_desire_coord, &Item::Product(product)).unwrap();
                 while specific_reduction > 0.0 {
                     // walk down our desires, subtracting from satisfaction and our total reduction
                     let mut desire = self.desires
@@ -428,7 +428,7 @@ impl Property {
                     // get next desire, if no next, break out.
                     let temp = self
                     .walk_down_tiers_for_item(&specific_desire_coord, 
-                        &DesireItem::Product(product));
+                        &Item::Product(product));
                     specific_desire_coord = if let Some(val) = temp {
                         val
                     } else { break; }
@@ -439,7 +439,7 @@ impl Property {
                 let mut class_desire_coord = DesireCoord{ tier: self.highest_tier, idx: self.desires.len() };
                 let class = data.products.get(&product).unwrap().product_class.unwrap();
                 // get the class desires.
-                class_desire_coord = self.walk_down_tiers_for_item(&class_desire_coord, &DesireItem::Class(class)).unwrap();
+                class_desire_coord = self.walk_down_tiers_for_item(&class_desire_coord, &Item::Class(class)).unwrap();
                 while class_reduction > 0.0 {
                     // walk down our desires, subtracting from satisfaction and our total reduction
                     let mut desire = self.desires
@@ -454,7 +454,7 @@ impl Property {
                     // get next desire, if no next, break out.
                     let temp = self
                     .walk_down_tiers_for_item(&class_desire_coord, 
-                        &DesireItem::Class(class));
+                        &Item::Class(class));
                     class_desire_coord = if let Some(val) = temp {
                         val
                     } else { break; }
@@ -495,7 +495,7 @@ impl Property {
                         current_coord = self.walk_down_tiers(&current_coord).unwrap();
                         continue;
                     }
-                    let want = data.wants.get(desire.item.unwrap()).expect("Want not found.");
+                    let want = data.wants.get(&desire.item.unwrap()).expect("Want not found.");
                     // check if any of it's process is ours.
                     let shared_processes = want.process_sources.intersection(&valid_processes)
                         .collect_vec(); // TODO see if there's a better way to check if the intersection is empty.
@@ -513,7 +513,7 @@ impl Property {
                     for proc in shared_processes.iter()
                     .map(|x| data.processes.get(x).unwrap()) {
                         // get how many we need to undo this satisfaction
-                        let output = proc.effective_output_of(PartItem::Want(*desire.item.unwrap()));
+                        let output = proc.effective_output_of(Item::Want(desire.item.unwrap()));
                         let ratio = desire.amount / output;
                         // cap it at how many iterations we need at how many we originally planned.
                         let _change = proc.do_process(&result, 
@@ -578,7 +578,7 @@ impl Property {
     /// Finds the highest tier for a particular item which has satisfaction
     /// 
     /// Returns None if no satisfaction in any product found.
-    pub fn get_highest_satisfied_tier_for_item(&self, item: DesireItem) -> Option<usize> {
+    pub fn get_highest_satisfied_tier_for_item(&self, item: Item) -> Option<usize> {
         // get those desires which have any satisfaction
         let possible = self.desires.iter()
             .filter(|x| x.item == item && x.satisfaction > 0.0)
@@ -659,7 +659,7 @@ impl Property {
     /// has an idx > self.desires.len() it will drag it down to len, allowing you to
     /// start at a tier specifically, without touching a higher tier.
     pub fn walk_down_tiers_for_item(&self, prev: &DesireCoord, 
-    item: &DesireItem) -> Option<DesireCoord> {
+    item: &Item) -> Option<DesireCoord> {
         // set the current equal to prev so we can edit safely.
         let mut curr = *prev;
         // if the current idx is past our endpoint, then smash it down.
@@ -692,7 +692,7 @@ impl Property {
     /// Take an item and finds the lowest tier available which can still accept the item.
     /// 
     /// Used primarily to nicely find where to put an item when sifting.
-    pub fn get_lowest_unsatisfied_tier_of_item(&self, item: DesireItem) -> Option<usize> {
+    pub fn get_lowest_unsatisfied_tier_of_item(&self, item: Item) -> Option<usize> {
         // get those desires which contain our item and are not fully satisfied.
         let possible = self.desires.iter()
             .filter(|x| x.item == item && !x.is_fully_satisfied())
@@ -787,7 +787,7 @@ impl Property {
     /// at. The previous index need not be valid to be used.
     /// 
     /// If there is no next step, it returns None.
-    pub fn walk_up_tiers_for_item(&self, prev: &Option<DesireCoord>, item: &DesireItem) -> Option<DesireCoord> {
+    pub fn walk_up_tiers_for_item(&self, prev: &Option<DesireCoord>, item: &Item) -> Option<DesireCoord> {
         // If no previous given, make it.
         // if given increment idx.
         let mut curr = if prev.is_none() { DesireCoord{tier: 0, idx: 0}} 
@@ -918,10 +918,10 @@ impl Property {
     pub fn market_satisfaction(&mut self, market: &MarketHistory) -> f64 {
         self.market_satisfaction = 0.0;
         for desire in self.desires.iter()
-        .filter(|x| x.item.is_specific()) {
+        .filter(|x| x.item.is_product()) {
             let product = desire.item.unwrap();
             self.market_satisfaction += 
-                market.get_product_price(product, 0.0) * 
+                market.get_product_price(&product, 0.0) * 
                 desire.satisfaction;
         }
         self.market_satisfaction
@@ -951,7 +951,7 @@ impl Property {
     }
 
     /// Gets the sum total satisfaction of a specific item.
-    pub fn total_satisfaction_of_item(&self, item: DesireItem) -> f64 {
+    pub fn total_satisfaction_of_item(&self, item: Item) -> f64 {
         self.desires.iter().filter(|x| x.item == item)
             .map(|x| x.satisfaction).sum()
     }
@@ -1002,7 +1002,7 @@ impl Property {
             }
             let desire = self.desires.get_mut(current.idx).unwrap();
             match desire.item {
-                DesireItem::Want(want) => { // if want
+                Item::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
                     // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
                     if self.want_expectations.contains_key(&want) {
@@ -1065,7 +1065,7 @@ impl Property {
                     for proc_id in want_info.use_sources.iter() {
                         let process = data.processes.get(proc_id).unwrap();
                         // get how much the process outputs
-                        let eff = process.effective_output_of(PartItem::Want(want));
+                        let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
                         let mut combined_wants = self.want_store.clone();
@@ -1121,7 +1121,7 @@ impl Property {
                     for proc_id in want_info.consumption_sources.iter() {
                         let process = data.processes.get(proc_id).unwrap();
                         // get how much the process outputs
-                        let eff = process.effective_output_of(PartItem::Want(want));
+                        let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
                         let mut combined_wants = self.want_store.clone();
@@ -1172,7 +1172,7 @@ impl Property {
                         cleared.insert(current.idx); // add to cleared.
                     }
                 },
-                DesireItem::Class(class) => { // if class item
+                Item::Class(class) => { // if class item
                     // get that class's products
                     let class = data.product_classes.get(&class).unwrap();
                     // if there is no overlap between our property and add to cleared
@@ -1211,7 +1211,7 @@ impl Property {
                         cleared.insert(current.idx); // add to cleared and gtfo
                     }
                 },
-                DesireItem::Product(product) => { // if specific item
+                Item::Product(product) => { // if specific item
                     // get our info for this product
                     let info_opt = self.property.get_mut(&product);
                     if info_opt.is_none() { // if we have none of this item, set this as cleared.
@@ -1344,13 +1344,13 @@ impl Property {
         for idx in 0..self.desires.len() {
             let desire = self.desires.get(idx).unwrap();
             match desire.item {
-                DesireItem::Want(id) => {
+                Item::Want(id) => {
                     result += format!("W{:04}|", id).as_str();
                 },
-                DesireItem::Class(id) => {
+                Item::Class(id) => {
                     result += format!("C{:04}|", id).as_str();
                 },
-                DesireItem::Product(id) => {
+                Item::Product(id) => {
                     result += format!("P{:04}|", id).as_str();
                 },
             }
@@ -1481,14 +1481,14 @@ impl Property {
             // get how much satisfaction is left to satisfy here.
             // placeholder catch for wants and classes as we do not have access to their estimate prices
             // TODO when price for class and want added, update here.
-            if let DesireItem::Want(_) = desire.item {
+            if let Item::Want(_) = desire.item {
                 continue;
-            } else if let DesireItem::Class(_) = desire.item {
+            } else if let Item::Class(_) = desire.item {
                 continue;
             }
             // get the price per unit.
             let unit_price = match desire.item {
-                DesireItem::Product(id) => market.get_product_price(&id, 0.0),
+                Item::Product(id) => market.get_product_price(&id, 0.0),
                 _ => 0.0,
             };
             // get how much we need to satisfy.
@@ -1595,7 +1595,7 @@ impl Property {
             }
             let mut desire = self.desires.get_mut(current.idx).unwrap();
             match desire.item {
-                DesireItem::Want(want) => { // if want
+                Item::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
                     // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
                     if self.want_expectations.contains_key(&want) {
@@ -1658,7 +1658,7 @@ impl Property {
                     for proc_id in want_info.use_sources.iter().sorted() {
                         let process = data.processes.get(proc_id).unwrap();
                         // get how much the process outputs
-                        let eff = process.effective_output_of(PartItem::Want(want));
+                        let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
                         let mut combined_wants = self.want_store.clone();
@@ -1714,7 +1714,7 @@ impl Property {
                     for proc_id in want_info.consumption_sources.iter().sorted() {
                         let process = data.processes.get(proc_id).unwrap();
                         // get how much the process outputs
-                        let eff = process.effective_output_of(PartItem::Want(want));
+                        let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
                         let mut combined_wants = self.want_store.clone();
@@ -1765,7 +1765,7 @@ impl Property {
                         cleared.insert(current.idx); // add to cleared.
                     }
                 },
-                DesireItem::Class(class) => { // if class item
+                Item::Class(class) => { // if class item
                     // get that class's products
                     let class = data.product_classes.get(&class).unwrap();
                     // if there is no overlap between our property and add to cleared
@@ -1804,7 +1804,7 @@ impl Property {
                         cleared.insert(current.idx); // add to cleared and gtfo
                     }
                 },
-                DesireItem::Product(product) => { // if specific item
+                Item::Product(product) => { // if specific item
                     // get our info for this product
                     let info_opt = self.property.get_mut(&product);
                     if info_opt.is_none() { // if we have none of this item, set this as cleared.
@@ -1958,7 +1958,7 @@ impl Property {
                 0.0 // if nothing to translate into, then skill level doesn't matter.
             };
             let iter_target = (target - final_result) / // the remaining target
-                process.effective_output_of(PartItem::Specific(SHOPPING_TIME_ID)); // how much an iteration completes
+                process.effective_output_of(Item::Product(SHOPPING_TIME_ID)); // how much an iteration completes
             let proc_result = process.do_process_with_property(&self.property, 
                 &available_wants, eff_skill_level, 0.0, Some(iter_target), false, data);
             if proc_result.iterations == 0.0 {

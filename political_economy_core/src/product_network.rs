@@ -3,7 +3,7 @@
 
 use std::collections::HashMap;
 
-use crate::{data_manager::DataManager, objects::process::{PartItem, ProcessSectionTag}};
+use crate::{data_manager::DataManager, objects::{process::ProcessSectionTag, item::Item}};
 
 /// Product Network storage.
 #[derive(Debug)]
@@ -115,13 +115,13 @@ impl ProductNetwork{
                     ProcessSectionTag::Capital => {
                         // if input or capital, than it's an input 
                         match part.item {
-                            PartItem::Specific(id) => {
+                            Item::Product(id) => {
                                 let idx = self.get_prod_idx(&id);
                                 conn.input_idx.push(*idx); // add input's idx
                                 let node = self.get_node_mut(*idx);
                                 node.outgoing.push(conn_idx); // add connection as output
                             },
-                            PartItem::Class(class) => {
+                            Item::Class(class) => {
                                 let class_group = data.product_classes.get(&class).unwrap();
                                 for id in class_group {
                                     let idx = self.get_prod_idx(&id);
@@ -130,7 +130,7 @@ impl ProductNetwork{
                                     node.outgoing.push(conn_idx); // add connection as output
                                 }
                             },
-                            PartItem::Want(id) => {
+                            Item::Want(id) => {
                                 let idx = self.get_want_idx(&id);
                                 conn.input_idx.push(*idx); // add input's idx
                                 let node = self.get_node_mut(*idx);
@@ -140,13 +140,13 @@ impl ProductNetwork{
                     },
                     ProcessSectionTag::Output => {
                         match part.item {
-                            PartItem::Specific(id) => {
+                            Item::Product(id) => {
                                 let idx = self.get_prod_idx(&id);
                                 conn.output_idx.push(*idx); // add output's idx
                                 let node = self.get_node_mut(*idx);
                                 node.incoming.push(conn_idx); // add connection as input
                             },
-                            PartItem::Class(class) => {
+                            Item::Class(class) => {
                                 let class_group = data.product_classes.get(&class).unwrap();
                                 for id in class_group {
                                     let idx = self.get_prod_idx(&id);
@@ -155,7 +155,7 @@ impl ProductNetwork{
                                     node.incoming.push(conn_idx); // add connection as input
                                 }
                             },
-                            PartItem::Want(id) => {
+                            Item::Want(id) => {
                                 let idx = self.get_want_idx(&id);
                                 conn.output_idx.push(*idx); // add output's idx
                                 let node = self.get_node_mut(*idx);

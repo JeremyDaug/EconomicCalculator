@@ -3,7 +3,7 @@
 use core::fmt;
 use std::error::Error;
 
-use super::property::TieredValue;
+use super::{item::Item};
 
 /// Desires
 /// 
@@ -17,7 +17,7 @@ use super::property::TieredValue;
 #[derive(Debug, Clone)]
 pub struct Desire {
     /// The item (Product or Want) sought out.
-    pub item: DesireItem,
+    pub item: Item,
     /// The tier this desire starts at.
     pub start: usize,
     /// The last tier which has this desire.
@@ -46,7 +46,7 @@ pub struct Desire {
 }
 
 impl Desire {
-    pub fn new(item: DesireItem, 
+    pub fn new(item: Item, 
         start: usize, 
         end: Option<usize>, 
         amount: f64, 
@@ -281,9 +281,9 @@ impl Desire {
     ///
     /// ```
     /// use political_economy_core::objects::desire::Desire;
-    /// use political_economy_core::objects::desire::DesireItem;
+    /// use political_economy_core::objects::desire::Item;
     ///
-    /// let desire = Desire{item: DesireItem::Product(0),start: 2, end: Some(10),
+    /// let desire = Desire{item: Item::Product(0),start: 2, end: Some(10),
     ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
     /// assert_eq!(desire.steps_on_tier(4), true);
     /// ```
@@ -495,72 +495,6 @@ pub enum DesireTag{
     Periodic { offset: u64, cycle: u64 },
 }
 
-/// # Desire Item Enum
-/// 
-/// Contains data for desires that are sought.
-/// 
-/// Want, Class, or Product
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum DesireItem {
-    /// A desire for a want (Food).
-    Want(usize),
-    /// A desire for a class of good (Bread).
-    Class(usize),
-    /// A desire for a specific good (Wonderbread).
-    Product(usize),
-}
-
-/// Defines what 
-impl DesireItem {
-
-    /// unwraps the value from a DesireItem, does not destroy the original (?).
-    pub fn unwrap(&self) -> &usize {
-        match self {
-            DesireItem::Product(prod) => prod,
-            DesireItem::Want(want) => want,
-            DesireItem::Class(prod) => prod,
-        }
-    }
-
-    /// Checks if the item is a Want.
-    pub fn is_want(&self) -> bool {
-        match self {
-            DesireItem::Want(_) => true,
-            _ => false
-        }
-    }
-
-    /// Checks if the item is a Product.
-    pub fn is_specific(&self) -> bool {
-        match self {
-            DesireItem::Product(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_class(&self) -> bool {
-        match self {
-            DesireItem::Class(_) => true,
-            _ => false
-        }
-    }
-
-    /// Checks if this is a specific product.
-    pub fn is_this_specific_product(&self, item: &usize) -> bool {
-        match self {
-            DesireItem::Product(val) => val == item,
-            _ => false
-        }
-    }
-
-    /// Checks if this is a specific want.
-    pub fn is_this_want(&self, item: &usize) -> bool {
-        match self {
-            DesireItem::Want(val) => val == item,
-            _ => false
-        }
-    }
-}
 
 /// Errors for desires, so we know more explicitly how and where we messed up.
 #[derive(Debug)]

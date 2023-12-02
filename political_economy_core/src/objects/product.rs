@@ -237,7 +237,7 @@ impl Product {
     pub fn add_process<'a>(&mut self, process: &Process) -> Result<(), &'a str> {
         // sanity check the product is used
         if process.process_parts.iter()
-            .all(|x| !(x.item.is_specific() && x.item.unwrap() == self.id)) {
+            .all(|x| !(x.item.is_product() && x.item.unwrap() == self.id)) {
                 return Result::Err("Process does not contain the product.");
         }
         self.processes.insert(process.id());

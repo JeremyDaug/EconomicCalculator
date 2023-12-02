@@ -1,6 +1,6 @@
 use std::{collections::{HashSet, HashMap}, vec};
 
-use super::{product::Product, skill_group::SkillGroup, process::{Process, ProcessPart, ProcessPartTag}};
+use super::{product::Product, skill_group::SkillGroup, process::{Process, ProcessPart, ProcessPartTag}, item::Item};
 
 #[derive(Debug)]
 pub struct Skill {
@@ -81,13 +81,13 @@ impl Skill {
             return Err(format!("Skill '{}' has no Labor.", self.name))
         }
         let input = ProcessPart {
-            item: super::process::PartItem::Specific(0),
+            item: Item::Product(0),
             amount: 1.0,
             part_tags: vec![ProcessPartTag::Fixed],
             part: super::process::ProcessSectionTag::Input,
         };
         let output = ProcessPart{
-            item: super::process::PartItem::Specific(self.labor),
+            item: Item::Product(self.labor),
             amount: 1.0,
             part_tags: vec![],
             part: super::process::ProcessSectionTag::Output,

@@ -8,14 +8,14 @@ use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current};
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST, SHOPPING_TIME_ID}, objects::{property::{DesireCoord, TieredValue}, desire::DesireItem}};
+use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST, SHOPPING_TIME_ID}, objects::{property::{DesireCoord, TieredValue}}};
 
 use super::{property::Property,
     pop_breakdown_table::PopBreakdownTable,
     buyer::Buyer, seller::Seller, actor::Actor,
     market::MarketHistory,
     actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult},
-    buy_result::BuyResult, property_info::PropertyInfo, product::ProductTag,
+    buy_result::BuyResult, property_info::PropertyInfo, product::ProductTag, item::Item,
 };
 
 /// Pops are the data storage for a population group.
@@ -513,9 +513,9 @@ impl Pop {
             // get our current desire target
             let mut current_desire_item = curr_desire.item;
             let mut multiple_buys = vec![];
-            // get how many items we need to buy for this desire.
-            let _distinct_items = match current_desire_item {
-                DesireItem::Want(id) => { // for wants, we need to get the product inputs.
+            // get the items we need to buy and how many.
+            let expected_trips = match current_desire_item {
+                Item::Want(id) => { // for wants, we need to get the product inputs.
                     // if it's a want, go to the most common satisfaction 
                     // of that want in the market.
                     self.push_message(rx, tx, 
@@ -541,7 +541,7 @@ impl Pop {
                         0.0
                     } else { panic!("Should not be here.") }
                 },
-                DesireItem::Class(id) => { // for class, any item of the class will be good enough.
+                Item::Class(id) => { // for class, any item of the class will be good enough.
                     self.push_message(rx, tx,
                     ActorMessage::FindClass { class: id, 
                         sender: self.actor_info() });
@@ -553,13 +553,13 @@ impl Pop {
                                 buyer: ActorInfo::Firm(0) }
                         ]);
                     if let ActorMessage::FoundClass { buyer, product } = result {
-                        current_desire_item = DesireItem::Product(product.clone());
+                        current_desire_item = Item::Product(product.clone());
                         1.0
                     } else if let ActorMessage::ClassNotFound { product, buyer } = result {
                         0.0
                     } else { unreachable!("Should not reach here!"); }
                 },
-                DesireItem::Product(_) => 1.0, // for specific product. only one item will be needed.
+                Item::Product(_) => 1.0, // for specific product. only one item will be needed.
             };
             // preemptively get the next desire
             // next_desire = self.property.walk_up_tiers(next_desire);
@@ -569,7 +569,7 @@ impl Pop {
             // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
             available_shopping_time += self.property.get_shopping_time(
-                SHOPPING_TIME_COST * _distinct_items - available_shopping_time, 
+                SHOPPING_TIME_COST * expected_trips - available_shopping_time, 
                 data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
             // check that it's enough time to go out buying
             if SHOPPING_TIME_COST > available_shopping_time {
@@ -680,8 +680,8 @@ impl Pop {
     tx: &Sender<ActorMessage>,
     data: &DataManager,
     market: &MarketHistory,
-    item: &DesireItem) -> BuyResult {
-        if let DesireItem::Product(product) = item {
+    item: &Item) -> BuyResult {
+        if let Item::Product(product) = item {
             // get time cost for later
             // let time_cost = self.standard_shop_time_cost();
             let price_estimate = self.property.property
@@ -949,7 +949,7 @@ impl Pop {
                     } 
                     // get those resources which were actually used to satisfy the current desire and amount.
                     let result = match current_desire.item {
-                        DesireItem::Want(_) => {
+                        Item::Want(_) => {
                             // try to remove the released products from our property.
                             self.property.remove_properties(&released, data);
                             // go through each process and try to remove what they need, if we can
@@ -990,7 +990,7 @@ impl Pop {
 
                             released
                         },
-                        DesireItem::Class(class_id) => {
+                        Item::Class(class_id) => {
                             // get how much we need to remove
                             let mut remove = current_desire.satisfaction_at_tier(coord.tier);
                             // get all products which satisfy this desire.
@@ -1009,7 +1009,7 @@ impl Pop {
                             }
                             actual_release
                         },
-                        DesireItem::Product(prod_id) => {
+                        Item::Product(prod_id) => {
                             // specific product, get only those items
                             let mut actual_release = HashMap::new();
                             // remove up to the current satisfaction at our current tier.

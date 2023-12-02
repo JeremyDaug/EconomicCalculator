@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::process::{Process, ProcessTag, PartItem};
+use super::{process::{Process, ProcessTag}, item::Item};
 
 /// A Want is a generic desire that can be sought after. It cannot be
 /// bought, sold, or otherwise traded directly, but must be produced
@@ -77,7 +77,7 @@ impl Want {
         let mut contains_want = false;
         for output in process.process_parts.iter()
             .filter(|x| x.part.is_output()) {
-            if let PartItem::Want(id) = output.item {
+            if let Item::Want(id) = output.item {
                 if id == self.id {
                     contains_want = true;
                 }

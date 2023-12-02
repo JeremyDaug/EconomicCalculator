@@ -24,7 +24,7 @@ mod tests {
             assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
 
             // expend from unreserved
             test.safe_remove(25.0);
@@ -33,7 +33,7 @@ mod tests {
             assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
 
             // expend from unreserved
             test.safe_remove(25.0);
@@ -42,7 +42,7 @@ mod tests {
             assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
 
             // expend from reserved
             test.safe_remove(25.0);
@@ -51,7 +51,7 @@ mod tests {
             assert!(test.reserved == 0.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
 
             // don't expend
             test.safe_remove(25.0);
@@ -60,7 +60,7 @@ mod tests {
             assert!(test.reserved == 0.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
         }
 
         #[test]
@@ -73,7 +73,7 @@ mod tests {
             assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
 
             // expend from unreserved
             test.expend(25.0);
@@ -82,7 +82,7 @@ mod tests {
             assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
 
             // expend from unreserved
             test.expend(25.0);
@@ -91,7 +91,7 @@ mod tests {
             assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
 
             // don't expend
             test.expend(25.0);
@@ -100,7 +100,7 @@ mod tests {
             assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
-            assert!(test.specific_reserve == 0.0);
+            assert!(test.product_reserve == 0.0);
         }
 
         mod available_should {
@@ -115,7 +115,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
                 // check it's correct
                 assert!(test.available() == 100.0);
 
@@ -123,7 +123,7 @@ mod tests {
                 test.shift_to_reserved(50.0);
                 assert!(test.available() == 100.0);
 
-                // shift to specific
+                // shift to Product
                 test.shift_to_class_reserve(50.0);
                 assert!(test.available() == 50.0);
             }
@@ -145,7 +145,7 @@ mod tests {
                 assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 // remove just from unreserved
                 test.remove(40.0);
                 assert!(test.total_property == 60.0);
@@ -153,7 +153,7 @@ mod tests {
                 assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 // remove from unreserved and reserve
                 test.remove(30.0);
                 assert!(test.total_property == 30.0);
@@ -161,7 +161,7 @@ mod tests {
                 assert!(test.reserved == 5.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 // remove from reserve and spec_reserves
                 test.remove(30.0);
                 assert!(test.total_property == 00.0);
@@ -169,7 +169,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
                 // remove from all pools at once
                 test.add_property(100.0);
                 test.shift_to_class_reserve(25.0);
@@ -181,14 +181,14 @@ mod tests {
                 assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 test.remove(100.0);
                 assert!(test.total_property == 00.0);
                 assert!(test.unreserved == 00.0);
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
             }
 
             #[test]
@@ -200,7 +200,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
 
                 test.remove(-100.0);
                 assert!(test.total_property == 110.0);
@@ -208,7 +208,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
             }
         }
 
@@ -224,7 +224,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
 
                 test.add_property(100.0);
                 assert!(test.total_property == 110.0);
@@ -232,7 +232,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
             }
 
             #[test]
@@ -248,7 +248,7 @@ mod tests {
                 assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 // remove just from unreserved
                 test.add_property(-40.0);
                 assert!(test.total_property == 60.0);
@@ -256,7 +256,7 @@ mod tests {
                 assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 // remove from unreserved and reserve
                 test.add_property(-30.0);
                 assert!(test.total_property == 30.0);
@@ -264,7 +264,7 @@ mod tests {
                 assert!(test.reserved == 5.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 // remove from reserve and spec_reserves
                 test.add_property(-30.0);
                 assert!(test.total_property == 00.0);
@@ -272,7 +272,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
                 // remove from all pools at once
                 test.add_property(100.0);
                 test.shift_to_class_reserve(25.0);
@@ -284,14 +284,14 @@ mod tests {
                 assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
-                assert!(test.specific_reserve == 25.0);
+                assert!(test.product_reserve == 25.0);
                 test.add_property(-100.0);
                 assert!(test.total_property == 00.0);
                 assert!(test.unreserved == 00.0);
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
             }
         }
 
@@ -309,7 +309,7 @@ mod tests {
                 assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 50.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
 
                 test.reset_reserves();
                 assert!(test.total_property == 100.0);
@@ -317,7 +317,7 @@ mod tests {
                 assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
             }
         }
 
@@ -332,7 +332,7 @@ mod tests {
                 assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 0.0);
 
@@ -340,7 +340,7 @@ mod tests {
                 assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 10.0);
-                assert!(test.specific_reserve == 0.0);
+                assert!(test.product_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 0.0);
             }
@@ -351,7 +351,7 @@ mod tests {
                 let result = test.max_spec_reserve();
                 assert!(result == 0.0);
 
-                test.specific_reserve = 1.0;
+                test.product_reserve = 1.0;
                 let result = test.max_spec_reserve();
                 assert!(result == 1.0);
 
@@ -376,7 +376,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
-                assert!(test.specific_reserve == 2.5);
+                assert!(test.product_reserve == 2.5);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
 
@@ -385,7 +385,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 2.5);
-                assert!(test.specific_reserve == 7.5);
+                assert!(test.product_reserve == 7.5);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
 
@@ -394,7 +394,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
                 assert!(test.reserved == 0.0);
-                assert!(test.specific_reserve == 12.5);
+                assert!(test.product_reserve == 12.5);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
 
@@ -403,7 +403,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 0.0);
-                assert!(test.specific_reserve == 15.0);
+                assert!(test.product_reserve == 15.0);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
             }
@@ -413,14 +413,14 @@ mod tests {
                 let mut test = PropertyInfo::new(10.0);
                 test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
-                test.specific_reserve += 5.0;
+                test.product_reserve += 5.0;
 
                 // check that it reserves from overlap first.
                 test.shift_to_class_reserve(2.5);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 2.5);
                 assert!(test.want_reserve == 0.0);
 
@@ -429,7 +429,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 2.5);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 7.5);
                 assert!(test.want_reserve == 0.0);
 
@@ -438,7 +438,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
                 assert!(test.reserved == 0.0);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 12.5);
                 assert!(test.want_reserve == 0.0);
 
@@ -447,7 +447,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 0.0);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 15.0);
                 assert!(test.want_reserve == 0.0);
             }
@@ -457,14 +457,14 @@ mod tests {
                 let mut test = PropertyInfo::new(10.0);
                 test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
-                test.specific_reserve += 5.0;
+                test.product_reserve += 5.0;
 
                 // check that it reserves from overlap first.
                 test.shift_to_want_reserve(2.5);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 5.0);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 2.5);
 
@@ -473,7 +473,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 5.0);
                 assert!(test.reserved == 2.5);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 7.5);
 
@@ -482,7 +482,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
                 assert!(test.reserved == 0.0);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 12.5);
 
@@ -491,7 +491,7 @@ mod tests {
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
                 assert!(test.reserved == 0.0);
-                assert!(test.specific_reserve == 5.0);
+                assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 15.0);
             }
@@ -504,8 +504,8 @@ mod tests {
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
-             property::Property, desire::{Desire, DesireItem},
-              species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo}, 
+             property::Property, desire::Desire,
+              species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, item::Item}, 
               demographics::Demographics, data_manager::DataManager};
 
         /// Makes a pop for testing. The pop will have the following info
@@ -541,7 +541,7 @@ mod tests {
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire { 
-                item: DesireItem::Want(2), // food
+                item: Item::Want(2), // food
                 start: 0, 
                 end: Some(4), 
                 amount: 1.0, 
@@ -549,7 +549,7 @@ mod tests {
                 step: 1, 
                 tags: vec![] };
             let species_desire_2 = Desire { 
-                item: DesireItem::Want(3), // shelter
+                item: Item::Want(3), // shelter
                 start: 7, 
                 end: Some(13), 
                 amount: 1.0, 
@@ -557,7 +557,7 @@ mod tests {
                 step: 2, 
                 tags: vec![] };
             let species_desire_3 = Desire { 
-                item: DesireItem::Want(4), //clothing
+                item: Item::Want(4), //clothing
                 start: 2, 
                 end: Some(8), 
                 amount: 1.0, 
@@ -566,7 +566,7 @@ mod tests {
                 tags: vec![] };
 
             let culture_desire_1 = Desire { 
-                item: DesireItem::Product(2), // ambrosia fruit
+                item: Item::Product(2), // ambrosia fruit
                 start: 10, 
                 end: Some(30), 
                 amount: 1.0, 
@@ -574,7 +574,7 @@ mod tests {
                 step: 5, 
                 tags: vec![] };
             let culture_desire_2 = Desire { 
-                item: DesireItem::Product(6), // clothes
+                item: Item::Product(6), // clothes
                 start: 15, 
                 end: None, 
                 amount: 1.0, 
@@ -583,7 +583,7 @@ mod tests {
                 tags: vec![] };
 
             let ideology_desire_1 = Desire { 
-                item: DesireItem::Product(14), // Hut
+                item: Item::Product(14), // Hut
                 start: 30, 
                 end: None, 
                 amount: 1.0, 
@@ -591,7 +591,7 @@ mod tests {
                 step: 0, 
                 tags: vec![] };
             let ideology_desire_2 = Desire { 
-                item: DesireItem::Product(15), // Cabin
+                item: Item::Product(15), // Cabin
                 start: 50, 
                 end: None, 
                 amount: 1.0, 
@@ -897,7 +897,7 @@ mod tests {
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(4), 
                 amount: 1.0, 
@@ -905,7 +905,7 @@ mod tests {
                 step: 1, 
                 tags: vec![] };
             let species_desire_2 = Desire{ 
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 9, 
                 end: None, 
                 amount: 1.0, 
@@ -914,7 +914,7 @@ mod tests {
                 tags: vec![] };
 
             let culture_desire_1 = Desire{ 
-                item: DesireItem::Product(2), 
+                item: Item::Product(2), 
                 start: 10, 
                 end: None, 
                 amount: 1.0, 
@@ -922,7 +922,7 @@ mod tests {
                 step: 0, 
                 tags: vec![] };
             let culture_desire_2 = Desire{ 
-                item: DesireItem::Product(3), 
+                item: Item::Product(3), 
                 start: 15, 
                 end: None, 
                 amount: 1.0, 
@@ -931,7 +931,7 @@ mod tests {
                 tags: vec![] };
 
             let ideology_desire_1 = Desire{ 
-                item: DesireItem::Product(4), 
+                item: Item::Product(4), 
                 start: 30, 
                 end: None, 
                 amount: 1.0, 
@@ -939,7 +939,7 @@ mod tests {
                 step: 0, 
                 tags: vec![] };
             let ideology_desire_2 = Desire{ 
-                item: DesireItem::Product(5), 
+                item: Item::Product(5), 
                 start: 31, 
                 end: None, 
                 amount: 1.0, 
@@ -1033,27 +1033,27 @@ mod tests {
             assert_eq!(test.property.len(), 6);
             // species desire 1 x 20
             let desire_test = test.property.desires.iter()
-            .find(|x| x.item == DesireItem::Product(0)).expect("Item Not found");
+            .find(|x| x.item == Item::Product(0)).expect("Item Not found");
             assert_eq!(desire_test.amount, 20.0);
             // species desire 1 x 20
             let desire_test = test.property.desires.iter()
-            .find(|x| x.item == DesireItem::Product(1)).expect("Item Not found");
+            .find(|x| x.item == Item::Product(1)).expect("Item Not found");
             assert_eq!(desire_test.amount, 20.0);
             // culture desire 1 x 10
             let desire_test = test.property.desires.iter()
-            .find(|x| x.item == DesireItem::Product(2)).expect("Item Not found");
+            .find(|x| x.item == Item::Product(2)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
             // culture desire 2 x 10
             let desire_test = test.property.desires.iter()
-            .find(|x| x.item == DesireItem::Product(3)).expect("Item Not found");
+            .find(|x| x.item == Item::Product(3)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
             // ideology desire 1 x 10
             let desire_test = test.property.desires.iter()
-            .find(|x| x.item == DesireItem::Product(4)).expect("Item Not found");
+            .find(|x| x.item == Item::Product(4)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
             // ideology desire 1 x 10
             let desire_test = test.property.desires.iter()
-            .find(|x| x.item == DesireItem::Product(5)).expect("Item Not found");
+            .find(|x| x.item == Item::Product(5)).expect("Item Not found");
             assert_eq!(desire_test.amount, 10.0);
 
         }
@@ -1487,7 +1487,7 @@ mod tests {
             }
 
             #[test]
-            pub fn should_wait_only_on_specific_messages_requested() {
+            pub fn should_wait_only_on_Product_messages_requested() {
                 // do basic setup.
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
@@ -2350,7 +2350,7 @@ mod tests {
         // Completed
         mod standard_buy_should {
             use std::{collections::HashMap, thread, time::Duration};
-            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo, desire::{Desire, DesireItem}};
+            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo, desire::Desire, item::Item};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -2531,7 +2531,7 @@ mod tests {
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
                 // swap out infinite clothes for the class desire instead.
                 test.property.desires.get_mut(4).unwrap()
-                    .item = DesireItem::Class(6);
+                    .item = Item::Class(6);
                 // add in pop's property and sift their desires.
                 // we have 20 extra food than we need (20*5=100.0 units)
                 // this covers all food and leave excess for trading
@@ -2684,7 +2684,7 @@ mod tests {
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
                 // swap out infinite clothes for the want desire instead.
                 test.property.desires.get_mut(4).unwrap()
-                    .item = DesireItem::Want(2);
+                    .item = Item::Want(2);
                 // Add in pop's property and sift their desires.
                 // We need 100.0 units for species food desire and the overlapping culture desire for ambrosia fruit.
                 // We have an additional 10.0 units of food desire at 15+10n tier.
@@ -3195,10 +3195,10 @@ mod tests {
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
                 test.property.desires.clear();
-                test.property.desires.push(Desire::new(DesireItem::Product(2), 
+                test.property.desires.push(Desire::new(Item::Product(2), 
                     0, None, 40.0, 
                     0.0, 1, vec![]).unwrap());
-                test.property.desires.push(Desire::new(DesireItem::Product(15), 
+                test.property.desires.push(Desire::new(Item::Product(15), 
                     0, None, 40.0, 0.0, 1, vec![]).unwrap());
                 // enough food for both tier 0, and tier 1.
                 test.property.add_property(2, 80.0, &data);
@@ -3574,7 +3574,7 @@ mod tests {
         mod try_to_buy_should {
             use std::{collections::HashMap, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, desire::DesireItem, seller::Seller, buy_result::BuyResult}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item}};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -3627,7 +3627,7 @@ mod tests {
                 // setup property split
                 let handle = thread::spawn(move || {
                     let result = test.try_to_buy(&mut passed_rx, &passed_tx, &data, 
-                        &history, &DesireItem::Product(15), 10.0);
+                        &history, &Item::Product(15));
                     (test, result)
                 });
                 thread::sleep(Duration::from_millis(100));
@@ -3705,7 +3705,7 @@ mod tests {
                 // setup property split
                 let handle = thread::spawn(move || {
                     let result = test.try_to_buy(&mut passed_rx, &passed_tx, &data, 
-                        &history, &DesireItem::Product(15), 10.0);
+                        &history, &Item::Product(15));
                     (test, result)
                 });
 
@@ -3788,7 +3788,7 @@ mod tests {
                 // setup property split
                 let handle = thread::spawn(move || {
                     let result = test.try_to_buy(&mut passed_rx, &passed_tx, &data, 
-                        &history, &DesireItem::Product(15), 10.0);
+                        &history, &Item::Product(15));
                     (test, result)
                 });
 
@@ -3884,7 +3884,7 @@ mod tests {
         mod shopping_loop_should {
             use std::{collections::HashMap, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, desire::DesireItem, seller::Seller, buy_result::BuyResult}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item}};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -3897,7 +3897,7 @@ mod tests {
             }
 
             #[test]
-            pub fn correctly_deal_with_a_standard_specific_buy() {
+            pub fn correctly_deal_with_a_standard_Product_buy() {
                 let mut test = make_test_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
@@ -3945,7 +3945,7 @@ mod tests {
                 // setup property split
                 let handle = thread::spawn(move || {
                     let result = test.try_to_buy(&mut passed_rx, &passed_tx, &data, 
-                        &history, &DesireItem::Product(15), 10.0);
+                        &history, &Item::Product(15));
                     (test, result)
                 });
 
@@ -4354,7 +4354,7 @@ mod tests {
     mod property_tests {
         use std::collections::{HashSet, HashMap, VecDeque};
 
-        use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag}, market::{MarketHistory, ProductInfo}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species}, data_manager::DataManager, demographics::Demographics};
+        use crate::{objects::{property::{Property, DesireCoord}, desire::Desire, want::Want, product::Product, process::{Process, ProcessPart, ProcessSectionTag}, market::{MarketHistory, ProductInfo}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species, item::Item}, data_manager::DataManager, demographics::Demographics};
 
         /// Makes a pop for testing. The pop will have the following info
         /// 
@@ -4387,7 +4387,7 @@ mod tests {
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
-                item: DesireItem::Want(2), // food
+                item: Item::Want(2), // food
                 start: 0, 
                 end: Some(4), 
                 amount: 1.0, 
@@ -4395,7 +4395,7 @@ mod tests {
                 step: 1, 
                 tags: vec![] };
             let species_desire_2 = Desire{ 
-                item: DesireItem::Want(3), // shelter
+                item: Item::Want(3), // shelter
                 start: 7, 
                 end: Some(13), 
                 amount: 1.0, 
@@ -4403,7 +4403,7 @@ mod tests {
                 step: 2, 
                 tags: vec![] };
             let species_desire_3 = Desire{ 
-                item: DesireItem::Want(4), //clothing
+                item: Item::Want(4), //clothing
                 start: 2, 
                 end: Some(8), 
                 amount: 1.0, 
@@ -4412,7 +4412,7 @@ mod tests {
                 tags: vec![] };
 
             let culture_desire_1 = Desire{ 
-                item: DesireItem::Product(2), // ambrosia fruit
+                item: Item::Product(2), // ambrosia fruit
                 start: 10, 
                 end: Some(30), 
                 amount: 1.0, 
@@ -4420,7 +4420,7 @@ mod tests {
                 step: 5, 
                 tags: vec![] };
             let culture_desire_2 = Desire{ 
-                item: DesireItem::Product(6), // clothes
+                item: Item::Product(6), // clothes
                 start: 15, 
                 end: None, 
                 amount: 1.0, 
@@ -4429,7 +4429,7 @@ mod tests {
                 tags: vec![] };
 
             let ideology_desire_1 = Desire{ 
-                item: DesireItem::Product(14), // Hut
+                item: Item::Product(14), // Hut
                 start: 30, 
                 end: None, 
                 amount: 1.0, 
@@ -4437,7 +4437,7 @@ mod tests {
                 step: 0, 
                 tags: vec![] };
             let ideology_desire_2 = Desire{ 
-                item: DesireItem::Product(15), // Cabin
+                item: Item::Product(15), // Cabin
                 start: 50, 
                 end: None, 
                 amount: 1.0, 
@@ -4768,13 +4768,13 @@ mod tests {
                 minimum_time: 0.0,
                 process_parts: vec![
                     ProcessPart{ 
-                        item: PartItem::Specific(0), 
+                        item: Item::Product(0), 
                         amount: 1.0, 
                         part_tags: vec![],
                         part: ProcessSectionTag::Input
                     },
                     ProcessPart{ 
-                        item: PartItem::Want(1), 
+                        item: Item::Want(1), 
                         amount: 1.0, 
                         part_tags: vec![],
                         part: ProcessSectionTag::Output
@@ -4795,19 +4795,19 @@ mod tests {
                 minimum_time: 0.0,
                 process_parts: vec![
                     ProcessPart{ // bread
-                        item: PartItem::Class(1), 
+                        item: Item::Class(1), 
                         amount: 1.0, 
                         part_tags: vec![],
                         part: ProcessSectionTag::Input
                     },
                     ProcessPart{ // time
-                        item: PartItem::Specific(0), 
+                        item: Item::Product(0), 
                         amount: 0.1, 
                         part_tags: vec![],
                         part: ProcessSectionTag::Input
                     },
                     ProcessPart{ 
-                        item: PartItem::Want(0), 
+                        item: Item::Want(0), 
                         amount: 1.0, 
                         part_tags: vec![],
                         part: ProcessSectionTag::Output
@@ -4827,13 +4827,13 @@ mod tests {
                 minimum_time: 0.0,
                 process_parts: vec![
                     ProcessPart{ 
-                        item: PartItem::Specific(0), 
+                        item: Item::Product(0), 
                         amount: 1.0, 
                         part_tags: vec![],
                         part: ProcessSectionTag::Input
                     },
                     ProcessPart{ 
-                        item: PartItem::Want(1), 
+                        item: Item::Want(1), 
                         amount: 1.0, 
                         part_tags: vec![],
                         part: ProcessSectionTag::Output
@@ -4895,42 +4895,42 @@ mod tests {
         mod satisfaction_from_amv_should {
             use std::collections::HashMap;
 
-            use crate::objects::{property::Property, desire::{Desire, DesireItem}, market::{MarketHistory, ProductInfo}};
+            use crate::objects::{property::Property, desire::Desire, market::{MarketHistory, ProductInfo}, item::Item};
 
             // TODO when class and want price estimates are added, add tests for them also
             // TODO when improving the function to predict things more accurately add a unified test to ensure overlap is taken into account.
             #[test]
             pub fn predict_satisfaction_gained_from_products() {
                 let mut test_desires = vec![];
-                test_desires.push(Desire::new(DesireItem::Product(0), 
+                test_desires.push(Desire::new(Item::Product(0), 
                     0, 
                     None, 
                     1.0, 
                     0.0, 
                     1, 
                     vec![]).unwrap());
-                test_desires.push(Desire::new(DesireItem::Product(1), 
+                test_desires.push(Desire::new(Item::Product(1), 
                     0, 
                     None, 
                     1.0, 
                     0.0, 
                     1, 
                     vec![]).unwrap());
-                test_desires.push(Desire::new(DesireItem::Product(2), 
+                test_desires.push(Desire::new(Item::Product(2), 
                     0, 
                     None, 
                     1.0, 
                     0.0, 
                     1, 
                     vec![]).unwrap());
-                test_desires.push(Desire::new(DesireItem::Product(3), 
+                test_desires.push(Desire::new(Item::Product(3), 
                     0, 
                     None, 
                     1.0, 
                     0.0, 
                     1, 
                     vec![]).unwrap());
-                test_desires.push(Desire::new(DesireItem::Product(4), 
+                test_desires.push(Desire::new(Item::Product(4), 
                     0, 
                     None, 
                     1.0, 
@@ -5003,7 +5003,7 @@ mod tests {
         mod decay_goods_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{property::Property, product::Product, want::Want, process::{ProcessTag, Process, ProcessPart, PartItem, ProcessSectionTag}, property_info::PropertyInfo}, data_manager::DataManager};
+            use crate::{objects::{property::Property, product::Product, want::Want, process::{ProcessTag, Process, ProcessPart, ProcessSectionTag}, property_info::PropertyInfo, item::Item}, data_manager::DataManager};
 
             #[test]
             pub fn decay_goods_correctly_for_all_failure_types() {
@@ -5157,13 +5157,13 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(2), 
+                        ProcessPart{ item: Item::Product(2), 
                             amount: 1.0, part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), 
+                        ProcessPart{ item: Item::Want(0), 
                             amount: 1.0, part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Specific(3), 
+                        ProcessPart{ item: Item::Product(3), 
                             amount: 1.0, part_tags: vec![], 
                             part: ProcessSectionTag::Output }
                     ],
@@ -5202,13 +5202,13 @@ mod tests {
         }
 
         mod first_desire_should {
-            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
+            use crate::objects::{desire::Desire, property::Property, item::Item};
             
             #[test]
             pub fn find_the_lowest_and_first_desire() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 4, 
                     end: None, 
                     amount: 1.0, 
@@ -5216,7 +5216,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 7, 
                     end: None, 
                     amount: 1.0, 
@@ -5224,7 +5224,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 2, 
                     end: None, 
                     amount: 1.0, 
@@ -5232,7 +5232,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 1, 
                     end: None, 
                     amount: 1.0, 
@@ -5247,13 +5247,13 @@ mod tests {
         }
 
         mod get_first_unsatisfied_desire_should {
-            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
+            use crate::objects::{desire::Desire, property::Property, item::Item};
             
             #[test]
             pub fn find_the_lowest_and_first_unsatisfied_desire() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 4, 
                     end: None, 
                     amount: 1.0, 
@@ -5261,7 +5261,7 @@ mod tests {
                     step: 0,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 7, 
                     end: Some(13), 
                     amount: 1.0, 
@@ -5269,7 +5269,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 2, 
                     end: None, 
                     amount: 1.0, 
@@ -5277,7 +5277,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 1, 
                     end: None, 
                     amount: 1.0, 
@@ -5298,7 +5298,7 @@ mod tests {
             pub fn return_none_when_all_desires_are_fully_satisfied() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 4, 
                     end: None, 
                     amount: 1.0, 
@@ -5306,7 +5306,7 @@ mod tests {
                     step: 0,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 7, 
                     end: Some(13), 
                     amount: 1.0, 
@@ -5314,7 +5314,7 @@ mod tests {
                     step: 0,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 2, 
                     end: None, 
                     amount: 1.0, 
@@ -5322,7 +5322,7 @@ mod tests {
                     step: 0,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 1, 
                     end: None, 
                     amount: 1.0, 
@@ -5338,14 +5338,14 @@ mod tests {
         mod add_products_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{process::{Process, ProcessTag, ProcessPart, PartItem, ProcessSectionTag}, want::Want, product::Product, property::Property, desire::{DesireItem, Desire}}, data_manager::DataManager};
+            use crate::{objects::{process::{Process, ProcessTag, ProcessPart, ProcessSectionTag}, want::Want, product::Product, property::Property, desire::Desire, item::Item}, data_manager::DataManager};
 
 
             #[test]
             pub fn add_multiple_products_to_property_then_sift() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -5353,7 +5353,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -5364,7 +5364,7 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -5517,8 +5517,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -5536,8 +5536,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -5575,7 +5575,7 @@ mod tests {
         mod add_property_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}, seller::Seller}, data_manager::DataManager};
+            use crate::{objects::{desire::Desire, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, seller::Seller, item::Item}, data_manager::DataManager};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -5604,19 +5604,19 @@ mod tests {
                 // everything should automatically be sifted
                 assert_eq!(test.property.property[&2].total_property, 120.0);
                 assert_eq!(test.property.property[&2].unreserved, 20.0);
-                assert_eq!(test.property.property[&2].specific_reserve, 50.0);
+                assert_eq!(test.property.property[&2].product_reserve, 50.0);
                 assert_eq!(test.property.property[&2].class_reserve, 0.0);
                 assert_eq!(test.property.property[&2].want_reserve, 100.0);
 
                 assert_eq!(test.property.property[&14].total_property, 80.0);
                 assert_eq!(test.property.property[&14].unreserved, 0.0);
-                assert_eq!(test.property.property[&14].specific_reserve, 10.0);
+                assert_eq!(test.property.property[&14].product_reserve, 10.0);
                 assert_eq!(test.property.property[&14].class_reserve, 0.0);
                 assert_eq!(test.property.property[&14].want_reserve, 80.0);
 
                 assert_eq!(test.property.property[&6].total_property, 100.0);
                 assert_eq!(test.property.property[&6].unreserved, 0.0);
-                assert_eq!(test.property.property[&6].specific_reserve, 100.0);
+                assert_eq!(test.property.property[&6].product_reserve, 100.0);
                 assert_eq!(test.property.property[&6].class_reserve, 0.0);
                 assert_eq!(test.property.property[&6].want_reserve, 80.0);
 
@@ -5634,7 +5634,7 @@ mod tests {
             pub fn sift_from_expected_wants_correctly() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -5642,7 +5642,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -5653,7 +5653,7 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -5806,8 +5806,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -5825,8 +5825,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -5855,7 +5855,7 @@ mod tests {
             pub fn add_and_sift_correctly_without_exchanges() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -5863,7 +5863,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -5871,7 +5871,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -5882,7 +5882,7 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -6022,8 +6022,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -6041,8 +6041,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -6066,7 +6066,7 @@ mod tests {
                 assert!(test.desires[1].satisfaction == 0.0);
                 assert!(test.desires[2].satisfaction == 0.0);
                 assert!(test.property.get(&0).unwrap().total_property == 5.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 5.0);
                 assert!(test.property.get(&1).is_none());
                 assert!(test.property.get(&2).is_none());
                 assert!(test.property.get(&3).is_none());
@@ -6076,7 +6076,7 @@ mod tests {
                 assert!(test.desires[1].satisfaction == 5.0);
                 assert!(test.desires[2].satisfaction == 0.0);
                 assert!(test.property.get(&0).unwrap().total_property == 5.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 5.0);
                 assert!(test.property.get(&1).unwrap().total_property == 5.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 5.0);
                 assert!(test.property.get(&2).is_none());
@@ -6087,7 +6087,7 @@ mod tests {
                 assert!(test.desires[1].satisfaction == 5.0);
                 assert!(test.desires[2].satisfaction == 5.0);
                 assert!(test.property.get(&0).unwrap().total_property == 5.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 5.0);
                 assert!(test.property.get(&1).unwrap().total_property == 5.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 5.0);
                 assert!(test.property.get(&2).unwrap().total_property == 5.0);
@@ -6099,7 +6099,7 @@ mod tests {
                 assert!(test.desires[1].satisfaction == 5.0);
                 assert!(test.desires[2].satisfaction == 10.0);
                 assert!(test.property.get(&0).unwrap().total_property == 5.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 5.0);
                 assert!(test.property.get(&1).unwrap().total_property == 5.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 5.0);
                 assert!(test.property.get(&2).unwrap().total_property == 5.0);
@@ -6112,7 +6112,7 @@ mod tests {
                 assert!(test.desires[1].satisfaction == 5.0);
                 assert!(test.desires[2].satisfaction == 15.0);
                 assert!(test.property.get(&0).unwrap().total_property == 5.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 5.0);
                 assert!(test.property.get(&1).unwrap().total_property == 5.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 5.0);
                 assert!(test.property.get(&2).unwrap().total_property == 5.0);
@@ -6126,7 +6126,7 @@ mod tests {
                 assert!(test.desires[1].satisfaction == 5.0);
                 assert!(test.desires[2].satisfaction == 20.0);
                 assert!(test.property.get(&0).unwrap().total_property == 5.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 5.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 5.0);
                 assert!(test.property.get(&1).unwrap().total_property == 5.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 5.0);
                 assert!(test.property.get(&2).unwrap().total_property == 5.0);
@@ -6141,7 +6141,7 @@ mod tests {
             pub fn add_and_sift_correctly_with_overlap_between_sections() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6149,7 +6149,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6157,7 +6157,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6165,7 +6165,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Product(2), 
+                    item: Item::Product(2), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6176,9 +6176,9 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific and class
+                // 0 for Product and class
                 // 1 for class and ownership
-                // 2 for specific and ownership
+                // 2 for Product and ownership
                 // 3 for use
                 // 4 for consumption
                 data.products.insert(0, Product{
@@ -6319,8 +6319,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -6338,8 +6338,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -6367,7 +6367,7 @@ mod tests {
                 assert!(test.desires[2].satisfaction == 0.0);
                 assert!(test.desires[3].satisfaction == 0.0);
                 assert!(test.property.get(&0).unwrap().total_property == 1.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 1.0);
                 assert!(test.property.get(&0).unwrap().class_reserve == 1.0);
                 assert!(test.property.get(&1).is_none());
                 assert!(test.property.get(&2).is_none());
@@ -6381,7 +6381,7 @@ mod tests {
                 assert!(test.desires[2].satisfaction == 1.0);
                 assert!(test.desires[3].satisfaction == 0.0);
                 assert!(test.property.get(&0).unwrap().total_property == 1.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 1.0);
                 assert!(test.property.get(&0).unwrap().class_reserve == 1.0);
                 assert!(test.property.get(&1).unwrap().total_property == 1.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 1.0);
@@ -6397,13 +6397,13 @@ mod tests {
                 assert!(test.desires[2].satisfaction == 2.0);
                 assert!(test.desires[3].satisfaction == 1.0);
                 assert!(test.property.get(&0).unwrap().total_property == 1.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 1.0);
                 assert!(test.property.get(&0).unwrap().class_reserve == 1.0);
                 assert!(test.property.get(&1).unwrap().total_property == 1.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 1.0);
                 assert!(test.property.get(&1).unwrap().want_reserve == 1.0);
                 assert!(test.property.get(&2).unwrap().total_property == 1.0);
-                assert!(test.property.get(&2).unwrap().specific_reserve == 1.0);
+                assert!(test.property.get(&2).unwrap().product_reserve == 1.0);
                 assert!(test.property.get(&2).unwrap().want_reserve == 1.0);
                 assert!(test.property.get(&3).is_none());
                 assert!(test.property.get(&4).is_none());
@@ -6413,7 +6413,7 @@ mod tests {
                 assert!(test.desires[2].satisfaction == 3.0);
                 assert!(test.desires[3].satisfaction == 1.0);
                 assert!(test.property.get(&0).unwrap().total_property == 1.0);
-                assert!(test.property.get(&0).unwrap().specific_reserve == 1.0);
+                assert!(test.property.get(&0).unwrap().product_reserve == 1.0);
                 assert!(test.property.get(&1).unwrap().total_property == 1.0);
                 assert!(test.property.get(&1).unwrap().class_reserve == 1.0);
                 assert!(test.property.get(&2).unwrap().total_property == 1.0);
@@ -6425,13 +6425,13 @@ mod tests {
         }
 
         mod total_estimated_value_should {
-            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
+            use crate::objects::{desire::Desire, property::Property, item::Item};
 
             #[test]
             pub fn return_tiered_value_correctly() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,1, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6439,7 +6439,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,1,...
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6447,7 +6447,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,1,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6506,7 +6506,7 @@ mod tests {
         mod preduct_value_gained_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{desire::{Desire, DesireItem}, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}}, data_manager::DataManager};
+            use crate::{objects::{desire::Desire, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, item::Item}, data_manager::DataManager};
 
             #[test]
             pub fn sift_products_down_from_higher_wants() {
@@ -6518,7 +6518,7 @@ mod tests {
             pub fn return_value_gained_correctly() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6526,7 +6526,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6537,7 +6537,7 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -6690,8 +6690,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -6709,8 +6709,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -6735,7 +6735,7 @@ mod tests {
             pub fn calculate_correctly_without_exchanges() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6743,7 +6743,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6751,7 +6751,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -6762,7 +6762,7 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -6902,8 +6902,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -6921,8 +6921,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -7013,7 +7013,7 @@ mod tests {
             pub fn correctly_calculate_with_overlap_between_sections() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7021,7 +7021,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7029,7 +7029,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7037,7 +7037,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Product(2), 
+                    item: Item::Product(2), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7048,9 +7048,9 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific and class
+                // 0 for Product and class
                 // 1 for class and ownership
-                // 2 for specific and ownership
+                // 2 for Product and ownership
                 // 3 for use
                 // 4 for consumption
                 data.products.insert(0, Product{
@@ -7191,8 +7191,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -7210,8 +7210,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -7285,13 +7285,13 @@ mod tests {
         mod predict_value_changed_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{process::{ProcessTag, PartItem, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::{Property, TieredValue}, desire::{DesireItem, Desire}}, data_manager::DataManager};
+            use crate::{objects::{process::{ProcessTag, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::{Property, TieredValue}, desire::Desire, item::Item}, data_manager::DataManager};
 
             #[test]
             pub fn return_changed_value_correctly() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7299,7 +7299,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7307,7 +7307,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7318,7 +7318,7 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -7458,8 +7458,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -7477,8 +7477,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -7523,7 +7523,7 @@ mod tests {
         mod predict_value_lost_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{process::{ProcessTag, PartItem, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::Property, desire::{DesireItem, Desire}}, data_manager::DataManager};
+            use crate::{objects::{process::{ProcessTag, ProcessPart, ProcessSectionTag, Process}, want::Want, product::Product, property::Property, desire::Desire, item::Item}, data_manager::DataManager};
 
             // TODO add additional stress tests.
 
@@ -7531,7 +7531,7 @@ mod tests {
             pub fn return_value_lost_correctly() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7539,7 +7539,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7547,7 +7547,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,...
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -7558,7 +7558,7 @@ mod tests {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -7698,8 +7698,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -7717,8 +7717,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -7756,7 +7756,7 @@ mod tests {
         pub fn unsafe_add_property_should_add_and_mark_as_unsifted() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,2
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(2), 
                 amount: 1.0, 
@@ -7764,7 +7764,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6,8,10
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 0, 
                 end: Some(10), 
                 amount: 1.0, 
@@ -7784,7 +7784,7 @@ mod tests {
             assert!(val.total_property == 10.0);
             assert!(val.unreserved == 10.0);
             assert!(val.reserved == 0.0);
-            assert!(val.specific_reserve == 0.0);
+            assert!(val.product_reserve == 0.0);
             assert!(val.class_reserve == 0.0);
             assert!(val.want_reserve == 0.0);
         }
@@ -7792,13 +7792,13 @@ mod tests {
         mod market_wealth_should {
             use std::collections::HashMap;
 
-            use crate::objects::{desire::{Desire, DesireItem}, property::Property, market::{MarketHistory, ProductInfo}};
+            use crate::objects::{desire::Desire, property::Property, market::{MarketHistory, ProductInfo}, item::Item};
 
             #[test]
             pub fn return_the_total_amv_of_property() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(2), 
                     amount: 1.0, 
@@ -7806,7 +7806,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(1), 
+                    item: Item::Product(1), 
                     start: 0, 
                     end: Some(10), 
                     amount: 1.0, 
@@ -7847,13 +7847,13 @@ mod tests {
         mod market_satisfaction_should {
             use std::collections::HashMap;
 
-            use crate::objects::{desire::{Desire, DesireItem}, property::Property, market::{MarketHistory, ProductInfo}};
+            use crate::objects::{desire::Desire, property::Property, market::{MarketHistory, ProductInfo}, item::Item};
 
             #[test]
             pub fn return_correct_market_satisfaction() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(2), 
                     amount: 1.0, 
@@ -7861,7 +7861,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(1), 
+                    item: Item::Product(1), 
                     start: 0, 
                     end: Some(10), 
                     amount: 1.0, 
@@ -7897,13 +7897,13 @@ mod tests {
         }
 
         mod update_satisfactions_should {
-            use crate::objects::{desire::{Desire, DesireItem}, property::Property};
+            use crate::objects::{desire::Desire, property::Property, item::Item};
 
             #[test]
             pub fn correctly_update_satisfaction() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(2), 
                     amount: 1.0, 
@@ -7911,7 +7911,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(1), 
+                    item: Item::Product(1), 
                     start: 0, 
                     end: Some(10), 
                     amount: 1.0, 
@@ -7919,7 +7919,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(2), 
+                    item: Item::Product(2), 
                     start: 0, 
                     end: Some(10), 
                     amount: 1.0, 
@@ -7940,7 +7940,7 @@ mod tests {
             pub fn set_full_tier_and_hard_sat_to_none_when_at_least_one_desire_unsatisfied() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(2), 
                     amount: 1.0, 
@@ -7948,7 +7948,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(1), 
+                    item: Item::Product(1), 
                     start: 0, 
                     end: Some(10), 
                     amount: 1.0, 
@@ -7956,7 +7956,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(2), 
+                    item: Item::Product(2), 
                     start: 0, 
                     end: Some(10), 
                     amount: 1.0, 
@@ -7977,14 +7977,14 @@ mod tests {
         mod remove_property_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, want::Want, process::{Process, ProcessPart, PartItem, ProcessTag, ProcessSectionTag}}, data_manager::DataManager};
+            use crate::{objects::{property::Property, desire::Desire, property_info::PropertyInfo, product::Product, want::Want, process::{Process, ProcessPart, ProcessTag, ProcessSectionTag}, item::Item}, data_manager::DataManager};
 
             #[test]
             pub fn correctly_remove_item_from_property_and_satisfaction() {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -8137,8 +8137,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -8156,8 +8156,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -8172,7 +8172,7 @@ mod tests {
                 // setup desires
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8180,7 +8180,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(1), 
+                    item: Item::Product(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8188,7 +8188,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(2), 
+                    item: Item::Product(2), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8196,7 +8196,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(3), 
+                    item: Item::Product(3), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8204,7 +8204,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(4), 
+                    item: Item::Product(4), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8212,7 +8212,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8220,7 +8220,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(4), 
+                    item: Item::Product(4), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8228,7 +8228,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8236,7 +8236,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8294,14 +8294,14 @@ mod tests {
         mod print_satisfactions_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{data_manager::DataManager, objects::{product::Product, want::Want, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, desire::{Desire, DesireItem}, property::Property, property_info::PropertyInfo}};
+            use crate::{data_manager::DataManager, objects::{product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, desire::Desire, property::Property, property_info::PropertyInfo, item::Item}};
 
             #[test]
             pub fn print_correctly() {
                 // make some default data for tests
                 let mut data = DataManager::new();
                 // 5 products, 
-                // 0 for specific
+                // 0 for Product
                 // 1 for class
                 // 2 for ownership
                 // 3 for use
@@ -8454,8 +8454,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(3), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Capital },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Use(3)
@@ -8473,8 +8473,8 @@ mod tests {
                     description: "".to_string(),
                     minimum_time: 0.0,
                     process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
+                        ProcessPart{ item: Item::Product(4), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), amount: 1.0, part_tags: vec![], part: ProcessSectionTag::Output }
                     ],
                     process_tags: vec![
                         ProcessTag::Consumption(4)
@@ -8489,7 +8489,7 @@ mod tests {
                 // setup desires
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8497,7 +8497,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6,8,10
-                    item: DesireItem::Product(1), 
+                    item: Item::Product(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8505,7 +8505,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(2), 
+                    item: Item::Product(2), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8513,7 +8513,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(3), 
+                    item: Item::Product(3), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8521,7 +8521,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(4), 
+                    item: Item::Product(4), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8529,7 +8529,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Class(1), 
+                    item: Item::Class(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8537,7 +8537,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Product(4), 
+                    item: Item::Product(4), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8545,7 +8545,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Want(0), 
+                    item: Item::Want(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8553,7 +8553,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2
-                    item: DesireItem::Want(1), 
+                    item: Item::Want(1), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -8577,7 +8577,7 @@ mod tests {
         pub fn total_desire_at_tier() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,2
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(2), 
                 amount: 1.0, 
@@ -8585,7 +8585,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6,8,10
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 0, 
                 end: Some(10), 
                 amount: 1.0, 
@@ -8604,7 +8604,7 @@ mod tests {
         pub fn total_satisfaction_at_tier() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,2
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(2), 
                 amount: 1.0, 
@@ -8612,7 +8612,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6,8,10
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 0, 
                 end: Some(10), 
                 amount: 1.0, 
@@ -8630,7 +8630,7 @@ mod tests {
         pub fn satisfied_at_tier_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,2
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(2), 
                 amount: 1.0, 
@@ -8638,7 +8638,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6,8,10
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 0, 
                 end: Some(10), 
                 amount: 1.0, 
@@ -8656,10 +8656,10 @@ mod tests {
             // TODO update test for lookahead when added.
             use std::collections::{HashMap, HashSet, VecDeque};
 
-            use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want, market::{ProductInfo, MarketHistory}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species}, data_manager::DataManager, demographics::Demographics};
+            use crate::{objects::{property::{Property, DesireCoord}, desire::Desire, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, want::Want, market::{ProductInfo, MarketHistory}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species, item::Item}, data_manager::DataManager, demographics::Demographics};
 
             #[test]
-            pub fn shift_want_class_and_specific_desires_correctly() {
+            pub fn shift_want_class_and_Product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -8778,19 +8778,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -8814,19 +8814,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -8844,21 +8844,21 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         3,
                         Some(30),
                         1.0,
                         0.0,
                         3,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         5,
                         Some(10),
                         1.0,
@@ -8894,28 +8894,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
-                assert!(prop0.specific_reserve == 2.0);
+                assert!(prop0.product_reserve == 2.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 10.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 // ensure want process plan is recorded correctly.
                 assert_eq!(test.process_plan[&0], 10.0);
                 assert!(test.process_plan.get(&2).is_none());
@@ -9045,19 +9045,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -9081,19 +9081,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -9111,14 +9111,14 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         3,
                         Some(30),
                         1.0,
@@ -9149,35 +9149,35 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
-                assert!(prop0.specific_reserve == 0.0);
+                assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 10.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 assert_eq!(result.tier, 24);
                 assert!(135.0 < result.value);
                 assert!(result.value < 136.0);
             }
 
             #[test]
-            pub fn shift_want_and_specific_desires_correctly() {
+            pub fn shift_want_and_Product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -9296,19 +9296,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -9332,19 +9332,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -9362,14 +9362,14 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Product(2),
+                    Desire::new(Item::Product(2),
                         3,
                         Some(15),
                         1.0,
@@ -9401,28 +9401,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
-                assert!(prop0.specific_reserve == 0.0);
+                assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 10.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 5.0);
+                assert!(prop2.product_reserve == 5.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 assert_eq!(result.tier, 25);
                 assert!(146.0 < result.value);
                 assert!(result.value < 147.0);
@@ -9548,19 +9548,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -9584,19 +9584,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -9614,14 +9614,14 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         3,
                         Some(12),
                         1.0,
@@ -9653,28 +9653,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
-                assert!(prop0.specific_reserve == 0.0);
+                assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 6.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 14.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 11.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 4.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 assert_eq!(result.tier, 25);
                 assert!(143.0 < result.value);
                 assert!(result.value < 144.0);
@@ -9751,14 +9751,14 @@ mod tests {
                 });
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         0,
                         None,
                         1.0,
                         0.0,
                         4,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         3,
                         Some(12),
                         1.0,
@@ -9790,7 +9790,7 @@ mod tests {
                 assert_eq!(prop0.reserved, 0.0);
                 assert_eq!(prop0.want_reserve, 0.0);
                 assert_eq!(prop0.class_reserve, 11.0);
-                assert_eq!(prop0.specific_reserve, 0.0);
+                assert_eq!(prop0.product_reserve, 0.0);
                 // touched 2nd product
                 let prop1 = test.property.get(&1).unwrap();
                 assert_eq!(prop1.total_property, 15.0);
@@ -9798,7 +9798,7 @@ mod tests {
                 assert_eq!(prop1.reserved, 0.0);
                 assert_eq!(prop1.want_reserve, 0.0);
                 assert_eq!(prop1.class_reserve, 0.0);
-                assert_eq!(prop1.specific_reserve, 0.0);
+                assert_eq!(prop1.product_reserve, 0.0);
                 // untouched 3rd product
                 let prop2 = test.property.get(&2).unwrap();
                 assert_eq!(prop2.total_property, 10.0);
@@ -9806,27 +9806,27 @@ mod tests {
                 assert_eq!(prop2.reserved, 0.0);
                 assert_eq!(prop2.want_reserve, 0.0);
                 assert_eq!(prop2.class_reserve, 0.0);
-                assert_eq!(prop2.specific_reserve, 0.0);
+                assert_eq!(prop2.product_reserve, 0.0);
                 assert_eq!(result.tier, 24);
                 assert!(58.0 < result.value);
                 assert!(result.value < 59.0);
             }
 
-            /// Sifts 1 specific desire only, don't set up wants
+            /// Sifts 1 Product desire only, don't set up wants
             /// or class desires.
             #[test]
-            pub fn sift_specific_desire_correctly() {
+            pub fn sift_Product_desire_correctly() {
                 // data needed, but not set up for this test.
                 let data = &DataManager::new();
                 let test_desires = vec![
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         0,
                         Some(100),
                         1.0,
                         0.0,
                         5,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         3,
                         Some(12),
                         1.0,
@@ -9856,14 +9856,14 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 0.0);
                 assert!(prop0.class_reserve == 0.0);
-                assert!(prop0.specific_reserve == 10.0);
+                assert!(prop0.product_reserve == 10.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 10.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 0.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 assert_eq!(result.tier, 25);
                 assert!(59.0 < result.value);
                 assert!(result.value < 60.0);
@@ -9989,19 +9989,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -10025,19 +10025,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -10055,21 +10055,21 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         3,
                         Some(30),
                         1.0,
                         0.0,
                         3,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         5,
                         Some(10),
                         1.0,
@@ -10105,28 +10105,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
-                assert!(prop0.specific_reserve == 2.0);
+                assert!(prop0.product_reserve == 2.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 1.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 9.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 11.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 9.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 // ensure the tiered value is correct to match
                 assert_eq!(result.tier, 24);
                 assert!(146.0 < result.value);
@@ -10137,7 +10137,7 @@ mod tests {
         mod release_desire_at_should {
             use std::collections::{VecDeque, HashMap};
 
-            use crate::{objects::{pop::Pop, property::{Property, DesireCoord}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::{Desire, DesireItem}, species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}}, demographics::Demographics, data_manager::DataManager};
+            use crate::{objects::{pop::Pop, property::{Property, DesireCoord}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire, species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, item::Item}, demographics::Demographics, data_manager::DataManager};
 
             /// Makes a pop for testing. The pop will have the following info
             /// 
@@ -10170,7 +10170,7 @@ mod tests {
                     backlog: VecDeque::new()};
 
                 let species_desire_1 = Desire { 
-                    item: DesireItem::Want(2), // food
+                    item: Item::Want(2), // food
                     start: 0, 
                     end: Some(4), 
                     amount: 1.0, 
@@ -10178,7 +10178,7 @@ mod tests {
                     step: 1, 
                     tags: vec![] };
                 let species_desire_2 = Desire { 
-                    item: DesireItem::Want(3), // shelter
+                    item: Item::Want(3), // shelter
                     start: 7, 
                     end: Some(13), 
                     amount: 1.0, 
@@ -10186,7 +10186,7 @@ mod tests {
                     step: 2, 
                     tags: vec![] };
                 let species_desire_3 = Desire { 
-                    item: DesireItem::Want(4), //clothing
+                    item: Item::Want(4), //clothing
                     start: 2, 
                     end: Some(8), 
                     amount: 1.0, 
@@ -10195,7 +10195,7 @@ mod tests {
                     tags: vec![] };
 
                 let culture_desire_1 = Desire { 
-                    item: DesireItem::Product(2), // ambrosia fruit
+                    item: Item::Product(2), // ambrosia fruit
                     start: 10, 
                     end: Some(30), 
                     amount: 1.0, 
@@ -10203,7 +10203,7 @@ mod tests {
                     step: 5, 
                     tags: vec![] };
                 let culture_desire_2 = Desire { 
-                    item: DesireItem::Product(6), // clothes
+                    item: Item::Product(6), // clothes
                     start: 15, 
                     end: None, 
                     amount: 1.0, 
@@ -10212,7 +10212,7 @@ mod tests {
                     tags: vec![] };
 
                 let ideology_desire_1 = Desire { 
-                    item: DesireItem::Product(14), // Hut
+                    item: Item::Product(14), // Hut
                     start: 30, 
                     end: None, 
                     amount: 1.0, 
@@ -10220,7 +10220,7 @@ mod tests {
                     step: 0, 
                     tags: vec![] };
                 let ideology_desire_2 = Desire { 
-                    item: DesireItem::Product(15), // Cabin
+                    item: Item::Product(15), // Cabin
                     start: 50, 
                     end: None, 
                     amount: 1.0, 
@@ -10375,7 +10375,7 @@ mod tests {
                 let mut test = test.property;
                 // swap out infinite clothes for the class desire instead.
                 test.desires.get_mut(4).unwrap()
-                    .item = DesireItem::Class(6);
+                    .item = Item::Class(6);
                 // add in pop's property and sift their desires.
                 // we have 20 extra food than we need (20*5=100.0 units)
                 // this covers all food and leave excess for trading
@@ -10420,7 +10420,7 @@ mod tests {
         mod get_shopping_time_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{property::{Property, DesireCoord}, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want, market::MarketHistory}, data_manager::DataManager};
+            use crate::{objects::{property::{Property, DesireCoord}, desire::Desire, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, want::Want, market::MarketHistory, item::Item}, data_manager::DataManager};
 
             #[test]
             pub fn exit_early_when_product_already_exists() {
@@ -10492,19 +10492,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(0), 
+                            item: Item::Product(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -10527,7 +10527,7 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
@@ -10631,13 +10631,13 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(0), 
+                            item: Item::Product(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -10665,7 +10665,7 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         1,
                         None,
                         1.0,
@@ -10698,10 +10698,10 @@ mod tests {
             // TODO update test for lookahead when added.
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{property::Property, desire::{Desire, DesireItem}, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}, want::Want}, data_manager::DataManager};
+            use crate::{objects::{property::Property, desire::Desire, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, want::Want, item::Item}, data_manager::DataManager};
 
             #[test]
-            pub fn shift_want_class_and_specific_desires_correctly() {
+            pub fn shift_want_class_and_Product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -10820,19 +10820,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -10856,19 +10856,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -10886,21 +10886,21 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         3,
                         Some(30),
                         1.0,
                         0.0,
                         3,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         5,
                         Some(10),
                         1.0,
@@ -10936,28 +10936,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
-                assert!(prop0.specific_reserve == 2.0);
+                assert!(prop0.product_reserve == 2.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 // ensure want process plan is recorded correctly.
                 assert_eq!(test.process_plan[&0], 10.0);
                 assert_eq!(test.process_plan[&1], 10.0);
@@ -11087,19 +11087,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -11123,19 +11123,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -11153,14 +11153,14 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         3,
                         Some(30),
                         1.0,
@@ -11191,28 +11191,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
-                assert!(prop0.specific_reserve == 0.0);
+                assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 // ensure want process plan is recorded correctly.
                 assert_eq!(test.process_plan[&0], 10.0);
                 assert_eq!(test.process_plan[&1], 10.0);
@@ -11222,7 +11222,7 @@ mod tests {
             }
 
             #[test]
-            pub fn shift_want_and_specific_desires_correctly() {
+            pub fn shift_want_and_Product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -11341,19 +11341,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -11377,19 +11377,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -11407,14 +11407,14 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Product(2),
+                    Desire::new(Item::Product(2),
                         3,
                         Some(15),
                         1.0,
@@ -11445,28 +11445,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
-                assert!(prop0.specific_reserve == 0.0);
+                assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 5.0);
+                assert!(prop2.product_reserve == 5.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 // ensure want process plan is recorded correctly.
                 assert_eq!(test.process_plan[&0], 10.0);
                 assert_eq!(test.process_plan[&1], 10.0);
@@ -11595,19 +11595,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(1), 
+                            item: Item::Product(1), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -11631,19 +11631,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart { 
-                            item: PartItem::Specific(2), 
+                            item: Item::Product(2), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Specific(3), 
+                            item: Item::Product(3), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input
                         },
                         ProcessPart { 
-                            item: PartItem::Want(0), 
+                            item: Item::Want(0), 
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output
@@ -11661,14 +11661,14 @@ mod tests {
 
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         1,
                         None,
                         1.0,
                         0.0,
                         1,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Want(0),
+                    Desire::new(Item::Want(0),
                         3,
                         Some(12),
                         1.0,
@@ -11699,28 +11699,28 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
-                assert!(prop0.specific_reserve == 0.0);
+                assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
                 assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.specific_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
                 // ensure want process plan is recorded correctly.
                 assert_eq!(test.process_plan[&0], 10.0);
                 assert_eq!(test.process_plan[&1], 10.0);
@@ -11800,14 +11800,14 @@ mod tests {
                 });
                 data.update_product_classes().expect("Could not function");
                 let test_desires = vec![
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         0,
                         None,
                         1.0,
                         0.0,
                         4,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Class(0),
+                    Desire::new(Item::Class(0),
                         3,
                         Some(12),
                         1.0,
@@ -11837,21 +11837,21 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 0.0);
                 assert!(prop0.class_reserve == 15.0);
-                assert!(prop0.specific_reserve == 0.0);
+                assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 15.0);
                 assert!(prop1.unreserved == 0.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 15.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 10.0);
                 assert!(prop2.unreserved == 10.0);
                 assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 0.0);
                 assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.specific_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
                 // ensure want process plan is recorded correctly.
                 assert_eq!(test.process_plan.len(), 0);
                 assert_eq!(result.tier, 100);
@@ -11859,21 +11859,21 @@ mod tests {
                 assert!(result.value < 182147.0);
             }
 
-            /// Sifts 1 specific desire only, don't set up wants
+            /// Sifts 1 Product desire only, don't set up wants
             /// or class desires.
             #[test]
-            pub fn sift_specific_desire_correctly() {
+            pub fn sift_Product_desire_correctly() {
                 // data needed, but not set up for this test.
                 let data = &DataManager::new();
                 let test_desires = vec![
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         0,
                         Some(100),
                         1.0,
                         0.0,
                         5,
                         vec![]).unwrap(),
-                    Desire::new(DesireItem::Product(0),
+                    Desire::new(Item::Product(0),
                         3,
                         Some(12),
                         1.0,
@@ -11902,14 +11902,14 @@ mod tests {
                 assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 0.0);
                 assert!(prop0.class_reserve == 0.0);
-                assert!(prop0.specific_reserve == 15.0);
+                assert!(prop0.product_reserve == 15.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 10.0);
                 assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 0.0);
-                assert!(prop1.specific_reserve == 0.0);
+                assert!(prop1.product_reserve == 0.0);
                 // ensure want process plan is recorded correctly.
                 assert_eq!(test.process_plan.len(), 0);
                 assert_eq!(result.tier, 50);
@@ -11922,7 +11922,7 @@ mod tests {
         pub fn get_highest_satisfied_tier_for_item_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(1), 
                 amount: 1.0, 
@@ -11930,7 +11930,7 @@ mod tests {
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 2, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -11938,7 +11938,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
-                item: DesireItem::Want(0), 
+                item: Item::Want(0), 
                 start: 3, 
                 end: None, 
                 amount: 1.0, 
@@ -11947,21 +11947,21 @@ mod tests {
                 tags: vec![]});
             let mut test = Property::new(test_desires);
 
-            let result1 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0));
+            let result1 = test.get_highest_satisfied_tier_for_item(Item::Product(0));
             assert_eq!(result1, None);
 
             test.desires[0].add_satisfaction(2.0);
-            let result2 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0))
+            let result2 = test.get_highest_satisfied_tier_for_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result2, 1);
 
             test.desires[1].add_satisfaction(2.0);
-            let result3 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0))
+            let result3 = test.get_highest_satisfied_tier_for_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result3, 1);
 
             test.desires[2].add_satisfaction(2.0);
-            let result4 = test.get_highest_satisfied_tier_for_item(DesireItem::Product(0))
+            let result4 = test.get_highest_satisfied_tier_for_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result4, 1);
         }
@@ -11970,7 +11970,7 @@ mod tests {
         pub fn get_highest_satisfied_tier_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(1), 
                 amount: 1.0, 
@@ -11978,7 +11978,7 @@ mod tests {
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 2, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -11986,7 +11986,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
-                item: DesireItem::Want(0), 
+                item: Item::Want(0), 
                 start: 3, 
                 end: None, 
                 amount: 1.0, 
@@ -12018,7 +12018,7 @@ mod tests {
         pub fn correctly_walk_down_tiers_for_item() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(1), 
                 amount: 1.0, 
@@ -12026,7 +12026,7 @@ mod tests {
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 0, 2,4,6
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 0, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -12034,7 +12034,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,3,6,9, ...
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -12072,7 +12072,7 @@ mod tests {
         pub fn correctly_walk_down_tiers() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(1), 
                 amount: 1.0, 
@@ -12080,7 +12080,7 @@ mod tests {
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 0, 2,4,6
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 0, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -12088,7 +12088,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,3,6,9, ...
-                item: DesireItem::Want(0), 
+                item: Item::Want(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -12132,7 +12132,7 @@ mod tests {
         pub fn get_lowest_unsatisfied_tier_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(1), 
                 amount: 1.0, 
@@ -12140,7 +12140,7 @@ mod tests {
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 2, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -12148,7 +12148,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
-                item: DesireItem::Want(0), 
+                item: Item::Want(0), 
                 start: 3, 
                 end: None, 
                 amount: 1.0, 
@@ -12181,7 +12181,7 @@ mod tests {
         pub fn get_lowest_unsatisfied_tier_for_item_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(1), 
                 amount: 1.0, 
@@ -12189,7 +12189,7 @@ mod tests {
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 2, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -12197,7 +12197,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 3, 
                 end: None, 
                 amount: 1.0, 
@@ -12206,22 +12206,22 @@ mod tests {
                 tags: vec![]});
             let mut test = Property::new(test_desires);
 
-            let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result1 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Error Found on empty thing.");
             assert_eq!(result1, 0);
 
             test.desires[0].add_satisfaction(2.0);
-            let result2 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result2 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result2, 2);
 
             test.desires[1].add_satisfaction(2.0);
-            let result3 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result3 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result3, 3);
 
             test.desires[2].add_satisfaction(2.0);
-            let result4 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result4 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result4, 6);
         }
@@ -12230,7 +12230,7 @@ mod tests {
         pub fn get_lowest_unsatisfied_tier_for_item_and_exclude_other_items_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,1
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(1), 
                 amount: 1.0, 
@@ -12238,7 +12238,7 @@ mod tests {
                 step: 1,
                 tags: vec![]});
             test_desires.push(Desire{ // 2,4,6
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 2, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -12246,7 +12246,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 3,6,9, ...
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 3, 
                 end: None, 
                 amount: 1.0, 
@@ -12255,28 +12255,28 @@ mod tests {
                 tags: vec![]});
             let mut test = Property::new(test_desires);
 
-            let result1 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result1 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Error Found on empty thing.");
             assert_eq!(result1, 0);
 
             test.desires[0].add_satisfaction(2.0);
-            let result2 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result2 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result2, 2);
 
             test.desires[1].add_satisfaction(2.0);
-            let result3 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result3 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result3, 6);
 
             test.desires[2].add_satisfaction(2.0);
-            let result4 = test.get_lowest_unsatisfied_tier_of_item(DesireItem::Product(0))
+            let result4 = test.get_lowest_unsatisfied_tier_of_item(Item::Product(0))
                 .expect("Couldn't find.");
             assert_eq!(result4, 6);
         }
 
         mod walk_up_tiers_should {
-            use crate::objects::{desire::{Desire, DesireItem}, property::{Property, DesireCoord}};
+            use crate::objects::{desire::Desire, property::{Property, DesireCoord}, item::Item};
 
             /// Tests that if the function is given a desirecoord with
             /// an index > desires.len(), that it simply wraps back around
@@ -12285,7 +12285,7 @@ mod tests {
             pub fn safely_accept_overlapped_idxs_from_prev() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,1
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(1), 
                     amount: 1.0, 
@@ -12293,7 +12293,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(6), 
                     amount: 1.0, 
@@ -12301,7 +12301,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,3,6,9, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -12324,7 +12324,7 @@ mod tests {
             pub fn walk_up_tiers_correctly() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,1
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(1), 
                     amount: 1.0, 
@@ -12332,7 +12332,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(6), 
                     amount: 1.0, 
@@ -12340,7 +12340,7 @@ mod tests {
                     step: 2,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,3,6,9, ...
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -12374,7 +12374,7 @@ mod tests {
             pub fn walk_up_tiers_correctly_and_return_none_when_out() {
                 let mut test_desires = vec![];
                 test_desires.push(Desire{ // 0,1
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(1), 
                     amount: 1.0, 
@@ -12382,7 +12382,7 @@ mod tests {
                     step: 1,
                     tags: vec![]});
                 test_desires.push(Desire{ // 0,2,4,6
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(6), 
                     amount: 1.0, 
@@ -12416,7 +12416,7 @@ mod tests {
         pub fn walk_up_tiers_for_item_correctly() {
             let mut test_desires = vec![];
             test_desires.push(Desire{ // 0,2, 4
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(4), 
                 amount: 1.0, 
@@ -12424,7 +12424,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6
-                item: DesireItem::Product(1), 
+                item: Item::Product(1), 
                 start: 0, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -12432,7 +12432,7 @@ mod tests {
                 step: 2,
                 tags: vec![]});
             test_desires.push(Desire{ // 0,2,4,6
-                item: DesireItem::Want(0), 
+                item: Item::Want(0), 
                 start: 0, 
                 end: Some(6), 
                 amount: 1.0, 
@@ -12444,7 +12444,7 @@ mod tests {
             let mut curr = None;
             let mut results = vec![];
             loop {
-                let val = test.walk_up_tiers_for_item(&curr, &DesireItem::Product(0));
+                let val = test.walk_up_tiers_for_item(&curr, &Item::Product(0));
                 if let Some(value) = val {
                     results.push(Some((value.tier, value.idx)));
                     curr = Some(value);
@@ -12623,15 +12623,15 @@ mod tests {
     }
 
     mod desire_tests {
-        use crate::objects::desire::{Desire, DesireItem};
+        use crate::objects::{desire::Desire, item::Item};
 
         mod missing_satisfaction_should {
-            use crate::objects::desire::{Desire, DesireItem};
+            use crate::objects::{desire::Desire, item::Item};
 
             #[test]
             pub fn return_missing_satisfaction_to_reach_tiers() {
                 let step_1_no_sat = Desire {
-                    item: DesireItem::Product(0),
+                    item: Item::Product(0),
                     start: 0,
                     end: None,
                     amount: 2.0,
@@ -12640,7 +12640,7 @@ mod tests {
                     tags: vec![],
                 };
                 let step_5_no_sat = Desire {
-                    item: DesireItem::Product(0),
+                    item: Item::Product(0),
                     start: 0,
                     end: None,
                     amount: 2.0,
@@ -12649,7 +12649,7 @@ mod tests {
                     tags: vec![],
                 };
                 let step_1_some_sat = Desire {
-                    item: DesireItem::Product(0),
+                    item: Item::Product(0),
                     start: 0,
                     end: None,
                     amount: 2.0,
@@ -12658,7 +12658,7 @@ mod tests {
                     tags: vec![],
                 };
                 let step_5_some_sat = Desire {
-                    item: DesireItem::Product(0),
+                    item: Item::Product(0),
                     start: 0,
                     end: None,
                     amount: 2.0,
@@ -12683,12 +12683,12 @@ mod tests {
         }
 
         mod steps_in_interval_should {
-            use crate::objects::desire::{DesireItem, Desire};
+            use crate::objects::{desire::Desire, item::Item};
 
             #[test]
             pub fn always_return_false_when() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 10, 
                     end: None, 
                     amount: 2.0, 
@@ -12703,7 +12703,7 @@ mod tests {
             #[test]
             pub fn act_correctly_with_single_tier_desire() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 10, 
                     end: None, 
                     amount: 2.0, 
@@ -12724,7 +12724,7 @@ mod tests {
             #[test]
             pub fn act_correctly_with_stretched_desire() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 10, 
                     end: Some(20), 
                     amount: 2.0, 
@@ -12745,7 +12745,7 @@ mod tests {
             #[test]
             pub fn act_correctly_with_infinite_desire() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 10, 
                     end: None, 
                     amount: 2.0, 
@@ -12763,12 +12763,12 @@ mod tests {
         }
 
         mod before_start_should {
-            use crate::objects::desire::{DesireItem, Desire};
+            use crate::objects::{desire::Desire, item::Item};
 
             #[test]
             pub fn return_false_if_after_start() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 10, 
                     end: None, 
                     amount: 2.0, 
@@ -12782,7 +12782,7 @@ mod tests {
             #[test]
             pub fn return_true_if_before_start() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 10, 
                     end: None, 
                     amount: 2.0, 
@@ -12795,12 +12795,12 @@ mod tests {
         }
 
         mod past_end_should {
-            use crate::objects::desire::{DesireItem, Desire};
+            use crate::objects::{desire::Desire, item::Item};
 
             #[test]
             pub fn return_false_if_nonstretched_desire_is_before_start() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 10, 
                     end: None, 
                     amount: 2.0, 
@@ -12814,7 +12814,7 @@ mod tests {
             #[test]
             pub fn return_true_if_tier_is_after_start_for_non_stretched_desire() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 2.0, 
@@ -12828,7 +12828,7 @@ mod tests {
             #[test]
             pub fn return_false_if_before_last() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(10), 
                     amount: 2.0, 
@@ -12842,7 +12842,7 @@ mod tests {
             #[test]
             pub fn return_true_if_tier_after_last() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(10), 
                     amount: 2.0, 
@@ -12856,7 +12856,7 @@ mod tests {
             #[test]
             pub fn return_false_when_desire_is_infinite() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 2.0, 
@@ -12871,7 +12871,7 @@ mod tests {
         #[test]
         pub fn correctly_add_satisfaction_at_tier() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -12893,7 +12893,7 @@ mod tests {
         #[test]
         pub fn correctly_multiply_desire() {
             let test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 2.0, 
@@ -12914,7 +12914,7 @@ mod tests {
         #[test]
         pub fn correctly_add_satisfaction() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -12935,7 +12935,7 @@ mod tests {
         #[test]
         pub fn get_unsatisfied_to_tier() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 1, 
                 end: None, 
                 amount: 1.0, 
@@ -12982,7 +12982,7 @@ mod tests {
         #[test]
         pub fn get_satisfaction_up_to_tier() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 1, 
                 end: None, 
                 amount: 1.0, 
@@ -13032,7 +13032,7 @@ mod tests {
         #[test]
         pub fn get_next_tier_up_correctly() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 10, 
                 end: None, 
                 amount: 1.0, 
@@ -13063,7 +13063,7 @@ mod tests {
         #[test]
         pub fn change_end_correctly() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -13081,7 +13081,7 @@ mod tests {
         #[test]
         pub fn correctly_return_steps() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -13101,7 +13101,7 @@ mod tests {
         #[test]
         pub fn show_is_stretched() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -13119,7 +13119,7 @@ mod tests {
         #[test]
         pub fn show_is_infinite() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 1.0, 
@@ -13137,7 +13137,7 @@ mod tests {
         #[test]
         pub fn calculate_satisfaction_at_tier() {
             let test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: None, 
                 amount: 2.0, 
@@ -13152,13 +13152,13 @@ mod tests {
         }
 
         mod steps_to_tier_should {
-            use crate::objects::desire::{Desire, DesireItem};
+            use crate::objects::{desire::Desire, item::Item};
 
             
             #[test]
             pub fn calculate_steps_to_tier_correctly_for_infinite_desire() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 2.0, 
@@ -13175,7 +13175,7 @@ mod tests {
             #[test]
             pub fn calculate_steps_to_tier_correctly_for_stretched_desire() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(2), 
                     amount: 2.0, 
@@ -13192,7 +13192,7 @@ mod tests {
             #[test]
             pub fn calculate_steps_to_tier_correctly_for_singular_tier_desire() {
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 1, 
                     end: None, 
                     amount: 2.0, 
@@ -13208,12 +13208,12 @@ mod tests {
         }
 
         mod steps_on_tier_should {
-            use crate::objects::desire::{Desire, DesireItem};
+            use crate::objects::{desire::Desire, item::Item};
 
             #[test]
             pub fn calculate_steps_on_tier_correctly() {
                 let mut test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: Some(10), 
                     amount: 2.0, 
@@ -13233,7 +13233,7 @@ mod tests {
                 assert!(test.steps_on_tier(12));
 
                 let test = Desire{ 
-                    item: DesireItem::Product(0), 
+                    item: Item::Product(0), 
                     start: 0, 
                     end: None, 
                     amount: 1.0, 
@@ -13250,7 +13250,7 @@ mod tests {
         #[test]
         pub fn check_if_fully_satisfied() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(10), 
                 amount: 2.0, 
@@ -13266,7 +13266,7 @@ mod tests {
         #[test]
         pub fn calculate_total_desire() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(10), 
                 amount: 2.0, 
@@ -13284,7 +13284,7 @@ mod tests {
         #[test]
         pub fn calculate_total_satisfaction() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(10), 
                 amount: 2.0, 
@@ -13302,7 +13302,7 @@ mod tests {
         #[test]
         pub fn calculate_total_desire_at_tier() {
             let mut test = Desire{ 
-                item: DesireItem::Product(0), 
+                item: Item::Product(0), 
                 start: 0, 
                 end: Some(10), 
                 amount: 2.0, 
@@ -13616,10 +13616,10 @@ mod tests {
     }
 
     mod process_tests {
-        use crate::{objects::process::{Process, ProcessPart, PartItem, ProcessSectionTag}, data_manager::DataManager};
+        use crate::{objects::{process::{Process, ProcessPart, ProcessSectionTag}, item::Item}, data_manager::DataManager};
 
         mod uses_product_should {
-            use crate::{data_manager::DataManager, objects::{product::Product, process::{Process, ProcessPart, ProcessSectionTag, PartItem}}};
+            use crate::{data_manager::DataManager, objects::{product::Product, process::{Process, ProcessPart, ProcessSectionTag}, item::Item}};
 
             #[test]
             pub fn return_true_when_product_class_is_a_input() {
@@ -13689,19 +13689,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart{ 
-                            item: PartItem::Class(0),
+                            item: Item::Class(0),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input 
                         },
                         ProcessPart{ 
-                            item: PartItem::Specific(2),
+                            item: Item::Product(2),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital 
                         },
                         ProcessPart{ 
-                            item: PartItem::Specific(3),
+                            item: Item::Product(3),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output 
@@ -13785,19 +13785,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart{ 
-                            item: PartItem::Specific(2),
+                            item: Item::Product(2),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input 
                         },
                         ProcessPart{ 
-                            item: PartItem::Class(0),
+                            item: Item::Class(0),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital 
                         },
                         ProcessPart{ 
-                            item: PartItem::Specific(3),
+                            item: Item::Product(3),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output 
@@ -13881,19 +13881,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart{ 
-                            item: PartItem::Specific(2),
+                            item: Item::Product(2),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input 
                         },
                         ProcessPart{ 
-                            item: PartItem::Specific(0),
+                            item: Item::Product(0),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital 
                         },
                         ProcessPart{ 
-                            item: PartItem::Specific(3),
+                            item: Item::Product(3),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output 
@@ -13977,19 +13977,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart{ 
-                            item: PartItem::Specific(2),
+                            item: Item::Product(2),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input 
                         },
                         ProcessPart{ 
-                            item: PartItem::Class(0),
+                            item: Item::Class(0),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital 
                         },
                         ProcessPart{ 
-                            item: PartItem::Specific(3),
+                            item: Item::Product(3),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output 
@@ -14073,19 +14073,19 @@ mod tests {
                     minimum_time: 0.0,
                     process_parts: vec![
                         ProcessPart{ 
-                            item: PartItem::Specific(2),
+                            item: Item::Product(2),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input 
                         },
                         ProcessPart{ 
-                            item: PartItem::Class(0),
+                            item: Item::Class(0),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital 
                         },
                         ProcessPart{ 
-                            item: PartItem::Specific(3),
+                            item: Item::Product(3),
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output 
@@ -14105,7 +14105,7 @@ mod tests {
         mod do_process_with_property_should {
             use std::{str::FromStr, collections::HashMap};
 
-            use crate::{objects::{process::{Process, ProcessPart, ProcessSectionTag, PartItem}, property_info::PropertyInfo}, data_manager::DataManager};
+            use crate::{objects::{process::{Process, ProcessPart, ProcessSectionTag}, property_info::PropertyInfo, item::Item}, data_manager::DataManager};
 
             #[test]
             pub fn return_process_returns_empty_correctly() {
@@ -14115,24 +14115,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 2.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 0.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 2.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14163,24 +14163,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 0.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 2.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14223,24 +14223,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 0.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 2.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14285,24 +14285,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 0.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 2.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14347,24 +14347,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 0.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 2.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14402,24 +14402,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 0.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.5, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 2.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14453,12 +14453,12 @@ mod tests {
         mod do_process {
             use std::{str::FromStr, collections::HashMap};
 
-            use crate::{objects::process::{Process, ProcessPart, ProcessSectionTag, PartItem}, data_manager::DataManager};
+            use crate::{objects::{process::{Process, ProcessPart, ProcessSectionTag}, item::Item}, data_manager::DataManager};
 
             mod do_process_should {
                 use std::{str::FromStr, collections::HashMap};
 
-                use crate::{objects::process::{Process, PartItem, ProcessPart, ProcessSectionTag}, data_manager::DataManager};
+                use crate::{objects::{process::{Process, ProcessPart, ProcessSectionTag}, item::Item}, data_manager::DataManager};
 
                 #[test]
                 pub fn return_process_returns_empty_correctly() {
@@ -14468,24 +14468,24 @@ mod tests {
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Specific(0), // input product
+                            ProcessPart{ item: Item::Product(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Want(0), // input want
+                            ProcessPart{ item: Item::Want(0), // input want
                                 amount: 2.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Specific(1), // Capital product
+                            ProcessPart{ item: Item::Product(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Specific(2), // output product
+                            ProcessPart{ item: Item::Product(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
-                            ProcessPart{ item: PartItem::Want(2), // output want
+                            ProcessPart{ item: Item::Want(2), // output want
                                 amount: 2.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -14516,24 +14516,24 @@ mod tests {
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Specific(0), // input product
+                            ProcessPart{ item: Item::Product(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Want(0), // input want
+                            ProcessPart{ item: Item::Want(0), // input want
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Specific(1), // Capital product
+                            ProcessPart{ item: Item::Product(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Specific(2), // output product
+                            ProcessPart{ item: Item::Product(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
-                            ProcessPart{ item: PartItem::Want(2), // output want
+                            ProcessPart{ item: Item::Want(2), // output want
                                 amount: 2.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -14576,24 +14576,24 @@ mod tests {
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Specific(0), // input product
+                            ProcessPart{ item: Item::Product(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Want(0), // input want
+                            ProcessPart{ item: Item::Want(0), // input want
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Specific(1), // Capital product
+                            ProcessPart{ item: Item::Product(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Specific(2), // output product
+                            ProcessPart{ item: Item::Product(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
-                            ProcessPart{ item: PartItem::Want(2), // output want
+                            ProcessPart{ item: Item::Want(2), // output want
                                 amount: 2.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -14636,24 +14636,24 @@ mod tests {
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Specific(0), // input product
+                            ProcessPart{ item: Item::Product(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Want(0), // input want
+                            ProcessPart{ item: Item::Want(0), // input want
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Specific(1), // Capital product
+                            ProcessPart{ item: Item::Product(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Specific(2), // output product
+                            ProcessPart{ item: Item::Product(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
-                            ProcessPart{ item: PartItem::Want(2), // output want
+                            ProcessPart{ item: Item::Want(2), // output want
                                 amount: 2.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -14691,24 +14691,24 @@ mod tests {
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Specific(0), // input product
+                            ProcessPart{ item: Item::Product(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Want(0), // input want
+                            ProcessPart{ item: Item::Want(0), // input want
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Specific(1), // Capital product
+                            ProcessPart{ item: Item::Product(1), // Capital product
                                 amount: 0.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Specific(2), // output product
+                            ProcessPart{ item: Item::Product(2), // output product
                                 amount: 1.5, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
-                            ProcessPart{ item: PartItem::Want(2), // output want
+                            ProcessPart{ item: Item::Want(2), // output want
                                 amount: 2.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -14742,7 +14742,7 @@ mod tests {
             mod effective_output_of_should {
                 use std::str::FromStr;
 
-                use crate::objects::process::{Process, ProcessPart, PartItem, ProcessSectionTag};
+                use crate::objects::{process::{Process, ProcessPart, ProcessSectionTag}, item::Item};
 
                 #[test]
                 pub fn return_correctly_for_input_capital_output_and_unrelated_items() {
@@ -14750,24 +14750,24 @@ mod tests {
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
                         minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: PartItem::Specific(0), // input product
+                            ProcessPart{ item: Item::Product(0), // input product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Want(0), // input want
+                            ProcessPart{ item: Item::Want(0), // input want
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Input },
-                            ProcessPart{ item: PartItem::Specific(1), // Capital product
+                            ProcessPart{ item: Item::Product(1), // Capital product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Capital },
                             // placeholder for capital want
-                            ProcessPart{ item: PartItem::Specific(2), // output product
+                            ProcessPart{ item: Item::Product(2), // output product
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
-                            ProcessPart{ item: PartItem::Want(2), // output want
+                            ProcessPart{ item: Item::Want(2), // output want
                                 amount: 1.0, 
                                 part_tags: vec![], 
                                 part: ProcessSectionTag::Output },
@@ -14777,17 +14777,17 @@ mod tests {
                         technology_requirement: None, tertiary_tech: None };
 
                     // not in at all
-                    assert!(test.effective_output_of(PartItem::Want(3)) == 0.0);
-                    assert!(test.effective_output_of(PartItem::Specific(3)) == 0.0);
+                    assert!(test.effective_output_of(Item::Want(3)) == 0.0);
+                    assert!(test.effective_output_of(Item::Product(3)) == 0.0);
                     // input
-                    assert!(test.effective_output_of(PartItem::Want(0)) == 0.0);
-                    assert!(test.effective_output_of(PartItem::Specific(0)) == 0.0);
+                    assert!(test.effective_output_of(Item::Want(0)) == 0.0);
+                    assert!(test.effective_output_of(Item::Product(0)) == 0.0);
                     // capital
                     // capital want placeholder.
-                    assert!(test.effective_output_of(PartItem::Specific(1)) == 0.0);
+                    assert!(test.effective_output_of(Item::Product(1)) == 0.0);
                     // output 
-                    assert!(test.effective_output_of(PartItem::Want(2)) == 1.0);
-                    assert!(test.effective_output_of(PartItem::Specific(2)) == 1.0);
+                    assert!(test.effective_output_of(Item::Want(2)) == 1.0);
+                    assert!(test.effective_output_of(Item::Product(2)) == 1.0);
                 }
             }
 
@@ -14799,24 +14799,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14856,24 +14856,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14908,24 +14908,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -14960,24 +14960,24 @@ mod tests {
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
                     minimum_time: 0.0, process_parts: vec![
-                        ProcessPart{ item: PartItem::Specific(0), // input product
+                        ProcessPart{ item: Item::Product(0), // input product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Want(0), // input want
+                        ProcessPart{ item: Item::Want(0), // input want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Input },
-                        ProcessPart{ item: PartItem::Specific(1), // Capital product
+                        ProcessPart{ item: Item::Product(1), // Capital product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Capital },
                         // placeholder for capital want
-                        ProcessPart{ item: PartItem::Specific(2), // output product
+                        ProcessPart{ item: Item::Product(2), // output product
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
-                        ProcessPart{ item: PartItem::Want(2), // output want
+                        ProcessPart{ item: Item::Want(2), // output want
                             amount: 1.0, 
                             part_tags: vec![], 
                             part: ProcessSectionTag::Output },
@@ -15041,13 +15041,13 @@ mod tests {
             // product never matches want ever, don't bother checking those mismatches
             // test input product to test_other input correct (never match)
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -15062,13 +15062,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -15083,13 +15083,13 @@ mod tests {
             test_other.process_parts.clear();
             // input to capital (never match)
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -15104,13 +15104,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -15125,13 +15125,13 @@ mod tests {
             test_other.process_parts.clear();
             // input to output
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15146,13 +15146,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15167,13 +15167,13 @@ mod tests {
             test_other.process_parts.clear();
             // capital to input (never match)
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -15188,13 +15188,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -15209,13 +15209,13 @@ mod tests {
             test_other.process_parts.clear();
             // capital to capital (never match)
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -15230,13 +15230,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -15251,13 +15251,13 @@ mod tests {
             test_other.process_parts.clear();
             // capital to output (match only products)
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15272,13 +15272,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15293,13 +15293,13 @@ mod tests {
             test_other.process_parts.clear();
             // output to input
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -15314,13 +15314,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
@@ -15335,13 +15335,13 @@ mod tests {
             test_other.process_parts.clear();
             // output to capital (don't match on wants)
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -15356,13 +15356,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
@@ -15377,13 +15377,13 @@ mod tests {
             test_other.process_parts.clear();
             // output to output (never match)
             let input = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15398,13 +15398,13 @@ mod tests {
             test_other.process_parts.clear();
                 // want check
             let input = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let output = ProcessPart{
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15442,13 +15442,13 @@ mod tests {
             assert!(!test.can_feed_self(&data));
             // match on input-output product
             test.process_parts.push(ProcessPart {
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             });
             test.process_parts.push(ProcessPart {
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15459,13 +15459,13 @@ mod tests {
             // match on capital-output product
             test.process_parts.clear();
             test.process_parts.push(ProcessPart {
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             });
             test.process_parts.push(ProcessPart {
-                item: PartItem::Specific(0),
+                item: Item::Product(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15475,13 +15475,13 @@ mod tests {
             // match on input-output want
             test.process_parts.clear();
             test.process_parts.push(ProcessPart {
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Input,
             });
             test.process_parts.push(ProcessPart {
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15491,13 +15491,13 @@ mod tests {
             // don't match on capital-output want
             test.process_parts.clear();
             test.process_parts.push(ProcessPart {
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Capital,
             });
             test.process_parts.push(ProcessPart {
-                item: PartItem::Want(0),
+                item: Item::Want(0),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -15557,11 +15557,11 @@ mod tests {
             assert_eq!(result.minimum_time, 0.0);
             assert!(result.process_parts.iter()
                 .any(|x| {
-                    x.item.is_specific() && x.item.unwrap() == 0
+                    x.item.is_product() && x.item.unwrap() == 0
                 }));
             assert!(result.process_parts.iter()
                 .any(|x| {
-                    x.item.is_specific() && x.item.unwrap() == test_skill.labor
+                    x.item.is_product() && x.item.unwrap() == test_skill.labor
                 }));
             assert!(result.process_tags.is_empty());
             assert_eq!(result.skill_minimum, 0.0);
@@ -15670,7 +15670,7 @@ mod tests {
     }
 
     mod product_tests {
-        use crate::objects::{product::{Product, ProductTag}, want::Want, process::{Process, ProcessPart, ProcessSectionTag, PartItem, ProcessTag}};
+        use crate::objects::{product::{Product, ProductTag}, want::Want, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, item::Item};
 
         pub mod add_to_class_should {
             use std::collections::{HashSet, HashMap};
@@ -15864,7 +15864,7 @@ mod tests {
 
             // ignore the untagged
             let part = ProcessPart { 
-                item: PartItem::Specific(0), 
+                item: Item::Product(0), 
                 amount: 1.0, 
                 part_tags: vec![], 
                 part: ProcessSectionTag::Input
@@ -16202,7 +16202,7 @@ mod tests {
 
     mod want_tests {
 
-        use crate::objects::{want::Want, product::Product, process::{Process, ProcessPart, PartItem, ProcessSectionTag, ProcessTag}};
+        use crate::objects::{want::Want, product::Product, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, item::Item};
 
         #[test]
         pub fn add_process_source_returns_err_on() {
@@ -16253,7 +16253,7 @@ mod tests {
             };
 
             let want_output = ProcessPart{
-                item: PartItem::Want(test.id),
+                item: Item::Want(test.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -16302,13 +16302,13 @@ mod tests {
                 tertiary_tech: None,
             };
             let product_input = ProcessPart{
-                item: PartItem::Specific(test_product.id),
+                item: Item::Product(test_product.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let want_output = ProcessPart{
-                item: PartItem::Want(test.id),
+                item: Item::Want(test.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
@@ -16361,13 +16361,13 @@ mod tests {
                 tertiary_tech: None,
             };
             let product_input = ProcessPart{
-                item: PartItem::Specific(test_product.id),
+                item: Item::Product(test_product.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,
             };
             let want_output = ProcessPart{
-                item: PartItem::Want(test.id),
+                item: Item::Want(test.id),
                 amount: 1.0,
                 part_tags: vec![],
                 part: ProcessSectionTag::Output,

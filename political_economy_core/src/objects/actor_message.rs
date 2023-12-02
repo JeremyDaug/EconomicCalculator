@@ -268,6 +268,9 @@ impl ActorMessage {
                 buyer, .. } => {
                     *seller == me || *buyer == me
                 }, // from market, created by FindProduct, you're buyer or seller.
+            ActorMessage::FoundClass { buyer, .. } => {
+                *buyer == me
+                }, // from market, to buyer
             ActorMessage::FoundWant { buyer,
                 .. } => *buyer == me, // from market, to buyer or seller
             ActorMessage::ProductNotFound { buyer,

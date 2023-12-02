@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 use crate::data_manager::DataManager;
 
-use super::property_info::PropertyInfo;
+use super::{property_info::PropertyInfo, item::Item};
 
 #[derive(Debug)]
 pub struct Process {
@@ -48,7 +48,7 @@ impl Process {
     /// 
     /// Gets the process's input products
     pub fn input_products(&self) -> Vec<&ProcessPart> {
-        self.process_parts.iter().filter(|x| x.part.is_input() && x.item.is_specific()).collect_vec()
+        self.process_parts.iter().filter(|x| x.part.is_input() && x.item.is_product()).collect_vec()
     }
 
     /// # Inputs and Capital
@@ -62,7 +62,7 @@ impl Process {
     /// 
     /// Gets the process's input and capital products
     pub fn input_and_capital_products(&self) -> Vec<&ProcessPart> {
-        self.process_parts.iter().filter(|x| !x.part.is_output() && x.item.is_specific()).collect_vec()
+        self.process_parts.iter().filter(|x| !x.part.is_output() && x.item.is_product()).collect_vec()
     }
 
     /// # Capital
@@ -76,7 +76,7 @@ impl Process {
     /// 
     /// Gets the process's capital products
     pub fn capital_products(&self) -> Vec<&ProcessPart> {
-        self.process_parts.iter().filter(|x| x.part.is_capital() && x.item.is_specific()).collect_vec()
+        self.process_parts.iter().filter(|x| x.part.is_capital() && x.item.is_product()).collect_vec()
     }
 
     /// # Outputs
@@ -90,7 +90,7 @@ impl Process {
     /// 
     /// Gets the process's output products
     pub fn output_products(&self) -> Vec<&ProcessPart> {
-        self.process_parts.iter().filter(|x| x.part.is_output() && x.item.is_specific()).collect_vec()
+        self.process_parts.iter().filter(|x| x.part.is_output() && x.item.is_product()).collect_vec()
     }
 
     /// # Outputs Proudct
@@ -100,7 +100,7 @@ impl Process {
     /// Returns true if any output is the product, false otherwise.
     pub fn outputs_product(&self, product: usize) -> bool {
         self.process_parts.iter()
-        .filter(|x| x.part.is_output() && x.item.is_specific())
+        .filter(|x| x.part.is_output() && x.item.is_product())
         .any(|x| x.item.unwrap() == product)
     }
 
@@ -181,7 +181,7 @@ impl Process {
         // check that the product is a capital and a product (no want capitals handled yet)
         let capitals =
             self.process_parts.iter().filter(|x| x.part.is_capital() &&
-                        x.item.is_specific());
+                        x.item.is_product());
         let mut outputs 
             = other.process_parts.iter().filter(|x| x.part.is_output());
 
@@ -225,7 +225,7 @@ impl Process {
             self.process_parts.iter().filter(|x| x.part.is_output());
         // check against all inputs and capital products (not capital wants)
         let mut inputs 
-            = other.process_parts.iter().filter(|x| x.part.is_capital() && x.item.is_specific());
+            = other.process_parts.iter().filter(|x| x.part.is_capital() && x.item.is_product());
 
         for output in outputs {
             if inputs.any(|x| x.item == output.item) {
@@ -251,15 +251,15 @@ impl Process {
         let mut checked_classes = HashSet::new();
         for part in self.process_parts.iter() {
             match part.item {
-                PartItem::Specific(prod) => {
+                Item::Product(prod) => {
                     let count = checked_products.entry(prod).or_insert(vec![]);
                     count.push(part);
                 }
-                PartItem::Want(want) => {
+                Item::Want(want) => {
                     let count = checked_wants.entry(want).or_insert(vec![]);
                     count.push(part);
                 }
-                PartItem::Class(class) => {
+                Item::Class(class) => {
                     checked_classes.insert(class);
                 },
             }
@@ -289,7 +289,7 @@ impl Process {
         // Class must be an input or capital, so only check output products.
         if self.process_parts.iter()
         // only get specific outputs
-        .filter(|&x| x.part.is_output() && x.item.is_specific())
+        .filter(|&x| x.part.is_output() && x.item.is_product())
         // if any of them are in one of our classes, return true.
         .any(|x| {
             if let Some(product_class) = data.get_product_class(x.item.unwrap()) {
@@ -356,7 +356,7 @@ impl Process {
         for process_part in self.process_parts.iter() {
             if let ProcessSectionTag::Capital = process_part.part {
                 // todo add capital want handling here.
-                if let PartItem::Want(_id) = process_part.item {
+                if let Item::Want(_id) = process_part.item {
                     continue;
                 }
             }
@@ -364,17 +364,17 @@ impl Process {
                 continue;
             }
             match process_part.item { // TODO add optional check here.
-                PartItem::Specific(id) => {
+                Item::Product(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
                     ratio_available = ratio_available
                         .min(available_products.get(&id).unwrap_or(&0.0) / process_part.amount);
                 },
-                PartItem::Want(id) => {
+                Item::Want(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
                     ratio_available = ratio_available
                         .min(available_wants.get(&id).unwrap_or(&0.0) / process_part.amount);
                 },
-                PartItem::Class(id) => {
+                Item::Class(id) => {
                     // TODO add quality check here!
                     // TODO add way to check against repeat products here.
                     // get all possible items of the class in our products
@@ -412,11 +412,11 @@ impl Process {
             let mut _in_out_sign = 1.0;
             match process_part.part {
                 ProcessSectionTag::Capital => {
-                    if let PartItem::Specific(_id) = process_part.item {
+                    if let Item::Product(_id) = process_part.item {
                         // add used capital products
                         results.capital_products
                         .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
-                    } else if let PartItem::Want(_id) = process_part.item { 
+                    } else if let Item::Want(_id) = process_part.item { 
                         // TODO add capital want handling here also.
                     }
                     continue;
@@ -426,17 +426,17 @@ impl Process {
             } 
             // if not capital, add to appropriate input_output
             match process_part.item {
-                PartItem::Specific(id) => {
+                Item::Product(id) => {
                     results.input_output_products.entry(id)
                     .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
                     .or_insert(_in_out_sign * process_part.amount * ratio_available);
                 },
-                PartItem::Want(id) => {
+                Item::Want(id) => {
                     results.input_output_wants.entry(id)
                     .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
                     .or_insert(_in_out_sign * process_part.amount * ratio_available);
                 },
-                PartItem::Class(id) => { // TODO test this part of the code!
+                Item::Class(id) => { // TODO test this part of the code!
                     debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
                     // TODO improve this to deal with overlap and quality management.
                     // get the plass products
@@ -519,7 +519,7 @@ impl Process {
         for process_part in self.process_parts.iter() {
             if let ProcessSectionTag::Capital = process_part.part {
                 // todo add capital want handling here.
-                if let PartItem::Want(_id) = process_part.item {
+                if let Item::Want(_id) = process_part.item {
                     continue;
                 }
             }
@@ -527,7 +527,7 @@ impl Process {
                 continue;
             }
             match process_part.item { // TODO add optional check here.
-                PartItem::Specific(id) => {
+                Item::Product(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
                     if let Some(prod_info) = available_products.get(&id) {
                         ratio_available = ratio_available
@@ -536,12 +536,12 @@ impl Process {
                         ratio_available = 0.0;
                     }
                 },
-                PartItem::Want(id) => {
+                Item::Want(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
                     ratio_available = ratio_available
                         .min(available_wants.get(&id).unwrap_or(&0.0) / process_part.amount);
                 },
-                PartItem::Class(id) => {
+                Item::Class(id) => {
                     // TODO add quality check here!
                     // TODO add way to check against repeat products here.
                     // get all possible items of the class in our products
@@ -579,11 +579,11 @@ impl Process {
             let mut _in_out_sign = 1.0;
             match process_part.part {
                 ProcessSectionTag::Capital => {
-                    if let PartItem::Specific(_id) = process_part.item {
+                    if let Item::Product(_id) = process_part.item {
                         // add used capital products
                         results.capital_products
                         .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
-                    } else if let PartItem::Want(_id) = process_part.item { 
+                    } else if let Item::Want(_id) = process_part.item { 
                         // TODO add capital want handling here also.
                     }
                     continue;
@@ -593,17 +593,17 @@ impl Process {
             } 
             // if not capital, add to appropriate input_output
             match process_part.item {
-                PartItem::Specific(id) => {
+                Item::Product(id) => {
                     results.input_output_products.entry(id)
                     .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
                     .or_insert(_in_out_sign * process_part.amount * ratio_available);
                 },
-                PartItem::Want(id) => {
+                Item::Want(id) => {
                     results.input_output_wants.entry(id)
                     .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
                     .or_insert(_in_out_sign * process_part.amount * ratio_available);
                 },
-                PartItem::Class(id) => { // TODO test this part of the code!
+                Item::Class(id) => { // TODO test this part of the code!
                     debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
                     // TODO improve this to deal with overlap and quality management.
                     // get the class products
@@ -640,7 +640,7 @@ impl Process {
     /// TODO add in logic to handle chance outputs when chance is created.
     /// 
     /// TODO when optional inputs are available, return a min and max instead of just 1 value.
-    pub fn effective_output_of(&self, item: PartItem) -> f64 {
+    pub fn effective_output_of(&self, item: Item) -> f64 {
         let outputs = self.process_parts.iter()
             .filter(|x| x.part.is_output() && x.item == item).collect_vec();
         // since we don't have chance products yet, just sum them together.
@@ -661,14 +661,14 @@ impl Process {
             return self.process_parts.iter()
             .filter(|x| !x.part.is_output())
             .any(|x| {
-                (x.item.is_specific() && x.item.unwrap() == product) || 
+                (x.item.is_product() && x.item.unwrap() == product) || 
                 (x.item.is_class() && x.item.unwrap() == class)
             });
         } else {
             // if product does not have a class, just look at the specifics.
             return self.process_parts.iter()
             .filter(|x| !x.part.is_output())
-            .any(|x| x.item.is_specific() && x.item.unwrap() == product);
+            .any(|x| x.item.is_product() && x.item.unwrap() == product);
         }
     }
 }
@@ -722,7 +722,7 @@ impl ProcessOutputs {
 #[derive(Debug)]
 pub struct ProcessPart {
     /// The item of this part, may be either a product or a want.
-    pub item: PartItem,
+    pub item: Item,
     /// The amount it takes in
     pub amount: f64,
     /// the tags for this part of the process.
@@ -861,63 +861,4 @@ pub enum ProcessTag {
     Sorter,
     Scrapping,
     Scrubber
-}
-
-/// Part item defines what kind of item the part requests.
-/// 
-/// Products or Wants.
-#[derive(Debug, PartialEq, Eq)]
-pub enum PartItem {
-    /// The Part is a Product and should be treated as such.
-    /// This cannot be used with QualityBased as this would require allowing 
-    /// alterantive products.
-    /// 
-    /// TODO this restriction may be changed with the introduction of a packet system.
-    Specific(usize),
-    /// The part is a class of product, and any product within this class can function.
-    /// 
-    /// # Not for use as Output!!
-    Class(usize),
-    /// The Part is a want and should be treated as such.
-    Want(usize)
-}
-
-impl PartItem {
-    /// Unwraps the id in either want or product Enum.
-    /// 
-    /// # Note
-    /// 
-    /// If id's are replaced with references, this will need to be changed to 
-    /// 
-    /// accept the difference.
-    pub fn unwrap(&self) -> usize {
-        match self {
-            PartItem::Specific(item) => *item,
-            PartItem::Want(item) => *item,
-            PartItem::Class(item) => *item,
-        }
-    }
-
-    /// Checks if the item is a Want.
-    pub fn is_want(&self) -> bool {
-        match self {
-            PartItem::Want(_) => true,
-            _ => false
-        }
-    }
-
-    /// Checks if the item is a Product.
-    pub fn is_specific(&self) -> bool {
-        match self {
-            PartItem::Specific(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_class(&self) -> bool {
-        match self {
-            PartItem::Class(_) => true,
-            _ => false
-        }
-    }
 }

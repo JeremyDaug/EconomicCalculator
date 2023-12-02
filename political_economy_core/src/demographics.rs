@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 
-use crate::objects::{species::Species, culture::Culture, desire::{Desire, DesireItem}, ideology::Ideology};
+use crate::objects::{species::Species, culture::Culture, desire::Desire, ideology::Ideology, item::Item};
 
 /// Demographics is the data handler for our demographic data. It stores all of our
 /// shared population data, making it available for reading during most phases and
@@ -43,7 +43,7 @@ impl Demographics {
         // food desires, the only Required items for a species currently.
         // 1 unit prefered total, half is always necissary.
         let food = Desire{ 
-            item: DesireItem::Want(1), 
+            item: Item::Want(1), 
             start: 0, 
             end: Some(1), 
             amount: 0.5, 
@@ -54,7 +54,7 @@ impl Demographics {
         // Rest desire, 0 required, 2 for health every level up,
         // 8 hours preferred.
         let rest = Desire{ 
-            item: DesireItem::Want(0), 
+            item: Item::Want(0), 
             start: 1, 
             end: Some(4), 
             amount: 2.0, 
@@ -89,7 +89,7 @@ impl Demographics {
 
         // ambrosia preference, 
         let ambrosia = Desire{ 
-            item: DesireItem::Product(2), 
+            item: Item::Product(2), 
             start: 10, 
             end: Some(100), 
             amount: 1.0, 
@@ -99,7 +99,7 @@ impl Demographics {
         };
         // Housing, a bigger house is always wanted.
         let housing = Desire{ 
-            item: DesireItem::Want(2), 
+            item: Item::Want(2), 
             start: 5, 
             end: None, 
             amount: 0.5, 
@@ -109,7 +109,7 @@ impl Demographics {
         };
         // Clothing, some clothing is just needed, 2 sets is enough for clothing.
         let clothing = Desire{ 
-            item: DesireItem::Want(3), 
+            item: Item::Want(3), 
             start: 5, 
             end: Some(20), 
             amount: 0.5, 
@@ -121,7 +121,7 @@ impl Demographics {
         // nice clothes are the next option, and you never have
         // enough.
         let fashion = Desire{ 
-            item: DesireItem::Want(3), 
+            item: Item::Want(3), 
             start: 23, 
             end: None, 
             amount: 0.1, 
@@ -133,7 +133,7 @@ impl Demographics {
         // desire which never ends after everything else has been
         // met.
         let wealth = Desire{ 
-            item: DesireItem::Want(3), 
+            item: Item::Want(3), 
             start: 25, 
             end: None, 
             amount: 0.5, 
@@ -170,7 +170,7 @@ impl Demographics {
 
         // Suits
         let suit = Desire{ 
-            item: DesireItem::Product(7), 
+            item: Item::Product(7), 
             start: 35, 
             end: None, 
             amount: 1.0, 
@@ -181,7 +181,7 @@ impl Demographics {
 
         // Cabin
         let cabin = Desire{ 
-            item: DesireItem::Product(15), 
+            item: Item::Product(15), 
             start: 30, 
             end: None, 
             amount: 1.0, 
@@ -192,7 +192,7 @@ impl Demographics {
 
         // Cotton Boll
         let cotton_boll = Desire{ 
-            item: DesireItem::Product(3), 
+            item: Item::Product(3), 
             start: 50, 
             end: None, 
             amount: 1.0, 

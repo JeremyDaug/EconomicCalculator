@@ -20,7 +20,7 @@ pub struct PropertyInfo {
     /// The amount that has been reserved for our desires, but not yet placed. Anywhere
     pub reserved: f64,
     /// The amount that has been reserved for specific product desires.
-    pub specific_reserve: f64,
+    pub product_reserve: f64,
     /// The amount that has been reserved to satisfy abstract product desires.
     pub class_reserve: f64,
     /// The amount that has been reserved to satisfy want desires.
@@ -63,7 +63,7 @@ impl PropertyInfo {
         Self { total_property: available, 
             unreserved: available, 
             reserved: 0.0, 
-            specific_reserve: 0.0, 
+            product_reserve: 0.0, 
             class_reserve: 0.0, 
             want_reserve: 0.0,
             consumed: 0.0,
@@ -108,7 +108,7 @@ impl PropertyInfo {
         self.reserved = 0.0;
         self.want_reserve = 0.0;
         self.class_reserve = 0.0;
-        self.specific_reserve = 0.0;
+        self.product_reserve = 0.0;
     }
 
     /// # Add Property
@@ -137,7 +137,7 @@ impl PropertyInfo {
 
     /// Gets the highest of our 3 reserves.
     pub fn max_spec_reserve(&self) -> f64 {
-        self.specific_reserve
+        self.product_reserve
             .max(self.class_reserve)
             .max(self.want_reserve)
     }
@@ -151,10 +151,10 @@ impl PropertyInfo {
     pub fn shift_to_specific_reserve(&mut self, quantity: f64) {
         let mut quantity = quantity.abs();
         let other_max = self.class_reserve.max(self.want_reserve);
-        if other_max > self.specific_reserve { 
+        if other_max > self.product_reserve { 
             // if we have some from other reserves, get from there first.
-            let shift = (other_max-self.specific_reserve).min(quantity);
-            self.specific_reserve += shift;
+            let shift = (other_max-self.product_reserve).min(quantity);
+            self.product_reserve += shift;
             quantity -= shift;
             if quantity == 0.0 { return; }
         }
@@ -164,7 +164,7 @@ impl PropertyInfo {
             let shift = self.reserved.min(quantity);
             // remove from reserve, add to spec reserve, and remove from quantity
             self.reserved -= shift;
-            self.specific_reserve += shift;
+            self.product_reserve += shift;
             quantity -= shift;
             if quantity == 0.0 { return; }
         }
@@ -172,7 +172,7 @@ impl PropertyInfo {
         if self.unreserved > 0.0 {
             let shift = self.unreserved.min(quantity);
             self.unreserved -= shift;
-            self.specific_reserve += shift;
+            self.product_reserve += shift;
         }
     }
 
@@ -184,7 +184,7 @@ impl PropertyInfo {
     /// Shifts based on the absolute value.
     pub fn shift_to_class_reserve(&mut self, quantity: f64) {
         let mut quantity = quantity.abs();
-        let other_max = self.specific_reserve.max(self.want_reserve);
+        let other_max = self.product_reserve.max(self.want_reserve);
         if other_max > self.class_reserve { 
             // if we have some from other reserves, get from there first.
             let shift = (other_max-self.class_reserve).min(quantity);
@@ -218,7 +218,7 @@ impl PropertyInfo {
     /// Shifts based on the absolute value.
     pub fn shift_to_want_reserve(&mut self, quantity: f64) {
         let mut quantity = quantity.abs();
-        let other_max = self.specific_reserve.max(self.class_reserve);
+        let other_max = self.product_reserve.max(self.class_reserve);
         if other_max > self.want_reserve { 
             // if we have some from other reserves, get from there first.
             let shift = (other_max-self.want_reserve).min(quantity);
@@ -323,8 +323,8 @@ impl PropertyInfo {
             if self.class_reserve.is_sign_negative() { self.class_reserve = 0.0; }
             self.want_reserve -= remove;
             if self.want_reserve.is_sign_negative() { self.want_reserve = 0.0; }
-            self.specific_reserve -= remove;
-            if self.specific_reserve.is_sign_negative() { self.specific_reserve = 0.0; }
+            self.product_reserve -= remove;
+            if self.product_reserve.is_sign_negative() { self.product_reserve = 0.0; }
             self.total_property -= remove;
         }
     }
@@ -354,7 +354,7 @@ impl PropertyInfo {
     /// How much of our product can be shifted into 
     /// specific reserve pool.
     pub fn available_for_specific(&self) -> f64 {
-        self.total_property - self.specific_reserve
+        self.total_property - self.product_reserve
     }
 
     /// # Available for Class Pool
