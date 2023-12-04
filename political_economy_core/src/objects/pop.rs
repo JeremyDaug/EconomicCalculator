@@ -497,6 +497,7 @@ impl Pop {
         let mut next_desire = self.property.get_first_unsatisfied_desire();
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
+        // todo when the ablitiy to buy shopping time is available, add a first pass here.
         // start our buying loop.
         while let Some(curr_desire_coord) = next_desire { // Should have our current desire coords in next_desire
             // start by getting our desire
@@ -509,10 +510,11 @@ impl Pop {
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
             }
-            
+
             // get our current desire target
-            let mut current_desire_item = curr_desire.item;
-            let mut multiple_buys = vec![];
+            let sat_target = curr_desire.missing_satisfaction(curr_desire_coord.tier);
+            let current_desire_item = curr_desire.item;
+            let mut buy_targets: Vec<(Item, f64)> = vec![];
             // get the items we need to buy and how many.
             let expected_trips = match current_desire_item {
                 Item::Want(id) => { // for wants, we need to get the product inputs.
@@ -520,20 +522,30 @@ impl Pop {
                     // of that want in the market.
                     self.push_message(rx, tx, 
                         ActorMessage::FindWant { want: id, sender: self.actor_info() });
-                    // get the process the market suggests then 
+                    // wait for the market to respond with either it's suggested process, or failure.
                     let result = self.active_wait(rx, tx, data, market, 
                         &vec![
-                            ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, prcocess: 0 },
+                            ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, process: 0 },
                             ActorMessage::WantNotFound { want: 0, buyer: ActorInfo::Firm(0) }
                         ]);
-                    if let ActorMessage::FoundWant { buyer: _, want, prcocess: _ } = result {
-                        // get the process
-                        let process_info = data.processes.get(&want).unwrap();
+                    if let ActorMessage::FoundWant { process, .. } = result {
+                        // get the process suggested
+                        let process_info = data.processes.get(&process).unwrap();
                         let needs = process_info.inputs_and_capital();
                         // get what needs to be gotten
                         for part in needs.iter()
-                         {
-                            multiple_buys.push((&part.item, part.amount));
+                        {
+                            match part.item { // add the part item to our buy targets
+                                Item::Want(_) => 
+                                    panic!("Use/Consume should not have wants."),
+                                Item::Class(id) => {
+                                    // get class item which satisfies.
+                                    let result = self.find_class_product(rx, tx, id, data, market);
+                                    
+                                },
+                                Item::Product(id) => todo!(),
+                            }
+                            buy_targets.push((part.item.clone(), part.amount));
                         }
                         1.0 * needs.len() as f64
                     } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
@@ -542,24 +554,18 @@ impl Pop {
                     } else { panic!("Should not be here.") }
                 },
                 Item::Class(id) => { // for class, any item of the class will be good enough.
-                    self.push_message(rx, tx,
-                    ActorMessage::FindClass { class: id, 
-                        sender: self.actor_info() });
-                    let result = self.active_wait(rx, tx, data, market,
-                        &vec![
-                            ActorMessage::FoundClass { buyer: ActorInfo::Firm(0), 
-                                product: 0 },
-                            ActorMessage::ClassNotFound { product: 0, 
-                                buyer: ActorInfo::Firm(0) }
-                        ]);
-                    if let ActorMessage::FoundClass { buyer, product } = result {
-                        current_desire_item = Item::Product(product.clone());
+                    let result = self.find_class_product(rx, tx, id, data, market);
+                    if let Some(product) = result {
+                        buy_targets.push((Item::Product(product), sat_target));
                         1.0
-                    } else if let ActorMessage::ClassNotFound { product, buyer } = result {
+                    } else {
                         0.0
-                    } else { unreachable!("Should not reach here!"); }
+                    }
                 },
-                Item::Product(_) => 1.0, // for specific product. only one item will be needed.
+                Item::Product(_) => {
+                    buy_targets.push((current_desire_item.clone(), sat_target));
+                    1.0
+                }, // for specific product. only one item will be needed.
             };
             // preemptively get the next desire
             // next_desire = self.property.walk_up_tiers(next_desire);
@@ -568,6 +574,7 @@ impl Pop {
             self.property.sift_up_to(&curr_desire_coord, data);
             // get a trip of time worth 
             // TODO update to take more dynamic time payment into account.
+            // TODO when purchasing shopping time is available, add an option for that here.
             available_shopping_time += self.property.get_shopping_time(
                 SHOPPING_TIME_COST * expected_trips - available_shopping_time, 
                 data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
@@ -579,7 +586,7 @@ impl Pop {
                 self.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
                 break;
             }
-            if multiple_buys.len() > 0 {
+            if buy_targets.len() > 0 {
                 // loop over the buys and react to the results of them.
                 break;
             } else {
@@ -597,6 +604,33 @@ impl Pop {
                 // with result of buy gotten, go to the next loop.
             }
         }
+    }
+
+    /// # Find Class Product
+    /// 
+    /// Helper Function, summarizes the sending of a class find and responding to it.
+    /// returns the product which was returned. If no product was found it returns None instead.
+    /// 
+    /// Not meant for public use, public for testing
+    pub fn find_class_product(&mut self, rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, class: usize, data: &DataManager, 
+    market: &MarketHistory) -> Option<usize> {
+        self.push_message(rx, tx,
+            ActorMessage::FindClass { class, 
+                sender: self.actor_info() });
+            let result = self.active_wait(rx, tx, data, market,
+                &vec![
+                    ActorMessage::FoundClass { buyer: ActorInfo::Firm(0), 
+                        product: 0 },
+                    ActorMessage::ClassNotFound { class: 0, 
+                        buyer: ActorInfo::Firm(0) }
+                ]);
+            if let ActorMessage::FoundClass { buyer: _, product } = result {
+                Some(product)
+            } else if let ActorMessage::ClassNotFound { class: _, 
+            buyer: _ } = result {
+                None
+            } else { unreachable!("Should not reach here!"); }
     }
 
     /// # Skill Average

@@ -739,6 +739,93 @@ mod tests {
             (data, market)
         }
 
+        mod find_class_product_should{
+            use std::{thread, time::Duration};
+
+            use crate::{objects::{property_info::PropertyInfo, actor_message::ActorMessage, seller::Seller}, constants::TIME_ID};
+
+            use super::{make_test_pop, prepare_data_for_market_actions};
+
+            #[test]
+            pub fn correctly_respond_to_class_found() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, market) = prepare_data_for_market_actions(&mut test);
+                // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
+                test.is_selling = true;
+                // add a bunch of time for shopping.
+                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
+                // setup messaging
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                let handle = thread::spawn(move || {
+                    let result = test.find_class_product(&mut passed_rx, &passed_tx, 0, &data,
+                        &market);
+                    (test, result)
+                });
+                thread::sleep(Duration::from_millis(100));
+
+                if let ActorMessage::FindClass { class, sender } = rx.recv().unwrap() {
+                    assert_eq!(class, 0, "Mismatched class.");
+                    assert_eq!(sender, pop_info, "Mismatched Actor.");
+                } else {
+                    assert!(false, "Incorrect Message Recieved.");
+                }
+
+                tx.send(ActorMessage::FoundClass { buyer: pop_info, product: 10 }).expect("Unexpected Break.");
+                thread::sleep(Duration::from_millis(100));
+
+                let (_, result) = handle.join().unwrap();
+                if let Some(product) = result {
+                    assert_eq!(product, 10, "Product id Mismatch.");
+                } else {
+                    assert!(false, "No product returned.")
+                }
+            }
+
+            #[test]
+            pub fn correctly_respond_to_class_not_found() {
+                let mut test = make_test_pop();
+                let pop_info = test.actor_info();
+                let (data, market) = prepare_data_for_market_actions(&mut test);
+                // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
+                test.is_selling = true;
+                // add a bunch of time for shopping.
+                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
+                // setup messaging
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                let handle = thread::spawn(move || {
+                    let result = test.find_class_product(&mut passed_rx, &passed_tx, 0, &data,
+                        &market);
+                    (test, result)
+                });
+                thread::sleep(Duration::from_millis(100));
+
+                if let ActorMessage::FindClass { class, sender } = rx.recv().unwrap() {
+                    assert_eq!(class, 0, "Mismatched class.");
+                    assert_eq!(sender, pop_info, "Mismatched Actor.");
+                } else {
+                    assert!(false, "Incorrect Message Recieved.");
+                }
+
+                tx.send(ActorMessage::ClassNotFound { class: 0, buyer: pop_info})
+                    .expect("Unexpected Break.");
+                thread::sleep(Duration::from_millis(100));
+
+                let (_, result) = handle.join().unwrap();
+                if let Some(_) = result {
+                    assert!(false, "Product returned when it shouldn't have.");
+                } else {
+                    assert!(true);
+                }
+            }
+        }
+
         // FIXME
         mod free_time {
             use std::{thread, time::Duration};

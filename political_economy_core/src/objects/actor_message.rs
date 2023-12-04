@@ -71,7 +71,7 @@ pub enum ActorMessage {
     /// 
     /// Sent by the market if it recieved a FindClass msg, but found no products
     /// in the market which are for sale and satisfy that class.
-    ClassNotFound { product: usize, buyer: ActorInfo },
+    ClassNotFound { class: usize, buyer: ActorInfo },
     /// Returned from an attempt to purchase a want satisfier and failed to
     /// find any which would satisfy at all.
     WantNotFound { want: usize, buyer: ActorInfo },
@@ -93,7 +93,7 @@ pub enum ActorMessage {
     /// option. It returns the process the market views as most likely to succeed.
     /// 
     /// This allows a buyer to purchase multiple possible goods.
-    FoundWant {buyer: ActorInfo, want: usize, prcocess: usize },
+    FoundWant {buyer: ActorInfo, want: usize, process: usize },
 
     /// Return from seller after ActorMessage::CheckItem if they have the item
     /// in stock. returns their price and available stock.
