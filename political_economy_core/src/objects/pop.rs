@@ -541,9 +541,13 @@ impl Pop {
                                 Item::Class(id) => {
                                     // get class item which satisfies.
                                     let result = self.find_class_product(rx, tx, id, data, market);
-                                    
+                                    if let Some(product) = result {
+                                        buy_targets.push((Item::Product(product), 
+                                        part.amount * sat_target));
+                                    } // else don't add anything we can't use.
                                 },
-                                Item::Product(id) => todo!(),
+                                Item::Product(id) => 
+                                    buy_targets.push((Item::Product(id), sat_target * part.amount)),
                             }
                             buy_targets.push((part.item.clone(), part.amount));
                         }
