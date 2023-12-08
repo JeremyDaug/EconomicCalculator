@@ -498,14 +498,14 @@ impl Pop {
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // todo when the ablitiy to buy shopping time is available, add a first pass here.
-        // start our buying loop.
-        while let Some(curr_desire_coord) = next_desire { // Should have our current desire coords in next_desire
+        // start our buying loop
+        // Should have our current desire coords in next_desire
+        while let Some(curr_desire_coord) = next_desire { 
             // start by getting our desire
             let curr_desire = self.property.desires
                 .get(curr_desire_coord.idx).unwrap().clone();
             // if the current desire is already satisfied for wahtever reason move on
             if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
-                // this loop should never 
                 // get the next, and continue.
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
@@ -532,6 +532,7 @@ impl Pop {
                         // get the process suggested
                         let process_info = data.processes.get(&process).unwrap();
                         let needs = process_info.inputs_and_capital();
+                        let mut things_to_get = 0.0;
                         // get what needs to be gotten
                         for part in needs.iter()
                         {
@@ -543,16 +544,19 @@ impl Pop {
                                     let result = self.find_class_product(rx, tx, id, data, market);
                                     if let Some(product) = result {
                                         buy_targets.push((Item::Product(product), 
-                                        part.amount * sat_target));
+                                            part.amount * sat_target));
+                                            things_to_get += 1.0;
                                     } // else don't add anything we can't use.
                                 },
-                                Item::Product(id) => 
-                                    buy_targets.push((Item::Product(id), sat_target * part.amount)),
+                                Item::Product(id) => {
+                                    buy_targets.push((Item::Product(id), sat_target * part.amount));
+                                    things_to_get += 1.0;
+                                },
                             }
                             buy_targets.push((part.item.clone(), part.amount));
                         }
-                        1.0 * needs.len() as f64
-                    } else if let ActorMessage::WantNotFound { want: _, buyer: _ } = result {
+                        things_to_get
+                    } else if let ActorMessage::WantNotFound { .. } = result {
                         // if the want is not found in the market, then move on to the next desire
                         0.0
                     } else { panic!("Should not be here.") }
@@ -571,42 +575,30 @@ impl Pop {
                     1.0
                 }, // for specific product. only one item will be needed.
             };
-            // preemptively get the next desire
-            // next_desire = self.property.walk_up_tiers(next_desire);
             // then sift up to this desire point to free up excess resources.
             // TODO when sifting is improved, drop this.
             self.property.sift_up_to(&curr_desire_coord, data);
-            // get a trip of time worth 
-            // TODO update to take more dynamic time payment into account.
-            // TODO when purchasing shopping time is available, add an option for that here.
-            available_shopping_time += self.property.get_shopping_time(
-                SHOPPING_TIME_COST * expected_trips - available_shopping_time, 
-                data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
-            // check that it's enough time to go out buying
-            if SHOPPING_TIME_COST > available_shopping_time {
-                // if we don't have enough time to go shopping, break out, we won't
-                // resolve that problem here.
-                // return the time to our property and gtfo.
-                self.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
-                break;
-            }
-            if buy_targets.len() > 0 {
-                // loop over the buys and react to the results of them.
-                break;
-            } else {
-                // Do the buy
-                let result = self.try_to_buy(rx, tx, data, market, &current_desire_item);
-                // react to the result and subtract from our shopping time.
-                // TODO ^^
-                match result {
-                    BuyResult::CancelBuy => todo!(),
-                    BuyResult::NotSuccessful { reason } => todo!(),
-                    BuyResult::SellerClosed => todo!(),
-                    BuyResult::Successful => todo!(),
-                    BuyResult::NoTime => todo!(),
+
+            // Do one buy at a time, ignoring if we have enough time for all trips or not
+            // TODO improve this to actually peak ahead to see if it can go shopping enough to get what it needs and satisfy that desire.
+            // TODO Do some additional work te ensure we don't go buying stuff we already have available.
+            for buy_target in buy_targets {
+                // get a trip of time worth 
+                // TODO update to take more dynamic time payment into account.
+                // TODO when purchasing shopping time is available, add an option for that here.
+                available_shopping_time += self.property.get_shopping_time(
+                    self.standard_shop_time_cost() - available_shopping_time, 
+                    data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
+                // check that it's enough time to go out buying
+                if self.standard_shop_time_cost() > available_shopping_time {
+                    // if we don't have enough time to go shopping for this desire,
+                    self.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
+                    break;
                 }
-                // with result of buy gotten, go to the next loop.
             }
+            // the next desire
+            next_desire = self.property.walk_up_tiers(next_desire);
+            
         }
     }
 
