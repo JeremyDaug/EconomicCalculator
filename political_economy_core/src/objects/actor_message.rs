@@ -251,6 +251,8 @@ pub enum OfferResult {
     /// The Seller cannot accept the offer because he is out of stock
     /// Reduce weight in selection -10
     OutOfStock,
+    /// The item was not found in the market.
+    NotInMarket,
 }
 
 impl ActorMessage {
