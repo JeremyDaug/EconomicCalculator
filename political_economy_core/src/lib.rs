@@ -4100,9 +4100,9 @@ mod tests {
         mod shopping_loop_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::TIME_ID};
 
-            use super::{make_test_pop};
+            use super::make_test_pop;
 
             /// Intentionally super simple pop generation
             /// 
@@ -4281,7 +4281,32 @@ mod tests {
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
                 
-                // add the initial property of the pop we'll be using
+                // add the initial property of the pop we'll be using\
+                // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
+                test.property.add_property(2, 20.0, &data);
+                test.property.add_property(3, 20.0, &data);
+                test.property.add_property(6, 20.0, &data);
+                test.property.add_property(14, 20.0, &data);
+                // add in 1.1 shopping trip worth of time
+                test.property.add_property(TIME_ID, 
+                    1.1 * test.standard_shop_time_cost(), &data);
+                
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup firm we're talking with
+                // let selling_firm = ActorInfo::Firm(1);
+
+                // setup property split
+                let handle = thread::spawn(move || {
+                    let result = test.try_to_buy(&mut passed_rx, &passed_tx, &data, 
+                        &history, 15, 0.0);
+                    (test, result)
+                });
+                thread::sleep(Duration::from_millis(100));
+                // since it's too expnesive, it should 
+                assert!(handle.is_finished(), "Did not finish yet.");
             }
         }
     }
