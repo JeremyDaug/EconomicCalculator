@@ -4307,14 +4307,14 @@ mod tests {
 
                 // setup property split
                 let handle = thread::spawn(move || {
-                    let result = test.try_to_buy(&mut passed_rx, &passed_tx, &data, 
-                        &history, 15, 0.0);
+                    let result = test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                        &history);
                     (test, result)
                 });
                 thread::sleep(Duration::from_millis(100));
 
                 let mut msgs = vec![];
-                while let Ok(Some(msg)) = rx.try_recv() {
+                while let Ok(msg) = rx.recv() {
                     msgs.push(msg);
                     println!("{}", msg);
                 }
