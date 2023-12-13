@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /// Actor Message is a message which can be passed between
 /// two actor threads.
 ///
@@ -215,6 +217,12 @@ pub enum ActorMessage {
         action: FirmEmployeeAction },
 
 
+}
+
+impl Display for ActorMessage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 /// Used to denote how an offer went and what the buyer felt like for it.

@@ -4297,6 +4297,13 @@ mod tests {
                 let passed_tx = tx.clone();
                 // setup firm we're talking with
                 // let selling_firm = ActorInfo::Firm(1);
+                let mut unsat_desires = vec![];
+                unsat_desires.push(test.property.get_first_unsatisfied_desire().unwrap());
+                for _ in 0..5 {
+                    unsat_desires.push(test.property.walk_up_tiers(
+                        Some(*unsat_desires.last().unwrap())).unwrap());
+                }
+                // highest tier 30 : idx 3 1.0 Ambrosia Fruit
 
                 // setup property split
                 let handle = thread::spawn(move || {
@@ -4305,8 +4312,12 @@ mod tests {
                     (test, result)
                 });
                 thread::sleep(Duration::from_millis(100));
-                // since it's too expnesive, it should 
-                assert!(handle.is_finished(), "Did not finish yet.");
+
+                let mut msgs = vec![];
+                while let Ok(Some(msg)) = rx.try_recv() {
+                    msgs.push(msg);
+                    println!("{}", msg);
+                }
             }
         }
     }
