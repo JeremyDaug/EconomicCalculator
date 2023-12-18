@@ -458,11 +458,25 @@ impl Desire {
     /// # Satisfied at Tier
     /// 
     /// Checks if we are satisfied at a specific tier or not.
+    /// 
+    /// No satisfaction, it's always false.
+    /// 
+    /// If tier is below the highest tier with satisfaction, it's true.
+    /// 
+    /// if above the highest tier with satisfaction, it's false.
+    /// 
+    /// if it matches, then it checks if that specific tier is fully satisfied.
     pub fn satisfied_at_tier(&self, tier: usize) -> bool {
-        if self.satisfaction_at_tier(tier) < self.amount {
+        if let Some(upto) = self.satisfaction_up_to_tier() {
+            match tier.cmp(&upto) {
+                std::cmp::Ordering::Less => true,
+                std::cmp::Ordering::Equal => {
+                    self.amount == self.satisfaction_at_tier(tier)
+                },
+                std::cmp::Ordering::Greater => false,
+            }
+        } else { // if no satisfaction, cannot be satisfied anywhere.
             false
-        } else {
-            true
         }
     }
 

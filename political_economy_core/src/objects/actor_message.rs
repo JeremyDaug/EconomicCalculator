@@ -19,7 +19,7 @@ use std::fmt::Display;
 /// May be worth it to break some of these messages out, specifically move most inter-actor
 /// messages or offer messages to another enum and consolidate them into a more common
 /// message type for here. May do that later, not sure.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ActorMessage {
     /// The start message so that all actors in a market know
     /// that all other actors are up and running and they can

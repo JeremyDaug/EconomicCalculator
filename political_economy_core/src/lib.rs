@@ -1395,6 +1395,138 @@ mod tests {
 
             use super::make_test_pop;
 
+            mod specific_wait_should {
+                use std::{thread, time::Duration, collections::{HashMap, HashSet}};
+
+                use crate::objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller};
+    
+                use super::make_test_pop;
+
+                #[test]
+                pub fn wait_only_on_product_messages_requested() {
+                    // do basic setup.
+                    let mut test = make_test_pop();
+                    let pop_info = test.actor_info();
+                    let firm = ActorInfo::Firm(0);
+                    // setup message queue.
+                    let (tx, rx) = barrage::bounded(10);
+                    // push a bunch of stuff to get it blocked.
+                    let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
+                        seller: ActorInfo::Firm(0), proudct: 0 };
+                    let desired_msg1 = ActorMessage::BuyOffer { buyer: firm, 
+                        seller: pop_info, product: 0, price_opinion: OfferResult::Cheap, 
+                        quantity: 10.0, followup: 0 };
+                    let desired_msg2 = ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
+                        proudct: 4 };
+                    let buffer_msg = ActorMessage::BuyOfferFollowup { buyer: firm, 
+                        seller: pop_info, product: 0, offer_product: 2, 
+                        offer_quantity: 5.0, followup: 0 };
+    
+                    // get the thread going
+                    let handler = thread::spawn(move || {
+                        let result = test.specific_wait(&rx, &vec![
+                            ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
+                                seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
+                                quantity: 0.0, followup: 0 },
+                            ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
+                                proudct: 4 }]);
+                        (test, result)
+                    });
+    
+                    // add msgs.
+                    tx.send(undesired_msg).expect("Failed to send."); // ignored
+                    tx.send(buffer_msg).expect("Failed to send."); // put in backlog
+                    tx.send(desired_msg1).expect("Failed to send."); // picked up
+                    tx.send(desired_msg2).expect("Failed to send.");// not recieved.
+    
+                    thread::sleep(Duration::from_millis(100));
+                    // get the actor and info back
+                    let (mut test, result) = handler.join().unwrap();
+                    // ensure that the result was recieved
+                    if let ActorMessage::BuyOffer { buyer, seller, 
+                    product, price_opinion, 
+                    quantity, followup } = result {
+                        assert_eq!(buyer, firm);
+                        assert_eq!(seller, pop_info);
+                        assert_eq!(product, 0);
+                        assert_eq!(price_opinion, OfferResult::Cheap);
+                        assert_eq!(quantity, 10.0);
+                        assert_eq!(followup, 0);
+                    } else { assert!(false); }
+                    assert_eq!(test.backlog.len(), 1);
+                    let backlogged = test.backlog.pop_front().unwrap();
+                    if let ActorMessage::BuyOfferFollowup { buyer, seller, 
+                    product, offer_product, 
+                    offer_quantity, followup } = backlogged {
+                        assert_eq!(buyer, firm);
+                        assert_eq!(seller, pop_info);
+                        assert_eq!(product, 0);
+                        assert_eq!(offer_product, 2);
+                        assert_eq!(offer_quantity, 5.0);
+                        assert_eq!(followup, 0);
+                    } else { assert!(false); }
+                }
+
+                #[test]
+                pub fn pull_specified_msgs_from_backlog_when_available() {
+                    // do basic setup.
+                    let mut test = make_test_pop();
+                    let pop_info = test.actor_info();
+                    let firm = ActorInfo::Firm(0);
+                    // setup message queue.
+                    let (tx, rx) = barrage::bounded(10);
+                    // push a bunch of stuff to get it blocked.
+                    let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
+                        seller: ActorInfo::Firm(0), proudct: 0 };
+                    let desired_msg1 = ActorMessage::BuyOffer { buyer: firm, 
+                        seller: pop_info, product: 0, price_opinion: OfferResult::Cheap, 
+                        quantity: 10.0, followup: 0 };
+                    let desired_msg2 = ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
+                        proudct: 4 };
+                    let buffer_msg = ActorMessage::BuyOfferFollowup { buyer: firm, 
+                        seller: pop_info, product: 0, offer_product: 2, 
+                        offer_quantity: 5.0, followup: 0 };
+
+                    // pre-add our msgs
+                    test.backlog.push_back(undesired_msg);
+                    test.backlog.push_back(desired_msg1);
+                    test.backlog.push_back(desired_msg2);
+                    test.backlog.push_back(buffer_msg);
+    
+                    // get the thread going
+                    let handler = thread::spawn(move || {
+                        let result = test.specific_wait(&rx, &vec![
+                            ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
+                                seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
+                                quantity: 0.0, followup: 0 }]);
+                        (test, result)
+                    });
+
+                    // don't send anything.
+
+                    // get the actor and info back
+                    let (mut test, result) = handler.join().unwrap();
+                    // ensure that the result was recieved
+                    if let ActorMessage::BuyOffer { buyer, seller, 
+                    product, price_opinion, 
+                    quantity, followup } = result {
+                        assert_eq!(buyer, firm);
+                        assert_eq!(seller, pop_info);
+                        assert_eq!(product, 0);
+                        assert_eq!(price_opinion, OfferResult::Cheap);
+                        assert_eq!(quantity, 10.0);
+                        assert_eq!(followup, 0);
+                    } else { assert!(false); }
+                    assert_eq!(test.backlog.len(), 3);
+                    let backlogged1 = test.backlog.pop_front().unwrap();
+                    assert_eq!(backlogged1, undesired_msg);
+                    let backlogged2 = test.backlog.pop_front().unwrap();
+                    assert_eq!(backlogged2, desired_msg2);
+                    let backlogged3 = test.backlog.pop_front().unwrap();
+                    assert_eq!(backlogged3, buffer_msg);
+                }
+            }
+
             #[test]
             pub fn should_consume_msgs_with_msg_catchup_internal_consumes_first() {
                 let mut test = make_test_pop();
@@ -1571,71 +1703,6 @@ mod tests {
             #[test]
             pub fn should_active_wait_successfully() {
                 // Test skipped due to use of process_common_message
-            }
-
-            #[test]
-            pub fn should_wait_only_on_Product_messages_requested() {
-                // do basic setup.
-                let mut test = make_test_pop();
-                let pop_info = test.actor_info();
-                let firm = ActorInfo::Firm(0);
-                // setup message queue.
-                let (tx, rx) = barrage::bounded(10);
-                // push a bunch of stuff to get it blocked.
-                let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
-                    seller: ActorInfo::Firm(0), proudct: 0 };
-                let desired_msg1 = ActorMessage::BuyOffer { buyer: firm, 
-                    seller: pop_info, product: 0, price_opinion: OfferResult::Cheap, 
-                    quantity: 10.0, followup: 0 };
-                let desired_msg2 = ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
-                    proudct: 4 };
-                let buffer_msg = ActorMessage::BuyOfferFollowup { buyer: firm, 
-                    seller: pop_info, product: 0, offer_product: 2, 
-                    offer_quantity: 5.0, followup: 0 };
-
-                // get the thread going
-                let handler = thread::spawn(move || {
-                    let result = test.specific_wait(&rx, &vec![
-                        ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
-                            seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
-                            quantity: 0.0, followup: 0 },
-                        ActorMessage::CheckItem { buyer: firm, seller: pop_info, 
-                            proudct: 4 }]);
-                    (test, result)
-                });
-
-                // add msgs.
-                tx.send(undesired_msg).expect("Failed to send."); // ignored
-                tx.send(buffer_msg).expect("Failed to send."); // put in backlog
-                tx.send(desired_msg1).expect("Failed to send."); // picked up
-                tx.send(desired_msg2).expect("Failed to send.");// not recieved.
-
-                thread::sleep(Duration::from_millis(100));
-                // get the actor and info back
-                let (mut test, result) = handler.join().unwrap();
-                // ensure that the result was recieved
-                if let ActorMessage::BuyOffer { buyer, seller, 
-                product, price_opinion, 
-                quantity, followup } = result {
-                    assert_eq!(buyer, firm);
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 0);
-                    assert_eq!(price_opinion, OfferResult::Cheap);
-                    assert_eq!(quantity, 10.0);
-                    assert_eq!(followup, 0);
-                } else { assert!(false); }
-                assert_eq!(test.backlog.len(), 1);
-                let backlogged = test.backlog.pop_front().unwrap();
-                if let ActorMessage::BuyOfferFollowup { buyer, seller, 
-                product, offer_product, 
-                offer_quantity, followup } = backlogged {
-                    assert_eq!(buyer, firm);
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 0);
-                    assert_eq!(offer_product, 2);
-                    assert_eq!(offer_quantity, 5.0);
-                    assert_eq!(followup, 0);
-                } else { assert!(false); }
             }
         
             #[test]
@@ -4135,7 +4202,7 @@ mod tests {
                         None, None, None, 
                         1));
 
-                // Food
+                // Food 0
                 result.property.desires.push(
                     Desire{
                         item: Item::Want(2),
@@ -4148,7 +4215,7 @@ mod tests {
                     }
                 );
 
-                // Shelter
+                // Shelter 1
                 result.property.desires.push(
                     Desire{
                         item: Item::Want(3),
@@ -4161,7 +4228,7 @@ mod tests {
                     }
                 );
 
-                // Clothing
+                // Clothing 2
                 result.property.desires.push(
                     Desire{
                         item: Item::Want(4),
@@ -4174,7 +4241,7 @@ mod tests {
                     }
                 );
 
-                // ambrosia fruit
+                // ambrosia fruit 3
                 result.property.desires.push(
                     Desire{
                         item: Item::Product(2),
@@ -4187,7 +4254,7 @@ mod tests {
                     }
                 );
 
-                // clothes
+                // clothes 4
                 result.property.desires.push(
                     Desire{
                         item: Item::Class(6),
@@ -4200,7 +4267,7 @@ mod tests {
                     }
                 );
 
-                // Hut/Cabin
+                // Hut/Cabin 5
                 result.property.desires.push(
                     Desire{
                         item: Item::Class(14),
@@ -4280,17 +4347,18 @@ mod tests {
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let seller = ActorInfo::Firm(1);
                 
                 // add the initial property of the pop we'll be using\
                 // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
-                test.property.add_property(2, 20.0, &data);
+                test.property.add_property(2, 4.0, &data);
                 test.property.add_property(3, 20.0, &data);
-                test.property.add_property(6, 20.0, &data);
-                test.property.add_property(14, 20.0, &data);
+                test.property.add_property(6, 3.0, &data);
+                test.property.add_property(14, 3.0, &data);
                 // add in 1.1 shopping trip worth of time
                 test.property.add_property(TIME_ID, 
                     1.1 * test.standard_shop_time_cost(), &data);
-                
+
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -4303,7 +4371,6 @@ mod tests {
                     unsat_desires.push(test.property.walk_up_tiers(
                         Some(*unsat_desires.last().unwrap())).unwrap());
                 }
-                // highest tier 30 : idx 3 1.0 Ambrosia Fruit
 
                 // setup property split
                 let handle = thread::spawn(move || {
@@ -4312,6 +4379,70 @@ mod tests {
                     (test, result)
                 });
                 thread::sleep(Duration::from_millis(100));
+
+                // first want recieved. tier 1, idx 0, food want.
+                if let ActorMessage::FindWant { want, sender } = rx
+                .recv().expect("Unexpected Disconnect.") {
+                    println!("Find Want Recieved.");
+                    assert_eq!(want, 2, "Want incorrect.");
+                    assert_eq!(sender, pop_info, "Incorrect sender?");
+                } else {
+                    assert!(false, "FindWant not recieved.")
+                }
+
+                // send want found message with ambrosia fruit consumption (13)
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Sudden Disconnect!");
+                // clear out the message just sent.
+                rx.recv().expect("Broke.");
+
+                thread::sleep(Duration::from_millis(100));
+
+                if let ActorMessage::FindProduct { product, sender } = 
+                rx.recv().expect("Broke.") {
+                    println!("Find Product Recieved.");
+                    assert_eq!(product, 2, "Incorrect Product.");
+                    assert_eq!(sender, pop_info, "Incorrect sender");
+                } else {
+                    assert!(false, "FindProduct not recieved.");
+                }
+
+                // send product found response
+                tx.send(ActorMessage::FoundProduct { seller, 
+                    buyer: pop_info, product: 2 }).expect("Broke.");
+                rx.recv().expect("Broke");
+
+                // send in stock message, since seller has customer.
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, 
+                    product: 2, price: 1.0, quantity: 1000.0 }).expect("Broke.");
+                rx.recv().expect("Broke");
+
+                if let ActorMessage::BuyOffer { buyer, seller, product, 
+                price_opinion, quantity, followup } = rx.recv().expect("Broke") {
+                    println!("Buy Offer Recieved.");
+                    assert_eq!(buyer, pop_info, "wrong buyer.");
+                    assert_eq!(seller, seller, "wrong seller.");
+                    assert_eq!(product, 2, "wrong product.");
+                    assert_eq!(price_opinion, OfferResult::Cheap, "wrong oppinion.");
+                    assert_eq!(quantity, 1.0, "wrong quantity.");
+                    assert_eq!(followup, 1, "wrong followups.");
+                } else {
+                    assert!(false, "buy offer not recieved.")
+                }
+
+                if let ActorMessage::BuyOfferFollowup { buyer, seller,
+                product, offer_product, offer_quantity, followup }
+                = rx.recv().expect("Broke.") {
+                    println!("Buy Offer Followup Recieved.");
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, seller);
+                    assert_eq!(product, 2);
+                    assert_eq!(offer_product, 3);
+                    assert_eq!(offer_quantity, 1.0);
+                    assert_eq!(followup, 0);
+                } else {
+                    assert!(false, "Wrong Message.");
+                }
 
                 let mut msgs = vec![];
                 while let Ok(msg) = rx.recv() {
@@ -8909,30 +9040,35 @@ mod tests {
             assert_eq!(test.total_satisfaction_at_tier(4), 0.0);
         }
 
-        #[test]
-        pub fn satisfied_at_tier_correctly() {
-            let mut test_desires = vec![];
-            test_desires.push(Desire{ // 0,2
-                item: Item::Product(0), 
-                start: 0, 
-                end: Some(2), 
-                amount: 1.0, 
-                satisfaction: 1.0,
-                step: 2,
-                tags: vec![]});
-            test_desires.push(Desire{ // 0,2,4,6,8,10
-                item: Item::Product(1), 
-                start: 0, 
-                end: Some(10), 
-                amount: 1.0, 
-                satisfaction: 2.0,
-                step: 2,
-                tags: vec![]});
-            let test = Property::new(test_desires);
+        pub mod satisfied_at_tier_should {
+            use crate::objects::{desire::Desire, property::Property, item::Item};
 
-            assert!(test.satisfied_at_tier(0));
-            assert!(!test.satisfied_at_tier(2));
-            assert!(!test.satisfied_at_tier(4));
+            #[test]
+            pub fn calculate_correctly() {
+                let mut test_desires = vec![];
+                test_desires.push(Desire{ // 0,2
+                    item: Item::Product(0), 
+                    start: 0, 
+                    end: Some(2), 
+                    amount: 1.0, 
+                    satisfaction: 1.0,
+                    step: 2,
+                    tags: vec![]});
+                test_desires.push(Desire{ // 0,2,4,6,8,10
+                    item: Item::Product(1), 
+                    start: 0, 
+                    end: Some(10), 
+                    amount: 1.0, 
+                    satisfaction: 2.0,
+                    step: 2,
+                    tags: vec![]});
+                let test = Property::new(test_desires);
+
+                assert!(test.satisfied_at_tier(0));
+                assert!(!test.satisfied_at_tier(2));
+                assert!(!test.satisfied_at_tier(4));
+            }
+
         }
 
         mod sift_up_to_should {
@@ -13436,7 +13572,6 @@ mod tests {
 
         mod steps_to_tier_should {
             use crate::objects::{desire::Desire, item::Item};
-
             
             #[test]
             pub fn calculate_steps_to_tier_correctly_for_infinite_desire() {
@@ -13599,6 +13734,37 @@ mod tests {
             test.end = None;
             test.step = 0;
             assert_eq!(test.total_desire_at_tier(0).expect("Error"), 2.0);
+        }
+    
+        pub mod satisfied_at_tier_should {
+            use crate::objects::{desire::Desire, item::Item};
+
+            #[test]
+            pub fn correctly_calculate_if_satisfied_at_particular_tiers() {
+                let mut test = Desire{
+                    item: Item::Want(2),
+                    start: 0,
+                    end: Some(10),
+                    amount: 1.0,
+                    satisfaction: 3.0,
+                    step: 2,
+                    tags: vec![],
+                };
+
+                let sat_tier = test.satisfaction_up_to_tier();
+
+                assert!(test.satisfied_at_tier(2));
+                assert!(test.satisfied_at_tier(3));
+                assert!(test.satisfied_at_tier(4));
+                assert!(!test.satisfied_at_tier(5));
+                assert!(!test.satisfied_at_tier(6));
+
+                test.satisfaction = 0.0;
+                assert!(!test.satisfied_at_tier(0));
+
+                test.satisfaction = 3.5;
+                assert!(!test.satisfied_at_tier(6));
+            }
         }
     }
 

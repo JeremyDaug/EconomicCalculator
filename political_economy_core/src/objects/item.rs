@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /// # Item Enum
 /// 
 /// A Common storage enum for products, classes, and wants so that we can 
@@ -10,6 +12,12 @@ pub enum Item {
     Class(usize),
     /// A desire for a specific good (Wonderbread).
     Product(usize),
+}
+
+impl Display for Item {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 /// Defines what 

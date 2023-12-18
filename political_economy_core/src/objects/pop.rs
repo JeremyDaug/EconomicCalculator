@@ -245,20 +245,31 @@ impl Pop {
         }
     }
 
-    /// Specific wait function.
+    /// # Specific wait function.
     ///
+    /// First checks the backlog for the message requested, if it finds it, 
+    /// it extracts it and returns that. If it doesn't, then it 
     /// Waits on a specific message or messages to be recieved directed for us.
     /// If it's any other message for us, it's put onto the backlog.
     ///
     /// Meant to be used primarily when we are locked into a state where we
     /// shouldn't respond to anything else but what we're focusing on.
-    ///
+    /// 
     /// May be improved by making find work with incomplete ActorMessages or some
     /// other mechanism that removes the need to created dummies to make it work.
     pub fn specific_wait(&mut self,
     rx: &Receiver<ActorMessage>,
     find: &Vec<ActorMessage>) -> ActorMessage {
         // TODO Look into improving Find Parameter so it doesn't need a fully filled out ActorMessage to function.
+        // first, look through the backlog to ensure we haven't already gotten what we're looking for.
+        for idx in 0..self.backlog.len() {
+            if find.iter()
+            .any(|x| {
+                std::mem::discriminant(x) == std::mem::discriminant(&self.backlog[idx])
+            }) {
+                return self.backlog.remove(idx).expect("Somehow walked off end of backlog.");
+            }
+        }
         loop {
             let msg = self.get_next_message(rx);
             if find.iter()
@@ -509,7 +520,8 @@ impl Pop {
             let curr_desire = self.property.desires
                 .get(curr_desire_coord.idx).unwrap().clone();
             // if the current desire is already satisfied for wahtever reason move on
-            if !curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
+            let is_sat = curr_desire.satisfied_at_tier(curr_desire_coord.tier);
+            if curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
                 // get the next, and continue.
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
