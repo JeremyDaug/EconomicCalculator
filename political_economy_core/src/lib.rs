@@ -4444,6 +4444,14 @@ mod tests {
                     assert!(false, "Wrong Message.");
                 }
 
+                // send back accept message.
+                tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
+                    seller, product: 2, offer_result: OfferResult::Reasonable })
+                    .expect("borkd");
+                rx.recv().expect("borkd");
+
+                // respond to finish deal
+
                 let mut msgs = vec![];
                 while let Ok(msg) = rx.recv() {
                     msgs.push(msg);
