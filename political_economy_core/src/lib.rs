@@ -4167,7 +4167,7 @@ mod tests {
         mod shopping_loop_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::TIME_ID};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
             use super::make_test_pop;
 
@@ -4374,9 +4374,9 @@ mod tests {
 
                 // setup property split
                 let handle = thread::spawn(move || {
-                    let result = test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
                         &history);
-                    (test, result)
+                    test
                 });
                 thread::sleep(Duration::from_millis(100));
 
@@ -4450,7 +4450,20 @@ mod tests {
                     .expect("borkd");
                 rx.recv().expect("borkd");
 
-                // respond to finish deal
+                // Deal completed, should also finish shopping, check for shop as predicted.
+                // it should've bought 1.0 units of 2 for 1.0 units of 3 and 0.2 units of time/shopping time.
+                let test = handle.join().unwrap();
+                let food_info = test.property.property[&2];
+                let cotton_info = test.property.property[&3];
+                let hut_info = test.property.property[&14];
+                let time_info = test.property.property[&TIME_ID];
+                let shopping_info = test.property.property[&SHOPPING_TIME_ID];
+                // check that we recorded our expenditure in time and AMV
+                assert_eq!(food_info.total_property, 5.0);
+                assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
+                assert_eq!(food_info.amv_cost, 3.0);
+                assert_eq!(food_info.recieved, 1.0);
+
 
                 let mut msgs = vec![];
                 while let Ok(msg) = rx.recv() {
