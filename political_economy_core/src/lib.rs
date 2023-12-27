@@ -4174,12 +4174,12 @@ mod tests {
             /// Intentionally super simple pop generation
             /// 
             /// sets desires to 
-            /// 10 food want (0-9)
-            /// 5 clothes want (5-9)
-            /// 5 shelter want (5-9)
-            /// inf ambrosia fruit 10+
-            /// inf clothes class 10+
-            /// inf shelter class 15+
+            /// - 10 food want (0-9)
+            /// - 5 clothes want (5-9)
+            /// - 5 shelter want (5-9)
+            /// - inf ambrosia fruit 10+
+            /// - inf clothes class 10+
+            /// - inf shelter class 15+
             pub fn default_pop() -> Pop {
                 let mut result = Pop {
                     id: 0,
@@ -4343,7 +4343,7 @@ mod tests {
             }
 
             #[test]
-            pub fn correctly_stop_when_unable_to_satisfy_desires() {
+            pub fn stop_when_out_of_time() {
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
@@ -4457,19 +4457,277 @@ mod tests {
                 let cotton_info = test.property.property[&3];
                 let hut_info = test.property.property[&14];
                 let time_info = test.property.property[&TIME_ID];
-                let shopping_info = test.property.property[&SHOPPING_TIME_ID];
+                assert!(test.property.property.get(&SHOPPING_TIME_ID).is_none(), "Shopping Time Found.");
                 // check that we recorded our expenditure in time and AMV
                 assert_eq!(food_info.total_property, 5.0);
                 assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
-                assert_eq!(food_info.amv_cost, 3.0);
+                assert_eq!(food_info.amv_cost, 5.0);
                 assert_eq!(food_info.recieved, 1.0);
+                // cotton was expended for food
+                assert_eq!(cotton_info.total_property, 19.0);
+                assert_eq!(cotton_info.spent, 1.0);
+                // huts were untouched
+                assert_eq!(hut_info.total_property, 3.0);
+                // time was spent for shopping
+                assert_eq!(time_info.total_property, (1.1 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
 
+            }
 
-                let mut msgs = vec![];
-                while let Ok(msg) = rx.recv() {
-                    msgs.push(msg);
-                    println!("{}", msg);
+            #[test]
+            pub fn stop_when_no_desires_remain() {
+                let mut test = default_pop();
+                let pop_info = test.actor_info();
+                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let seller = ActorInfo::Firm(1);
+                // alter desires to run out of desires.
+                // food 
+                test.property.clear_desires();
+                test.property.add_desire(&Desire::new(Item::Want(2), 0, 
+                    Some(10), 1.0, 0.0, 1, vec![]).unwrap());
+                
+                // add the initial property of the pop we'll be using\
+                // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
+                test.property.add_property(2, 10.0, &data);
+                test.property.add_property(3, 100.0, &data);
+                test.property.add_property(6, 10.0, &data);
+                test.property.add_property(14, 10.0, &data);
+                // add in way to much shopping time.
+                test.property.add_property(TIME_ID, 
+                    100.0 * test.standard_shop_time_cost(), &data);
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                // get loop running
+                let handle = thread::spawn(move || {
+                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                        &history);
+                    test
+                });
+                thread::sleep(Duration::from_millis(100));
+
+                // first want recieved. tier 1, idx 0, food want.
+                if let ActorMessage::FindWant { want, sender } = rx
+                .recv().expect("Unexpected Disconnect.") {
+                    println!("Find Want Recieved.");
+                    assert_eq!(want, 2, "Want incorrect.");
+                    assert_eq!(sender, pop_info, "Incorrect sender?");
+                } else {
+                    assert!(false, "FindWant not recieved.")
                 }
+
+                // send want found message with ambrosia fruit consumption (13)
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Sudden Disconnect!");
+                // clear out the message just sent.
+                rx.recv().expect("Broke.");
+
+                thread::sleep(Duration::from_millis(100));
+
+                if let ActorMessage::FindProduct { product, sender } = 
+                rx.recv().expect("Broke.") {
+                    println!("Find Product Recieved.");
+                    assert_eq!(product, 2, "Incorrect Product.");
+                    assert_eq!(sender, pop_info, "Incorrect sender");
+                } else {
+                    assert!(false, "FindProduct not recieved.");
+                }
+
+                // send product found response
+                tx.send(ActorMessage::FoundProduct { seller, 
+                    buyer: pop_info, product: 2 }).expect("Broke.");
+                rx.recv().expect("Broke");
+
+                // send in stock message, since seller has customer.
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, 
+                    product: 2, price: 1.0, quantity: 1000.0 }).expect("Broke.");
+                rx.recv().expect("Broke");
+
+                if let ActorMessage::BuyOffer { buyer, seller, product, 
+                price_opinion, quantity, followup } = rx.recv().expect("Broke") {
+                    println!("Buy Offer Recieved.");
+                    assert_eq!(buyer, pop_info, "wrong buyer.");
+                    assert_eq!(seller, seller, "wrong seller.");
+                    assert_eq!(product, 2, "wrong product.");
+                    assert_eq!(price_opinion, OfferResult::Steal, "wrong oppinion.");
+                    assert_eq!(quantity, 1.0, "wrong quantity.");
+                    assert_eq!(followup, 1, "wrong followups.");
+                } else {
+                    assert!(false, "buy offer not recieved.")
+                }
+
+                if let ActorMessage::BuyOfferFollowup { buyer, seller,
+                product, offer_product, offer_quantity, followup }
+                = rx.recv().expect("Broke.") {
+                    println!("Buy Offer Followup Recieved.");
+                    assert_eq!(buyer, pop_info);
+                    assert_eq!(seller, seller);
+                    assert_eq!(product, 2);
+                    assert_eq!(offer_product, 3);
+                    assert_eq!(offer_quantity, 1.0);
+                    assert_eq!(followup, 0);
+                } else {
+                    assert!(false, "Wrong Message.");
+                }
+
+                // send back accept message.
+                tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
+                    seller, product: 2, offer_result: OfferResult::Reasonable })
+                    .expect("borkd");
+                rx.recv().expect("borkd");
+
+                // Deal completed, should also finish shopping, check for shop as predicted.
+                // it should've bought 1.0 units of 2 for 1.0 units of 3 and 0.2 units of time/shopping time.
+                let test = handle.join().unwrap();
+                let food_info = test.property.property[&2];
+                let cotton_info = test.property.property[&3];
+                let hut_info = test.property.property[&14];
+                let time_info = test.property.property[&TIME_ID];
+                assert!(test.property.property.get(&SHOPPING_TIME_ID).is_none(), "Shopping Time Found.");
+                // check that we recorded our expenditure in time and AMV
+                assert_eq!(food_info.total_property, 11.0);
+                assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
+                assert_eq!(food_info.amv_cost, 5.0);
+                assert_eq!(food_info.recieved, 1.0);
+                // cotton was expended for food
+                assert_eq!(cotton_info.total_property, 99.0);
+                assert_eq!(cotton_info.spent, 1.0);
+                // huts were untouched
+                assert_eq!(hut_info.total_property, 10.0);
+                // time was spent for shopping
+                assert_eq!(time_info.total_property, (100.0 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
+            }
+
+            #[test]
+            pub fn reattempt_purchase_once_before_cancelling_and_moving_on() {
+                let mut test = default_pop();
+                let pop_info = test.actor_info();
+                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let seller = ActorInfo::Firm(1);
+                // alter desires to run out of desires.
+                // food 
+                test.property.clear_desires();
+                test.property.add_desire(&Desire::new(Item::Want(2), 0, 
+                    Some(10), 1.0, 0.0, 1, vec![]).unwrap());
+                
+                
+                // add the initial property of the pop we'll be using\
+                // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
+                test.property.add_property(2, 10.0, &data);
+                test.property.add_property(3, 100.0, &data);
+                test.property.add_property(6, 10.0, &data);
+                test.property.add_property(14, 10.0, &data);
+                // add in way to much shopping time.
+                test.property.add_property(TIME_ID, 
+                    100.0 * test.standard_shop_time_cost(), &data);
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                // get loop running
+                let handle = thread::spawn(move || {
+                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                        &history);
+                    test
+                });
+                thread::sleep(Duration::from_millis(100));
+
+                // first want recieved. tier 1, idx 0, food want.
+                if let ActorMessage::FindWant { want, sender } = rx
+                .recv().expect("Unexpected Disconnect.") {
+                    println!("Find Want Recieved.");
+                    assert_eq!(want, 2, "Want incorrect.");
+                    assert_eq!(sender, pop_info, "Incorrect sender?");
+                } else {
+                    assert!(false, "FindWant not recieved.")
+                }
+
+                // send want found message with ambrosia fruit consumption (13)
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Sudden Disconnect!");
+                // clear out the message just sent.
+                rx.recv().expect("Broke.");
+
+                thread::sleep(Duration::from_millis(100));
+
+                if let ActorMessage::FindProduct { product, sender } = 
+                rx.recv().expect("Broke.") {
+                    println!("Find Product Recieved.");
+                    assert_eq!(product, 2, "Incorrect Product.");
+                    assert_eq!(sender, pop_info, "Incorrect sender");
+                } else {
+                    assert!(false, "FindProduct not recieved.");
+                }
+
+                // send product found response
+                tx.send(ActorMessage::FoundProduct { seller, 
+                    buyer: pop_info, product: 2 }).expect("Broke.");
+                rx.recv().expect("Broke");
+
+                // send in stock message, since seller has customer.
+                tx.send(ActorMessage::NotInStock { buyer: pop_info, seller, product: 2 })
+                    .expect("Broke.");
+                rx.recv().expect("Broke");
+
+                // pop tried to buy once and failed, they'll try again, back to the start.
+                
+                // send want found message with ambrosia fruit consumption (13)
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Sudden Disconnect!");
+                // clear out the message just sent.
+                rx.recv().expect("Broke.");
+
+                thread::sleep(Duration::from_millis(100));
+
+                if let ActorMessage::FindProduct { product, sender } = 
+                rx.recv().expect("Broke.") {
+                    println!("Find Product Recieved.");
+                    assert_eq!(product, 2, "Incorrect Product.");
+                    assert_eq!(sender, pop_info, "Incorrect sender");
+                } else {
+                    assert!(false, "FindProduct not recieved.");
+                }
+
+                // send product found response
+                tx.send(ActorMessage::FoundProduct { seller, 
+                    buyer: pop_info, product: 2 }).expect("Broke.");
+                rx.recv().expect("Broke");
+
+                // send in stock message, since seller has customer.
+                tx.send(ActorMessage::NotInStock { buyer: pop_info, seller, product: 2 })
+                    .expect("Broke.");
+                rx.recv().expect("Broke");
+
+                // Failed twice, it should marke it as complete and exit out.
+                thread::sleep(Duration::from_millis(1000));
+                if !handle.is_finished() {
+                    assert!(false, "Did not finish yet?")
+                }
+
+                // Deal completed, should also finish shopping, check for shop as predicted.
+                // it should've bought 1.0 units of 2 for 1.0 units of 3 and 0.2 units of time/shopping time.
+                let test = handle.join().unwrap();
+                let food_info = test.property.property[&2];
+                let cotton_info = test.property.property[&3];
+                let hut_info = test.property.property[&14];
+                let time_info = test.property.property[&TIME_ID];
+                assert!(test.property.property.get(&SHOPPING_TIME_ID).is_none(), "Shopping Time Found.");
+                // check that we recorded our expenditure in time and AMV
+                assert_eq!(food_info.total_property, 11.0);
+                assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
+                assert_eq!(food_info.amv_cost, 5.0);
+                assert_eq!(food_info.recieved, 1.0);
+                // cotton was expended for food
+                assert_eq!(cotton_info.total_property, 99.0);
+                assert_eq!(cotton_info.spent, 1.0);
+                // huts were untouched
+                assert_eq!(hut_info.total_property, 10.0);
+                // time was spent for shopping
+                assert_eq!(time_info.total_property, (100.0 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
             }
         }
     }
@@ -8369,6 +8627,21 @@ mod tests {
                 assert!(test.quantity_satisfied == 12.0);
                 assert!(test.partial_satisfaction > 3.0 && test.partial_satisfaction < 4.0);
                 assert_eq!(test.hard_satisfaction.unwrap(), 4);
+            }
+
+            #[test]
+            pub fn set_satisfaction_for_fully_satiated_desires_correctly() {
+                let mut test = Property::new(vec![
+                    Desire::new(Item::Product(2), 0, Some(10), 1.0, 11.0, 1, vec![]).unwrap()
+                ]);
+
+                test.update_satisfactions();
+
+                assert_eq!(test.full_tier_satisfaction.unwrap(), 10);
+                assert_eq!(test.hard_satisfaction.unwrap(), 11);
+                assert_eq!(test.quantity_satisfied, 11.0);
+                assert_eq!(test.partial_satisfaction, 1.0);
+                assert_eq!(test.highest_tier, 10);
             }
 
             #[test]

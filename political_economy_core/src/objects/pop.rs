@@ -514,8 +514,26 @@ impl Pop {
         let mut available_shopping_time = 0.0;
         // todo when the ablitiy to buy shopping time is available, add a first pass here.
         // start our buying loop
+        let mut prev = None;
+        let mut retry = false;
         // Should have our current desire coords in next_desire
         while let Some(curr_desire_coord) = next_desire {
+            if prev == next_desire && !retry { // if we are retrying, note that
+                retry = true;
+            } else if prev == next_desire && retry { 
+                // if already retried and came back for more, mark desire as complete
+                // and move on to the next.
+                completed_desires.insert(curr_desire_coord.idx);
+                next_desire = self.property.walk_up_tiers(next_desire);
+                retry = false;
+                continue;
+            }
+            // check that our desire is not in completed.
+            if completed_desires.contains(&curr_desire_coord.idx) {
+                prev = next_desire;
+                next_desire = self.property.walk_up_tiers(next_desire);
+                continue;
+            }
             // start by getting our desire
             let curr_desire = self.property.desires
                 .get(curr_desire_coord.idx).unwrap().clone();
@@ -621,6 +639,11 @@ impl Pop {
                     break;
                 } else {
                     // since we have enough time, go shopping.
+                    // expend then return excess shopping time to property
+                    let remaining_shop_time = available_shopping_time - self.standard_shop_time_cost();
+                    if remaining_shop_time > 0.0 {
+                        self.property.add_property(SHOPPING_TIME_ID, remaining_shop_time, data);
+                    }
                     // TODO make use of buy_result instead of ignoring it.
                     let buy_result = self.try_to_buy(rx, tx, data, market, buy_target, buy_quantity);
                     // the result if positive should do pretty much nothing. Target Success.

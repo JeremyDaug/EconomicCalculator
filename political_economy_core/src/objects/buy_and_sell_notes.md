@@ -1,6 +1,22 @@
 # Buying and Selling
 Buying and selling has Two major sections, the Search, and the Deal.
 
+## Shopping Time
+
+Shopping Time is (as of Dec 22, 2023) a required product like Time. Unlike Time however, Shopping Time is much more specific in it's usage and purpose. Time goes to pretty much everything. Shopping time is only used for shopping. 
+
+Currently (Dec 22, 2023), Shopping Time is spent in one singular block of size 0.2 when leaving to go shopping. This is fixed and includes everything from stepping out of the house to stepping back in. It's very rough, but good enough for version 1.0.
+
+### Shopping Time Improvement
+
+We can improve shopping time by breaking apart the shopping trip. I can think of 3 parts worth making.
+
+1. Travel Time, this covers leaving home to arriving at the business and back, but not the time in the shop. This is defined by how the territory is organized and layed out as well as possible transportation (not just public but private transportation).
+2. Store Organization. This is a time modifier created based on how the shop is organized. This organization would allow for faster or slower shopping (at the cost of other factors like Security and aesthetics). This is a per (unique) product cost.
+3. Checkout. This is how long it takes to pay for goods and get out. This is modified by the number of customers there as well as how they are checking out. Again, this would effect other parts of the business like Store organization. This and Store organization may roll into each other for particular kinds or organization. IE a store organized like a pharmacy with all goods behind the counter and the employees getting what the customer requests would be relatively high security, but also a slower and have a cost in labor.
+
+I'd like to add this eventually, but it's on the back burner for now in favor of getting basic shopping time done.
+
 ## The Search
 
 Before anything a seller must offer up a Sell Order to the market, if they don't then they cannot normally be reached for a deal. Sell Orders include what product they are offering, their price in AMV, and quantity.

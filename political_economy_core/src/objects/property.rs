@@ -55,6 +55,9 @@ pub struct Property {
     /// 
     /// No tier is fully satisfied, then it returns None.
     /// 
+    /// If desires are totally satiated, it returns the highest end tier 
+    /// desire.
+    /// 
     /// A rough measure of contentment. 
     /// 
     /// Low values with stuffed desires mark material wealth with
@@ -870,6 +873,17 @@ impl Property {
             }
             // always check against the highest tier
             self.highest_tier = self.highest_tier.max(tier);
+        }
+        // if highest tier is still max, lower it to the highest end tier
+        if self.full_tier_satisfaction.unwrap_or(0) == usize::MAX {
+            for desire in self.desires.iter() {
+                let end = if let Some(end) = desire.end {
+                    end 
+                } else { desire.start };
+                if self.full_tier_satisfaction.unwrap() > end {
+                    self.full_tier_satisfaction = Some(end);
+                }
+            }
         }
         // update tiered_satisfaction
         self.tiered_satisfaction = self.total_estimated_value();
@@ -2154,7 +2168,7 @@ pub struct TimeBreakdown {
 }
 
 /// The coordinates of a desire, both it's tier and index in desires. Used for tier walking.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DesireCoord {
     pub tier: usize,
     pub idx: usize
