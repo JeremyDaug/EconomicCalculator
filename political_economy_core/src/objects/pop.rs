@@ -534,6 +534,19 @@ impl Pop {
                 next_desire = self.property.walk_up_tiers(next_desire);
                 continue;
             }
+            // check that we have enough time to go shopping (either time itself or shopping time)
+            if let Some(time) = self.property.property.get(&TIME_ID) {
+                if time.available() < self.standard_shop_time_cost() {
+                    break;
+                }
+            } else if let Some(shopping_time) = self.property.property.get(&SHOPPING_TIME_ID) {
+                if shopping_time.available() < self.standard_shop_time_cost() {
+                    break;
+                }
+            } else {
+                // if we don't have either pure time or shopping time, stop.
+                break;
+            }
             // start by getting our desire
             let curr_desire = self.property.desires
                 .get(curr_desire_coord.idx).unwrap().clone();
@@ -702,7 +715,6 @@ impl Pop {
                 // the next desire
                 next_desire = self.property.walk_up_tiers(next_desire);
             }
-            break; // debug, trying to first pass this shit. Only want 1 loop.
         }
     }
 

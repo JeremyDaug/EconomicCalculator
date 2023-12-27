@@ -4610,8 +4610,7 @@ mod tests {
                 // food 
                 test.property.clear_desires();
                 test.property.add_desire(&Desire::new(Item::Want(2), 0, 
-                    Some(10), 1.0, 0.0, 1, vec![]).unwrap());
-                
+                    None, 1.0, 0.0, 1, vec![]).unwrap());
                 
                 // add the initial property of the pop we'll be using\
                 // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
