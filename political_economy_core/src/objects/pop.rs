@@ -3,7 +3,7 @@
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
 use core::panic;
-use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current};
+use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current, arch::x86_64};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
@@ -510,6 +510,9 @@ impl Pop {
         // setup our sanity check escape mechanism, primarily if we find ourselves 
         let mut completed_desires = HashSet::new();
 
+        // preemptively get shopping time cost
+        let shopping_time_cost = self.standard_shop_time_cost();
+
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
         // todo when the ablitiy to buy shopping time is available, add a first pass here.
@@ -518,6 +521,9 @@ impl Pop {
         let mut retry = false;
         // Should have our current desire coords in next_desire
         while let Some(curr_desire_coord) = next_desire {
+            if completed_desires.len() == self.property.desires.len() {
+                break; // if all desires are marked complete, gtfo.
+            }
             if prev == next_desire && !retry { // if we are retrying, note that
                 retry = true;
             } else if prev == next_desire && retry { 
@@ -536,11 +542,11 @@ impl Pop {
             }
             // check that we have enough time to go shopping (either time itself or shopping time)
             if let Some(time) = self.property.property.get(&TIME_ID) {
-                if time.available() < self.standard_shop_time_cost() {
+                if time.available() < shopping_time_cost {
                     break;
                 }
             } else if let Some(shopping_time) = self.property.property.get(&SHOPPING_TIME_ID) {
-                if shopping_time.available() < self.standard_shop_time_cost() {
+                if shopping_time.available() < shopping_time_cost {
                     break;
                 }
             } else {
@@ -641,10 +647,10 @@ impl Pop {
                 // TODO update to take more dynamic time payment into account.
                 // TODO when purchasing shopping time is available, add an option for that here.
                 available_shopping_time += self.property.get_shopping_time(
-                    self.standard_shop_time_cost() - available_shopping_time,
+                    shopping_time_cost - available_shopping_time,
                     data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
                 // check that it's enough time to go out buying
-                if self.standard_shop_time_cost() > available_shopping_time {
+                if shopping_time_cost > available_shopping_time {
                     // if we don't have enough time to go shopping for this desire we likely won't be able to go shopping for
                     // anything, so add the excess shopping time to our property and gtfo (consired allowing it to be refunded.)
                     // todo refund shopping time here as it hasn't actually been spend yet 
@@ -653,10 +659,18 @@ impl Pop {
                 } else {
                     // since we have enough time, go shopping.
                     // expend then return excess shopping time to property
-                    let remaining_shop_time = available_shopping_time - self.standard_shop_time_cost();
+                    let remaining_shop_time = available_shopping_time - shopping_time_cost;
                     if remaining_shop_time > 0.0 {
                         self.property.add_property(SHOPPING_TIME_ID, remaining_shop_time, data);
                     }
+                    // regardless of our success or failure, add it to the cost.
+                    self.property.property.entry(buy_target)
+                    .and_modify(|x| x.time_cost += shopping_time_cost)
+                    .or_insert({
+                        let mut temp = PropertyInfo::new(0.0);
+                        temp.time_cost = shopping_time_cost;
+                        temp
+                    });
                     // TODO make use of buy_result instead of ignoring it.
                     let buy_result = self.try_to_buy(rx, tx, data, market, buy_target, buy_quantity);
                     // the result if positive should do pretty much nothing. Target Success.
@@ -707,6 +721,8 @@ impl Pop {
                 // enter standard buy for that (if possible)
                 // 
             }
+            // always set our previous desire
+            prev = next_desire;
             // check if the next tier is beyond the end of our current desire.
             if curr_desire.past_end(curr_desire_coord.tier + 1) {
                 completed_desires.insert(curr_desire_coord.idx);

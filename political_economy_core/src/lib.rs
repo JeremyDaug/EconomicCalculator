@@ -4673,6 +4673,16 @@ mod tests {
                 rx.recv().expect("Broke");
 
                 // pop tried to buy once and failed, they'll try again, back to the start.
+
+                // first want recieved. tier 1, idx 0, food want.
+                if let ActorMessage::FindWant { want, sender } = rx
+                .recv().expect("Unexpected Disconnect.") {
+                    println!("Find Want Recieved.");
+                    assert_eq!(want, 2, "Want incorrect.");
+                    assert_eq!(sender, pop_info, "Incorrect sender?");
+                } else {
+                    assert!(false, "FindWant not recieved.")
+                }
                 
                 // send want found message with ambrosia fruit consumption (13)
                 tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
@@ -4716,13 +4726,13 @@ mod tests {
                 let time_info = test.property.property[&TIME_ID];
                 assert!(test.property.property.get(&SHOPPING_TIME_ID).is_none(), "Shopping Time Found.");
                 // check that we recorded our expenditure in time and AMV
-                assert_eq!(food_info.total_property, 11.0);
-                assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
-                assert_eq!(food_info.amv_cost, 5.0);
-                assert_eq!(food_info.recieved, 1.0);
+                assert_eq!(food_info.total_property, 10.0);
+                assert_eq!(food_info.time_cost, 2.0 * test.standard_shop_time_cost());
+                assert_eq!(food_info.amv_cost, 0.0);
+                assert_eq!(food_info.recieved, 0.0);
                 // cotton was expended for food
-                assert_eq!(cotton_info.total_property, 99.0);
-                assert_eq!(cotton_info.spent, 1.0);
+                assert_eq!(cotton_info.total_property, 100.0);
+                assert_eq!(cotton_info.spent, 0.0);
                 // huts were untouched
                 assert_eq!(hut_info.total_property, 10.0);
                 // time was spent for shopping
