@@ -465,7 +465,13 @@ impl Pop {
             }
         }
 
+        // Go shopping to get more stuff
         self.shopping_loop(rx, tx, data, market);
+
+        // measure overall success
+        // Compare starting point to ending point
+        // compare start+hypo to ending
+        // this helps define economic sentiment (prospering/decaying)
 
         // after we run out of stuff to buy, send finished and leave, consumption comes later
         self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });
@@ -668,7 +674,7 @@ impl Pop {
                     .and_modify(|x| x.time_cost += shopping_time_cost)
                     .or_insert({
                         let mut temp = PropertyInfo::new(0.0);
-                        temp.time_cost = shopping_time_cost;
+                        temp.time_cost += shopping_time_cost;
                         temp
                     });
                     // TODO make use of buy_result instead of ignoring it.
@@ -681,18 +687,14 @@ impl Pop {
                             },
                         BuyResult::NotSuccessful { reason } => {
                             match reason {
-                                OfferResult::Incomplete => {
+                                OfferResult::Incomplete => { // deal cancelled preemtively for some reason, assume nothing good
                                     go_to_next = true;
-                                }, // deal cancelled preemtively for some reason, assume nothing good
-                                OfferResult::Rejected => {
-                                    go_to_next = false;
-                                }, // deal was not in our favor, go shopping elsewhere.
-                                OfferResult::TooExpensive => {
-                                    go_to_next = true;
-                                }, // price point was too damn high, move on.
-                                OfferResult::OutOfStock => {
-                                    go_to_next = false;
-                                }, // incomplete due to insuffecient stock from buyer, try again
+                                }, 
+                                OfferResult::Rejected | // deal was not in our favor, go shopping elsewhere.
+                                OfferResult::TooExpensive | // Too expensive at current store
+                                OfferResult::OutOfStock => { // incomplete due to insuffecient stock from buyer, try again
+                                    go_to_next = false; // try again
+                                },
                                 OfferResult::NotInMarket => {
                                     go_to_next = false;
                                     emergency_buy = true;
@@ -779,12 +781,12 @@ impl Pop {
         match msg {
             ActorMessage::FoundProduct { seller, buyer,
             product } => {
-                if buyer == self.actor_info() {
-                    panic!("Product Found message with us as the buyer should not be found outside of deal state.");
-                } else if seller == self.actor_info() {
+                if seller == self.actor_info() {
                     // TODO When change is possible, deal with it here.
                     let _accepted = self.standard_sell(rx, tx, data, market, product, buyer);
-                } else { unreachable!("How TF did we get here? We shouldn't have recieved this FoundProduct Message!"); }
+                } else {
+                    debug_assert!(false, "This message should only ever be recieved here while we are a seller.");
+                }
                 return None;
             },
             // TODO add Seller Approaches Logic Here.
@@ -844,8 +846,6 @@ impl Pop {
     market: &MarketHistory,
     product: usize,
     buy_target: f64) -> BuyResult {
-        // get time cost for later
-        // let time_cost = self.standard_shop_time_cost();
         let price_estimate = self.property.property
             .entry(product)
             .or_insert(PropertyInfo::new(0.0))
@@ -1192,8 +1192,7 @@ impl Pop {
                 offer_result: _ } => {
                     let _gain = self.property.add_products(&resulting_change, data);
                     self.property.record_exchange(resulting_change);
-                    self.property.record_purchase(product, current_offer_amv,
-                        self.standard_shop_time_cost());
+                    self.property.record_purchase(product, current_offer_amv);
                     // send back close
                     self.push_message(rx, tx, ActorMessage::FinishDeal { buyer, seller, product });
                     return BuyResult::Successful;
@@ -1226,12 +1225,12 @@ impl Pop {
                             product,
                             price_opinion: OfferResult::Rejected });
                         // record expended time trying to buy the target
-                        self.property.record_purchase(sought_product, 0.0, self.standard_shop_time_cost());
+                        self.property.record_purchase(sought_product, 0.0);
                         return BuyResult::CancelBuy;
                     } else { // if still positive satisfaction change, accept.
                         self.property.add_products(&resulting_change, data);
                         self.property.record_exchange(resulting_change);
-                        self.property.record_purchase(product, current_offer_amv, self.standard_shop_time_cost());
+                        self.property.record_purchase(product, current_offer_amv);
                         self.push_message(rx, tx, ActorMessage::FinishDeal { buyer, seller, product });
                         return BuyResult::Successful;
                     }
@@ -1240,12 +1239,12 @@ impl Pop {
                 seller,
                 product } => {
                     // TODO add some method of retrying, either recursing, or entering a special rebuy function.
-                    self.property.record_purchase(product, 0.0, self.standard_shop_time_cost());
+                    self.property.record_purchase(product, 0.0);
                     return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
                 },
                 ActorMessage::CloseDeal { .. } => {
                     // Deal closed, no reason given by seller.
-                    self.property.record_purchase(sought_product, 0.0, self.standard_shop_time_cost());
+                    self.property.record_purchase(sought_product, 0.0);
                     return BuyResult::SellerClosed;
                 },
                 _ => panic!("Incorrect Response. Impossible to get here.")

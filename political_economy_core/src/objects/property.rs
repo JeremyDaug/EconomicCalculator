@@ -11,7 +11,7 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::{HashMap, HashSet}, ops::{AddAssign, Add, Sub, SubAssign, Div}, hash::Hash};
+use std::{collections::{HashMap, HashSet}, ops::{AddAssign, Add, Sub, SubAssign, Div}};
 
 use itertools::Itertools;
 
@@ -1537,7 +1537,7 @@ impl Property {
     /// TODO currently lazy, uses self.sift_up_to() to get our correction
     /// TODO improve this to actually be targeted rather than imprecise.
     pub fn release_desire_at(&mut self, coord: &DesireCoord, 
-    market: &MarketHistory, 
+    _market: &MarketHistory, 
     data: &DataManager) 
     -> HashMap<usize, f64> {
         let mut result = HashMap::new();
@@ -2134,11 +2134,9 @@ impl Property {
     /// 
     /// Panics if product given does not currently exist in our property data.
     pub fn record_purchase(&mut self, product: usize, 
-    amv_expended: f64, 
-    time_expended: f64) {
+    amv_expended: f64) {
         if let Some(info) = self.property.get_mut(&product) {
             info.amv_cost += amv_expended;
-            info.time_cost += time_expended;
         } else {
             panic!("Product {} not found in property info.", product);
         }

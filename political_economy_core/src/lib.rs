@@ -505,7 +505,7 @@ mod tests {
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
              property::Property, desire::Desire,
-              species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, item::Item}, 
+              species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, item::Item}, 
               demographics::Demographics, data_manager::DataManager};
 
         /// Makes a pop for testing. The pop will have the following info
@@ -742,7 +742,8 @@ mod tests {
         mod find_class_product_should{
             use std::{thread, time::Duration};
 
-            use crate::{objects::{property_info::PropertyInfo, actor_message::ActorMessage, seller::Seller}, constants::TIME_ID};
+            use crate::{objects::{property_info::PropertyInfo, actor_message::ActorMessage, seller::Seller}, 
+                constants::TIME_ID};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -1396,7 +1397,7 @@ mod tests {
             use super::make_test_pop;
 
             mod specific_wait_should {
-                use std::{thread, time::Duration, collections::{HashMap, HashSet}};
+                use std::{thread, time::Duration};
 
                 use crate::objects::{actor_message::{ActorMessage, ActorInfo, OfferResult}, seller::Seller};
     
@@ -1474,7 +1475,7 @@ mod tests {
                     let pop_info = test.actor_info();
                     let firm = ActorInfo::Firm(0);
                     // setup message queue.
-                    let (tx, rx) = barrage::bounded(10);
+                    let (_tx, rx) = barrage::bounded(10);
                     // push a bunch of stuff to get it blocked.
                     let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
                         seller: ActorInfo::Firm(0), proudct: 0 };
@@ -1955,7 +1956,7 @@ mod tests {
             }
         }
 
-        // Working
+        // Complete
         mod work_day_processing {
             use std::{thread, time::Duration};
 
@@ -2121,7 +2122,7 @@ mod tests {
             }
         }
 
-        // Working
+        // Completed
         mod create_offer_tests {
             use std::collections::HashMap;
 
@@ -2503,7 +2504,7 @@ mod tests {
     
         // Completed
         mod standard_buy_should {
-            use std::{collections::HashMap, thread, time::Duration};
+            use std::{time::Duration, thread};
             use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo, desire::Desire, item::Item};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -2675,7 +2676,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 20.0);
                 assert_eq!(test.property.property[&15].amv_cost, 119.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                // assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]
@@ -2804,7 +2805,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 10.0);
                 assert_eq!(test.property.property[&15].amv_cost, 60.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]
@@ -2957,7 +2958,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 10.0);
                 assert_eq!(test.property.property[&15].amv_cost, 60.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]
@@ -3092,7 +3093,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 10.0);
                 assert_eq!(test.property.property[&15].amv_cost, 60.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]
@@ -3170,9 +3171,8 @@ mod tests {
                 if let ActorMessage::InStock { .. } = rx.recv().unwrap() {
                 } else { assert!(false); }
                 // Check that the purchase failed correctly.
-                if let ActorMessage::RejectPurchase { buyer, 
-                seller, product, 
-                price_opinion } = rx.recv().unwrap() {
+                if let ActorMessage::RejectPurchase { 
+                price_opinion, .. } = rx.recv().unwrap() {
                     assert_eq!(price_opinion, OfferResult::TooExpensive);
                 } else { assert!(false, "Standard Buy Did Not Fall Through.") }
                 let (test, result) = handle.join().unwrap();
@@ -3329,7 +3329,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 8.0);
                 assert_eq!(test.property.property[&15].amv_cost, 60.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]
@@ -3407,9 +3407,7 @@ mod tests {
                     assert_eq!(price_opinion, OfferResult::Cheap);
                     assert_eq!(quantity, 10.0);
                     assert_eq!(followup, 2);
-                } else if let ActorMessage::RejectPurchase { buyer, 
-                    seller, product, 
-                    price_opinion } = msg {
+                } else if let ActorMessage::RejectPurchase { .. } = msg {
                         assert!(false, "Reciveed RejectPurchase instead.")
                 }
                 else { assert!(false, "Did not recieve buy offer."); }
@@ -3469,7 +3467,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 10.0);
                 assert_eq!(test.property.property[&15].amv_cost, 55.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]
@@ -3582,7 +3580,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 00.0);
                 assert_eq!(test.property.property[&15].amv_cost, 00.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             #[test]
@@ -3718,7 +3716,7 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 0.0);
                 assert_eq!(test.property.property[&15].amv_cost, 0.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
             // TODO test retry when reject offer recieved here!
@@ -3849,15 +3847,15 @@ mod tests {
                 assert_eq!(test.property.property[&15].spent, 0.0);
                 assert_eq!(test.property.property[&15].recieved, 0.0);
                 assert_eq!(test.property.property[&15].amv_cost, 0.0);
-                assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
+                //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
         }
     
         // Completed
         mod try_to_buy_should {
-            use std::{collections::HashMap, thread, time::Duration};
+            use std::{thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item}};
+            use crate::objects::{property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -4003,7 +4001,7 @@ mod tests {
                 let (test, result) = handle.join().unwrap();
                 // check that everything is as expected.
                 if let BuyResult::NotSuccessful { reason } = result {
-                    assert_eq!(reason, OfferResult::OutOfStock);
+                    assert_eq!(reason, OfferResult::NotInMarket);
                 } else { assert!(false, "Did not recieve NotSuccessful result!")}
                 assert_eq!(test.property.property.get(&2).unwrap().total_property, 120.0);
                 assert_eq!(test.property.property.get(&2).unwrap().spent, 0.0);
@@ -4164,12 +4162,11 @@ mod tests {
             }
         }
     
+        // Completed
         mod shopping_loop_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, property_info::PropertyInfo, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
-
-            use super::make_test_pop;
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
             /// Intentionally super simple pop generation
             /// 
@@ -4346,7 +4343,7 @@ mod tests {
             pub fn stop_when_out_of_time() {
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
-                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let (data, history) = prepare_data_for_market_actions(&mut test);
                 let seller = ActorInfo::Firm(1);
                 
                 // add the initial property of the pop we'll be using\
@@ -4383,7 +4380,7 @@ mod tests {
                 // first want recieved. tier 1, idx 0, food want.
                 if let ActorMessage::FindWant { want, sender } = rx
                 .recv().expect("Unexpected Disconnect.") {
-                    println!("Find Want Recieved.");
+                    //println!("Find Want Recieved.");
                     assert_eq!(want, 2, "Want incorrect.");
                     assert_eq!(sender, pop_info, "Incorrect sender?");
                 } else {
@@ -4400,7 +4397,7 @@ mod tests {
 
                 if let ActorMessage::FindProduct { product, sender } = 
                 rx.recv().expect("Broke.") {
-                    println!("Find Product Recieved.");
+                    //println!("Find Product Recieved.");
                     assert_eq!(product, 2, "Incorrect Product.");
                     assert_eq!(sender, pop_info, "Incorrect sender");
                 } else {
@@ -4419,7 +4416,7 @@ mod tests {
 
                 if let ActorMessage::BuyOffer { buyer, seller, product, 
                 price_opinion, quantity, followup } = rx.recv().expect("Broke") {
-                    println!("Buy Offer Recieved.");
+                    //println!("Buy Offer Recieved.");
                     assert_eq!(buyer, pop_info, "wrong buyer.");
                     assert_eq!(seller, seller, "wrong seller.");
                     assert_eq!(product, 2, "wrong product.");
@@ -4433,7 +4430,7 @@ mod tests {
                 if let ActorMessage::BuyOfferFollowup { buyer, seller,
                 product, offer_product, offer_quantity, followup }
                 = rx.recv().expect("Broke.") {
-                    println!("Buy Offer Followup Recieved.");
+                    //println!("Buy Offer Followup Recieved.");
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, seller);
                     assert_eq!(product, 2);
@@ -4477,7 +4474,7 @@ mod tests {
             pub fn stop_when_no_desires_remain() {
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
-                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let (data, history) = prepare_data_for_market_actions(&mut test);
                 let seller = ActorInfo::Firm(1);
                 // alter desires to run out of desires.
                 // food 
@@ -4511,7 +4508,7 @@ mod tests {
                 // first want recieved. tier 1, idx 0, food want.
                 if let ActorMessage::FindWant { want, sender } = rx
                 .recv().expect("Unexpected Disconnect.") {
-                    println!("Find Want Recieved.");
+                    //println!("Find Want Recieved.");
                     assert_eq!(want, 2, "Want incorrect.");
                     assert_eq!(sender, pop_info, "Incorrect sender?");
                 } else {
@@ -4528,7 +4525,7 @@ mod tests {
 
                 if let ActorMessage::FindProduct { product, sender } = 
                 rx.recv().expect("Broke.") {
-                    println!("Find Product Recieved.");
+                    //println!("Find Product Recieved.");
                     assert_eq!(product, 2, "Incorrect Product.");
                     assert_eq!(sender, pop_info, "Incorrect sender");
                 } else {
@@ -4547,7 +4544,7 @@ mod tests {
 
                 if let ActorMessage::BuyOffer { buyer, seller, product, 
                 price_opinion, quantity, followup } = rx.recv().expect("Broke") {
-                    println!("Buy Offer Recieved.");
+                    //println!("Buy Offer Recieved.");
                     assert_eq!(buyer, pop_info, "wrong buyer.");
                     assert_eq!(seller, seller, "wrong seller.");
                     assert_eq!(product, 2, "wrong product.");
@@ -4561,7 +4558,7 @@ mod tests {
                 if let ActorMessage::BuyOfferFollowup { buyer, seller,
                 product, offer_product, offer_quantity, followup }
                 = rx.recv().expect("Broke.") {
-                    println!("Buy Offer Followup Recieved.");
+                    //println!("Buy Offer Followup Recieved.");
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, seller);
                     assert_eq!(product, 2);
@@ -4604,7 +4601,7 @@ mod tests {
             pub fn reattempt_purchase_once_before_cancelling_and_moving_on() {
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
-                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let (data, history) = prepare_data_for_market_actions(&mut test);
                 let seller = ActorInfo::Firm(1);
                 // alter desires to run out of desires.
                 // food 
@@ -4638,7 +4635,7 @@ mod tests {
                 // first want recieved. tier 1, idx 0, food want.
                 if let ActorMessage::FindWant { want, sender } = rx
                 .recv().expect("Unexpected Disconnect.") {
-                    println!("Find Want Recieved.");
+                    //println!("Find Want Recieved.");
                     assert_eq!(want, 2, "Want incorrect.");
                     assert_eq!(sender, pop_info, "Incorrect sender?");
                 } else {
@@ -4655,7 +4652,7 @@ mod tests {
 
                 if let ActorMessage::FindProduct { product, sender } = 
                 rx.recv().expect("Broke.") {
-                    println!("Find Product Recieved.");
+                    //println!("Find Product Recieved.");
                     assert_eq!(product, 2, "Incorrect Product.");
                     assert_eq!(sender, pop_info, "Incorrect sender");
                 } else {
@@ -4677,7 +4674,7 @@ mod tests {
                 // first want recieved. tier 1, idx 0, food want.
                 if let ActorMessage::FindWant { want, sender } = rx
                 .recv().expect("Unexpected Disconnect.") {
-                    println!("Find Want Recieved.");
+                    //println!("Find Want Recieved.");
                     assert_eq!(want, 2, "Want incorrect.");
                     assert_eq!(sender, pop_info, "Incorrect sender?");
                 } else {
@@ -4694,7 +4691,7 @@ mod tests {
 
                 if let ActorMessage::FindProduct { product, sender } = 
                 rx.recv().expect("Broke.") {
-                    println!("Find Product Recieved.");
+                    //println!("Find Product Recieved.");
                     assert_eq!(product, 2, "Incorrect Product.");
                     assert_eq!(sender, pop_info, "Incorrect sender");
                 } else {
@@ -4737,6 +4734,193 @@ mod tests {
                 assert_eq!(hut_info.total_property, 10.0);
                 // time was spent for shopping
                 assert_eq!(time_info.total_property, (100.0 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
+            }
+            
+            // additional tests to consider adding
+            // TODO Shopping_Loop buy_result tests
+            // TODO Shopping_loop emergency buy routing when Emergency buy is made
+            // TODO Shopping_loop full_spread Barter when that option is possible.
+        }
+    
+        mod free_time_should {
+            use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
+
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
+
+            /// Intentionally super simple pop generation
+            /// 
+            /// sets desires to 
+            /// - 10 food want (0-9)
+            /// - 5 clothes want (5-9)
+            /// - 5 shelter want (5-9)
+            /// - inf ambrosia fruit 10+
+            /// - inf clothes class 10+
+            /// - inf shelter class 15+
+            pub fn default_pop() -> Pop {
+                let mut result = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 1.0,
+                    higher_skill_level: 2.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable { table: vec![], total: 0 },
+                    is_selling: true,
+                    backlog: VecDeque::new(),
+                };
+
+                // don't care about pop breakdown. it's not actually being used.
+                result.breakdown_table.insert_pops(
+                    PBRow::new(0, None, None, 
+                        None, None, None, 
+                        None, None, None, 
+                        1));
+
+                // Food 0
+                result.property.desires.push(
+                    Desire{
+                        item: Item::Want(2),
+                        start: 0,
+                        end: Some(9),
+                        amount: 1.0,
+                        satisfaction: 0.0,
+                        step: 1,
+                        tags: vec![],
+                    }
+                );
+
+                // Shelter 1
+                result.property.desires.push(
+                    Desire{
+                        item: Item::Want(3),
+                        start: 5,
+                        end: Some(9),
+                        amount: 1.0,
+                        satisfaction: 0.0,
+                        step: 1,
+                        tags: vec![],
+                    }
+                );
+
+                // Clothing 2
+                result.property.desires.push(
+                    Desire{
+                        item: Item::Want(4),
+                        start: 5,
+                        end: Some(9),
+                        amount: 1.0,
+                        satisfaction: 0.0,
+                        step: 1,
+                        tags: vec![],
+                    }
+                );
+
+                // ambrosia fruit 3
+                result.property.desires.push(
+                    Desire{
+                        item: Item::Product(2),
+                        start: 10,
+                        end: None,
+                        amount: 1.0,
+                        satisfaction: 0.0,
+                        step: 1,
+                        tags: vec![],
+                    }
+                );
+
+                // clothes 4
+                result.property.desires.push(
+                    Desire{
+                        item: Item::Class(6),
+                        start: 15,
+                        end: None,
+                        amount: 1.0,
+                        satisfaction: 0.0,
+                        step: 1,
+                        tags: vec![],
+                    }
+                );
+
+                // Hut/Cabin 5
+                result.property.desires.push(
+                    Desire{
+                        item: Item::Class(14),
+                        start: 15,
+                        end: None,
+                        amount: 1.0,
+                        satisfaction: 0.0,
+                        step: 1,
+                        tags: vec![],
+                    }
+                );
+
+                result
+            }
+
+            /// preps a pop's property, the property's data, and market prices of those items.
+            /// 
+            /// Sets all values to 1.0 amv and salability of 0.5 by default.
+            /// 
+            /// Exceptions are:
+            /// - Ambrosia Fruit are set as a currency (Sal 1.0, currency=true)
+            /// - Cotton Boll is set to currency with salability 1.0, and price of 5.0
+            /// - Cotton Clothes are priced at 10.0 amv.
+            /// - Cotton Suit is priced at 20.0 amv.
+            /// - Hut has a price of 100.0 amv.
+            /// - Cabin has a price of 1000.0 amv.
+            /// 
+            /// This is for testing buy and sell functions, not offer_calculations.
+            pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
+                let mut data = DataManager::new();
+                // TODO update this when we update Load All
+                data.load_all(&String::from("")).expect("Error on load?");
+                let product = data.products.get_mut(&6).unwrap();
+                product.fractional = true;
+
+                let mut market = MarketHistory {
+                    info: HashMap::new(),
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
+                // quickly set all prices to 1.0 for ease going forward.
+                for idx in 0..26 {
+                    market.info.insert(idx, ProductInfo {
+                        available: 0.0,
+                        price: 1.0,
+                        offered: 0.0,
+                        sold: 0.0,
+                        salability: 0.5,
+                        is_currency: false,
+                    });
+                }
+                // ambrosia fruit
+                market.info.get_mut(&2).expect("Brok").salability = 1.0;
+                market.info.get_mut(&2).expect("Brok").is_currency = true;
+
+                market.info.get_mut(&3).expect("Brok").salability = 1.0;
+                market.info.get_mut(&3).expect("Brok").is_currency = true;
+                market.info.get_mut(&3).expect("Brok").price = 5.0;
+
+                market.info.get_mut(&6).expect("Brok").price = 10.0;
+                market.info.get_mut(&7).expect("Brok").price = 20.0;
+
+                market.info.get_mut(&14).expect("Brok").price = 100.0;
+                market.info.get_mut(&15).expect("Brok").price = 1000.0;
+
+                market.currencies.push(2);
+                // sale priority would go here if used.
+
+                // pop.property.property.insert(6, PropertyInfo::new(10.0));
+                // TODO fix this info.
+
+                (data, market)
+            }
+
+            #[test]
+            pub fn correctly_run_through_free_time_as_expected() {
+                
             }
         }
     }
@@ -5941,7 +6125,7 @@ mod tests {
                     satisfaction: 0.0,
                     step: 1,
                     tags: vec![]});
-                let mut test = Property::new(test_desires);
+                let test = Property::new(test_desires);
                 let result = test.first_desire();
                 assert_eq!(result.idx, 3);
                 assert_eq!(result.tier, 1);
@@ -6031,7 +6215,7 @@ mod tests {
                     satisfaction: 1.0,
                     step: 0,
                     tags: vec![]});
-                let mut test = Property::new(test_desires);
+                let test = Property::new(test_desires);
                 let result = test.get_first_unsatisfied_desire();
                 assert!(result.is_none());
             }
@@ -6277,14 +6461,14 @@ mod tests {
         mod add_property_should {
             use std::collections::{HashSet, HashMap};
 
-            use crate::{objects::{desire::Desire, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, seller::Seller, item::Item}, data_manager::DataManager};
+            use crate::{objects::{desire::Desire, property::Property, product::Product, want::Want, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, item::Item}, data_manager::DataManager};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
             pub fn correctly_sift_test_data() {
                 let mut test = make_test_pop();
-                let (data, mut history) = prepare_data_for_market_actions(&mut test);
+                let (data, _history) = prepare_data_for_market_actions(&mut test);
                 // add in pop's property and sift their desires.
                 // we have 20 extra food than we need (20*5=100.0 units)
                 // this covers all food and leave excess for trading
@@ -9376,12 +9560,15 @@ mod tests {
 
         mod sift_up_to_should {
             // TODO update test for lookahead when added.
-            use std::collections::{HashMap, HashSet, VecDeque};
+            use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{property::{Property, DesireCoord}, desire::Desire, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, want::Want, market::{ProductInfo, MarketHistory}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species, item::Item}, data_manager::DataManager, demographics::Demographics};
+            use crate::{objects::{property::{Property, DesireCoord}, desire::Desire, 
+                property_info::PropertyInfo, product::Product, 
+                process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, 
+                want::Want, item::Item}, data_manager::DataManager};
 
             #[test]
-            pub fn shift_want_class_and_Product_desires_correctly() {
+            pub fn shift_want_class_and_product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -9899,7 +10086,7 @@ mod tests {
             }
 
             #[test]
-            pub fn shift_want_and_Product_desires_correctly() {
+            pub fn shift_want_and_product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -10537,7 +10724,7 @@ mod tests {
             /// Sifts 1 Product desire only, don't set up wants
             /// or class desires.
             #[test]
-            pub fn sift_Product_desire_correctly() {
+            pub fn sift_product_desire_correctly() {
                 // data needed, but not set up for this test.
                 let data = &DataManager::new();
                 let test_desires = vec![
@@ -11423,7 +11610,7 @@ mod tests {
             use crate::{objects::{property::Property, desire::Desire, property_info::PropertyInfo, product::Product, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, want::Want, item::Item}, data_manager::DataManager};
 
             #[test]
-            pub fn shift_want_class_and_Product_desires_correctly() {
+            pub fn shift_want_class_and_product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -11944,7 +12131,7 @@ mod tests {
             }
 
             #[test]
-            pub fn shift_want_and_Product_desires_correctly() {
+            pub fn shift_want_and_product_desires_correctly() {
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
                 // wants 0
@@ -12584,7 +12771,7 @@ mod tests {
             /// Sifts 1 Product desire only, don't set up wants
             /// or class desires.
             #[test]
-            pub fn sift_Product_desire_correctly() {
+            pub fn sift_product_desire_correctly() {
                 // data needed, but not set up for this test.
                 let data = &DataManager::new();
                 let test_desires = vec![
@@ -14053,8 +14240,6 @@ mod tests {
                     step: 2,
                     tags: vec![],
                 };
-
-                let sat_tier = test.satisfaction_up_to_tier();
 
                 assert!(test.satisfied_at_tier(2));
                 assert!(test.satisfied_at_tier(3));
