@@ -4920,7 +4920,49 @@ mod tests {
 
             #[test]
             pub fn correctly_run_through_free_time_as_expected() {
+                // setup pop, market, and history.                
+                let mut test = default_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                let seller = ActorInfo::Firm(1);
+                // alter desires to run out of desires.
+                // food 
+                test.property.clear_desires();
+                test.property.add_desire(&Desire::new(Item::Want(2), 0, 
+                    None, 1.0, 0.0, 1, vec![]).unwrap());
                 
+                // add the initial property of the pop we'll be using\
+                // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
+                test.property.add_property(2, 10.0, &data);
+                test.property.add_property(3, 100.0, &data);
+                test.property.add_property(6, 10.0, &data);
+                test.property.add_property(14, 10.0, &data);
+                // add in way to much shopping time.
+                test.property.add_property(TIME_ID, 
+                    100.0 * test.standard_shop_time_cost(), &data);
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                // get loop running
+                let handle = thread::spawn(move || {
+                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                        &history);
+                    test
+                });
+                thread::sleep(Duration::from_millis(100));
+
+                // start loop, force through a number of shopping actions
+
+                if let Some(msg) = rx.recv().ok() {
+                    println!("{}", msg);
+                }
+
+                // let it wrap up
+
+                // check that it correctly recorded the satisfaction success/failure.
             }
         }
     }
