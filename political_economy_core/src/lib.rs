@@ -4956,7 +4956,20 @@ mod tests {
 
                 // start loop, force through a number of shopping actions
 
-                if let Some(msg) = rx.recv().ok() {
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Borkd");
+
+                    thread::sleep(Duration::from_millis(100));
+
+                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
+                    .expect("Borked");
+
+                thread::sleep(Duration::from_millis(100));
+
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                    .expect("Borkt.");
+
+                while let Some(msg) = rx.recv().ok() {
                     println!("{}", msg);
                 }
 
