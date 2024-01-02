@@ -705,13 +705,15 @@ mod tests {
             product.fractional = true;
 
             let mut market = MarketHistory {
-                info: HashMap::new(),
+                product_info: HashMap::new(),
                 sale_priority: vec![],
                 currencies: vec![],
+                class_info: HashMap::new(),
+                want_info: HashMap::new(),
             };
             // quickly set all prices to 1.0 for ease going forward.
             for idx in 0..26 {
-                market.info.insert(idx, ProductInfo {
+                market.product_info.insert(idx, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -721,14 +723,14 @@ mod tests {
                 });
             }
             // ambrosia fruit
-            market.info.get_mut(&2).expect("Brok").salability = 1.0;
-            market.info.get_mut(&2).expect("Brok").is_currency = true;
+            market.product_info.get_mut(&2).expect("Brok").salability = 1.0;
+            market.product_info.get_mut(&2).expect("Brok").is_currency = true;
 
-            market.info.get_mut(&6).expect("Brok").price = 10.0;
-            market.info.get_mut(&7).expect("Brok").price = 20.0;
+            market.product_info.get_mut(&6).expect("Brok").price = 10.0;
+            market.product_info.get_mut(&7).expect("Brok").price = 20.0;
 
-            market.info.get_mut(&14).expect("Brok").price = 100.0;
-            market.info.get_mut(&15).expect("Brok").price = 1000.0;
+            market.product_info.get_mut(&14).expect("Brok").price = 100.0;
+            market.product_info.get_mut(&15).expect("Brok").price = 1000.0;
 
             market.currencies.push(2);
             // sale priority would go here if used.
@@ -2149,11 +2151,13 @@ mod tests {
                 spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec![],
                     currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
-                market.info.insert(2, ProductInfo {
+                market.product_info.insert(2, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2161,7 +2165,7 @@ mod tests {
                     salability: 100.0,
                     is_currency: true,
                 });
-                market.info.insert(3, ProductInfo {
+                market.product_info.insert(3, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2169,7 +2173,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(4, ProductInfo {
+                market.product_info.insert(4, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2177,7 +2181,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(5, ProductInfo {
+                market.product_info.insert(5, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2185,7 +2189,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(6, ProductInfo {
+                market.product_info.insert(6, ProductInfo {
                     available: 0.0,
                     price: 3.0,
                     offered: 0.0,
@@ -2193,7 +2197,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(7, ProductInfo {
+                market.product_info.insert(7, ProductInfo {
                     available: 0.0,
                     price: 100.0,
                     offered: 0.0,
@@ -2242,11 +2246,13 @@ mod tests {
                 spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec![],
                     currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
-                market.info.insert(2, ProductInfo {
+                market.product_info.insert(2, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2254,7 +2260,7 @@ mod tests {
                     salability: 100.0,
                     is_currency: true,
                 });
-                market.info.insert(3, ProductInfo {
+                market.product_info.insert(3, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2262,7 +2268,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(4, ProductInfo {
+                market.product_info.insert(4, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2270,7 +2276,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(5, ProductInfo {
+                market.product_info.insert(5, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2278,7 +2284,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(6, ProductInfo {
+                market.product_info.insert(6, ProductInfo {
                     available: 0.0,
                     price: 3.0,
                     offered: 0.0,
@@ -2286,7 +2292,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(7, ProductInfo {
+                market.product_info.insert(7, ProductInfo {
                     available: 0.0,
                     price: 100.0,
                     offered: 0.0,
@@ -2336,11 +2342,13 @@ mod tests {
                 spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec![],
                     currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
-                market.info.insert(2, ProductInfo {
+                market.product_info.insert(2, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2348,7 +2356,7 @@ mod tests {
                     salability: 100.0,
                     is_currency: true,
                 });
-                market.info.insert(3, ProductInfo {
+                market.product_info.insert(3, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2356,7 +2364,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(4, ProductInfo {
+                market.product_info.insert(4, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2364,7 +2372,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(5, ProductInfo {
+                market.product_info.insert(5, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -2372,7 +2380,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(6, ProductInfo {
+                market.product_info.insert(6, ProductInfo {
                     available: 0.0,
                     price: 2.0,
                     offered: 0.0,
@@ -2380,7 +2388,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(7, ProductInfo {
+                market.product_info.insert(7, ProductInfo {
                     available: 0.0,
                     price: 5.0,
                     offered: 0.0,
@@ -2428,11 +2436,13 @@ mod tests {
                 spend.insert(7, PropertyInfo::new(10.0));
 
                 let mut market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec![],
                     currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
-                market.info.insert(2, ProductInfo {
+                market.product_info.insert(2, ProductInfo {
                     available: 0.0,
                     price: 2.0,
                     offered: 0.0,
@@ -2440,7 +2450,7 @@ mod tests {
                     salability: 100.0,
                     is_currency: true,
                 });
-                market.info.insert(3, ProductInfo {
+                market.product_info.insert(3, ProductInfo {
                     available: 0.0,
                     price: 3.0,
                     offered: 0.0,
@@ -2448,7 +2458,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(4, ProductInfo {
+                market.product_info.insert(4, ProductInfo {
                     available: 0.0,
                     price: 4.0,
                     offered: 0.0,
@@ -2456,7 +2466,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(5, ProductInfo {
+                market.product_info.insert(5, ProductInfo {
                     available: 0.0,
                     price: 15.0,
                     offered: 0.0,
@@ -2464,7 +2474,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(6, ProductInfo {
+                market.product_info.insert(6, ProductInfo {
                     available: 0.0,
                     price: 3.0,
                     offered: 0.0,
@@ -2472,7 +2482,7 @@ mod tests {
                     salability: 1.0,
                     is_currency: false,
                 });
-                market.info.insert(7, ProductInfo {
+                market.product_info.insert(7, ProductInfo {
                     available: 0.0,
                     price: 100.0,
                     offered: 0.0,
@@ -2584,9 +2594,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -2713,9 +2723,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -2848,10 +2858,10 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&7).unwrap().price = 10.0; // 0.0 likely to exchange.
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&7).unwrap().price = 10.0; // 0.0 likely to exchange.
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3000,10 +3010,10 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&7).unwrap().price = 10.0; // 0.0 likely to exchange.
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&7).unwrap().price = 10.0; // 0.0 likely to exchange.
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3142,9 +3152,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 15.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 15.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3236,9 +3246,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3366,9 +3376,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3496,8 +3506,8 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.025;
-                history.info.get_mut(&15).unwrap().price = 1.0;
+                history.product_info.get_mut(&2).unwrap().price = 1.025;
+                history.product_info.get_mut(&15).unwrap().price = 1.0;
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3622,9 +3632,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3755,9 +3765,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3894,9 +3904,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3972,9 +3982,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -4055,9 +4065,9 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -4301,13 +4311,15 @@ mod tests {
                 product.fractional = true;
 
                 let mut market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec![],
                     currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
                 // quickly set all prices to 1.0 for ease going forward.
                 for idx in 0..26 {
-                    market.info.insert(idx, ProductInfo {
+                    market.product_info.insert(idx, ProductInfo {
                         available: 0.0,
                         price: 1.0,
                         offered: 0.0,
@@ -4317,18 +4329,18 @@ mod tests {
                     });
                 }
                 // ambrosia fruit
-                market.info.get_mut(&2).expect("Brok").salability = 1.0;
-                market.info.get_mut(&2).expect("Brok").is_currency = true;
+                market.product_info.get_mut(&2).expect("Brok").salability = 1.0;
+                market.product_info.get_mut(&2).expect("Brok").is_currency = true;
 
-                market.info.get_mut(&3).expect("Brok").salability = 1.0;
-                market.info.get_mut(&3).expect("Brok").is_currency = true;
-                market.info.get_mut(&3).expect("Brok").price = 5.0;
+                market.product_info.get_mut(&3).expect("Brok").salability = 1.0;
+                market.product_info.get_mut(&3).expect("Brok").is_currency = true;
+                market.product_info.get_mut(&3).expect("Brok").price = 5.0;
 
-                market.info.get_mut(&6).expect("Brok").price = 10.0;
-                market.info.get_mut(&7).expect("Brok").price = 20.0;
+                market.product_info.get_mut(&6).expect("Brok").price = 10.0;
+                market.product_info.get_mut(&7).expect("Brok").price = 20.0;
 
-                market.info.get_mut(&14).expect("Brok").price = 100.0;
-                market.info.get_mut(&15).expect("Brok").price = 1000.0;
+                market.product_info.get_mut(&14).expect("Brok").price = 100.0;
+                market.product_info.get_mut(&15).expect("Brok").price = 1000.0;
 
                 market.currencies.push(2);
                 // sale priority would go here if used.
@@ -4880,13 +4892,15 @@ mod tests {
                 product.fractional = true;
 
                 let mut market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec![],
                     currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
                 // quickly set all prices to 1.0 for ease going forward.
                 for idx in 0..26 {
-                    market.info.insert(idx, ProductInfo {
+                    market.product_info.insert(idx, ProductInfo {
                         available: 0.0,
                         price: 1.0,
                         offered: 0.0,
@@ -4896,18 +4910,18 @@ mod tests {
                     });
                 }
                 // ambrosia fruit
-                market.info.get_mut(&2).expect("Brok").salability = 1.0;
-                market.info.get_mut(&2).expect("Brok").is_currency = true;
+                market.product_info.get_mut(&2).expect("Brok").salability = 1.0;
+                market.product_info.get_mut(&2).expect("Brok").is_currency = true;
 
-                market.info.get_mut(&3).expect("Brok").salability = 1.0;
-                market.info.get_mut(&3).expect("Brok").is_currency = true;
-                market.info.get_mut(&3).expect("Brok").price = 5.0;
+                market.product_info.get_mut(&3).expect("Brok").salability = 1.0;
+                market.product_info.get_mut(&3).expect("Brok").is_currency = true;
+                market.product_info.get_mut(&3).expect("Brok").price = 5.0;
 
-                market.info.get_mut(&6).expect("Brok").price = 10.0;
-                market.info.get_mut(&7).expect("Brok").price = 20.0;
+                market.product_info.get_mut(&6).expect("Brok").price = 10.0;
+                market.product_info.get_mut(&7).expect("Brok").price = 20.0;
 
-                market.info.get_mut(&14).expect("Brok").price = 100.0;
-                market.info.get_mut(&15).expect("Brok").price = 1000.0;
+                market.product_info.get_mut(&14).expect("Brok").price = 100.0;
+                market.product_info.get_mut(&15).expect("Brok").price = 1000.0;
 
                 market.currencies.push(2);
                 // sale priority would go here if used.
@@ -5492,13 +5506,15 @@ mod tests {
             product.fractional = true;
 
             let mut market = MarketHistory {
-                info: HashMap::new(),
+                product_info: HashMap::new(),
                 sale_priority: vec![],
                 currencies: vec![],
+                class_info: HashMap::new(),
+                want_info: HashMap::new(),
             };
             // quickly set all prices to 1.0 for ease going forward.
             for idx in 0..26 {
-                market.info.insert(idx, ProductInfo {
+                market.product_info.insert(idx, ProductInfo {
                     available: 0.0,
                     price: 1.0,
                     offered: 0.0,
@@ -5508,14 +5524,14 @@ mod tests {
                 });
             }
             // ambrosia fruit
-            market.info.get_mut(&2).expect("Brok").salability = 1.0;
-            market.info.get_mut(&2).expect("Brok").is_currency = true;
+            market.product_info.get_mut(&2).expect("Brok").salability = 1.0;
+            market.product_info.get_mut(&2).expect("Brok").is_currency = true;
 
-            market.info.get_mut(&6).expect("Brok").price = 10.0;
-            market.info.get_mut(&7).expect("Brok").price = 20.0;
+            market.product_info.get_mut(&6).expect("Brok").price = 10.0;
+            market.product_info.get_mut(&7).expect("Brok").price = 20.0;
 
-            market.info.get_mut(&14).expect("Brok").price = 100.0;
-            market.info.get_mut(&15).expect("Brok").price = 1000.0;
+            market.product_info.get_mut(&14).expect("Brok").price = 100.0;
+            market.product_info.get_mut(&15).expect("Brok").price = 1000.0;
 
             market.currencies.push(2);
             // sale priority would go here if used.
@@ -5885,8 +5901,10 @@ mod tests {
                 info.insert(2, ProductInfo::new(10.0));
                 info.insert(3, ProductInfo::new(20.0));
                 info.insert(4, ProductInfo::new(50.0));
-                let market = MarketHistory { info, 
+                let market = MarketHistory { product_info: info, 
                     sale_priority: vec![], 
+                    want_info: HashMap::new(),
+                    class_info: HashMap::new(),
                     currencies: vec![] };
                 let result = test.satisfaction_from_amv(1.0, &market); // first
                 assert_eq!(result.tier, 0);
@@ -8773,9 +8791,11 @@ mod tests {
                     is_currency: false,
                 });
                 let test_market = MarketHistory{
-                    info: product_info,
+                    product_info,
                     sale_priority: vec![],
                     currencies: vec![],
+                    want_info: HashMap::new(),
+                    class_info: HashMap::new(),
                 };
                 // TODO fix this
                 test.unsafe_add_property(0, 4.0);
@@ -8828,9 +8848,11 @@ mod tests {
                     is_currency: false,
                 });
                 let test_market = MarketHistory{
-                    info: product_info,
+                    product_info,
                     sale_priority: vec![],
                     currencies: vec![],
+                    want_info: HashMap::new(),
+                    class_info: HashMap::new(),
                 };
                 let result = test.market_satisfaction(&test_market);
                 assert!(result == 17.0);
@@ -11298,13 +11320,15 @@ mod tests {
                 product.fractional = true;
 
                 let mut market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec![],
                     currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
                 // quickly set all prices to 1.0 for ease going forward.
                 for idx in 0..26 {
-                    market.info.insert(idx, ProductInfo {
+                    market.product_info.insert(idx, ProductInfo {
                         available: 0.0,
                         price: 1.0,
                         offered: 0.0,
@@ -11314,14 +11338,14 @@ mod tests {
                     });
                 }
                 // ambrosia fruit
-                market.info.get_mut(&2).expect("Brok").salability = 1.0;
-                market.info.get_mut(&2).expect("Brok").is_currency = true;
+                market.product_info.get_mut(&2).expect("Brok").salability = 1.0;
+                market.product_info.get_mut(&2).expect("Brok").is_currency = true;
 
-                market.info.get_mut(&6).expect("Brok").price = 10.0;
-                market.info.get_mut(&7).expect("Brok").price = 20.0;
+                market.product_info.get_mut(&6).expect("Brok").price = 10.0;
+                market.product_info.get_mut(&7).expect("Brok").price = 20.0;
 
-                market.info.get_mut(&14).expect("Brok").price = 100.0;
-                market.info.get_mut(&15).expect("Brok").price = 1000.0;
+                market.product_info.get_mut(&14).expect("Brok").price = 100.0;
+                market.product_info.get_mut(&15).expect("Brok").price = 1000.0;
 
                 market.currencies.push(2);
                 // sale priority would go here if used.
@@ -11364,10 +11388,10 @@ mod tests {
                 // Anything else offered would be 
                 // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
                 // 20 ambrosia fruit and 20 cotton clothes.
-                history.info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.info.get_mut(&7).unwrap().price = 10.0; // 0.0 likely to exchange.
-                history.info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
+                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
+                history.product_info.get_mut(&7).unwrap().price = 10.0; // 0.0 likely to exchange.
+                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
 
                 // Try to release the highest desire tier, at tier 105, 
                 // the class desire for clothes.
@@ -11484,9 +11508,11 @@ mod tests {
                     tertiary_tech: None,
                 });
                 let market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec!(),
                     currencies: vec!(),
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
 
                 data.update_product_classes().expect("Could not function");
@@ -11622,9 +11648,11 @@ mod tests {
                 data.products.get_mut(&1).unwrap()
                     .processes.insert(0);
                 let market = MarketHistory {
-                    info: HashMap::new(),
+                    product_info: HashMap::new(),
                     sale_priority: vec!(),
                     currencies: vec!(),
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
                 };
 
                 data.update_product_classes().expect("Could not function");

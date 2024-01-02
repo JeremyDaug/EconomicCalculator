@@ -9,7 +9,7 @@ use crate::{demographics::Demographics, data_manager::DataManager, constants::{S
 use super::{pop::Pop, 
     firm::Firm, 
     actor::Actor, 
-    actor_message::{ActorMessage, ActorInfo, OfferResult}, 
+    actor_message::{ActorMessage, ActorInfo, OfferResult, WantSource}, 
     institution::Institution, 
     state::State, 
     seller::Seller};
@@ -83,7 +83,6 @@ pub struct Market {
 
     /// The Current market prices in AMV.
     pub prices: HashMap<usize, f64>,
-    // TODO consider adding an estimated value for wants and classes in the market, this would be made by calculating all possible ways to get the good, pricing out each option, then averaging the prices.
     /// The products which are available for sale, and how many of them.
     pub products_for_sale: HashMap<usize, f64>,
     /// how much of each proudct was demanded by buyers generally.
@@ -98,6 +97,22 @@ pub struct Market {
     /// The Salability of each item. Any itme above SALABILITY_THRESHOLD 
     /// is considered a currency for this market naturally. 
     pub salability: HashMap<usize, f64>,
+
+    /// The Estimated price of various wants in the market, based on
+    /// a weighted average for both products in processes and processes 
+    /// used in the market.
+    pub want_prices: HashMap<usize, f64>,
+    /// How many times a want was requested.
+    /// 
+    /// Note: This is not necissarily how many units of the want are
+    /// desired, but how many times it was called.
+    pub want_requests: HashMap<usize, f64>,
+    /// The various ways the want was satisfied in this market. Includes how
+    /// many of each method was used.
+    pub want_sources: HashMap<usize, Vec<(WantSource, f64)>>,
+
+    // Todo put class price info here for possible use. may not be necessary.
+
     /// Any Currencies which have been declared as currency for this market.
     /// Typically done by either a state, or another particularly powerful
     /// entitiy.
@@ -565,7 +580,11 @@ impl Market {
 #[derive(Debug, Clone)]
 pub struct MarketHistory {
     /// The info for each product we store in memory.
-    pub info: HashMap<usize, ProductInfo>,
+    pub product_info: HashMap<usize, ProductInfo>,
+    /// The info for each class available in this market.
+    pub class_info: HashMap<usize, ClassInfo>,
+    /// The info for each want we want to store in memory.
+    pub want_info: HashMap<usize, WantInfo>,
     /// Organizes products by their sale priority (Salability Highest to lowest).
     /// TODO Perhaps change this to take AMV into account in some fashion.
     pub sale_priority: Vec<usize>,
@@ -575,40 +594,13 @@ pub struct MarketHistory {
     // TODO add estimate prices for wants and product classes.
 }
 
-/// Market History info for our products, to make getting info more easy.
-#[derive(Debug, Clone, Copy)]
-pub struct ProductInfo {
-    /// How many are available in the environment to grab.
-    pub available: f64,
-    /// Yesterday's price for the item.
-    pub price: f64,
-    /// How many were offered yesterday.
-    pub offered: f64,
-    /// How many were sold yesterday.
-    pub sold: f64,
-    /// The item's Salability Rating.
-    pub salability: f64,
-    /// If the item is a currency. May be true even if Salability isn't
-    /// above threshold.
-    pub is_currency: bool,
-}
-
-impl ProductInfo {
-    pub fn new(price: f64) -> Self { 
-            Self { available: 0.0, 
-                price, 
-                offered: 0.0, 
-                sold: 0.0, 
-                salability: 0.5, 
-                is_currency: false } 
-        }
-}
-
 impl MarketHistory {
     /// Creates a market history of yesterday based on the current market given
     /// to it.
     pub fn create(market: &Market) -> Self {
-        let mut ret = MarketHistory { info: HashMap::new(),
+        let mut ret = MarketHistory { product_info: HashMap::new(),
+            want_info: HashMap::new(),
+            class_info: HashMap::new(),
             sale_priority: vec![],
             currencies: vec![],
         };
@@ -624,13 +616,18 @@ impl MarketHistory {
                 true
             } else { false };
 
-            ret.info.insert(*product, ProductInfo { available: *avail, 
+            ret.product_info.insert(*product, ProductInfo { available: *avail, 
                 price: *price,  offered: *offered, sold: *sold, 
                 salability: *sal, is_currency: currency });
         }
+        // go through and calculate class price based on possible products 
+        // weighted by the amount sold
+        // go through each want and calculate the estimated value of the want in the current market.
+
+        // TODO add calculation from active market info here!
 
         // add in those currencies which are dictated to be currencies by the market.
-        for (product, info) in ret.info.iter()
+        for (product, info) in ret.product_info.iter()
         .sorted_by(|a, b| {
             // sort buy salability, highest to lowest
             // TODO, perhaps have this sort by Salability * AMV Part of TODO Line:537 above.
@@ -647,11 +644,11 @@ impl MarketHistory {
 
     /// Helper function, gets a product from our history.
     pub fn get_product(&self, product: &usize) -> &ProductInfo {
-        self.info.get(product).expect("Product Not Found!")
+        self.product_info.get(product).expect("Product Not Found!")
     }
 
     pub fn get_product_price(&self, product: &usize, default: f64) -> f64 {
-        if let Some(result) = self.info.get(product) {
+        if let Some(result) = self.product_info.get(product) {
             result.price
         } else {
             default
@@ -665,7 +662,7 @@ impl MarketHistory {
     /// If the item does not have a salability in the market it returns the
     /// DEFAULT_SALABILITY.
     pub fn get_product_salability(&self, product: &usize) -> f64 {
-        if let Some(result) = self.info.get(product) {
+        if let Some(result) = self.product_info.get(product) {
             result.salability
         } else {
             constants::DEFAULT_SALABILITY
@@ -695,6 +692,11 @@ impl MarketHistory {
     pub fn get_want_price(&self, id: usize, arg: f64) -> f64 {
         1.0
     }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct ClassInfo {
+
 }
 
 /// The Ways in which a market can connect to another market directly.
@@ -786,4 +788,54 @@ impl DealRecord {
            current_result
         } 
     }
+}
+
+/// Market History for wants to make estimating the price of a want easier 
+/// to find.
+#[derive(Debug, Clone, Copy)]
+pub struct WantInfo {
+    /// The estimated price of the product, created from the 
+    /// weighted average of the constituent product and possible processes.
+    /// 
+    /// In calculation, each process is given a price equivalent to the 
+    /// weight of each product in the process.
+    pub est_price: f64,
+    /// The estimated number of products in the process, allowing one to 
+    /// create an average price of the products involved. 
+    pub est_products: f64
+}
+
+impl WantInfo {
+    pub fn new(est_price: f64) -> Self { 
+            Self { est_price, est_products: 1.0} 
+        }
+}
+
+/// Market History info for our products, to make getting info more easy.
+#[derive(Debug, Clone, Copy)]
+pub struct ProductInfo {
+    /// How many are available in the environment to grab.
+    pub available: f64,
+    /// Yesterday's price for the item.
+    pub price: f64,
+    /// How many were offered yesterday.
+    pub offered: f64,
+    /// How many were sold yesterday.
+    pub sold: f64,
+    /// The item's Salability Rating.
+    pub salability: f64,
+    /// If the item is a currency. May be true even if Salability isn't
+    /// above threshold.
+    pub is_currency: bool,
+}
+
+impl ProductInfo {
+    pub fn new(price: f64) -> Self { 
+            Self { available: 0.0, 
+                price, 
+                offered: 0.0, 
+                sold: 0.0, 
+                salability: 0.5, 
+                is_currency: false } 
+        }
 }

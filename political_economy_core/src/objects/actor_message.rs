@@ -416,3 +416,23 @@ pub enum ActorType {
     Institution,
     State,
 }
+
+/// Used for recording the source of wants in the market.
+/// 
+/// Includes options for both ownership (product) or a process.
+#[derive(Debug, Copy, Clone)]
+pub enum WantSource {
+    /// Product(Ownership) source of the want.
+    Product(usize),
+    /// Process source of the want.
+    Process(usize)
+}
+
+impl WantSource {
+    pub fn unwrap(&self) -> usize {
+        match self {
+            WantSource::Product(id) |
+            WantSource::Process(id) => *id,
+        }
+    }
+}
