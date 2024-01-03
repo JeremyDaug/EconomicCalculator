@@ -163,7 +163,7 @@ impl Market {
             let mut threads = vec![];
             // spin up the actors
             for firm in firms.iter_mut() {
-                let history = MarketHistory::create(self);
+                let history = MarketHistory::create(self, data);
                 let firm_sender = lcl_sender.clone();
                 let mut firm_rcvr = lcl_receiver.clone();
                 threads.push(scope.spawn(move |_| {
@@ -173,7 +173,7 @@ impl Market {
             }
             for pop in pops.iter_mut() {
                 // add pop to popWealthWeight for later possible use
-                let history = MarketHistory::create(self);
+                let history = MarketHistory::create(self, data);
                 self.pop_wealth_weight.push(WeightedActor { actor: pop.actor_info(), 
                     weight: pop.total_wealth(&history) });
                 let pop_sender = lcl_sender.clone();
@@ -187,7 +187,7 @@ impl Market {
             for inst in institutions.iter_mut() {
                 let sender = lcl_sender.clone();
                 let mut recv = lcl_receiver.clone();
-                let history = MarketHistory::create(self);
+                let history = MarketHistory::create(self, data);
                 threads.push(scope.spawn(move |_| {
                     inst.run_market_day(sender, &mut recv, 
                         data, demos, &history);
@@ -196,7 +196,7 @@ impl Market {
             for state in states.iter_mut() {
                 let sender = lcl_sender.clone();
                 let mut recv = lcl_receiver.clone();
-                let history = MarketHistory::create(self);
+                let history = MarketHistory::create(self, data);
                 threads.push(scope.spawn(move |_| {
                     state.run_market_day(sender, &mut recv, 
                         data,  demos, &history);
@@ -591,13 +591,16 @@ pub struct MarketHistory {
     /// The products which are Currencies in our market for whatever reason.
     /// Sorted by Salability (highest to lowest)
     pub currencies: Vec<usize>,
-    // TODO add estimate prices for wants and product classes.
 }
 
 impl MarketHistory {
-    /// Creates a market history of yesterday based on the current market given
-    /// to it.
-    pub fn create(market: &Market) -> Self {
+    /// # Create
+    /// 
+    /// Creates a market history of based on the current market given
+    /// to it. 
+    /// 
+    /// TODO Not Tested
+    pub fn create(market: &Market, data: &DataManager) -> Self {
         let mut ret = MarketHistory { product_info: HashMap::new(),
             want_info: HashMap::new(),
             class_info: HashMap::new(),
@@ -605,6 +608,7 @@ impl MarketHistory {
             currencies: vec![],
         };
         // go through each product and copy over it's info from the market.
+        // also add class prices.
         for (product, price) in market.prices.iter() {
             let avail = market.resources.get(product).unwrap_or(&0.0);
             let offered = market.products_for_sale.get(product).unwrap_or(&0.0);
@@ -619,11 +623,22 @@ impl MarketHistory {
             ret.product_info.insert(*product, ProductInfo { available: *avail, 
                 price: *price,  offered: *offered, sold: *sold, 
                 salability: *sal, is_currency: currency });
+            // add to the class it's a part of (if any)
+            if let Some(class) = data.products.get(product)
+            .expect("Product not found!").product_class {
+                ret.class_info.entry(class)
+                .and_modify(|x| {
+                    x.price = (x.price * x.sold + price * sold) / (x.sold + sold); 
+                    x.options += 1;
+                    x.offered += offered;
+                    x.sold += sold;
+                })
+                .or_insert(ClassInfo { price: *price, options: 1, offered: *offered, sold: *sold  });
+            }
         }
-        // go through and calculate class price based on possible products 
-        // weighted by the amount sold
-        // go through each want and calculate the estimated value of the want in the current market.
 
+        // go through each want and calculate the estimated value of the want in the current market.
+        
         // TODO add calculation from active market info here!
 
         // add in those currencies which are dictated to be currencies by the market.
@@ -694,9 +709,19 @@ impl MarketHistory {
     }
 }
 
+/// Market info for product classes.
 #[derive(Debug, Copy, Clone)]
 pub struct ClassInfo {
-
+    /// The average price of a product in this class, weighted by availility of
+    /// the product in the market.
+    pub price: f64,
+    /// The variety of products within this class in the market.
+    pub options: usize,
+    /// The number of this class which were offered in the market yesterday.
+    pub offered: f64,
+    /// The total number of products in this class which was sold in
+    /// the market.
+    pub sold: f64,
 }
 
 /// The Ways in which a market can connect to another market directly.
