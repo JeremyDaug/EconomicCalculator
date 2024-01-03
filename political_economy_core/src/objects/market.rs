@@ -154,7 +154,8 @@ impl Market {
         // get our thread scope for our children.
         thread::scope(|scope| {
             // make our history immutable so we can hand it out elsewhere.
-            // TODO get rid of this clone if possible.
+            // TODO get rid of history cloning if possible.
+            let shared_history = MarketHistory::create(self, data);
             // get our sender and recievers for the threads
             let (lcl_sender, 
                 lcl_receiver) 
@@ -163,7 +164,7 @@ impl Market {
             let mut threads = vec![];
             // spin up the actors
             for firm in firms.iter_mut() {
-                let history = MarketHistory::create(self, data);
+                let history = shared_history.clone();
                 let firm_sender = lcl_sender.clone();
                 let mut firm_rcvr = lcl_receiver.clone();
                 threads.push(scope.spawn(move |_| {
@@ -173,7 +174,7 @@ impl Market {
             }
             for pop in pops.iter_mut() {
                 // add pop to popWealthWeight for later possible use
-                let history = MarketHistory::create(self, data);
+                let history = shared_history.clone();
                 self.pop_wealth_weight.push(WeightedActor { actor: pop.actor_info(), 
                     weight: pop.total_wealth(&history) });
                 let pop_sender = lcl_sender.clone();
@@ -187,7 +188,7 @@ impl Market {
             for inst in institutions.iter_mut() {
                 let sender = lcl_sender.clone();
                 let mut recv = lcl_receiver.clone();
-                let history = MarketHistory::create(self, data);
+                let history = shared_history.clone();
                 threads.push(scope.spawn(move |_| {
                     inst.run_market_day(sender, &mut recv, 
                         data, demos, &history);
@@ -196,7 +197,7 @@ impl Market {
             for state in states.iter_mut() {
                 let sender = lcl_sender.clone();
                 let mut recv = lcl_receiver.clone();
-                let history = MarketHistory::create(self, data);
+                let history = shared_history.clone();
                 threads.push(scope.spawn(move |_| {
                     state.run_market_day(sender, &mut recv, 
                         data,  demos, &history);
@@ -204,7 +205,7 @@ impl Market {
             }
 
             // once we spin up all actors, send them the OK message.
-            lcl_sender.send(ActorMessage::StartDay).expect("Someho Closed. Panic!");
+            lcl_sender.send(ActorMessage::StartDay).expect("Somehow Closed. Panic!");
 
             // Enter holding pattern while the children do their work
             let mut completed_firms = HashSet::new();
