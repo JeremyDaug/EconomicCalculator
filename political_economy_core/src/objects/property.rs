@@ -1494,16 +1494,14 @@ impl Property {
             }
             // get how much satisfaction is left to satisfy here.
             // placeholder catch for wants and classes as we do not have access to their estimate prices
-            // TODO when price for class and want added, update here.
-            if let Item::Want(_) = desire.item {
-                continue;
-            } else if let Item::Class(_) = desire.item {
-                continue;
-            }
             // get the price per unit.
             let unit_price = match desire.item {
-                Item::Product(id) => market.get_product_price(&id, 0.0),
-                _ => 0.0,
+                Item::Product(id) => market
+                    .get_product_price(&id, 1.0),
+                Item::Class(id) => market
+                    .get_class_price(id, 1.0),
+                Item::Want(id) => market
+                    .get_class_price(id, 1.0)
             };
             // get how much we need to satisfy.
             let units_left = desire.amount - desire.satisfaction_at_tier(tier);

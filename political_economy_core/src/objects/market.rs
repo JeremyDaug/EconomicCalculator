@@ -639,8 +639,24 @@ impl MarketHistory {
         }
 
         // go through each want and calculate the estimated value of the want in the current market.
-        
-        // TODO add calculation from active market info here!
+        for (want, sources) in market.want_sources.iter() {
+            let mut total = 0.0;
+            let mut total_weight = 0.0;
+            for (source, amount) in sources.iter()
+            .filter(|(_, amount)| *amount > 0.0) {
+                let price = match source {
+                    WantSource::Product(id) => {
+                        *market.prices.get(id).unwrap()
+                    },
+                    WantSource::Process(id) => {
+                        calculate_want_price(market, data, *id, &ret)
+                    },
+                };
+                total = (total * total_weight + price * amount) / (total_weight + amount);
+                total_weight += amount;
+            }
+            ret.want_info.insert(*want, WantInfo { est_price: total, est_products: sources.len() as f64 });
+        }
 
         // add in those currencies which are dictated to be currencies by the market.
         for (product, info) in ret.product_info.iter()
@@ -657,6 +673,8 @@ impl MarketHistory {
         }
         ret
     }
+
+    
 
     /// Helper function, gets a product from our history.
     pub fn get_product(&self, product: &usize) -> &ProductInfo {
@@ -694,7 +712,11 @@ impl MarketHistory {
     /// 
     /// TODO update this when class prices are added, this is a placeholder.
     pub fn get_class_price(&self, id: usize, default: f64) -> f64 {
-        1.0
+        if let Some(result) = self.class_info.get(&id) {
+            result.price
+        } else {
+            default
+        }
     }
 
     /// # Get Want Price
@@ -705,9 +727,35 @@ impl MarketHistory {
     /// the processes which make it.
     /// 
     /// TODO update this when want prices are added, this is a placeholder.
-    pub fn get_want_price(&self, id: usize, arg: f64) -> f64 {
-        1.0
+    pub fn get_want_price(&self, id: usize, default: f64) -> f64 {
+        if let Some(result) = self.want_info.get(&id) {
+            result.est_price
+        } else {
+            default
+        }
     }
+}
+
+/// Helper function
+/// 
+/// Calculates the value of a want given the market data and id of the want in question.
+fn calculate_want_price(market: &Market, data: &DataManager, id: usize, history: &MarketHistory) -> f64 {
+    let mut total_price = 0.0;
+    let mut total_quantity = 0.0;
+    let proc_info = data.processes.get(&id).unwrap();
+    for part in proc_info.input_and_capital_products()
+    .iter() {
+        let price = match part.item {
+            super::item::Item::Want(id) => 0.0, // todo consider adding in recursive calculation for other wants.
+            super::item::Item::Class(id) => history.class_info.get(&id)
+                .unwrap_or(&ClassInfo::new(0.0)).price,
+            super::item::Item::Product(id) => history.product_info.get(&id)
+                .unwrap_or(&ProductInfo::new(0.0)).price,
+        };
+        total_price = (total_price * total_quantity + price * part.amount) / (total_quantity + part.amount);
+        total_quantity += part.amount;
+    }
+    total_price
 }
 
 /// Market info for product classes.
@@ -723,6 +771,16 @@ pub struct ClassInfo {
     /// The total number of products in this class which was sold in
     /// the market.
     pub sold: f64,
+}
+impl ClassInfo {
+    fn new(price: f64) -> ClassInfo {
+        ClassInfo {
+            price,
+            options: 0,
+            offered: 0,
+            sold: 0,
+        }
+    }
 }
 
 /// The Ways in which a market can connect to another market directly.
