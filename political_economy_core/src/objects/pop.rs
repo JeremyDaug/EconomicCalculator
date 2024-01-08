@@ -48,9 +48,26 @@ pub struct Pop {
     pub property: Property,
     /// A breakdown of the Population's demographics.
     pub breakdown_table: PopBreakdownTable,
-    // Mood
+
     /// Whether the pop is selling or not.
     pub is_selling: bool,
+
+    // todo Mood related stuff goes here.
+
+    /// The current total satisfaction of the pop.
+    /// 
+    /// This is updated after free_time().
+    pub current_sat: TieredValue,
+    /// The previous satisfaction of the pop from yesterday.
+    /// 
+    /// This is updated after free_time().
+    pub prev_sat: TieredValue,
+    /// The hypothetical satisfaction target this pop believes it could reach 
+    /// with perfect information and amv equal trades.
+    /// 
+    /// This updates after free_time().
+    pub hypo_change: TieredValue,
+
     /// Backlogs of messages, to help keep things clear.
     pub backlog: VecDeque<ActorMessage>,
 }
@@ -439,7 +456,7 @@ impl Pop {
     data: &DataManager,
     market: &MarketHistory) {
         // start by organizing our property, reserve everything for our desires.
-        let initial_sat = self.property.sift_all(data);
+        self.prev_sat = self.property.sift_all(data);
 
         // After reserving for desires directly, measure excess wealth in AMV and 'sift' that.
         let mut surplus = HashMap::new();
@@ -449,7 +466,7 @@ impl Pop {
             surplus.insert(product, amount);
             amv_surplus += amount * market.get_product_price(&product, 1.0);
         }
-        let hypothetical_satisfaction = self.property.satisfaction_from_amv(amv_surplus, market);
+        self.hypo_change = self.property.satisfaction_from_amv(amv_surplus, market);
 
         // put up our surplus for sale if we desire it
         if self.is_selling {
@@ -469,9 +486,9 @@ impl Pop {
         self.shopping_loop(rx, tx, data, market);
 
         // measure overall success
-        // Compare starting point to ending point
-        // compare start+hypo to ending
+        self.current_sat = self.property.sift_all(data);
         // this helps define economic sentiment (prospering/decaying)
+        // todo modify mood based on results here.
 
         // after we run out of stuff to buy, send finished and leave, consumption comes later
         self.push_message(rx, tx, ActorMessage::Finished { sender: self.actor_info() });

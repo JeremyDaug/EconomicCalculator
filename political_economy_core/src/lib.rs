@@ -504,7 +504,7 @@ mod tests {
 
         use crate::{objects::{pop::Pop, 
             pop_breakdown_table::{PopBreakdownTable, PBRow},
-             property::Property, desire::Desire,
+             property::{Property, TieredValue}, desire::Desire,
               species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, item::Item}, 
               demographics::Demographics, data_manager::DataManager};
 
@@ -538,6 +538,9 @@ mod tests {
                 property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
+                current_sat: TieredValue { tier: 0, value: 0.0 },
+                prev_sat: TieredValue { tier: 0, value: 0.0 },
+                hypo_change: TieredValue { tier: 0, value: 0.0 },
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire { 
@@ -829,148 +832,6 @@ mod tests {
             }
         }
 
-        // FIXME
-        mod free_time {
-            use std::{thread, time::Duration};
-
-            use crate::{objects::{actor_message::ActorMessage, seller::Seller, property_info::PropertyInfo}, constants::TIME_ID};
-
-            use super::{make_test_pop, prepare_data_for_market_actions};
-
-
-            /// This is a test to touch most of the free time stuff just to 
-            /// sanity check it. Doesn't push any messages for 
-            /// common_processing to deal with, just forces it to
-            /// run out of stuff to buy and checks that it acts appropriately.
-            #[test]
-            pub fn should_act_as_expected() {
-                let mut test = make_test_pop();
-                let pop_info = test.actor_info();
-                let (data, market) = prepare_data_for_market_actions(&mut test);
-                // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
-                test.is_selling = true;
-                // add a bunch of time for shopping.
-                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
-                // setup messaging
-                let (tx, rx) = barrage::bounded(10);
-                let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
-
-                let handle = thread::spawn(move || {
-                    test.free_time(&mut passed_rx, &passed_tx, &data, &market);
-                    test
-                });
-                thread::sleep(Duration::from_millis(100));
-                // ensure that free time put up their items for sale
-                let msg = rx.recv().expect("Unexpected Close.");
-                if handle.is_finished() { assert!(false); } // ensure we're not done.
-
-                if let ActorMessage::SellOrder { sender, product, quantity, 
-                amv } = msg {
-                    assert_eq!(sender, pop_info);
-                    assert_eq!(product, 6);
-                    assert!(quantity == 10.0);
-                    assert!(amv == 2.0);
-                } else { assert!(false); }
-                thread::sleep(Duration::from_millis(100));
-
-                // wait for the pop to send out it's Find Product Message
-                let msg = rx.recv().expect("Find Product Not recieved.");
-                if let ActorMessage::FindProduct { product, sender } = msg {
-                    assert_eq!(product, 7);
-                    assert_eq!(sender, pop_info);
-                } else { assert!(false); }
-
-                tx.send(ActorMessage::ProductNotFound { product: 7, buyer: pop_info })
-                .expect("Unexpected Break.");
-                rx.recv().expect("Not Closed"); // consume our ProductNotFound message
-                thread::sleep(Duration::from_millis(100));
-                // with the not found message sent, that should be the only 
-                // thing they attempted to buy and should finish up.
-                let msg = rx.recv().expect("Unexpected Close");
-                if let ActorMessage::Finished { sender } = msg {
-                    assert_eq!(sender, pop_info);
-                } else { assert!(false); };
-                if handle.is_finished() { assert!(false); }
-                // Send our Finished msg to wrap it up.
-                tx.send(ActorMessage::AllFinished).expect("Closed?");
-                thread::sleep(Duration::from_millis(100));
-                // with that send, wrap up.
-                if !handle.is_finished() { assert!(false); }
-                let test = handle.join().unwrap();
-
-                assert!(test.property.property.get(&TIME_ID).unwrap().total_property == 100.0);
-            }
-
-            /// This is a test to touch most of the free time stuff just to 
-            /// sanity check it. Doesn't push any messages for 
-            /// common_processing to deal with, just forces it to
-            /// run out of stuff to buy and checks that it acts appropriately.
-            #[test]
-            pub fn should_leave_when_time_has_run_out() {
-                let mut test = make_test_pop();
-                let pop_info = test.actor_info();
-                let (data, market) = prepare_data_for_market_actions(&mut test);
-                // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
-                test.is_selling = true;
-                // add a bunch of time for shopping.
-                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 1.0));
-                // add an additional product to the priority list
-                // setup messaging
-                let (tx, rx) = barrage::bounded(10);
-                let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
-
-                let handle = thread::spawn(move || {
-                    test.free_time(&mut passed_rx, &passed_tx, &data, &market);
-                    test
-                });
-                thread::sleep(Duration::from_millis(100));
-                // ensure that free time put up their items for sale
-                let msg = rx.recv().expect("Unexpected Close.");
-                if handle.is_finished() { assert!(false); } // ensure we're not done.
-
-                if let ActorMessage::SellOrder { sender, product, quantity, 
-                amv } = msg {
-                    assert_eq!(sender, pop_info);
-                    assert_eq!(product, 6);
-                    assert!(quantity == 10.0);
-                    assert!(amv == 2.0);
-                } else { assert!(false); }
-                thread::sleep(Duration::from_millis(100));
-
-                // wait for the pop to send out it's Find Product Message
-                let msg = rx.recv().expect("Find Product Not recieved.");
-                if let ActorMessage::FindProduct { product, sender } = msg {
-                    assert_eq!(product, 7);
-                    assert_eq!(sender, pop_info);
-                } else { assert!(false, "Did not Recieve Find Product msg!"); }
-
-                tx.send(ActorMessage::ProductNotFound { product: 7, buyer: pop_info })
-                .expect("Unexpected Break.");
-                rx.recv().expect("Not Closed"); // consume our ProductNotFound message
-                thread::sleep(Duration::from_millis(100));
-                // with the not found message sent, that should be the only 
-                // thing they attempted to buy and should finish up.
-                let msg = rx.recv().expect("Unexpected Close");
-                if let ActorMessage::Finished { sender } = msg {
-                    assert_eq!(sender, pop_info);
-                } else if let ActorMessage::FindProduct { .. } = msg {
-                    assert!(false, "Enough time to send for next product!");
-                }
-                else { assert!(false, "Did Not Recieve Finished!"); };
-                if handle.is_finished() { assert!(false); }
-                // Send our Finished msg to wrap it up.
-                tx.send(ActorMessage::AllFinished).expect("Closed?");
-                thread::sleep(Duration::from_millis(100));
-                // with that send, wrap up.
-                if !handle.is_finished() { assert!(false); }
-                let test = handle.join().unwrap();
-
-                assert!(test.property.property.get(&TIME_ID).unwrap().total_property == 1.0);
-            }
-        }
-
         #[test]
         pub fn update_pop_desires_equivalently() {
             let mut test = Pop{ 
@@ -984,6 +845,9 @@ mod tests {
                 property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
+                current_sat: TieredValue { tier: 0, value: 0.0 },
+                prev_sat: TieredValue { tier: 0, value: 0.0 },
+                hypo_change: TieredValue { tier: 0, value: 0.0 },
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
@@ -4176,7 +4040,7 @@ mod tests {
         mod shopping_loop_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
             /// Intentionally super simple pop generation
             /// 
@@ -4199,6 +4063,9 @@ mod tests {
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable { table: vec![], total: 0 },
                     is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
                     backlog: VecDeque::new(),
                 };
 
@@ -4757,7 +4624,7 @@ mod tests {
         mod free_time_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::Property, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
             /// Intentionally super simple pop generation
             /// 
@@ -4780,6 +4647,9 @@ mod tests {
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable { table: vec![], total: 0 },
                     is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
                     backlog: VecDeque::new(),
                 };
 
@@ -4934,7 +4804,7 @@ mod tests {
 
             #[test]
             pub fn correctly_run_through_free_time_as_expected() {
-                // setup pop, market, and history.                
+                // setup pop, market, and history.
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);
@@ -4962,7 +4832,95 @@ mod tests {
 
                 // get loop running
                 let handle = thread::spawn(move || {
-                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                    test.free_time(&mut passed_rx, &passed_tx, &data, 
+                        &history);
+                    test
+                });
+                thread::sleep(Duration::from_millis(100));
+
+                // start loop, force through a number of shopping actions
+                rx.recv().expect("Borked"); // find want
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Borkd");
+                thread::sleep(Duration::from_millis(100));
+                rx.recv().expect("Borked"); // find product
+                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
+                    .expect("Borked");
+                thread::sleep(Duration::from_millis(100));
+                rx.recv().expect("Borked"); // find product
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                    .expect("Borkt.");
+                rx.recv().expect("bord"); // reject purchase
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Borkd");
+
+                thread::sleep(Duration::from_millis(100));
+
+                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
+                    .expect("Borked");
+
+                thread::sleep(Duration::from_millis(100));
+
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                    .expect("Borkt.");
+
+                tx.send(ActorMessage::AllFinished).expect("Borkd");
+
+                let mut all_msgs = vec![];
+                while let Ok(msg) = rx.recv() {
+                    all_msgs.push(msg);
+                    println!("{}", msg);
+                    if let ActorMessage::Finished { .. } = msg {
+                        break;
+                    }
+                }
+
+                // let it wrap up
+                let test = handle.join().unwrap();
+
+                // clear out messages on this side and enusre Finished Message was sent.
+
+                assert!(all_msgs.contains(&ActorMessage::Finished { 
+                    sender: pop_info 
+                }));
+                // check that it correctly recorded the satisfaction success/failure.
+                // no change should've occurred.
+                assert_eq!(test.prev_sat, test.current_sat);
+            }
+
+            #[test]
+            pub fn correctly_put_excess_goods_up_for_sale() {
+                // setup pop, market, and history.
+                let mut test = default_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                let seller = ActorInfo::Firm(1);
+                // alter desires to run out of desires.
+                // food 
+                test.property.clear_desires();
+                test.property.add_desire(&Desire::new(Item::Want(2), 0, 
+                    None, 1.0, 0.0, 1, vec![]).unwrap());
+
+                // add the initial property of the pop we'll be using\
+                // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
+                test.property.add_property(2, 10.0, &data);
+                test.property.add_property(3, 100.0, &data);
+                test.property.add_property(6, 10.0, &data);
+                test.property.add_property(14, 10.0, &data);
+                // add in way to much shopping time.
+                test.property.add_property(TIME_ID, 
+                    100.0 * test.standard_shop_time_cost(), &data);
+                // marg goods as up for sale.
+                test.is_selling = true;
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+
+                // get loop running
+                let handle = thread::spawn(move || {
+                    test.free_time(&mut passed_rx, &passed_tx, &data, 
                         &history);
                     test
                 });
@@ -4983,13 +4941,41 @@ mod tests {
                 tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
                     .expect("Borkt.");
 
-                while let Some(msg) = rx.recv().ok() {
+                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+                    .expect("Borkd");
+
+                thread::sleep(Duration::from_millis(100));
+
+                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
+                    .expect("Borked");
+
+                thread::sleep(Duration::from_millis(100));
+
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                    .expect("Borkt.");
+
+                tx.send(ActorMessage::AllFinished).expect("Borkd");
+
+                let mut all_msgs = vec![];
+                while let Ok(msg) = rx.recv() {
+                    all_msgs.push(msg);
                     println!("{}", msg);
+                    if let ActorMessage::Finished { .. } = msg {
+                        break;
+                    }
                 }
 
                 // let it wrap up
+                let test = handle.join().unwrap();
 
+                // clear out messages on this side and enusre Finished Message was sent.
+
+                assert!(all_msgs.contains(&ActorMessage::Finished { 
+                    sender: pop_info 
+                }));
                 // check that it correctly recorded the satisfaction success/failure.
+                // no change should've occurred.
+                assert_eq!(test.prev_sat, test.current_sat);
             }
         }
     }
@@ -5309,7 +5295,7 @@ mod tests {
     mod property_tests {
         use std::collections::{HashSet, HashMap, VecDeque};
 
-        use crate::{objects::{property::{Property, DesireCoord}, desire::Desire, want::Want, product::Product, process::{Process, ProcessPart, ProcessSectionTag}, market::{MarketHistory, ProductInfo}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species, item::Item}, data_manager::DataManager, demographics::Demographics};
+        use crate::{objects::{property::{Property, DesireCoord, TieredValue}, desire::Desire, want::Want, product::Product, process::{Process, ProcessPart, ProcessSectionTag}, market::{MarketHistory, ProductInfo}, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, ideology::Ideology, culture::Culture, species::Species, item::Item}, data_manager::DataManager, demographics::Demographics};
 
         /// Makes a pop for testing. The pop will have the following info
         /// 
@@ -5339,6 +5325,9 @@ mod tests {
                 property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
+                current_sat: TieredValue { tier: 0, value: 0.0 },
+                prev_sat: TieredValue { tier: 0, value: 0.0 },
+                hypo_change: TieredValue { tier: 0, value: 0.0 },
                 backlog: VecDeque::new()};
 
             let species_desire_1 = Desire{ 
@@ -11123,7 +11112,7 @@ mod tests {
         mod release_desire_at_should {
             use std::collections::{VecDeque, HashMap};
 
-            use crate::{objects::{pop::Pop, property::{Property, DesireCoord}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire, species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, item::Item}, demographics::Demographics, data_manager::DataManager};
+            use crate::{objects::{pop::Pop, property::{Property, DesireCoord, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire, species::Species, culture::Culture, ideology::Ideology, market::{MarketHistory, ProductInfo}, item::Item}, demographics::Demographics, data_manager::DataManager};
 
             /// Makes a pop for testing. The pop will have the following info
             /// 
@@ -11153,6 +11142,9 @@ mod tests {
                     property: Property::new(vec![]), 
                     breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                     is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
                     backlog: VecDeque::new()};
 
                 let species_desire_1 = Desire { 

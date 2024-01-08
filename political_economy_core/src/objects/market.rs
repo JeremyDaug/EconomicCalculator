@@ -777,8 +777,8 @@ impl ClassInfo {
         ClassInfo {
             price,
             options: 0,
-            offered: 0,
-            sold: 0,
+            offered: 0.0,
+            sold: 0.0,
         }
     }
 }
