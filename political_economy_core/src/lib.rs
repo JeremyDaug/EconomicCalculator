@@ -4802,7 +4802,7 @@ mod tests {
                 (data, market)
             }
 
-            #[test]
+            #[test] // TODO periodic hanging, recheck.
             pub fn correctly_run_through_free_time_as_expected() {
                 // setup pop, market, and history.
                 let mut test = default_pop();
@@ -4884,7 +4884,7 @@ mod tests {
                 assert_eq!(test.prev_sat, test.current_sat);
             }
 
-            #[test]
+            #[test] // TODO periodic hanging, recheck.
             pub fn correctly_put_excess_goods_up_for_sale() {
                 // setup pop, market, and history.
                 let mut test = default_pop();
