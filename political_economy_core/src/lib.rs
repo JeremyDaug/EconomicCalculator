@@ -4848,28 +4848,24 @@ mod tests {
                     .expect("Borked");
                 thread::sleep(Duration::from_millis(100));
                 rx.recv().expect("Borked"); // find product
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
                     .expect("Borkt.");
                 rx.recv().expect("bord"); // reject purchase
                 tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
                     .expect("Borkd");
-
-                thread::sleep(Duration::from_millis(100));
-
+                rx.recv().expect("Borked"); // find product
                 tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
                     .expect("Borked");
-
-                thread::sleep(Duration::from_millis(100));
-
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                thread::sleep(Duration::from_millis(100)); // pause so in stock can arrive.
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
                     .expect("Borkt.");
-
+                rx.recv().expect("Brd"); // reject purchase?
                 tx.send(ActorMessage::AllFinished).expect("Borkd");
 
                 let mut all_msgs = vec![];
                 while let Ok(msg) = rx.recv() {
                     all_msgs.push(msg);
-                    println!("{}", msg);
+                    //println!("{}", msg);
                     if let ActorMessage::Finished { .. } = msg {
                         break;
                     }
@@ -4900,7 +4896,7 @@ mod tests {
                 test.property.clear_desires();
                 test.property.add_desire(&Desire::new(Item::Want(2), 0, 
                     None, 1.0, 0.0, 1, vec![]).unwrap());
-
+                
                 // add the initial property of the pop we'll be using\
                 // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
                 test.property.add_property(2, 10.0, &data);
@@ -4910,7 +4906,8 @@ mod tests {
                 // add in way to much shopping time.
                 test.property.add_property(TIME_ID, 
                     100.0 * test.standard_shop_time_cost(), &data);
-                // marg goods as up for sale.
+
+                // set our selling state to true.
                 test.is_selling = true;
 
                 // setup message queue.
@@ -4925,41 +4922,73 @@ mod tests {
                     test
                 });
                 thread::sleep(Duration::from_millis(100));
+                
+                // check that all non-reserved property is put up for sale.
+                let mut sales = vec![];
+                while let Ok(msg) = rx.recv() {
+                    if let ActorMessage::SellOrder { .. } = msg {
+                        //println!("{}", msg);
+                        sales.push(msg);
+                    } else {
+                        break;
+                    }
+                }
+                // check that the sales are as predicted
+                let mut found_prods = vec![];
+                for msg in sales {
+                    if let ActorMessage::SellOrder { sender, product, 
+                    quantity, amv } = msg {
+                        found_prods.push(product);
+                        if product == 3 {
+                            assert_eq!(sender, pop_info);
+                            assert_eq!(quantity, 100.0);
+                            assert_eq!(amv, 5.0);
+                        } else if product == 14 {
+                            assert_eq!(sender, pop_info);
+                            assert_eq!(quantity, 10.0);
+                            assert_eq!(amv, 100.0);
+                        } else if product == 6 {
+                            assert_eq!(sender, pop_info);
+                            assert_eq!(quantity, 10.0);
+                            assert_eq!(amv, 10.0);
+                        } else {
+                            assert!(false, "Product {} not expected.", product);
+                        }
+                    } else {
+                        assert!(false, "Bad message recievd during sales.");
+                    }
+                }
+                assert!(found_prods.contains(&3));
+                assert!(found_prods.contains(&14));
+                assert!(found_prods.contains(&6));
 
                 // start loop, force through a number of shopping actions
-
                 tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
                     .expect("Borkd");
-
-                    thread::sleep(Duration::from_millis(100));
-
+                thread::sleep(Duration::from_millis(100));
+                rx.recv().expect("Borked"); // find product
                 tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
                     .expect("Borked");
-
                 thread::sleep(Duration::from_millis(100));
-
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                rx.recv().expect("Borked"); // find product
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
                     .expect("Borkt.");
-
+                rx.recv().expect("bord"); // reject purchase
                 tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
                     .expect("Borkd");
-
-                thread::sleep(Duration::from_millis(100));
-
+                rx.recv().expect("Borked"); // find product
                 tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
                     .expect("Borked");
-
-                thread::sleep(Duration::from_millis(100));
-
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1.0, quantity: 10000.0 })
+                thread::sleep(Duration::from_millis(100)); // pause so in stock can arrive.
+                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
                     .expect("Borkt.");
-
+                rx.recv().expect("Brd"); // reject purchase?
                 tx.send(ActorMessage::AllFinished).expect("Borkd");
 
                 let mut all_msgs = vec![];
                 while let Ok(msg) = rx.recv() {
                     all_msgs.push(msg);
-                    println!("{}", msg);
+                    //println!("{}", msg);
                     if let ActorMessage::Finished { .. } = msg {
                         break;
                     }

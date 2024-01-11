@@ -455,6 +455,7 @@ impl Pop {
     pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
     data: &DataManager,
     market: &MarketHistory) {
+        // TODO consider inverting this so the shopping loop can be separated and make testing easier.
         // start by organizing our property, reserve everything for our desires.
         self.prev_sat = self.property.sift_all(data);
 
@@ -471,12 +472,15 @@ impl Pop {
         // put up our surplus for sale if we desire it
         if self.is_selling {
             for (&product, &amount) in surplus.iter()
-            .filter(|(&id, _)| data.products.get(&id).expect("Product Not found!").tags
+            .filter(|(&id, _)| !data.products.get(&id).expect("Product Not found!").tags
             .contains(&ProductTag::NonTransferrable)) { // put everything that is transferrable up for sale.
+                if amount.floor() == 0.0 {
+                    continue;
+                }
                 self.push_message(rx, tx,
                 ActorMessage::SellOrder { sender: self.actor_info(),
                     product,
-                    quantity: amount,
+                    quantity: amount.floor(), // floor it because only whole units may be transfered.
                     amv: market.get_product_price(&product, 1.0) });
                 // non-firms offer at the current market price.
             }
