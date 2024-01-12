@@ -4850,9 +4850,11 @@ mod tests {
                 rx.recv().expect("Borked"); // find product
                 tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
                     .expect("Borkt.");
+                thread::sleep(Duration::from_millis(100));
                 rx.recv().expect("bord"); // reject purchase
                 tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
                     .expect("Borkd");
+                thread::sleep(Duration::from_millis(100));
                 rx.recv().expect("Borked"); // find product
                 tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
                     .expect("Borked");
@@ -4973,9 +4975,11 @@ mod tests {
                 rx.recv().expect("Borked"); // find product
                 tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
                     .expect("Borkt.");
+                thread::sleep(Duration::from_millis(100));
                 rx.recv().expect("bord"); // reject purchase
                 tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
                     .expect("Borkd");
+                thread::sleep(Duration::from_millis(100));
                 rx.recv().expect("Borked"); // find product
                 tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
                     .expect("Borked");

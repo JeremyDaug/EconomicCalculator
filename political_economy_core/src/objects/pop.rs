@@ -318,7 +318,7 @@ impl Pop {
                     amount: self.property.work_time
                     });
                 // and remove that time from our property as well
-                self.property.remove_property(TIME_ID, -self.property.work_time, data);
+                self.property.remove_property(TIME_ID, self.property.work_time, data);
             },
             FirmEmployeeAction::RequestEverything => {
                 // loop over everything and send it to the firm.
@@ -528,8 +528,8 @@ impl Pop {
     /// TODO consider adding a 'grocery list' prebuy option which gets the most consistently bought items to improve efficiency and reduce the number of times it needs to go out and buy.
     /// TODO Once possible, allow this to buy multiple items at the same store before moving on to the next.
     pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>,
-        tx: &Sender<ActorMessage>,
-        data: &DataManager, market: &MarketHistory) {
+    tx: &Sender<ActorMessage>,
+    data: &DataManager, market: &MarketHistory) {
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
         let mut next_desire = self.property.get_first_unsatisfied_desire();
