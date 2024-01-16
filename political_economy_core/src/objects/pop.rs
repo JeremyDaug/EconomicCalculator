@@ -140,6 +140,8 @@ impl Pop {
     pub fn push_message(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
     msg: ActorMessage) {
         loop {
+            // try to clear out prior msgs before sending.
+            self.msg_catchup(rx);
             let result = tx.try_send(msg);
             if let Ok(_) = result {
                 break; // if message got sent out, break.
@@ -151,9 +153,6 @@ impl Pop {
                     barrage::TrySendError::Full(_) => (), // if just full, consume and try again.
                 }
             }
-            // if we get here, the queue is blocked, so read and if it's
-            // for us, put it on the back burner.
-            self.msg_catchup(rx);
         };
     }
 

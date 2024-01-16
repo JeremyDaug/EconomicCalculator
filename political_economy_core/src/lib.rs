@@ -4938,12 +4938,14 @@ mod tests {
                 
                 // check that all non-reserved property is put up for sale.
                 let mut sales = vec![];
-                while let Ok(msg) = rx.recv() {
-                    if let ActorMessage::SellOrder { .. } = msg {
-                        //println!("{}", msg);
-                        sales.push(msg);
-                    } else {
-                        break;
+                for _ in 0..3 {
+                    if let Ok(msg) = rx.recv() {
+                        if let ActorMessage::SellOrder { .. } = msg {
+                            //println!("{}", msg);
+                            sales.push(msg);
+                        } else {
+                            break;
+                        }
                     }
                 }
                 // check that the sales are as predicted
@@ -4983,6 +4985,7 @@ mod tests {
                     if let Some(msg) = msg {
                         if let ActorMessage::Finished { sender } = msg {
                             assert_eq!(sender, pop_info, "Incorrect Sender");
+                            break;
                         }
                     }
                     let now = std::time::SystemTime::now();
