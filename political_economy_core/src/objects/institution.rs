@@ -44,7 +44,7 @@ impl Actor for Institution {
     /// This is a placeholder. Currently it just sends Finished, and ends
     /// it there.
     fn run_market_day(&mut self, 
-        sender: Sender<ActorMessage>,
+        sender: &mut Sender<ActorMessage>,
         _reciever: &mut Receiver<ActorMessage>,
         _data: &DataManager,
         _demos: &Demographics,

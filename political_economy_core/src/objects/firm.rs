@@ -120,7 +120,7 @@ impl Actor for Firm {
     /// Once we get the AllFinished message, complete any remaining cleanup, 
     /// and close out.
     fn run_market_day(&mut self, 
-        sender: Sender<ActorMessage>,
+        sender: &mut Sender<ActorMessage>,
         _reciever: &mut Receiver<ActorMessage>,
         _data: &DataManager,
         _demos: &Demographics,

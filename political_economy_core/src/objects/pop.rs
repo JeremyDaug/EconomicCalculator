@@ -452,9 +452,15 @@ impl Pop {
     /// as successes or failure comes in.
     ///
     /// ## Not Tested due to complexity.
-    pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+    pub fn free_time(&mut self, rx: &mut Receiver<ActorMessage>, tx: &mut Sender<ActorMessage>,
     data: &DataManager,
-    market: &MarketHistory) {
+    market: &MarketHistory,
+    shopping_loop: fn(&mut Pop, 
+        &mut Receiver<ActorMessage>, 
+        &mut Sender<ActorMessage>, 
+        &DataManager, 
+        &MarketHistory,)) 
+    {
         // TODO consider inverting this so the shopping loop can be separated and make testing easier.
         // start by organizing our property, reserve everything for our desires.
         self.prev_sat = self.property.sift_all(data);
@@ -487,7 +493,7 @@ impl Pop {
         }
 
         // Go shopping to get more stuff
-        self.shopping_loop(rx, tx, data, market);
+        shopping_loop(self, rx, tx, data, market);
 
         // measure overall success
         self.current_sat = self.property.sift_all(data);
@@ -527,18 +533,18 @@ impl Pop {
     /// TODO Sift Improvement Location: When Sifting is upgraded to not be destructive, come back here and upgrade the time extraction.
     /// TODO consider adding a 'grocery list' prebuy option which gets the most consistently bought items to improve efficiency and reduce the number of times it needs to go out and buy.
     /// TODO Once possible, allow this to buy multiple items at the same store before moving on to the next.
-    pub fn shopping_loop(&mut self, rx: &mut Receiver<ActorMessage>,
-    tx: &Sender<ActorMessage>,
+    pub fn shopping_loop(pop: &mut Pop, rx: &mut Receiver<ActorMessage>,
+    tx: &mut Sender<ActorMessage>,
     data: &DataManager, market: &MarketHistory) {
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
-        let mut next_desire = self.property.get_first_unsatisfied_desire();
+        let mut next_desire = pop.property.get_first_unsatisfied_desire();
 
         // setup our sanity check escape mechanism, primarily if we find ourselves 
         let mut completed_desires = HashSet::new();
 
         // preemptively get shopping time cost
-        let shopping_time_cost = self.standard_shop_time_cost();
+        let shopping_time_cost = pop.standard_shop_time_cost();
 
         // also initialize shopping time, none should exist prior to here.
         let mut available_shopping_time = 0.0;
@@ -548,7 +554,7 @@ impl Pop {
         let mut retry = false;
         // Should have our current desire coords in next_desire
         while let Some(curr_desire_coord) = next_desire {
-            if completed_desires.len() == self.property.desires.len() {
+            if completed_desires.len() == pop.property.desires.len() {
                 break; // if all desires are marked complete, gtfo.
             }
             if prev == next_desire && !retry { // if we are retrying, note that
@@ -557,22 +563,22 @@ impl Pop {
                 // if already retried and came back for more, mark desire as complete
                 // and move on to the next.
                 completed_desires.insert(curr_desire_coord.idx);
-                next_desire = self.property.walk_up_tiers(next_desire);
+                next_desire = pop.property.walk_up_tiers(next_desire);
                 retry = false;
                 continue;
             }
             // check that our desire is not in completed.
             if completed_desires.contains(&curr_desire_coord.idx) {
                 prev = next_desire;
-                next_desire = self.property.walk_up_tiers(next_desire);
+                next_desire = pop.property.walk_up_tiers(next_desire);
                 continue;
             }
             // check that we have enough time to go shopping (either time itself or shopping time)
-            if let Some(time) = self.property.property.get(&TIME_ID) {
+            if let Some(time) = pop.property.property.get(&TIME_ID) {
                 if time.available() < shopping_time_cost {
                     break;
                 }
-            } else if let Some(shopping_time) = self.property.property.get(&SHOPPING_TIME_ID) {
+            } else if let Some(shopping_time) = pop.property.property.get(&SHOPPING_TIME_ID) {
                 if shopping_time.available() < shopping_time_cost {
                     break;
                 }
@@ -581,13 +587,13 @@ impl Pop {
                 break;
             }
             // start by getting our desire
-            let curr_desire = self.property.desires
+            let curr_desire = pop.property.desires
                 .get(curr_desire_coord.idx).unwrap().clone();
             // if the current desire is already satisfied for wahtever reason move on
             let is_sat = curr_desire.satisfied_at_tier(curr_desire_coord.tier);
             if curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
                 // get the next, and continue.
-                next_desire = self.property.walk_up_tiers(next_desire);
+                next_desire = pop.property.walk_up_tiers(next_desire);
                 continue;
             }
 
@@ -600,10 +606,10 @@ impl Pop {
                 Item::Want(id) => { // for wants, we need to get the product inputs.
                     // if it's a want, go to the most common satisfaction
                     // of that want in the market.
-                    self.push_message(rx, tx,
-                        ActorMessage::FindWant { want: *id, sender: self.actor_info() });
+                    pop.push_message(rx, tx,
+                        ActorMessage::FindWant { want: *id, sender: pop.actor_info() });
                     // wait for the market to respond with either it's suggested process, or failure.
-                    let result = self.active_wait(rx, tx, data, market,
+                    let result = pop.active_wait(rx, tx, data, market,
                         &vec![
                             ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, process: 0 },
                             ActorMessage::WantNotFound { want: 0, buyer: ActorInfo::Firm(0) }
@@ -621,7 +627,7 @@ impl Pop {
                                     panic!("Use/Consume should not have wants."),
                                 Item::Class(id) => {
                                     // get class item which satisfies.
-                                    let result = self.find_class_product(rx, tx, id, data, market);
+                                    let result = pop.find_class_product(rx, tx, id, data, market);
                                     if let Some(product) = result {
                                         buy_targets.push((product,
                                             part.amount * sat_target));
@@ -641,7 +647,7 @@ impl Pop {
                     } else { panic!("Should not be here.") }
                 },
                 Item::Class(id) => { // for class, any item of the class will be good enough.
-                    let result = self.find_class_product(rx, tx, *id, data, market);
+                    let result = pop.find_class_product(rx, tx, *id, data, market);
                     if let Some(product) = result {
                         buy_targets.push((product, sat_target));
                         1.0
@@ -656,7 +662,7 @@ impl Pop {
             };
             // then sift up to this desire point to free up excess resources.
             // TODO when sifting is improved, drop this.
-            self.property.sift_up_to(&curr_desire_coord, data);
+            pop.property.sift_up_to(&curr_desire_coord, data);
 
             // prepare a check to see if we want to move on or not.
             let mut go_to_next = true;
@@ -666,32 +672,32 @@ impl Pop {
             // TODO improve this to actually peak ahead to see if it can go shopping enough to get what it needs and satisfy that desire.
             for (buy_target, buy_quantity) in buy_targets {
                 // check if we need to get the item or not
-                if self.property.property.get(&buy_target).unwrap()
+                if pop.property.property.get(&buy_target).unwrap()
                     .available() >= buy_quantity {
                     continue; // if not skip to next.
                 } // since we do need some amount of it,
                 // get a trip of time worth
                 // TODO update to take more dynamic time payment into account.
                 // TODO when purchasing shopping time is available, add an option for that here.
-                available_shopping_time += self.property.get_shopping_time(
+                available_shopping_time += pop.property.get_shopping_time(
                     shopping_time_cost - available_shopping_time,
-                    data, market, self.skill_average(), self.skill, Some(curr_desire_coord));
+                    data, market, pop.skill_average(), pop.skill, Some(curr_desire_coord));
                 // check that it's enough time to go out buying
                 if shopping_time_cost > available_shopping_time {
                     // if we don't have enough time to go shopping for this desire we likely won't be able to go shopping for
                     // anything, so add the excess shopping time to our property and gtfo (consired allowing it to be refunded.)
                     // todo refund shopping time here as it hasn't actually been spend yet 
-                    self.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
+                    pop.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
                     break;
                 } else {
                     // since we have enough time, go shopping.
                     // expend then return excess shopping time to property
                     let remaining_shop_time = available_shopping_time - shopping_time_cost;
                     if remaining_shop_time > 0.0 {
-                        self.property.add_property(SHOPPING_TIME_ID, remaining_shop_time, data);
+                        pop.property.add_property(SHOPPING_TIME_ID, remaining_shop_time, data);
                     }
                     // regardless of our success or failure, add it to the cost.
-                    self.property.property.entry(buy_target)
+                    pop.property.property.entry(buy_target)
                     .and_modify(|x| x.time_cost += shopping_time_cost)
                     .or_insert({
                         let mut temp = PropertyInfo::new(0.0);
@@ -699,7 +705,7 @@ impl Pop {
                         temp
                     });
                     // TODO make use of buy_result instead of ignoring it.
-                    let buy_result = self.try_to_buy(rx, tx, data, market, buy_target, buy_quantity);
+                    let buy_result = pop.try_to_buy(rx, tx, data, market, buy_target, buy_quantity);
                     // the result if positive should do pretty much nothing. Target Success.
                     // If failure, we want to reduce the target by some measure, how much, will likely depend on the kind of failure.
                     match buy_result {
@@ -752,7 +758,7 @@ impl Pop {
             }
             if go_to_next {
                 // the next desire
-                next_desire = self.property.walk_up_tiers(next_desire);
+                next_desire = pop.property.walk_up_tiers(next_desire);
             }
         }
     }
@@ -1618,7 +1624,7 @@ impl Actor for Pop {
     /// Panics if it recieves any message before ActorMessage::StartDay
     /// to ensure the broadcast queue is open.
     fn run_market_day(&mut self,
-    tx: Sender<ActorMessage>,
+    tx: &mut Sender<ActorMessage>,
     rx: &mut Receiver<ActorMessage>,
     data: &DataManager,
     _demos: &Demographics,
@@ -1659,7 +1665,7 @@ impl Actor for Pop {
         // employee, or if it's a disorganized owner, it's share of everything.
         // Start free time section, roll between processing for wants, going
         // out to buy things, and dealing with recieved sale orders.
-        self.free_time(rx, &tx, data, history);
+        self.free_time(rx, tx, data, history, Pop::shopping_loop);
 
         // TODO Taxes will either be done here, or in free_time above. Methods of Taxation will need to be looked into for the system.
 

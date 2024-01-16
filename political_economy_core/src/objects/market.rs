@@ -165,10 +165,10 @@ impl Market {
             // spin up the actors
             for firm in firms.iter_mut() {
                 let history = shared_history.clone();
-                let firm_sender = lcl_sender.clone();
+                let mut firm_sender = lcl_sender.clone();
                 let mut firm_rcvr = lcl_receiver.clone();
                 threads.push(scope.spawn(move |_| {
-                    firm.run_market_day(firm_sender, &mut firm_rcvr,
+                    firm.run_market_day(&mut firm_sender, &mut firm_rcvr,
                         data, demos, &history);
                 }));
             }
@@ -177,29 +177,29 @@ impl Market {
                 let history = shared_history.clone();
                 self.pop_wealth_weight.push(WeightedActor { actor: pop.actor_info(), 
                     weight: pop.total_wealth(&history) });
-                let pop_sender = lcl_sender.clone();
+                let mut pop_sender = lcl_sender.clone();
                 let mut pop_recv = lcl_receiver.clone();
                 threads.push(scope.spawn(move |_| {
-                    pop.run_market_day(pop_sender, &mut pop_recv,
+                    pop.run_market_day(&mut pop_sender, &mut pop_recv,
                     data, demos, &history);
                 }));
 
             }
             for inst in institutions.iter_mut() {
-                let sender = lcl_sender.clone();
+                let mut sender = lcl_sender.clone();
                 let mut recv = lcl_receiver.clone();
                 let history = shared_history.clone();
                 threads.push(scope.spawn(move |_| {
-                    inst.run_market_day(sender, &mut recv, 
+                    inst.run_market_day(&mut sender, &mut recv, 
                         data, demos, &history);
                 }));
             }
             for state in states.iter_mut() {
-                let sender = lcl_sender.clone();
+                let mut sender = lcl_sender.clone();
                 let mut recv = lcl_receiver.clone();
                 let history = shared_history.clone();
                 threads.push(scope.spawn(move |_| {
-                    state.run_market_day(sender, &mut recv, 
+                    state.run_market_day(&mut sender, &mut recv, 
                         data,  demos, &history);
                 }));
             }

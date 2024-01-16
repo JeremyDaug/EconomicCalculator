@@ -4040,6 +4040,8 @@ mod tests {
         mod shopping_loop_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
+            use barrage::{Receiver, Sender};
+
             use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
             /// Intentionally super simple pop generation
@@ -4238,7 +4240,7 @@ mod tests {
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
+                let mut passed_tx = tx.clone();
                 // setup firm we're talking with
                 // let selling_firm = ActorInfo::Firm(1);
                 let mut unsat_desires = vec![];
@@ -4250,7 +4252,7 @@ mod tests {
 
                 // setup property split
                 let handle = thread::spawn(move || {
-                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                    Pop::shopping_loop(&mut test, &mut passed_rx, &mut passed_tx, &data, 
                         &history);
                     test
                 });
@@ -4374,11 +4376,11 @@ mod tests {
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
+                let mut passed_tx = tx.clone();
 
                 // get loop running
                 let handle = thread::spawn(move || {
-                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                    Pop::shopping_loop(&mut test, &mut passed_rx, &mut passed_tx, &data, 
                         &history);
                     test
                 });
@@ -4501,11 +4503,11 @@ mod tests {
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
+                let mut passed_tx = tx.clone();
 
                 // get loop running
                 let handle = thread::spawn(move || {
-                    test.shopping_loop(&mut passed_rx, &passed_tx, &data, 
+                    Pop::shopping_loop(&mut test, &mut passed_rx, &mut passed_tx, &data, 
                         &history);
                     test
                 });
@@ -4621,8 +4623,11 @@ mod tests {
             // TODO Shopping_loop full_spread Barter when that option is possible.
         }
     
+        // TODO Contains some hang-ups
         mod free_time_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
+
+            use barrage::{Sender, Receiver};
 
             use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
@@ -4802,7 +4807,13 @@ mod tests {
                 (data, market)
             }
 
-            #[test] // TODO periodic hanging, recheck.
+            fn dont_shop_loop(pop: &mut Pop, rx: &mut Receiver<ActorMessage>,
+                tx: &mut Sender<ActorMessage>,
+                data: &DataManager, market: &MarketHistory) {
+
+            }
+
+            #[test]
             pub fn correctly_run_through_free_time_as_expected() {
                 // setup pop, market, and history.
                 let mut test = default_pop();
@@ -4828,12 +4839,12 @@ mod tests {
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
+                let mut passed_tx = tx.clone();
 
                 // get loop running
                 let handle = thread::spawn(move || {
-                    test.free_time(&mut passed_rx, &passed_tx, &data, 
-                        &history);
+                    test.free_time(&mut passed_rx, &mut passed_tx, &data, 
+                        &history, dont_shop_loop);
                     test
                 });
                 thread::sleep(Duration::from_millis(100));
@@ -4915,12 +4926,12 @@ mod tests {
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
+                let mut passed_tx = tx.clone();
 
                 // get loop running
                 let handle = thread::spawn(move || {
-                    test.free_time(&mut passed_rx, &passed_tx, &data, 
-                        &history);
+                    test.free_time(&mut passed_rx, &mut passed_tx, &data, 
+                        &history, dont_shop_loop);
                     test
                 });
                 thread::sleep(Duration::from_millis(100));
@@ -4964,48 +4975,29 @@ mod tests {
                 assert!(found_prods.contains(&14));
                 assert!(found_prods.contains(&6));
 
-                // start loop, force through a number of shopping actions
-                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
-                    .expect("Borkd");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("Borked"); // find product
-                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
-                    .expect("Borked");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("Borked"); // find product
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
-                    .expect("Borkt.");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("bord"); // reject purchase
-                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
-                    .expect("Borkd");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("Borked"); // find product
-                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
-                    .expect("Borked");
-                thread::sleep(Duration::from_millis(100)); // pause so in stock can arrive.
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
-                    .expect("Borkt.");
-                rx.recv().expect("Brd"); // reject purchase?
-                tx.send(ActorMessage::AllFinished).expect("Borkd");
-
-                let mut all_msgs = vec![];
-                while let Ok(msg) = rx.recv() {
-                    all_msgs.push(msg);
-                    //println!("{}", msg);
-                    if let ActorMessage::Finished { .. } = msg {
-                        break;
+                // start loop, recieved and completed, nothing actually done here.
+                thread::sleep(Duration::from_millis(1000));
+                // should recieve finished here
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::Finished { sender } = msg {
+                            assert_eq!(sender, pop_info, "Incorrect Sender");
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
                     }
                 }
+
+                // send all finished to wrap up.
+                tx.send(ActorMessage::AllFinished).expect("Borkd");
 
                 // let it wrap up
                 let test = handle.join().unwrap();
 
-                // clear out messages on this side and enusre Finished Message was sent.
-
-                assert!(all_msgs.contains(&ActorMessage::Finished { 
-                    sender: pop_info 
-                }));
                 // check that it correctly recorded the satisfaction success/failure.
                 // no change should've occurred.
                 assert_eq!(test.prev_sat, test.current_sat);
