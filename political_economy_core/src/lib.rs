@@ -4629,7 +4629,7 @@ mod tests {
 
             use barrage::{Sender, Receiver};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire, property_info::PropertyInfo}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
             /// Intentionally super simple pop generation
             /// 
@@ -4807,10 +4807,33 @@ mod tests {
                 (data, market)
             }
 
-            fn dont_shop_loop(pop: &mut Pop, rx: &mut Receiver<ActorMessage>,
-                tx: &mut Sender<ActorMessage>,
-                data: &DataManager, market: &MarketHistory) {
+            fn dont_shop_loop(_pop: &mut Pop, _rx: &mut Receiver<ActorMessage>,
+                _tx: &mut Sender<ActorMessage>,
+                _data: &DataManager, _market: &MarketHistory) {}
 
+            /// Shopping loop adds and removes based on the amount of time available to the pop.
+            /// Each unit does the following
+            /// 
+            /// 1. Pure Positive, add food (prod 2) remove only time.
+            /// 2. Neutral, add food but remove some cloth.
+            /// 3. Negative, remove some cloth.
+            fn shop_loop(pop: &mut Pop, _rx: &mut Receiver<ActorMessage>,
+            _tx: &mut Sender<ActorMessage>,
+            data: &DataManager, _market: &MarketHistory) {
+                let time = pop.property.property.get(&TIME_ID).unwrap().clone();
+                if time.available() > 3.0 {
+                    pop.property.remove_property(TIME_ID, 1.0, data);
+                    pop.property.remove_property(6, 1.0, data);
+                }
+                if time.available() > 2.0 {
+                    pop.property.remove_property(TIME_ID, 1.0, data);
+                    pop.property.remove_property(6, 1.0, data);
+                    pop.property.add_property(2, 1.0, data);
+                }
+                if time.available() > 1.0 {
+                    pop.property.remove_property(TIME_ID, 1.0, data);
+                    pop.property.add_property(2, 1.0, data);
+                }
             }
 
             #[test]
@@ -4844,36 +4867,12 @@ mod tests {
                 // get loop running
                 let handle = thread::spawn(move || {
                     test.free_time(&mut passed_rx, &mut passed_tx, &data, 
-                        &history, dont_shop_loop);
+                        &history, shop_loop);
                     test
                 });
                 thread::sleep(Duration::from_millis(100));
 
-                // start loop, force through a number of shopping actions
-                rx.recv().expect("Borked"); // find want
-                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
-                    .expect("Borkd");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("Borked"); // find product
-                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
-                    .expect("Borked");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("Borked"); // find product
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
-                    .expect("Borkt.");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("bord"); // reject purchase
-                tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
-                    .expect("Borkd");
-                thread::sleep(Duration::from_millis(100));
-                rx.recv().expect("Borked"); // find product
-                tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
-                    .expect("Borked");
-                thread::sleep(Duration::from_millis(100)); // pause so in stock can arrive.
-                tx.send(ActorMessage::InStock { buyer: pop_info, seller, product: 2, price: 1000.0, quantity: 10000.0 })
-                    .expect("Borkt.");
-                rx.recv().expect("Brd"); // reject purchase?
-                tx.send(ActorMessage::AllFinished).expect("Borkd");
+                // start loop, shopping msgs not needed to 
 
                 let mut all_msgs = vec![];
                 while let Ok(msg) = rx.recv() {
@@ -4897,7 +4896,7 @@ mod tests {
                 assert_eq!(test.prev_sat, test.current_sat);
             }
 
-            #[test] // TODO periodic hanging, recheck.
+            #[test]
             pub fn correctly_put_excess_goods_up_for_sale() {
                 // setup pop, market, and history.
                 let mut test = default_pop();
