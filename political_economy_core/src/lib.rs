@@ -498,6 +498,7 @@ mod tests {
         }
     }
 
+    // TODO ALter Pop class and functions to be more invertable, at least with Free_time, Shopping_loop, Try_to_buy, and Standard Buy
     mod pop_tests {
         // fix
         use std::collections::{HashMap, VecDeque};
@@ -4040,8 +4041,6 @@ mod tests {
         mod shopping_loop_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
-            use barrage::{Receiver, Sender};
-
             use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
 
             /// Intentionally super simple pop generation
@@ -4623,13 +4622,12 @@ mod tests {
             // TODO Shopping_loop full_spread Barter when that option is possible.
         }
     
-        // TODO Contains some hang-ups
         mod free_time_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
             use barrage::{Sender, Receiver};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire, property_info::PropertyInfo}, constants::{TIME_ID, SHOPPING_TIME_ID}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::ActorMessage, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::TIME_ID};
 
             /// Intentionally super simple pop generation
             /// 
@@ -4821,28 +4819,27 @@ mod tests {
             _tx: &mut Sender<ActorMessage>,
             data: &DataManager, _market: &MarketHistory) {
                 let time = pop.property.property.get(&TIME_ID).unwrap().clone();
-                if time.available() > 3.0 {
+                if time.available() >= 3.0 {
                     pop.property.remove_property(TIME_ID, 1.0, data);
                     pop.property.remove_property(6, 1.0, data);
                 }
-                if time.available() > 2.0 {
+                if time.available() >= 2.0 {
                     pop.property.remove_property(TIME_ID, 1.0, data);
                     pop.property.remove_property(6, 1.0, data);
                     pop.property.add_property(2, 1.0, data);
                 }
-                if time.available() > 1.0 {
+                if time.available() >= 1.0 {
                     pop.property.remove_property(TIME_ID, 1.0, data);
                     pop.property.add_property(2, 1.0, data);
                 }
             }
 
             #[test]
-            pub fn correctly_run_through_free_time_as_expected() {
+            pub fn set_current_and_previous_sat_correctly_after_change() {
                 // setup pop, market, and history.
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);
-                let seller = ActorInfo::Firm(1);
                 // alter desires to run out of desires.
                 // food 
                 test.property.clear_desires();
@@ -4857,7 +4854,7 @@ mod tests {
                 test.property.add_property(14, 10.0, &data);
                 // add in way to much shopping time.
                 test.property.add_property(TIME_ID, 
-                    100.0 * test.standard_shop_time_cost(), &data);
+                    1.0, &data);
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -4872,25 +4869,94 @@ mod tests {
                 });
                 thread::sleep(Duration::from_millis(100));
 
-                // start loop, shopping msgs not needed to 
-
-                let mut all_msgs = vec![];
-                while let Ok(msg) = rx.recv() {
-                    all_msgs.push(msg);
-                    //println!("{}", msg);
-                    if let ActorMessage::Finished { .. } = msg {
-                        break;
+                // start loop, recieved and completed, nothing actually done here.
+                thread::sleep(Duration::from_millis(1000));
+                // should recieve finished here
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::Finished { sender } = msg {
+                            assert_eq!(sender, pop_info, "Incorrect Sender");
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
                     }
                 }
+
+                // send all finished to wrap up.
+                tx.send(ActorMessage::AllFinished).expect("Borkd");
 
                 // let it wrap up
                 let test = handle.join().unwrap();
 
-                // clear out messages on this side and enusre Finished Message was sent.
+                // check that it correctly recorded the satisfaction success/failure.
+                // no change should've occurred.
+                assert!(test.prev_sat < test.current_sat);
+            }
 
-                assert!(all_msgs.contains(&ActorMessage::Finished { 
-                    sender: pop_info 
-                }));
+            #[test]
+            pub fn set_current_and_previous_sat_correctly_after_no_change() {
+                // setup pop, market, and history.
+                let mut test = default_pop();
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // alter desires to run out of desires.
+                // food 
+                test.property.clear_desires();
+                test.property.add_desire(&Desire::new(Item::Want(2), 0, 
+                    None, 1.0, 0.0, 1, vec![]).unwrap());
+                
+                // add the initial property of the pop we'll be using\
+                // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
+                test.property.add_property(2, 10.0, &data);
+                test.property.add_property(3, 100.0, &data);
+                test.property.add_property(6, 10.0, &data);
+                test.property.add_property(14, 10.0, &data);
+                // add in way to much shopping time.
+                test.property.add_property(TIME_ID, 
+                    0.0, &data);
+
+                // setup message queue.
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let mut passed_tx = tx.clone();
+
+                // get loop running
+                let handle = thread::spawn(move || {
+                    test.free_time(&mut passed_rx, &mut passed_tx, &data, 
+                        &history, shop_loop);
+                    test
+                });
+                thread::sleep(Duration::from_millis(100));
+
+                // start loop, recieved and completed, nothing actually done here.
+                thread::sleep(Duration::from_millis(1000));
+                // should recieve finished here
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::Finished { sender } = msg {
+                            assert_eq!(sender, pop_info, "Incorrect Sender");
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
+                }
+
+                // send all finished to wrap up.
+                tx.send(ActorMessage::AllFinished).expect("Borkd");
+
+                // let it wrap up
+                let test = handle.join().unwrap();
+
                 // check that it correctly recorded the satisfaction success/failure.
                 // no change should've occurred.
                 assert_eq!(test.prev_sat, test.current_sat);
@@ -4902,7 +4968,6 @@ mod tests {
                 let mut test = default_pop();
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);
-                let seller = ActorInfo::Firm(1);
                 // alter desires to run out of desires.
                 // food 
                 test.property.clear_desires();

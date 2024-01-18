@@ -72,6 +72,7 @@ pub struct Pop {
     pub backlog: VecDeque<ActorMessage>,
 }
 
+// TODO Alter to make testing easier through Inverting functions which depend on message passing. In particular, free_time, shopping_loop, try_to_buy, and standard_buy
 impl Pop {
     /// Takes the current population table, and updates desires to match the population
     /// breakdown. This is a hard reset, so is advised to call only as needed.
@@ -460,7 +461,6 @@ impl Pop {
         &DataManager, 
         &MarketHistory,)) 
     {
-        // TODO consider inverting this so the shopping loop can be separated and make testing easier.
         // start by organizing our property, reserve everything for our desires.
         self.prev_sat = self.property.sift_all(data);
 
