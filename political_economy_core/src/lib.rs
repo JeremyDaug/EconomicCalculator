@@ -14,6 +14,7 @@ mod tests {
     mod property_info_tests {
         use crate::objects::property_info::PropertyInfo;
 
+        /*
         #[test]
         pub fn safe_remove_should_remove_from_unreserved_and_reserved_only() {
             let mut test = PropertyInfo::new(100.0);
@@ -21,7 +22,7 @@ mod tests {
             test.shift_to_reserved(25.0);
             assert!(test.total_property == 100.0);
             assert!(test.unreserved == 50.0);
-            assert!(test.reserved == 25.0);
+            //assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
@@ -30,7 +31,7 @@ mod tests {
             test.safe_remove(25.0);
             assert!(test.total_property == 75.0);
             assert!(test.unreserved == 25.0);
-            assert!(test.reserved == 25.0);
+            //assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
@@ -39,7 +40,7 @@ mod tests {
             test.safe_remove(25.0);
             assert!(test.total_property == 50.0);
             assert!(test.unreserved == 0.0);
-            assert!(test.reserved == 25.0);
+            //assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
@@ -48,7 +49,7 @@ mod tests {
             test.safe_remove(25.0);
             assert!(test.total_property == 25.0);
             assert!(test.unreserved == 0.0);
-            assert!(test.reserved == 0.0);
+            //assert!(test.reserved == 0.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
@@ -57,20 +58,20 @@ mod tests {
             test.safe_remove(25.0);
             assert!(test.total_property == 25.0);
             assert!(test.unreserved == 0.0);
-            assert!(test.reserved == 0.0);
+            //assert!(test.reserved == 0.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
-        }
+        } */
 
         #[test]
         pub fn expend_should_remove_from_unreserved_only() {
             let mut test = PropertyInfo::new(100.0);
             test.shift_to_class_reserve(25.0);
-            test.shift_to_reserved(25.0);
+            //test.shift_to_reserved(25.0);
             assert!(test.total_property == 100.0);
-            assert!(test.unreserved == 50.0);
-            assert!(test.reserved == 25.0);
+            assert!(test.unreserved == 75.0);
+            //assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
@@ -78,8 +79,8 @@ mod tests {
             // expend from unreserved
             test.expend(25.0);
             assert!(test.total_property == 75.0);
-            assert!(test.unreserved == 25.0);
-            assert!(test.reserved == 25.0);
+            assert!(test.unreserved == 50.0);
+            //assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
@@ -87,17 +88,17 @@ mod tests {
             // expend from unreserved
             test.expend(25.0);
             assert!(test.total_property == 50.0);
-            assert!(test.unreserved == 0.0);
-            assert!(test.reserved == 25.0);
+            assert!(test.unreserved == 25.0);
+            //assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
 
             // don't expend
             test.expend(25.0);
-            assert!(test.total_property == 50.0);
+            assert!(test.total_property == 25.0);
             assert!(test.unreserved == 0.0);
-            assert!(test.reserved == 25.0);
+            //assert!(test.reserved == 25.0);
             assert!(test.want_reserve == 0.0);
             assert!(test.class_reserve == 25.0);
             assert!(test.product_reserve == 0.0);
@@ -112,7 +113,7 @@ mod tests {
                 let mut test = PropertyInfo::new(100.0);
                 assert!(test.total_property == 100.0);
                 assert!(test.unreserved == 100.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -120,8 +121,8 @@ mod tests {
                 assert!(test.available() == 100.0);
 
                 // shift to reserve
-                test.shift_to_reserved(50.0);
-                assert!(test.available() == 100.0);
+                // test.shift_to_reserved(50.0);
+                // assert!(test.available() == 100.0);
 
                 // shift to Product
                 test.shift_to_class_reserve(50.0);
@@ -139,26 +140,26 @@ mod tests {
                 test.shift_to_class_reserve(25.0);
                 test.shift_to_specific_reserve(25.0);
                 test.shift_to_want_reserve(25.0);
-                test.shift_to_reserved(25.0);
+                //test.shift_to_reserved(25.0);
                 assert!(test.total_property == 100.0);
-                assert!(test.unreserved == 50.0);
-                assert!(test.reserved == 25.0);
+                assert!(test.unreserved == 75.0);
+                //assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
                 // remove just from unreserved
                 test.remove(40.0);
                 assert!(test.total_property == 60.0);
-                assert!(test.unreserved == 10.0);
-                assert!(test.reserved == 25.0);
+                assert!(test.unreserved == 35.0);
+                //assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
                 // remove from unreserved and reserve
                 test.remove(30.0);
                 assert!(test.total_property == 30.0);
-                assert!(test.unreserved == 00.0);
-                assert!(test.reserved == 5.0);
+                assert!(test.unreserved == 5.0);
+                //assert!(test.reserved == 5.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
@@ -166,7 +167,7 @@ mod tests {
                 test.remove(30.0);
                 assert!(test.total_property == 00.0);
                 assert!(test.unreserved == 00.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -175,17 +176,17 @@ mod tests {
                 test.shift_to_class_reserve(25.0);
                 test.shift_to_specific_reserve(25.0);
                 test.shift_to_want_reserve(25.0);
-                test.shift_to_reserved(25.0);
+                //test.shift_to_reserved(25.0);
                 assert!(test.total_property == 100.0);
-                assert!(test.unreserved == 50.0);
-                assert!(test.reserved == 25.0);
+                assert!(test.unreserved == 75.0);
+                //assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
                 test.remove(100.0);
                 assert!(test.total_property == 00.0);
                 assert!(test.unreserved == 00.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -197,7 +198,7 @@ mod tests {
 
                 assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 10.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -205,7 +206,7 @@ mod tests {
                 test.remove(-100.0);
                 assert!(test.total_property == 110.0);
                 assert!(test.unreserved == 110.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -221,7 +222,7 @@ mod tests {
 
                 assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 10.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -229,7 +230,7 @@ mod tests {
                 test.add_property(100.0);
                 assert!(test.total_property == 110.0);
                 assert!(test.unreserved == 110.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -242,26 +243,26 @@ mod tests {
                 test.shift_to_class_reserve(25.0);
                 test.shift_to_specific_reserve(25.0);
                 test.shift_to_want_reserve(25.0);
-                test.shift_to_reserved(25.0);
+                // test.shift_to_reserved(25.0);
                 assert!(test.total_property == 100.0);
-                assert!(test.unreserved == 50.0);
-                assert!(test.reserved == 25.0);
+                assert!(test.unreserved == 75.0);
+                //assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
                 // remove just from unreserved
                 test.add_property(-40.0);
                 assert!(test.total_property == 60.0);
-                assert!(test.unreserved == 10.0);
-                assert!(test.reserved == 25.0);
+                assert!(test.unreserved == 35.0);
+                //assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
                 // remove from unreserved and reserve
                 test.add_property(-30.0);
                 assert!(test.total_property == 30.0);
-                assert!(test.unreserved == 00.0);
-                assert!(test.reserved == 5.0);
+                assert!(test.unreserved == 5.0);
+                //assert!(test.reserved == 5.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
@@ -269,7 +270,7 @@ mod tests {
                 test.add_property(-30.0);
                 assert!(test.total_property == 00.0);
                 assert!(test.unreserved == 00.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -278,17 +279,17 @@ mod tests {
                 test.shift_to_class_reserve(25.0);
                 test.shift_to_specific_reserve(25.0);
                 test.shift_to_want_reserve(25.0);
-                test.shift_to_reserved(25.0);
+                //test.shift_to_reserved(25.0);
                 assert!(test.total_property == 100.0);
-                assert!(test.unreserved == 50.0);
-                assert!(test.reserved == 25.0);
+                assert!(test.unreserved == 75.0);
+                //assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 25.0);
                 assert!(test.class_reserve == 25.0);
                 assert!(test.product_reserve == 25.0);
                 test.add_property(-100.0);
                 assert!(test.total_property == 00.0);
                 assert!(test.unreserved == 00.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -303,10 +304,10 @@ mod tests {
                 let mut test = PropertyInfo::new(100.0);
 
                 test.shift_to_class_reserve(50.0);
-                test.shift_to_reserved(25.0);
+                // test.shift_to_reserved(25.0);
                 assert!(test.total_property == 100.0);
-                assert!(test.unreserved == 25.0);
-                assert!(test.reserved == 25.0);
+                assert!(test.unreserved == 50.0);
+                //assert!(test.reserved == 25.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 50.0);
                 assert!(test.product_reserve == 0.0);
@@ -314,7 +315,7 @@ mod tests {
                 test.reset_reserves();
                 assert!(test.total_property == 100.0);
                 assert!(test.unreserved == 100.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.want_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.product_reserve == 0.0);
@@ -324,26 +325,26 @@ mod tests {
         mod shift_tests {
             use crate::objects::property_info::PropertyInfo;
 
-            #[test]
+            /*#[test]
             pub fn shift_to_reserved_correctly() {
                 let mut test = PropertyInfo::new(10.0);
 
-                test.shift_to_reserved(5.0);
+                // test.shift_to_reserved(5.0);
                 assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 5.0);
-                assert!(test.reserved == 5.0);
+                //assert!(test.reserved == 5.0);
                 assert!(test.product_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 0.0);
 
-                test.shift_to_reserved(10.0);
+                // test.shift_to_reserved(10.0);
                 assert!(test.total_property == 10.0);
                 assert!(test.unreserved == 0.0);
-                assert!(test.reserved == 10.0);
+                //assert!(test.reserved == 10.0);
                 assert!(test.product_reserve == 0.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 0.0);
-            }
+            }*/
 
             #[test]
             pub fn get_max_special_reserve_correctly() {
@@ -367,15 +368,15 @@ mod tests {
             #[test]
             pub fn shift_to_specific_reserve_correctly() {
                 let mut test = PropertyInfo::new(10.0);
-                test.shift_to_reserved(5.0);
+                // test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
                 test.class_reserve += 5.0;
 
                 // check that it reserves from overlap first.
                 test.shift_to_specific_reserve(2.5);
                 assert!(test.total_property == 15.0);
-                assert!(test.unreserved == 5.0);
-                assert!(test.reserved == 5.0);
+                assert!(test.unreserved == 10.0);
+                //assert!(test.reserved == 5.0);
                 assert!(test.product_reserve == 2.5);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
@@ -383,8 +384,8 @@ mod tests {
                 // check that it takes from overlap and reserved
                 test.shift_to_specific_reserve(5.0);
                 assert!(test.total_property == 15.0);
-                assert!(test.unreserved == 5.0);
-                assert!(test.reserved == 2.5);
+                assert!(test.unreserved == 7.5);
+                //assert!(test.reserved == 2.5);
                 assert!(test.product_reserve == 7.5);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
@@ -393,7 +394,7 @@ mod tests {
                 test.shift_to_specific_reserve(5.0);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.product_reserve == 12.5);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
@@ -402,7 +403,7 @@ mod tests {
                 test.shift_to_specific_reserve(5.0);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.product_reserve == 15.0);
                 assert!(test.class_reserve == 5.0);
                 assert!(test.want_reserve == 0.0);
@@ -411,15 +412,15 @@ mod tests {
             #[test]
             pub fn shift_to_class_reserve_correctly() {
                 let mut test = PropertyInfo::new(10.0);
-                test.shift_to_reserved(5.0);
+                // test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
                 test.product_reserve += 5.0;
 
                 // check that it reserves from overlap first.
                 test.shift_to_class_reserve(2.5);
                 assert!(test.total_property == 15.0);
-                assert!(test.unreserved == 5.0);
-                assert!(test.reserved == 5.0);
+                assert!(test.unreserved == 10.0);
+                //assert!(test.reserved == 5.0);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 2.5);
                 assert!(test.want_reserve == 0.0);
@@ -427,8 +428,8 @@ mod tests {
                 // check that it takes from overlap and reserved
                 test.shift_to_class_reserve(5.0);
                 assert!(test.total_property == 15.0);
-                assert!(test.unreserved == 5.0);
-                assert!(test.reserved == 2.5);
+                assert!(test.unreserved == 7.5);
+                //assert!(test.reserved == 2.5);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 7.5);
                 assert!(test.want_reserve == 0.0);
@@ -437,7 +438,7 @@ mod tests {
                 test.shift_to_class_reserve(5.0);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 12.5);
                 assert!(test.want_reserve == 0.0);
@@ -446,7 +447,7 @@ mod tests {
                 test.shift_to_class_reserve(5.0);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 15.0);
                 assert!(test.want_reserve == 0.0);
@@ -455,15 +456,15 @@ mod tests {
             #[test]
             pub fn shift_to_want_reserve_correctly() {
                 let mut test = PropertyInfo::new(10.0);
-                test.shift_to_reserved(5.0);
+                // test.shift_to_reserved(5.0);
                 test.total_property += 5.0;
                 test.product_reserve += 5.0;
 
                 // check that it reserves from overlap first.
                 test.shift_to_want_reserve(2.5);
                 assert!(test.total_property == 15.0);
-                assert!(test.unreserved == 5.0);
-                assert!(test.reserved == 5.0);
+                assert!(test.unreserved == 10.0);
+                //assert!(test.reserved == 5.0);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 2.5);
@@ -471,8 +472,8 @@ mod tests {
                 // check that it takes from overlap and reserved
                 test.shift_to_want_reserve(5.0);
                 assert!(test.total_property == 15.0);
-                assert!(test.unreserved == 5.0);
-                assert!(test.reserved == 2.5);
+                assert!(test.unreserved == 7.5);
+                //assert!(test.reserved == 2.5);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 7.5);
@@ -481,7 +482,7 @@ mod tests {
                 test.shift_to_want_reserve(5.0);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 2.5);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 12.5);
@@ -490,7 +491,7 @@ mod tests {
                 test.shift_to_want_reserve(5.0);
                 assert!(test.total_property == 15.0);
                 assert!(test.unreserved == 0.0);
-                assert!(test.reserved == 0.0);
+                //assert!(test.reserved == 0.0);
                 assert!(test.product_reserve == 5.0);
                 assert!(test.class_reserve == 0.0);
                 assert!(test.want_reserve == 15.0);
@@ -5070,6 +5071,13 @@ mod tests {
                 assert_eq!(test.prev_sat, test.current_sat);
             }
         }
+    
+        mod consume_goods_should {
+            #[test]
+            pub fn act_acording_to_consumption_plans() {
+                
+            }
+        }
     }
 
     mod pop_breakdown_table_tests {
@@ -8823,7 +8831,7 @@ mod tests {
             let val = test.property.get(&0).unwrap();
             assert!(val.total_property == 10.0);
             assert!(val.unreserved == 10.0);
-            assert!(val.reserved == 0.0);
+            //assert!(val.reserved == 0.0);
             assert!(val.product_reserve == 0.0);
             assert!(val.class_reserve == 0.0);
             assert!(val.want_reserve == 0.0);
@@ -9958,28 +9966,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
                 assert!(prop0.product_reserve == 2.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 10.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -10213,28 +10221,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
                 assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 10.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -10465,28 +10473,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
                 assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 10.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 10.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 5.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -10717,28 +10725,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
                 assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 6.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 14.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 11.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 4.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -10854,7 +10862,7 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert_eq!(prop0.total_property, 15.0);
                 assert_eq!(prop0.unreserved, 4.0);
-                assert_eq!(prop0.reserved, 0.0);
+                //assert_eq!(prop0.reserved, 0.0);
                 assert_eq!(prop0.want_reserve, 0.0);
                 assert_eq!(prop0.class_reserve, 11.0);
                 assert_eq!(prop0.product_reserve, 0.0);
@@ -10862,7 +10870,7 @@ mod tests {
                 let prop1 = test.property.get(&1).unwrap();
                 assert_eq!(prop1.total_property, 15.0);
                 assert_eq!(prop1.unreserved, 15.0);
-                assert_eq!(prop1.reserved, 0.0);
+                //assert_eq!(prop1.reserved, 0.0);
                 assert_eq!(prop1.want_reserve, 0.0);
                 assert_eq!(prop1.class_reserve, 0.0);
                 assert_eq!(prop1.product_reserve, 0.0);
@@ -10870,7 +10878,7 @@ mod tests {
                 let prop2 = test.property.get(&2).unwrap();
                 assert_eq!(prop2.total_property, 10.0);
                 assert_eq!(prop2.unreserved, 10.0);
-                assert_eq!(prop2.reserved, 0.0);
+                //assert_eq!(prop2.reserved, 0.0);
                 assert_eq!(prop2.want_reserve, 0.0);
                 assert_eq!(prop2.class_reserve, 0.0);
                 assert_eq!(prop2.product_reserve, 0.0);
@@ -10920,14 +10928,14 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 5.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 0.0);
                 assert!(prop0.class_reserve == 0.0);
                 assert!(prop0.product_reserve == 10.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 10.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.product_reserve == 0.0);
@@ -11169,28 +11177,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
                 assert!(prop0.product_reserve == 2.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 1.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 9.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 8.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 11.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 9.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 15.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 0.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -12009,28 +12017,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
                 assert!(prop0.product_reserve == 2.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -12264,28 +12272,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
                 assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -12518,28 +12526,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
                 assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
-                assert!(prop2.reserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 5.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
-                assert!(prop3.reserved == 0.0);
+                //assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -12772,28 +12780,28 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 15.0);
                 assert!(prop0.class_reserve == 0.0);
                 assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                // assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 10.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 20.0);
                 assert!(prop2.unreserved == 0.0);
-                assert!(prop2.reserved == 0.0);
+                // assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 20.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
                 let prop3 = test.property.get(&3).unwrap();
                 assert!(prop3.total_property == 15.0);
                 assert!(prop3.unreserved == 5.0);
-                assert!(prop3.reserved == 0.0);
+                // assert!(prop3.reserved == 0.0);
                 assert!(prop3.want_reserve == 10.0);
                 assert!(prop3.class_reserve == 0.0);
                 assert!(prop3.product_reserve == 0.0);
@@ -12910,21 +12918,21 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                // assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 0.0);
                 assert!(prop0.class_reserve == 15.0);
                 assert!(prop0.product_reserve == 0.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 15.0);
                 assert!(prop1.unreserved == 0.0);
-                assert!(prop1.reserved == 0.0);
+                // assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 15.0);
                 assert!(prop1.product_reserve == 0.0);
                 let prop2 = test.property.get(&2).unwrap();
                 assert!(prop2.total_property == 10.0);
                 assert!(prop2.unreserved == 10.0);
-                assert!(prop2.reserved == 0.0);
+                // assert!(prop2.reserved == 0.0);
                 assert!(prop2.want_reserve == 0.0);
                 assert!(prop2.class_reserve == 0.0);
                 assert!(prop2.product_reserve == 0.0);
@@ -12975,14 +12983,14 @@ mod tests {
                 let prop0 = test.property.get(&0).unwrap();
                 assert!(prop0.total_property == 15.0);
                 assert!(prop0.unreserved == 0.0);
-                assert!(prop0.reserved == 0.0);
+                // assert!(prop0.reserved == 0.0);
                 assert!(prop0.want_reserve == 0.0);
                 assert!(prop0.class_reserve == 0.0);
                 assert!(prop0.product_reserve == 15.0);
                 let prop1 = test.property.get(&1).unwrap();
                 assert!(prop1.total_property == 10.0);
                 assert!(prop1.unreserved == 10.0);
-                assert!(prop1.reserved == 0.0);
+                // assert!(prop1.reserved == 0.0);
                 assert!(prop1.want_reserve == 0.0);
                 assert!(prop1.class_reserve == 0.0);
                 assert!(prop1.product_reserve == 0.0);

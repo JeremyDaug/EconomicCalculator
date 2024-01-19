@@ -72,7 +72,7 @@ pub struct Pop {
     pub backlog: VecDeque<ActorMessage>,
 }
 
-// TODO Alter to make testing easier through Inverting functions which depend on message passing. In particular, free_time, shopping_loop, try_to_buy, and standard_buy
+// TODO #66 issue Alter to make testing easier through Inverting functions which depend on message passing. In particular, free_time, shopping_loop, try_to_buy, and standard_buy
 impl Pop {
     /// Takes the current population table, and updates desires to match the population
     /// breakdown. This is a hard reset, so is advised to call only as needed.
@@ -1508,9 +1508,17 @@ impl Pop {
     /// # Consume Goods
     ///
     /// Our end of daily activities. Goes through our goods, consuming them
-    /// and adding to our satisfaction.
+    /// and adding to our satisfaction as dictated by our plans (calculated by sifting)
     pub fn consume_goods(&mut self, _data: &DataManager, _history: &MarketHistory) {
-        todo!("This when we get back to it.")
+        // due to the ease of calculation, assume class and product wants are 
+        // correctly calculated. Record those reserved items and satisfactions,
+        // release them from reserves.
+        for (_id, property) in self.property.property.iter_mut() {
+            property.direct_use();
+        }
+
+        // Now, follow through with planned processes, consuming products and 
+        // using capital.
     }
 
     /// # Decay Goods

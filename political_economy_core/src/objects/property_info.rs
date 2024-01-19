@@ -18,7 +18,7 @@ pub struct PropertyInfo {
     /// The amount that is unreserved, available to be spent or shifted elsewhere.
     pub unreserved: f64,
     /// The amount that has been reserved for our desires, but not yet placed. Anywhere
-    pub reserved: f64,
+    //pub reserved: f64,
     /// The amount that has been reserved for specific product desires.
     pub product_reserve: f64,
     /// The amount that has been reserved to satisfy abstract product desires.
@@ -36,7 +36,9 @@ pub struct PropertyInfo {
     pub recieved: f64,
     /// The amount spent today in exchange for other things.
     pub spent: f64,
-    /// The amount which has been consumed today.
+    /// The amount which has been consumed today, this includes both consumed 
+    /// as inputs in processes, as well as those 'used (consumed but not 
+    /// destroyed)' to satisfy product and class desires.
     pub consumed: f64,
     /// The amount which was used today, Removed from total_property, meant to be added back in at th end of the day.
     pub used: f64,
@@ -62,7 +64,7 @@ impl PropertyInfo {
     pub fn new(available: f64) -> Self { 
         Self { total_property: available, 
             unreserved: available, 
-            reserved: 0.0, 
+            // reserved: 0.0, 
             product_reserve: 0.0, 
             class_reserve: 0.0, 
             want_reserve: 0.0,
@@ -105,7 +107,7 @@ impl PropertyInfo {
     /// Removes everything from the reserves, adding them back to unreserved.
     pub fn reset_reserves(&mut self) {
         self.unreserved = self.total_property;
-        self.reserved = 0.0;
+        // self.reserved = 0.0;
         self.want_reserve = 0.0;
         self.class_reserve = 0.0;
         self.product_reserve = 0.0;
@@ -129,10 +131,12 @@ impl PropertyInfo {
     /// # Shift To Reserved
     /// 
     /// Shifts the given quantity from unreserved to reserved.
+    #[deprecated]
     pub fn shift_to_reserved(&mut self, quantity: f64) {
+        assert!(false, "Reserve is not used.");
         let available = self.unreserved.min(quantity);
         self.unreserved -= available;
-        self.reserved += available;
+        // self.reserved += available;
     }
 
     /// Gets the highest of our 3 reserves.
@@ -159,15 +163,15 @@ impl PropertyInfo {
             if quantity == 0.0 { return; }
         }
         // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.product_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return; }
-        }
+        // if self.reserved > 0.0 {
+        //     // get the smaller between available, and shift target.
+        //     let shift = self.reserved.min(quantity);
+        //     // remove from reserve, add to spec reserve, and remove from quantity
+        //     self.reserved -= shift;
+        //     self.product_reserve += shift;
+        //     quantity -= shift;
+        //     if quantity == 0.0 { return; }
+        // }
         // if not enough from reserve, then from unreserved.
         if self.unreserved > 0.0 {
             let shift = self.unreserved.min(quantity);
@@ -193,15 +197,15 @@ impl PropertyInfo {
             if quantity == 0.0 { return; }
         }
         // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.class_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return; }
-        }
+        // if self.reserved > 0.0 {
+        //     // get the smaller between available, and shift target.
+        //     let shift = self.reserved.min(quantity);
+        //     // remove from reserve, add to spec reserve, and remove from quantity
+        //     self.reserved -= shift;
+        //     self.class_reserve += shift;
+        //     quantity -= shift;
+        //     if quantity == 0.0 { return; }
+        // }
         // if not enough from reserve, then from unreserved.
         if self.unreserved > 0.0 {
             let shift = self.unreserved.min(quantity);
@@ -227,15 +231,15 @@ impl PropertyInfo {
             if quantity == 0.0 { return; }
         }
         // not enough from overlap alone, shift from reserve.
-        if self.reserved > 0.0 {
-            // get the smaller between available, and shift target.
-            let shift = self.reserved.min(quantity);
-            // remove from reserve, add to spec reserve, and remove from quantity
-            self.reserved -= shift;
-            self.want_reserve += shift;
-            quantity -= shift;
-            if quantity == 0.0 { return; }
-        }
+        // if self.reserved > 0.0 {
+        //     // get the smaller between available, and shift target.
+        //     let shift = self.reserved.min(quantity);
+        //     // remove from reserve, add to spec reserve, and remove from quantity
+        //     self.reserved -= shift;
+        //     self.want_reserve += shift;
+        //     quantity -= shift;
+        //     if quantity == 0.0 { return; }
+        // }
         // if not enough from reserve, then from unreserved.
         if self.unreserved > 0.0 {
             let shift = self.unreserved.min(quantity);
@@ -249,7 +253,7 @@ impl PropertyInfo {
     /// The amount available that has not been specifically reserved,
     /// or used.
     pub fn available(&self) -> f64 {
-        self.unreserved + self.reserved
+        self.unreserved
     }
 
     /// # Expend
@@ -268,18 +272,20 @@ impl PropertyInfo {
     /// specific reserves.
     /// 
     /// Removes from unreserved first, then reserved.
+    #[deprecated]
     pub fn safe_remove(&mut self, remove: f64) {
+        assert!(false, "Not needed without reserve");
         // remove from unreserved first
-        let unreserved_removal = self.unreserved.min(remove);
+        // let unreserved_removal = self.unreserved.min(remove);
         
-        if unreserved_removal > 0.0 {
-            self.unreserved -= unreserved_removal;
-            self.total_property -= unreserved_removal;
-        }
-        let reserved_removal = self.reserved.min(remove - unreserved_removal);
-        if reserved_removal == 0.0 { return; }
-        self.reserved -= reserved_removal;
-        self.total_property -= reserved_removal;
+        // if unreserved_removal > 0.0 {
+        //     self.unreserved -= unreserved_removal;
+        //     self.total_property -= unreserved_removal;
+        // }
+        // let reserved_removal = self.reserved.min(remove - unreserved_removal);
+        // if reserved_removal == 0.0 { return; }
+        // self.reserved -= reserved_removal;
+        // self.total_property -= reserved_removal;
     }
 
     /// # Remove
@@ -307,13 +313,13 @@ impl PropertyInfo {
             if remainder == 0.0 { return; }
         }
         // if unreserved is not enough, remove from general reserve
-        if self.reserved > 0.0 {
-            let remove = self.reserved.min(remainder);
-            self.reserved -= remove;
-            self.total_property -= remove;
-            remainder -= remove;
-            if remainder == 0.0 { return; }
-        }
+        // if self.reserved > 0.0 {
+        //     let remove = self.reserved.min(remainder);
+        //     self.reserved -= remove;
+        //     self.total_property -= remove;
+        //     remainder -= remove;
+        //     if remainder == 0.0 { return; }
+        // }
         // if unreserved and reserved not enough, remove from specifc reserves
         let max_spec_reserve = self.max_spec_reserve();
         if max_spec_reserve > 0.0 {
@@ -376,5 +382,24 @@ impl PropertyInfo {
     /// How many units we are needed to reach our max target.
     pub fn remaining_target(&self) -> f64 {
         self.max_target - self.total_property
+    }
+
+    /// # Direct Use
+    /// 
+    /// Direct Use, 'consumes' the item for product and class desires.
+    /// 
+    /// Removes all products in class or product reserves and notes the usage
+    /// of these products.
+    pub fn direct_use(&mut self) {
+        self.consumed = self.class_reserve + self.product_reserve;
+        // check if correction of balance will be needed.
+        let correct_balance = self.class_reserve > self.want_reserve || 
+            self.product_reserve > self.want_reserve;
+        self.class_reserve = 0.0;
+        self.product_reserve = 0.0;
+        // correct reserves if needed
+        if correct_balance {
+            self.unreserved = self.total_property - self.want_reserve;
+        }
     }
 }
