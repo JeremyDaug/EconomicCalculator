@@ -970,6 +970,220 @@ impl Property {
             .map(|x| x.satisfaction).sum()
     }
 
+    /// # Consume Wants
+    /// 
+    /// Intended to be used after 'consuming' class and product desires.
+    /// 
+    /// It works by clearing out existing satisfactions for want desires, then
+    /// effectively re-sifting the wants. However, instead of reserving products
+    /// and it consumes or uses them as needs demand.
+    /// 
+    /// Instead of adding to the process plan, it removes from it, as a sanity 
+    /// check.
+    /// 
+    /// After the using both, it will try to go through with the stanard route
+    /// just in case.
+    pub fn consume_wants(&mut self, data: &DataManager) {
+        // Walk up Want Desires and satisfy them in order. 
+        // if we try to satsify all at once, we may run into an error as 
+        // later processes can depend on earlier.
+
+        // to ensure proper functioning, clear out satisfaction for want desires.
+        for desire in self.desires.iter_mut()
+        .filter(|x| x.item.is_want()) {
+            desire.satisfaction = 0.0;
+        }
+        let mut cleared = HashSet::new();
+        let mut current_opt = None;
+        while let Some(current) = self.walk_up_tiers(current_opt) {
+            current_opt = Some(current); // get ready for next.
+            if cleared.len() == self.desires.len() {
+                break; // if all have been cleared, gtfo
+            }
+            if cleared.contains(&current.idx) {
+                continue; // if already cleared, skip.
+            }
+            let desire = self.desires.get_mut(current.idx).unwrap();
+            if desire.item.is_class() || desire.item.is_product() {
+                // if class or product desire, skip, those are already covered.
+                cleared.insert(current.idx);
+                continue;
+            }
+            if let Item::Want(want) = desire.item {
+                // start by pulling out of the expected wants, to improve efficiency
+                // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
+                if self.want_expectations.contains_key(&want) {
+                    let expectation = self.want_expectations.get_mut(&want).unwrap();
+                    if *expectation > 0.0 { // if positive expectation, use
+                        let shift = expectation
+                        .min(desire.amount - desire.satisfaction_at_tier(current.tier));
+                        *expectation -= shift;
+                        desire.satisfaction += shift;
+                    }
+                }
+                if desire.satisfied_at_tier(current.tier) {
+                    if desire.past_end(current.tier + 1) {
+                        cleared.insert(current.idx);
+                    }
+                    continue;
+                }
+                // get our want's info
+                let want_info = data.wants.get(&want).unwrap();
+                // start with ownership sources
+                for own_source_id in want_info.ownership_sources.iter() {
+                    if !self.property.contains_key(own_source_id) {
+                        continue; // if don't have it, skip.
+                    }
+                    // get our property info
+                    let prop_info = self.property.get_mut(own_source_id).unwrap();
+                    let available_product = prop_info.available_for_want();
+                    if available_product == 0.0 {
+                        continue; // if none available for shift, skip.
+                    }
+                    // get the product's data
+                    let product_info = data.products.get(own_source_id).unwrap();
+                    // how much satisfaction we have left
+                    let remaining_sat = desire.amount - desire.satisfaction_at_tier(current.tier);
+                    let eff = product_info.wants.get(&want).unwrap(); // how efficient the product is at satisfying this want.
+                    let target = remaining_sat / eff; // how many of our product we need to satisfy
+                    let target = target.min(available_product); // how many we can actually get
+                    for (own_want, eff) in product_info.wants.iter() {
+                        if *own_want == want { // if our want, add to sat
+                            desire.satisfaction += eff * target;
+                        } else { // if not, add to expectations for later possible use.
+                            self.want_expectations.entry(*own_want)
+                            .and_modify(|x| *x += eff * target)
+                            .or_insert(eff * target);
+                        }
+                    }
+                    prop_info.shift_to_used(target); // shift property to used.
+                    if desire.satisfied_at_tier(current.tier) { // if satisfied, break the loop
+                        break;
+                    }
+                }
+                // check for completion
+                if desire.satisfied_at_tier(current.tier) {
+                    if desire.past_end(current.tier + 1) {
+                        cleared.insert(current.idx);
+                    }
+                    continue;
+                }
+                // if uncompleted, go to use processes.
+                for proc_id in want_info.use_sources.iter() {
+                    let process = data.processes.get(proc_id).unwrap();
+                    // get how much the process outputs
+                    let eff = process.effective_output_of(Item::Want(want));
+                    // how many iterations we need to reach the target.
+                    let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
+                    let mut combined_wants = self.want_store.clone();
+                    for (want_id, amount) in self.want_expectations.iter() {
+                        combined_wants.entry(*want_id)
+                        .and_modify(|x| *x += amount)
+                        .or_insert(*amount);
+                    }
+                    let outputs = process.do_process_with_property(&self.property, 
+                        &combined_wants, 
+                        0.0, 0.0, Some(target_iter), true, data);
+                    if outputs.iterations == 0.0 {
+                        debug_assert!(*self.process_plan.get(proc_id).unwrap_or(&0.0) != 0.0, 
+                            "Process '{}' which should be used returned 0 iterations.", proc_id);
+                        continue; // if no iterations possible, skip
+                    }
+                    // we do some iterations, so update stuff
+                    self.process_plan.entry(*proc_id)
+                        .and_modify(|x| *x += outputs.iterations)
+                        .or_insert(outputs.iterations);
+                    for (&product, &quant) in outputs.input_output_products.iter() {
+                        if quant < 0.0 { // if negative, shift
+                            self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
+                        }
+                        self.product_expectations.entry(product)
+                        .and_modify(|x| *x += quant)
+                        .or_insert(quant);
+                    }
+                    for (&product, &quant) in outputs.capital_products.iter() {
+                        // if capital, just shift to want reserve
+                        self.property.get_mut(&product).unwrap()
+                        .shift_to_want_reserve(-quant);
+                    }
+                    for (&edited_want, &quant) in outputs.input_output_wants.iter() {
+                        if edited_want == want { // if the want is what we're trying to satisy, add it
+                            desire.satisfaction += quant;
+                        } else {
+                            self.want_expectations.entry(want)
+                            .and_modify(|x| *x += quant)
+                            .or_insert(quant);
+                        }
+                    }
+                    if desire.satisfied_at_tier(current.tier) {
+                        break; // if satified, break out
+                    }
+                }
+                // we got out check for completion
+                if desire.satisfied_at_tier(current.tier) {
+                    if desire.past_end(current.tier + 1) {
+                        cleared.insert(current.idx);
+                    }
+                    continue;
+                }
+                // if we get here, then try consumption processes
+                for proc_id in want_info.consumption_sources.iter() {
+                    let process = data.processes.get(proc_id).unwrap();
+                    // get how much the process outputs
+                    let eff = process.effective_output_of(Item::Want(want));
+                    // how many iterations we need to reach the target.
+                    let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
+                    let mut combined_wants = self.want_store.clone();
+                    for (want_id, amount) in self.want_expectations.iter() {
+                        combined_wants.entry(*want_id)
+                        .and_modify(|x| *x += amount)
+                        .or_insert(*amount);
+                    }
+                    let outputs = process.do_process_with_property(&self.property, 
+                        &combined_wants, 
+                        0.0, 0.0, Some(target_iter), true, data);
+                    if outputs.iterations == 0.0 {
+                        continue; // if no iterations possible, skip
+                    }
+                    // we do some iterations, so update stuff
+                    self.process_plan.entry(*proc_id)
+                        .and_modify(|x| *x += outputs.iterations)
+                        .or_insert(outputs.iterations);
+                    for (&product, &quant) in outputs.input_output_products.iter() {
+                        if quant < 0.0 { // if negative, shift
+                            self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
+                        }
+                        self.product_expectations.entry(product)
+                        .and_modify(|x| *x += quant)
+                        .or_insert(quant);
+                    }
+                    for (&product, &quant) in outputs.capital_products.iter() {
+                        // if capital, just shift to want reserve
+                        self.property.get_mut(&product).unwrap()
+                        .shift_to_want_reserve(-quant);
+                    }
+                    for (&edited_want, &quant) in outputs.input_output_wants.iter() {
+                        if edited_want == want { // if the want is what we're trying to satisy, add it
+                            desire.satisfaction += quant;
+                        } else {
+                            self.want_expectations.entry(want)
+                            .and_modify(|x| *x += quant)
+                            .or_insert(quant);
+                        }
+                    }
+                    if desire.satisfied_at_tier(current.tier) {
+                        break; // if satified, break out
+                    }
+                }
+                // we've done what we can
+                if !desire.satisfied_at_tier(current.tier) || // if unable to be fully satisfied
+                desire.past_end(current.tier + 1) { // or there is no next tier
+                    cleared.insert(current.idx); // add to cleared.
+                }
+            }
+        }
+    }
+
     /// # Sift All 
     /// 
     /// Used to sift our property and predict our uses for them.
@@ -1189,7 +1403,7 @@ impl Property {
                 Item::Class(class) => { // if class item
                     // get that class's products
                     let class = data.product_classes.get(&class).unwrap();
-                    // if there is no overlap between our property and add to cleared
+                    // if there is no overlap between our property, add to cleared
                     if !class.iter().any(|x| self.property.contains_key(x)) {
                         cleared.insert(current.idx);
                         continue;

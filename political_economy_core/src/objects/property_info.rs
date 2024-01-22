@@ -384,13 +384,13 @@ impl PropertyInfo {
         self.max_target - self.total_property
     }
 
-    /// # Direct Use
+    /// # Use Directly
     /// 
-    /// Direct Use, 'consumes' the item for product and class desires.
+    /// Use Directly 'consumes' the item for product and class desires.
     /// 
     /// Removes all products in class or product reserves and notes the usage
     /// of these products.
-    pub fn direct_use(&mut self) {
+    pub fn use_directly(&mut self) {
         self.consumed = self.class_reserve + self.product_reserve;
         // check if correction of balance will be needed.
         let correct_balance = self.class_reserve > self.want_reserve || 
@@ -401,5 +401,16 @@ impl PropertyInfo {
         if correct_balance {
             self.unreserved = self.total_property - self.want_reserve;
         }
+    }
+
+    /// # Totally Use
+    /// 
+    /// Consumes all reserves for the product and consumes the want reserve from the total.
+    pub fn totally_use(&mut self) {
+        self.consumed = self.class_reserve + self.product_reserve + self.want_reserve;
+        self.class_reserve = 0.0;
+        self.product_reserve = 0.0;
+        self.total_property -= self.want_reserve;
+        self.want_reserve = 0.0;
     }
 }

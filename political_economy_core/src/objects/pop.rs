@@ -3,7 +3,7 @@
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
 use core::panic;
-use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current, arch::x86_64};
+use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current, arch::x86_64, fmt::Debug};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
@@ -1509,16 +1509,16 @@ impl Pop {
     ///
     /// Our end of daily activities. Goes through our goods, consuming them
     /// and adding to our satisfaction as dictated by our plans (calculated by sifting)
-    pub fn consume_goods(&mut self, _data: &DataManager, _history: &MarketHistory) {
+    pub fn consume_goods(&mut self, data: &DataManager, _history: &MarketHistory) {
         // due to the ease of calculation, assume class and product wants are 
         // correctly calculated. Record those reserved items and satisfactions,
         // release them from reserves.
         for (_id, property) in self.property.property.iter_mut() {
-            property.direct_use();
+            property.use_directly();
         }
 
-        // Now, follow through with planned processes, consuming products and 
-        // using capital.
+        // call property's consume want function
+        self.property.consume_wants(data);
     }
 
     /// # Decay Goods
