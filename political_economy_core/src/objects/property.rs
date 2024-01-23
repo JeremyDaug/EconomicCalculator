@@ -1089,22 +1089,25 @@ impl Property {
                             "Process '{}' which should be used returned 0 iterations.", proc_id);
                         continue; // if no iterations possible, skip
                     }
-                    // we do some iterations, so update stuff
-                    self.process_plan.entry(*proc_id)
-                        .and_modify(|x| *x += outputs.iterations)
-                        .or_insert(outputs.iterations);
+                    // we do some iterations, so remove from plan for the purpose of testing validity
+                    *self.process_plan.get_mut(proc_id)
+                        .unwrap() -= outputs.iterations;
                     for (&product, &quant) in outputs.input_output_products.iter() {
-                        if quant < 0.0 { // if negative, shift
-                            self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
+                        if quant < 0.0 { // if negative, remove from property
+                            let mut prop = self.property.get_mut(&product).unwrap();
+                            prop.remove(quant);
+                            prop.consumed += quant;
+                        } else { // if positive, add to used
+                            let info = self.property.get_mut(&product).unwrap();
+                            info.used += quant;
+                            info.recieved += quant;
+                            info.total_property += quant;
                         }
-                        self.product_expectations.entry(product)
-                        .and_modify(|x| *x += quant)
-                        .or_insert(quant);
                     }
                     for (&product, &quant) in outputs.capital_products.iter() {
                         // if capital, just shift to want reserve
                         self.property.get_mut(&product).unwrap()
-                        .shift_to_want_reserve(-quant);
+                            .shift_to_used(quant);
                     }
                     for (&edited_want, &quant) in outputs.input_output_wants.iter() {
                         if edited_want == want { // if the want is what we're trying to satisy, add it
