@@ -17,7 +17,7 @@ use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::{TIER_RATIO, SHOPPING_TIME_ID}};
 
-use super::{desire::Desire, market::MarketHistory, property_info::PropertyInfo, item::Item};
+use super::{desire::Desire, market::{MarketHistory, WantInfo}, property_info::PropertyInfo, item::Item};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -28,7 +28,7 @@ pub struct Property {
     /// The property currently owned bey the actor.
     pub property: HashMap<usize, PropertyInfo>,
     /// The wants stored and not used up yet.
-    pub want_store: HashMap<usize, f64>,
+    pub want_store: HashMap<usize, WantInfo>,
     /// Whether the pop who owns this property is a disorganized firm or not.
     pub is_disorganized: bool,
     /// How much time we have worked on average over the past few days.
@@ -1094,7 +1094,7 @@ impl Property {
                         .unwrap() -= outputs.iterations;
                     for (&product, &quant) in outputs.input_output_products.iter() {
                         if quant < 0.0 { // if negative, remove from property
-                            let mut prop = self.property.get_mut(&product).unwrap();
+                            let prop = self.property.get_mut(&product).unwrap();
                             prop.remove(quant);
                             prop.consumed += quant;
                         } else { // if positive, add to used
@@ -1110,6 +1110,9 @@ impl Property {
                             .shift_to_used(quant);
                     }
                     for (&edited_want, &quant) in outputs.input_output_wants.iter() {
+                        if quant < 0.0 { // if consumed, remove it
+                            // DEBUG
+                        }
                         if edited_want == want { // if the want is what we're trying to satisy, add it
                             desire.satisfaction += quant;
                         } else {

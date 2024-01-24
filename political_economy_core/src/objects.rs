@@ -27,3 +27,4 @@ pub mod buy_result;
 pub mod property_info;
 pub mod property;
 pub mod item;
+pub mod want_info;
