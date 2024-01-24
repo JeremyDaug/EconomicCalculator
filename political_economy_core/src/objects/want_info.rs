@@ -11,7 +11,7 @@
 /// - expended: how much was expended in processes
 /// - consumed: how much was conumed for desires.
 /// - total_current: How much is available in total
-#[derive(Debug, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct WantInfo {
     /// The current total available to use.
     pub total_current: f64,
@@ -72,8 +72,81 @@ impl WantInfo {
 
     /// # Expend
     /// 
-    /// Moves value from total to 
+    /// Moves value from total to expended.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if it tries to expend more than is available or
+    /// if it recieves a negative value.
+    /// 
+    /// TODO Consider swaping panic to Debug asserts.
     pub fn expend(&mut self, value: f64) {
+        if value < 0.0 {
+            panic!("Value is negative.");
+        }
+        self.total_current -= value;
+        self.expended += value;
+        if self.expendable() < 0.0 {
+            panic!("Expended more than was available.")
+        }
+    }
 
+    /// # Realize All
+    /// 
+    /// Takes current expectations and adds/subtracts it from the
+    /// total_current.
+    pub fn realize_all(&mut self) {
+        debug_assert!(self.total_current < self.expectations, "Expectations somehow larger than current total.");
+        self.total_current += self.expectations;
+        self.expectations = 0.0;
+    }
+
+    /// # Realize
+    /// 
+    /// Realize takes the value given and shifts it to (or away) from
+    /// expectations and into the total. Positive values take positive from
+    /// expectation adds that to total_current and negative values take negative
+    /// value from expectations and removes it from total_current.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if the value it is trying to shift cannot be realized. IE,
+    /// mismatched signes between value and self.expectations or same sign
+    /// but value > self.expectations (abs)
+    /// 
+    /// TODO Consider swaping panic to Debug asserts.
+    pub fn realize(&mut self, value: f64) {
+        if self.expectations.is_sign_negative() == value.is_sign_negative() {
+            if self.expectations.abs() < value.abs() {
+                panic!("Value to realize is too big.")
+            }
+        } else { // if sign mismatch.
+            panic!("Value-expectation Sign Mismatch (+/-).")
+        }
+        self.expectations -= value;
+        self.total_current += value;
+    }
+
+    /// # Consume
+    /// 
+    /// Moves valee from total to consumed, also takes from expectations
+    /// if it can. Consumes total current first.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if the value shifted results in a negative total_current.
+    pub fn consume(&mut self, value: f64) {
+        if self.consumable() < value {
+            panic!("Value to consume is greater than total available.")
+        }
+        if value < 0.0 {
+            panic!("Cannot consume a negative value.")
+        }
+        self.total_current -= value;
+        if self.total_current < 0.0 {
+            self.expectations += self.total_current;
+            self.total_current = 0.0;
+        }
+        self.consumed += value;
     }
 }
