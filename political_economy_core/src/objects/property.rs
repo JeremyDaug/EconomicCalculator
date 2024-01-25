@@ -28,7 +28,7 @@ pub struct Property {
     /// The property currently owned bey the actor.
     pub property: HashMap<usize, PropertyInfo>,
     /// The wants stored and not used up yet.
-    pub want_store: HashMap<usize, WantInfo>,
+    pub want_store: HashMap<usize, f64>,
     /// Whether the pop who owns this property is a disorganized firm or not.
     pub is_disorganized: bool,
     /// How much time we have worked on average over the past few days.

@@ -11,6 +11,77 @@ extern crate lazy_static;
 
 #[cfg(test)]
 mod tests {
+    mod want_info_tests {
+        mod new_should {
+            use crate::objects::want_info::WantInfo;
+
+            #[test]
+            pub fn correctly_set_values() {
+                let test = WantInfo::new(10.0);
+                assert_eq!(test.total_current, 10.0);
+                assert_eq!(test.day_start, 10.0);
+                assert_eq!(test.gained, 0.0);
+                assert_eq!(test.expectations, 0.0);
+                assert_eq!(test.expended, 0.0);
+                assert_eq!(test.consumed, 0.0);
+            }
+        }
+
+        mod new_day_should {
+            use crate::objects::want_info::WantInfo;
+
+            #[test]
+            pub fn correctly_reset_values() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 1.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.new_day();
+                assert_eq!(test.total_current, 10.0);
+                assert_eq!(test.day_start, 10.0);
+                assert_eq!(test.gained, 0.0);
+                assert_eq!(test.expectations, 0.0);
+                assert_eq!(test.expended, 0.0);
+                assert_eq!(test.consumed, 0.0);
+            }
+        }
+
+        mod consumable_should {
+            use crate::objects::want_info::WantInfo;
+
+            #[test]
+            pub fn return_sum_of_total_current_and_expectations() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 1.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                let result = test.consumable();
+                assert_eq!(result, 11.0);
+            }
+        }
+
+        mod expendable_should {
+            use crate::objects::want_info::WantInfo;
+
+
+            #[test]
+            pub fn return_sum_of_total_and_expectation_excluding_positive_values() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 1.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                let result = test.expendable();
+                assert_eq!(result, 10.0);
+                test.expectations = -1.0;
+                let result = test.expendable();
+                assert_eq!(result, 9.0);
+            }
+        }
+    }
+
     mod property_info_tests {
         use crate::objects::property_info::PropertyInfo;
 
