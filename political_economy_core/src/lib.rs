@@ -65,7 +65,6 @@ mod tests {
         mod expendable_should {
             use crate::objects::want_info::WantInfo;
 
-
             #[test]
             pub fn return_sum_of_total_and_expectation_excluding_positive_values() {
                 let mut test = WantInfo::new(10.0);
@@ -78,6 +77,46 @@ mod tests {
                 test.expectations = -1.0;
                 let result = test.expendable();
                 assert_eq!(result, 9.0);
+            }
+        }
+
+        mod expend_should {
+            use crate::objects::want_info::WantInfo;
+
+            #[test]
+            pub fn correctly_move_value_from_total_current_to_expended() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 1.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.expend(5.0);
+                assert_eq!(test.total_current, 5.0);
+                assert_eq!(test.day_start, 10.0);
+                assert_eq!(test.gained, 1.0);
+                assert_eq!(test.expectations, 1.0);
+                assert_eq!(test.expended, 6.0);
+                assert_eq!(test.consumed, 1.0);
+            }
+        }
+
+        mod realize_all_should{
+            use crate::objects::want_info::WantInfo;
+
+            #[test]
+            pub fn correctly_add_positive_expectations() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.realize_all();
+                assert_eq!(test.total_current, 20.0);
+                assert_eq!(test.day_start, 10.0);
+                assert_eq!(test.gained, 1.0);
+                assert_eq!(test.expectations, 0.0);
+                assert_eq!(test.expended, 1.0);
+                assert_eq!(test.consumed, 1.0);
             }
         }
     }

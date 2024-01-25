@@ -74,21 +74,14 @@ impl WantInfo {
     /// 
     /// Moves value from total to expended.
     /// 
-    /// # Panics
-    /// 
-    /// Panics if it tries to expend more than is available or
-    /// if it recieves a negative value.
-    /// 
-    /// TODO Consider swaping panic to Debug asserts.
+    /// It should only have positive values less than or equal to 
+    /// self.total_current.
     pub fn expend(&mut self, value: f64) {
-        if value < 0.0 {
-            panic!("Value is negative.");
-        }
+        debug_assert!(value > 0.0, "Value is negative.");
         self.total_current -= value;
         self.expended += value;
-        if self.expendable() < 0.0 {
-            panic!("Expended more than was available.")
-        }
+        debug_assert!( self.expendable() > 0.0, 
+            "Expended more than was available.");
     }
 
     /// # Realize All
@@ -96,9 +89,9 @@ impl WantInfo {
     /// Takes current expectations and adds/subtracts it from the
     /// total_current.
     pub fn realize_all(&mut self) {
-        debug_assert!(self.total_current < self.expectations, "Expectations somehow larger than current total.");
         self.total_current += self.expectations;
         self.expectations = 0.0;
+        debug_assert!(self.total_current > 0.0, "Expected losses larger than current total available.")
     }
 
     /// # Realize
