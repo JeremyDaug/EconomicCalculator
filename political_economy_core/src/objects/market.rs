@@ -585,7 +585,7 @@ pub struct MarketHistory {
     /// The info for each class available in this market.
     pub class_info: HashMap<usize, ClassInfo>,
     /// The info for each want we want to store in memory.
-    pub want_info: HashMap<usize, WantInfo>,
+    pub want_info: HashMap<usize, MarketWantInfo>,
     /// Organizes products by their sale priority (Salability Highest to lowest).
     /// TODO Perhaps change this to take AMV into account in some fashion.
     pub sale_priority: Vec<usize>,
@@ -655,7 +655,7 @@ impl MarketHistory {
                 total = (total * total_weight + price * amount) / (total_weight + amount);
                 total_weight += amount;
             }
-            ret.want_info.insert(*want, WantInfo { est_price: total, est_products: sources.len() as f64 });
+            ret.want_info.insert(*want, MarketWantInfo { est_price: total, est_products: sources.len() as f64 });
         }
 
         // add in those currencies which are dictated to be currencies by the market.
@@ -877,7 +877,7 @@ impl DealRecord {
 /// Market History for wants to make estimating the price of a want easier 
 /// to find.
 #[derive(Debug, Clone, Copy)]
-pub struct WantInfo {
+pub struct MarketWantInfo {
     /// The estimated price of the product, created from the 
     /// weighted average of the constituent product and possible processes.
     /// 
@@ -889,7 +889,7 @@ pub struct WantInfo {
     pub est_products: f64
 }
 
-impl WantInfo {
+impl MarketWantInfo {
     pub fn new(est_price: f64) -> Self { 
             Self { est_price, est_products: 1.0} 
         }

@@ -119,6 +119,106 @@ mod tests {
                 assert_eq!(test.consumed, 1.0);
             }
         }
+    
+        mod realize_should {
+            use crate::objects::want_info::WantInfo;
+
+            #[test]
+            pub fn correctly_shift_value_from_expectations_to_total_current() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.realize(5.0);
+                assert_eq!(test.total_current, 15.0);
+                assert_eq!(test.expectations, 5.0);
+                assert_eq!(test.gained, 1.0);
+                assert_eq!(test.expended, 1.0);
+                assert_eq!(test.consumed, 1.0);
+                assert_eq!(test.day_start, 10.0);
+            }
+
+            #[test]
+            #[should_panic]
+            pub fn debug_check_sign_mismatch(){
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.realize(-5.0);
+            }
+
+            #[test]
+            #[should_panic]
+            pub fn debug_check_value_too_high(){
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.realize(15.0);
+            }
+        }
+
+        mod consume_should {
+            use crate::objects::want_info::WantInfo;
+
+            #[test]
+            pub fn consume_from_total_current_first() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.consume(5.0);
+                assert_eq!(test.total_current, 5.0);
+                assert_eq!(test.expectations, 10.0);
+                assert_eq!(test.gained, 1.0);
+                assert_eq!(test.expended, 1.0);
+                assert_eq!(test.consumed, 6.0);
+                assert_eq!(test.day_start, 10.0);
+            }
+
+            #[test]
+            pub fn take_from_total_current_then_from_expectations() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.consume(15.0);
+                assert_eq!(test.total_current, 0.0);
+                assert_eq!(test.expectations, 5.0);
+                assert_eq!(test.gained, 1.0);
+                assert_eq!(test.expended, 1.0);
+                assert_eq!(test.consumed, 16.0);
+                assert_eq!(test.day_start, 10.0);
+            }
+
+            #[test]
+            #[should_panic]
+            pub fn debug_check_value_greater_than_consumeable() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.consume(25.0);
+            }
+
+            #[test]
+            #[should_panic]
+            pub fn debug_check_value_not_negative() {
+                let mut test = WantInfo::new(10.0);
+                test.gained = 1.0;
+                test.expectations = 10.0;
+                test.expended = 1.0;
+                test.consumed = 1.0;
+                test.consume(-1.0);
+            }
+        }
     }
 
     mod property_info_tests {
@@ -1758,7 +1858,7 @@ mod tests {
         mod process_firm_message {
             use std::collections::HashMap;
 
-            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, seller::Seller, property_info::PropertyInfo}, constants::TIME_ID};
+            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, property_info::PropertyInfo, seller::Seller, want_info::WantInfo}, constants::TIME_ID};
 
             use super::make_test_pop;
             use super::prepare_data_for_market_actions;
@@ -1831,8 +1931,8 @@ mod tests {
                 test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
                 test.property.property.insert(3, PropertyInfo::new(10.0));
                 test.property.property.insert(5, PropertyInfo::new(10.0));
-                test.property.want_store.insert(4, 20.0);
-                test.property.want_store.insert(6, 5.0);
+                test.property.want_store.insert(4, WantInfo::new(20.0));
+                test.property.want_store.insert(6, WantInfo::new(5.0));
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1896,8 +1996,8 @@ mod tests {
                 test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
                 test.property.property.insert(3, PropertyInfo::new(10.0));
                 test.property.property.insert(5, PropertyInfo::new(10.0));
-                test.property.want_store.insert(4, 20.0);
-                test.property.want_store.insert(6, 5.0);
+                test.property.want_store.insert(4, WantInfo::new(20.0));
+                test.property.want_store.insert(6, WantInfo::new(5.0));
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -1929,8 +2029,8 @@ mod tests {
                 assert_eq!(test.property.property.get(&5).unwrap().total_property, 10.0);
                 assert!(!test.property.property.contains_key(&3));
                 assert_eq!(test.property.want_store.len(), 2);
-                assert_eq!(*test.property.want_store.get(&4).unwrap(), 20.0);
-                assert_eq!(*test.property.want_store.get(&6).unwrap(), 5.0);
+                assert_eq!(test.property.want_store.get(&4).unwrap().total_current, 20.0);
+                assert_eq!(test.property.want_store.get(&6).unwrap().total_current, 5.0);
             }
         }
 
@@ -2005,7 +2105,7 @@ mod tests {
                 let test = handler.join().unwrap();
                 
                 // check that the want was recieved
-                assert_eq!(*test.property.want_store.get(&0).unwrap(), 10.0);
+                assert_eq!(test.property.want_store.get(&0).unwrap().total_current, 10.0);
             }
 
             #[test]
@@ -6161,7 +6261,7 @@ mod tests {
         mod decay_goods_should {
             use std::collections::{HashMap, HashSet};
 
-            use crate::{objects::{property::Property, product::Product, want::Want, process::{ProcessTag, Process, ProcessPart, ProcessSectionTag}, property_info::PropertyInfo, item::Item}, data_manager::DataManager};
+            use crate::{objects::{item::Item, process::{ProcessTag, Process, ProcessPart, ProcessSectionTag}, product::Product, property::Property, property_info::PropertyInfo, want::Want, want_info::WantInfo}, data_manager::DataManager};
 
             #[test]
             pub fn decay_goods_correctly_for_all_failure_types() {
@@ -6338,10 +6438,10 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(10.0));
                 test.property.insert(3, PropertyInfo::new(10.0));
-                test.want_store.insert(0, 10.0);
-                test.want_store.insert(1, 10.0);
-                test.want_store.insert(2, 10.0);
-                test.want_store.insert(3, 10.0);
+                test.want_store.insert(0, WantInfo::new(10.0));
+                test.want_store.insert(1, WantInfo::new(10.0));
+                test.want_store.insert(2, WantInfo::new(10.0));
+                test.want_store.insert(3, WantInfo::new(10.0));
                 test.decay_goods(&data);
                 // check that everything decayed correctly.
                 assert_eq!(test.property[&0].total_property, 10.0);

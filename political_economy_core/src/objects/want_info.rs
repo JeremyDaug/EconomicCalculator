@@ -101,21 +101,18 @@ impl WantInfo {
     /// expectation adds that to total_current and negative values take negative
     /// value from expectations and removes it from total_current.
     /// 
-    /// # Panics
+    /// # Debug Checks
     /// 
-    /// Panics if the value it is trying to shift cannot be realized. IE,
+    /// Checks if the value it is trying to shift cannot be realized. IE,
     /// mismatched signes between value and self.expectations or same sign
     /// but value > self.expectations (abs)
-    /// 
-    /// TODO Consider swaping panic to Debug asserts.
     pub fn realize(&mut self, value: f64) {
-        if self.expectations.is_sign_negative() == value.is_sign_negative() {
-            if self.expectations.abs() < value.abs() {
-                panic!("Value to realize is too big.")
-            }
-        } else { // if sign mismatch.
-            panic!("Value-expectation Sign Mismatch (+/-).")
-        }
+        // if sign mismatch
+        debug_assert!(self.expectations.is_sign_negative() == value.is_sign_negative(), 
+            "Value expectation sign mismatch, one is positive the other is negative.");
+        // value to shift is 
+        debug_assert!(self.expectations.abs() > value.abs(),
+            "Value to realize is too big.");
         self.expectations -= value;
         self.total_current += value;
     }
@@ -129,12 +126,11 @@ impl WantInfo {
     /// 
     /// Panics if the value shifted results in a negative total_current.
     pub fn consume(&mut self, value: f64) {
-        if self.consumable() < value {
-            panic!("Value to consume is greater than total available.")
-        }
-        if value < 0.0 {
-            panic!("Cannot consume a negative value.")
-        }
+        debug_assert!(self.consumable() >= value, 
+            "Value to consume is greater than total available.");
+        debug_assert!(value > 0.0,
+            "Cannot consume a negative value.");
+
         self.total_current -= value;
         if self.total_current < 0.0 {
             self.expectations += self.total_current;

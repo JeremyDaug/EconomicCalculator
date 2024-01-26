@@ -348,7 +348,7 @@ impl Pop {
                         sender: self.actor_info(),
                         reciever: firm,
                         want,
-                        amount
+                        amount.total_current
                     });
                     self.property.want_store.remove(&want)
                     .expect("Not found?");

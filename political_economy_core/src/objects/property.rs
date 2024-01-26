@@ -17,7 +17,7 @@ use itertools::Itertools;
 
 use crate::{data_manager::DataManager, constants::{TIER_RATIO, SHOPPING_TIME_ID}};
 
-use super::{desire::Desire, market::{MarketHistory, WantInfo}, property_info::PropertyInfo, item::Item};
+use super::{desire::Desire, item::Item, market::MarketHistory, property_info::PropertyInfo, want_info::WantInfo};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -28,7 +28,7 @@ pub struct Property {
     /// The property currently owned bey the actor.
     pub property: HashMap<usize, PropertyInfo>,
     /// The wants stored and not used up yet.
-    pub want_store: HashMap<usize, f64>,
+    pub want_store: HashMap<usize, WantInfo>,
     /// Whether the pop who owns this property is a disorganized firm or not.
     pub is_disorganized: bool,
     /// How much time we have worked on average over the past few days.
@@ -49,8 +49,6 @@ pub struct Property {
     /// The expected inputs and outputs of our process plan.
     /// Only includes inputs and outputs, not capital for sanity reasons.
     pub product_expectations: HashMap<usize, f64>,
-    /// The Expected inputs and outputs of our process plan for wants.
-    pub want_expectations: HashMap<usize, f64>,
     /// The highest tier of satisfaction which is fully satisfied.
     /// 
     /// No tier is fully satisfied, then it returns None.
@@ -121,7 +119,6 @@ impl Property {
             highest_tier: 0,
             process_plan: HashMap::new(),
             product_expectations: HashMap::new(),
-            want_expectations: HashMap::new(),
             is_disorganized: true,
             work_time: 0.0,
             wage_estimate: 0.0,
