@@ -20,7 +20,7 @@ pub struct WantInfo {
     /// How much we have explicitly gained.
     pub gained: f64,
     /// How much we expect to gain through processes.
-    pub expectations: f64,
+    pub expected: f64,
     /// How much we have expended for processes
     pub expended: f64,
     /// How much we have consumed for desires.
@@ -32,7 +32,7 @@ impl WantInfo {
         Self { total_current: day_start, 
             day_start, 
             gained: 0.0, 
-            expectations: 0.0,
+            expected: 0.0,
             expended: 0.0, 
             consumed: 0.0 
         } 
@@ -47,7 +47,7 @@ impl WantInfo {
     pub fn new_day(&mut self) {
         self.day_start = self.total_current;
         self.gained = 0.0;
-        self.expectations = 0.0;
+        self.expected = 0.0;
         self.expended = 0.0;
         self.consumed = 0.0;
     }
@@ -59,7 +59,7 @@ impl WantInfo {
     /// 
     /// If the value is zero, assume there is a problem.
     pub fn consumable(&self) -> f64 {
-        self.total_current + self.expectations
+        self.total_current + self.expected
     }
 
     /// # Expendable
@@ -67,7 +67,7 @@ impl WantInfo {
     /// How much can be expended right now. Caps available at total_current,
     /// removes any that are expected to be spent.
     pub fn expendable(&self) -> f64 {
-        self.total_current + self.expectations.min(0.0)
+        self.total_current + self.expected.min(0.0)
     }
 
     /// # Expend
@@ -89,8 +89,8 @@ impl WantInfo {
     /// Takes current expectations and adds/subtracts it from the
     /// total_current.
     pub fn realize_all(&mut self) {
-        self.total_current += self.expectations;
-        self.expectations = 0.0;
+        self.total_current += self.expected;
+        self.expected = 0.0;
         debug_assert!(self.total_current > 0.0, "Expected losses larger than current total available.")
     }
 
@@ -108,12 +108,12 @@ impl WantInfo {
     /// but value > self.expectations (abs)
     pub fn realize(&mut self, value: f64) {
         // if sign mismatch
-        debug_assert!(self.expectations.is_sign_negative() == value.is_sign_negative(), 
+        debug_assert!(self.expected.is_sign_negative() == value.is_sign_negative(), 
             "Value expectation sign mismatch, one is positive the other is negative.");
         // value to shift is 
-        debug_assert!(self.expectations.abs() > value.abs(),
+        debug_assert!(self.expected.abs() > value.abs(),
             "Value to realize is too big.");
-        self.expectations -= value;
+        self.expected -= value;
         self.total_current += value;
     }
 
@@ -133,9 +133,18 @@ impl WantInfo {
 
         self.total_current -= value;
         if self.total_current < 0.0 {
-            self.expectations += self.total_current;
+            self.expected += self.total_current;
             self.total_current = 0.0;
         }
         self.consumed += value;
+    }
+
+    /// # Add
+    /// 
+    /// Adds the given value to the total_current and
+    /// gained.
+    pub fn add(&mut self, value: f64) {
+        self.total_current += value;
+        self.gained += value;
     }
 }

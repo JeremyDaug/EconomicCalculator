@@ -21,7 +21,7 @@ mod tests {
                 assert_eq!(test.total_current, 10.0);
                 assert_eq!(test.day_start, 10.0);
                 assert_eq!(test.gained, 0.0);
-                assert_eq!(test.expectations, 0.0);
+                assert_eq!(test.expected, 0.0);
                 assert_eq!(test.expended, 0.0);
                 assert_eq!(test.consumed, 0.0);
             }
@@ -34,14 +34,14 @@ mod tests {
             pub fn correctly_reset_values() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 1.0;
+                test.expected = 1.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.new_day();
                 assert_eq!(test.total_current, 10.0);
                 assert_eq!(test.day_start, 10.0);
                 assert_eq!(test.gained, 0.0);
-                assert_eq!(test.expectations, 0.0);
+                assert_eq!(test.expected, 0.0);
                 assert_eq!(test.expended, 0.0);
                 assert_eq!(test.consumed, 0.0);
             }
@@ -54,7 +54,7 @@ mod tests {
             pub fn return_sum_of_total_current_and_expectations() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 1.0;
+                test.expected = 1.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 let result = test.consumable();
@@ -69,12 +69,12 @@ mod tests {
             pub fn return_sum_of_total_and_expectation_excluding_positive_values() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 1.0;
+                test.expected = 1.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 let result = test.expendable();
                 assert_eq!(result, 10.0);
-                test.expectations = -1.0;
+                test.expected = -1.0;
                 let result = test.expendable();
                 assert_eq!(result, 9.0);
             }
@@ -87,14 +87,14 @@ mod tests {
             pub fn correctly_move_value_from_total_current_to_expended() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 1.0;
+                test.expected = 1.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.expend(5.0);
                 assert_eq!(test.total_current, 5.0);
                 assert_eq!(test.day_start, 10.0);
                 assert_eq!(test.gained, 1.0);
-                assert_eq!(test.expectations, 1.0);
+                assert_eq!(test.expected, 1.0);
                 assert_eq!(test.expended, 6.0);
                 assert_eq!(test.consumed, 1.0);
             }
@@ -107,14 +107,14 @@ mod tests {
             pub fn correctly_add_positive_expectations() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.realize_all();
                 assert_eq!(test.total_current, 20.0);
                 assert_eq!(test.day_start, 10.0);
                 assert_eq!(test.gained, 1.0);
-                assert_eq!(test.expectations, 0.0);
+                assert_eq!(test.expected, 0.0);
                 assert_eq!(test.expended, 1.0);
                 assert_eq!(test.consumed, 1.0);
             }
@@ -127,12 +127,12 @@ mod tests {
             pub fn correctly_shift_value_from_expectations_to_total_current() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.realize(5.0);
                 assert_eq!(test.total_current, 15.0);
-                assert_eq!(test.expectations, 5.0);
+                assert_eq!(test.expected, 5.0);
                 assert_eq!(test.gained, 1.0);
                 assert_eq!(test.expended, 1.0);
                 assert_eq!(test.consumed, 1.0);
@@ -144,7 +144,7 @@ mod tests {
             pub fn debug_check_sign_mismatch(){
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.realize(-5.0);
@@ -155,7 +155,7 @@ mod tests {
             pub fn debug_check_value_too_high(){
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.realize(15.0);
@@ -169,12 +169,12 @@ mod tests {
             pub fn consume_from_total_current_first() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.consume(5.0);
                 assert_eq!(test.total_current, 5.0);
-                assert_eq!(test.expectations, 10.0);
+                assert_eq!(test.expected, 10.0);
                 assert_eq!(test.gained, 1.0);
                 assert_eq!(test.expended, 1.0);
                 assert_eq!(test.consumed, 6.0);
@@ -185,12 +185,12 @@ mod tests {
             pub fn take_from_total_current_then_from_expectations() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.consume(15.0);
                 assert_eq!(test.total_current, 0.0);
-                assert_eq!(test.expectations, 5.0);
+                assert_eq!(test.expected, 5.0);
                 assert_eq!(test.gained, 1.0);
                 assert_eq!(test.expended, 1.0);
                 assert_eq!(test.consumed, 16.0);
@@ -202,7 +202,7 @@ mod tests {
             pub fn debug_check_value_greater_than_consumeable() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.consume(25.0);
@@ -213,7 +213,7 @@ mod tests {
             pub fn debug_check_value_not_negative() {
                 let mut test = WantInfo::new(10.0);
                 test.gained = 1.0;
-                test.expectations = 10.0;
+                test.expected = 10.0;
                 test.expended = 1.0;
                 test.consumed = 1.0;
                 test.consume(-1.0);
@@ -6452,10 +6452,10 @@ mod tests {
                 assert_eq!(test.property[&1].lost, 5.0);
                 assert_eq!(test.property[&2].lost, 10.0);
                 assert_eq!(test.property[&3].lost, 0.0);
-                assert_eq!(test.want_store[&0], 20.0);
-                assert_eq!(test.want_store[&1], 5.0);
-                assert_eq!(test.want_store[&2], 7.5);
-                assert_eq!(test.want_store[&3], 0.0);
+                assert_eq!(test.want_store[&0].total_current, 20.0);
+                assert_eq!(test.want_store[&1].total_current, 5.0);
+                assert_eq!(test.want_store[&2].total_current, 7.5);
+                assert_eq!(test.want_store[&3].total_current, 0.0);
             }
         }
 

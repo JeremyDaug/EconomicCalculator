@@ -10,12 +10,7 @@ use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST, SHOPPING_TIME_ID}, objects::{property::{DesireCoord, TieredValue}}};
 
-use super::{property::Property,
-    pop_breakdown_table::PopBreakdownTable,
-    buyer::Buyer, seller::Seller, actor::Actor,
-    market::MarketHistory,
-    actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult},
-    buy_result::{BuyResult, self}, property_info::PropertyInfo, product::ProductTag, item::Item,
+use super::{actor::Actor, actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, buy_result::{BuyResult, self}, buyer::Buyer, item::Item, market::MarketHistory, pop_breakdown_table::PopBreakdownTable, product::ProductTag, property::Property, property_info::PropertyInfo, seller::Seller, want_info::WantInfo
 };
 
 /// Pops are the data storage for a population group.
@@ -348,7 +343,7 @@ impl Pop {
                         sender: self.actor_info(),
                         reciever: firm,
                         want,
-                        amount.total_current
+                        amount: amount.total_current
                     });
                     self.property.want_store.remove(&want)
                     .expect("Not found?");
@@ -401,7 +396,9 @@ impl Pop {
             match msg {
                 ActorMessage::WantSplash { sender: _, want, amount } => {
                     // catch any splashed wants for a while.
-                    *self.property.want_store.entry(want).or_insert(0.0) += amount;
+                    self.property.want_store.entry(want)
+                        .or_insert(WantInfo::new(0.0))
+                        .add(amount);
                 },
                 ActorMessage::SendProduct {
                     sender: _,
@@ -819,16 +816,20 @@ impl Pop {
             ActorMessage::SendProduct { product, amount, .. } => {
                 // We're recieving a product, add to our unreserved amount.
                 self.property.property.entry(product)
-                .and_modify(|x| { x.add_property(amount); })
-                .or_insert(PropertyInfo::new(amount));
+                    .and_modify(|x| { x.add_property(amount); })
+                    .or_insert(PropertyInfo::new(amount));
                 return None;
             },
             ActorMessage::SendWant { want, amount, .. } => {
-                *self.property.want_store.entry(want).or_insert(0.0) += amount;
+                self.property.want_store.entry(want)
+                    .or_insert(WantInfo::new(0.0))
+                    .add(amount);
                 return None;
             },
             ActorMessage::WantSplash { want, amount, .. } => {
-                *self.property.want_store.entry(want).or_insert(0.0) += amount;
+                self.property.want_store.entry(want)
+                    .or_insert(WantInfo::new(0.0))
+                    .add(amount);
                 return None;
             },
             ActorMessage::FirmToEmployee { firm, employee: _,
