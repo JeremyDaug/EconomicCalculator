@@ -6593,11 +6593,11 @@ mod tests {
             }
         }
 
+        /// DEBUG Come back here after fixing sift_all
         mod add_products_should {
             use std::collections::{HashSet, HashMap};
 
             use crate::{objects::{process::{Process, ProcessTag, ProcessPart, ProcessSectionTag}, want::Want, product::Product, property::Property, desire::Desire, item::Item}, data_manager::DataManager};
-
 
             #[test]
             pub fn add_multiple_products_to_property_then_sift() {
@@ -6830,6 +6830,7 @@ mod tests {
             }
         }
 
+        /// DEBUG Come back here after fixing sift_all
         mod add_property_should {
             use std::collections::{HashSet, HashMap};
 

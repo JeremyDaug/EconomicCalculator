@@ -532,7 +532,7 @@ impl Property {
 
     /// Helper function, creates a copy of our property as a hashset.
     /// 
-    /// Uses total property, not some
+    /// Uses total property, not available or unreserved.
     pub fn property_to_hashmap(&self) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
         for (&id, &prop) in self.property.iter() {
@@ -1169,10 +1169,7 @@ impl Property {
                             desire.satisfaction += quant;
                         } else {
                             self.want_store.get_mut(&edited_want).unwrap()
-                                .
-                            self.want_expectations.entry(want)
-                            .and_modify(|x| *x += quant)
-                            .or_insert(quant);
+                                .realize(quant);
                         }
                     }
                     if desire.satisfied_at_tier(current.tier) {
@@ -1185,6 +1182,15 @@ impl Property {
                     cleared.insert(current.idx); // add to cleared.
                 }
             }
+        }
+    }
+
+    /// # Clear Expectations
+    /// 
+    /// This resets all expectations in want store.
+    pub fn clear_expectations(&mut self) {
+        for (_, info) in self.want_store.iter_mut() {
+            info.expected = 0.0;
         }
     }
 
@@ -1219,7 +1225,7 @@ impl Property {
         }
         self.process_plan.clear();
         self.product_expectations.clear();
-        self.want_expectations.clear();
+        self.clear_expectations();
         // with data cleared, walk up our tiers and reserve items for our desires as needed.
         // we are allowed to satisfy our wants from the expectations, but not products expected.
         let mut cleared = HashSet::new();
@@ -1237,13 +1243,13 @@ impl Property {
                 Item::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
                     // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
-                    if self.want_expectations.contains_key(&want) {
-                        let expectation = self.want_expectations.get_mut(&want).unwrap();
-                        if *expectation > 0.0 { // if positive expectation, use
-                            let shift = expectation
-                            .min(desire.amount - desire.satisfaction_at_tier(current.tier));
-                            *expectation -= shift;
-                            desire.satisfaction += shift;
+                    if self.want_store.contains_key(&want) {
+                        let want_info = self.want_store.get_mut(&want).unwrap();
+                        if want_info.expected > 0.0 {
+                            let target = want_info.expected
+                                .min(desire.amount - desire.satisfaction_at_tier(current.tier));
+                            want_info.consume(target);
+                            desire.satisfaction += target;
                         }
                     }
                     if desire.satisfied_at_tier(current.tier) {
@@ -1275,10 +1281,16 @@ impl Property {
                         for (own_want, eff) in product_info.wants.iter() {
                             if *own_want == want { // if our want, add to sat
                                 desire.satisfaction += eff * target;
-                            } else { // if not, add to expectations
-                                self.want_expectations.entry(*own_want)
-                                .and_modify(|x| *x += eff * target)
-                                .or_insert(eff * target);
+                            } else { // if not, add to total
+                                self.want_store.entry(*own_want)
+                                    .and_modify(|x| x.expected += eff * target)
+                                    .or_insert({
+                                        let mut ret = WantInfo::new(0.0);
+                                        ret.expected += eff * target;
+                                        ret
+                                    });
+                                self.want_store.get_mut(own_want).unwrap()
+                                    .add(eff * target);
                             }
                         }
                         prop_info.shift_to_want_reserve(target); // shift property to want.
@@ -1300,11 +1312,9 @@ impl Property {
                         let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
-                        let mut combined_wants = self.want_store.clone();
-                        for (want_id, amount) in self.want_expectations.iter() {
-                            combined_wants.entry(*want_id)
-                            .and_modify(|x| *x += amount)
-                            .or_insert(*amount);
+                        let mut combined_wants = HashMap::new();
+                        for (want_id, want_info) in self.want_store.iter() {
+                            combined_wants.insert(*want_id, want_info.expendable());
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
@@ -1333,9 +1343,8 @@ impl Property {
                             if edited_want == want { // if the want is what we're trying to satisy, add it
                                 desire.satisfaction += quant;
                             } else {
-                                self.want_expectations.entry(want)
-                                .and_modify(|x| *x += quant)
-                                .or_insert(quant);
+                                self.want_store.get_mut(&edited_want).unwrap()
+                                    .realize(quant);
                             }
                         }
                         if desire.satisfied_at_tier(current.tier) {
@@ -1356,11 +1365,9 @@ impl Property {
                         let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
-                        let mut combined_wants = self.want_store.clone();
-                        for (want_id, amount) in self.want_expectations.iter() {
-                            combined_wants.entry(*want_id)
-                            .and_modify(|x| *x += amount)
-                            .or_insert(*amount);
+                        let mut combined_wants = HashMap::new();
+                        for (want_id, want_info) in self.want_store.iter() {
+                            combined_wants.insert(*want_id, want_info.expendable());
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
@@ -1389,9 +1396,8 @@ impl Property {
                             if edited_want == want { // if the want is what we're trying to satisy, add it
                                 desire.satisfaction += quant;
                             } else {
-                                self.want_expectations.entry(want)
-                                .and_modify(|x| *x += quant)
-                                .or_insert(quant);
+                                self.want_store.get_mut(&edited_want).unwrap()
+                                    .realize(quant);
                             }
                         }
                         if desire.satisfied_at_tier(current.tier) {
@@ -1623,15 +1629,19 @@ impl Property {
     /// 
     /// Goes through the property contained and goes through decay and failure
     /// effects for each want and good stored.
+    /// 
+    /// This should occur after all processes and consumption for the day is done.
     pub fn decay_goods(&mut self, data: &DataManager) {
         // start by decaying wants 
-        for (want, quant) in self.want_store.iter_mut() {
-            let want_info = data.wants.get(want).unwrap();
-            let decay = 1.0 - want_info.decay;
-            *quant *= decay; // multiply by decay and assign again.
+        for (want_id, want_info) in self.want_store.iter_mut() {
+            let want = data.wants.get(want_id).unwrap();
+            let decay = want.decay * want_info.total_current;
+            want_info.total_current -= decay; // remove from total.
+            want_info.lost += decay; // add to expended 
         }
         // get a copy of our existing property for processing
         let original_property = self.property_to_hashmap();
+        let original_wants = self.wants_to_hashmap();
         let mut property_change = HashMap::new();
         let mut want_change = HashMap::new();
         // then decay/fail products
@@ -1645,7 +1655,7 @@ impl Property {
                     let fail_proc = data.processes.get(&proc_id).unwrap();
                     let results = fail_proc
                     .do_process(&original_property, 
-                        &self.want_store, 0.0, 
+                        &original_wants, 0.0, 
                         0.0, Some(failed), 
                         true, data);
                     for (&product, &amount) in results.input_output_products.iter() {
@@ -1682,8 +1692,8 @@ impl Property {
         }
         for (&want, &amount) in want_change.iter() {
             self.want_store.entry(want)
-            .and_modify(|x| *x += amount)
-            .or_insert(amount);
+            .and_modify(|x| x.total_current += amount)
+            .or_insert(WantInfo::new(amount));
         }
     }
 
@@ -1771,7 +1781,6 @@ impl Property {
         for (&id, info) in self.property.iter_mut() {
             if info.unreserved > 0.0 {
                 let shift = info.unreserved;
-                info.safe_remove(shift);
                 result.entry(id)
                 .and_modify(|x| *x += shift)
                 .or_insert(shift);
@@ -1802,7 +1811,9 @@ impl Property {
         }
         self.process_plan.clear();
         self.product_expectations.clear();
-        self.want_expectations.clear();
+        for (_, info) in self.want_store.iter_mut() {
+            info.expected = 0.0;
+        }
         // with data cleared, walk up our tiers and reserve items for our desires as needed.
         // we are allowed to satisfy our wants from the expectations, but not products expected.
         let mut cleared = HashSet::new();
@@ -1828,12 +1839,12 @@ impl Property {
                 Item::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
                     // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
-                    if self.want_expectations.contains_key(&want) {
-                        let expectation = self.want_expectations.get_mut(&want).unwrap();
-                        if *expectation > 0.0 { // if positive expectation, use
-                            let shift = expectation
+                    if self.want_store.contains_key(&want) {
+                        let want_info = self.want_store.get_mut(&want).unwrap();
+                        if want_info.expected > 0.0 { // if positive expectation, use
+                            let shift = want_info.expected
                             .min(desire.amount - desire.satisfaction_at_tier(current.tier));
-                            *expectation -= shift;
+                            want_info.expected -= shift;
                             desire.satisfaction += shift;
                         }
                     }
@@ -1867,9 +1878,13 @@ impl Property {
                             if *own_want == want { // if our want, add to sat
                                 desire.satisfaction += eff * target;
                             } else { // if not, add to expectations
-                                self.want_expectations.entry(*own_want)
-                                .and_modify(|x| *x += eff * target)
-                                .or_insert(eff * target);
+                                self.want_store.entry(*own_want)
+                                .and_modify(|x| x.expected += eff * target)
+                                .or_insert({
+                                    let mut val = WantInfo::new(0.0);
+                                    val.expected += eff * target;
+                                    val
+                                });
                             }
                         }
                         prop_info.shift_to_want_reserve(target); // shift property to want.
@@ -1891,11 +1906,9 @@ impl Property {
                         let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
-                        let mut combined_wants = self.want_store.clone();
-                        for (want_id, amount) in self.want_expectations.iter() {
-                            combined_wants.entry(*want_id)
-                            .and_modify(|x| *x += amount)
-                            .or_insert(*amount);
+                        let mut combined_wants = HashMap::new();;
+                        for (&want_id, want_info) in self.want_store.iter() {
+                            combined_wants.insert(want_id, want_info.expendable());
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
@@ -1924,9 +1937,13 @@ impl Property {
                             if edited_want == want { // if the want is what we're trying to satisy, add it
                                 desire.satisfaction += quant;
                             } else {
-                                self.want_expectations.entry(want)
-                                .and_modify(|x| *x += quant)
-                                .or_insert(quant);
+                                self.want_store.entry(edited_want)
+                                .and_modify(|x| x.expected += quant)
+                                .or_insert({
+                                    let mut ret = WantInfo::new(0.0);
+                                    ret.expected += quant;
+                                    ret
+                                });
                             }
                         }
                         if desire.satisfied_at_tier(current.tier) {
@@ -1947,11 +1964,9 @@ impl Property {
                         let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
-                        let mut combined_wants = self.want_store.clone();
-                        for (want_id, amount) in self.want_expectations.iter() {
-                            combined_wants.entry(*want_id)
-                            .and_modify(|x| *x += amount)
-                            .or_insert(*amount);
+                        let mut combined_wants = HashMap::new();
+                        for (want_id, want_info) in self.want_store.iter() {
+                            combined_wants.insert(*want_id, want_info.expendable());
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
@@ -1980,9 +1995,13 @@ impl Property {
                             if edited_want == want { // if the want is what we're trying to satisy, add it
                                 desire.satisfaction += quant;
                             } else {
-                                self.want_expectations.entry(want)
-                                .and_modify(|x| *x += quant)
-                                .or_insert(quant);
+                                self.want_store.entry(edited_want)
+                                .and_modify(|x| x.expected += quant)
+                                .or_insert({
+                                    let mut ret = WantInfo::new(0.0);
+                                    ret.expected = quant;
+                                    ret
+                                });
                             }
                         }
                         if desire.satisfied_at_tier(current.tier) {
@@ -2083,13 +2102,7 @@ impl Property {
         // then extract wants which might feed into it.
         let mut available_wants = HashMap::new();
         for (&id, &avail) in self.want_store.iter() {
-            available_wants.insert(id, avail);
-        }
-        for (&id, &change) in self.want_expectations.iter()
-        .filter(|x| *x.1 < 0.0) { // remove those we expect to use.
-            available_wants.entry(id)
-            .and_modify(|x| *x += change)
-            .or_insert(change);
+            available_wants.insert(id, avail.expendable());
         }
         // then start counting up how much shopping time we might be able to get.
         let mut max_available = 0.0;
@@ -2168,13 +2181,7 @@ impl Property {
         // extract wants which might feed into it.
         let mut available_wants = HashMap::new();
         for (&id, &avail) in self.want_store.iter() {
-            available_wants.insert(id, avail);
-        }
-        for (&id, &change) in self.want_expectations.iter()
-        .filter(|x| *x.1 < 0.0) { // subtract those which we expect to use elsewhere.
-            available_wants.entry(id)
-            .and_modify(|x| *x += change)
-            .or_insert(change);
+            available_wants.insert(id, avail.expendable());
         }
         for process in data.products.get(&SHOPPING_TIME_ID).unwrap() // The product
         .processes.iter() // the process IDs which time is related to
@@ -2221,10 +2228,19 @@ impl Property {
             // add/remove consumed/expended wants
             for (&want, &amount) in proc_result.input_output_wants.iter() {
                 // wants consumed here are definitely safe, probably.
-                let test = self.want_store.entry(want)
-                    .and_modify(|x| *x += amount)
-                    .or_insert(amount);
-                debug_assert!(*test > 0.0, "Want was made negative.");
+                if amount > 0.0 { // if adding
+                    self.want_store.entry(want)
+                        .and_modify(|x| x.add(amount))
+                        .or_insert({
+                            let mut ret = WantInfo::new(0.0);
+                            ret.add(amount);
+                            ret
+                        });
+                } else { // if subtracting, panic if trying to subtract something does doesn't exist.
+                    let val = self.want_store.get_mut(&want)
+                        .expect("Want to subtract from not found, will be negative.");
+                    val.expend(amount); // checks for negative value in here.
+                }
             }
         }
         final_result
@@ -2368,6 +2384,19 @@ impl Property {
             insert.max_target = target;
             self.property.insert(product, insert);
         }
+    }
+
+    /// # Wants to HashMap
+    /// 
+    /// Takes current want_store and translates it to a hashmap.
+    /// 
+    /// Does not take expectation into account, just total_current.
+    fn wants_to_hashmap(&self) -> HashMap<usize, f64> {
+        let mut result = HashMap::new();
+        for (&want_id, info) in self.want_store.iter() {
+            result.insert(want_id, info.total_current);
+        }
+        result
     }
 }
 

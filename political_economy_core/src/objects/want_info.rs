@@ -25,6 +25,8 @@ pub struct WantInfo {
     pub expended: f64,
     /// How much we have consumed for desires.
     pub consumed: f64,
+    /// How much was been lost, typically to decay.
+    pub lost: f64
 }
 
 impl WantInfo {
@@ -34,7 +36,8 @@ impl WantInfo {
             gained: 0.0, 
             expected: 0.0,
             expended: 0.0, 
-            consumed: 0.0 
+            consumed: 0.0,
+            lost: 0.0
         } 
     }
 
