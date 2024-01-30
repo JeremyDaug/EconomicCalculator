@@ -5283,9 +5283,312 @@ mod tests {
         }
     
         mod consume_goods_should {
+            use std::collections::{HashMap, VecDeque};
+
+            use crate::{data_manager::DataManager, objects::{market::MarketHistory, pop::Pop, pop_breakdown_table::PopBreakdownTable, process::Process, product::Product, property::{Property, TieredValue}, property_info::PropertyInfo, want::Want}};
+
             #[test]
             pub fn act_acording_to_consumption_plans() {
+                // Start by setting up the data and sifting.
+                // data needed, but not set up for this test.
+                let mut data = DataManager::new();
+                // wants 0
+                let mut want0 = Want{
+                    id: 0,
+                    name: "".to_string(),
+                    description: "".to_string(),
+                    decay: 0.0,
+                    ownership_sources: HashSet::new(),
+                    process_sources: HashSet::new(),
+                    use_sources: HashSet::new(),
+                    consumption_sources: HashSet::new(),
+                };
+                want0.ownership_sources.insert(0);
+                want0.process_sources.insert(0);
+                want0.process_sources.insert(1);
+                want0.use_sources.insert(0);
+                want0.consumption_sources.insert(1);
+                data.wants.insert(0, want0);
+                // products
+                data.products.insert(0, Product{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(0),
+                });
+                data.products.get_mut(&0).unwrap()
+                .wants.insert(0, 1.0);
+                data.products.insert(1, Product{
+                    id: 1,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: Some(0),
+                });
+                let mut product2 = Product{
+                    id: 2,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                product2.use_processes.insert(0);
+                product2.consumption_processes.insert(1);
+                data.products.insert(2, product2);
+                data.products.insert(3, Product{
+                    id: 3,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    unit_name: "".to_string(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: None,
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                });
+                // products use 1 + 2 = want 0
+                data.processes.insert(0, Process{
+                    id: 0,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(1), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Capital
+                        },
+                        ProcessPart { 
+                            item: Item::Want(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output
+                        }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Use(2)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+                // products consume 2 + 3 = want 0
+                data.processes.insert(1, Process{
+                    id: 1,
+                    name: "".to_string(),
+                    variant_name: "".to_string(),
+                    description: "".to_string(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input
+                        },
+                        ProcessPart { 
+                            item: Item::Want(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output
+                        }
+                    ],
+                    process_tags: vec![
+                        ProcessTag::Consumption(2)
+                    ],
+                    skill: None,
+                    skill_minimum: 0.0,
+                    skill_maximum: 0.0,
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                });
+
+                data.update_product_classes().expect("Could not function");
+                let test_desires = vec![
+                    Desire::new(Item::Want(0),
+                        1,
+                        None,
+                        1.0,
+                        0.0,
+                        1,
+                        vec![]).unwrap(),
+                    Desire::new(Item::Class(0),
+                        3,
+                        Some(30),
+                        1.0,
+                        0.0,
+                        3,
+                        vec![]).unwrap(),
+                    Desire::new(Item::Product(0),
+                        5,
+                        Some(10),
+                        1.0,
+                        0.0,
+                        5,
+                        vec![]).unwrap()
+                ];
+                let mut test = Property::new(test_desires);
+                test.property.insert(0, PropertyInfo::new(15.0));
+                test.property.insert(1, PropertyInfo::new(10.0));
+                test.property.insert(2, PropertyInfo::new(20.0));
+                test.property.insert(3, PropertyInfo::new(15.0));
+                let result = test.sift_all(&data);
+                // check that the sitfing was done correctly.
+                // 26.0 into desire 0, (tier 100)
+                let desire0 = test.desires.get(0).unwrap();
+                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 35);
+                assert!(desire0.satisfaction == 35.0);
+                // 4.0 into desire 1 (tier 12, totally satisfied)
+                let desire1 = test.desires.get(1).unwrap();
+                assert!(desire1.is_fully_satisfied());
+                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 30);
+                assert!(desire1.satisfaction == 10.0);
+                // 4.0 into desire 1 (tier 12, totally satisfied)
+                let desire2 = test.desires.get(2).unwrap();
+                assert!(desire2.is_fully_satisfied());
+                assert_eq!(desire2.satisfaction_up_to_tier().unwrap(), 10);
+                assert!(desire2.satisfaction == 2.0);
+                // and check that items were reserved correctly.
+                let prop0 = test.property.get(&0).unwrap();
+                assert!(prop0.total_property == 15.0);
+                assert!(prop0.unreserved == 0.0);
+                //assert!(prop0.reserved == 0.0);
+                assert!(prop0.want_reserve == 15.0);
+                // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
+                assert!(prop0.product_reserve == 2.0);
+                let prop1 = test.property.get(&1).unwrap();
+                assert!(prop1.total_property == 10.0);
+                assert!(prop1.unreserved == 0.0);
+                //assert!(prop1.reserved == 0.0);
+                assert!(prop1.want_reserve == 10.0);
+                assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
+                assert!(prop1.product_reserve == 0.0);
+                let prop2 = test.property.get(&2).unwrap();
+                assert!(prop2.total_property == 20.0);
+                assert!(prop2.unreserved == 0.0);
+                //assert!(prop2.reserved == 0.0);
+                assert!(prop2.want_reserve == 20.0);
+                assert!(prop2.class_reserve == 0.0);
+                assert!(prop2.product_reserve == 0.0);
+                let prop3 = test.property.get(&3).unwrap();
+                assert!(prop3.total_property == 15.0);
+                assert!(prop3.unreserved == 5.0);
+                //assert!(prop3.reserved == 0.0);
+                assert!(prop3.want_reserve == 10.0);
+                assert!(prop3.class_reserve == 0.0);
+                assert!(prop3.product_reserve == 0.0);
+                // ensure want process plan is recorded correctly.
+                assert_eq!(test.process_plan[&0], 10.0);
+                assert_eq!(test.process_plan[&1], 10.0);
+                // ensure the tiered value is correct to match
+                assert_eq!(result.tier, 35);
+                assert!(490.0 < result.value);
+                assert!(result.value < 491.0);
+
+
+                // With sifting and sanity checking that done, do and check consume goods.
+                let history = MarketHistory {
+                    product_info: HashMap::new(),
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
+                    sale_priority: vec![],
+                    currencies: vec![],
+                };
                 
+                let mut pop = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: test,
+                    breakdown_table: PopBreakdownTable {
+                        table: vec![],
+                        total: 10,
+                    },
+                    is_selling: true,
+                    current_sat: result,
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
+                    backlog: VecDeque::new(),
+                };
+                
+                pop.consume_goods(&data, &history);
+                // with consume goods run
+                // check all products unreserved and consumed as expected.
+                // check wants consumed/produced as expected and with no expected remaining.
+                // and check that processes planned has successfully zeroed out.
             }
         }
     }
@@ -6593,7 +6896,6 @@ mod tests {
             }
         }
 
-        /// DEBUG Come back here after fixing sift_all
         mod add_products_should {
             use std::collections::{HashSet, HashMap};
 
@@ -6830,7 +7132,6 @@ mod tests {
             }
         }
 
-        /// DEBUG Come back here after fixing sift_all
         mod add_property_should {
             use std::collections::{HashSet, HashMap};
 
@@ -7104,8 +7405,8 @@ mod tests {
                 assert!(test.desires[1].satisfaction == 0.0);
                 test.add_property(2, 1.0, &data);
                 // should satisfy 1 of want 0, and 2 of want 1
-                assert!(test.desires[0].satisfaction == 1.0);
-                assert!(test.desires[1].satisfaction == 2.0);
+                assert_eq!(test.desires[0].satisfaction, 1.0);
+                assert_eq!(test.desires[1].satisfaction, 2.0);
                 assert!(test.property.get(&2).unwrap().total_property == 1.0);
                 assert!(test.property.get(&2).unwrap().want_reserve == 1.0);
             }

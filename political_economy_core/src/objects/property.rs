@@ -1289,8 +1289,6 @@ impl Property {
                                         ret.expected += eff * target;
                                         ret
                                     });
-                                self.want_store.get_mut(own_want).unwrap()
-                                    .add(eff * target);
                             }
                         }
                         prop_info.shift_to_want_reserve(target); // shift property to want.
