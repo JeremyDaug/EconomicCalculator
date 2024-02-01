@@ -5283,9 +5283,9 @@ mod tests {
         }
     
         mod consume_goods_should {
-            use std::collections::{HashMap, VecDeque};
+            use std::collections::{HashMap, HashSet, VecDeque};
 
-            use crate::{data_manager::DataManager, objects::{market::MarketHistory, pop::Pop, pop_breakdown_table::PopBreakdownTable, process::Process, product::Product, property::{Property, TieredValue}, property_info::PropertyInfo, want::Want}};
+            use crate::{data_manager::DataManager, objects::{desire::Desire, item::Item, market::MarketHistory, pop::Pop, pop_breakdown_table::PopBreakdownTable, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, product::Product, property::{Property, TieredValue}, property_info::PropertyInfo, want::Want}};
 
             #[test]
             pub fn act_acording_to_consumption_plans() {
@@ -5586,7 +5586,35 @@ mod tests {
                 
                 pop.consume_goods(&data, &history);
                 // with consume goods run
+                // check desires again.
+                let desire0 = pop.property.desires.get(0).unwrap();
+                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 35);
+                assert!(desire0.satisfaction == 35.0);
+                // 4.0 into desire 1 (tier 12, totally satisfied)
+                let desire1 = pop.property.desires.get(1).unwrap();
+                assert!(desire1.is_fully_satisfied());
+                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 30);
+                assert!(desire1.satisfaction == 10.0);
+                // 4.0 into desire 1 (tier 12, totally satisfied)
+                let desire2 = pop.property.desires.get(2).unwrap();
+                assert!(desire2.is_fully_satisfied());
+                assert_eq!(desire2.satisfaction_up_to_tier().unwrap(), 10);
+                assert!(desire2.satisfaction == 2.0);
+
                 // check all products unreserved and consumed as expected.
+                let prop0 = pop.property.property.get(&0).unwrap();
+                assert_eq!(prop0.total_property, 15.0);
+                assert_eq!(prop0.unreserved, 15.0);
+
+                let prop1 = pop.property.property.get(&1).unwrap();
+                assert_eq!(prop1.total_property, 10.0);
+                assert_eq!(prop1.unreserved, 10.0);
+
+                let prop2 = pop.property.property.get(&2).unwrap();
+                assert_eq!(prop2.total_property, 10.0);
+                assert_eq!(prop2.unreserved, 10.0);
+
+                let prop3 = pop.property.property.get(&3).unwrap();
                 // check wants consumed/produced as expected and with no expected remaining.
                 // and check that processes planned has successfully zeroed out.
             }
