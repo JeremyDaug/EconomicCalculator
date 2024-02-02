@@ -1511,15 +1511,7 @@ impl Pop {
     /// Our end of daily activities. Goes through our goods, consuming them
     /// and adding to our satisfaction as dictated by our plans (calculated by sifting)
     pub fn consume_goods(&mut self, data: &DataManager, _history: &MarketHistory) {
-        // due to the ease of calculation, assume class and product wants are 
-        // correctly calculated. Record those reserved items and satisfactions,
-        // release them from reserves.
-        for (_id, property) in self.property.property.iter_mut() {
-            property.use_directly();
-        }
-
-        // call property's consume want function
-        self.property.consume_wants(data);
+        self.property.consume_goods(data, _history);
     }
 
     /// # Decay Goods

@@ -982,7 +982,13 @@ impl Property {
     /// 
     /// After the using both, it will try to go through with the stanard route
     /// just in case.
-    pub fn consume_wants(&mut self, data: &DataManager) {
+    pub fn consume_goods(&mut self, data: &DataManager, _history: &MarketHistory) {
+        // due to the ease of calculation, assume class and product wants are 
+        // correctly calculated. Record those reserved items and satisfactions,
+        // release them from reserves.
+        for (_id, property) in self.property.iter_mut() {
+            property.use_directly();
+        }
         // Walk up Want Desires and satisfy them in order. 
         // if we try to satsify all at once, we may run into an error as 
         // later processes can depend on earlier.
