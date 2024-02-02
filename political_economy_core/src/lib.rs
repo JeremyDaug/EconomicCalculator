@@ -13751,7 +13751,7 @@ mod tests {
             use crate::{data_manager::DataManager, objects::{desire::Desire, item::Item, market::MarketHistory, pop::Pop, pop_breakdown_table::PopBreakdownTable, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, product::Product, property::{Property, TieredValue}, property_info::PropertyInfo, want::Want}};
 
             #[test]
-            pub fn act_acording_to_consumption_plans() {
+            pub fn satisfy_and_consume_products_for_desires_as_planned() {
                 // Start by setting up the data and sifting.
                 // data needed, but not set up for this test.
                 let mut data = DataManager::new();
@@ -13964,59 +13964,6 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(10.0));
                 test.property.insert(2, PropertyInfo::new(20.0));
                 test.property.insert(3, PropertyInfo::new(15.0));
-                let result = test.sift_all(&data);
-                // check that the sitfing was done correctly.
-                // 26.0 into desire 0, (tier 100)
-                let desire0 = test.desires.get(0).unwrap();
-                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 35);
-                assert!(desire0.satisfaction == 35.0);
-                // 4.0 into desire 1 (tier 12, totally satisfied)
-                let desire1 = test.desires.get(1).unwrap();
-                assert!(desire1.is_fully_satisfied());
-                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 30);
-                assert!(desire1.satisfaction == 10.0);
-                // 4.0 into desire 1 (tier 12, totally satisfied)
-                let desire2 = test.desires.get(2).unwrap();
-                assert!(desire2.is_fully_satisfied());
-                assert_eq!(desire2.satisfaction_up_to_tier().unwrap(), 10);
-                assert!(desire2.satisfaction == 2.0);
-                // and check that items were reserved correctly.
-                let prop0 = test.property.get(&0).unwrap();
-                assert!(prop0.total_property == 15.0);
-                assert!(prop0.unreserved == 0.0);
-                //assert!(prop0.reserved == 0.0);
-                assert!(prop0.want_reserve == 15.0);
-                // assert!(prop0.class_reserve == 0.0); both are in the same class, so either is valid, selection order cannot be guaranteed (yet).
-                assert!(prop0.product_reserve == 2.0);
-                let prop1 = test.property.get(&1).unwrap();
-                assert!(prop1.total_property == 10.0);
-                assert!(prop1.unreserved == 0.0);
-                //assert!(prop1.reserved == 0.0);
-                assert!(prop1.want_reserve == 10.0);
-                assert!((prop1.class_reserve + prop0.class_reserve) == 10.0);
-                assert!(prop1.product_reserve == 0.0);
-                let prop2 = test.property.get(&2).unwrap();
-                assert!(prop2.total_property == 20.0);
-                assert!(prop2.unreserved == 0.0);
-                //assert!(prop2.reserved == 0.0);
-                assert!(prop2.want_reserve == 20.0);
-                assert!(prop2.class_reserve == 0.0);
-                assert!(prop2.product_reserve == 0.0);
-                let prop3 = test.property.get(&3).unwrap();
-                assert!(prop3.total_property == 15.0);
-                assert!(prop3.unreserved == 5.0);
-                //assert!(prop3.reserved == 0.0);
-                assert!(prop3.want_reserve == 10.0);
-                assert!(prop3.class_reserve == 0.0);
-                assert!(prop3.product_reserve == 0.0);
-                // ensure want process plan is recorded correctly.
-                assert_eq!(test.process_plan[&0], 10.0);
-                assert_eq!(test.process_plan[&1], 10.0);
-                // ensure the tiered value is correct to match
-                assert_eq!(result.tier, 35);
-                assert!(490.0 < result.value);
-                assert!(result.value < 491.0);
-
 
                 // With sifting and sanity checking that done, do and check consume goods.
                 let history = MarketHistory {

@@ -977,27 +977,102 @@ impl Property {
     /// effectively re-sifting the wants. However, instead of reserving products
     /// and it consumes or uses them as needs demand.
     /// 
-    /// Instead of adding to the process plan, it removes from it, as a sanity 
-    /// check.
-    /// 
     /// After the using both, it will try to go through with the stanard route
     /// just in case.
+    /// 
+    /// TODO Consider combining this with sift functions into singular function that can do either consumption or non-consuming sifting.
     pub fn consume_goods(&mut self, data: &DataManager, _history: &MarketHistory) {
-        // due to the ease of calculation, assume class and product wants are 
-        // correctly calculated. Record those reserved items and satisfactions,
-        // release them from reserves.
-        for (_id, property) in self.property.iter_mut() {
-            property.use_directly();
+        // start by resetting property and satisfactions
+        for (_, info) in self.property.iter_mut() {
+            info.reset_reserves();
         }
-        // Walk up Want Desires and satisfy them in order. 
-        // if we try to satsify all at once, we may run into an error as 
-        // later processes can depend on earlier.
-
-        // to ensure proper functioning, clear out satisfaction for want desires.
-        for desire in self.desires.iter_mut()
-        .filter(|x| x.item.is_want()) {
+        for desire in self.desires.iter_mut() {
             desire.satisfaction = 0.0;
         }
+        self.process_plan.clear();
+        self.product_expectations.clear();
+        self.clear_expectations();
+
+        // start by satisfying product and class desires.
+        let mut cleared = HashSet::new();
+        let mut current_opt = None;
+        while let Some(current) = self.walk_up_tiers(current_opt) {
+            current_opt = Some(current); // get ready for next.
+            if cleared.len() == self.desires.len() {
+                break; // if all desires marked clear, gtfo
+            }
+            if cleared.contains(&current.idx) {
+                continue; // if current desire cleared, skip.
+            }
+            let desire = self.desires.get_mut(current.idx).unwrap();
+            match desire.item {
+                Item::Want(_) => { cleared.insert(current.idx); }, // if want, skip for now.
+                Item::Class(class) => { // if class item
+                    // get that class's products
+                    let class = data.product_classes.get(&class).unwrap();
+                    // if there is no overlap between our property, add to cleared
+                    if !class.iter().any(|x| self.property.contains_key(x)) {
+                        cleared.insert(current.idx);
+                        continue;
+                    }
+                    // since there is some overlap, try to shift that
+                    let mut shifted = 0.0;
+                    for product_id in class.iter() { 
+                        // try each product we have
+                        let info_opt = self.property.get_mut(product_id);
+                        if info_opt.is_none() {
+                            continue; // if we don't have the product, go to next
+                        }
+                        let info = info_opt.unwrap();
+                        let available_shift = info.available_for_class();
+                        if available_shift == 0.0 {
+                            continue; // if nothing available to shift, go to next
+                        }
+                        // since we have something to get, get what we can to attempt to shift
+                        let shift = available_shift
+                            .min(desire.amount - desire.satisfaction_at_tier(current.tier));
+                        // with our shift amount, do the shift
+                        info.shift_to_class_reserve(shift);
+                        desire.satisfaction += shift;
+                        shifted += shift;
+                        if desire.satisfied_at_tier(current.tier) {
+                            break; // if we satisfied this tier, break out.
+                        }
+                    }
+                    if shifted == 0.0 ||                        // if shifted nothing
+                    !desire.satisfied_at_tier(current.tier) ||  // or unable to fully satisfy
+                    desire.past_end(current.tier + 1) {         // or there is no next step.
+                        cleared.insert(current.idx);            // add to cleared and gtfo
+                    }
+                },
+                Item::Product(product) => { // if specific item
+                    // get our info for this product
+                    let info_opt = self.property.get_mut(&product);
+                    if info_opt.is_none() { // if we have none of this item, set this as cleared.
+                        cleared.insert(current.idx);
+                        continue;
+                    }
+                    let info = info_opt.unwrap();
+                    // how much we can shift vs how much we want to shift
+                    let shift = info.available_for_specific()
+                        .min(desire.amount - desire.satisfaction_at_tier(current.tier));
+                    if shift == 0.0 { // if nothing to shift, add this to cleared and gtfo
+                        cleared.insert(current.idx);
+                        continue;
+                    }
+                    // if any shift, shift to reserved and add to satisfaction
+                    info.shift_to_specific_reserve(shift); // reserve from property
+                    desire.satisfaction += shift; // add to satisfaction
+                    // wrap up with completion checks
+                    if desire.past_end(current.tier + 1) || // if past end
+                    !desire.satisfied_at_tier(current.tier) { // or unable to satisfy, clear
+                        cleared.insert(current.idx);
+                    }
+                }
+            };
+        }
+
+        // with class and specific wants done, do wants.
         let mut cleared = HashSet::new();
         let mut current_opt = None;
         while let Some(current) = self.walk_up_tiers(current_opt) {
