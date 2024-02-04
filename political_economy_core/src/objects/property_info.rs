@@ -349,8 +349,7 @@ impl PropertyInfo {
     pub fn shift_to_used(&mut self, quantity: f64) {
         // remove from reserves
         self.remove(quantity);
-        // add back to total property
-        self.total_property += quantity;
+        // do not add back to total as it is effectively unavailable going forward.
         // add to used
         self.used += quantity;
     }

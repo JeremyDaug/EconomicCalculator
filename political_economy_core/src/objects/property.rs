@@ -1128,8 +1128,15 @@ impl Property {
                     let target = remaining_sat / eff; // how many of our product we need to satisfy
                     let target = target.min(available_product); // how many we can actually get
                     for (own_want, eff) in product_info.wants.iter() {
-                        if *own_want == want { // if our want, add to sat
+                        if *own_want == want { // if our want, add to sat and consumed
                             desire.satisfaction += eff * target;
+                            self.want_store.entry(*own_want)
+                                .and_modify(|x| x.consumed += eff * target)
+                                .or_insert({
+                                    let mut ret = WantInfo::new(0.0);
+                                    ret.consumed += eff * target;
+                                    ret
+                                });
                         } else { // if not, shift from expectations
                             self.want_store.get_mut(own_want).unwrap()
                                 .realize(eff * target);
@@ -1161,25 +1168,20 @@ impl Property {
                     }
                     let outputs = process.do_process_with_property(&self.property, 
                         &combined_wants, 
-                        0.0, 0.0, Some(target_iter), true, data);
+                        0.0, 0.0, Some(target_iter), true, 
+                        data, true);
                     if outputs.iterations == 0.0 {
-                        debug_assert!(*self.process_plan.get(proc_id).unwrap_or(&0.0) != 0.0, 
-                            "Process '{}' which should be used returned 0 iterations.", proc_id);
                         continue; // if no iterations possible, skip
                     }
-                    // we do some iterations, so remove from plan for the purpose of testing validity
-                    *self.process_plan.get_mut(proc_id)
-                        .unwrap() -= outputs.iterations;
                     for (&product, &quant) in outputs.input_output_products.iter() {
                         if quant < 0.0 { // if negative, remove from property
                             let prop = self.property.get_mut(&product).unwrap();
-                            prop.remove(quant);
-                            prop.consumed += quant;
+                            prop.remove(-quant);
+                            prop.consumed -= quant;
                         } else { // if positive, add to used
                             let info = self.property.get_mut(&product).unwrap();
                             info.used += quant;
                             info.recieved += quant;
-                            info.total_property += quant;
                         }
                     }
                     for (&product, &quant) in outputs.capital_products.iter() {
@@ -1194,6 +1196,13 @@ impl Property {
                         } else { // if created
                             if edited_want == want { // if the want is what we're trying to satisy, add it
                                 desire.satisfaction += quant;
+                                self.want_store.entry(edited_want)
+                                .and_modify(|x| x.consumed += quant)
+                                .or_insert({
+                                    let mut ret = WantInfo::new(0.0);
+                                    ret.consumed += quant;
+                                    ret
+                                });
                             } else { // if not, then shift from expected (which was defined in soft sift).
                                 self.want_store.get_mut(&edited_want).unwrap()
                                 .realize(quant);
@@ -1224,21 +1233,20 @@ impl Property {
                     }
                     let outputs = process.do_process_with_property(&self.property, 
                         &combined_wants, 
-                        0.0, 0.0, Some(target_iter), true, data);
+                        0.0, 0.0, Some(target_iter), true, data, true);
                     if outputs.iterations == 0.0 {
                         continue; // if no iterations possible, skip
                     }
-                    // we do some iterations, so update stuff
-                    self.process_plan.entry(*proc_id)
-                        .and_modify(|x| *x += outputs.iterations)
-                        .or_insert(outputs.iterations);
                     for (&product, &quant) in outputs.input_output_products.iter() {
                         if quant < 0.0 { // if negative, shift
-                            self.property.get_mut(&product).unwrap().shift_to_want_reserve(quant);
+                            let prop = self.property.get_mut(&product).unwrap();
+                            prop.remove(-quant);
+                            prop.consumed -= quant;
+                        } else {
+                            let info = self.property.get_mut(&product).unwrap();
+                            info.used += quant;
+                            info.recieved += quant;
                         }
-                        self.product_expectations.entry(product)
-                        .and_modify(|x| *x += quant)
-                        .or_insert(quant);
                     }
                     for (&product, &quant) in outputs.capital_products.iter() {
                         // if capital, just shift to want reserve
@@ -1248,6 +1256,13 @@ impl Property {
                     for (&edited_want, &quant) in outputs.input_output_wants.iter() {
                         if edited_want == want { // if the want is what we're trying to satisy, add it
                             desire.satisfaction += quant;
+                            self.want_store.entry(edited_want)
+                            .and_modify(|x| x.consumed += quant)
+                            .or_insert({
+                                let mut ret = WantInfo::new(0.0);
+                                ret.consumed += quant;
+                                ret
+                            });
                         } else {
                             self.want_store.get_mut(&edited_want).unwrap()
                                 .realize(quant);
@@ -1397,7 +1412,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data);
+                            0.0, 0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -1450,7 +1465,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data);
+                            0.0, 0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -1991,7 +2006,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data);
+                            0.0, 0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -2049,7 +2064,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data);
+                            0.0, 0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -2276,7 +2291,7 @@ impl Property {
             let iter_target = (target - final_result) / // the remaining target
                 process.effective_output_of(Item::Product(SHOPPING_TIME_ID)); // how much an iteration completes
             let proc_result = process.do_process_with_property(&self.property, 
-                &available_wants, eff_skill_level, 0.0, Some(iter_target), false, data);
+                &available_wants, eff_skill_level, 0.0, Some(iter_target), false, data, false);
             if proc_result.iterations == 0.0 {
                 continue; // if no successful iterations, skip.
             }

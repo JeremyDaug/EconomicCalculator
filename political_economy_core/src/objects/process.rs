@@ -473,6 +473,8 @@ impl Process {
     /// whether it will allow it to push higher with an efficiency boost or
     /// not.
     /// 
+    /// Allow Reserves bool defines whether it limits itself to unreserved items or not.
+    /// 
     /// ## Returns
     /// 
     /// Returns a ProcessOutputs item, which contains all changes the process would make if applied
@@ -508,7 +510,8 @@ impl Process {
     /// FIXME Does not handle Overlapping or duplicate products at all. Do Not Use Overlapping Classes or Duplicate Products
     pub fn do_process_with_property(&self, available_products: &HashMap<usize, PropertyInfo>, 
     available_wants: &HashMap<usize, f64>, _pop_skill: f64,
-    _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, data: &DataManager) 
+    _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, data: &DataManager,
+    allow_reserves: bool) 
     -> ProcessOutputs {
         let mut results = ProcessOutputs::new();
         // get how many cycles we can do in total
@@ -530,8 +533,13 @@ impl Process {
                 Item::Product(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
                     if let Some(prod_info) = available_products.get(&id) {
-                        ratio_available = ratio_available
-                            .min(prod_info.available() / process_part.amount);
+                        if allow_reserves {
+                            ratio_available = ratio_available
+                                .min(prod_info.available_for_want() / process_part.amount);
+                        } else {
+                            ratio_available = ratio_available
+                                .min(prod_info.unreserved / process_part.amount)
+                        }
                     } else { // if we don't have that item in property, return to 0.0
                         ratio_available = 0.0;
                     }
@@ -553,7 +561,11 @@ impl Process {
                         } else { false }
                     });
                     // how many items within the class we have,
-                    let sum: f64 = class_mates.map(|x| x.1.available_for_want()).sum();
+                    let sum: f64 = if allow_reserves {
+                         class_mates.map(|x| x.1.available_for_want()).sum()
+                    } else {
+                        class_mates.map(|x| x.1.unreserved).sum()
+                    };
                     ratio_available = ratio_available.min(sum / process_part.amount);
                 }
             }

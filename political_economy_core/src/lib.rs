@@ -1251,7 +1251,7 @@ mod tests {
                     test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
                         10, buyer);
                     test
-                }); 
+                });
                 // wait a second to let it wrap up.
                 thread::sleep(Duration::from_millis(100));
                 // check that it's finished
@@ -13946,24 +13946,24 @@ mod tests {
                         vec![]).unwrap(),
                     Desire::new(Item::Class(0),
                         3,
-                        Some(30),
+                        None,
                         1.0,
                         0.0,
-                        3,
+                        1,
                         vec![]).unwrap(),
                     Desire::new(Item::Product(0),
                         5,
-                        Some(10),
+                        None,
                         1.0,
                         0.0,
-                        5,
+                        1,
                         vec![]).unwrap()
                 ];
                 let mut test = Property::new(test_desires);
-                test.property.insert(0, PropertyInfo::new(15.0));
-                test.property.insert(1, PropertyInfo::new(10.0));
-                test.property.insert(2, PropertyInfo::new(20.0));
-                test.property.insert(3, PropertyInfo::new(15.0));
+                test.property.insert(0, PropertyInfo::new(15.0)); // 0 consumed
+                test.property.insert(1, PropertyInfo::new(10.0)); // 10 consumed in 0
+                test.property.insert(2, PropertyInfo::new(20.0)); // 10 consumed in 1, 10 used in 0
+                test.property.insert(3, PropertyInfo::new(15.0)); // 10 consumed in 1
 
                 // With sifting and sanity checking that done, do and check consume goods.
                 let history = MarketHistory {
@@ -13978,47 +13978,41 @@ mod tests {
                 // with consume goods run
                 // check desires again.
                 let desire0 = test.desires.get(0).unwrap();
-                assert_eq!(desire0.satisfaction_up_to_tier().unwrap(), 35);
-                assert!(desire0.satisfaction == 35.0);
+                assert_eq!(desire0.satisfaction, 35.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire1 = test.desires.get(1).unwrap();
-                assert!(desire1.is_fully_satisfied());
-                assert_eq!(desire1.satisfaction_up_to_tier().unwrap(), 30);
-                assert!(desire1.satisfaction == 10.0);
+                assert_eq!(desire1.satisfaction, 25.0);
                 // 4.0 into desire 1 (tier 12, totally satisfied)
                 let desire2 = test.desires.get(2).unwrap();
-                assert!(desire2.is_fully_satisfied());
-                assert_eq!(desire2.satisfaction_up_to_tier().unwrap(), 10);
-                assert!(desire2.satisfaction == 2.0);
+                assert_eq!(desire2.satisfaction, 15.0);
 
                 // check all products unreserved and consumed as expected.
                 let prop0 = test.property.get(&0).unwrap();
-                assert_eq!(prop0.total_property, 15.0);
-                assert_eq!(prop0.unreserved, 15.0);
+                assert_eq!(prop0.total_property, 0.0);
+                assert_eq!(prop0.unreserved, 0.0);
+                assert_eq!(prop0.used, 15.0);
 
                 let prop1 = test.property.get(&1).unwrap();
-                assert_eq!(prop1.total_property, 10.0);
-                assert_eq!(prop1.unreserved, 10.0);
+                assert_eq!(prop1.total_property, 0.0);
+                assert_eq!(prop1.unreserved, 0.0);
 
                 let prop2 = test.property.get(&2).unwrap();
-                assert_eq!(prop2.total_property, 10.0);
-                assert_eq!(prop2.unreserved, 10.0);
+                assert_eq!(prop2.total_property, 0.0);
+                assert_eq!(prop2.unreserved, 0.0);
+                assert_eq!(prop2.used, 10.0);
 
                 let prop3 = test.property.get(&3).unwrap();
                 assert_eq!(prop3.total_property, 5.0);
                 assert_eq!(prop3.unreserved, 5.0);
                 // check wants consumed/produced as expected and with no expected remaining.
                 let want0 = test.want_store.get(&0).unwrap();
-                assert_eq!(want0.consumed, 50.0);
+                assert_eq!(want0.consumed, 35.0);
                 assert_eq!(want0.expected, 0.0);
                 assert_eq!(want0.total_current, 0.0);
 
                 // and check that processes planned has successfully zeroed out.
-                let proc0 = *test.process_plan.get(&0).unwrap();
-                assert_eq!(proc0, 0.0);
-
-                let proc1 = *test.process_plan.get(&1).unwrap();
-                assert_eq!(proc1, 0.0);
+                assert!(!test.process_plan.contains_key(&0));
+                assert!(!test.process_plan.contains_key(&1));
             }
         }
     }
@@ -15737,7 +15731,7 @@ mod tests {
                 let available_wants = HashMap::new();
                 let result = test.do_process_with_property(&available_products, 
                     &available_wants, 0.0, 0.0, 
-                    None, true, &data);
+                    None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 0.0);
                 assert!(result.effective_iterations == 0.0);
@@ -15792,7 +15786,7 @@ mod tests {
                 available_wants.insert(2, 1.0);
                 let result = test.do_process_with_property(&available_products, 
                     &available_wants, 0.0, 0.0, 
-                    None, true, &data);
+                    None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 1.0);
                 assert!(result.effective_iterations == 1.0);
@@ -15852,7 +15846,7 @@ mod tests {
                 available_wants.insert(2, 4.0);
                 let result = test.do_process_with_property(&available_products, 
                     &available_wants, 0.0, 0.0, 
-                    None, true, &data);
+                    None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 1.5);
                 assert!(result.effective_iterations == 1.5);
@@ -15916,7 +15910,7 @@ mod tests {
                 available_wants.insert(2, 4.0);
                 let result = test.do_process_with_property(&available_products, 
                     &available_wants, 0.0, 0.0, 
-                    None, true, &data);
+                    None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 1.0);
                 assert!(result.effective_iterations == 1.0);
@@ -15976,7 +15970,7 @@ mod tests {
                 available_wants.insert(2, 1.0);
                 let result = test.do_process_with_property(&available_products, 
                     &available_wants, 0.0, 0.0, 
-                    None, true, &data);
+                    None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 0.0);
                 assert!(result.effective_iterations == 0.0);
@@ -16031,7 +16025,7 @@ mod tests {
                 available_wants.insert(2, 1.0);
                 let result = test.do_process_with_property(&available_products, 
                     &available_wants, 0.0, 0.0, 
-                    None, true, &data);
+                    None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 0.0);
                 assert!(result.effective_iterations == 0.0);
