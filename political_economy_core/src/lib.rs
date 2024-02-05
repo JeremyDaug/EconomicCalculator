@@ -2590,8 +2590,8 @@ mod tests {
     
         // Completed
         mod standard_buy_should {
-            use std::{time::Duration, thread};
-            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, buy_result::BuyResult, property_info::PropertyInfo, desire::Desire, item::Item};
+            use std::{collections::VecDeque, thread, time::Duration};
+            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, buy_result::BuyResult, desire::Desire, item::Item, pop::Pop, pop_breakdown_table::PopBreakdownTable, property::{Property, TieredValue}, property_info::PropertyInfo, seller::Seller};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
@@ -3290,41 +3290,41 @@ mod tests {
             /// instead. We don't care about a further respones one way or another.
             #[test]
             pub fn send_reduced_purchase_when_unable_to_meet_full_pricepoint() {
-                let mut test = make_test_pop();
+                let mut test = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable {
+                        table: vec![],
+                        total: 1,
+                    },
+                    is_selling: false,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
+                    backlog: VecDeque::new(),
+                };
+                // to ease getting the sweet spot, remove clothing desire.
+                test.property.desires.push(
+                    Desire { item: Item::Product(15), start: 0, end: None, amount: 1.0, satisfaction: 0.0, step: 1, tags: vec![] }
+                );
                 let pop_info = test.actor_info();
                 let (data, mut history) = prepare_data_for_market_actions(&mut test);
-                // add in pop's property and sift their desires.
-                // we have 20 extra food than we need (20*5=100.0 units)
-                // this covers all food and leave excess for trading
-                // This covers both species food desire and culture ambrosia fruit desire.
-                test.property.add_property(2, 120.0, &data);
-                // the have all clothing needs (2-8) covered with 80 units
-                // clothing culture desire is covered up to tier 85. (30 more than cabin at tier 50)
-                // 20 * 5 units
-                // they have 20.0 extra units available to trade.
-                test.property.add_property(6, 100.0, &data);
-                // they have all the shelter they need via huts
-                // 4 * 20 units
-                // this covers both the shelter desire and the hut desire
-                test.property.add_property(14, 80.0, &data);
-                // missing desires are 10 cabins at tier 50, and the infinite
-                // desire for 10 units of clothes every 10 tiers.
-                // we want to target buying 10 cabins.
+                // add in our property to exchange. 10 shirts, AMV value of 20.0 total
+                test.property.add_property(6, 2.0, &data);
                 let val = test.property.property.entry(15)
-                .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
+                    .or_insert(PropertyInfo::new(0.0));
+                val.max_target = 2.0;
                 val.min_target = 0.0;
 
-                // The pop is trying to buy 10 cabins at tier 50
-                // It should always include the 20.0 units of Ambrosia fruit, 
-                // which they have in excess.
-                // They should also include 20.0 sets of clothes, which are available in excess.
-                // Anything else offered would be 
-                // set the prices of ambrosia fruit, clothes, and cabins so that the cabin is just purchaseable with
-                // 20 ambrosia fruit and 20 cotton clothes.
-                history.product_info.get_mut(&2).unwrap().price = 1.0; // 20.0 total
-                history.product_info.get_mut(&6).unwrap().price = 2.0; // 40.0 total
-                history.product_info.get_mut(&15).unwrap().price = 5.9; // 59.0 total
+                // 2 clothes for targeting 2 cabins. Will only get 1. AMV fin market is arbitrarily high.
+                history.product_info.get_mut(&6).unwrap().price = 2.0;
+                history.product_info.get_mut(&15).unwrap().price = 1000.0;
 
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
@@ -3344,7 +3344,7 @@ mod tests {
 
                 // send the in stock message.
                 tx.send(ActorMessage::InStock { buyer: pop_info, 
-                    seller: selling_firm, product: 15, price: 6.9, 
+                    seller: selling_firm, product: 15, price: 2.5, 
                     quantity: 100.0 }).expect("Sudden Disconnect?");
                 thread::sleep(Duration::from_millis(100));
                 // should have the first message we sent
@@ -3360,9 +3360,9 @@ mod tests {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
                     assert_eq!(product, 15);
-                    assert_eq!(price_opinion, OfferResult::Expensive);
-                    assert_eq!(quantity, 8.0);
-                    assert_eq!(followup, 2);
+                    assert_eq!(price_opinion, OfferResult::Steal);
+                    assert_eq!(quantity, 1.0);
+                    assert_eq!(followup, 1);
                 } else { assert!(false); }
                 // then check that the sent the expected food
                 if let ActorMessage::BuyOfferFollowup { buyer, 
@@ -3372,19 +3372,8 @@ mod tests {
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, selling_firm);
                     assert_eq!(product, 15);
-                    assert!(offer_product == 2);
-                    assert_eq!(offer_quantity, 20.0);
-                    assert_eq!(followup, 1);
-                } else { assert!(false); }
-                if let ActorMessage::BuyOfferFollowup { buyer, 
-                seller, product, 
-                offer_product, offer_quantity, 
-                followup } = rx.recv().unwrap() {
-                    assert_eq!(buyer, pop_info);
-                    assert_eq!(seller, selling_firm);
-                    assert_eq!(product, 15);
-                    assert!(offer_product == 6);
-                    assert_eq!(offer_quantity, 20.0);
+                    assert_eq!(offer_product, 6, "Incorrect Offered Product!");
+                    assert_eq!(offer_quantity, 2.0);
                     assert_eq!(followup, 0);
                 } else { assert!(false); }
                 // with the offer sent correctly, send our acceptance and go forward
@@ -3401,20 +3390,13 @@ mod tests {
                     assert!(true);
                 } else { assert!(false); }
                 // check that property was exchanged
-                assert_eq!(test.property.property.get(&2).unwrap().total_property, 100.0);
-                assert_eq!(test.property.property.get(&6).unwrap().total_property, 80.0);
-                assert_eq!(test.property.property.get(&14).unwrap().total_property, 80.0);
-                assert_eq!(test.property.property.get(&15).unwrap().total_property, 8.0);
+                assert_eq!(test.property.property.get(&6).unwrap().total_property, 0.0);
+                assert_eq!(test.property.property.get(&15).unwrap().total_property, 1.0);
                 // check records for the products as well.
-                assert_eq!(test.property.property[&2].spent, 20.0);
-                assert_eq!(test.property.property[&2].recieved, 0.0);
-                assert_eq!(test.property.property[&6].spent, 20.0);
-                assert_eq!(test.property.property[&6].recieved, 0.0);
-                assert_eq!(test.property.property[&14].spent, 0.0);
-                assert_eq!(test.property.property[&14].recieved, 0.0);
+                assert_eq!(test.property.property[&6].spent, 2.0);
                 assert_eq!(test.property.property[&15].spent, 0.0);
-                assert_eq!(test.property.property[&15].recieved, 8.0);
-                assert_eq!(test.property.property[&15].amv_cost, 60.0);
+                assert_eq!(test.property.property[&15].recieved, 1.0);
+                assert_eq!(test.property.property[&15].amv_cost, 4.0);
                 //assert_eq!(test.property.property[&15].time_cost, test.standard_shop_time_cost());
             }
 
@@ -4511,7 +4493,7 @@ mod tests {
                     assert_eq!(buyer, pop_info, "wrong buyer.");
                     assert_eq!(seller, seller, "wrong seller.");
                     assert_eq!(product, 2, "wrong product.");
-                    assert_eq!(price_opinion, OfferResult::Cheap, "wrong oppinion.");
+                    assert_eq!(price_opinion, OfferResult::Reasonable, "wrong oppinion.");
                     assert_eq!(quantity, 1.0, "wrong quantity.");
                     assert_eq!(followup, 1, "wrong followups.");
                 } else {
@@ -4558,7 +4540,6 @@ mod tests {
                 assert_eq!(hut_info.total_property, 3.0);
                 // time was spent for shopping
                 assert_eq!(time_info.total_property, (1.1 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
-
             }
 
             #[test]
@@ -4639,7 +4620,7 @@ mod tests {
                     assert_eq!(buyer, pop_info, "wrong buyer.");
                     assert_eq!(seller, seller, "wrong seller.");
                     assert_eq!(product, 2, "wrong product.");
-                    assert_eq!(price_opinion, OfferResult::Steal, "wrong oppinion.");
+                    assert_eq!(price_opinion, OfferResult::TooExpensive, "wrong oppinion.");
                     assert_eq!(quantity, 1.0, "wrong quantity.");
                     assert_eq!(followup, 1, "wrong followups.");
                 } else {

@@ -1046,6 +1046,10 @@ impl Pop {
                             .and_modify(|x| *x -= capped);
                         // reduce by half, round down for good measure.
                         capped = (capped / 2.0).floor();
+                        if capped == 0.0 { // if we hit zero here
+                            current_offer.remove(product); // remove entirely
+                            break; // and break loop.
+                        }
                         // correct offer and amv
                         current_offer_amv += capped * eff_amv;
                         current_offer.entry(*product)
