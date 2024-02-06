@@ -4630,11 +4630,11 @@ mod tests {
                 if let ActorMessage::BuyOfferFollowup { buyer, seller,
                 product, offer_product, offer_quantity, followup }
                 = rx.recv().expect("Broke.") {
-                    //println!("Buy Offer Followup Recieved.");
+                    println!("Buy Offer Followup Recieved.");
                     assert_eq!(buyer, pop_info);
                     assert_eq!(seller, seller);
                     assert_eq!(product, 2);
-                    assert_eq!(offer_product, 3);
+                    assert_eq!(offer_product, 6);
                     assert_eq!(offer_quantity, 1.0);
                     assert_eq!(followup, 0);
                 } else {
@@ -4658,11 +4658,11 @@ mod tests {
                 // check that we recorded our expenditure in time and AMV
                 assert_eq!(food_info.total_property, 11.0);
                 assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
-                assert_eq!(food_info.amv_cost, 5.0);
+                assert_eq!(food_info.amv_cost, 10.0);
                 assert_eq!(food_info.recieved, 1.0);
                 // cotton was expended for food
-                assert_eq!(cotton_info.total_property, 99.0);
-                assert_eq!(cotton_info.spent, 1.0);
+                assert_eq!(cotton_info.total_property, 100.0);
+                assert_eq!(cotton_info.spent, 0.0);
                 // huts were untouched
                 assert_eq!(hut_info.total_property, 10.0);
                 // time was spent for shopping

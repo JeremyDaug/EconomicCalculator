@@ -1006,6 +1006,9 @@ impl Pop {
             for (product, info) in self.property.property.iter()
             .filter(|(_, info)| info.unreserved > 0.0) // get property which isn't reserved.
             .sorted_by(|a, b| {
+                a.0.cmp(b.0) // sort by ID first to stabilize results ?
+            })
+            .sorted_by(|a, b| {
                 // sort by sal in descending order.
                 // TODO improve to also take practicality of the exchange, ie value density
                 let a_val = market.get_product_salability(&a.0);
@@ -1507,7 +1510,17 @@ impl Pop {
     _tx: &Sender<ActorMessage>, _data: &DataManager,
     _market: &MarketHistory,
     _product: usize, _buyer: ActorInfo) -> HashMap<usize, f64> {
-        todo!("Redo for property update!")
+        // we have recieved a found product with us as the seller.
+        // check how much we are willing to offer in exchange,
+        // set the price at the current market price (pops cannot set their own explicit AMV price)
+        // then send back the response yay or nay
+        // if nay, gtfo
+        // if yay, wait for response.
+
+        // response recieved
+        // if negative response gtfo
+        // if positive response check if the trade is worth it in Satisfaction.
+        // if it is, respond in the positive, else respond in the negative
     }
 
     /// # Consume Goods
@@ -1548,9 +1561,11 @@ impl Pop {
     /// priority over today.
     ///
     /// With the success rate updated, we then alter our targets, and budgets.
+    /// 
+    /// TODO: Use this if needed, for now it does nothing. adaptation is 
     pub fn adapt_future_plan(&mut self, _data: &DataManager,
     _history: &MarketHistory) {
-        todo!("Either Redo or drop after Property Update!")
+        
     }
 
     /// # Product Initialization
