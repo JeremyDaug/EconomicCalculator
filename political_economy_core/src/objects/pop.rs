@@ -3,14 +3,14 @@
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
 use core::panic;
-use std::{collections::{VecDeque, HashMap, HashSet}, ops::Add, thread::current, arch::x86_64, fmt::Debug};
+use std::{arch::x86_64, collections::{HashMap, HashSet, VecDeque}, fmt::Debug, intrinsics::unreachable, ops::Add, thread::current};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
 use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST, SHOPPING_TIME_ID}, objects::{property::{DesireCoord, TieredValue}}};
 
-use super::{actor::Actor, actor_message::{ActorMessage, ActorType, ActorInfo, FirmEmployeeAction, OfferResult}, buy_result::{BuyResult, self}, buyer::Buyer, item::Item, market::MarketHistory, pop_breakdown_table::PopBreakdownTable, product::ProductTag, property::Property, property_info::PropertyInfo, seller::Seller, want_info::WantInfo
+use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction, OfferResult}, buy_result::{self, BuyResult}, buyer::Buyer, item::Item, market::MarketHistory, pop_breakdown_table::PopBreakdownTable, product::ProductTag, property::{Property, ValueInOut}, property_info::PropertyInfo, seller::Seller, want_info::WantInfo
 };
 
 /// Pops are the data storage for a population group.
@@ -1506,21 +1506,64 @@ impl Pop {
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
     /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry and/or the seller to lose time to the deal.
     /// TODO Currently does not do change, accepts offer or rejects, no returning change.
-    pub fn standard_sell(&mut self, _rx: &mut Receiver<ActorMessage>,
-    _tx: &Sender<ActorMessage>, _data: &DataManager,
-    _market: &MarketHistory,
-    _product: usize, _buyer: ActorInfo) -> HashMap<usize, f64> {
+    pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>,
+    tx: &Sender<ActorMessage>, data: &DataManager,
+    market: &MarketHistory,
+    product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
+        let ret = HashMap::new();
         // we have recieved a found product with us as the seller.
         // check how much we are willing to offer in exchange,
+        let mut available = 0.0;
+        let value_lost =
+        // extract and remove all product which does to satisfying desires above this level.
+        if let Some(hard_sat_lvl) = self.property.hard_satisfaction {
+            self.property.sift_up_to(&DesireCoord { tier: hard_sat_lvl, 
+                idx: self.property.desires.len() }, 
+                data);
+            available = self.property.property.get(&product).unwrap().available();
+            self.property.sift_all(data);
+            self.property.remove_property(product, available, data)
+        } else {
+            available = self.property.property.get(&product).unwrap().available();
+            self.property.remove_property(product, available, data)
+        };
         // set the price at the current market price (pops cannot set their own explicit AMV price)
+        let price = market.get_product_price(&product, 1.0);
         // then send back the response yay or nay
-        // if nay, gtfo
-        // if yay, wait for response.
+        if available < 1.0 { // if nay
+            // send OOS
+            self.push_message(rx, tx, 
+                ActorMessage::NotInStock { buyer, seller: self.actor_info(), product });
+            // Add property back
+            self.property.add_property(product, available, data);
+            // then GTFO
+            return ret;
+        }  else { // if yay
+            // send In Stock
+            self.push_message(rx, tx, 
+                ActorMessage::InStock { buyer, seller: self.actor_info(), 
+                    product, price, quantity: available });
+        } // message was sent
+        // get response
+        let response = self.specific_wait(rx, &vec![
+            ActorMessage::RejectOffer { buyer, seller: self.actor_info(), product },
+            ActorMessage::BuyOffer { buyer, seller: self.actor_info(), product, 
+                price_opinion: OfferResult::Cheap, quantity: 1.0, followup: 0 }
+        ]);
 
-        // response recieved
-        // if negative response gtfo
+        match response {
+            ActorMessage::RejectOffer { buyer, seller, product } => {
+                return ret; // if negative response gtfo
+            },
+            ActorMessage::BuyOffer { buyer, seller, product, price_opinion, quantity, followup } => {
+                // if valid check if the trade is worth it.
+            },
+            _ => unreachable!("Should never be reached")
+        };
+        
         // if positive response check if the trade is worth it in Satisfaction.
         // if it is, respond in the positive, else respond in the negative
+        ret
     }
 
     /// # Consume Goods
