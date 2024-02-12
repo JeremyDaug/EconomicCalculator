@@ -129,6 +129,8 @@ pub enum ActorMessage {
     /// The Followup messages for a buy offer. Includes buyer, seller, and product.
     /// Also incrludes the id of the product offered in return, it's quantity, and
     /// how many followup messages to expect. 0 means it's the last.
+    /// 
+    /// offer_quantity should be positive (ie gained by the buyer).
     BuyOfferFollowup { buyer: ActorInfo, seller: ActorInfo, product: usize,
         offer_product: usize, offer_quantity: f64, followup: usize },
 

@@ -3,7 +3,7 @@
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
 use core::panic;
-use std::{arch::x86_64, collections::{HashMap, HashSet, VecDeque}, fmt::Debug, intrinsics::unreachable, ops::Add, thread::current};
+use std::{arch::x86_64, collections::{HashMap, HashSet, VecDeque}, fmt::Debug, ops::Add, thread::current};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
@@ -806,7 +806,7 @@ impl Pop {
             product } => {
                 if seller == self.actor_info() {
                     // TODO When change is possible, deal with it here.
-                    let _accepted = self.standard_sell(rx, tx, data, market, product, buyer);
+                    self.standard_sell(rx, tx, data, market, product, buyer);
                 } else {
                     debug_assert!(false, "This message should only ever be recieved here while we are a seller.");
                 }
@@ -1323,6 +1323,37 @@ impl Pop {
         result
     }
 
+    /// # Recieve Offer Followups
+    /// 
+    /// A shorthand method used to gather a string of messages for us. 
+    /// 
+    /// The values returned should be positive (ie, gained by the buyer)
+    pub fn recieve_offer_followups(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, buyer: ActorInfo, followups: usize) -> HashMap<usize, f64> {
+        let mut result = HashMap::new();
+        for expected_remainder in (0..followups).rev() {
+            let response = self.specific_wait(rx, &vec![
+                ActorMessage::BuyOfferFollowup { buyer: ActorInfo::Firm(0),
+                    seller: ActorInfo::Firm(0),
+                    product: 0,
+                    offer_product: 0,
+                    offer_quantity: 0.0,
+                    followup: 0 }
+            ]);
+            if let ActorMessage::BuyOfferFollowup { buyer: b,
+            seller,
+            product,
+            offer_product,
+            offer_quantity,
+            followup: follows } = response {
+                result.insert(offer_product, offer_quantity);
+                debug_assert!(seller == self.actor_info());
+                debug_assert!(b == buyer);
+                debug_assert!(follows == expected_remainder);
+            } else { panic!("Recieved something we shouldn't have.") }
+        }
+        result
+    }
+
     fn offer_result_selector(sat_gain: TieredValue, sat_lost: TieredValue) -> OfferResult {
         let sat_ratio = sat_lost / sat_gain;
         if sat_ratio > constants::TOO_EXPENSIVE { OfferResult::TooExpensive }
@@ -1501,31 +1532,43 @@ impl Pop {
     /// pop's demand for those items. Desired items get their full AMV, while
     /// undesired items have their price modified by their salability.
     ///
-    /// Returns the payment recieved so we can sort it into keep and spend.
-    ///
     /// TODO upgrade this to take in the possibility of charity and/or givaways.
     /// TODO currently, this costs the seller no time, and they immediately close out. This should be updated to allow the buyer to retry and/or the seller to lose time to the deal.
     /// TODO Currently does not do change, accepts offer or rejects, no returning change.
     pub fn standard_sell(&mut self, rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory,
-    product: usize, buyer: ActorInfo) -> HashMap<usize, f64> {
-        let ret = HashMap::new();
+    product: usize, buyer: ActorInfo) {
+        let mut ret = HashMap::new();
         // we have recieved a found product with us as the seller.
         // check how much we are willing to offer in exchange,
         let mut available = 0.0;
         let value_lost =
         // extract and remove all product which does to satisfying desires above this level.
         if let Some(hard_sat_lvl) = self.property.hard_satisfaction {
+            // get the current value preemptively
+            let original_sat = self.property.tiered_satisfaction;
+            // knock off the top of our satisfaction
             self.property.sift_up_to(&DesireCoord { tier: hard_sat_lvl, 
                 idx: self.property.desires.len() }, 
                 data);
+            // get how much that makes available
             available = self.property.property.get(&product).unwrap().available();
-            self.property.sift_all(data);
-            self.property.remove_property(product, available, data)
-        } else {
+            // actually remove it
+            self.property.remove_property(product, available, data);
+            // return the new sat - orignial sat
+            self.property.tiered_satisfaction - original_sat
+        } else { // if no existing hard_sat
+            // get our original
+            let lost = self.property.tiered_satisfaction;
+            // release everything
+            self.property.unsift();
+            // get available
             available = self.property.property.get(&product).unwrap().available();
-            self.property.remove_property(product, available, data)
+            // then remove what's available.
+            self.property.remove_property(product, available, data);
+            // return the difference between what's 
+            self.property.tiered_satisfaction - lost
         };
         // set the price at the current market price (pops cannot set their own explicit AMV price)
         let price = market.get_product_price(&product, 1.0);
@@ -1537,7 +1580,7 @@ impl Pop {
             // Add property back
             self.property.add_property(product, available, data);
             // then GTFO
-            return ret;
+            return;
         }  else { // if yay
             // send In Stock
             self.push_message(rx, tx, 
@@ -1551,19 +1594,26 @@ impl Pop {
                 price_opinion: OfferResult::Cheap, quantity: 1.0, followup: 0 }
         ]);
 
-        match response {
-            ActorMessage::RejectOffer { buyer, seller, product } => {
-                return ret; // if negative response gtfo
-            },
-            ActorMessage::BuyOffer { buyer, seller, product, price_opinion, quantity, followup } => {
-                // if valid check if the trade is worth it.
-            },
-            _ => unreachable!("Should never be reached")
-        };
-        
-        // if positive response check if the trade is worth it in Satisfaction.
-        // if it is, respond in the positive, else respond in the negative
-        ret
+        if let ActorMessage::RejectOffer { buyer, seller, product } = response {
+            return; // if negative response gtfo
+        } else if let ActorMessage::BuyOffer { buyer, seller, 
+        product, price_opinion, quantity, followup } = response {
+            // if valid check if the trade is worth it.
+            ret = self.recieve_offer_followups(rx, tx, buyer, followup);
+            ret.insert(product, -quantity);
+            let gain = self.property.predict_value_changed(&ret, data);
+            if value_lost > gain { // if loss less than gain, reject offer
+                self.push_message(rx, tx, 
+                    ActorMessage::RejectOffer { buyer, seller: self.actor_info(), product });
+                ret.clear(); // clear out 
+            } else { // if gain greater than loss, accept offer
+                // TODO consider adding change here. 
+                self.push_message(rx, tx, 
+                    ActorMessage::SellerAcceptOfferAsIs { buyer, seller: self.actor_info(), 
+                        product, offer_result: price_opinion });
+            }
+        } else { unreachable!("Should never be reached."); }
+        self.property.add_products(&ret, data);
     }
 
     /// # Consume Goods

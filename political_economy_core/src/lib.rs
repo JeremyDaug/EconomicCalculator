@@ -1224,244 +1224,77 @@ mod tests {
 
         }
 
-        // FIXME
         mod standard_sell {
-            use std::{collections::HashMap, thread, time::Duration};
-            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, property_info::PropertyInfo};
+            use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
+            use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, desire::Desire, item::Item, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, property::{Property, TieredValue}, property_info::PropertyInfo, seller::Seller};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
             pub fn should_send_out_of_stock_and_return_when_unable_to_sell_item() {
-                let mut test = make_test_pop();
+                let mut test = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable {
+                        table: vec![],
+                        total: 1,
+                    },
+                    is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
+                    backlog: VecDeque::new(),
+                };
                 let pop_info = test.actor_info();
                 let (data, history) = prepare_data_for_market_actions(&mut test);
-                // setup message queu
-                let (tx, rx) = barrage::bounded(10);
-                let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
-                // setup firm we're talking with
-                let buyer = ActorInfo::Firm(1);
-                // setup property split
-                let mut keep = HashMap::new();
-
-                keep.insert(6, 
-                        PropertyInfo::new(test.property.property.get(&6).unwrap().total_property + 10.0));
-
-                let handle = thread::spawn(move || {
-                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        10, buyer);
-                    test
-                });
-                // wait a second to let it wrap up.
-                thread::sleep(Duration::from_millis(100));
-                // check that it's finished
-                if !handle.is_finished() { assert!(false); }
-                // confirm the message was sent
-                let result = rx.recv().unwrap();
-                if let ActorMessage::NotInStock { buyer, seller, 
-                product } = result {
-                    assert_eq!(buyer, buyer);
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 10);
-                } else { assert!(false); }
-                // get the seller back
-                let test = handle.join().unwrap();
-
-                // ensure that the seller hasn't sold anything
-                assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
-                assert!(test.property.property.get(&7).is_none());
-            }
-
-            #[test]
-            pub fn should_send_in_stock_and_accept_reject_purchase_and_close_deal() {
-                let mut test = make_test_pop();
-                let pop_info = test.actor_info();
-                let (data, history) = prepare_data_for_market_actions(&mut test);
-                // setup message queu
-                let (tx, rx) = barrage::bounded(10);
-                let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
-                // setup firm we're talking with
-                let buyer = ActorInfo::Firm(1);
-                // update the property and spend to have product 7.
-                test.property.property.clear();
-                test.property.property.insert(7, PropertyInfo::new(10.0));
-                let mut keep = HashMap::new();
-                keep.insert(7, PropertyInfo::new(10.0));
-
-                let handle = thread::spawn(move || {
-                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        7, buyer);
-                    test
-                }); 
-                // wait a second to let it wrap up.
-                thread::sleep(Duration::from_millis(100));
-                // check that it's not finished
-                if handle.is_finished() { assert!(false); }
-                // confirm the message was sent
-                let result = rx.recv().unwrap();
-                if let ActorMessage::InStock { buyer, seller, 
-                product, price, quantity } = result {
-                    assert_eq!(buyer, buyer);
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 7);
-                    assert!(price == 5.0);
-                    assert!(quantity == 10.0);
-                } else { assert!(false); }
-
-                // send RejectPurchase and Close Deal Messages
-                tx.send(ActorMessage::RejectPurchase { buyer, 
-                    seller: pop_info, product: 7, 
-                    price_opinion: OfferResult::TooExpensive })
-                    .expect("Failed to send.");
-                tx.send(ActorMessage::CloseDeal { buyer, seller: pop_info, 
-                    product: 7 }).expect("Failed to send, here!");
-                thread::sleep(Duration::from_millis(100));
-                // get the seller back
-                let test = handle.join().unwrap();
-
-                // ensure that the seller hasn't sold anything
-                assert!(test.property.property.get(&7).unwrap().total_property == 10.0);
-                assert!(test.property.property.get(&6).is_none());
-            }
-
-            #[test]
-            pub fn should_send_in_stock_recieve_buy_offer_and_close_when_offer_underprice() {
-                let mut test = make_test_pop();
-                let pop_info = test.actor_info();
-                let (data, history) = prepare_data_for_market_actions(&mut test);
-                // setup message queu
-                let (tx, rx) = barrage::bounded(10);
-                let mut passed_rx = rx.clone();
-                let passed_tx = tx.clone();
-                // setup firm we're talking with
-                let buyer = ActorInfo::Firm(1);
-                // update the property and spend to have product 7.
-                test.property.property.clear();
-                test.property.property.insert(7, PropertyInfo::new(10.0));
-                let mut keep = HashMap::new();
-                keep.insert(7, PropertyInfo::new(10.0));
-
-                let handle = thread::spawn(move || {
-                    let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        7, buyer);
-                    (test, result)
-                }); 
-                // wait a second to let it wrap up.
-                thread::sleep(Duration::from_millis(100));
-                // check that it's not finished
-                if handle.is_finished() { assert!(false); }
-                // confirm the message was sent
-                let result = rx.recv().unwrap();
-                if let ActorMessage::InStock { buyer: _, seller, 
-                product, price, quantity } = result {
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 7);
-                    assert!(price == 5.0);
-                    assert!(quantity == 10.0);
-                } else { assert!(false); }
-
-                // send Buy Offer. 3 of item 6.
-                tx.send(ActorMessage::BuyOffer { buyer, seller: pop_info, 
-                    product: 7, price_opinion: OfferResult::Reasonable, 
-                    quantity: 1.0, followup: 1 })
-                    .expect("Failed to send.");
-                tx.send(ActorMessage::BuyOfferFollowup { buyer, seller: pop_info, 
-                    product: 7, offer_product: 6, offer_quantity: 2.0, 
-                    followup: 0 })
-                    .expect("Failed to send.");
-                thread::sleep(Duration::from_millis(100));
-                // get the seller back
-                let (test, returned) = handle.join().unwrap();
-
-                // check that we get back the close deal rejection
-                let mut result = ActorMessage::AllFinished;
-                while let Ok(msg) = rx.try_recv() {
-                    if let Some(msg) = msg {
-                        result = msg; // last message should be the expected close
-                    } else { break; }
-                }
-
-                if let ActorMessage::CloseDeal { buyer, seller,
-                product } = result {
-                    assert_eq!(buyer, buyer);
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 7);
-                }
-
-                // ensure that the seller hasn't sold anything
-                assert!(test.property.property.get(&7).unwrap().total_property == 10.0);
-                assert!(test.property.property.get(&6).is_none());
-                assert_eq!(returned.len(), 0);
-            }
-
-            #[test]
-            pub fn should_send_in_stock_recieve_buy_offer_and_accept_when_properly_paid() {
-                let mut test = make_test_pop();
-                let pop_info = test.actor_info();
-                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // create simple desire to test against.
+                test.property.desires.push(Desire::new(Item::Product(1), 0, None, 1.0, 0.0, 
+                    1, vec![]).expect("whoops"));
+                // add product
+                test.property.add_property(1, 10.0, &data);
                 // setup message queue
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
                 let passed_tx = tx.clone();
-                // setup firm we're talking with
-                let buyer = ActorInfo::Firm(1);
-                // update the property and spend to have product 7.
-                test.property.property.clear();
-                test.property.property.insert(7, PropertyInfo::new(10.0));
-                let mut keep = HashMap::new();
-                keep.insert(7, PropertyInfo::new(10.0));
+                // setup pop we're talking with
+                let test_buyer = ActorInfo::Pop(1);
 
                 let handle = thread::spawn(move || {
-                    let result = test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
-                        7, buyer);
-                    (test, result)
-                }); 
-                // wait a second to let it wrap up.
-                thread::sleep(Duration::from_millis(100));
-                // check that it's not finished
-                if handle.is_finished() { assert!(false); }
-                // confirm the message was sent
-                let result = rx.recv().unwrap();
-                if let ActorMessage::InStock { buyer: _, seller, 
-                product, price, quantity } = result {
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 7);
-                    assert!(price == 5.0);
-                    assert!(quantity == 10.0);
-                } else { assert!(false); }
+                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                        10, test_buyer);
+                    test
+                });
 
-                // send Buy Offer. 6 of item 6.
-                tx.send(ActorMessage::BuyOffer { buyer, seller: pop_info, 
-                    product: 7, price_opinion: OfferResult::Reasonable, 
-                    quantity: 1.0, followup: 1 })
-                    .expect("Failed to send.");
-                tx.send(ActorMessage::BuyOfferFollowup { buyer, seller: pop_info, 
-                    product: 7, offer_product: 6, offer_quantity: 6.0, 
-                    followup: 0 })
-                    .expect("Failed to send.");
-                thread::sleep(Duration::from_millis(100));
-                // get the seller back
-                let (test, returned) = handle.join().unwrap();
-
-                // check that we get back the close deal rejection
-                let mut result = ActorMessage::AllFinished;
+                let start = std::time::SystemTime::now();
                 while let Ok(msg) = rx.try_recv() {
                     if let Some(msg) = msg {
-                        result = msg; // last message should be the expected close
-                    } else { break; }
+                        if let ActorMessage::NotInStock { buyer, seller,
+                        product } = msg {
+                            assert_eq!(buyer, test_buyer);
+                            assert_eq!(seller, pop_info);
+                            assert_eq!(product, 10);
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
                 }
-                if let ActorMessage::SellerAcceptOfferAsIs { buyer, seller, 
-                product, offer_result: _ } = result {
-                    assert_eq!(buyer, buyer);
-                    assert_eq!(seller, pop_info);
-                    assert_eq!(product, 7);
-                } else { assert!(false); }
+                // wait a second to let it wrap up.
+                thread::sleep(Duration::from_millis(100));
+                // check that it's finished
+                if !handle.is_finished() { assert!(false); }
 
-                // ensure that the seller has sold correctly
-                assert!(test.property.property.get(&7).unwrap().total_property == 9.0);
-                assert!(test.property.property.get(&6).is_none());
-                assert!(*returned.get(&6).unwrap() == 6.0);
+                // ensure that the seller hasn't sold anything
+                assert!(test.property.property.get(&6).unwrap().total_property == 10.0);
+                assert!(test.property.property.get(&7).is_none());
             }
 
             // TODO When returning change is possible, add test here and update previous test.

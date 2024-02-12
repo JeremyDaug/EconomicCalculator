@@ -2492,6 +2492,22 @@ impl Property {
         }
         result
     }
+
+    /// # Unsift
+    /// 
+    /// A function designed to remove all products from satisfaction.
+    pub fn unsift(&mut self) {
+        // start by resetting property and satisfactions
+        for (_, info) in self.property.iter_mut() {
+            info.reset_reserves();
+        }
+        for desire in self.desires.iter_mut() {
+            desire.satisfaction = 0.0;
+        }
+        self.process_plan.clear();
+        self.product_expectations.clear();
+        self.clear_expectations();
+    }
 }
 
 /// # Time Breakdown
