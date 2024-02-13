@@ -1539,6 +1539,14 @@ impl Pop {
     tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory,
     product: usize, buyer: ActorInfo) {
+        // TODO do time check here when seller time cost added.
+        // check we have product.
+        if !self.property.property.contains_key(&product) {
+            // send OOS
+            self.push_message(rx, tx, 
+                ActorMessage::NotInStock { buyer, seller: self.actor_info(), product });
+            return;
+        }
         let mut ret = HashMap::new();
         // we have recieved a found product with us as the seller.
         // check how much we are willing to offer in exchange,
