@@ -1224,13 +1224,13 @@ mod tests {
 
         }
 
-        mod standard_sell {
+        mod standard_sell_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
             use crate::objects::{actor_message::{ActorInfo, ActorMessage, OfferResult}, desire::Desire, item::Item, pop::Pop, pop_breakdown_table::{PBRow, PopBreakdownTable}, property::{Property, TieredValue}, property_info::PropertyInfo, seller::Seller};
             use super::{make_test_pop, prepare_data_for_market_actions};
 
             #[test]
-            pub fn should_send_out_of_stock_when_item_not_owned() {
+            pub fn send_out_of_stock_when_item_not_owned() {
                 let mut test = Pop {
                     id: 0,
                     job: 0,
@@ -1285,7 +1285,7 @@ mod tests {
                     let now = std::time::SystemTime::now();
                     if now.duration_since(start).expect("Bad Time!") 
                         > Duration::from_secs(3) {
-                        //assert!(false, "Timed Out.");
+                        assert!(false, "Timed Out.");
                     }
                 }
                 // wait a second to let it wrap up.
@@ -1297,6 +1297,221 @@ mod tests {
 
                 // ensure that the seller hasn't sold anything
                 assert_eq!(test.property.property.get(&1).unwrap().total_property, 10.0);
+            }
+
+            #[test]
+            pub fn send_out_of_stock_when_item_is_insufficient() {
+                let mut test = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable {
+                        table: vec![],
+                        total: 1,
+                    },
+                    is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
+                    backlog: VecDeque::new(),
+                };
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // create simple desire to test against.
+                test.property.desires.push(Desire::new(Item::Product(1), 0, 
+                    None, 1.0, 0.0, 
+                    1, vec![]).expect("whoops"));
+                // add product
+                test.property.add_property(1, 10.0, &data);
+                test.property.add_property(10, 0.5, &data);
+                // setup message queue
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup pop we're talking with
+                let test_buyer = ActorInfo::Pop(1);
+
+                let handle = thread::spawn(move || {
+                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                        10, test_buyer);
+                    test
+                });
+
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::NotInStock { buyer, seller,
+                        product } = msg {
+                            assert_eq!(buyer, test_buyer);
+                            assert_eq!(seller, pop_info);
+                            assert_eq!(product, 10);
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
+                }
+                // wait a second to let it wrap up.
+                thread::sleep(Duration::from_millis(100));
+                // check that it's finished
+                if !handle.is_finished() { assert!(false); }
+
+                let test = handle.join().unwrap();
+
+                // ensure that the seller hasn't sold anything
+                assert_eq!(test.property.property.get(&1).unwrap().total_property, 10.0);
+                assert_eq!(test.property.property.get(&10).unwrap().total_property, 0.5);
+            }
+
+            #[test]
+            pub fn send_out_of_stock_when_item_is_insufficient_and_when_no_satisfaction() {
+                let mut test = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable {
+                        table: vec![],
+                        total: 1,
+                    },
+                    is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
+                    backlog: VecDeque::new(),
+                };
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // create simple desire to test against.
+                test.property.desires.push(Desire::new(Item::Product(1), 0, 
+                    None, 1.0, 0.0, 
+                    1, vec![]).expect("whoops"));
+                // add product
+                // test.property.add_property(1, 10.0, &data);
+                test.property.add_property(10, 0.5, &data);
+                // setup message queue
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup pop we're talking with
+                let test_buyer = ActorInfo::Pop(1);
+
+                let handle = thread::spawn(move || {
+                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                        10, test_buyer);
+                    test
+                });
+
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::NotInStock { buyer, seller,
+                        product } = msg {
+                            assert_eq!(buyer, test_buyer);
+                            assert_eq!(seller, pop_info);
+                            assert_eq!(product, 10);
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
+                }
+                // wait a second to let it wrap up.
+                thread::sleep(Duration::from_millis(100));
+                // check that it's finished
+                if !handle.is_finished() { assert!(false); }
+
+                let test = handle.join().unwrap();
+
+                // ensure that the seller hasn't sold anything
+                assert_eq!(test.property.property.get(&10).unwrap().total_property, 0.5);
+            }
+
+            #[test]
+            pub fn send_in_stock_and_deal_with_offer_rejected_successfully() {
+                assert!(false);
+                let mut test = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable {
+                        table: vec![],
+                        total: 1,
+                    },
+                    is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
+                    backlog: VecDeque::new(),
+                };
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // create simple desire to test against.
+                test.property.desires.push(Desire::new(Item::Product(1), 0, 
+                    None, 1.0, 0.0, 
+                    1, vec![]).expect("whoops"));
+                // add product
+                // test.property.add_property(1, 10.0, &data);
+                test.property.add_property(10, 0.5, &data);
+                // setup message queue
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup pop we're talking with
+                let test_buyer = ActorInfo::Pop(1);
+
+                let handle = thread::spawn(move || {
+                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                        10, test_buyer);
+                    test
+                });
+
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::NotInStock { buyer, seller,
+                        product } = msg {
+                            assert_eq!(buyer, test_buyer);
+                            assert_eq!(seller, pop_info);
+                            assert_eq!(product, 10);
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
+                }
+                // wait a second to let it wrap up.
+                thread::sleep(Duration::from_millis(100));
+                // check that it's finished
+                if !handle.is_finished() { assert!(false); }
+
+                let test = handle.join().unwrap();
+
+                // ensure that the seller hasn't sold anything
+                assert_eq!(test.property.property.get(&10).unwrap().total_property, 0.5);
             }
 
             // TODO When returning change is possible, add test here and update previous test.

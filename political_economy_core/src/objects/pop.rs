@@ -1581,7 +1581,7 @@ impl Pop {
         // set the price at the current market price (pops cannot set their own explicit AMV price)
         let price = market.get_product_price(&product, 1.0);
         // then send back the response yay or nay
-        if available < 1.0 { // if nay
+        if available < 1.0 { // if nay (cannot sell fractions of a unit)
             // send OOS
             self.push_message(rx, tx, 
                 ActorMessage::NotInStock { buyer, seller: self.actor_info(), product });
