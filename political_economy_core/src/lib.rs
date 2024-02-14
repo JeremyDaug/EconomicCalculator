@@ -1444,7 +1444,6 @@ mod tests {
 
             #[test]
             pub fn send_in_stock_and_deal_with_offer_rejected_successfully() {
-                assert!(false);
                 let mut test = Pop {
                     id: 0,
                     job: 0,
@@ -1472,7 +1471,7 @@ mod tests {
                     1, vec![]).expect("whoops"));
                 // add product
                 // test.property.add_property(1, 10.0, &data);
-                test.property.add_property(10, 0.5, &data);
+                test.property.add_property(10, 10.0, &data);
                 // setup message queue
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -1489,11 +1488,13 @@ mod tests {
                 let start = std::time::SystemTime::now();
                 while let Ok(msg) = rx.try_recv() {
                     if let Some(msg) = msg {
-                        if let ActorMessage::NotInStock { buyer, seller,
-                        product } = msg {
+                        if let ActorMessage::InStock { buyer, seller,
+                        product, price, quantity } = msg {
                             assert_eq!(buyer, test_buyer);
                             assert_eq!(seller, pop_info);
                             assert_eq!(product, 10);
+                            assert_eq!(price, 100.0);
+                            assert_eq!(quantity, 10.0);
                             break;
                         }
                     }
@@ -1503,6 +1504,10 @@ mod tests {
                         assert!(false, "Timed Out.");
                     }
                 }
+                // send rejection
+                tx.send(ActorMessage::RejectOffer { buyer: test_buyer, seller: pop_info, product: 10 })
+                    .expect("Borkde");
+
                 // wait a second to let it wrap up.
                 thread::sleep(Duration::from_millis(100));
                 // check that it's finished
@@ -1511,7 +1516,7 @@ mod tests {
                 let test = handle.join().unwrap();
 
                 // ensure that the seller hasn't sold anything
-                assert_eq!(test.property.property.get(&10).unwrap().total_property, 0.5);
+                assert_eq!(test.property.property.get(&10).unwrap().total_property, 10.0);
             }
 
             // TODO When returning change is possible, add test here and update previous test.
