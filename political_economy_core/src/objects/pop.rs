@@ -1597,12 +1597,14 @@ impl Pop {
         } // message was sent
         // get response
         let response = self.specific_wait(rx, &vec![
-            ActorMessage::RejectOffer { buyer, seller: self.actor_info(), product },
+            ActorMessage::RejectPurchase { buyer, seller: self.actor_info(), product: 0, price_opinion: OfferResult::Cheap },
             ActorMessage::BuyOffer { buyer, seller: self.actor_info(), product, 
                 price_opinion: OfferResult::Cheap, quantity: 1.0, followup: 0 }
         ]);
 
-        if let ActorMessage::RejectOffer { buyer, seller, product } = response {
+        if let ActorMessage::RejectPurchase { .. } = response {
+            // return our held property
+            self.property.add_property(product, available, data);
             return; // if negative response gtfo
         } else if let ActorMessage::BuyOffer { buyer, seller, 
         product, price_opinion, quantity, followup } = response {

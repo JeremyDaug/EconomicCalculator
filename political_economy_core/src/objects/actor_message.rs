@@ -114,7 +114,7 @@ pub enum ActorMessage {
 
     /// From Buyer to seller.
     ///
-    /// Buyer Rejects as price, unable to purchase at the current price.
+    /// Buyer Rejects at price, unable to purchase at the current price.
     ///
     /// It is either too expensive in Absolute terms (total budget) or
     /// too expensive currently (current budget and can't buy).

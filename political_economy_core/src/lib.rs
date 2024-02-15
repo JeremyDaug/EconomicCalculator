@@ -1493,7 +1493,7 @@ mod tests {
                             assert_eq!(buyer, test_buyer);
                             assert_eq!(seller, pop_info);
                             assert_eq!(product, 10);
-                            assert_eq!(price, 100.0);
+                            assert_eq!(price, 1.0);
                             assert_eq!(quantity, 10.0);
                             break;
                         }
@@ -1505,8 +1505,25 @@ mod tests {
                     }
                 }
                 // send rejection
-                tx.send(ActorMessage::RejectOffer { buyer: test_buyer, seller: pop_info, product: 10 })
+                tx.send(ActorMessage::RejectPurchase { buyer: test_buyer, 
+                    seller: pop_info, 
+                    product: 10, 
+                    price_opinion: OfferResult::TooExpensive })
                     .expect("Borkde");
+
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::RejectPurchase { .. } = msg {
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
+                }
 
                 // wait a second to let it wrap up.
                 thread::sleep(Duration::from_millis(100));
@@ -1517,6 +1534,104 @@ mod tests {
 
                 // ensure that the seller hasn't sold anything
                 assert_eq!(test.property.property.get(&10).unwrap().total_property, 10.0);
+            }
+
+            #[test]
+            pub fn send_in_stock_recieve_offer_and_reject_offer_reasonably() {
+                let mut test = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable {
+                        table: vec![],
+                        total: 1,
+                    },
+                    is_selling: true,
+                    current_sat: TieredValue { tier: 0, value: 0.0 },
+                    prev_sat: TieredValue { tier: 0, value: 0.0 },
+                    hypo_change: TieredValue { tier: 0, value: 0.0 },
+                    backlog: VecDeque::new(),
+                };
+                let pop_info = test.actor_info();
+                let (data, history) = prepare_data_for_market_actions(&mut test);
+                // create simple desire to test against.
+                test.property.desires.push(Desire::new(Item::Product(1), 0, 
+                    None, 1.0, 0.0, 
+                    1, vec![]).expect("whoops"));
+                test.property.desires.push(Desire::new(Item::Product(10), 0,
+                    None, 1.0, 0.0, 1, vec![])
+                    .expect("Bups."));
+                // add product
+                test.property.add_property(1, 10.0, &data);
+                test.property.add_property(10, 1.0, &data);
+                // setup message queue
+                let (tx, rx) = barrage::bounded(10);
+                let mut passed_rx = rx.clone();
+                let passed_tx = tx.clone();
+                // setup pop we're talking with
+                let test_buyer = ActorInfo::Pop(1);
+
+                let handle = thread::spawn(move || {
+                    test.standard_sell(&mut passed_rx, &passed_tx, &data, &history, 
+                        1, test_buyer);
+                    test
+                });
+
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::InStock { buyer, seller,
+                        product, price, quantity } = msg {
+                            assert_eq!(buyer, test_buyer);
+                            assert_eq!(seller, pop_info);
+                            assert_eq!(product, 1);
+                            assert_eq!(price, 1.0);
+                            assert_eq!(quantity, 9.0);
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
+                }
+                // send rejection
+                tx.send(ActorMessage::BuyOffer { buyer: test_buyer, 
+                    seller: pop_info, 
+                    product: 10, 
+                    price_opinion: OfferResult::TooExpensive, quantity: 5.0, followup: 1 })
+                    .expect("Borkde");
+
+                let start = std::time::SystemTime::now();
+                while let Ok(msg) = rx.try_recv() {
+                    if let Some(msg) = msg {
+                        if let ActorMessage::RejectPurchase { .. } = msg {
+                            break;
+                        }
+                    }
+                    let now = std::time::SystemTime::now();
+                    if now.duration_since(start).expect("Bad Time!") 
+                        > Duration::from_secs(3) {
+                        assert!(false, "Timed Out.");
+                    }
+                }
+
+                // wait a second to let it wrap up.
+                thread::sleep(Duration::from_millis(100));
+                // check that it's finished
+                if !handle.is_finished() { assert!(false); }
+
+                let test = handle.join().unwrap();
+
+                // ensure that the seller hasn't sold anything
+                assert_eq!(test.property.property.get(&1).unwrap().total_property, 10.0);
+                assert_eq!(test.property.property.get(&10).unwrap().total_property, 1.0);
             }
 
             // TODO When returning change is possible, add test here and update previous test.
