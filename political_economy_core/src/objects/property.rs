@@ -256,7 +256,10 @@ impl Property {
     /// # Panics
     /// 
     /// Panics if it tries to subtract more of a product than is available.
-    pub fn predict_value_changed(&self, alterations: &HashMap<usize, f64>, data: &DataManager) -> TieredValue {
+    /// 
+    /// TODO include excess AMV expenditure estimate gain. Would require adding Market History as well.
+    pub fn predict_value_changed(&self, alterations: &HashMap<usize, f64>, 
+        data: &DataManager) -> TieredValue {
         // create our clone first
         let mut clone = self.cheap_clone();
         for (&product, &amount) in alterations.iter() {

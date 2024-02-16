@@ -124,6 +124,8 @@ pub enum ActorMessage {
     /// The start of a Buy offer from a buyer. Includes buyer, seller, and product
     /// to make finding easy. It also includes price opinion, the amount requested,
     /// and how many followup messages to expect.
+    /// 
+    /// A positive quantity value here is what is going to be lost by the seller.
     BuyOffer { buyer: ActorInfo, seller: ActorInfo, product: usize,
         price_opinion: OfferResult, quantity: f64, followup: usize },
     /// The Followup messages for a buy offer. Includes buyer, seller, and product.

@@ -1551,11 +1551,8 @@ impl Pop {
         // we have recieved a found product with us as the seller.
         // check how much we are willing to offer in exchange,
         let mut available = 0.0;
-        let value_lost =
         // extract and remove all product which does to satisfying desires above this level.
         if let Some(hard_sat_lvl) = self.property.hard_satisfaction {
-            // get the current value preemptively
-            let original_sat = self.property.tiered_satisfaction;
             // knock off the top of our satisfaction
             self.property.sift_up_to(&DesireCoord { tier: hard_sat_lvl, 
                 idx: self.property.desires.len() }, 
@@ -1564,19 +1561,13 @@ impl Pop {
             available = self.property.property.get(&product).unwrap().available();
             // actually remove it
             self.property.remove_property(product, available, data);
-            // return the new sat - orignial sat
-            self.property.tiered_satisfaction - original_sat
         } else { // if no existing hard_sat
-            // get our original
-            let lost = self.property.tiered_satisfaction;
             // release everything
             self.property.unsift();
             // get available
             available = self.property.property.get(&product).unwrap().available();
             // then remove what's available.
             self.property.remove_property(product, available, data);
-            // return the difference between what's 
-            self.property.tiered_satisfaction - lost
         };
         // set the price at the current market price (pops cannot set their own explicit AMV price)
         let price = market.get_product_price(&product, 1.0);
@@ -1601,20 +1592,21 @@ impl Pop {
             ActorMessage::BuyOffer { buyer, seller: self.actor_info(), product, 
                 price_opinion: OfferResult::Cheap, quantity: 1.0, followup: 0 }
         ]);
+        // return our property preemtively for possible extraction.
+        self.property.add_property(product, available, data);
 
         if let ActorMessage::RejectPurchase { .. } = response {
-            // return our held property
-            self.property.add_property(product, available, data);
             return; // if negative response gtfo
-        } else if let ActorMessage::BuyOffer { buyer, seller, 
+        } else if let ActorMessage::BuyOffer { buyer, seller: _, 
         product, price_opinion, quantity, followup } = response {
             // if valid check if the trade is worth it.
             ret = self.recieve_offer_followups(rx, tx, buyer, followup);
             ret.insert(product, -quantity);
-            let gain = self.property.predict_value_changed(&ret, data);
-            if value_lost > gain { // if loss less than gain, reject offer
+            let value_change = self.property.predict_value_changed(&ret, data);
+            if value_change.value < 0.0 { // if loss less than gain, reject offer
                 self.push_message(rx, tx, 
-                    ActorMessage::RejectOffer { buyer, seller: self.actor_info(), product });
+                    ActorMessage::RejectOffer { buyer, 
+                        seller: self.actor_info(), product });
                 ret.clear(); // clear out 
             } else { // if gain greater than loss, accept offer
                 // TODO consider adding change here. 
