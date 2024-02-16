@@ -586,7 +586,6 @@ impl Pop {
             let curr_desire = pop.property.desires
                 .get(curr_desire_coord.idx).unwrap().clone();
             // if the current desire is already satisfied for wahtever reason move on
-            let is_sat = curr_desire.satisfied_at_tier(curr_desire_coord.tier);
             if curr_desire.satisfied_at_tier(curr_desire_coord.tier) {
                 // get the next, and continue.
                 next_desire = pop.property.walk_up_tiers(next_desire);
@@ -666,12 +665,15 @@ impl Pop {
 
             // Do one buy at a time, ignoring if we have enough time for all trips or not
             // TODO improve this to actually peak ahead to see if it can go shopping enough to get what it needs and satisfy that desire.
-            for (buy_target, buy_quantity) in buy_targets {
+            for (buy_target, mut buy_quantity) in buy_targets {
                 // check if we need to get the item or not
-                if pop.property.property.get(&buy_target).unwrap()
-                    .available() >= buy_quantity {
+                let property_info = pop.property.property.get(&buy_target).unwrap();
+                if property_info.available() >= buy_quantity {
                     continue; // if not skip to next.
-                } // since we do need some amount of it,
+                } else if (property_info.max_target - property_info.available()) > buy_quantity { 
+                    // if our current target_quantity is less than our remaining max target, upgrade to the remainder
+                    buy_quantity = property_info.max_target - property_info.available();
+                }
                 // get a trip of time worth
                 // TODO update to take more dynamic time payment into account.
                 // TODO when purchasing shopping time is available, add an option for that here.
@@ -701,7 +703,8 @@ impl Pop {
                         temp
                     });
                     // TODO make use of buy_result instead of ignoring it.
-                    let buy_result = pop.try_to_buy(rx, tx, data, market, buy_target, buy_quantity);
+                    let buy_result = pop.try_to_buy(rx, tx, data, market, 
+                        buy_target, buy_quantity);
                     // the result if positive should do pretty much nothing. Target Success.
                     // If failure, we want to reduce the target by some measure, how much, will likely depend on the kind of failure.
                     match buy_result {
@@ -1644,23 +1647,31 @@ impl Pop {
     /// from todays buying, selling, and consuming to modify our plan for
     /// tomorrow.
     ///
-    /// Using both our desires and knowledge of what we achieved today
-    /// in particular, we seek to improve our efficiency at achieving our
-    /// desires by altering how much time and/or AMV we budget to them as
-    /// well as alter our buy ordering by swaping Product Knowledge in our
-    /// list and altering our buy targets we want to reach.
-    ///
-    /// We start by updating how successful we were. The ratio of achieved to
-    /// the target is our current success rate, then apply that to our previous
-    /// success rate. This should be a weighted sum, giving the prior days
-    /// priority over today.
-    ///
-    /// With the success rate updated, we then alter our targets, and budgets.
+    /// For now, all this does is alter min and max targets for our owned 
+    /// property. 
     /// 
+    /// ## Max Target Alterations
+    /// 
+    /// When we hit or overshoot the target, we the increase the max, capping
+    /// at the consumed amount + 1 (see TODO below). If we are below the max
+    /// we lower it by a fraction of the difference (1/10th currently rounded up). If
+    /// below Min, we reduce max by half the target.
+    /// 
+    /// ## Min target Alterations
+    /// 
+    /// While consumed is above Min, we increase our min by a fraction of the
+    /// difference (1/5 currently (rounded away from 0)). This is capped at
+    /// zero and max_target.
+    /// 
+    /// TODO: 
+    /// TODO: Alter Max_target cap to be limited by both consumed about a new factor, Security Factor (how many days we want to build up)
     /// TODO: Use this if needed, for now it does nothing. adaptation is 
     pub fn adapt_future_plan(&mut self, _data: &DataManager,
     _history: &MarketHistory) {
-        
+        for (_, info) in self.property.property.iter_mut() {
+            let old_max = info.max_target;
+            let old_min = info.min_target;
+        }
     }
 
     /// # Product Initialization

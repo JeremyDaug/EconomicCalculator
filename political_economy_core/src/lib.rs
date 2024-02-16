@@ -4702,6 +4702,8 @@ mod tests {
                 (data, market)
             }
 
+            // TODO add test for upgrading buy_quantity below max up to max.
+
             #[test]
             pub fn stop_when_out_of_time() {
                 let mut test = default_pop();
