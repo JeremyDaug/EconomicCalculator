@@ -2478,7 +2478,7 @@ impl Property {
     pub fn add_target(&mut self, product: usize, target: f64) {
         if !self.property.contains_key(&product) {
             let mut insert = PropertyInfo::new(0.0);
-            insert.max_target = target;
+            insert.upper_target = target;
             self.property.insert(product, insert);
         }
     }

@@ -8,7 +8,7 @@ use std::{arch::x86_64, collections::{HashMap, HashSet, VecDeque}, fmt::Debug, o
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{OVERSPEND_THRESHOLD, TIME_ID, self, SHOPPING_TIME_COST, SHOPPING_TIME_ID}, objects::{property::{DesireCoord, TieredValue}}};
+use crate::{constants::{self, ACP_MAX_HARD_REDUCTION_FACTOR, ACP_MAX_SOFT_REDUCTION_FACTOR, ACP_MIN_REDUCTION_FACTOR, OVERSPEND_THRESHOLD, SHOPPING_TIME_COST, SHOPPING_TIME_ID, TIME_ID}, data_manager::DataManager, demographics::Demographics, objects::property::{DesireCoord, TieredValue}};
 
 use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction, OfferResult}, buy_result::{self, BuyResult}, buyer::Buyer, item::Item, market::MarketHistory, pop_breakdown_table::PopBreakdownTable, product::ProductTag, property::{Property, ValueInOut}, property_info::PropertyInfo, seller::Seller, want_info::WantInfo
 };
@@ -670,9 +670,9 @@ impl Pop {
                 let property_info = pop.property.property.get(&buy_target).unwrap();
                 if property_info.available() >= buy_quantity {
                     continue; // if not skip to next.
-                } else if (property_info.max_target - property_info.available()) > buy_quantity { 
+                } else if (property_info.upper_target - property_info.available()) > buy_quantity { 
                     // if our current target_quantity is less than our remaining max target, upgrade to the remainder
-                    buy_quantity = property_info.max_target - property_info.available();
+                    buy_quantity = property_info.upper_target - property_info.available();
                 }
                 // get a trip of time worth
                 // TODO update to take more dynamic time payment into account.
@@ -1641,7 +1641,7 @@ impl Pop {
         self.property.decay_goods(data);
     }
 
-    /// # Adapt future Plan
+    /// # Adapt Future Plan
     ///
     /// Adapt future plan takes our existing knowledge base and our results
     /// from todays buying, selling, and consuming to modify our plan for
@@ -1652,25 +1652,46 @@ impl Pop {
     /// 
     /// ## Max Target Alterations
     /// 
-    /// When we hit or overshoot the target, we the increase the max, capping
-    /// at the consumed amount + 1 (see TODO below). If we are below the max
-    /// we lower it by a fraction of the difference (1/10th currently rounded up). If
-    /// below Min, we reduce max by half the target.
+    /// When we hit or overshoot the target, we the increase the max by half 
+    /// the difference (round up), capping at the consumed + current total + 1 
+    /// (see TODO below). If we are below the max we lower it by a fraction of 
+    /// the difference (1/10th currently rounded up (to 0.0)). If below Min, we 
+    /// reduce max by half the difference.
     /// 
     /// ## Min target Alterations
     /// 
     /// While consumed is above Min, we increase our min by a fraction of the
-    /// difference (1/5 currently (rounded away from 0)). This is capped at
-    /// zero and max_target.
+    /// difference (1/5 currently (rounded up)). This is capped at
+    /// zero and max_target. If consumed is below min it lowers it by 1/5 also
     /// 
-    /// TODO: 
     /// TODO: Alter Max_target cap to be limited by both consumed about a new factor, Security Factor (how many days we want to build up)
-    /// TODO: Use this if needed, for now it does nothing. adaptation is 
+    /// TODO Add mood modifier for going below minimum. (Uncertainty/fear/anger)
     pub fn adapt_future_plan(&mut self, _data: &DataManager,
     _history: &MarketHistory) {
-        for (_, info) in self.property.property.iter_mut() {
-            let old_max = info.max_target;
-            let old_min = info.min_target;
+        for (_id, info) in self.property.property.iter_mut() {
+            let old_max = info.upper_target;
+            let old_min = info.lower_target;
+            let total_lost = info.consumed + info.lost;
+            let peak = info.total_property + total_lost;
+            let max_diff = peak - old_max;
+            if max_diff >= 0.0 { // if at or above old max
+                // add half the difference rounded up (min 1.0)
+                let diff = (max_diff * constants::APC_MAX_GROWTH_FACTOR)
+                    .ceil().max(1.0);
+                info.upper_target += diff;
+            } else if old_min < peak { // below max, but above peak
+                // reduce by a fraction of the difference (min 0.0)
+                let diff = (max_diff * ACP_MAX_SOFT_REDUCTION_FACTOR).ceil();
+                info.upper_target += diff;
+            } else { // below both max and min, reduce by half diff round down
+                let diff = (max_diff * ACP_MAX_HARD_REDUCTION_FACTOR).floor();
+                info.upper_target += diff;
+            }
+
+            // get the difference between total_lost and min and shift 
+            let min_diff = ((total_lost - info.lower_target) * ACP_MIN_REDUCTION_FACTOR)
+                .ceil();
+            info.lower_target += min_diff;
         }
     }
 

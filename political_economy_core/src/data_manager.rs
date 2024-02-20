@@ -35,12 +35,12 @@ use crate::{objects::{want::Want,
 /// These are items which should always be there and will effectively always have some use.
 /// 
 /// - Required Wants
-///   - ID 0: Rest
-///   - ID 1: Liesure
+///   - ID 0: Rest - Passive Idle time like sleep.
+///   - ID 1: Wealth - A generic want representing "stuff".
+///   - ID 2: Leisure - Active Idle Time, like play or relaxation.
 ///   - TODO Items
 ///     - Space - How much space is available absolutely.
 ///     - Free Space - How much unused space they have available, not used in storage.
-///     - Wealth - A Measure of AMV available (unit of AMV -> Wealth may be defined by market)
 /// - Required Products:
 ///   - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
 ///                         refreshed every day)
@@ -56,7 +56,7 @@ use crate::{objects::{want::Want,
 ///     - Nothing (void item, may not be needed)
 /// - Required Processes:
 ///   - ID 0: Shopping (Time -> Shopping Time + Liesure)
-///   - ID 1: Liesure (Time -> Liesure)
+///   - ID 1: Leisure (Time -> Liesure)
 /// - Required Tech:
 ///   - TODO Items
 ///     - Brainstorming (origin tech)

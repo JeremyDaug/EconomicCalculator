@@ -1,3 +1,8 @@
+//! Constants file.
+//! 
+//! This is partially intended as a placeholder to some things. If so desired
+//! this can (and should) be updated to a config file
+
 /// The ID for the required time product.
 pub const TIME_ID: usize = 0;
 /// # Shopping Time Id
@@ -118,16 +123,25 @@ pub const CHEAP: f64 = 0.2;
 // steal < 0.25
 
 
-/// ----------- Adapt future plan constants
-
-/// The reducted weight of Loss to success rate today.
-pub const LOSS_TO_SUCCESS_WEIGHT: f64 = 0.25;
-/// The threshold value (0.75 - 1.0) for a major success in reaching a target.
-pub const MAJOR_TARGET_SUCCESS_THRESHOLD: f64 = 0.75;
-/// The threshold value (0.5 - 0.75) for normal success in reaching a target.
-pub const STANDARD_TARGET_SUCCESS_THRESHOLD: f64 = 0.5;
-/// The Threshold value (0.25 - 0.5) for normal failure in reaching a target.
-pub const STANDARD_TARGET_FAILURE_THRESHOLD: f64 = 0.25;
-// Major TargetFailure THreshold
-
-pub const TARGET_MINIMUM_THRESHOLD: f64 = 0.1;
+// ----------- Adapt future plan constants
+/// # Adapt Plan Max (Target) Growth Factor
+/// 
+/// When changing the max target of a good, this is how much of the difference
+/// between the current max_target and the achieved Peak is added to the
+/// max for next time.
+pub const APC_MAX_GROWTH_FACTOR: f64 = 0.5;
+/// # Adapt Plan Max (Target) Soft Reduction Factor
+/// 
+/// When the peak achieved is between the Min target and Max target we
+/// reduce the Max by the difference * this factor (rounded up).
+pub const ACP_MAX_SOFT_REDUCTION_FACTOR: f64 = 0.1;
+/// # Adapt Plan Max (target) Hard Reduction Factor
+/// 
+/// WHen the peak achieved is below even the minimum target, we reduce the
+/// max_target by the difference * this factor (rounded down).
+pub const ACP_MAX_HARD_REDUCTION_FACTOR: f64 = 0.5;
+/// # Adapt Plan Min (target) Reduction Factor
+/// 
+/// This is the factor by which the difference between total losses 
+/// (consumption and lost) today is multiplied.
+pub const ACP_MIN_REDUCTION_FACTOR: f64 = 0.2;

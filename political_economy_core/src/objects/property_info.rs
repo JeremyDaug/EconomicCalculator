@@ -26,10 +26,10 @@ pub struct PropertyInfo {
     /// The amount that has been reserved to satisfy want desires.
     pub want_reserve: f64,
 
-    /// The upper target we will buy up to. 
-    pub max_target: f64,
-    /// The target to own for this at the end of each day.
-    pub min_target: f64, 
+    /// The upper target we will buy up to in one go to shortcut multiple purchases.
+    pub upper_target: f64,
+    /// The target which is considered safe enough to cover common consumption and losses for the day.
+    pub lower_target: f64, 
     /// The number we maintained from yesterday.
     pub rollover: f64,
     /// The number we got by any means today.
@@ -71,8 +71,8 @@ impl PropertyInfo {
             consumed: 0.0,
             used: 0.0,
             spent: 0.0,
-            max_target: 1.0,
-            min_target: 0.0,
+            upper_target: 1.0,
+            lower_target: 0.0,
             rollover: 0.0,
             recieved: 0.0,
             lost: 0.0, 
@@ -380,7 +380,7 @@ impl PropertyInfo {
     /// 
     /// How many units we are needed to reach our max target.
     pub fn remaining_target(&self) -> f64 {
-        self.max_target - self.total_property
+        self.upper_target - self.total_property
     }
 
     /// # Use Directly

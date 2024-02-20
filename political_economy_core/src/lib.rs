@@ -2950,8 +2950,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -3079,8 +3079,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -3214,8 +3214,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -3366,8 +3366,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                     .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -3508,8 +3508,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -3609,8 +3609,8 @@ mod tests {
                 test.property.add_property(6, 2.0, &data);
                 let val = test.property.property.entry(15)
                     .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 2.0;
-                val.min_target = 0.0;
+                val.upper_target = 2.0;
+                val.lower_target = 0.0;
 
                 // 2 clothes for targeting 2 cabins. Will only get 1. AMV fin market is arbitrarily high.
                 history.product_info.get_mut(&6).unwrap().price = 2.0;
@@ -3714,8 +3714,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -3844,8 +3844,8 @@ mod tests {
                 // a d
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 40.0;
-                val.min_target = 0.0;
+                val.upper_target = 40.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -3970,8 +3970,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -4103,8 +4103,8 @@ mod tests {
                 // we want to target buying 10 cabins.
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -4242,8 +4242,8 @@ mod tests {
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
                 val.amv_unit_estimate = 1.0;
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -4320,8 +4320,8 @@ mod tests {
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
                 val.amv_unit_estimate = 10.0;
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -4403,8 +4403,8 @@ mod tests {
                 let val = test.property.property.entry(15)
                 .or_insert(PropertyInfo::new(0.0));
                 val.amv_unit_estimate = 10.0;
-                val.max_target = 10.0;
-                val.min_target = 0.0;
+                val.upper_target = 10.0;
+                val.lower_target = 0.0;
 
                 // The pop is trying to buy 10 cabins at tier 50
                 // It should always include the 20.0 units of Ambrosia fruit, 
@@ -5555,6 +5555,163 @@ mod tests {
             }
         }
 
+        mod adapt_future_plan_should {
+            use std::collections::{HashMap, VecDeque};
+
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, pop::Pop, pop_breakdown_table::PopBreakdownTable, property::{Property, TieredValue}, property_info::PropertyInfo}};
+
+            /// preps a pop's property, the property's data, and market prices of those items.
+            /// 
+            /// Sets all values to 1.0 amv and salability of 0.5 by default.
+            /// 
+            /// Exceptions are:
+            /// - Ambrosia Fruit are set as a currency (Sal 1.0, currency=true)
+            /// - Cotton Boll is set to currency with salability 1.0, and price of 5.0
+            /// - Cotton Clothes are priced at 10.0 amv.
+            /// - Cotton Suit is priced at 20.0 amv.
+            /// - Hut has a price of 100.0 amv.
+            /// - Cabin has a price of 1000.0 amv.
+            /// 
+            /// This is for testing buy and sell functions, not offer_calculations.
+            pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
+                let mut data = DataManager::new();
+                // TODO update this when we update Load All
+                data.load_all(&String::from("")).expect("Error on load?");
+                let product = data.products.get_mut(&6).unwrap();
+                product.fractional = true;
+
+                let mut market = MarketHistory {
+                    product_info: HashMap::new(),
+                    sale_priority: vec![],
+                    currencies: vec![],
+                    class_info: HashMap::new(),
+                    want_info: HashMap::new(),
+                };
+                // quickly set all prices to 1.0 for ease going forward.
+                for idx in 0..26 {
+                    market.product_info.insert(idx, ProductInfo {
+                        available: 0.0,
+                        price: 1.0,
+                        offered: 0.0,
+                        sold: 0.0,
+                        salability: 0.5,
+                        is_currency: false,
+                    });
+                }
+                // ambrosia fruit
+                market.product_info.get_mut(&2).expect("Brok").salability = 1.0;
+                market.product_info.get_mut(&2).expect("Brok").is_currency = true;
+
+                market.product_info.get_mut(&3).expect("Brok").salability = 1.0;
+                market.product_info.get_mut(&3).expect("Brok").is_currency = true;
+                market.product_info.get_mut(&3).expect("Brok").price = 5.0;
+
+                market.product_info.get_mut(&6).expect("Brok").price = 10.0;
+                market.product_info.get_mut(&7).expect("Brok").price = 20.0;
+
+                market.product_info.get_mut(&14).expect("Brok").price = 100.0;
+                market.product_info.get_mut(&15).expect("Brok").price = 1000.0;
+
+                market.currencies.push(2);
+                // sale priority would go here if used.
+
+                // pop.property.property.insert(6, PropertyInfo::new(10.0));
+                // TODO fix this info.
+
+                (data, market)
+            }
+
+            #[test]
+            pub fn increase_max_when_peak_equal_or_above_max_target() {
+                let mut pop = Pop {
+                    id: 0,
+                    job: 0,
+                    firm: 0,
+                    market: 0,
+                    skill: 0,
+                    lower_skill_level: 0.0,
+                    higher_skill_level: 0.0,
+                    property: Property::new(vec![]),
+                    breakdown_table: PopBreakdownTable { table: vec![], total: 1 },
+                    is_selling: false,
+                    current_sat: TieredValue { tier: 0, value: 0.0},
+                    prev_sat: TieredValue { tier: 0, value: 0.0},
+                    hypo_change: TieredValue { tier: 0, value: 0.0},
+                    backlog: VecDeque::new(),
+                };
+
+                let (data, history) = prepare_data_for_market_actions(&mut pop);
+
+                // setup equal to max target
+                let mut info = PropertyInfo::new(10.0);
+                info.upper_target = 20.0;
+                info.lower_target = 10.0;
+                info.consumed = 5.0;
+                info.lost = 5.0;
+                pop.property.property.insert(0, info);
+                // and greater than max targets.
+                let mut info = PropertyInfo::new(10.0);
+                info.upper_target = 20.0;
+                info.lower_target = 10.0;
+                info.consumed = 15.0;
+                info.lost = 5.0;
+                pop.property.property.insert(1, info);
+                // between upper and lower
+                let mut info = PropertyInfo::new(10.0);
+                info.upper_target = 30.0;
+                info.lower_target = 10.0;
+                info.consumed = 5.0;
+                info.lost = 5.0;
+                pop.property.property.insert(2, info);
+                // below/equal lower
+                let mut info = PropertyInfo::new(10.0);
+                info.upper_target = 30.0;
+                info.lower_target = 20.0;
+                info.consumed = 5.0;
+                info.lost = 5.0;
+                pop.property.property.insert(3, info);
+                // total_loss above lower target
+                let mut info = PropertyInfo::new(10.0);
+                info.upper_target = 30.0;
+                info.lower_target = 5.0;
+                info.consumed = 5.0;
+                info.lost = 5.0;
+                pop.property.property.insert(4, info);
+                // total_loss above lower target
+                let mut info = PropertyInfo::new(10.0);
+                info.upper_target = 30.0;
+                info.lower_target = 20.0;
+                info.consumed = 5.0;
+                info.lost = 5.0;
+                pop.property.property.insert(5, info);
+
+                pop.adapt_future_plan(&data, &history);
+
+                let info0 = pop.property.property.get(&0).unwrap();
+                assert_eq!(info0.upper_target, 21.0);
+                assert_eq!(info0.lower_target, 10.0);
+                let info1 = pop.property.property.get(&1).unwrap();
+                assert_eq!(info1.upper_target, 25.0);
+                assert_eq!(info1.lower_target, 12.0);
+                let info2 = pop.property.property.get(&2).unwrap();
+                assert_eq!(info2.upper_target, 29.0);
+                assert_eq!(info2.lower_target, 10.0);
+                let info3 = pop.property.property.get(&3).unwrap();
+                assert_eq!(info3.upper_target, 25.0);
+                assert_eq!(info3.lower_target, 18.0);
+                let info4 = pop.property.property.get(&4).unwrap();
+                assert_eq!(info4.upper_target, 29.0);
+                assert_eq!(info4.lower_target, 6.0);
+                let info5 = pop.property.property.get(&5).unwrap();
+                assert_eq!(info5.upper_target, 25.0);
+                assert_eq!(info5.lower_target, 18.0);
+            }
+        }
+
+        /// These tests 
+        mod pop_integration_tests {
+
+        }
     }
 
     mod pop_breakdown_table_tests {
