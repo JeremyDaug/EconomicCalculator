@@ -3,24 +3,11 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
-use crate::{objects::{want::Want, 
-    skill_group::SkillGroup,
-    skill::Skill, 
-    technology::Technology,
-    technology_family::TechnologyFamily, 
-    product::{Product, ProductTag}, 
-    process_node::ProcessNode, 
-    process::{Process, 
+use crate::{constants::{BRAINSTORMING_TECH_ID, DISCERNMENT_SKILL_ID, RESTING_PROC_ID, REST_WANT_ID, SHOPPING_TIME_PRODUCT_ID, SHOPPING_TIME_PROC_ID, TIME_PRODUCT_ID, WEALTH_WANT_ID}, objects::{culture::Culture, firm::Firm, item::Item, job::Job, market::Market, pop::Pop, process::{Process, 
         ProcessPart, 
         ProcessPartTag, 
         ProcessSectionTag, 
-        ProcessTag}, 
-    job::Job, 
-    species::Species, 
-    culture::Culture, 
-    pop::Pop, 
-    market::Market, 
-    firm::Firm, item::Item}, constants::{REST_WANT_ID, WEALTH_WANT_ID, SHOPPING_TIME_ID, TIME_ID, SHOPPING_TIME_PROC_ID, RESTING_PROC_ID}};
+        ProcessTag}, process_node::ProcessNode, product::{Product, ProductTag}, skill::Skill, skill_group::SkillGroup, species::Species, technology::{self, Technology}, technology_family::TechnologyFamily, want::Want}};
 
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
@@ -35,9 +22,8 @@ use crate::{objects::{want::Want,
 /// These are items which should always be there and will effectively always have some use.
 /// 
 /// - Required Wants
-///   - ID 0: Rest - Passive Idle time like sleep.
+///   - ID 0: Rest - Passive Leisure time like sleep.
 ///   - ID 1: Wealth - A generic want representing "stuff".
-///   - ID 2: Leisure - Active Idle Time, like play or relaxation.
 ///   - TODO Items
 ///     - Space - How much space is available absolutely.
 ///     - Free Space - How much unused space they have available, not used in storage.
@@ -55,8 +41,8 @@ use crate::{objects::{want::Want,
 ///     - Land (Very Fertile Land)
 ///     - Nothing (void item, may not be needed)
 /// - Required Processes:
-///   - ID 0: Shopping (Time -> Shopping Time + Liesure)
-///   - ID 1: Leisure (Time -> Liesure)
+///   - ID 0: Shopping (Time -> Shopping Time)
+///   - ID 1: Sleep (Time -> Rest)
 /// - Required Tech:
 ///   - TODO Items
 ///     - Brainstorming (origin tech)
@@ -158,6 +144,123 @@ impl DataManager {
         }
     }
 
+    /// # Required Items
+    /// 
+    /// Adds items which are required by the system innately. Without these 
+    /// items, the system will not work.
+    /// Currently, there are a handful of items which are considered 'Required' by the system.
+    /// These are items which should always be there and will effectively always have some use.
+    /// 
+    /// - Required Wants
+    ///   - ID 0: Rest - Passive Leisure time like sleep.
+    ///   - ID 1: Wealth - A generic want representing "stuff".
+    ///   - TODO Items
+    ///     - Space - How much space is available absolutely.
+    ///     - Free Space - How much unused space they have available, not used in storage.
+    /// - Required Products:
+    ///   - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
+    ///                         refreshed every day)
+    ///   - ID 1: Shopping Time (Used to shop)
+    ///   - TODO Items
+    ///     - Land (abstract)
+    ///     - Land (Wasteland)
+    ///     - Land (Marignal Land)
+    ///     - Land (Scrub Land)
+    ///     - Land (Quality Land)
+    ///     - Land (Fertile Land)
+    ///     - Land (Very Fertile Land)
+    ///     - Nothing (void item, may not be needed)
+    /// - Required Processes:
+    ///   - ID 0: Shopping (Time -> Shopping Time)
+    ///   - ID 1: Sleep (Time -> Rest)
+    /// - Required Tech:
+    ///   - ID 0: Brainstorming (origin tech)
+    ///   Required Skills:
+    ///   - ID 0: Discernment, The Skill of shopping_time.
+    pub fn required_items(&mut self) {
+        // Wants, Rest and Wealth
+        let rest =  match Want::new(REST_WANT_ID, 
+        String::from("Rest"), 
+        String::from("Rest is the joy of Idle time."), 
+        0.1) {
+            Result::Err(_) => panic!(),
+            Result::Ok(want) => want
+        };
+        
+        let wealth = match Want::new(
+            WEALTH_WANT_ID,
+            String::from("Wealth"),
+            String::from("Wealth is the amount of things you have built up. Not just money, but things. This is a required item."),
+            0.2) {
+            Result::Err(_) => panic!(),
+            Result::Ok(want) => want
+        };
+
+        self.wants.insert(REST_WANT_ID, rest);
+        self.wants.insert(WEALTH_WANT_ID, wealth);
+
+        // No Tech Groups
+        // Techs, Brainstorming
+        let brainstorming = Technology {
+            id: BRAINSTORMING_TECH_ID,
+            name: "Brainstorming".to_string(),
+            description: "Thinking hard can often lead to interesting places.".to_string(),
+            base_cost: 1,
+            tier: 0,
+            families: HashSet::new(),
+            children: HashSet::new(),
+            parents: HashSet::new(),
+        };
+        self.technology.insert(BRAINSTORMING_TECH_ID, brainstorming);
+
+        // products, Time and Shopping Time
+        // Generic Time
+        let time = Product::new(TIME_PRODUCT_ID,
+            String::from("Time"),
+            String::from(""),
+            String::from("Time. Always is short supply."), 
+            String::from("Hour(s)"), 
+            0,
+            0.0,
+            0.0,
+            Some(0),
+            true,
+            vec![ProductTag::NonTransferrable],
+            None,
+            None).unwrap();
+        // Shopping Time
+        let shopping_time = Product::new(SHOPPING_TIME_PRODUCT_ID,
+            String::from("Shopping Time"),
+            String::from(""),
+            String::from("Shopping Time, productive, but sometimes frustrating."), 
+            String::from("Hour(s)"), 
+            0,
+            0.0,
+            0.0,
+            Some(0),
+            true,
+            Vec::new(),
+            None,
+            None).unwrap();
+        self.products.insert(TIME_PRODUCT_ID, time);
+        self.products.insert(SHOPPING_TIME_PRODUCT_ID, shopping_time);
+
+        // no skill groups by default
+        // skills, Discernment, the skill behind Shopping_time
+        // TODO come back here later after exploring decay of capital goods.
+        let discernment = Skill {
+            id: DISCERNMENT_SKILL_ID,
+            name: String::from("Discernment"),
+            description: String::from("The ability to tell things apart, to distinguish between what you want and don't want, where you want to go or not go, makes finding what you want that much easier."),
+            labor: SHOPPING_TIME_PRODUCT_ID,
+            skill_group: HashSet::new(),
+            related_skills: HashMap::new(),
+        };
+        self.skills.insert(DISCERNMENT_SKILL_ID, discernment);
+
+
+    }
+
     /// Loads wants from a file into the data manager,
     /// Currently, this just loads pre-existing data.
     pub fn load_wants(&mut self, _file_name: &String) -> Result<(), String> {
@@ -236,7 +339,7 @@ impl DataManager {
 
     pub fn load_products(&mut self, _file_name: &String) -> Result<(), String> {
         // Generic Time
-        let time = Product::new(TIME_ID,
+        let time = Product::new(TIME_PRODUCT_ID,
             String::from("Time"),
             String::from(""),
             String::from("Time. Always is short supply."), 
@@ -250,7 +353,7 @@ impl DataManager {
             None,
             None).unwrap();
         // Shopping Time
-        let shopping_time = Product::new(SHOPPING_TIME_ID,
+        let shopping_time = Product::new(SHOPPING_TIME_PRODUCT_ID,
             String::from("Shopping Time"),
             String::from(""),
             String::from("Shopping Time, productive, but sometimes frustrating."), 
@@ -880,7 +983,7 @@ impl DataManager {
 
         // Next do Resting Process
         let rest_input = ProcessPart {
-            item: Item::Product(TIME_ID),
+            item: Item::Product(TIME_PRODUCT_ID),
             amount: 1.0,
             part_tags: vec![],
             part: ProcessSectionTag::Input,

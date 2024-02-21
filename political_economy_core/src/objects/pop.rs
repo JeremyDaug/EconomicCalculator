@@ -8,7 +8,7 @@ use std::{arch::x86_64, collections::{HashMap, HashSet, VecDeque}, fmt::Debug, o
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{constants::{self, ACP_MAX_HARD_REDUCTION_FACTOR, ACP_MAX_SOFT_REDUCTION_FACTOR, ACP_MIN_REDUCTION_FACTOR, OVERSPEND_THRESHOLD, SHOPPING_TIME_COST, SHOPPING_TIME_ID, TIME_ID}, data_manager::DataManager, demographics::Demographics, objects::property::{DesireCoord, TieredValue}};
+use crate::{constants::{self, ACP_MAX_HARD_REDUCTION_FACTOR, ACP_MAX_SOFT_REDUCTION_FACTOR, ACP_MIN_REDUCTION_FACTOR, OVERSPEND_THRESHOLD, SHOPPING_TIME_COST, SHOPPING_TIME_PRODUCT_ID, TIME_PRODUCT_ID}, data_manager::DataManager, demographics::Demographics, objects::property::{DesireCoord, TieredValue}};
 
 use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction, OfferResult}, buy_result::{self, BuyResult}, buyer::Buyer, item::Item, market::MarketHistory, pop_breakdown_table::PopBreakdownTable, product::ProductTag, property::{Property, ValueInOut}, property_info::PropertyInfo, seller::Seller, want_info::WantInfo
 };
@@ -309,11 +309,11 @@ impl Pop {
                 // send over our work time
                 self.push_message(rx, tx, ActorMessage::SendProduct { sender: self.actor_info(),
                     reciever: firm,
-                    product: TIME_ID,
+                    product: TIME_PRODUCT_ID,
                     amount: self.property.work_time
                     });
                 // and remove that time from our property as well
-                self.property.remove_property(TIME_ID, self.property.work_time, data);
+                self.property.remove_property(TIME_PRODUCT_ID, self.property.work_time, data);
             },
             FirmEmployeeAction::RequestEverything => {
                 // loop over everything and send it to the firm.
@@ -570,11 +570,11 @@ impl Pop {
                 continue;
             }
             // check that we have enough time to go shopping (either time itself or shopping time)
-            if let Some(time) = pop.property.property.get(&TIME_ID) {
+            if let Some(time) = pop.property.property.get(&TIME_PRODUCT_ID) {
                 if time.available() < shopping_time_cost {
                     break;
                 }
-            } else if let Some(shopping_time) = pop.property.property.get(&SHOPPING_TIME_ID) {
+            } else if let Some(shopping_time) = pop.property.property.get(&SHOPPING_TIME_PRODUCT_ID) {
                 if shopping_time.available() < shopping_time_cost {
                     break;
                 }
@@ -685,14 +685,14 @@ impl Pop {
                     // if we don't have enough time to go shopping for this desire we likely won't be able to go shopping for
                     // anything, so add the excess shopping time to our property and gtfo (consired allowing it to be refunded.)
                     // todo refund shopping time here as it hasn't actually been spend yet 
-                    pop.property.add_property(SHOPPING_TIME_ID, available_shopping_time, data);
+                    pop.property.add_property(SHOPPING_TIME_PRODUCT_ID, available_shopping_time, data);
                     break;
                 } else {
                     // since we have enough time, go shopping.
                     // expend then return excess shopping time to property
                     let remaining_shop_time = available_shopping_time - shopping_time_cost;
                     if remaining_shop_time > 0.0 {
-                        pop.property.add_property(SHOPPING_TIME_ID, remaining_shop_time, data);
+                        pop.property.add_property(SHOPPING_TIME_PRODUCT_ID, remaining_shop_time, data);
                     }
                     // regardless of our success or failure, add it to the cost.
                     pop.property.property.entry(buy_target)
@@ -1776,7 +1776,7 @@ impl Actor for Pop {
     _demos: &Demographics,
     history: &MarketHistory) {
         // before we even begin, add in the time we have for the day.
-        self.property.add_property(TIME_ID, (self.breakdown_table.total as f64) *
+        self.property.add_property(TIME_PRODUCT_ID, (self.breakdown_table.total as f64) *
             24.0 * self.breakdown_table.average_productivity(), data);
 
         // started up, so wait for the first message.

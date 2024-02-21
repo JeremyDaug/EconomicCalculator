@@ -4,7 +4,7 @@
 //! this can (and should) be updated to a config file
 
 /// The ID for the required time product.
-pub const TIME_ID: usize = 0;
+pub const TIME_PRODUCT_ID: usize = 0;
 /// # Shopping Time Id
 /// 
 /// The id for the required Shopping Time product.
@@ -39,17 +39,23 @@ pub const TIME_ID: usize = 0;
 /// Salesmanning, This is the comparable to the standard buy trip, but with the
 /// person looking to sell rather than buy. Making this comparable to Standard
 /// Buy is reasonable, but making it more expensive may be better to encourage
-pub const SHOPPING_TIME_ID: usize = 1;
-
+pub const SHOPPING_TIME_PRODUCT_ID: usize = 1;
 
 /// The Id for the required Rest Want.
 pub const REST_WANT_ID: usize = 0;
 /// The ID for the Required Wealth Want.
 pub const WEALTH_WANT_ID: usize = 1;
+
+/// The ID for the Brainstorming base tech.
+pub const BRAINSTORMING_TECH_ID: usize = 0;
+
 /// The ID for the process which turns time to Shopping Time.
 pub const SHOPPING_TIME_PROC_ID: usize = 0;
 /// The ID for the process which turns time into Liesure.
 pub const RESTING_PROC_ID: usize = 1;
+
+/// The ID for the Skill Discernment.
+pub const DISCERNMENT_SKILL_ID: usize = 0;
 
 
 // These are configuration constants. Could be floated off into a

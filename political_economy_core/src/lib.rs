@@ -960,7 +960,7 @@ mod tests {
             use std::{thread, time::Duration};
 
             use crate::{objects::{property_info::PropertyInfo, actor_message::ActorMessage, seller::Seller}, 
-                constants::TIME_ID};
+                constants::TIME_PRODUCT_ID};
 
             use super::{make_test_pop, prepare_data_for_market_actions};
 
@@ -972,7 +972,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
+                test.property.property.insert(TIME_PRODUCT_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -1011,7 +1011,7 @@ mod tests {
                 // don't worry about it buying anything, we'll just pass back a middle finger to get what we want.
                 test.is_selling = true;
                 // add a bunch of time for shopping.
-                test.property.property.insert(TIME_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
+                test.property.property.insert(TIME_PRODUCT_ID, PropertyInfo::new(test.standard_shop_time_cost() + 100.0));
                 // setup messaging
                 let (tx, rx) = barrage::bounded(10);
                 let mut passed_rx = rx.clone();
@@ -2148,7 +2148,7 @@ mod tests {
         mod process_firm_message {
             use std::collections::HashMap;
 
-            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, property_info::PropertyInfo, seller::Seller, want_info::WantInfo}, constants::TIME_ID};
+            use crate::{objects::{actor_message::{ActorInfo, FirmEmployeeAction, ActorMessage}, property_info::PropertyInfo, seller::Seller, want_info::WantInfo}, constants::TIME_PRODUCT_ID};
 
             use super::make_test_pop;
             use super::prepare_data_for_market_actions;
@@ -2180,7 +2180,7 @@ mod tests {
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.property.work_time = work_time;
-                test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.property.property.insert(TIME_PRODUCT_ID, PropertyInfo::new(20.0));
                 // setup message queue.
                 let (tx, rx) = barrage::bounded(10);
                 let passed_rx = rx.clone();
@@ -2199,7 +2199,7 @@ mod tests {
                     product, amount } = msg {
                         assert_eq!(sender, test.actor_info());
                         assert_eq!(reciever, firm);
-                        assert_eq!(product, TIME_ID);
+                        assert_eq!(product, TIME_PRODUCT_ID);
                         assert_eq!(amount, work_time);
                     }
                     else { assert!(false); }
@@ -2208,7 +2208,7 @@ mod tests {
                 let rx_msg = rx.try_recv().expect("Unexpected Disconnect?");
                 assert!(rx_msg.is_none());
                 // check that the pop has reduced it's time appropriately.
-                assert_eq!(test.property.property.get(&TIME_ID).unwrap().total_property, 10.0);
+                assert_eq!(test.property.property.get(&TIME_PRODUCT_ID).unwrap().total_property, 10.0);
             }
 
             #[test]
@@ -2218,7 +2218,7 @@ mod tests {
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.property.work_time = work_time;
-                test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.property.property.insert(TIME_PRODUCT_ID, PropertyInfo::new(20.0));
                 test.property.property.insert(3, PropertyInfo::new(10.0));
                 test.property.property.insert(5, PropertyInfo::new(10.0));
                 test.property.want_store.insert(4, WantInfo::new(20.0));
@@ -2264,7 +2264,7 @@ mod tests {
                 // assert that the items were sent
                 assert_eq!(rec_prods.len(), 3);
                 assert_eq!(rec_wants.len(), 2);
-                assert_eq!(*rec_prods.get(&TIME_ID).unwrap(), 20.0);
+                assert_eq!(*rec_prods.get(&TIME_PRODUCT_ID).unwrap(), 20.0);
                 assert_eq!(*rec_prods.get(&3).unwrap(), 10.0);
                 assert_eq!(*rec_prods.get(&5).unwrap(), 10.0);
                 assert_eq!(*rec_wants.get(&4).unwrap(), 20.0);
@@ -2283,7 +2283,7 @@ mod tests {
                 // add the pop's time to work from memory
                 let work_time = 10.0;
                 test.property.work_time = work_time;
-                test.property.property.insert(TIME_ID, PropertyInfo::new(20.0));
+                test.property.property.insert(TIME_PRODUCT_ID, PropertyInfo::new(20.0));
                 test.property.property.insert(3, PropertyInfo::new(10.0));
                 test.property.property.insert(5, PropertyInfo::new(10.0));
                 test.property.want_store.insert(4, WantInfo::new(20.0));
@@ -2315,7 +2315,7 @@ mod tests {
 
                 // and assert that those items have been removed from the pop
                 assert_eq!(test.property.property.len(), 2);
-                assert_eq!(test.property.property.get(&TIME_ID).unwrap().total_property, 20.0);
+                assert_eq!(test.property.property.get(&TIME_PRODUCT_ID).unwrap().total_property, 20.0);
                 assert_eq!(test.property.property.get(&5).unwrap().total_property, 10.0);
                 assert!(!test.property.property.contains_key(&3));
                 assert_eq!(test.property.want_store.len(), 2);
@@ -4524,7 +4524,7 @@ mod tests {
         mod shopping_loop_should {
             use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_ID, SHOPPING_TIME_ID}};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::{ActorInfo, ActorMessage, OfferResult}, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::{TIME_PRODUCT_ID, SHOPPING_TIME_PRODUCT_ID}};
 
             /// Intentionally super simple pop generation
             /// 
@@ -4718,7 +4718,7 @@ mod tests {
                 test.property.add_property(6, 3.0, &data);
                 test.property.add_property(14, 3.0, &data);
                 // add in 1.1 shopping trip worth of time
-                test.property.add_property(TIME_ID, 
+                test.property.add_property(TIME_PRODUCT_ID, 
                     1.1 * test.standard_shop_time_cost(), &data);
 
                 // setup message queue.
@@ -4818,8 +4818,8 @@ mod tests {
                 let food_info = test.property.property[&2];
                 let cotton_info = test.property.property[&3];
                 let hut_info = test.property.property[&14];
-                let time_info = test.property.property[&TIME_ID];
-                assert!(test.property.property.get(&SHOPPING_TIME_ID).is_none(), "Shopping Time Found.");
+                let time_info = test.property.property[&TIME_PRODUCT_ID];
+                assert!(test.property.property.get(&SHOPPING_TIME_PRODUCT_ID).is_none(), "Shopping Time Found.");
                 // check that we recorded our expenditure in time and AMV
                 assert_eq!(food_info.total_property, 5.0);
                 assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
@@ -4853,7 +4853,7 @@ mod tests {
                 test.property.add_property(6, 10.0, &data);
                 test.property.add_property(14, 10.0, &data);
                 // add in way to much shopping time.
-                test.property.add_property(TIME_ID, 
+                test.property.add_property(TIME_PRODUCT_ID, 
                     100.0 * test.standard_shop_time_cost(), &data);
 
                 // setup message queue.
@@ -4945,8 +4945,8 @@ mod tests {
                 let food_info = test.property.property[&2];
                 let cotton_info = test.property.property[&3];
                 let hut_info = test.property.property[&14];
-                let time_info = test.property.property[&TIME_ID];
-                assert!(test.property.property.get(&SHOPPING_TIME_ID).is_none(), "Shopping Time Found.");
+                let time_info = test.property.property[&TIME_PRODUCT_ID];
+                assert!(test.property.property.get(&SHOPPING_TIME_PRODUCT_ID).is_none(), "Shopping Time Found.");
                 // check that we recorded our expenditure in time and AMV
                 assert_eq!(food_info.total_property, 11.0);
                 assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
@@ -4980,7 +4980,7 @@ mod tests {
                 test.property.add_property(6, 10.0, &data);
                 test.property.add_property(14, 10.0, &data);
                 // add in way to much shopping time.
-                test.property.add_property(TIME_ID, 
+                test.property.add_property(TIME_PRODUCT_ID, 
                     100.0 * test.standard_shop_time_cost(), &data);
 
                 // setup message queue.
@@ -5084,8 +5084,8 @@ mod tests {
                 let food_info = test.property.property[&2];
                 let cotton_info = test.property.property[&3];
                 let hut_info = test.property.property[&14];
-                let time_info = test.property.property[&TIME_ID];
-                assert!(test.property.property.get(&SHOPPING_TIME_ID).is_none(), "Shopping Time Found.");
+                let time_info = test.property.property[&TIME_PRODUCT_ID];
+                assert!(test.property.property.get(&SHOPPING_TIME_PRODUCT_ID).is_none(), "Shopping Time Found.");
                 // check that we recorded our expenditure in time and AMV
                 assert_eq!(food_info.total_property, 10.0);
                 assert_eq!(food_info.time_cost, 2.0 * test.standard_shop_time_cost());
@@ -5111,7 +5111,7 @@ mod tests {
 
             use barrage::{Sender, Receiver};
 
-            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::ActorMessage, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::TIME_ID};
+            use crate::{data_manager::DataManager, objects::{market::{MarketHistory, ProductInfo}, actor_message::ActorMessage, seller::Seller, item::Item, pop::Pop, property::{Property, TieredValue}, pop_breakdown_table::{PopBreakdownTable, PBRow}, desire::Desire}, constants::TIME_PRODUCT_ID};
 
             /// Intentionally super simple pop generation
             /// 
@@ -5302,18 +5302,18 @@ mod tests {
             fn shop_loop(pop: &mut Pop, _rx: &mut Receiver<ActorMessage>,
             _tx: &mut Sender<ActorMessage>,
             data: &DataManager, _market: &MarketHistory) {
-                let time = pop.property.property.get(&TIME_ID).unwrap().clone();
+                let time = pop.property.property.get(&TIME_PRODUCT_ID).unwrap().clone();
                 if time.available() >= 3.0 {
-                    pop.property.remove_property(TIME_ID, 1.0, data);
+                    pop.property.remove_property(TIME_PRODUCT_ID, 1.0, data);
                     pop.property.remove_property(6, 1.0, data);
                 }
                 if time.available() >= 2.0 {
-                    pop.property.remove_property(TIME_ID, 1.0, data);
+                    pop.property.remove_property(TIME_PRODUCT_ID, 1.0, data);
                     pop.property.remove_property(6, 1.0, data);
                     pop.property.add_property(2, 1.0, data);
                 }
                 if time.available() >= 1.0 {
-                    pop.property.remove_property(TIME_ID, 1.0, data);
+                    pop.property.remove_property(TIME_PRODUCT_ID, 1.0, data);
                     pop.property.add_property(2, 1.0, data);
                 }
             }
@@ -5337,7 +5337,7 @@ mod tests {
                 test.property.add_property(6, 10.0, &data);
                 test.property.add_property(14, 10.0, &data);
                 // add in way to much shopping time.
-                test.property.add_property(TIME_ID, 
+                test.property.add_property(TIME_PRODUCT_ID, 
                     1.0, &data);
 
                 // setup message queue.
@@ -5401,7 +5401,7 @@ mod tests {
                 test.property.add_property(6, 10.0, &data);
                 test.property.add_property(14, 10.0, &data);
                 // add in way to much shopping time.
-                test.property.add_property(TIME_ID, 
+                test.property.add_property(TIME_PRODUCT_ID, 
                     0.0, &data);
 
                 // setup message queue.
@@ -5465,7 +5465,7 @@ mod tests {
                 test.property.add_property(6, 10.0, &data);
                 test.property.add_property(14, 10.0, &data);
                 // add in way to much shopping time.
-                test.property.add_property(TIME_ID, 
+                test.property.add_property(TIME_PRODUCT_ID, 
                     100.0 * test.standard_shop_time_cost(), &data);
 
                 // set our selling state to true.

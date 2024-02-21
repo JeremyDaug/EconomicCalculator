@@ -15,7 +15,7 @@ use std::{collections::{hash_map, HashMap, HashSet}, ops::{AddAssign, Add, Sub, 
 
 use itertools::Itertools;
 
-use crate::{data_manager::DataManager, constants::{TIER_RATIO, SHOPPING_TIME_ID}};
+use crate::{data_manager::DataManager, constants::{TIER_RATIO, SHOPPING_TIME_PRODUCT_ID}};
 
 use super::{desire::Desire, item::Item, market::MarketHistory, property_info::PropertyInfo, want_info::WantInfo};
 
@@ -2203,10 +2203,10 @@ impl Property {
         }
         // then start counting up how much shopping time we might be able to get.
         let mut max_available = 0.0;
-        for process in data.products.get(&SHOPPING_TIME_ID).unwrap() // The product
+        for process in data.products.get(&SHOPPING_TIME_PRODUCT_ID).unwrap() // The product
         .processes.iter() // the process IDs which time is related to
         .map(|x| data.processes.get(x).unwrap()) // the process info
-        .filter(|x| x.outputs_product(SHOPPING_TIME_ID)) { // the processes which output it.
+        .filter(|x| x.outputs_product(SHOPPING_TIME_PRODUCT_ID)) { // the processes which output it.
             // todo, pass in pop_skill info later. Ignore for now
             let result = process.do_process(&available_products, 
                 &available_wants, 0.0, 
@@ -2214,7 +2214,7 @@ impl Property {
             // check result availability
             if result.iterations > 0.0 {
                 // if any iterations done, see how much shopping time we got.
-                let output = result.input_output_products.get(&SHOPPING_TIME_ID).unwrap();
+                let output = result.input_output_products.get(&SHOPPING_TIME_PRODUCT_ID).unwrap();
                 // add to our output, then remove any change from our available products and wants
                 max_available += output;
                 for (&id, &change) in result.input_output_products.iter() {
@@ -2265,7 +2265,7 @@ impl Property {
         // get the final output ready.
         let mut final_result = 0.0;
         // first extract from storage any Shopping Time we have available and waiting to use.
-        if let Some(info) = self.property.get_mut(&SHOPPING_TIME_ID) {
+        if let Some(info) = self.property.get_mut(&SHOPPING_TIME_PRODUCT_ID) {
             let shift = info.available().min(target);
             final_result += info.available().min(target); // add existing to final
             info.remove(shift); // remove from info
@@ -2280,10 +2280,10 @@ impl Property {
         for (&id, &avail) in self.want_store.iter() {
             available_wants.insert(id, avail.expendable());
         }
-        for process in data.products.get(&SHOPPING_TIME_ID).unwrap() // The product
+        for process in data.products.get(&SHOPPING_TIME_PRODUCT_ID).unwrap() // The product
         .processes.iter() // the process IDs which time is related to
         .map(|x| data.processes.get(x).unwrap()) // the process info
-        .filter(|x| x.outputs_product(SHOPPING_TIME_ID)) // the processes which output it.
+        .filter(|x| x.outputs_product(SHOPPING_TIME_PRODUCT_ID)) // the processes which output it.
         .sorted_by(|a, b| a.id.cmp(&b.id)) { // ID order.
             // try to do the process up to our target output.
             let eff_skill_level = if let Some(skill_id) = process.skill {
@@ -2292,7 +2292,7 @@ impl Property {
                 0.0 // if nothing to translate into, then skill level doesn't matter.
             };
             let iter_target = (target - final_result) / // the remaining target
-                process.effective_output_of(Item::Product(SHOPPING_TIME_ID)); // how much an iteration completes
+                process.effective_output_of(Item::Product(SHOPPING_TIME_PRODUCT_ID)); // how much an iteration completes
             let proc_result = process.do_process_with_property(&self.property, 
                 &available_wants, eff_skill_level, 0.0, Some(iter_target), false, data, false);
             if proc_result.iterations == 0.0 {
@@ -2300,11 +2300,11 @@ impl Property {
             }
             // else remove/reserve property for the output
             for (&product, &amount) in proc_result.input_output_products.iter() {
-                if product == SHOPPING_TIME_ID {
+                if product == SHOPPING_TIME_PRODUCT_ID {
                     // if our product, add to the final result, don't add to property.
                     final_result += amount;
                     // add our time to expenditures.
-                    self.property.entry(SHOPPING_TIME_ID)
+                    self.property.entry(SHOPPING_TIME_PRODUCT_ID)
                         .and_modify(|x| x.spent += amount);
                 } else if amount > 0.0 { // if adding, then add to property.
                     self.property.entry(product)
