@@ -1789,8 +1789,7 @@ impl Actor for Pop {
         self.property.sift_specific_products();
         self.is_selling = if self.property.is_disorganized {
             true
-        }
-        else {
+        } else {
             // TODO add check here.
             // Checks would probably be a panic check, (has resources but
             // is starving)

@@ -412,4 +412,12 @@ impl PropertyInfo {
         self.total_property -= self.want_reserve;
         self.want_reserve = 0.0;
     }
+    
+    /// # Release Used
+    ///
+    /// Release Used, takes the used and shifts it back to unreserved.
+    pub fn release_used(&mut self) {
+        self.add_property(self.used);
+        self.used = 0.0;
+    }
 }

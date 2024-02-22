@@ -1736,6 +1736,10 @@ impl Property {
             want_info.total_current -= decay; // remove from total.
             want_info.lost += decay; // add to expended 
         }
+        // release used products/capital for decay.
+        for (_, info) in self.property.iter_mut() {
+            info.release_used();
+        }
         // get a copy of our existing property for processing
         let original_property = self.property_to_hashmap();
         let original_wants = self.wants_to_hashmap();
