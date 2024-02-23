@@ -1743,8 +1743,10 @@ impl Property {
         // get a copy of our existing property for processing
         let original_property = self.property_to_hashmap();
         let original_wants = self.wants_to_hashmap();
-        let mut property_change = HashMap::new();
-        let mut want_change = HashMap::new();
+        let mut property_lost = HashMap::new();
+        let mut property_gained = HashMap::new();
+        let mut want_lost = HashMap::new();
+        let mut want_gained = HashMap::new();
         // then decay/fail products
         for (product, info) in self.property.iter_mut() {
             let prod_info = data.products.get(product).unwrap();
@@ -1761,39 +1763,64 @@ impl Property {
                         true, data);
                     for (&product, &amount) in results.input_output_products.iter() {
                         // add to current property.
-                        property_change.entry(product)
-                        .and_modify(|x| *x += amount)
-                        .or_insert(amount);
+                        if amount > 0.0 {
+                            property_gained.entry(product)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        } else {
+                            property_lost.entry(product)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        }
                     }
                     for (&want, &amount) in results.input_output_wants.iter() {
-                        want_change.entry(want)
-                        .and_modify(|x| *x += amount)
-                        .or_insert(amount);
+                        if amount > 0.0 {
+                            want_gained.entry(want)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        } else {
+                            want_lost.entry(want)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        }
                     }
                 } else { // if no process, just shift failed products to lost.
-                    property_change.entry(*product)
+                    property_lost.entry(*product)
                     .and_modify(|x| *x -= failed)
                     .or_insert(-failed);
                 }
             }
         }
         // wrap up by adding/removing what was changed
-        for (&product, &amount) in property_change.iter() {
-            if amount < 0.0 { // if being removed
-                self.property.entry(product)
-                .and_modify(|x| {
-                    x.remove(-amount);
-                    x.lost -= amount;
-                });
-            } else { // if being added
-                self.property.entry(product)
-                .and_modify(|x| x.add_property(amount))
-                .or_insert(PropertyInfo::new(amount));
-            }
+        for (&product, &amount) in property_lost.iter() {
+            self.property.entry(product)
+            .and_modify(|x| {
+                x.remove(-amount);
+                x.lost -= amount;
+            });
         }
-        for (&want, &amount) in want_change.iter() {
+        for (&product, &amount) in property_gained.iter() {
+            self.property.entry(product)
+            .and_modify(|x| {
+                x.add_property(amount);
+                x.recieved += amount;
+            })
+            .or_insert(PropertyInfo::new(amount));
+        }
+        for (&want, &amount) in want_lost.iter() {
             self.want_store.entry(want)
-            .and_modify(|x| x.total_current += amount)
+            .and_modify(|x| {
+                x.total_current += amount; 
+                x.lost -= amount;
+            })
+            .or_insert(WantInfo::new(amount));
+        }
+        for (&want, &amount) in want_gained.iter() {
+            self.want_store.entry(want)
+            .and_modify(|x| {
+                x.total_current += amount; 
+                x.gained += amount;
+            })
             .or_insert(WantInfo::new(amount));
         }
     }

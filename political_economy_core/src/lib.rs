@@ -6923,9 +6923,6 @@ mod tests {
                 });
                 // wants
                 // 0 doesn't decay (is produced by P2)
-                // 1 decays by 50%
-                // 2 decays by 25%
-                // 3 decays by 100%
                 let want0 = Want{
                     id: 0,
                     name: "".to_string(),
@@ -6936,40 +6933,7 @@ mod tests {
                     use_sources: HashSet::new(),
                     consumption_sources: HashSet::new(),
                 };
-                let want1 = Want{
-                    id: 1,
-                    name: "".to_string(),
-                    description: "".to_string(),
-                    decay: 0.5,
-                    ownership_sources: HashSet::new(),
-                    process_sources: HashSet::new(),
-                    use_sources: HashSet::new(),
-                    consumption_sources: HashSet::new(),
-                };
-                let want2 = Want{
-                    id: 2,
-                    name: "".to_string(),
-                    description: "".to_string(),
-                    decay: 0.25,
-                    ownership_sources: HashSet::new(),
-                    process_sources: HashSet::new(),
-                    use_sources: HashSet::new(),
-                    consumption_sources: HashSet::new(),
-                };
-                let want3 = Want{
-                    id: 3,
-                    name: "".to_string(),
-                    description: "".to_string(),
-                    decay: 1.0,
-                    ownership_sources: HashSet::new(),
-                    process_sources: HashSet::new(),
-                    use_sources: HashSet::new(),
-                    consumption_sources: HashSet::new(),
-                };
                 data.wants.insert(want0.id, want0);
-                data.wants.insert(want1.id, want1);
-                data.wants.insert(want2.id, want2);
-                data.wants.insert(want3.id, want3);
                 // add processes
                 data.processes.insert(0, Process{
                     id: 0,
@@ -7014,6 +6978,12 @@ mod tests {
                 assert_eq!(test.property[&1].lost, 5.0);
                 assert_eq!(test.property[&2].lost, 10.0);
                 assert_eq!(test.property[&3].lost, 0.0);
+                assert_eq!(test.property[&0].recieved, 0.0);
+                assert_eq!(test.property[&1].recieved, 0.0);
+                assert_eq!(test.property[&2].recieved, 0.0);
+                assert_eq!(test.property[&3].recieved, 10.0);
+                
+                assert_eq!(test.want_store[&0].total_current, 10.0);
             }
 
             #[test]
@@ -7205,6 +7175,10 @@ mod tests {
                 assert_eq!(test.property[&1].lost, 5.0);
                 assert_eq!(test.property[&2].lost, 10.0);
                 assert_eq!(test.property[&3].lost, 0.0);
+                assert_eq!(test.property[&0].recieved, 0.0);
+                assert_eq!(test.property[&1].recieved, 0.0);
+                assert_eq!(test.property[&2].recieved, 0.0);
+                assert_eq!(test.property[&3].recieved, 10.0);
                 
                 assert_eq!(test.want_store[&0].total_current, 20.0);
                 assert_eq!(test.want_store[&1].total_current, 5.0);
@@ -7214,6 +7188,10 @@ mod tests {
                 assert_eq!(test.want_store[&1].lost, 5.0);
                 assert_eq!(test.want_store[&2].lost, 2.5);
                 assert_eq!(test.want_store[&3].lost, 10.0);
+                assert_eq!(test.want_store[&0].gained, 10.0);
+                assert_eq!(test.want_store[&1].gained, 0.0);
+                assert_eq!(test.want_store[&2].gained, 0.0);
+                assert_eq!(test.want_store[&3].gained, 0.0);
             }
         }
 
