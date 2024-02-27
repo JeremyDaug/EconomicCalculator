@@ -40,6 +40,8 @@ pub const TIME_PRODUCT_ID: usize = 0;
 /// person looking to sell rather than buy. Making this comparable to Standard
 /// Buy is reasonable, but making it more expensive may be better to encourage
 pub const SHOPPING_TIME_PRODUCT_ID: usize = 1;
+/// The ID for the Skill Discernment.
+pub const DISCERNMENT_PRODUCT_ID: usize = 2;
 
 /// The Id for the required Rest Want.
 pub const REST_WANT_ID: usize = 0;
@@ -53,9 +55,6 @@ pub const BRAINSTORMING_TECH_ID: usize = 0;
 pub const SHOPPING_TIME_PROC_ID: usize = 0;
 /// The ID for the process which turns time into Liesure.
 pub const RESTING_PROC_ID: usize = 1;
-
-/// The ID for the Skill Discernment.
-pub const DISCERNMENT_SKILL_ID: usize = 0;
 
 
 // These are configuration constants. Could be floated off into a

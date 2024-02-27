@@ -15871,20 +15871,6 @@ mod tests {
                 println!("{:>3} | {:<}", id, test.products[id].get_name());
             }
 
-            println!("----- Skill Group -----");
-            println!("----+------------------");
-            println!("| id|name");
-            for id in test.skill_groups.keys().sorted() {
-                println!("{:>3} | {:<}", id, test.skill_groups[id].name);
-            }
-
-            println!("----- Skill -----");
-            println!("----+------------------");
-            println!("| id|name");
-            for id in test.skills.keys().sorted() {
-                println!("{:>3} | {:<}", id, test.skills[id].name);
-            }
-
             println!("----- Processes -----");
             println!("----+------------------");
             println!("| id|name");

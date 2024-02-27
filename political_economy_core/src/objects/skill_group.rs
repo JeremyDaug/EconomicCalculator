@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use super::skill::Skill;
 
 #[derive(Debug)]
+#[deprecated]
 pub struct SkillGroup {
     id: usize,
     pub name: String,

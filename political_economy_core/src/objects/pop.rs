@@ -667,7 +667,10 @@ impl Pop {
             // TODO improve this to actually peak ahead to see if it can go shopping enough to get what it needs and satisfy that desire.
             for (buy_target, mut buy_quantity) in buy_targets {
                 // check if we need to get the item or not
-                let property_info = pop.property.property.get(&buy_target).unwrap();
+                // TODO consider testing this check specifically.
+                let property_info = pop.property.property
+                    .entry(buy_target)
+                    .or_insert(PropertyInfo::new(0.0));
                 if property_info.available() >= buy_quantity {
                     continue; // if not skip to next.
                 } else if (property_info.upper_target - property_info.available()) > buy_quantity { 

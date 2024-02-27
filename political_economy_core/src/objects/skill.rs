@@ -3,6 +3,7 @@ use std::{collections::{HashSet, HashMap}, vec};
 use super::{product::Product, skill_group::SkillGroup, process::{Process, ProcessPart, ProcessPartTag}, item::Item};
 
 #[derive(Debug)]
+#[deprecated]
 pub struct Skill {
     pub id: usize,
     pub name: String,
