@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
-use crate::{constants::{BRAINSTORMING_TECH_ID, DISCERNMENT_SKILL_ID, RESTING_PROC_ID, REST_WANT_ID, SHOPPING_TIME_PRODUCT_ID, SHOPPING_TIME_PROC_ID, TIME_PRODUCT_ID, WEALTH_WANT_ID}, objects::{culture::Culture, firm::Firm, item::Item, job::Job, market::Market, pop::Pop, process::{Process, 
+use crate::{constants::{BRAINSTORMING_TECH_ID, RESTING_PROC_ID, REST_WANT_ID, SHOPPING_TIME_PRODUCT_ID, SHOPPING_TIME_PROC_ID, TIME_PRODUCT_ID, WEALTH_WANT_ID}, objects::{culture::Culture, firm::Firm, item::Item, job::Job, market::Market, pop::Pop, process::{Process, 
         ProcessPart, 
         ProcessPartTag, 
         ProcessSectionTag, 
@@ -245,19 +245,7 @@ impl DataManager {
         self.products.insert(TIME_PRODUCT_ID, time);
         self.products.insert(SHOPPING_TIME_PRODUCT_ID, shopping_time);
 
-        // no skill groups by default
-        // skills, Discernment, the skill behind Shopping_time
-        // TODO come back here later after exploring decay of capital goods.
-        let discernment = Skill {
-            id: DISCERNMENT_SKILL_ID,
-            name: String::from("Discernment"),
-            description: String::from("The ability to tell things apart, to distinguish between what you want and don't want, where you want to go or not go, makes finding what you want that much easier."),
-            labor: SHOPPING_TIME_PRODUCT_ID,
-            skill_group: HashSet::new(),
-            related_skills: HashMap::new(),
-        };
-        self.skills.insert(DISCERNMENT_SKILL_ID, discernment);
-
+        // removing skills and skill groups.
 
     }
 
