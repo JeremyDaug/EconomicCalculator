@@ -915,7 +915,7 @@ mod tests {
         pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
             let mut data = DataManager::new();
             // TODO update this when we update Load All
-            data.load_all(&String::from("")).expect("Error on load?");
+            data.load_test_data().expect("Error on load?");
             let product = data.products.get_mut(&6).unwrap();
             product.fractional = true;
 
@@ -925,8 +925,7 @@ mod tests {
                 currencies: vec![],
                 class_info: HashMap::new(),
                 want_info: HashMap::new(),
-            };
-            // quickly set all prices to 1.0 for ease going forward.
+            };// quickly set all prices to 1.0 for ease going forward.
             for idx in 0..26 {
                 market.product_info.insert(idx, ProductInfo {
                     available: 0.0,
@@ -2505,7 +2504,7 @@ mod tests {
                 let mut data = DataManager::new();
 
                 // TODO when load_all is updated to take a file, relpace this with the 'default' load.
-                data.load_all(&"X".to_string()).expect("Error loading prefabs");
+                data.load_test_data().expect("Error loading prefabs");
 
                 // Add items to spend.
                 let mut spend = HashMap::new();
@@ -2600,7 +2599,7 @@ mod tests {
                 let mut data = DataManager::new();
 
                 // TODO when load_all is updated to take a file, relpace this with the 'default' load.
-                data.load_all(&"X".to_string()).expect("Error loading prefabs");
+                data.load_test_data().expect("Error loading prefabs");
 
                 // Add items to spend.
                 let mut spend = HashMap::new();
@@ -2694,7 +2693,7 @@ mod tests {
                 let mut data = DataManager::new();
 
                 // TODO when load_all is updated to take a file, relpace this with the 'default' load.
-                data.load_all(&"X".to_string()).expect("Error loading prefabs");
+                data.load_test_data().expect("Error loading prefabs");
                 // make 6 fractional.
                 data.products.get_mut(&6).unwrap().fractional = true;
 
@@ -2790,7 +2789,7 @@ mod tests {
                 let mut data = DataManager::new();
 
                 // TODO when load_all is updated to take a file, relpace this with the 'default' load.
-                data.load_all(&"X".to_string()).expect("Error loading prefabs");
+                data.load_test_data().expect("Error loading prefabs");
 
                 // Add items to spend.
                 let mut spend = HashMap::new();
@@ -4657,7 +4656,7 @@ mod tests {
             pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
                 let mut data = DataManager::new();
                 // TODO update this when we update Load All
-                data.load_all(&String::from("")).expect("Error on load?");
+                data.load_test_data().expect("Error on load?");
                 let product = data.products.get_mut(&6).unwrap();
                 product.fractional = true;
 
@@ -5244,7 +5243,7 @@ mod tests {
             pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
                 let mut data = DataManager::new();
                 // TODO update this when we update Load All
-                data.load_all(&String::from("")).expect("Error on load?");
+                data.load_test_data().expect("Error on load?");
                 let product = data.products.get_mut(&6).unwrap();
                 product.fractional = true;
 
@@ -5576,7 +5575,7 @@ mod tests {
             pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
                 let mut data = DataManager::new();
                 // TODO update this when we update Load All
-                data.load_all(&String::from("")).expect("Error on load?");
+                data.load_test_data().expect("Error on load?");
                 let product = data.products.get_mut(&6).unwrap();
                 product.fractional = true;
 
@@ -6224,7 +6223,7 @@ mod tests {
         pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
             let mut data = DataManager::new();
             // TODO update this when we update Load All
-            data.load_all(&String::from("")).expect("Error on load?");
+            data.load_test_data().expect("Error on load?");
             let product = data.products.get_mut(&6).unwrap();
             product.fractional = true;
 
@@ -12352,7 +12351,7 @@ mod tests {
             pub fn prepare_data_for_market_actions(_pop: &mut Pop) -> (DataManager, MarketHistory) {
                 let mut data = DataManager::new();
                 // TODO update this when we update Load All
-                data.load_all(&String::from("")).expect("Error on load?");
+                data.load_test_data().expect("Error on load?");
                 let product = data.products.get_mut(&6).unwrap();
                 product.fractional = true;
 
@@ -15837,7 +15836,7 @@ mod tests {
             use itertools::Itertools;
 
             let mut test = DataManager::new();
-            let result = test.load_all(&String::new());
+            let result = test.load_test_data();
 
             if let Err(message) = result {
                 panic!("\n{}", message);
@@ -16424,7 +16423,7 @@ mod tests {
             #[test]
             pub fn return_process_returns_empty_correctly() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -16472,7 +16471,7 @@ mod tests {
             #[test]
             pub fn return_process_returns_single_iteration_correctly() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -16532,7 +16531,7 @@ mod tests {
             #[test]
             pub fn return_process_returns_multiple_iterations_correctly() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -16594,7 +16593,7 @@ mod tests {
             #[test]
             pub fn return_process_correctly_restricts_based_on_property_reservations() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -16656,7 +16655,7 @@ mod tests {
             #[test]
             pub fn return_process_returns_no_iteration_when_missing_input() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -16711,7 +16710,7 @@ mod tests {
             #[test]
             pub fn return_process_returns_no_iteration_when_missing_capital() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -16777,7 +16776,7 @@ mod tests {
                 #[test]
                 pub fn return_process_returns_empty_correctly() {
                     let mut data = DataManager::new();
-                    data.load_all(&"file_name".to_string()).expect("Failed!");
+                    data.load_test_data().expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
@@ -16825,7 +16824,7 @@ mod tests {
                 #[test]
                 pub fn return_process_returns_single_iteration_correctly() {
                     let mut data = DataManager::new();
-                    data.load_all(&"file_name".to_string()).expect("Failed!");
+                    data.load_test_data().expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
@@ -16885,7 +16884,7 @@ mod tests {
                 #[test]
                 pub fn return_process_returns_multiple_iterations_correctly() {
                     let mut data = DataManager::new();
-                    data.load_all(&"file_name".to_string()).expect("Failed!");
+                    data.load_test_data().expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
@@ -16945,7 +16944,7 @@ mod tests {
                 #[test]
                 pub fn return_process_returns_no_iteration_when_missing_input() {
                     let mut data = DataManager::new();
-                    data.load_all(&"file_name".to_string()).expect("Failed!");
+                    data.load_test_data().expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
@@ -17000,7 +16999,7 @@ mod tests {
                 #[test]
                 pub fn return_process_returns_no_iteration_when_missing_capital() {
                     let mut data = DataManager::new();
-                    data.load_all(&"file_name".to_string()).expect("Failed!");
+                    data.load_test_data().expect("Failed!");
                     let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                         variant_name: String::from_str("").unwrap(), 
                         description: String::from_str("test").unwrap(), 
@@ -17108,7 +17107,7 @@ mod tests {
             #[test]
             pub fn should_return_correctly_when_eerything_needed_is_given() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -17165,7 +17164,7 @@ mod tests {
             #[test]
             pub fn should_return_empty_when_input_product_is_missing() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -17217,7 +17216,7 @@ mod tests {
             #[test]
             pub fn should_return_empty_when_capital_product_is_missing() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -17269,7 +17268,7 @@ mod tests {
             #[test]
             pub fn should_return_empty_when_input_want_is_missing() {
                 let mut data = DataManager::new();
-                data.load_all(&"file_name".to_string()).expect("Failed!");
+                data.load_test_data().expect("Failed!");
                 let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
                     variant_name: String::from_str("").unwrap(), 
                     description: String::from_str("test").unwrap(), 
@@ -17736,7 +17735,7 @@ mod tests {
         #[test]
         pub fn should_return_correctly_can_feed_self(){
             let mut data = DataManager::new();
-            data.load_all(&"file_name".to_string()).expect("Failed!");
+            data.load_test_data().expect("Failed!");
             let mut test = Process {
                 id: 0,
                 name: String::from("Test"),

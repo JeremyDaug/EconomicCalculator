@@ -251,7 +251,7 @@ impl DataManager {
 
     /// Loads wants from a file into the data manager,
     /// Currently, this just loads pre-existing data.
-    pub fn load_wants(&mut self, _file_name: &String) -> Result<(), String> {
+    pub fn load_test_wants(&mut self) -> Result<(), String> {
         let rest =  match Want::new(REST_WANT_ID, 
             String::from("Rest"), 
             String::from("Rest is the joy of Idle time."), 
@@ -315,17 +315,7 @@ impl DataManager {
         Ok(())
     }
 
-    pub fn load_technologies(&mut self, _file_name: &String) -> Result<(), String> {
-        //todo!("Not doing right now. Have better things to do than test out technology rules.");
-        Ok(())
-    }
-
-    pub fn load_technology_families(&mut self, _file_name: &String) -> Result<(), String> {
-        //todo!("Skipping for same reason as Load Technologies.")
-        Ok(())
-    }
-
-    pub fn load_products(&mut self, _file_name: &String) -> Result<(), String> {
+    pub fn load_test_products(&mut self) -> Result<(), String> {
         // Generic Time
         let time = Product::new(TIME_PRODUCT_ID,
             String::from("Time"),
@@ -769,7 +759,7 @@ impl DataManager {
         Ok(())
     }
 
-    pub fn load_skill_groups(&mut self, _file_name: &String) -> Result<(), String> {
+    pub fn load_test_skill_groups(&mut self) -> Result<(), String> {
         // farming 
         let mut farming_skills = HashSet::new();
         farming_skills.insert(0);
@@ -836,7 +826,7 @@ impl DataManager {
         Ok(())
     }
 
-    pub fn load_skills(&mut self, _file_name: &String) -> Result<(), String> {
+    pub fn load_test_skills(&mut self) -> Result<(), String> {
         // (labors and Services)
         // Ambrosia Farming
         let mut ambrosia_farming = Skill::new(0,
@@ -921,7 +911,7 @@ impl DataManager {
         Ok(())
     }
 
-    pub fn load_processes(&mut self, _file_name: &String) -> Result<(), String> {
+    pub fn load_test_processes(&mut self) -> Result<(), String> {
         let time = 0;
         let shopping_time = 1;
         let ambrosia_fruit = 2;
@@ -1746,7 +1736,7 @@ impl DataManager {
         Ok(())
     }
 
-    pub fn load_jobs(&mut self, _file_name: &String) -> Result<(), String> {
+    pub fn load_test_jobs(&mut self) -> Result<(), String> {
         // Food, clothes, and shelter
         let mut subsistence_farmer = Job::new(
             0, 
@@ -1932,15 +1922,13 @@ impl DataManager {
     /// Placeholder loader for everything Should load by sets later on, rather than all at once.
     /// 
     /// Todo when updating any of these, ensure that the current data is saved somewhere so it can be used for tests.
-    pub fn load_all(&mut self, _file_name: &String) -> Result<(), String> {
-        self.load_wants(_file_name)?;
-        self.load_technologies(_file_name)?;
-        self.load_technology_families(_file_name)?;
-        self.load_products(_file_name)?;
-        self.load_skills(_file_name)?;
-        self.load_skill_groups(_file_name)?;
-        self.load_processes(_file_name)?;
-        self.load_jobs(_file_name)?;
+    pub fn load_test_data(&mut self) -> Result<(), String> {
+        self.load_test_wants()?;
+        self.load_test_products()?;
+        self.load_test_skills()?;
+        self.load_test_skill_groups()?;
+        self.load_test_processes()?;
+        self.load_test_jobs()?;
 
         Ok(())
     }
