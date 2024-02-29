@@ -32,11 +32,11 @@ pub struct Pop {
     /// Which market they are in
     pub market: usize,
     /// The skill the pop uses.
-    pub skill: usize,
+    // pub skill: usize,
     /// The lower bound of their skill level.
-    pub lower_skill_level: f64,
+    // pub lower_skill_level: f64,
     /// the upper bound of their skill level spread.
-    pub higher_skill_level: f64,
+    // pub higher_skill_level: f64,
     /// The total desires and property of the pop.
     ///
     /// TODO Food For Thought. We include 2 infinite desires in all pops, wealth and Leisure, which act as sinks and help us balance our buy priorities. More thought is needed.
@@ -682,7 +682,7 @@ impl Pop {
                 // TODO when purchasing shopping time is available, add an option for that here.
                 available_shopping_time += pop.property.get_shopping_time(
                     shopping_time_cost - available_shopping_time,
-                    data, market, pop.skill_average(), pop.skill, Some(curr_desire_coord));
+                    data, market, Some(curr_desire_coord));
                 // check that it's enough time to go out buying
                 if shopping_time_cost > available_shopping_time {
                     // if we don't have enough time to go shopping for this desire we likely won't be able to go shopping for
@@ -790,14 +790,6 @@ impl Pop {
             buyer: _ } = result {
                 None
             } else { unreachable!("Should not reach here!"); }
-    }
-
-    /// # Skill Average
-    ///
-    /// Get's the effective (average) skill for the pop
-    /// ( higher + lower ) / 2.0
-    pub fn skill_average(&self) -> f64 {
-        (self.lower_skill_level + self.higher_skill_level) / 2.0
     }
 
     /// Processes common messages from the ActorMessages for current free time.

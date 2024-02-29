@@ -344,7 +344,7 @@ impl Process {
     /// 
     /// FIXME Does not handle Overlapping or duplicate products at all. Do Not Use Overlapping Classes or Duplicate Products
     pub fn do_process(&self, available_products: &HashMap<usize, f64>, 
-    available_wants: &HashMap<usize, f64>, _pop_skill: f64,
+    available_wants: &HashMap<usize, f64>, 
     _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, data: &DataManager) 
     -> ProcessOutputs {
         let mut results = ProcessOutputs::new();
@@ -509,8 +509,8 @@ impl Process {
     /// 
     /// FIXME Does not handle Overlapping or duplicate products at all. Do Not Use Overlapping Classes or Duplicate Products
     pub fn do_process_with_property(&self, available_products: &HashMap<usize, PropertyInfo>, 
-    available_wants: &HashMap<usize, f64>, _pop_skill: f64,
-    _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, data: &DataManager,
+    available_wants: &HashMap<usize, f64>, _other_efficiency_boni: f64, 
+    target: Option<f64>, _hard_cap: bool, data: &DataManager,
     allow_reserves: bool) 
     -> ProcessOutputs {
         let mut results = ProcessOutputs::new();

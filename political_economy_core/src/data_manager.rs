@@ -1945,20 +1945,6 @@ impl DataManager {
             Some(class)
         } else { None }
     }
-
-    /// # Translate Skill
-    /// 
-    /// Given a starting skill, a atrgeted skill, and a current skill level
-    /// return the effective skill level of the transition.
-    /// 
-    /// ## Note
-    /// 
-    /// Currently, this is not implemented fully, it just returns the default minimum transfer rate.
-    /// 
-    /// TODO Actually do this, this is just a placeholder. It should navigate the skill grid to find the most effective way to transition from one skill to another with the smallest skill level loss.
-    pub fn translate_skill(&self, skill: usize, skill_target: usize, skill_level: f64) -> f64 {
-        0.1
-    }
 }
 
 // new ids section

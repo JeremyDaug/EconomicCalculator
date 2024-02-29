@@ -1171,7 +1171,7 @@ impl Property {
                     }
                     let outputs = process.do_process_with_property(&self.property, 
                         &combined_wants, 
-                        0.0, 0.0, Some(target_iter), true, 
+                        0.0, Some(target_iter), true, 
                         data, true);
                     if outputs.iterations == 0.0 {
                         continue; // if no iterations possible, skip
@@ -1236,7 +1236,7 @@ impl Property {
                     }
                     let outputs = process.do_process_with_property(&self.property, 
                         &combined_wants, 
-                        0.0, 0.0, Some(target_iter), true, data, true);
+                        0.0, Some(target_iter), true, data, true);
                     if outputs.iterations == 0.0 {
                         continue; // if no iterations possible, skip
                     }
@@ -1415,7 +1415,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data, false);
+                            0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -1468,7 +1468,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data, false);
+                            0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -1759,8 +1759,7 @@ impl Property {
                     let results = fail_proc
                     .do_process(&original_property, 
                         &original_wants, 0.0, 
-                        0.0, Some(failed), 
-                        true, data);
+                        Some(failed), true, data);
                     for (&product, &amount) in results.input_output_products.iter() {
                         // add to current property.
                         if amount > 0.0 {
@@ -2040,7 +2039,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data, false);
+                            0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -2098,7 +2097,7 @@ impl Property {
                         }
                         let outputs = process.do_process_with_property(&self.property, 
                             &combined_wants, 
-                            0.0, 0.0, Some(target_iter), true, data, false);
+                            0.0, Some(target_iter), true, data, false);
                         if outputs.iterations == 0.0 {
                             continue; // if no iterations possible, skip
                         }
@@ -2241,7 +2240,7 @@ impl Property {
             // todo, pass in pop_skill info later. Ignore for now
             let result = process.do_process(&available_products, 
                 &available_wants, 0.0, 
-                0.0, None, false, data);
+                None, false, data);
             // check result availability
             if result.iterations > 0.0 {
                 // if any iterations done, see how much shopping time we got.
@@ -2292,7 +2291,7 @@ impl Property {
     /// TODO Improve this to only take from satisfaction above a certain point, not more.
     /// TODO Sift Improvement: When Sift has been improved to function non-destructively, this can be upgraded to take from satisfaction as well.
     pub fn get_shopping_time(&mut self, target: f64, data: &DataManager, 
-    _market: &MarketHistory, skill_level: f64, skill: usize, _cutoff: Option<DesireCoord>) -> f64 {
+    _market: &MarketHistory, _cutoff: Option<DesireCoord>) -> f64 {
         // get the final output ready.
         let mut final_result = 0.0;
         // first extract from storage any Shopping Time we have available and waiting to use.
@@ -2317,15 +2316,10 @@ impl Property {
         .filter(|x| x.outputs_product(SHOPPING_TIME_PRODUCT_ID)) // the processes which output it.
         .sorted_by(|a, b| a.id.cmp(&b.id)) { // ID order.
             // try to do the process up to our target output.
-            let eff_skill_level = if let Some(skill_id) = process.skill {
-                data.translate_skill(skill, skill_id, skill_level)
-            } else {
-                0.0 // if nothing to translate into, then skill level doesn't matter.
-            };
             let iter_target = (target - final_result) / // the remaining target
                 process.effective_output_of(Item::Product(SHOPPING_TIME_PRODUCT_ID)); // how much an iteration completes
             let proc_result = process.do_process_with_property(&self.property, 
-                &available_wants, eff_skill_level, 0.0, Some(iter_target), false, data, false);
+                &available_wants, 0.0, Some(iter_target), false, data, false);
             if proc_result.iterations == 0.0 {
                 continue; // if no successful iterations, skip.
             }

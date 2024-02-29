@@ -744,9 +744,6 @@ mod tests {
                 job: 0, 
                 firm: 0, 
                 market: 0, 
-                skill: 0, 
-                lower_skill_level: 0.0, 
-                higher_skill_level: 0.0, 
                 property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
@@ -1050,9 +1047,6 @@ mod tests {
                 job: 0, 
                 firm: 0, 
                 market: 0, 
-                skill: 0, 
-                lower_skill_level: 0.0, 
-                higher_skill_level: 0.0, 
                 property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
@@ -1235,9 +1229,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable {
                         table: vec![],
@@ -1305,9 +1296,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable {
                         table: vec![],
@@ -1377,9 +1365,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable {
                         table: vec![],
@@ -1448,9 +1433,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable {
                         table: vec![],
@@ -1542,9 +1524,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable {
                         table: vec![],
@@ -1651,9 +1630,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable {
                         table: vec![],
@@ -3584,9 +3560,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable {
                         table: vec![],
@@ -4540,9 +4513,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 1.0,
-                    higher_skill_level: 2.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable { table: vec![], total: 0 },
                     is_selling: true,
@@ -5127,9 +5097,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 1.0,
-                    higher_skill_level: 2.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable { table: vec![], total: 0 },
                     is_selling: true,
@@ -5627,9 +5594,6 @@ mod tests {
                     job: 0,
                     firm: 0,
                     market: 0,
-                    skill: 0,
-                    lower_skill_level: 0.0,
-                    higher_skill_level: 0.0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable { table: vec![], total: 1 },
                     is_selling: false,
@@ -6052,9 +6016,6 @@ mod tests {
                 job: 0, 
                 firm: 0, 
                 market: 0, 
-                skill: 0, 
-                lower_skill_level: 0.0, 
-                higher_skill_level: 0.0, 
                 property: Property::new(vec![]), 
                 breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                 is_selling: true,
@@ -12180,9 +12141,6 @@ mod tests {
                     job: 0, 
                     firm: 0, 
                     market: 0, 
-                    skill: 0, 
-                    lower_skill_level: 0.0, 
-                    higher_skill_level: 0.0, 
                     property: Property::new(vec![]), 
                     breakdown_table: PopBreakdownTable{ table: vec![], total: 0 }, 
                     is_selling: true,
@@ -12567,7 +12525,7 @@ mod tests {
                 test.property.insert(1, PropertyInfo::new(5.0));
                 // get total result and see if it gets out with existing property.
                 let result1 = test.get_shopping_time(2.5, &data, 
-                    &market, 0.0, 0, None);
+                    &market, None);
                 assert_eq!(result1, 2.5); // should get back our full target
                 assert_eq!(test.property.get(&1)
                     .unwrap().total_property, 2.5); // should still have 2.5 remaining
@@ -12577,7 +12535,7 @@ mod tests {
                 
                 // if it was remove, do it again, testing that it only returns what is
                 // available.
-                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0, None);
+                let capped_result = test.get_shopping_time(5.0, &data, &market, None);
                 assert_eq!(capped_result, 2.5); // should get back our what is available, nothing more.
                 assert_eq!(test.property.get(&1)
                     .unwrap().total_property, 0.0); // should still have 2.5 remaining
@@ -12709,13 +12667,13 @@ mod tests {
                 //test.property.insert(1, PropertyInfo::new(5.0));
                 // get total result and see if it gets out with existing property.
                 let result1 = test.get_shopping_time(2.0, &data, 
-                    &market, 0.0, 0, None);
+                    &market, None);
                 assert_eq!(result1, 2.0); // should get back our full target
                 // of the 5 started, 2 are sifted, 2 is consumed for shopping time.
                 assert_eq!(test.property[&0].total_property, 3.0);
                 
                 // do it again, overdrawing and being limited correctly.
-                let capped_result = test.get_shopping_time(5.0, &data, &market, 0.0, 0, None);
+                let capped_result = test.get_shopping_time(5.0, &data, &market, None);
                 assert_eq!(capped_result, 1.0); // should get back our what is available, nothing more.
                 // 2 were reserved, so 2 should remain.
                 assert_eq!(test.property[&0].total_property, 2.0);
@@ -16457,7 +16415,7 @@ mod tests {
                 let available_products = HashMap::new();
                 let available_wants = HashMap::new();
                 let result = test.do_process_with_property(&available_products, 
-                    &available_wants, 0.0, 0.0, 
+                    &available_wants, 0.0,
                     None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 0.0);
@@ -16512,7 +16470,7 @@ mod tests {
                 available_wants.insert(1, 1.0);
                 available_wants.insert(2, 1.0);
                 let result = test.do_process_with_property(&available_products, 
-                    &available_wants, 0.0, 0.0, 
+                    &available_wants, 0.0, 
                     None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 1.0);
@@ -16572,7 +16530,7 @@ mod tests {
                 available_wants.insert(1, 4.0);
                 available_wants.insert(2, 4.0);
                 let result = test.do_process_with_property(&available_products, 
-                    &available_wants, 0.0, 0.0, 
+                    &available_wants, 0.0, 
                     None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 1.5);
@@ -16636,7 +16594,7 @@ mod tests {
                 available_wants.insert(1, 4.0);
                 available_wants.insert(2, 4.0);
                 let result = test.do_process_with_property(&available_products, 
-                    &available_wants, 0.0, 0.0, 
+                    &available_wants, 0.0, 
                     None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 1.0);
@@ -16696,7 +16654,7 @@ mod tests {
                 available_wants.insert(1, 1.0);
                 available_wants.insert(2, 1.0);
                 let result = test.do_process_with_property(&available_products, 
-                    &available_wants, 0.0, 0.0, 
+                    &available_wants, 0.0, 
                     None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 0.0);
@@ -16751,7 +16709,7 @@ mod tests {
                 available_wants.insert(1, 1.0);
                 available_wants.insert(2, 1.0);
                 let result = test.do_process_with_property(&available_products, 
-                    &available_wants, 0.0, 0.0, 
+                    &available_wants, 0.0, 
                     None, true, &data, false);
                 // check that it's all empty.
                 assert!(result.iterations == 0.0);
@@ -16810,7 +16768,7 @@ mod tests {
                     let available_products = HashMap::new();
                     let available_wants = HashMap::new();
                     let result = test.do_process(&available_products, 
-                        &available_wants, 0.0, 0.0, 
+                        &available_wants, 0.0, 
                         None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 0.0);
@@ -16865,7 +16823,7 @@ mod tests {
                     available_wants.insert(1, 1.0);
                     available_wants.insert(2, 1.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, 0.0, 0.0, 
+                        &available_wants, 0.0, 
                         None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 1.0);
@@ -16925,7 +16883,7 @@ mod tests {
                     available_wants.insert(1, 4.0);
                     available_wants.insert(2, 4.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, 0.0, 0.0, 
+                        &available_wants, 0.0, 
                         None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 1.5);
@@ -16985,7 +16943,7 @@ mod tests {
                     available_wants.insert(1, 1.0);
                     available_wants.insert(2, 1.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, 0.0, 0.0, 
+                        &available_wants, 0.0, 
                         None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 0.0);
@@ -17040,7 +16998,7 @@ mod tests {
                     available_wants.insert(1, 1.0);
                     available_wants.insert(2, 1.0);
                     let result = test.do_process(&available_products, 
-                        &available_wants, 0.0, 0.0, 
+                        &available_wants, 0.0, 
                         None, true, &data);
                     // check that it's all empty.
                     assert!(result.iterations == 0.0);
@@ -17146,7 +17104,7 @@ mod tests {
                 avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    0.0, 0.0, None, false, &data);
+                    0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 1);
                 assert!(*results.capital_products.get(&1).unwrap() == 2.0);
@@ -17203,7 +17161,7 @@ mod tests {
                 avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    0.0, 0.0, None, false, &data);
+                    0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 0);
                 assert_eq!(results.input_output_products.len(), 0);
@@ -17255,7 +17213,7 @@ mod tests {
                 avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    0.0, 0.0, None, false, &data);
+                    0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 0);
                 assert_eq!(results.input_output_products.len(), 0);
@@ -17307,7 +17265,7 @@ mod tests {
                 //avail_wants.insert(0, 2.0);
                 
                 let results = test.do_process(&avail_products, &avail_wants, 
-                    0.0, 0.0, None, false, &data);
+                    0.0, None, false, &data);
                 
                 assert_eq!(results.capital_products.len(), 0);
                 assert_eq!(results.input_output_products.len(), 0);
