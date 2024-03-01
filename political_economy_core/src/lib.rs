@@ -5673,7 +5673,24 @@ mod tests {
 
         /// These tests 
         mod pop_integration_tests {
+            use crate::{data_manager::DataManager, objects::market::MarketHistory};
 
+            fn setup_pop_test_data() -> (MarketHistory, DataManager) {
+                let mut manager = DataManager::new();
+                // get required items.
+                // Loads 
+                // wants: Rest, Wealth, 
+                manager.required_items();
+
+                let mut history = MarketHistory {
+                    product_info: todo!(),
+                    class_info: todo!(),
+                    want_info: todo!(),
+                    sale_priority: todo!(),
+                    currencies: todo!(),
+                };
+                (history, manager)
+            }
         }
     }
 

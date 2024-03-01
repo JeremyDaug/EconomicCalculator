@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
-use crate::{constants::{BRAINSTORMING_TECH_ID, RESTING_PROC_ID, REST_WANT_ID, SHOPPING_TIME_PRODUCT_ID, SHOPPING_TIME_PROC_ID, TIME_PRODUCT_ID, WEALTH_WANT_ID}, objects::{culture::Culture, firm::Firm, item::Item, job::Job, market::Market, pop::Pop, process::{Process, 
+use crate::{constants::{BRAINSTORMING_TECH_ID, DISCERNMENT_PRODUCT_ID, RESTING_PROC_ID, REST_WANT_ID, SHOPPING_TIME_PROC_ID, SHOPPING_TIME_PRODUCT_ID, TIME_PRODUCT_ID, WEALTH_WANT_ID}, objects::{culture::Culture, firm::Firm, item::Item, job::Job, market::Market, pop::Pop, process::{Process, 
         ProcessPart, 
         ProcessPartTag, 
         ProcessSectionTag, 
@@ -246,11 +246,49 @@ impl DataManager {
             Vec::new(),
             None,
             None).unwrap();
+        let discernment = DataManager::create_skill(DISCERNMENT_PRODUCT_ID, 
+            String::from("Discernment"), String::from("The skill of telling superior from inferior."),
+            Some(99));
         self.products.insert(TIME_PRODUCT_ID, time);
         self.products.insert(SHOPPING_TIME_PRODUCT_ID, shopping_time);
+        self.products.insert(DISCERNMENT_PRODUCT_ID, discernment);
 
-        // removing skills and skill groups.
 
+    }
+
+    /// # Create Skill Product
+    /// 
+    /// This creates a skill product from the given parameters.
+    /// 
+    /// This skill has the following shared properties.
+    /// - No variant name
+    /// - Quality 0
+    /// - Mass and Bulk 0
+    /// - tags, NonTransferrable.
+    /// - Fractional: true
+    fn create_skill(id: usize, name: String, 
+    description: String, decay: Option<u32>) -> Product {
+        Product {
+            id,
+            name,
+            variant_name: String::from(""),
+            description,
+            unit_name: String::from("Rank(s)"),
+            quality: 0,
+            mass: 0.0,
+            bulk: 0.0,
+            mean_time_to_failure: decay,
+            fractional: true,
+            tags: vec![ProductTag::NonTransferrable],
+            wants: HashMap::new(),
+            processes: HashSet::new(),
+            failure_process: None,
+            use_processes: HashSet::new(),
+            consumption_processes: HashSet::new(),
+            maintenance_processes: HashSet::new(),
+            tech_required: None,
+            product_class: None,
+        }
     }
 
     /// Loads wants from a file into the data manager,

@@ -321,6 +321,7 @@ pub enum ProductTag {
     /// be transferred out of a market or territory.
     Fixed,
     /// The item is a currency, marking it as the preferred item to use to buy or sell items.
+    /// This partially overrides market salability mechanisms.
     Currency,
     /// The item is a service, it fails each day, turns into nothing, and cannot be transferred
     /// outside of the market.
