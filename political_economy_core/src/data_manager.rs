@@ -7,7 +7,13 @@ use crate::{constants::{BRAINSTORMING_TECH_ID, RESTING_PROC_ID, REST_WANT_ID, SH
         ProcessPart, 
         ProcessPartTag, 
         ProcessSectionTag, 
-        ProcessTag}, process_node::ProcessNode, product::{Product, ProductTag}, skill::Skill, skill_group::SkillGroup, species::Species, technology::{self, Technology}, technology_family::TechnologyFamily, want::Want}};
+        ProcessTag}, 
+        process_node::ProcessNode, 
+        product::{Product, ProductTag}, 
+        species::Species, 
+        technology::{self, Technology}, 
+        technology_family::TechnologyFamily, 
+        want::Want}};
 
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
@@ -60,8 +66,8 @@ pub struct DataManager {
     /// and it's variants, the values in the attached vector.
     pub product_classes: HashMap<usize, Vec<usize>>,
     // TODO Add in abstract to real product connections here.
-    pub skill_groups: HashMap<usize, SkillGroup>,
-    pub skills: HashMap<usize, Skill>,
+    //pub skill_groups: HashMap<usize, SkillGroup>,
+    //pub skills: HashMap<usize, Skill>,
     pub processes: HashMap<usize, Process>,
     // TODO Consider combining this with Processes (would still need to be set after loading)
     pub process_nodes: HashMap<usize, ProcessNode>,
@@ -113,8 +119,6 @@ impl DataManager {
             technology_families: HashMap::new(), 
             products: HashMap::new(), 
             product_classes: HashMap::new(),
-            skill_groups: HashMap::new(),
-            skills: HashMap::new(),
             processes: HashMap::new(),
             process_nodes: HashMap::new(),
             jobs: HashMap::new(),
@@ -543,6 +547,7 @@ impl DataManager {
             None).unwrap();
         cabin.product_class = Some(hut.id);
         cabin.add_to_class(&mut hut);
+
         // (labors and Services)
         // Ambrosia Farming
         let ambrosia_farming = Product::new(16,
@@ -759,158 +764,6 @@ impl DataManager {
         Ok(())
     }
 
-    pub fn load_test_skill_groups(&mut self) -> Result<(), String> {
-        // farming 
-        let mut farming_skills = HashSet::new();
-        farming_skills.insert(0);
-        farming_skills.insert(1);
-        let mut farming = SkillGroup::new(0,
-            String::from("Agriculture"),
-            String::from("While the details differ, a farm is a farm."),
-            0.4, farming_skills).unwrap();
-        let a_farming = self.skills.get_mut(&0).unwrap();
-        a_farming.connect_skill_group(&mut farming);
-        let c_farming = self.skills.get_mut(&1).unwrap();
-        c_farming.connect_skill_group(&mut farming);
-
-        // clothing
-        let mut clothing_skills = HashSet::new();
-        clothing_skills.insert(1);
-        clothing_skills.insert(2);
-        clothing_skills.insert(3);
-        clothing_skills.insert(4);
-        let mut clothier = SkillGroup::new(1,
-            String::from("Clothier"),
-            String::from("Dealing with thread, no matter it's form, is fairly similar."),
-            0.5, clothing_skills).unwrap();
-        c_farming.connect_skill_group(&mut clothier);
-        let spinning = self.skills.get_mut(&2).unwrap();
-        spinning.connect_skill_group(&mut clothier);
-        let weaving = self.skills.get_mut(&3).unwrap();
-        weaving.connect_skill_group(&mut clothier);
-        let tailoring = self.skills.get_mut(&4).unwrap();
-        tailoring.connect_skill_group(&mut clothier);
-
-        // carpentry
-        let mut carpentry_skills = HashSet::new();
-        carpentry_skills.insert(5);
-        carpentry_skills.insert(6);
-        carpentry_skills.insert(7);
-        carpentry_skills.insert(8);
-        let mut carpentry = SkillGroup::new(1,
-            String::from("Carpentry"),
-            String::from("Working with wood, no matter the purpose, has plenty in common."),
-            0.5, carpentry_skills).unwrap();
-        let skill = self.skills.get_mut(&5).unwrap();
-        skill.connect_skill_group(&mut carpentry);
-        let skill = self.skills.get_mut(&6).unwrap();
-        skill.connect_skill_group(&mut carpentry);
-        let skill = self.skills.get_mut(&7).unwrap();
-        skill.connect_skill_group(&mut carpentry);
-        let skill = self.skills.get_mut(&8).unwrap();
-        skill.connect_skill_group(&mut carpentry);
-
-        // architecture
-        let mut architecture_skills = HashSet::new();
-        architecture_skills.insert(7);
-        architecture_skills.insert(8);
-        let mut architecture = SkillGroup::new(1,
-            String::from("Architecture"),
-            String::from("Making and repairing buildings is always similar."),
-            0.5, architecture_skills).unwrap();
-        let skill = self.skills.get_mut(&7).unwrap();
-        skill.connect_skill_group(&mut architecture);
-        let skill = self.skills.get_mut(&8).unwrap();
-        skill.connect_skill_group(&mut architecture);
-
-        Ok(())
-    }
-
-    pub fn load_test_skills(&mut self) -> Result<(), String> {
-        // (labors and Services)
-        // Ambrosia Farming
-        let mut ambrosia_farming = Skill::new(0,
-            String::from("Ambrosia Farming"),
-            String::from("Ambrosia Farming"),
-            16);
-        // Cotton Farming
-        let mut cotton_farming = Skill::new(1,
-            String::from("Cotton Farming"),
-            String::from("Cotton Farming"),
-            17);
-        // Thread Spinning
-        let mut thread_spinning = Skill::new(2,
-            String::from("Thread Spinning"),
-            String::from("Thread Spinning"),
-            18);
-        // Weaving
-        let mut weaving = Skill::new(3,
-            String::from("Weaving"),
-            String::from("Weaving"),
-            19);
-        // Tailoring
-        let mut tailoring = Skill::new(4,
-            String::from("Tailoring"),
-            String::from("Tailoring"),
-            20);
-        // lumbering
-        let mut lumbering = Skill::new(5,
-            String::from("Lumbering"),
-            String::from("Lumbering"),
-            21);
-        // tool making
-        let mut tool_making = Skill::new(6,
-            String::from("Tool Making"),
-            String::from("Tool Making"),
-            22);
-        // construction
-        let mut construction = Skill::new(7,
-            String::from("Construction"),
-            String::from("Construction"),
-            23);
-        // building repair
-        let mut building_repair = Skill::new(8,
-            String::from("Building Repair"),
-            String::from("Building Repair"),
-            24);
-        // stone gathering
-        let stone_gathering = Skill::new(9,
-            String::from("Stone Gathering"),
-            String::from("Stone Gathering"),
-            25);
-
-        // add skill interconnections
-        // ambrosia and cotton farming are connected at 0.75 efficiency
-        ambrosia_farming.set_mutual_relation(&mut cotton_farming, 0.75);
-        // cotton farming, spinning, weaving, and tailoring relate
-        // cotton 
-        cotton_farming.set_mutual_relation(&mut thread_spinning, 0.2);
-        cotton_farming.set_mutual_relation(&mut weaving, 0.2);
-        cotton_farming.set_mutual_relation(&mut tailoring, 0.2);
-        // thread
-        thread_spinning.set_mutual_relation(&mut weaving, 0.5);
-        thread_spinning.set_mutual_relation(&mut tailoring, 0.5);
-        // weaving
-        weaving.set_mutual_relation(&mut tailoring, 0.75);
-        // lumbering
-        lumbering.set_mutual_relation(&mut tool_making, 0.3);
-        // construction - building repair
-        construction.set_mutual_relation(&mut building_repair, 0.8);
-
-        self.skills.insert(ambrosia_farming.id, ambrosia_farming);
-        self.skills.insert(cotton_farming.id, cotton_farming);
-        self.skills.insert(thread_spinning.id, thread_spinning);
-        self.skills.insert(weaving.id, weaving);
-        self.skills.insert(tailoring.id, tailoring);
-        self.skills.insert(lumbering.id, lumbering);
-        self.skills.insert(tool_making.id, tool_making);
-        self.skills.insert(construction.id, construction);
-        self.skills.insert(building_repair.id, building_repair);
-        self.skills.insert(stone_gathering.id, stone_gathering);
-
-        Ok(())
-    }
-
     pub fn load_test_processes(&mut self) -> Result<(), String> {
         let time = 0;
         let shopping_time = 1;
@@ -951,9 +804,6 @@ impl DataManager {
             minimum_time: 1.0,
             process_parts: vec![shop_input, shop_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -980,9 +830,6 @@ impl DataManager {
             minimum_time: 1.0,
             process_parts: vec![rest_input, rest_output],
             process_tags: vec![ProcessTag::Consumption(REST_WANT_ID)],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -991,55 +838,56 @@ impl DataManager {
         // next do labors, they'll be easy.
         // ambrosia farming 1
         let new_id = self.new_process_id(); // 2
-        let ambrosia = self.skills.get(&0).unwrap();
+
         let ambrosia_default 
-            = ambrosia.build_skill_process(new_id).unwrap();
+            = self.build_skill_process(16, new_id, 
+                String::from("Ambrosia Farming"), String::from(""));
         self.processes.insert(ambrosia_default.id, ambrosia_default);
         // cotton farming 2
         let new_id = self.new_process_id();
-        let cottoning = self.skills.get(&1).unwrap();
         let cotton_farming 
-            = cottoning.build_skill_process(new_id).unwrap();
+            = self.build_skill_process(17, new_id, 
+                String::from("Cotton Farming"), String::from(""));
         self.processes.insert(cotton_farming.id, cotton_farming);
         // thread spinning 3
         let new_id = self.new_process_id();
-        let spin_skill = self.skills.get(&2).unwrap();
-        let spinning = spin_skill.build_skill_process(new_id).unwrap();
+        let spinning = self.build_skill_process(18, new_id, 
+            String::from("Thread Spinning"), String::from(""));
         self.processes.insert(spinning.id, spinning);
         // Weaving 4
         let new_id = self.new_process_id();
-        let weave_skill = self.skills.get(&3).unwrap();
-        let weaving = weave_skill.build_skill_process(new_id).unwrap();
+        let weaving = self.build_skill_process(19, new_id, 
+            String::from("Weaving"), String::from(""));
         self.processes.insert(weaving.id, weaving);
         // Tailoring 5
         let new_id = self.new_process_id();
-        let tailor_skill = self.skills.get(&4).unwrap();
-        let tailoring = tailor_skill.build_skill_process(new_id).unwrap();
+        let tailoring = self.build_skill_process(20, new_id, 
+            String::from("Tailoring"), String::from(""));
         self.processes.insert(tailoring.id, tailoring);
         // Lumbering 6
         let new_id = self.new_process_id();
-        let lumber_skill = self.skills.get(&5).unwrap();
-        let lumbering = lumber_skill.build_skill_process(new_id).unwrap();
+        let lumbering = self.build_skill_process(21, new_id, 
+            String::from("Lumbering"), String::from(""));
         self.processes.insert(lumbering.id, lumbering);
         // Tool Maker 7
         let new_id = self.new_process_id();
-        let tool_skill = self.skills.get(&6).unwrap();
-        let tool_maker = tool_skill.build_skill_process(new_id).unwrap();
+        let tool_maker = self.build_skill_process(22, new_id, 
+            String::from("Tool Making"), String::from(""));
         self.processes.insert(tool_maker.id, tool_maker);
         // construction 8
         let new_id = self.new_process_id();
-        let construction_skill = self.skills.get(&7).unwrap();
-        let construction = construction_skill.build_skill_process(new_id).unwrap();
+        let construction = self.build_skill_process(23, new_id, 
+            String::from("Construction"), String::from(""));
         self.processes.insert(construction.id, construction);
         // building repair 9
         let new_id = self.new_process_id();
-        let building_repair_skill = self.skills.get(&8).unwrap();
-        let building_repair = building_repair_skill.build_skill_process(new_id).unwrap();
+        let building_repair = self.build_skill_process(24, new_id, 
+            String::from("Building Repair"), String::from(""));
         self.processes.insert(building_repair.id, building_repair);
         // stone gathering 10
         let new_id = self.new_process_id();
-        let stone_gathering_skill = self.skills.get(&9).unwrap();
-        let stone_gathering = stone_gathering_skill.build_skill_process(new_id).unwrap();
+        let stone_gathering = self.build_skill_process(25, new_id, 
+            String::from("Stone Gathering"), String::from(""));
         self.processes.insert(stone_gathering.id, stone_gathering);
 
         // ambrosia chain 
@@ -1070,9 +918,6 @@ impl DataManager {
             minimum_time: 1.0,
             process_parts: vec![labor_input, harvester_capital, fruit_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1098,9 +943,6 @@ impl DataManager {
             minimum_time: 0.0,
             process_parts: vec![food_input, food_output],
             process_tags: vec![ProcessTag::Consumption(2)],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 3.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1134,9 +976,6 @@ impl DataManager {
             minimum_time: 1.0,
             process_parts: vec![labor_input, harvester_capital, cotton_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1175,9 +1014,6 @@ impl DataManager {
             process_parts: vec![cotton_input, labor_input,
                 spinner_capital, thread_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1216,9 +1052,6 @@ impl DataManager {
             process_parts: vec![thread_input, labor_input,
                 loom_capital, cloth_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1251,9 +1084,6 @@ impl DataManager {
             process_parts: vec![cloth_input, labor_input,
                 cloth_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1292,9 +1122,6 @@ impl DataManager {
             process_parts: vec![cloth_input, labor_input, thread_input,
                 cloth_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1321,9 +1148,6 @@ impl DataManager {
             minimum_time: 0.0,
             process_parts: vec![labor_input, stone_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1349,9 +1173,6 @@ impl DataManager {
             minimum_time: 0.0,
             process_parts: vec![labor_input, hut_output],
             process_tags: Vec::new(),
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1383,9 +1204,6 @@ impl DataManager {
             minimum_time: 0.0,
             process_parts: vec![labor_input, hut_input, hut_output],
             process_tags: vec![ProcessTag::Maintenance(14)],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1419,9 +1237,6 @@ impl DataManager {
             minimum_time: 12.0,
             process_parts: vec![labor_input, axe_capital, wood_output],
             process_tags: vec![ProcessTag::Maintenance(14)],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1453,9 +1268,6 @@ impl DataManager {
             minimum_time: 12.0,
             process_parts: vec![labor_input, wood_input, wood_output],
             process_tags: vec![],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1487,9 +1299,6 @@ impl DataManager {
             minimum_time: 12.0,
             process_parts: vec![labor_input, wood_input, wood_output],
             process_tags: vec![],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1521,9 +1330,6 @@ impl DataManager {
             minimum_time: 12.0,
             process_parts: vec![labor_input, wood_input, wood_output],
             process_tags: vec![],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1555,9 +1361,6 @@ impl DataManager {
             minimum_time: 12.0,
             process_parts: vec![labor_input, wood_input, wood_output],
             process_tags: vec![],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1595,9 +1398,6 @@ impl DataManager {
             minimum_time: 1.0,
             process_parts: vec![labor_input, cabin_input, wood_input, cabin_output],
             process_tags: vec![ProcessTag::Maintenance(cabin)],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1635,9 +1435,6 @@ impl DataManager {
             minimum_time: 1.0,
             process_parts: vec![labor_input, stone_input, wood_input, axe_output],
             process_tags: vec![],
-            skill: None,
-            skill_minimum: 0.0,
-            skill_maximum: 0.0,
             technology_requirement: None,
             tertiary_tech: None,
         };
@@ -1734,6 +1531,51 @@ impl DataManager {
         }
 
         Ok(())
+    }
+
+        /// Creates a default process for the skill and it's labor.
+    /// 
+    /// # Defalts
+    /// 
+    /// The process defaults to taking 1 Time(fixed) (always id 0) 
+    /// and outputting 1 unit of labor.
+    /// 
+    /// 
+    /// The name is Labor, while vairant_name and description are the skill's name.
+    /// 
+    /// 
+    /// Minimum time = 0, skill min = 0, skill max = 3, and no techs attached.
+    /// 
+    /// The skill is also connected as the process's skill
+    /// 
+    /// # Notes
+    /// 
+    /// Edit to meet your needs later, as needed.
+    pub fn build_skill_process(&self, labor: usize, id: usize, name: String, desc: String) 
+    -> Process {
+        let input = ProcessPart {
+            item: Item::Product(TIME_PRODUCT_ID),
+            amount: 1.0,
+            part_tags: vec![ProcessPartTag::Fixed],
+            part: ProcessSectionTag::Input,
+        };
+        let output = ProcessPart{
+            item: Item::Product(labor),
+            amount: 1.0,
+            part_tags: vec![],
+            part: ProcessSectionTag::Output,
+        };
+        Process {
+            id: id,
+            name: "Labor".into(),
+            variant_name: name,
+            description: desc,
+            minimum_time: 0.0,
+            process_parts: vec![input, output],
+            process_tags: vec![],
+            technology_requirement: None,
+            tertiary_tech: None,
+        }
     }
 
     pub fn load_test_jobs(&mut self) -> Result<(), String> {
@@ -1925,8 +1767,6 @@ impl DataManager {
     pub fn load_test_data(&mut self) -> Result<(), String> {
         self.load_test_wants()?;
         self.load_test_products()?;
-        self.load_test_skills()?;
-        self.load_test_skill_groups()?;
         self.load_test_processes()?;
         self.load_test_jobs()?;
 
@@ -1993,27 +1833,6 @@ impl DataManager {
         }
     }
 
-    pub fn new_skill_group_id(&mut self) -> usize {
-        loop {
-            if self.skill_groups.contains_key(&self.skill_group_id) {
-                self.skill_group_id += 1;
-            }
-            else {
-                return self.skill_group_id;
-            }
-        }
-    }
-
-    pub fn new_skill_id(&mut self) -> usize {
-        loop {
-            if self.skills.contains_key(&self.skill_id) {
-                self.skill_id += 1;
-            }
-            else {
-                return self.skill_id;
-            }
-        }
-    }
     pub fn new_process_id(&mut self) -> usize {
         loop {
             if self.processes.contains_key(&self.process_id) {
@@ -2024,6 +1843,7 @@ impl DataManager {
             }
         }
     }
+
     pub fn new_job_id(&mut self) -> usize {
         loop {
             if self.jobs.contains_key(&self.job_id) {
@@ -2034,6 +1854,7 @@ impl DataManager {
             }
         }
     }
+
     pub fn new_species_id(&mut self) -> usize {
         loop {
             if self.species.contains_key(&self.species_id) {
@@ -2044,6 +1865,7 @@ impl DataManager {
             }
         }
     }
+
     pub fn new_culture_id(&mut self) -> usize {
         loop {
             if self.cultures.contains_key(&self.culture_id) {
@@ -2054,6 +1876,7 @@ impl DataManager {
             }
         }
     }
+
     pub fn new_pop_id(&mut self) -> usize {
         loop {
             if self.pops.contains_key(&self.pop_id) {
@@ -2064,6 +1887,7 @@ impl DataManager {
             }
         }
     }
+
     pub fn new_territory_id(&mut self) -> usize {
         loop {
             if self.territories.contains_key(&self.territory_id) {
@@ -2074,6 +1898,7 @@ impl DataManager {
             }
         }
     }
+
     pub fn new_market_id(&mut self) -> usize {
         loop {
             if self.markets.contains_key(&self.market_id) {
@@ -2084,6 +1909,7 @@ impl DataManager {
             }
         }
     }
+
     pub fn new_firm_i(&mut self) -> usize {
         loop {
             if self.firms.contains_key(&self.firm_id) {

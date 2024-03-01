@@ -17,9 +17,9 @@ pub struct Process {
     pub minimum_time: f64,
     pub process_parts: Vec<ProcessPart>,
     pub process_tags: Vec<ProcessTag>,
-    pub skill: Option<usize>,
-    pub skill_minimum: f64,
-    pub skill_maximum: f64,
+    //pub skill: Option<usize>,
+    //pub skill_minimum: f64,
+    //pub skill_maximum: f64,
     // Processes are always fractional, fractional items are handled on the product end.
     pub technology_requirement: Option<usize>,
     pub tertiary_tech: Option<usize>,

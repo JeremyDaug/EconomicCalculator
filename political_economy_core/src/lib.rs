@@ -6421,9 +6421,6 @@ mod tests {
                     }
                 ],
                 process_tags: vec![],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 0.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -6454,9 +6451,6 @@ mod tests {
                     }
                 ],
                 process_tags: vec![],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 0.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -6480,9 +6474,6 @@ mod tests {
                     }
                 ],
                 process_tags: vec![],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 0.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -6761,9 +6752,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Failure(1)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -6915,9 +6903,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Failure(1)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -7111,9 +7096,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Failure(1)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -7476,9 +7458,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -7495,9 +7474,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -7765,9 +7741,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -7784,9 +7757,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -7981,9 +7951,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -8000,9 +7967,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -8278,9 +8242,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -8297,9 +8258,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -8649,9 +8607,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -8668,9 +8623,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -8861,9 +8813,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -8880,9 +8829,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -9150,9 +9096,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -9169,9 +9112,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -9417,9 +9357,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -9436,9 +9373,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -9657,9 +9591,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -9676,9 +9607,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -10115,9 +10043,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -10134,9 +10059,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -10432,9 +10354,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(3)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -10451,9 +10370,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(4)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -10779,9 +10695,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -10815,9 +10728,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -11046,9 +10956,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -11082,9 +10989,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -11297,9 +11201,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -11333,9 +11234,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -11549,9 +11447,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -11585,9 +11480,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -11990,9 +11882,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -12026,9 +11915,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -12495,9 +12381,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(1)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -12630,9 +12513,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(0)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -12827,9 +12707,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -12863,9 +12740,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -13094,9 +12968,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -13130,9 +13001,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -13348,9 +13216,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -13384,9 +13249,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -13602,9 +13464,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -13638,9 +13497,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -14591,9 +14447,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Use(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -14627,9 +14480,6 @@ mod tests {
                     process_tags: vec![
                         ProcessTag::Consumption(2)
                     ],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 });
@@ -15979,9 +15829,6 @@ mod tests {
                         }
                     ],
                     process_tags: vec![],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 };
@@ -16075,9 +15922,6 @@ mod tests {
                         }
                     ],
                     process_tags: vec![],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 };
@@ -16171,9 +16015,6 @@ mod tests {
                         }
                     ],
                     process_tags: vec![],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 };
@@ -16267,9 +16108,6 @@ mod tests {
                         }
                     ],
                     process_tags: vec![],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 };
@@ -16363,9 +16201,6 @@ mod tests {
                         }
                     ],
                     process_tags: vec![],
-                    skill: None,
-                    skill_minimum: 0.0,
-                    skill_maximum: 0.0,
                     technology_requirement: None,
                     tertiary_tech: None,
                 };
@@ -16409,7 +16244,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
 
                 let available_products = HashMap::new();
@@ -16457,7 +16291,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
 
                 // 1 of each item, should allow for only 1 iteration to be done.
@@ -16517,7 +16350,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
 
                 // 1 of each item, should allow for only 1 iteration to be done.
@@ -16579,7 +16411,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
 
                 // 1 of each item, should allow for only 1 iteration to be done.
@@ -16641,7 +16472,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
 
                 // 1 of each item, should allow for only 1 iteration to be done.
@@ -16696,7 +16526,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
 
                 // 1 of each item, should allow for only 1 iteration to be done.
@@ -16762,7 +16591,6 @@ mod tests {
                                 part: ProcessSectionTag::Output },
                         ], 
                         process_tags: vec![], 
-                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                         technology_requirement: None, tertiary_tech: None };
 
                     let available_products = HashMap::new();
@@ -16810,7 +16638,6 @@ mod tests {
                                 part: ProcessSectionTag::Output },
                         ], 
                         process_tags: vec![], 
-                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                         technology_requirement: None, tertiary_tech: None };
 
                     // 1 of each item, should allow for only 1 iteration to be done.
@@ -16870,7 +16697,6 @@ mod tests {
                                 part: ProcessSectionTag::Output },
                         ], 
                         process_tags: vec![], 
-                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                         technology_requirement: None, tertiary_tech: None };
 
                     // 1 of each item, should allow for only 1 iteration to be done.
@@ -16930,7 +16756,6 @@ mod tests {
                                 part: ProcessSectionTag::Output },
                         ], 
                         process_tags: vec![], 
-                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                         technology_requirement: None, tertiary_tech: None };
 
                     // 1 of each item, should allow for only 1 iteration to be done.
@@ -16985,7 +16810,6 @@ mod tests {
                                 part: ProcessSectionTag::Output },
                         ], 
                         process_tags: vec![], 
-                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                         technology_requirement: None, tertiary_tech: None };
 
                     // 1 of each item, should allow for only 1 iteration to be done.
@@ -17044,7 +16868,6 @@ mod tests {
                                 part: ProcessSectionTag::Output },
                         ], 
                         process_tags: vec![], 
-                        skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                         technology_requirement: None, tertiary_tech: None };
 
                     // not in at all
@@ -17093,7 +16916,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
                 
                 // build available items
@@ -17150,7 +16972,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
                 
                 // build available items
@@ -17202,7 +17023,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
                 
                 // build available items
@@ -17254,7 +17074,6 @@ mod tests {
                             part: ProcessSectionTag::Output },
                     ], 
                     process_tags: vec![], 
-                    skill: Some(0), skill_minimum: 0.0, skill_maximum: 100.0, 
                     technology_requirement: None, tertiary_tech: None };
                 
                 // build available items
@@ -17287,9 +17106,6 @@ mod tests {
                 minimum_time: 0.0,
                 process_parts: vec![],
                 process_tags: vec![],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 0.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -17302,9 +17118,6 @@ mod tests {
                 minimum_time: 0.0,
                 process_parts: vec![],
                 process_tags: vec![],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 0.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -17702,9 +17515,6 @@ mod tests {
                 minimum_time: 0.0,
                 process_parts: vec![],
                 process_tags: vec![],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 0.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -17787,9 +17597,6 @@ mod tests {
                 minimum_time: 0.0,
                 process_parts: vec![],
                 process_tags: vec![],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 0.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -17797,146 +17604,6 @@ mod tests {
             let expectation = format!("{}({})", test.name, test.variant_name);
 
             assert_eq!(test.get_name(), expectation);
-        }
-    }
-
-    mod skill_group_tests {
-        // skipped, shouldn't have much need right now.
-    }
-
-    mod skill_tests {
-        use crate::objects::{skill::Skill, product::ProductTag};
-        // Tests here are kept to a minimum, they should 'just work'.
-
-        #[test]
-        pub fn should_return_process_from_process_build_if_labor(){
-            let test_skill = Skill::new(0, 
-                format!("Name"),
-                format!("Desc"),
-                1);
-
-            let result = test_skill.build_skill_process(1);
-
-            assert!(result.is_ok());
-
-            let result = result.unwrap();
-
-            assert_eq!(result.id, 1);
-            assert_eq!(result.name, String::from("Labor"));
-            assert_eq!(result.variant_name, test_skill.name);
-            assert_eq!(result.description, test_skill.description);
-            assert_eq!(result.minimum_time, 0.0);
-            assert!(result.process_parts.iter()
-                .any(|x| {
-                    x.item.is_product() && x.item.unwrap() == 0
-                }));
-            assert!(result.process_parts.iter()
-                .any(|x| {
-                    x.item.is_product() && x.item.unwrap() == test_skill.labor
-                }));
-            assert!(result.process_tags.is_empty());
-            assert_eq!(result.skill_minimum, 0.0);
-            assert_eq!(result.skill_maximum, 3.0);
-            assert!(result.technology_requirement.is_none());
-            assert!(result.tertiary_tech.is_none());
-        }
-
-        #[test]
-        pub fn should_return_err_from_process_build_if_no_labor(){
-            let test_skill = Skill::new(0, 
-                format!("Name"),
-                format!("Desc"),
-                0);
-
-        let result = test_skill.build_skill_process(1);
-
-        assert!(result.is_err());
-        }
-
-        #[test]
-        pub fn should_return_product_if_skill_has_no_labor(){
-            let test_skill = Skill::new(0, 
-                format!("Name"),
-                format!("Desc"),
-                0);
-
-            let result = test_skill.build_skill_labor(1);
-
-            assert!(result.is_some());
-
-            let result = result.unwrap();
-
-            assert_eq!(result.name, test_skill.name);
-            assert_eq!(result.variant_name, String::new());
-            assert_eq!(result.description, test_skill.description);
-            assert_eq!(result.unit_name, String::from("Hour(s)"));
-            assert!(result.mean_time_to_failure.is_some());
-            assert_eq!(result.mean_time_to_failure.unwrap(), 0);
-            assert!(result.tags.contains(&ProductTag::Service));
-            assert!(result.tech_required.is_none());
-        }
-
-        #[test]
-        pub fn should_return_none_if_skill_has_labor(){
-            let test_skill = Skill::new(0, 
-                format!("Name"),
-                format!("Desc"),
-                2);
-
-            let result = test_skill.build_skill_labor(1);
-
-            assert!(result.is_none());
-        }
-
-        #[test]
-        pub fn set_relation_correctly() {
-            let mut test1 = Skill::new(0,
-                String::from("Test"),
-                String::from("Test"), 
-                0);
-            
-            let test2 = Skill::new(1,
-                String::from("Test1"),
-                String::from("Test1"), 
-                1);
-
-            assert_eq!(test1.related_skills.len(), 0);
-
-            test1.set_relation(&test2, 0.1);
-
-            assert_eq!(test1.related_skills.len(), 1);
-            assert_eq!(match test1.related_skills.get(&1) {
-                None => &-1.0,
-                Some(val) => val
-            },
-             &0.1);
-            assert_eq!(test2.related_skills.len(), 0);
-
-            let mut test1 = Skill::new(0,
-                String::from("Test"),
-                String::from("Test"), 
-                0);
-            
-            let mut test2 = Skill::new(1,
-                String::from("Test1"),
-                String::from("Test1"), 
-                1);
-
-            assert_eq!(test1.related_skills.len(), 0);
-
-            test1.set_mutual_relation(&mut test2, 0.1);
-
-            assert_eq!(test1.related_skills.len(), 1);
-            assert_eq!(match test1.related_skills.get(&1){
-                None => &-1.0,
-                Some(val) => val
-            }
-            , &0.1);
-            assert_eq!(test2.related_skills.len(), 1);
-            assert_eq!(match test2.related_skills.get(&0) {
-                None => &-1.0,
-                Some(val) => val
-            }, &0.1);
         }
     }
 
@@ -18123,9 +17790,6 @@ mod tests {
                 minimum_time: 1.0,
                 process_parts: vec![],
                 process_tags: Vec::new(),
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 3.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -18490,9 +18154,6 @@ mod tests {
                 minimum_time: 1.0,
                 process_parts: vec![],
                 process_tags: Vec::new(),
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 3.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -18516,9 +18177,6 @@ mod tests {
                 minimum_time: 1.0,
                 process_parts: vec![],
                 process_tags: Vec::new(),
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 3.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -18566,9 +18224,6 @@ mod tests {
                 minimum_time: 1.0,
                 process_parts: vec![],
                 process_tags: vec![tag],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 3.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
@@ -18625,9 +18280,6 @@ mod tests {
                 minimum_time: 1.0,
                 process_parts: vec![],
                 process_tags: vec![tag],
-                skill: None,
-                skill_minimum: 0.0,
-                skill_maximum: 3.0,
                 technology_requirement: None,
                 tertiary_tech: None,
             };
