@@ -165,6 +165,7 @@ impl DataManager {
     ///   - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
     ///                         refreshed every day)
     ///   - ID 1: Shopping Time (Used to shop)
+    ///     ID 2: Discernment (shopping skill)
     ///   - TODO Items
     ///     - Land (abstract)
     ///     - Land (Wasteland)
@@ -253,7 +254,69 @@ impl DataManager {
         self.products.insert(SHOPPING_TIME_PRODUCT_ID, shopping_time);
         self.products.insert(DISCERNMENT_PRODUCT_ID, discernment);
 
+        // processes
+        let shop_input = ProcessPart{
+            item: Item::Product(TIME_PRODUCT_ID),
+            amount: 1.0,
+            part_tags: vec![ProcessPartTag::Fixed],
+            part: ProcessSectionTag::Input,
+        };
+        let shop_skill = ProcessPart {
+            item: Item::Product(DISCERNMENT_PRODUCT_ID),
+            amount: 1.0,
+            part_tags: vec![ProcessPartTag::Optional { missing_penalty: 0.0, final_bonus: 1.0 }],
+            part: ProcessSectionTag::Capital
+        };
+        let shop_output = ProcessPart{
+            item: Item::Product(SHOPPING_TIME_PROC_ID),
+            amount: 1.0,
+            part_tags: Vec::new(),
+            part: ProcessSectionTag::Output,
+        };
+        let shop_output = ProcessPart{
+            item: Item::Product(DISCERNMENT_PRODUCT_ID),
+            amount: 0.1,
+            part_tags: Vec::new(),
+            part: ProcessSectionTag::Output,
+        };
+        let go_shopping = Process{
+            id: SHOPPING_TIME_PROC_ID,
+            name: String::from("Go Shopping"),
+            variant_name: String::new(),
+            description: String::from("Shopping takes time."),
+            minimum_time: 1.0,
+            process_parts: vec![shop_input, shop_output],
+            process_tags: Vec::new(),
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(go_shopping.id, go_shopping);
 
+        // Next do Resting Process
+        let rest_input = ProcessPart {
+            item: Item::Product(TIME_PRODUCT_ID),
+            amount: 1.0,
+            part_tags: vec![],
+            part: ProcessSectionTag::Input,
+        };
+        let rest_output = ProcessPart {
+            item: Item::Want(REST_WANT_ID),
+            amount: 1.0,
+            part_tags: vec![],
+            part: ProcessSectionTag::Output,
+        };
+        let resting = Process {
+            id: RESTING_PROC_ID,
+            name: String::from("Resting"),
+            variant_name: String::new(),
+            description: String::from("Chilling Out."),
+            minimum_time: 1.0,
+            process_parts: vec![rest_input, rest_output],
+            process_tags: vec![ProcessTag::Consumption(REST_WANT_ID)],
+            technology_requirement: None,
+            tertiary_tech: None,
+        };
+        self.processes.insert(resting.id, resting);
     }
 
     /// # Create Skill Product
@@ -939,7 +1002,7 @@ impl DataManager {
         let harvester_capital = ProcessPart{
             item: Item::Product(hook),
             amount: 1.0,
-            part_tags: vec![ProcessPartTag::Optional(0.25)],
+            part_tags: vec![ProcessPartTag::Optional { missing_penalty: 0.0, final_bonus: 0.25 }],
             part: ProcessSectionTag::Capital,
         };
         let fruit_output = ProcessPart{
@@ -997,7 +1060,7 @@ impl DataManager {
         let harvester_capital = ProcessPart{
             item: Item::Product(9),
             amount: 1.0,
-            part_tags: vec![ProcessPartTag::Optional(1.0)],
+            part_tags: vec![ProcessPartTag::Optional{ missing_penalty: 0.0, final_bonus: 1.0}],
             part: ProcessSectionTag::Capital,
         };
         let cotton_output = ProcessPart{
@@ -1034,7 +1097,7 @@ impl DataManager {
         let spinner_capital = ProcessPart{
             item: Item::Product(10), // spinning wheel
             amount: 1.0,
-            part_tags: vec![ProcessPartTag::Optional(1.0)],
+            part_tags: vec![ProcessPartTag::Optional { missing_penalty: 0.0, final_bonus: 1.0 }],
             part: ProcessSectionTag::Capital,
         };
         let thread_output = ProcessPart{
@@ -1072,7 +1135,7 @@ impl DataManager {
         let loom_capital = ProcessPart{
             item: Item::Product(11),
             amount: 1.0,
-            part_tags: vec![ProcessPartTag::Optional(3.0)],
+            part_tags: vec![ProcessPartTag::Optional { missing_penalty: 0.0, final_bonus: 3.0 }],
             part: ProcessSectionTag::Capital,
         };
         let cloth_output = ProcessPart{
@@ -1258,7 +1321,7 @@ impl DataManager {
         let axe_capital = ProcessPart{
             item: Item::Product(12), // axe
             amount: 1.0,
-            part_tags: vec![ProcessPartTag::Optional(5.0)],
+            part_tags: vec![ProcessPartTag::Optional { missing_penalty: 0.0, final_bonus: 5.0}],
             part: ProcessSectionTag::Capital,
         };
         let wood_output = ProcessPart{

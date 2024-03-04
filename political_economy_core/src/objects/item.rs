@@ -4,7 +4,7 @@ use std::fmt::Display;
 /// 
 /// A Common storage enum for products, classes, and wants so that we can 
 /// pass it around more nicely.
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
 pub enum Item {
     /// A desire for a want (Food).
     Want(usize),

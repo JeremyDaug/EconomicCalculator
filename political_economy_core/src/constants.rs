@@ -150,3 +150,22 @@ pub const ACP_MAX_HARD_REDUCTION_FACTOR: f64 = 0.5;
 /// This is the factor by which the difference between total losses 
 /// (consumption and lost) today is multiplied.
 pub const ACP_MIN_REDUCTION_FACTOR: f64 = 0.2;
+
+
+// Common Functions, may split off into separate file.
+
+/// # Lerp
+/// 
+/// Takes in a start value v0, an end value v1, and a t value from 0.0 
+/// to 1.0 and returns the value between v0 and v1 t percent of the way 
+/// through. 
+/// 
+/// At t == 0, the result should be v0, at t == 1, it should be v1.
+/// 
+/// ## Does not panic
+/// 
+/// T may be outside of the interval [0.0, 1.0], but results will not be
+/// guaranteed.
+pub fn lerp(v0: f64, v1: f64, t: f64) -> f64 {
+    (1.0 - t) * v0 + t * v1
+}

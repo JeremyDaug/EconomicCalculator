@@ -332,7 +332,6 @@ impl ActorMessage {
                 product: _ } => *buyer == me || *seller == me,
             ActorMessage::RejectPurchase { buyer: _, seller,
                 product: _, price_opinion: _ } => *seller == me,
-
         }
     }
 }

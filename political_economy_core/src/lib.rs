@@ -5680,6 +5680,7 @@ mod tests {
                 // get required items.
                 // Loads 
                 // wants: Rest, Wealth, 
+                // products
                 manager.required_items();
 
                 let mut history = MarketHistory {

@@ -1,9 +1,9 @@
 ///! Processes transform Products and Wants into other products and wants.
 use std::collections::{HashMap, HashSet};
 
-use itertools::Itertools;
+use itertools::{zip_eq, Itertools};
 
-use crate::data_manager::DataManager;
+use crate::{constants::{self, lerp}, data_manager::DataManager};
 
 use super::{property_info::PropertyInfo, item::Item};
 
@@ -310,6 +310,12 @@ impl Process {
     /// whether it will allow it to push higher with an efficiency boost or
     /// not.
     /// 
+    /// Currently, it always uses optional goods when possible.(tm) It's not 
+    /// very smart about it yet though. Optional Good Bonuses are 
+    /// multiplicative, not additive.
+    /// 
+    /// TODO Ideally, optional goods are selected either here (or by the actor calling this) such that the additional expense is made up for the additional output gained, measured in AMV, presumably.
+    /// 
     /// ## Returns
     /// 
     /// This function returns 3 HashMaps in a Tuple.
@@ -330,7 +336,7 @@ impl Process {
     /// 
     /// Use with caution.
     /// 
-    /// TODO Include logic for process part tags: Consumption, Optional(f64), Fixed, Investment, Pollutant, Chance(char, usize)
+    /// TODO Include logic for process part tags: Consumption, Investment, Pollutant, Chance(char, usize)
     /// 
     /// TODO pop_skill and other_efficiency_boni are currently not taken into account.
     /// 
@@ -350,29 +356,55 @@ impl Process {
         let mut results = ProcessOutputs::new();
         // get how many cycles we can do in total
         // TODO check and take optional and fixed items into account here.
+        // the (rolling) throughput modifier from optional products
         // optional items will need to be ignored if unavailable, but add to the target of all non-fixed items
-        // fixed items ignore any efficiency gains from 
-        let mut ratio_available = f64::INFINITY;
-        for process_part in self.process_parts.iter() {
-            if let ProcessSectionTag::Capital = process_part.part {
+        // fixed items ignore any efficiency gains from optional
+        let mut ratios = HashMap::new();
+        let mut base_iters = f64::INFINITY; // how many we can get without modifications
+        let mut normals = HashMap::new(); // The highest we can get 
+        let mut highest_normal: f64 = 0.0;
+        let mut lowest_normal = f64::INFINITY;
+        let mut max_poss_fixed = f64::INFINITY; // the highest possible fixed iterations.
+        let mut bonus_throughput = 1.0; // The resulting thoughput bonus from optional parts.
+        let mut optional_iters = HashMap::new();
+        let mut optional_mods = HashMap::new();
+        for (idx, process_part) in self.process_parts.iter().enumerate() {
+            if let ProcessSectionTag::Capital = process_part.part { // skip capital wants for now.
                 // todo add capital want handling here.
                 if let Item::Want(_id) = process_part.item {
+                    debug_assert!(false, "Should not use wants in capital yet.");
                     continue;
                 }
             }
             if let ProcessSectionTag::Output = process_part.part { // if output, ignore
                 continue;
             }
-            match process_part.item { // TODO add optional check here.
+            let mut optional = None;
+            let mut fixed = false;
+            debug_assert!(optional.is_some() && fixed, "Cannot be both optional and fixed.");
+            for tag in process_part.part_tags.iter() { // get whether it's optional or fixed for later.
+                match tag {
+                    ProcessPartTag::Optional { missing_penalty, final_bonus } => {
+                        optional = Some((missing_penalty, final_bonus));
+                    },
+                    ProcessPartTag::Fixed => {
+                        fixed = true;
+                    },
+                    _ => ()
+                }
+            }
+            let mut ratio = 0.0;
+            match process_part.item { // get the amount of times we can do the part.
                 Item::Product(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
-                    ratio_available = ratio_available
-                        .min(available_products.get(&id).unwrap_or(&0.0) / process_part.amount);
+                    ratio = available_products.get(&id).unwrap_or(&0.0) 
+                        / process_part.amount
+                    ratios.insert(idx, ratio);
                 },
-                Item::Want(id) => {
+                Item::Want(id) => { // input wants are taken directly from storage.
                     // take lower between current ratio available and available_product / cycle_target.
-                    ratio_available = ratio_available
-                        .min(available_wants.get(&id).unwrap_or(&0.0) / process_part.amount);
+                    ratio = available_wants.get(&id).unwrap_or(&0.0) / process_part.amount
+                    ratios.insert(idx, ratio);
                 },
                 Item::Class(id) => {
                     // TODO add quality check here!
@@ -387,29 +419,57 @@ impl Process {
                     });
                     // how many items within the class we have,
                     let sum: f64 = class_mates.map(|x| x.1).sum();
-                    ratio_available = ratio_available.min(sum / process_part.amount);
+                    ratio = sum / process_part.amount;
+                    ratios.insert(idx, ratio);
                 }
             }
-            if ratio_available == 0.0 { // if ratio is 0, gtfo, we can't do anything.
-                return ProcessOutputs::new();
+            if let Some((penalty, bonus)) = optional { // if optional, get that info and record it as optional
+                optional_iters.insert(idx, ratio);
+                optional_mods.insert(idx, (penalty, bonus));
+            } else { // non optional
+                if fixed { // and fixed, modify max possible fixed to be the lower between this and it's current vaule.
+                    max_poss_fixed = max_poss_fixed.min(ratio);
+                } else { // if normal, record it for later use and check it for highest possible.
+                    normals.insert(idx, ratio);
+                    highest_normal = highest_normal.max(ratio);
+                    lowest_normal = lowest_normal.min(ratio);
+                }
             }
         }
-        // cap our ratio at the target
-        // TODO add check for hard_cap here.
-        if let Some(val) = target { // we assume that hard_cap == true for now
-            ratio_available = ratio_available.min(val);
+        // TODO #67 Add Load Check on processes, which ensures that an optional part tag is paired with a meaningful fixed or other limitation elsewhere.
+        // TODO cap is always treated as hard, need to do work to make it soft.
+        let cap = target.unwrap_or(f64::INFINITY); // get cap.
+        lowest_normal = lowest_normal.min(cap); // reduce max poss fixed to the cap.
+        // with values gotten, begin calculating our bonus and total throughput
+        for (key, &ratio) in optional_iters.iter() {
+            let available_fixed_iters = max_poss_fixed.min(ratio);
+            let (&start, &end) = optional_mods.get(key).unwrap();
+            let t = available_fixed_iters / max_poss_fixed;
+            let eff = lerp(start, end, t);
+            bonus_throughput = bonus_throughput * eff;
         }
-        // without efficiency gains, our ratio available == possible iteratons.
-        results.iterations = ratio_available;
+        // given that our normal iterations is the maximum we can consume, 
+        // find the amonut of fixed we'd need to match it with our current bonii.
+        let fixed_target = lowest_normal / bonus_throughput;
+        if fixed_target > max_poss_fixed { 
+            // If the possible target is above max fixed, reduce down to possible target
+            fixed_target = max_poss_fixed; // Since this is a reduction to fixed, full bonus will remain in effect
+            lowest_normal = fixed_target * bonus_throughput;
+        }
+        // TODO make consider adding profitability check here for optional products vs the extra output.
+        
+        let ratio_available = fixed_target * bonus_throughput;
+        // without efficiency gains, our ratio is our fixed target
+        results.iterations = fixed_target;
         // efficiency is equal to the total possible gain we were able to achieved.
-        results.efficiency = 1.0;
+        results.efficiency = bonus_throughput;
         // effective iterations is our iterations after applying efficiency gains.
         results.effective_iterations = ratio_available;
 
         // with our target ratio gotten, create the return results for inputs and outputs
         // TODO fixed items will also need to be taken into account here.
         for process_part in self.process_parts.iter() {
-            let mut _in_out_sign = 1.0;
+            let mut in_out_sign = 1.0;
             match process_part.part {
                 ProcessSectionTag::Capital => {
                     if let Item::Product(_id) = process_part.item {
@@ -421,20 +481,20 @@ impl Process {
                     }
                     continue;
                 },
-                ProcessSectionTag::Input => { _in_out_sign = -1.0; }, // subtract inputs
-                ProcessSectionTag::Output => { _in_out_sign = 1.0; }, // add outputs
+                ProcessSectionTag::Input => { in_out_sign = -1.0; }, // subtract inputs
+                ProcessSectionTag::Output => { in_out_sign = 1.0; }, // add outputs
             } 
             // if not capital, add to appropriate input_output
             match process_part.item {
                 Item::Product(id) => {
                     results.input_output_products.entry(id)
-                    .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
-                    .or_insert(_in_out_sign * process_part.amount * ratio_available);
+                    .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
+                    .or_insert(in_out_sign * process_part.amount * ratio_available);
                 },
                 Item::Want(id) => {
                     results.input_output_wants.entry(id)
-                    .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
-                    .or_insert(_in_out_sign * process_part.amount * ratio_available);
+                    .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
+                    .or_insert(in_out_sign * process_part.amount * ratio_available);
                 },
                 Item::Class(id) => { // TODO test this part of the code!
                     debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
@@ -450,7 +510,7 @@ impl Process {
                     // get items up to our needs
                     let mut target = process_part.amount * ratio_available;
                     for (&product_id, &quantity) in class_mates {
-                        let remove = quantity.min(target);
+           1             let remove = quantity.min(target);
                         results.input_output_products.entry(product_id)
                         .and_modify(|x| *x -= remove).or_insert(-remove);
                         target -= remove;
@@ -782,7 +842,13 @@ impl ProcessSectionTag {
 #[derive(Debug)]
 pub enum ProcessPartTag {
     /// Used to mark an input or capital as optional.
-    /// The value stored is the throughput gain for all other items.
+    /// 
+    /// missing_penalty is a penalty it applies if the optional product is 
+    /// missing. Should be non-positive (0.0 means no penalty.)
+    /// Final_bonus is the total throughput bonus granted after all of the 
+    /// requested amount is met.
+    /// The line between the penalty and final bonus is flat.
+    /// 
     /// Does not effect optional, fixed, or investment parts.
     /// Input items marked optional are not output, but instead consumed or 
     /// failed instead.
@@ -790,7 +856,7 @@ pub enum ProcessPartTag {
     /// ## Applicable to:
     /// - Inputs
     /// - Capital
-    Optional(f64),
+    Optional{missing_penalty: f64, final_bonus: f64},
     /// Marks an item as Cosumed, rather than destroyed by the process.
     /// Used particularly for items which don't directly go into the end
     /// product, but are still used to create the end product. IE, making 
@@ -844,6 +910,23 @@ pub enum ProcessPartTag {
     /// - Inputs
     /// - Capital
     QualityBased(f64)
+}
+
+impl ProcessPartTag {
+    /// # Optional lerp
+    /// 
+    /// Takes in an Optional ProcessPart Tag and a lerp value t.
+    /// 
+    /// ## Panics
+    /// 
+    /// Panics if given anything other than an Option ProcessPartTag,
+    pub fn optional_lerp(option_val: &ProcessPartTag, t: f64) -> f64 {
+        if let ProcessPartTag::Optional { missing_penalty, final_bonus } = option_val {
+            constants::lerp(*missing_penalty, *final_bonus, t)
+        } else {
+            panic!("fn optional_lerp MUST be given an Optional Tag. Nothing else should be accepted.")
+        }
+    }
 }
 
 #[derive(Debug)]

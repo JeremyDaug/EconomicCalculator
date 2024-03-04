@@ -1,6 +1,4 @@
 pub mod product;
-pub mod skill_group;
-pub mod skill;
 pub mod technology_family;
 pub mod technology;
 pub mod want;
