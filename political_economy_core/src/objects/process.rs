@@ -470,12 +470,33 @@ impl Process {
         // TODO fixed items will also need to be taken into account here.
         for process_part in self.process_parts.iter() {
             let mut in_out_sign = 1.0;
+            let mut fixed = false;
+            let mut optional = true;
+            let mut consumed = true;
+            for tag in process_part.part_tags.iter() {
+                match tag {
+                    ProcessPartTag::Fixed => fixed = true,
+                    ProcessPartTag::Optional { .. } => optional = true,
+                    ProcessPartTag::Consumed => consumed = true,
+                    _ => ()
+                }
+            }
             match process_part.part {
                 ProcessSectionTag::Capital => {
                     if let Item::Product(_id) = process_part.item {
                         // add used capital products
-                        results.capital_products
-                        .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
+                        if fixed {
+                            results.capital_products
+                                .insert(process_part.item.unwrap(), process_part.amount * fixed_target);
+                        } else if optional {
+                            results.capital_products
+                                .insert(process_part.item.unwrap(), process_part.amount * fixed_target);
+                        } else {
+                            results.capital_products
+                                .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
+                        }
+                        
+
                     } else if let Item::Want(_id) = process_part.item { 
                         // TODO add capital want handling here also.
                     }
@@ -487,9 +508,25 @@ impl Process {
             // if not capital, add to appropriate input_output
             match process_part.item {
                 Item::Product(id) => {
-                    results.input_output_products.entry(id)
-                    .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
-                    .or_insert(in_out_sign * process_part.amount * ratio_available);
+                    if fixed || optional {
+                        results.input_output_products.entry(id)
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_target)
+                            .or_insert(in_out_sign * process_part.amount * fixed_target);
+                    } else { // consumed or others
+                        results.input_output_products.entry(id)
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
+                            .or_insert(in_out_sign * process_part.amount * ratio_available);
+                    }
+
+                    if optional || consumed { // consume process on these.
+                        let prod = data.products.get(&id).unwrap();
+                        let process_id = prod.failure_process;
+                        if let Some(proc_id) = process_id {
+                            // just get outputs as that's all we need.
+                            let proc = data.processes.get(&proc_id).expect("Failure Process Not Found.");
+                            // TODO, pick up here.
+                        }
+                    }
                 },
                 Item::Want(id) => {
                     results.input_output_wants.entry(id)
