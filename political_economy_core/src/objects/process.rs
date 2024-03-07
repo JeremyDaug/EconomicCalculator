@@ -398,12 +398,12 @@ impl Process {
                 Item::Product(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
                     ratio = available_products.get(&id).unwrap_or(&0.0) 
-                        / process_part.amount
+                        / process_part.amount;
                     ratios.insert(idx, ratio);
                 },
                 Item::Want(id) => { // input wants are taken directly from storage.
                     // take lower between current ratio available and available_product / cycle_target.
-                    ratio = available_wants.get(&id).unwrap_or(&0.0) / process_part.amount
+                    ratio = available_wants.get(&id).unwrap_or(&0.0) / process_part.amount;
                     ratios.insert(idx, ratio);
                 },
                 Item::Class(id) => {
@@ -517,47 +517,87 @@ impl Process {
                             .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
                             .or_insert(in_out_sign * process_part.amount * ratio_available);
                     }
-
-                    if optional || consumed { // consume process on these.
-                        let prod = data.products.get(&id).unwrap();
-                        let process_id = prod.failure_process;
-                        if let Some(proc_id) = process_id {
-                            // just get outputs as that's all we need.
-                            let proc = data.processes.get(&proc_id).expect("Failure Process Not Found.");
-                            // TODO, pick up here.
-                        }
+                    // if optional or consumed, add the failure outputs.
+                    if optional || (consumed && fixed) { // consume process on these.
+                        Process::get_consumed_outputs(id, data, &mut results, fixed_target);
+                    } else if consumed { // consume process on these.
+                        Process::get_consumed_outputs(id, data, &mut results, ratio_available);
                     }
                 },
                 Item::Want(id) => {
-                    results.input_output_wants.entry(id)
-                    .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
-                    .or_insert(in_out_sign * process_part.amount * ratio_available);
+                    // Consumed are not considerde valid.
+                    if fixed {
+                        results.input_output_wants.entry(id)
+                        .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_target)
+                        .or_insert(in_out_sign * process_part.amount * fixed_target);
+                    } else { // not fixed
+                        results.input_output_wants.entry(id)
+                        .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
+                        .or_insert(in_out_sign * process_part.amount * ratio_available);
+                    }
                 },
                 Item::Class(id) => { // TODO test this part of the code!
                     debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
                     // TODO improve this to deal with overlap and quality management.
-                    // get the plass products
-                    let class_mates = available_products.iter()
-                    .filter(|(&prod_id, _)| {
-                        let class = data.get_product_class(prod_id);
-                        if let Some(val) = class {
-                            id == val
-                        } else { false }
-                    });
-                    // get items up to our needs
-                    let mut target = process_part.amount * ratio_available;
-                    for (&product_id, &quantity) in class_mates {
-           1             let remove = quantity.min(target);
-                        results.input_output_products.entry(product_id)
-                        .and_modify(|x| *x -= remove).or_insert(-remove);
-                        target -= remove;
-                        if target == 0.0 { break; }
+                    if fixed {
+                        Process::class_part_processing(id, &available_products, data, 
+                            fixed_target, process_part, &mut results);
+                    } else { // not fixed
+                        Process::class_part_processing(id, &available_products, data, 
+                            ratio_available, process_part, &mut results);
                     }
                 },
             }
         }
 
         results
+    }
+
+    fn get_consumed_outputs(product_id: usize, data: &DataManager, results: &mut ProcessOutputs, iterations: f64) {
+        let prod = data.products.get(&product_id).unwrap();
+        let process_id = prod.failure_process;
+        if let Some(proc_id) = process_id {
+            // just get outputs as that's all we need.
+            let proc = data.processes.get(&proc_id).expect("Failure Process Not Found.");
+            // shortcut our process. add our outputs and remove this input.
+            let proc_outs = proc.outputs();
+            for prod_out in proc_outs.iter() {
+                match prod_out.item {
+                    Item::Product(id) => {
+                        results.input_output_products.entry(id)
+                        .and_modify(|x| *x += prod_out.amount * iterations)
+                        .or_insert(prod_out.amount * iterations);
+                    },
+                    Item::Want(id) => {
+                        results.input_output_wants.entry(id)
+                        .and_modify(|x| *x += prod_out.amount * iterations)
+                        .or_insert(prod_out.amount * iterations);
+                    },
+                    _ => unreachable!("Should never be reached!")
+                }
+            }
+        }
+    }
+
+    fn class_part_processing(class_id: usize, available_products: &HashMap<usize, f64>, data: &DataManager, 
+    iterations: f64, process_part: &ProcessPart, results: &mut ProcessOutputs) {
+        // get the plass products
+        let class_mates = available_products.iter()
+        .filter(|(&prod_id, _)| {
+            let class = data.get_product_class(prod_id);
+            if let Some(val) = class {
+                class_id == val
+            } else { false }
+        });
+        // get items up to our needs
+        let mut target = process_part.amount * iterations;
+        for (&product_id, &quantity) in class_mates {
+            let remove = quantity.min(target);
+            results.input_output_products.entry(product_id)
+            .and_modify(|x| *x -= remove).or_insert(-remove);
+            target -= remove;
+            if target == 0.0 { break; }
+        }
     }
 
     /// # The Do Process With Property
@@ -890,6 +930,8 @@ pub enum ProcessPartTag {
     /// Input items marked optional are not output, but instead consumed or 
     /// failed instead.
     /// 
+    /// Optional goods are also Consumed.
+    /// 
     /// ## Applicable to:
     /// - Inputs
     /// - Capital
@@ -898,6 +940,9 @@ pub enum ProcessPartTag {
     /// Used particularly for items which don't directly go into the end
     /// product, but are still used to create the end product. IE, making 
     /// steel requires using a catalyst to remove the impurities.
+    /// 
+    /// Consumed goods are instantly failed upon use. 
+    /// TODO may need to change this over to consumed instead of used, but will require special consumption process or way to make special consupmtion. Maybe include it as parameter.
     /// 
     /// ## Applicable to:
     /// - Inputs
