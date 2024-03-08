@@ -362,7 +362,6 @@ impl Process {
         let mut ratios = HashMap::new();
         let mut base_iters = f64::INFINITY; // how many we can get without modifications
         let mut normals = HashMap::new(); // The highest we can get 
-        let mut highest_normal: f64 = 0.0;
         let mut lowest_normal = f64::INFINITY;
         let mut max_poss_fixed = f64::INFINITY; // the highest possible fixed iterations.
         let mut bonus_throughput = 1.0; // The resulting thoughput bonus from optional parts.
@@ -381,7 +380,6 @@ impl Process {
             }
             let mut optional = None;
             let mut fixed = false;
-            debug_assert!(optional.is_some() && fixed, "Cannot be both optional and fixed.");
             for tag in process_part.part_tags.iter() { // get whether it's optional or fixed for later.
                 match tag {
                     ProcessPartTag::Optional { missing_penalty, final_bonus } => {
@@ -393,6 +391,7 @@ impl Process {
                     _ => ()
                 }
             }
+            debug_assert!(!(optional.is_some() && fixed), "Cannot be both optional and fixed.");
             let mut ratio = 0.0;
             match process_part.item { // get the amount of times we can do the part.
                 Item::Product(id) => {
@@ -431,10 +430,13 @@ impl Process {
                     max_poss_fixed = max_poss_fixed.min(ratio);
                 } else { // if normal, record it for later use and check it for highest possible.
                     normals.insert(idx, ratio);
-                    highest_normal = highest_normal.max(ratio);
                     lowest_normal = lowest_normal.min(ratio);
                 }
             }
+        }
+        if max_poss_fixed == 0.0 || lowest_normal == 0.0 {
+            // if no possible iterations, skip to output nothing.
+            return ProcessOutputs::new();
         }
         // TODO #67 Add Load Check on processes, which ensures that an optional part tag is paired with a meaningful fixed or other limitation elsewhere.
         // TODO cap is always treated as hard, need to do work to make it soft.
@@ -450,7 +452,7 @@ impl Process {
         }
         // given that our normal iterations is the maximum we can consume, 
         // find the amonut of fixed we'd need to match it with our current bonii.
-        let fixed_target = lowest_normal / bonus_throughput;
+        let mut fixed_target = lowest_normal / bonus_throughput;
         if fixed_target > max_poss_fixed { 
             // If the possible target is above max fixed, reduce down to possible target
             fixed_target = max_poss_fixed; // Since this is a reduction to fixed, full bonus will remain in effect

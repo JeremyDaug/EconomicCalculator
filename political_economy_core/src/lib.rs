@@ -16568,6 +16568,58 @@ mod tests {
             }
         }
 
+        mod effective_output_of_should {
+            use std::str::FromStr;
+
+            use crate::objects::{process::{Process, ProcessPart, ProcessSectionTag}, item::Item};
+
+            #[test]
+            pub fn return_correctly_for_input_capital_output_and_unrelated_items() {
+                let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
+                    variant_name: String::from_str("").unwrap(), 
+                    description: String::from_str("test").unwrap(), 
+                    minimum_time: 0.0, process_parts: vec![
+                        ProcessPart{ item: Item::Product(0), // input product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Want(0), // input want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input },
+                        ProcessPart{ item: Item::Product(1), // Capital product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Capital },
+                        // placeholder for capital want
+                        ProcessPart{ item: Item::Product(2), // output product
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                        ProcessPart{ item: Item::Want(2), // output want
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output },
+                    ], 
+                    process_tags: vec![], 
+                    technology_requirement: None, tertiary_tech: None };
+
+                // not in at all
+                assert!(test.effective_output_of(Item::Want(3)) == 0.0);
+                assert!(test.effective_output_of(Item::Product(3)) == 0.0);
+                // input
+                assert!(test.effective_output_of(Item::Want(0)) == 0.0);
+                assert!(test.effective_output_of(Item::Product(0)) == 0.0);
+                // capital
+                // capital want placeholder.
+                assert!(test.effective_output_of(Item::Product(1)) == 0.0);
+                // output 
+                assert!(test.effective_output_of(Item::Want(2)) == 1.0);
+                assert!(test.effective_output_of(Item::Product(2)) == 1.0);
+            }
+        }
+
+
         mod do_process {
             use std::{str::FromStr, collections::HashMap};
 
@@ -16849,57 +16901,6 @@ mod tests {
                     assert_eq!(result.input_output_products.len(), 0);
                     assert_eq!(result.input_output_wants.len(), 0);
                     assert_eq!(result.capital_products.len(), 0);
-                }
-            }
-
-            mod effective_output_of_should {
-                use std::str::FromStr;
-
-                use crate::objects::{process::{Process, ProcessPart, ProcessSectionTag}, item::Item};
-
-                #[test]
-                pub fn return_correctly_for_input_capital_output_and_unrelated_items() {
-                    let test = Process{ id: 0, name: String::from_str("Test").unwrap(), 
-                        variant_name: String::from_str("").unwrap(), 
-                        description: String::from_str("test").unwrap(), 
-                        minimum_time: 0.0, process_parts: vec![
-                            ProcessPart{ item: Item::Product(0), // input product
-                                amount: 1.0, 
-                                part_tags: vec![], 
-                                part: ProcessSectionTag::Input },
-                            ProcessPart{ item: Item::Want(0), // input want
-                                amount: 1.0, 
-                                part_tags: vec![], 
-                                part: ProcessSectionTag::Input },
-                            ProcessPart{ item: Item::Product(1), // Capital product
-                                amount: 1.0, 
-                                part_tags: vec![], 
-                                part: ProcessSectionTag::Capital },
-                            // placeholder for capital want
-                            ProcessPart{ item: Item::Product(2), // output product
-                                amount: 1.0, 
-                                part_tags: vec![], 
-                                part: ProcessSectionTag::Output },
-                            ProcessPart{ item: Item::Want(2), // output want
-                                amount: 1.0, 
-                                part_tags: vec![], 
-                                part: ProcessSectionTag::Output },
-                        ], 
-                        process_tags: vec![], 
-                        technology_requirement: None, tertiary_tech: None };
-
-                    // not in at all
-                    assert!(test.effective_output_of(Item::Want(3)) == 0.0);
-                    assert!(test.effective_output_of(Item::Product(3)) == 0.0);
-                    // input
-                    assert!(test.effective_output_of(Item::Want(0)) == 0.0);
-                    assert!(test.effective_output_of(Item::Product(0)) == 0.0);
-                    // capital
-                    // capital want placeholder.
-                    assert!(test.effective_output_of(Item::Product(1)) == 0.0);
-                    // output 
-                    assert!(test.effective_output_of(Item::Want(2)) == 1.0);
-                    assert!(test.effective_output_of(Item::Product(2)) == 1.0);
                 }
             }
 
