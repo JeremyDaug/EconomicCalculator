@@ -16619,19 +16619,1389 @@ mod tests {
             }
         }
 
+        mod do_process_should {
+            use std::{collections::{HashMap, HashSet}, str::FromStr};
 
-        mod do_process {
-            use std::{str::FromStr, collections::HashMap};
+            use crate::{data_manager::DataManager, objects::{item::Item, process::{Process, ProcessPart, ProcessPartTag, ProcessSectionTag}, product::Product}};
 
-            use crate::{objects::{process::{Process, ProcessPart, ProcessSectionTag}, item::Item}, data_manager::DataManager};
+            #[test]
+            pub fn restrict_and_recalculate_when_reduction_would_increase_bonus() {
+                let mut data = DataManager::new();
+                let prod0 = Product {
+                    id: 0,
+                    name: String::from("Optional Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::from([0]),
+                    failure_process: Some(0),
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod1 = Product {
+                    id: 1,
+                    name: String::from("Normal Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod2 = Product {
+                    id: 2,
+                    name: String::from("Fixed Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod3 = Product {
+                    id: 3,
+                    name: String::from("Fixed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod4 = Product {
+                    id: 4,
+                    name: String::from("Normal Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod5 = Product {
+                    id: 5,
+                    name: String::from("Failed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                // setup product with a failure process.
+                let fail_proc = Process {
+                    id: 0,
+                    name: String::from("prod0 fail"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(5), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                let test_proc = Process {
+                    id: 1,
+                    name: String::from("test process"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Optional { 
+                                    missing_penalty: 0.0, 
+                                    final_bonus: 1.0 }
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(1), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Output 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(4), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                data.products.insert(0, prod0);
+                data.products.insert(1, prod1);
+                data.products.insert(2, prod2);
+                data.products.insert(3, prod3);
+                data.products.insert(4, prod4);
+                data.products.insert(5, prod5);
+                data.processes.insert(0, fail_proc);
+                data.processes.insert(1, test_proc);
+                let test_proc = data.processes.get(&1).unwrap();
 
-            // test optional bonus calculated handled correctly
-            // test optional input, fixed output
-            // test optional capital, fixed input
-            // test consumed input
+                let mut available_products = HashMap::new();
+                available_products.insert(0, 1.0); // optional, should use all
+                available_products.insert(1, 2.0); // normal, should only 1
+                available_products.insert(2, 2.0); // fixed, should use both via bonus.
+                let available_wants: HashMap<usize, f64> = HashMap::new();
+                let result = test_proc.do_process(&available_products, 
+                    &available_wants, 
+                    0.0, 
+                    None, 
+                    false, 
+                    &data);
+                
+                assert_eq!(result.effective_iterations, 2.0);
+                assert_eq!(result.iterations, 1.0);
+                assert_eq!(result.efficiency, 2.0);
+                assert_eq!(result.input_output_wants.len(), 0);
+                assert_eq!(result.input_output_products.len(), 6);
+                assert_eq!(result.input_output_products[&0], -1.0);
+                assert_eq!(result.input_output_products[&1], -2.0);
+                assert_eq!(result.input_output_products[&2], -1.0);
+                assert_eq!(result.input_output_products[&3], 1.0);
+                assert_eq!(result.input_output_products[&4], 2.0);
+                assert_eq!(result.input_output_products[&5], 1.0);
+                assert_eq!(result.capital_products.len(), 0);
+            }
+
+            #[test]
+            pub fn correctly_restrict_to_available_normal_products() {
+                let mut data = DataManager::new();
+                let prod0 = Product {
+                    id: 0,
+                    name: String::from("Optional Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::from([0]),
+                    failure_process: Some(0),
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod1 = Product {
+                    id: 1,
+                    name: String::from("Normal Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod2 = Product {
+                    id: 2,
+                    name: String::from("Fixed Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod3 = Product {
+                    id: 3,
+                    name: String::from("Fixed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod4 = Product {
+                    id: 4,
+                    name: String::from("Normal Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod5 = Product {
+                    id: 5,
+                    name: String::from("Failed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                // setup product with a failure process.
+                let fail_proc = Process {
+                    id: 0,
+                    name: String::from("prod0 fail"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(5), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                let test_proc = Process {
+                    id: 1,
+                    name: String::from("test process"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Optional { 
+                                    missing_penalty: 0.0, 
+                                    final_bonus: 1.0 }
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(1), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Output 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(4), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                data.products.insert(0, prod0);
+                data.products.insert(1, prod1);
+                data.products.insert(2, prod2);
+                data.products.insert(3, prod3);
+                data.products.insert(4, prod4);
+                data.products.insert(5, prod5);
+                data.processes.insert(0, fail_proc);
+                data.processes.insert(1, test_proc);
+                let test_proc = data.processes.get(&1).unwrap();
+
+                let mut available_products = HashMap::new();
+                available_products.insert(0, 4.0); // optional, should use all
+                available_products.insert(1, 2.0); // normal, should only 1
+                available_products.insert(2, 4.0); // fixed, should use both via bonus.
+                let available_wants: HashMap<usize, f64> = HashMap::new();
+                let result = test_proc.do_process(&available_products, 
+                    &available_wants, 
+                    0.0, 
+                    None, 
+                    false, 
+                    &data);
+                
+                assert_eq!(result.effective_iterations, 2.0);
+                assert_eq!(result.iterations, 1.0);
+                assert_eq!(result.efficiency, 2.0);
+                assert_eq!(result.input_output_wants.len(), 0);
+                assert_eq!(result.input_output_products.len(), 6);
+                assert_eq!(result.input_output_products[&0], -1.0);
+                assert_eq!(result.input_output_products[&1], -2.0);
+                assert_eq!(result.input_output_products[&2], -1.0);
+                assert_eq!(result.input_output_products[&3], 1.0);
+                assert_eq!(result.input_output_products[&4], 2.0);
+                assert_eq!(result.input_output_products[&5], 1.0);
+                assert_eq!(result.capital_products.len(), 0);
+            }
+
+            
+            #[test]
+            pub fn correctly_restrict_to_available_fixed() {
+                let mut data = DataManager::new();
+                let prod0 = Product {
+                    id: 0,
+                    name: String::from("Optional Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::from([0]),
+                    failure_process: Some(0),
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod1 = Product {
+                    id: 1,
+                    name: String::from("Normal Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod2 = Product {
+                    id: 2,
+                    name: String::from("Fixed Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod3 = Product {
+                    id: 3,
+                    name: String::from("Fixed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod4 = Product {
+                    id: 4,
+                    name: String::from("Normal Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod5 = Product {
+                    id: 5,
+                    name: String::from("Failed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                // setup product with a failure process.
+                let fail_proc = Process {
+                    id: 0,
+                    name: String::from("prod0 fail"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(5), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                let test_proc = Process {
+                    id: 1,
+                    name: String::from("test process"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Optional { 
+                                    missing_penalty: 0.0, 
+                                    final_bonus: 1.0 }
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(1), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Output 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(4), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                data.products.insert(0, prod0);
+                data.products.insert(1, prod1);
+                data.products.insert(2, prod2);
+                data.products.insert(3, prod3);
+                data.products.insert(4, prod4);
+                data.products.insert(5, prod5);
+                data.processes.insert(0, fail_proc);
+                data.processes.insert(1, test_proc);
+                let test_proc = data.processes.get(&1).unwrap();
+
+                let mut available_products = HashMap::new();
+                available_products.insert(0, 4.0); // optional, should use all
+                available_products.insert(1, 4.0); // normal, should only 1
+                available_products.insert(2, 1.0); // fixed, should use both via bonus.
+                let available_wants: HashMap<usize, f64> = HashMap::new();
+                let result = test_proc.do_process(&available_products, 
+                    &available_wants, 
+                    0.0, 
+                    None, 
+                    false, 
+                    &data);
+                
+                assert_eq!(result.effective_iterations, 2.0);
+                assert_eq!(result.iterations, 1.0);
+                assert_eq!(result.efficiency, 2.0);
+                assert_eq!(result.input_output_wants.len(), 0);
+                assert_eq!(result.input_output_products.len(), 6);
+                assert_eq!(result.input_output_products[&0], -1.0);
+                assert_eq!(result.input_output_products[&1], -2.0);
+                assert_eq!(result.input_output_products[&2], -1.0);
+                assert_eq!(result.input_output_products[&3], 1.0);
+                assert_eq!(result.input_output_products[&4], 2.0);
+                assert_eq!(result.input_output_products[&5], 1.0);
+                assert_eq!(result.capital_products.len(), 0);
+            }
+
+            #[test]
+            pub fn use_and_consume_optional_input_correctly() {
+                let mut data = DataManager::new();
+                let prod0 = Product {
+                    id: 0,
+                    name: String::from("Optional Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::from([0]),
+                    failure_process: Some(0),
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod1 = Product {
+                    id: 1,
+                    name: String::from("Normal Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod2 = Product {
+                    id: 2,
+                    name: String::from("Fixed Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod3 = Product {
+                    id: 3,
+                    name: String::from("Fixed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod4 = Product {
+                    id: 4,
+                    name: String::from("Normal Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod5 = Product {
+                    id: 5,
+                    name: String::from("Failed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                // setup product with a failure process.
+                let fail_proc = Process {
+                    id: 0,
+                    name: String::from("prod0 fail"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(5), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                let test_proc = Process {
+                    id: 1,
+                    name: String::from("test process"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Optional { 
+                                    missing_penalty: 0.0, 
+                                    final_bonus: 1.0 }
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(1), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Output 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(4), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                data.products.insert(0, prod0);
+                data.products.insert(1, prod1);
+                data.products.insert(2, prod2);
+                data.products.insert(3, prod3);
+                data.products.insert(4, prod4);
+                data.products.insert(5, prod5);
+                data.processes.insert(0, fail_proc);
+                data.processes.insert(1, test_proc);
+                let test_proc = data.processes.get(&1).unwrap();
+
+                let mut available_products = HashMap::new();
+                available_products.insert(0, 1.0); // optional, should use all
+                available_products.insert(1, 2.0); // fixed, should only 1
+                available_products.insert(2, 1.0); // nolmal, should use both via bonus.
+                let available_wants: HashMap<usize, f64> = HashMap::new();
+                let result = test_proc.do_process(&available_products, 
+                    &available_wants, 
+                    0.0, 
+                    None, 
+                    false, 
+                    &data);
+                
+                assert_eq!(result.effective_iterations, 2.0);
+                assert_eq!(result.iterations, 1.0);
+                assert_eq!(result.efficiency, 2.0);
+                assert_eq!(result.input_output_wants.len(), 0);
+                assert_eq!(result.input_output_products.len(), 6);
+                assert_eq!(result.input_output_products[&0], -1.0);
+                assert_eq!(result.input_output_products[&1], -2.0);
+                assert_eq!(result.input_output_products[&2], -1.0);
+                assert_eq!(result.input_output_products[&3], 1.0);
+                assert_eq!(result.input_output_products[&4], 2.0);
+                assert_eq!(result.input_output_products[&5], 1.0);
+                assert_eq!(result.capital_products.len(), 0);
+            }
+
+            #[test]
+            pub fn use_optional_capital_correctly() {
+                let mut data = DataManager::new();
+                let prod0 = Product {
+                    id: 0,
+                    name: String::from("Optional Capital"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::from([0]),
+                    failure_process: Some(0),
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod1 = Product {
+                    id: 1,
+                    name: String::from("Normal Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod2 = Product {
+                    id: 2,
+                    name: String::from("Fixed Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod3 = Product {
+                    id: 3,
+                    name: String::from("Fixed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod4 = Product {
+                    id: 4,
+                    name: String::from("Normal Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod5 = Product {
+                    id: 5,
+                    name: String::from("Failed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                // setup product with a failure process.
+                let fail_proc = Process {
+                    id: 0,
+                    name: String::from("prod0 fail"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                let test_proc = Process {
+                    id: 1,
+                    name: String::from("test process"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Optional { 
+                                    missing_penalty: 0.0, 
+                                    final_bonus: 1.0 }
+                            ], 
+                            part: ProcessSectionTag::Capital 
+                        },
+                        ProcessPart {
+                            item: Item::Product(1), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart {
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Fixed
+                            ], 
+                            part: ProcessSectionTag::Output 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(4), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                data.products.insert(0, prod0);
+                data.products.insert(1, prod1);
+                data.products.insert(2, prod2);
+                data.products.insert(3, prod3);
+                data.products.insert(4, prod4);
+                data.products.insert(5, prod5);
+                data.processes.insert(0, fail_proc);
+                data.processes.insert(1, test_proc);
+                let test_proc = data.processes.get(&1).unwrap();
+
+                let mut available_products = HashMap::new();
+                available_products.insert(0, 1.0); // optional, should use all
+                available_products.insert(1, 2.0); // fixed, should only 1
+                available_products.insert(2, 1.0); // nolmal, should use both via bonus.
+                let available_wants: HashMap<usize, f64> = HashMap::new();
+                let result = test_proc.do_process(&available_products, 
+                    &available_wants, 
+                    0.0, 
+                    None, 
+                    false, 
+                    &data);
+                
+                assert_eq!(result.effective_iterations, 2.0);
+                assert_eq!(result.iterations, 1.0);
+                assert_eq!(result.efficiency, 2.0);
+                assert_eq!(result.input_output_wants.len(), 0);
+                //assert_eq!(result.input_output_products[&0], -1.0);
+                assert_eq!(result.input_output_products.len(), 4);
+                assert_eq!(result.input_output_products[&1], -2.0);
+                assert_eq!(result.input_output_products[&2], -1.0);
+                assert_eq!(result.input_output_products[&3], 1.0);
+                assert_eq!(result.input_output_products[&4], 2.0);
+                assert_eq!(result.capital_products[&0], 1.0);
+            }
+
             #[test]
             pub fn correctly_consume_tagged_consumption_input() {
+                let mut data = DataManager::new();
+                let prod0 = Product {
+                    id: 0,
+                    name: String::from("Consumed Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::from([0]),
+                    failure_process: Some(0),
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod1 = Product {
+                    id: 1,
+                    name: String::from("Normal Input"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod2 = Product {
+                    id: 2,
+                    name: String::from("Normal Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                let prod3 = Product {
+                    id: 3,
+                    name: String::from("Failed Output"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    unit_name: String::new(),
+                    quality: 0,
+                    mass: 0.0,
+                    bulk: 0.0,
+                    mean_time_to_failure: Some(1000),
+                    fractional: false,
+                    tags: vec![],
+                    wants: HashMap::new(),
+                    processes: HashSet::new(),
+                    failure_process: None,
+                    use_processes: HashSet::new(),
+                    consumption_processes: HashSet::new(),
+                    maintenance_processes: HashSet::new(),
+                    tech_required: None,
+                    product_class: None,
+                };
+                // setup product with a failure process.
+                let fail_proc = Process {
+                    id: 0,
+                    name: String::from("prod0 fail"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(3), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                let test_proc = Process {
+                    id: 1,
+                    name: String::from("test product"),
+                    variant_name: String::new(),
+                    description: String::new(),
+                    minimum_time: 0.0,
+                    process_parts: vec![
+                        ProcessPart { 
+                            item: Item::Product(0), 
+                            amount: 1.0, 
+                            part_tags: vec![
+                                ProcessPartTag::Consumed
+                            ], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(1), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Input 
+                        },
+                        ProcessPart { 
+                            item: Item::Product(2), 
+                            amount: 1.0, 
+                            part_tags: vec![], 
+                            part: ProcessSectionTag::Output 
+                        }
+                    ],
+                    process_tags: vec![],
+                    technology_requirement: None,
+                    tertiary_tech: None,
+                };
+                data.products.insert(0, prod0);
+                data.products.insert(1, prod1);
+                data.products.insert(2, prod2);
+                data.products.insert(3, prod3);
+                data.processes.insert(0, fail_proc);
+                data.processes.insert(1, test_proc);
+                let test_proc = data.processes.get(&1).unwrap();
 
+                let mut available_products = HashMap::new();
+                available_products.insert(0, 2.0);
+                available_products.insert(1, 2.0);
+                let available_wants: HashMap<usize, f64> = HashMap::new();
+                let result = test_proc.do_process(&available_products, 
+                    &available_wants, 
+                    0.0, 
+                    None, 
+                    false, 
+                    &data);
+                
+                assert_eq!(result.effective_iterations, 2.0);
+                assert_eq!(result.iterations, 2.0);
+                assert_eq!(result.efficiency, 1.0);
+                assert_eq!(result.input_output_wants.len(), 0);
+                assert_eq!(result.input_output_products.len(), 4);
+                assert_eq!(result.input_output_products[&0], -2.0);
+                assert_eq!(result.input_output_products[&1], -2.0);
+                assert_eq!(result.input_output_products[&2], 2.0);
+                assert_eq!(result.input_output_products[&3], 2.0);
+                assert_eq!(result.capital_products.len(), 0);
             }
 
             #[test]

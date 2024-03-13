@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::{zip_eq, Itertools};
 
-use crate::{constants::{self, lerp}, data_manager::DataManager};
+use crate::{constants::{self, lerp, reverse_lerp}, data_manager::DataManager};
 
 use super::{property_info::PropertyInfo, item::Item};
 
@@ -351,7 +351,8 @@ impl Process {
     /// FIXME Does not handle Overlapping or duplicate products at all. Do Not Use Overlapping Classes or Duplicate Products
     pub fn do_process(&self, available_products: &HashMap<usize, f64>, 
     available_wants: &HashMap<usize, f64>, 
-    _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, data: &DataManager) 
+    _other_efficiency_boni: f64, target: Option<f64>, _hard_cap: bool, 
+    data: &DataManager) 
     -> ProcessOutputs {
         let mut results = ProcessOutputs::new();
         // get how many cycles we can do in total
@@ -360,11 +361,9 @@ impl Process {
         // optional items will need to be ignored if unavailable, but add to the target of all non-fixed items
         // fixed items ignore any efficiency gains from optional
         let mut ratios = HashMap::new();
-        let mut base_iters = f64::INFINITY; // how many we can get without modifications
         let mut normals = HashMap::new(); // The highest we can get 
         let mut lowest_normal = f64::INFINITY;
         let mut max_poss_fixed = f64::INFINITY; // the highest possible fixed iterations.
-        let mut bonus_throughput = 1.0; // The resulting thoughput bonus from optional parts.
         let mut optional_iters = HashMap::new();
         let mut optional_mods = HashMap::new();
         for (idx, process_part) in self.process_parts.iter().enumerate() {
@@ -442,22 +441,66 @@ impl Process {
         // TODO cap is always treated as hard, need to do work to make it soft.
         let cap = target.unwrap_or(f64::INFINITY); // get cap.
         lowest_normal = lowest_normal.min(cap); // reduce max poss fixed to the cap.
-        // with values gotten, begin calculating our bonus and total throughput
+
+        // TODO Note area for soon to come rewrite of this calculation section
+        // Get the minimum number of Fixed iterations we can do
+        // get the minimum number of Normal(Throughput modified) iterations we can do.
+        // Get the iterations we can do with bonuses.
+        // walk up the lowest possible options with each, using as much as possible.
+        let mut fixed_iters = 0.0; // how many iterations of fixed done.
+        let mut normal_iters = 0.0; // how many normal iterations to do.
+        let mut total_bonus = 0.0;
+        // how much of each bonus we consumed (organized by key).
+        let mut bonus_iters = HashMap::new();
+        loop {
+            // get lowest between normal, fixed, and optionals
+            let mut lowest = lowest_normal.min(max_poss_fixed)
+                .min(*optional_iters.values()
+                    .min_by(|a, b| a.total_cmp(b))
+                    .unwrap_or(&f64::INFINITY));
+            // with lowest gotten, record the results and subtract from others.
+            let mut current_bonus = 1.0;
+            let mut cap_reached = false;
+            // iterate by key
+            for (key, (&penalty, &bonus)) in optional_mods.iter()
+                .sorted_by(|a, b| a.0.cmp(b.0)) {
+                let &cur_bon_iter = optional_iters.get(key).unwrap();
+                if cur_bon_iter > 0.0 && !cap_reached{
+                    current_bonus = current_bonus * (1.0 + bonus);
+                } else {
+                    current_bonus = current_bonus * (1.0 + penalty);
+                }
+                // check if we've overshot the normal target
+                if current_bonus * lowest > normal_iters {
+                    // reduce the current bonus to match normal iters, then leave loop
+                    current_bonus = current_bonus / (1.0 + bonus);
+                    let target_bonus = normal_iters / (lowest * current_bonus);
+                }
+            }
+        }
+
+
+        // with values gotten, begin calculating our bonus and total throughput available
+        let mut max_bonus_iteration = f64::INFINITY;
         for (key, &ratio) in optional_iters.iter() {
             let available_fixed_iters = max_poss_fixed.min(ratio);
+            if ratio > 0.0 { // if no possible iterations, don't include.
+                max_bonus_iteration = max_bonus_iteration.min(ratio); 
+            }
             let (&start, &end) = optional_mods.get(key).unwrap();
             let t = available_fixed_iters / max_poss_fixed;
             let eff = lerp(start, end, t);
-            bonus_throughput = bonus_throughput * eff;
+            bonus_throughput = bonus_throughput * (1.0 + eff);
         }
         // given that our normal iterations is the maximum we can consume, 
         // find the amonut of fixed we'd need to match it with our current bonii.
         let mut fixed_target = lowest_normal / bonus_throughput;
-        if fixed_target > max_poss_fixed { 
+        if fixed_target >= max_poss_fixed { // if fixed target is above our possible, reduce
             // If the possible target is above max fixed, reduce down to possible target
-            fixed_target = max_poss_fixed; // Since this is a reduction to fixed, full bonus will remain in effect
+            fixed_target = max_poss_fixed;
+            // optional iterations can be lower so reduce their iterations
             lowest_normal = fixed_target * bonus_throughput;
-        }
+        } 
         // TODO make consider adding profitability check here for optional products vs the extra output.
         
         let ratio_available = fixed_target * bonus_throughput;
@@ -473,8 +516,8 @@ impl Process {
         for process_part in self.process_parts.iter() {
             let mut in_out_sign = 1.0;
             let mut fixed = false;
-            let mut optional = true;
-            let mut consumed = true;
+            let mut optional = false;
+            let mut consumed = false;
             for tag in process_part.part_tags.iter() {
                 match tag {
                     ProcessPartTag::Fixed => fixed = true,
@@ -541,13 +584,16 @@ impl Process {
                 Item::Class(id) => { // TODO test this part of the code!
                     debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
                     // TODO improve this to deal with overlap and quality management.
-                    if fixed {
+                    // remove from inputs
+                    let removed_products = if fixed {
                         Process::class_part_processing(id, &available_products, data, 
-                            fixed_target, process_part, &mut results);
+                            fixed_target, process_part, &mut results)
                     } else { // not fixed
                         Process::class_part_processing(id, &available_products, data, 
-                            ratio_available, process_part, &mut results);
-                    }
+                            ratio_available, process_part, &mut results)
+                    };
+                    // if marked consumed, also fail process those specific items as well.
+
                 },
             }
         }
@@ -582,8 +628,9 @@ impl Process {
     }
 
     fn class_part_processing(class_id: usize, available_products: &HashMap<usize, f64>, data: &DataManager, 
-    iterations: f64, process_part: &ProcessPart, results: &mut ProcessOutputs) {
-        // get the plass products
+    iterations: f64, process_part: &ProcessPart, results: &mut ProcessOutputs) -> HashMap<usize, f64> {
+        let mut ret = HashMap::new();
+        // get the class products
         let class_mates = available_products.iter()
         .filter(|(&prod_id, _)| {
             let class = data.get_product_class(prod_id);
@@ -594,12 +641,14 @@ impl Process {
         // get items up to our needs
         let mut target = process_part.amount * iterations;
         for (&product_id, &quantity) in class_mates {
-            let remove = quantity.min(target);
+            let add = quantity.min(target);
             results.input_output_products.entry(product_id)
-            .and_modify(|x| *x -= remove).or_insert(-remove);
-            target -= remove;
+            .and_modify(|x| *x += add).or_insert(add);
+            ret.insert(product_id, add);
+            target -= add;
             if target == 0.0 { break; }
         }
+        ret
     }
 
     /// # The Do Process With Property

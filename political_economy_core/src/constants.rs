@@ -169,3 +169,16 @@ pub const ACP_MIN_REDUCTION_FACTOR: f64 = 0.2;
 pub fn lerp(v0: f64, v1: f64, t: f64) -> f64 {
     (1.0 - t) * v0 + t * v1
 }
+
+/// # Reverse Lerp
+/// 
+/// Given standard lerp data, and the target position, this retruns
+/// the t value needed to get the target value given.
+/// 
+/// # Note
+/// 
+/// If v0 and v1 are equal, then f64 will return NaN as that's division by 0.
+pub fn reverse_lerp(v0: f64, v1: f64, target: f64) -> f64 {
+    debug_assert!(v0 != v1, "Division by zero issue will occur. Not valid result.");
+    (target - v0) / (v1 - v0)
+}

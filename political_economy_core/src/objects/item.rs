@@ -6,9 +6,21 @@ use std::fmt::Display;
 /// pass it around more nicely.
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
 pub enum Item {
-    /// A desire for a want (Food).
+    /// A desire for a want (Food). A generic, abstract thing that is 
+    /// often tied to many things, but is nothing specific.
     Want(usize),
-    /// A desire for a class of good (Bread).
+    /// A desire for a class of good (Bread). A generic, but otherwise 
+    /// concrete thing which can have many kinds contined within. Products
+    /// may or may not be variants of the same product.
+    /// 
+    /// # Note
+    /// 
+    /// NEVER assume products within the same class have the same bulk or
+    /// mass.
+    /// 
+    /// When used as an input to a process, it is treated like a product
+    /// and just cosumed by the process. To consume for a specific variant
+    /// of product, apply ProcessPartTag::Consumption.
     Class(usize),
     /// A desire for a specific good (Wonderbread).
     Product(usize),
