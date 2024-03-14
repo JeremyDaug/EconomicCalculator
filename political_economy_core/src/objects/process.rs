@@ -1,5 +1,5 @@
 ///! Processes transform Products and Wants into other products and wants.
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, option};
 
 use itertools::{zip_eq, Itertools};
 
@@ -449,7 +449,7 @@ impl Process {
         // walk up the lowest possible options with each, using as much as possible.
         let mut fixed_iters = 0.0; // how many iterations of fixed done.
         let mut normal_iters = 0.0; // how many normal iterations to do.
-        let mut total_bonus = 0.0;
+        let mut total_bonus = 1.0;
         // how much of each bonus we consumed (organized by key).
         let mut bonus_iters = HashMap::new();
         loop {
@@ -461,10 +461,13 @@ impl Process {
             // with lowest gotten, record the results and subtract from others.
             let mut current_bonus = 1.0;
             let mut cap_reached = false;
-            // iterate by key
+            // iterate by key over the optionals
             for (key, (&penalty, &bonus)) in optional_mods.iter()
                 .sorted_by(|a, b| a.0.cmp(b.0)) {
                 let &cur_bon_iter = optional_iters.get(key).unwrap();
+                bonus_iters.entry(key)
+                    .and_modify(|x| *x += cur_bon_iter)
+                    .or_insert(cur_bon_iter);
                 if cur_bon_iter > 0.0 && !cap_reached{
                     current_bonus = current_bonus * (1.0 + bonus);
                 } else {
@@ -473,47 +476,40 @@ impl Process {
                 // check if we've overshot the normal target
                 if current_bonus * lowest > normal_iters {
                     // reduce the current bonus to match normal iters, then leave loop
+                    bonus_iters.entry(key).and_modify(|x| *x -= cur_bon_iter); // remove iters
                     current_bonus = current_bonus / (1.0 + bonus);
-                    let target_bonus = normal_iters / (lowest * current_bonus);
+                    let target_bonus = normal_iters / (lowest * current_bonus); // get the bonus needed
+                    current_bonus = current_bonus * (1.0 + target_bonus); // add target back into current.
+                    let ratio = reverse_lerp(penalty, bonus, target_bonus); // get the ratio of iteration needed.
+                    bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
+                    cap_reached = true; // set cap reached = true for future needs.
+                    break; // get out of optional loop, no benefit can come from going further.
                 }
             }
-        }
-
-
-        // with values gotten, begin calculating our bonus and total throughput available
-        let mut max_bonus_iteration = f64::INFINITY;
-        for (key, &ratio) in optional_iters.iter() {
-            let available_fixed_iters = max_poss_fixed.min(ratio);
-            if ratio > 0.0 { // if no possible iterations, don't include.
-                max_bonus_iteration = max_bonus_iteration.min(ratio); 
+            // with bonii gotten, apply fixed alteration
+            max_poss_fixed -= lowest;
+            fixed_iters += lowest;
+            // same with normals, but don't forget the bonus throughput.
+            lowest_normal -= lowest * current_bonus;
+            normal_iters += lowest * current_bonus;
+            if max_poss_fixed == 0.0 || normal_iters == 0.0 {
+                // if we cannot get more fixed or normal iterations in, bounce.
+                break;
             }
-            let (&start, &end) = optional_mods.get(key).unwrap();
-            let t = available_fixed_iters / max_poss_fixed;
-            let eff = lerp(start, end, t);
-            bonus_throughput = bonus_throughput * (1.0 + eff);
         }
-        // given that our normal iterations is the maximum we can consume, 
-        // find the amonut of fixed we'd need to match it with our current bonii.
-        let mut fixed_target = lowest_normal / bonus_throughput;
-        if fixed_target >= max_poss_fixed { // if fixed target is above our possible, reduce
-            // If the possible target is above max fixed, reduce down to possible target
-            fixed_target = max_poss_fixed;
-            // optional iterations can be lower so reduce their iterations
-            lowest_normal = fixed_target * bonus_throughput;
-        } 
+
         // TODO make consider adding profitability check here for optional products vs the extra output.
         
-        let ratio_available = fixed_target * bonus_throughput;
         // without efficiency gains, our ratio is our fixed target
-        results.iterations = fixed_target;
+        results.iterations = fixed_iters;
         // efficiency is equal to the total possible gain we were able to achieved.
-        results.efficiency = bonus_throughput;
+        results.efficiency = total_bonus;
         // effective iterations is our iterations after applying efficiency gains.
-        results.effective_iterations = ratio_available;
+        results.effective_iterations = normal_iters;
 
         // with our target ratio gotten, create the return results for inputs and outputs
         // TODO fixed items will also need to be taken into account here.
-        for process_part in self.process_parts.iter() {
+        for (idx, process_part) in self.process_parts.iter().enumerate() {
             let mut in_out_sign = 1.0;
             let mut fixed = false;
             let mut optional = false;
@@ -532,13 +528,14 @@ impl Process {
                         // add used capital products
                         if fixed {
                             results.capital_products
-                                .insert(process_part.item.unwrap(), process_part.amount * fixed_target);
+                                .insert(process_part.item.unwrap(), process_part.amount * fixed_iters);
                         } else if optional {
+                            let optional_val = bonus_iters.get(&idx).unwrap();
                             results.capital_products
-                                .insert(process_part.item.unwrap(), process_part.amount * fixed_target);
+                                .insert(process_part.item.unwrap(), process_part.amount * optional_val);
                         } else {
                             results.capital_products
-                                .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
+                                .insert(process_part.item.unwrap(), process_part.amount * normal_iters);
                         }
                         
 
@@ -553,32 +550,40 @@ impl Process {
             // if not capital, add to appropriate input_output
             match process_part.item {
                 Item::Product(id) => {
-                    if fixed || optional {
+                    if fixed {
                         results.input_output_products.entry(id)
-                            .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_target)
-                            .or_insert(in_out_sign * process_part.amount * fixed_target);
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_iters)
+                            .or_insert(in_out_sign * process_part.amount * fixed_iters);
+                    } else if optional {
+                        let optional_val = bonus_iters.get(&idx).unwrap();
+                        results.input_output_products.entry(id)
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * optional_val)
+                            .or_insert(in_out_sign * process_part.amount * optional_val);
                     } else { // consumed or others
                         results.input_output_products.entry(id)
-                            .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
-                            .or_insert(in_out_sign * process_part.amount * ratio_available);
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * normal_iters)
+                            .or_insert(in_out_sign * process_part.amount * normal_iters);
                     }
                     // if optional or consumed, add the failure outputs.
-                    if optional || (consumed && fixed) { // consume process on these.
-                        Process::get_consumed_outputs(id, data, &mut results, fixed_target);
+                    if (consumed && fixed) { // consume process on these.
+                        Process::get_consumed_outputs(id, data, &mut results, fixed_iters);
+                    } else if optional {
+                        let &optional_val = bonus_iters.get(&idx).unwrap();
+                        Process::get_consumed_outputs(id, data, &mut results, optional_val);
                     } else if consumed { // consume process on these.
-                        Process::get_consumed_outputs(id, data, &mut results, ratio_available);
+                        Process::get_consumed_outputs(id, data, &mut results, normal_iters);
                     }
                 },
                 Item::Want(id) => {
                     // Consumed are not considerde valid.
                     if fixed {
                         results.input_output_wants.entry(id)
-                        .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_target)
-                        .or_insert(in_out_sign * process_part.amount * fixed_target);
+                        .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_iters)
+                        .or_insert(in_out_sign * process_part.amount * fixed_iters);
                     } else { // not fixed
                         results.input_output_wants.entry(id)
-                        .and_modify(|x| *x += in_out_sign * process_part.amount * ratio_available)
-                        .or_insert(in_out_sign * process_part.amount * ratio_available);
+                        .and_modify(|x| *x += in_out_sign * process_part.amount * normal_iters)
+                        .or_insert(in_out_sign * process_part.amount * normal_iters);
                     }
                 },
                 Item::Class(id) => { // TODO test this part of the code!
@@ -587,13 +592,19 @@ impl Process {
                     // remove from inputs
                     let removed_products = if fixed {
                         Process::class_part_processing(id, &available_products, data, 
-                            fixed_target, process_part, &mut results)
+                            fixed_iters, process_part, &mut results)
+                    } else if optional {
+                        let &optional_val = bonus_iters.get(&idx).unwrap();
+                        Process::class_part_processing(id, &available_products, data, 
+                            optional_val, process_part, &mut results)
                     } else { // not fixed
                         Process::class_part_processing(id, &available_products, data, 
-                            ratio_available, process_part, &mut results)
+                            normal_iters, process_part, &mut results)
                     };
                     // if marked consumed, also fail process those specific items as well.
-
+                    for (&id, &amount) in removed_products.iter() {
+                        Process::get_consumed_outputs(id, data, &mut results, amount);
+                    }
                 },
             }
         }
@@ -601,6 +612,14 @@ impl Process {
         results
     }
 
+    /// # Get consumed outputs
+    /// 
+    /// Takes an ID of the product we want to consume (fail), the result 
+    /// outputs we are going to add to, and the iterations (amount) of 
+    /// the item we are going to fail.
+    /// 
+    /// This does not destroy the product given, instead assuming that it
+    /// was consumed elsewhere.
     fn get_consumed_outputs(product_id: usize, data: &DataManager, results: &mut ProcessOutputs, iterations: f64) {
         let prod = data.products.get(&product_id).unwrap();
         let process_id = prod.failure_process;
