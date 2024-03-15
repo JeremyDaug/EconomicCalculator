@@ -366,6 +366,7 @@ impl Process {
         let mut max_poss_fixed = f64::INFINITY; // the highest possible fixed iterations.
         let mut optional_iters = HashMap::new();
         let mut optional_mods = HashMap::new();
+        let mut initial_penalty = 1.0; // the penalty which we have if no optional parts are used.
         for (idx, process_part) in self.process_parts.iter().enumerate() {
             if let ProcessSectionTag::Capital = process_part.part { // skip capital wants for now.
                 // todo add capital want handling here.
@@ -424,6 +425,7 @@ impl Process {
             if let Some((penalty, bonus)) = optional { // if optional, get that info and record it as optional
                 optional_iters.insert(idx, ratio);
                 optional_mods.insert(idx, (penalty, bonus));
+                initial_penalty = initial_penalty * (1.0 + penalty);
             } else { // non optional
                 if fixed { // and fixed, modify max possible fixed to be the lower between this and it's current vaule.
                     max_poss_fixed = max_poss_fixed.min(ratio);
@@ -454,48 +456,62 @@ impl Process {
         let mut bonus_iters = HashMap::new();
         loop {
             // get lowest between normal, fixed, and optionals
-            let mut lowest = lowest_normal.min(max_poss_fixed)
+            let lowest = lowest_normal.min(max_poss_fixed)
                 .min(*optional_iters.values()
                     .min_by(|a, b| a.total_cmp(b))
                     .unwrap_or(&f64::INFINITY));
             // with lowest gotten, record the results and subtract from others.
-            let mut current_bonus = 1.0;
+            let mut current_bonus = initial_penalty;
             let mut cap_reached = false;
             // iterate by key over the optionals
-            for (key, (&penalty, &bonus)) in optional_mods.iter()
+            for (&key, (&penalty, &bonus)) in optional_mods.iter()
                 .sorted_by(|a, b| a.0.cmp(b.0)) {
-                let &cur_bon_iter = optional_iters.get(key).unwrap();
-                bonus_iters.entry(key)
-                    .and_modify(|x| *x += cur_bon_iter)
-                    .or_insert(cur_bon_iter);
+                let &cur_bon_iter = optional_iters.get(&key).unwrap();
                 if cur_bon_iter > 0.0 && !cap_reached{
+                    // remove penalty first
+                    current_bonus = current_bonus / (1.0 + penalty);
                     current_bonus = current_bonus * (1.0 + bonus);
-                } else {
-                    current_bonus = current_bonus * (1.0 + penalty);
-                }
+                    // include in bonus iters fully
+                    bonus_iters.entry(key)
+                        .and_modify(|x| *x += lowest)
+                        .or_insert(lowest);
+                } // no else, penalty is included by default.
                 // check if we've overshot the normal target
-                if current_bonus * lowest > normal_iters {
-                    // reduce the current bonus to match normal iters, then leave loop
-                    bonus_iters.entry(key).and_modify(|x| *x -= cur_bon_iter); // remove iters
-                    current_bonus = current_bonus / (1.0 + bonus);
-                    let target_bonus = normal_iters / (lowest * current_bonus); // get the bonus needed
-                    current_bonus = current_bonus * (1.0 + target_bonus); // add target back into current.
-                    let ratio = reverse_lerp(penalty, bonus, target_bonus); // get the ratio of iteration needed.
-                    bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
-                    cap_reached = true; // set cap reached = true for future needs.
+                if current_bonus * lowest > lowest_normal {
+                    if lowest == lowest_normal { 
+                        // if overflows because this normal lowest is lowest, maximize savings
+                        bonus_iters.entry(key).and_modify(|x| *x -= lowest); // remove iters
+                        
+                        let fixed_target = lowest_normal / current_bonus;
+
+                        bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
+                    } else { // else, reduce to cap at normal
+                        // reduce the current bonus to match normal iters, then leave loop
+                        bonus_iters.entry(key).and_modify(|x| *x -= lowest); // remove iters
+                        current_bonus = current_bonus / (1.0 + bonus);
+                        let target_bonus = lowest_normal / (lowest * current_bonus); // get the bonus needed
+                        current_bonus = current_bonus * (1.0 + target_bonus); // add target back into current.
+                        let ratio = reverse_lerp(penalty, bonus, target_bonus); // get the ratio of iteration needed.
+                        bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
+                        cap_reached = true; // set cap reached = true for future needs.
+                    }
                     break; // get out of optional loop, no benefit can come from going further.
                 }
             }
+            // update total bonuses (add bonus via average.)
+            total_bonus = ((total_bonus * fixed_iters) + (current_bonus * lowest)) / (fixed_iters + lowest);
             // with bonii gotten, apply fixed alteration
             max_poss_fixed -= lowest;
             fixed_iters += lowest;
             // same with normals, but don't forget the bonus throughput.
             lowest_normal -= lowest * current_bonus;
             normal_iters += lowest * current_bonus;
-            if max_poss_fixed == 0.0 || normal_iters == 0.0 {
+            if max_poss_fixed == 0.0 || lowest_normal == 0.0 {
                 // if we cannot get more fixed or normal iterations in, bounce.
                 break;
-            }
+            } 
+            debug_assert!(max_poss_fixed >= 0.0, "Max Possible fixed somehow got below 0.");
+            debug_assert!(lowest_normal >= 0.0, "Lowest normal somehow got below 0.");
         }
 
         // TODO make consider adding profitability check here for optional products vs the extra output.

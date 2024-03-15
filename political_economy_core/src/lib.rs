@@ -17105,7 +17105,6 @@ mod tests {
                 assert_eq!(result.input_output_products[&5], 1.0);
                 assert_eq!(result.capital_products.len(), 0);
             }
-
             
             #[test]
             pub fn correctly_restrict_to_available_fixed() {
@@ -18329,7 +18328,7 @@ mod tests {
                 assert!(*results.input_output_products.get(&0).unwrap() == -2.0);
                 assert!(*results.input_output_products.get(&2).unwrap() == 2.0);
                 assert!(results.effective_iterations == 2.0);
-                assert!(results.efficiency == 1.0);
+                assert_eq!(results.efficiency, 1.0);
                 assert!(results.iterations == 2.0);
             }
 
