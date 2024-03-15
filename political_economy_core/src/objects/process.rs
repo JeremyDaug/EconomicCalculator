@@ -456,7 +456,7 @@ impl Process {
         let mut bonus_iters = HashMap::new();
         loop {
             // get lowest between normal, fixed, and optionals
-            let lowest = lowest_normal.min(max_poss_fixed)
+            let mut lowest = lowest_normal.min(max_poss_fixed)
                 .min(*optional_iters.values()
                     .min_by(|a, b| a.total_cmp(b))
                     .unwrap_or(&f64::INFINITY));
@@ -481,10 +481,9 @@ impl Process {
                     if lowest == lowest_normal { 
                         // if overflows because this normal lowest is lowest, maximize savings
                         bonus_iters.entry(key).and_modify(|x| *x -= lowest); // remove iters
-                        
-                        let fixed_target = lowest_normal / current_bonus;
-
-                        bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
+                        // reduce effective lowest to maximize effect.
+                        lowest = lowest_normal / current_bonus;
+                        bonus_iters.entry(key).and_modify(|x| *x += lowest); // add this ratio of iters back in.
                     } else { // else, reduce to cap at normal
                         // reduce the current bonus to match normal iters, then leave loop
                         bonus_iters.entry(key).and_modify(|x| *x -= lowest); // remove iters

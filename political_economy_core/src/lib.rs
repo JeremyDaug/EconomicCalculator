@@ -16865,6 +16865,8 @@ mod tests {
                 assert_eq!(result.capital_products.len(), 0);
             }
 
+            // TODO add test for when normal iteration overflow occurs and normal_lowest is not overall lowest.
+
             #[test]
             pub fn correctly_restrict_to_available_normal_products() {
                 let mut data = DataManager::new();
