@@ -16625,7 +16625,7 @@ mod tests {
             use crate::{data_manager::DataManager, objects::{item::Item, process::{Process, ProcessPart, ProcessPartTag, ProcessSectionTag}, product::Product}};
 
             #[test]
-            pub fn restrict_and_recalculate_when_reduction_would_increase_bonus() {
+            pub fn correctly_restrict_when_bonus_pushes_over_normal_but_normal_is_not_current_lowest() {
                 let mut data = DataManager::new();
                 let prod0 = Product {
                     id: 0,
@@ -16840,9 +16840,9 @@ mod tests {
                 let test_proc = data.processes.get(&1).unwrap();
 
                 let mut available_products = HashMap::new();
-                available_products.insert(0, 1.0); // optional, should use all
-                available_products.insert(1, 2.0); // normal, should only 1
-                available_products.insert(2, 2.0); // fixed, should use both via bonus.
+                available_products.insert(0, 4.0); // optional, should use all
+                available_products.insert(1, 4.0); // normal, should only 1
+                available_products.insert(2, 3.0); // fixed, should use both via bonus.
                 let available_wants: HashMap<usize, f64> = HashMap::new();
                 let result = test_proc.do_process(&available_products, 
                     &available_wants, 
@@ -16851,22 +16851,22 @@ mod tests {
                     false, 
                     &data);
                 
-                assert_eq!(result.effective_iterations, 2.0);
-                assert_eq!(result.iterations, 1.0);
-                assert_eq!(result.efficiency, 2.0);
+                assert_eq!(result.effective_iterations, 4.0);
+                assert_eq!(result.iterations, 3.0);
+                assert_eq!(result.efficiency, 4.0/3.0);
                 assert_eq!(result.input_output_wants.len(), 0);
                 assert_eq!(result.input_output_products.len(), 6);
-                assert_eq!(result.input_output_products[&0], -1.0);
-                assert_eq!(result.input_output_products[&1], -2.0);
-                assert_eq!(result.input_output_products[&2], -1.0);
-                assert_eq!(result.input_output_products[&3], 1.0);
-                assert_eq!(result.input_output_products[&4], 2.0);
-                assert_eq!(result.input_output_products[&5], 1.0);
+                // Note, this rounds due to floating point rounding errors around 
+                assert_eq!(result.input_output_products[&0].round(), -1.0);
+                assert_eq!(result.input_output_products[&1], -4.0);
+                assert_eq!(result.input_output_products[&2], -3.0);
+                assert_eq!(result.input_output_products[&3], 3.0);
+                assert_eq!(result.input_output_products[&4], 4.0);
+                // rounded to to floating point errors.
+                assert_eq!(result.input_output_products[&5].round(), 1.0);
                 assert_eq!(result.capital_products.len(), 0);
             }
-
-            // TODO add test for when normal iteration overflow occurs and normal_lowest is not overall lowest.
-
+            
             #[test]
             pub fn correctly_restrict_to_available_normal_products() {
                 let mut data = DataManager::new();

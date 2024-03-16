@@ -489,8 +489,8 @@ impl Process {
                         bonus_iters.entry(key).and_modify(|x| *x -= lowest); // remove iters
                         current_bonus = current_bonus / (1.0 + bonus);
                         let target_bonus = lowest_normal / (lowest * current_bonus); // get the bonus needed
-                        current_bonus = current_bonus * (1.0 + target_bonus); // add target back into current.
-                        let ratio = reverse_lerp(penalty, bonus, target_bonus); // get the ratio of iteration needed.
+                        current_bonus = current_bonus * (target_bonus); // add target back into current.
+                        let ratio = reverse_lerp(penalty, bonus, target_bonus-1.0); // get the ratio of iteration needed.
                         bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
                         cap_reached = true; // set cap reached = true for future needs.
                     }
