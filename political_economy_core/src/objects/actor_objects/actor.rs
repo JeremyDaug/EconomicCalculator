@@ -18,3 +18,7 @@ pub trait Actor {
         demos: &Demographics,
         history: &MarketHistory);
 }
+
+pub enum Something<'a> {
+    val { thing: &'a dyn Actor }
+}

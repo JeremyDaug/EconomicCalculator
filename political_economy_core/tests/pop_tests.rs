@@ -29,7 +29,7 @@ use political_economy_core::{
                 PopBreakdownTable}, 
             species::Species
         },
-        environmental_objects::market::{MarketHistory, ProductInfo}
+        environmental_objects::market::{MarketHistory, ProductInfo, MarketWantInfo}
     }
 };
 
@@ -4980,15 +4980,26 @@ mod pop_tests {
     /// These tests 
     mod pop_integration_tests {
         use std::collections::{HashMap, HashSet};
+        use itertools::Itertools;
+
         use super::super::*;
 
-        fn _setup_pop_test_data() -> (MarketHistory, DataManager) {
+        /// Gives
+        /// 
+        /// Wants: Rest, Wealth, Sustenance
+        /// Products: Time, Shopping Time, Discernment, Resources, Wealth, Capital, Skill
+        /// Processes: Go Shopping, Rest, Extraction, Make Wealth, Make Capital, Consume Capital
+        /// Market Prices (AMV):
+        /// - Resources: 1.0 
+        /// - Wealth: 5.0
+        /// - Capital: 3.0
+        fn setup_pop_test_data() -> (MarketHistory, DataManager) {
             let mut manager = DataManager::new();
             // get required items.
             // Loads 
             // wants: Rest, Wealth, 
             // products: Time, Shopping Time, Discernment Skill
-            // processes: Go Shopping, 
+            // processes: Go Shopping, Rest
             manager.required_items();
 
             // set up 'food' want in sustenance
@@ -5294,6 +5305,44 @@ mod pop_tests {
                 tertiary_tech: None,
             };
 
+            // sets up history.
+            let mut history = MarketHistory {
+                product_info: HashMap::new(),
+                class_info: HashMap::new(),
+                want_info: HashMap::new(),
+                sale_priority: vec![],
+                currencies: vec![],
+            };
+
+            history.product_info.insert(resources.id, ProductInfo {
+                available: 100.0,
+                price: 1.0,
+                offered: 100.0,
+                sold: 0.0,
+                salability: 0.5,
+                is_currency: false,
+            });
+            history.product_info.insert(wealth.id, ProductInfo {
+                available: 100.0,
+                price: 5.0,
+                offered: 100.0,
+                sold: 0.0,
+                salability: 1.0,
+                is_currency: false,
+            });
+            history.product_info.insert(capital.id, ProductInfo {
+                available: 100.0,
+                price: 3.0,
+                offered: 100.0,
+                sold: 0.0,
+                salability: 0.5,
+                is_currency: false,
+            });
+            history.want_info.insert(sustenance.id, MarketWantInfo::new(1.0));
+            history.sale_priority.push(wealth.id);
+            history.sale_priority.push(capital.id);
+            history.sale_priority.push(resources.id);
+
             manager.wants.insert(sustenance.id, sustenance);
             manager.products.insert(resources.id, resources);
             manager.products.insert(wealth.id, wealth);
@@ -5305,16 +5354,60 @@ mod pop_tests {
             manager.processes.insert(make_capital.id, make_capital);
             manager.processes.insert(consume_wealth.id, consume_wealth);
 
-            // sets up history.
-            let mut history = MarketHistory {
-                product_info: HashMap::new(),
-                class_info: HashMap::new(),
-                want_info: HashMap::new(),
-                sale_priority: vec![],
-                currencies: vec![],
-            };
-
             (history, manager)
+        }
+    
+        /// # Pop Barter Test
+        /// 
+        /// Given a simple economy, we test that two pops connecting to each 
+        /// other trade successfully at least once.
+        #[test]
+        fn pop_barter_test() {
+            let (history, data) = setup_pop_test_data();
+
+            // get some data to make values more robust.
+            let rest = data.wants.get(&REST_WANT_ID).unwrap();
+            let sustenance = data.wants.iter().find_or_first(|x| {
+                x.1.name.eq(&String::from("Sustenance"))
+            }).unwrap().1;
+            //let 
+
+            let mut pop1 = Pop {
+                id: 0,
+                job: 0,
+                firm: 0,
+                market: 0,
+                property: Property::new(vec![
+                    Desire::new(item, start, end, amount, satisfaction, step, tags)
+                ]),
+                breakdown_table: PopBreakdownTable {
+                    table: vec![],
+                    total: 1,
+                },
+                is_selling: true,
+                current_sat: TieredValue { tier: 0, value: 0.0 },
+                prev_sat: TieredValue { tier: 0, value: 0.0 },
+                hypo_change: TieredValue { tier: 0, value: 0.0 },
+                backlog: VecDeque::new(),
+            };
+            let mut pop2 = Pop {
+                id: 1,
+                job: 1,
+                firm: 1,
+                market: 0,
+                property: Property::new(vec![
+
+                ]),
+                breakdown_table: PopBreakdownTable {
+                    table: vec![],
+                    total: 1,
+                },
+                is_selling: true,
+                current_sat: TieredValue { tier: 0, value: 0.0 },
+                prev_sat: TieredValue { tier: 0, value: 0.0 },
+                hypo_change: TieredValue { tier: 0, value: 0.0 },
+                backlog: VecDeque::new(),
+            };
         }
     }
 }
