@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["add",""]],"mod":[["data_manager",""],["demographics","Demographics is the storage container and manager common demographic data like Species, Civilizations, Cultures, and Ideologies."],["objects",""],["runner","Master, this is the root for our simulation program going forward."]]};

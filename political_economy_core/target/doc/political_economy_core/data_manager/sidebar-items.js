@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["DataManager","The DataManager is the main manager for our simulation It contains all of the data needed for the simulation in active memory, available for use as needed."]]};

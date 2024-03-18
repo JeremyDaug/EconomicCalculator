@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Culture","A Culture, the social nature of the pop. How they act unconsciously, and how they view themselves."]]};

@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Master, this is the root for our simulation program going forward."><meta name="keywords" content="rust, rustlang, rust-lang, runner"><title>political_economy_core::runner - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../political_economy_core/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../political_economy_core/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module runner</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#structs">Structs</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../political_economy_core/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">political_economy_core</a>::<wbr><a class="mod" href="#">runner</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/political_economy_core/runner.rs.html#1-100">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Master, this is the root for our simulation program going forward.</p>
+<h2 id="data"><a href="#data">Data</a></h2>
+<ul>
+<li>Core Data
+<ul>
+<li>Sets</li>
+<li>Wants</li>
+<li>Technologies</li>
+<li>Technology Families</li>
+<li>Products</li>
+<li>Skills</li>
+<li>Skill Groups</li>
+<li>Processes</li>
+<li>Jobs</li>
+</ul>
+</li>
+<li>Recordkeeping
+<ul>
+<li>Species
+<ul>
+<li>Subtypes (Sex/Caste)</li>
+<li>Cohorts (Life Phases)</li>
+</ul>
+</li>
+<li>Civilization (Not Built)
+<ul>
+<li>Epoch (Ages)</li>
+</ul>
+</li>
+<li>Culture
+<ul>
+<li>Class</li>
+<li>Generation</li>
+</ul>
+</li>
+<li>Ideology (Not Built)
+<ul>
+<li>Wave</li>
+<li>Faction</li>
+</ul>
+</li>
+<li>Movements (Not Built)</li>
+</ul>
+</li>
+<li>Environmental
+<ul>
+<li>Territories</li>
+<li>Markets</li>
+</ul>
+</li>
+<li>Actors
+<ul>
+<li>Pops</li>
+<li>Firms</li>
+<li>Institutions (Not Built)</li>
+<li>States (Not Built)</li>
+</ul>
+</li>
+</ul>
+<h2 id="data-details"><a href="#data-details">Data Details</a></h2><h3 id="core-data"><a href="#core-data">Core Data</a></h3>
+<p>Core Data is the data which should never need to change during regular play.
+It only changes during the “Update” logical phase, which bookends our cycle
+and should be available to access through immutable references passed 
+around through the rest of the system.</p>
+<h3 id="recordkeeping"><a href="#recordkeeping">Recordkeeping</a></h3>
+<p>Recordkeeping data are those things which are primarily reference data, but 
+will be updated and record changes made during the appropriate change phase.
+The changes will primarily take place during the population phase, when new
+pops will be created, altered, assimilated, converted, or die.</p>
+<p>The Recordkeepers are handled collectively in a single thread as they
+shouldn’t need additional aid and </p>
+<p>Hypothetically, it is available as an immutable reference elsewhere in the
+code during most phases. During the Pop Change phase, it should be a
+listener, rather than a reference. The Pop Threads making changes record
+basic data, send that over to the Recordkeepers, and they send back
+additional data, for the pop thread to address and modify further (if
+necissary).</p>
+<h3 id="environmental"><a href="#environmental">Environmental</a></h3>
+<p>Environmental data are the places where actors are interacting in directly.
+These are in their own thread, with Markets being the primary, and territory 
+(the map) being secondary and buffered by the market. Markets are the primary
+interface between the actors and the map, the market has a compiled copy of
+the territories’ info that it contains.</p>
+<p>The Map will try to do it’s calculation work while the rest of the system works
+allowing to offload stuff. The hope is that the map can be going over it’s 
+data, updating available resources, calculating climatalogical changes like
+weather, tempurature, rain, etc. Hopefully this can be done with minimal
+collisions with the Market. </p>
+<p>Map alterations may be split into 2 phases, an exchange phase between it and 
+the market and a climate phase, getting the changes for the new map. Or
+the market and map will work together to start, then once market work is done
+the map will begun updating.</p>
+<h3 id="actors"><a href="#actors">Actors</a></h3>
+<p>Actors are those who can act and have an AI attached to them. Pops, Firms,
+Institutions, and States (states may be the same as Institutions), can
+all act and interact.</p>
+<p>Each actor is given it’s own thread so it may act with the market it is
+connected to, and may also communicate with it’s various connections
+such as parent or child firms which share a market.</p>
+<p>Actors and their Market communicate by bus to collect data and try and 
+exchange goods.</p>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Runner.html" title="political_economy_core::runner::Runner struct">Runner</a></div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="political_economy_core" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

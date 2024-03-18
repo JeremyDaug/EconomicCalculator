@@ -1,0 +1,21 @@
+[package]
+name = "political_economy_core"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lazy_static = "1.4.0"
+itertools = "0.12.1"
+crossbeam = "0.8.2"
+crossbeam-utils = "0.8.14"
+barrage = "0.2.3"
+rand = "0.8.5"
+
+[package.metadata.scripts]
+run = "cargo run"
+check = "cargo check"
+build = "cargo build"
+release = "cargo build --release"
+test = "cargo test"

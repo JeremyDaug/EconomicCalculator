@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Ideology","The worldview of a Pop. How they view the world, what they believe in and how they think things should be."]]};

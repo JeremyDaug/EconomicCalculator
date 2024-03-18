@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["DesireError","Errors for desires, so we know more explicitly how and where we messed up."],["DesireItem",""],["DesireTag","The tags a desire can be marked by, modifying how the desire is viewed. Many of these alter how they are treated, removing them from common calculations."]],"struct":[["Desire","Desires"]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ProductTag",""],["ProductVulnerability",""],["StorageType","The possible Storage Types available."]],"struct":[["Product",""]]};

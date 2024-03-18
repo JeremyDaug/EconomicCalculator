@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Pop","Pops are the data storage for a population group."]]};
