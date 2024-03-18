@@ -1,4 +1,4 @@
-use super::desire::Desire;
+use crate::objects::actor_objects::desire::Desire;
 
 /// The worldview of a Pop. How they view the world, what they believe in
 /// and how they think things should be.

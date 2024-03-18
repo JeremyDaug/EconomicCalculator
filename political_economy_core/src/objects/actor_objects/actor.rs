@@ -1,8 +1,11 @@
 use barrage::{Sender, Receiver};
 
 use crate::{data_manager::DataManager, demographics::Demographics};
+use crate::objects::environmental_objects::market::MarketHistory;
 
-use super::{actor_message::ActorMessage, market::MarketHistory};
+use super::actor_message::ActorMessage;
+
+
 
 /// A trait to demark a class as capable of acting in a market.
 pub trait Actor {

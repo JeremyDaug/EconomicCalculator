@@ -1,6 +1,6 @@
 //! Species covers the biological nature of a pop.
 
-use super::desire::Desire;
+use crate::objects::actor_objects::desire::Desire;
 
 /// A Species, the biological Reality of a Pop which they are built with.
 /// 

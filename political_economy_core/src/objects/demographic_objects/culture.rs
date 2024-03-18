@@ -1,4 +1,4 @@
-use super::desire::Desire;
+use crate::objects::actor_objects::desire::Desire;
 
 /// A Culture, the social nature of the pop. How they act unconsciously,
 /// and how they view themselves.

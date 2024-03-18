@@ -266,28 +266,6 @@ impl PropertyInfo {
         self.total_property -= available
     }
 
-    /// # Safe Remove
-    /// 
-    /// Removes a quantity from Unreserved and Reserved, but not the
-    /// specific reserves.
-    /// 
-    /// Removes from unreserved first, then reserved.
-    #[deprecated]
-    pub fn safe_remove(&mut self, remove: f64) {
-        assert!(false, "Not needed without reserve");
-        // remove from unreserved first
-        // let unreserved_removal = self.unreserved.min(remove);
-        
-        // if unreserved_removal > 0.0 {
-        //     self.unreserved -= unreserved_removal;
-        //     self.total_property -= unreserved_removal;
-        // }
-        // let reserved_removal = self.reserved.min(remove - unreserved_removal);
-        // if reserved_removal == 0.0 { return; }
-        // self.reserved -= reserved_removal;
-        // self.total_property -= reserved_removal;
-    }
-
     /// # Remove
     /// 
     /// Removes a set number of items from the breakdown.

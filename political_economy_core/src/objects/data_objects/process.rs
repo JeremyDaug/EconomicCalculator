@@ -1,11 +1,12 @@
 ///! Processes transform Products and Wants into other products and wants.
-use std::{collections::{HashMap, HashSet}, option};
+use std::collections::{HashMap, HashSet};
 
-use itertools::{zip_eq, Itertools};
+use itertools::Itertools;
 
-use crate::{constants::{self, lerp, reverse_lerp}, data_manager::DataManager};
+use crate::{constants::{self, reverse_lerp}, data_manager::DataManager, objects::actor_objects::property_info::PropertyInfo};
 
-use super::{property_info::PropertyInfo, item::Item};
+use super::item::Item;
+
 
 #[derive(Debug)]
 pub struct Process {
@@ -392,7 +393,7 @@ impl Process {
                 }
             }
             debug_assert!(!(optional.is_some() && fixed), "Cannot be both optional and fixed.");
-            let mut ratio = 0.0;
+            let ratio: f64;
             match process_part.item { // get the amount of times we can do the part.
                 Item::Product(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
@@ -462,12 +463,11 @@ impl Process {
                     .unwrap_or(&f64::INFINITY));
             // with lowest gotten, record the results and subtract from others.
             let mut current_bonus = initial_penalty;
-            let mut cap_reached = false;
             // iterate by key over the optionals
             for (&key, (&penalty, &bonus)) in optional_mods.iter()
                 .sorted_by(|a, b| a.0.cmp(b.0)) {
                 let &cur_bon_iter = optional_iters.get(&key).unwrap();
-                if cur_bon_iter > 0.0 && !cap_reached{
+                if cur_bon_iter > 0.0{
                     // remove penalty first
                     current_bonus = current_bonus / (1.0 + penalty);
                     current_bonus = current_bonus * (1.0 + bonus);
@@ -492,7 +492,6 @@ impl Process {
                         current_bonus = current_bonus * (target_bonus); // add target back into current.
                         let ratio = reverse_lerp(penalty, bonus, target_bonus-1.0); // get the ratio of iteration needed.
                         bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
-                        cap_reached = true; // set cap reached = true for future needs.
                     }
                     break; // get out of optional loop, no benefit can come from going further.
                 }
@@ -525,7 +524,7 @@ impl Process {
         // with our target ratio gotten, create the return results for inputs and outputs
         // TODO fixed items will also need to be taken into account here.
         for (idx, process_part) in self.process_parts.iter().enumerate() {
-            let mut in_out_sign = 1.0;
+            let in_out_sign;
             let mut fixed = false;
             let mut optional = false;
             let mut consumed = false;
@@ -580,7 +579,7 @@ impl Process {
                             .or_insert(in_out_sign * process_part.amount * normal_iters);
                     }
                     // if optional or consumed, add the failure outputs.
-                    if (consumed && fixed) { // consume process on these.
+                    if consumed && fixed { // consume process on these.
                         Process::get_consumed_outputs(id, data, &mut results, fixed_iters);
                     } else if optional {
                         let &optional_val = bonus_iters.get(&idx).unwrap();
@@ -1123,4 +1122,12 @@ pub enum ProcessTag {
     Sorter,
     Scrapping,
     Scrubber
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn testy_test_test() {
+        
+    }
 }

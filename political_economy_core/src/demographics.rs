@@ -5,7 +5,16 @@
 
 use std::collections::HashMap;
 
-use crate::objects::{species::Species, culture::Culture, desire::Desire, ideology::Ideology, item::Item};
+
+use crate::objects::{
+    actor_objects::desire::Desire, 
+    data_objects::item::Item, 
+    demographic_objects::{
+        culture::Culture, 
+        ideology::Ideology, 
+        species::Species 
+    }
+};
 
 /// Demographics is the data handler for our demographic data. It stores all of our
 /// shared population data, making it available for reading during most phases and

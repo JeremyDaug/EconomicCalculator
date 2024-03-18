@@ -42,6 +42,8 @@ pub const TIME_PRODUCT_ID: usize = 0;
 pub const SHOPPING_TIME_PRODUCT_ID: usize = 1;
 /// The ID for the Skill Discernment.
 pub const DISCERNMENT_PRODUCT_ID: usize = 2;
+/// The Id for generic Land.
+pub const LAND_PRODUCT_ID: usize = 3;
 
 /// The Id for the required Rest Want.
 pub const REST_WANT_ID: usize = 0;

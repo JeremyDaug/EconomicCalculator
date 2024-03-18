@@ -3,17 +3,40 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
-use crate::{constants::{BRAINSTORMING_TECH_ID, DISCERNMENT_PRODUCT_ID, RESTING_PROC_ID, REST_WANT_ID, SHOPPING_TIME_PROC_ID, SHOPPING_TIME_PRODUCT_ID, TIME_PRODUCT_ID, WEALTH_WANT_ID}, objects::{culture::Culture, firm::Firm, item::Item, job::Job, market::Market, pop::Pop, process::{Process, 
-        ProcessPart, 
-        ProcessPartTag, 
-        ProcessSectionTag, 
-        ProcessTag}, 
-        process_node::ProcessNode, 
+use crate::objects::{
+    demographic_objects::culture::Culture, 
+    demographic_objects::species::Species, 
+    actor_objects::{
+        firm::Firm,
+        job::Job, 
+        pop::Pop, 
+    },
+    data_objects::{
+        item::Item, 
+        process::{Process, 
+            ProcessPart, 
+            ProcessPartTag, 
+            ProcessSectionTag, 
+            ProcessTag}, 
         product::{Product, ProductTag}, 
-        species::Species, 
-        technology::{self, Technology}, 
+        process_node::ProcessNode, 
+        technology::Technology, 
         technology_family::TechnologyFamily, 
-        want::Want}};
+        want::Want
+    },
+    environmental_objects::market::Market, 
+};
+use crate::constants::{
+    BRAINSTORMING_TECH_ID,
+    DISCERNMENT_PRODUCT_ID, 
+    LAND_PRODUCT_ID, 
+    RESTING_PROC_ID, 
+    REST_WANT_ID, 
+    SHOPPING_TIME_PROC_ID, 
+    SHOPPING_TIME_PRODUCT_ID, 
+    TIME_PRODUCT_ID, 
+    WEALTH_WANT_ID
+};
 
 /// The DataManager is the main manager for our simulation
 /// It contains all of the data needed for the simulation in active memory, available for
@@ -97,8 +120,6 @@ pub struct DataManager {
     tech_id: usize,
     tech_fam_id: usize,
     product_id: usize,
-    skill_group_id: usize,
-    skill_id: usize,
     process_id: usize,
     job_id: usize,
     species_id: usize,
@@ -133,8 +154,6 @@ impl DataManager {
             tech_id: 0,
             tech_fam_id: 0,
             product_id: 0,
-            skill_group_id: 0,
-            skill_id: 0,
             process_id: 0,
             job_id: 0,
             species_id: 0,
@@ -247,12 +266,26 @@ impl DataManager {
             Vec::new(),
             None,
             None).unwrap();
-        let discernment = DataManager::create_skill(DISCERNMENT_PRODUCT_ID, 
+        let discernment = DataManager::create_skill_product(DISCERNMENT_PRODUCT_ID, 
             String::from("Discernment"), String::from("The skill of telling superior from inferior."),
             Some(99));
+        let land = Product::new(LAND_PRODUCT_ID,
+            String::from("Land"),
+            String::from("Simple"),
+            String::from("Land has many uses, and everyone needs some."), 
+            String::from("Plot(s)"), 
+            0,
+            0.0,
+            0.0,
+            None,
+            true,
+            vec![ProductTag::Fixed],
+            None,
+            None).unwrap();
         self.products.insert(TIME_PRODUCT_ID, time);
         self.products.insert(SHOPPING_TIME_PRODUCT_ID, shopping_time);
         self.products.insert(DISCERNMENT_PRODUCT_ID, discernment);
+        self.products.insert(LAND_PRODUCT_ID, land);
 
         // processes
         let shop_input = ProcessPart{
@@ -273,7 +306,7 @@ impl DataManager {
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,
         };
-        let shop_output = ProcessPart{
+        let shop_output_skill = ProcessPart{
             item: Item::Product(DISCERNMENT_PRODUCT_ID),
             amount: 0.1,
             part_tags: Vec::new(),
@@ -284,8 +317,8 @@ impl DataManager {
             name: String::from("Go Shopping"),
             variant_name: String::new(),
             description: String::from("Shopping takes time."),
-            minimum_time: 1.0,
-            process_parts: vec![shop_input, shop_output],
+            minimum_time: 0.0,
+            process_parts: vec![shop_input, shop_skill, shop_output, shop_output_skill],
             process_tags: Vec::new(),
             technology_requirement: None,
             tertiary_tech: None,
@@ -329,7 +362,7 @@ impl DataManager {
     /// - Mass and Bulk 0
     /// - tags, NonTransferrable.
     /// - Fractional: true
-    fn create_skill(id: usize, name: String, 
+    fn create_skill_product(id: usize, name: String, 
     description: String, decay: Option<u32>) -> Product {
         Product {
             id,

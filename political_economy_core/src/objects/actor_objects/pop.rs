@@ -3,14 +3,44 @@
 //! Used for any productive, intellegent actor in the system. Does not include animal
 //! populations.
 use core::panic;
-use std::{arch::x86_64, collections::{HashMap, HashSet, VecDeque}, fmt::Debug, ops::Add, thread::current};
+use std::{collections::{HashMap, HashSet, VecDeque}, fmt::Debug};
 
 use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
-use crate::{constants::{self, ACP_MAX_HARD_REDUCTION_FACTOR, ACP_MAX_SOFT_REDUCTION_FACTOR, ACP_MIN_REDUCTION_FACTOR, OVERSPEND_THRESHOLD, SHOPPING_TIME_COST, SHOPPING_TIME_PRODUCT_ID, TIME_PRODUCT_ID}, data_manager::DataManager, demographics::Demographics, objects::property::{DesireCoord, TieredValue}};
+use crate::{
+    constants::{self, ACP_MAX_HARD_REDUCTION_FACTOR, ACP_MAX_SOFT_REDUCTION_FACTOR, ACP_MIN_REDUCTION_FACTOR, OVERSPEND_THRESHOLD, SHOPPING_TIME_PRODUCT_ID, TIME_PRODUCT_ID}, 
+    data_manager::DataManager, 
+    demographics::Demographics, 
+    objects::{
+        actor_objects::property::{
+            DesireCoord,
+            TieredValue
+        },
+        data_objects::{
+            item::Item,
+            product::ProductTag,
+            want_info::WantInfo
+        },
+        environmental_objects::market::MarketHistory,
+        actor_objects::buyer::Buyer,
+        demographic_objects::pop_breakdown_table::PopBreakdownTable
+    }
+};
 
-use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction, OfferResult}, buy_result::{self, BuyResult}, buyer::Buyer, item::Item, market::MarketHistory, pop_breakdown_table::PopBreakdownTable, product::ProductTag, property::{Property, ValueInOut}, property_info::PropertyInfo, seller::Seller, want_info::WantInfo
+use super::{
+    actor::Actor, 
+    actor_message::{
+        ActorInfo, 
+        ActorMessage,
+        ActorType, 
+        FirmEmployeeAction, 
+        OfferResult
+    }, 
+    buy_result::BuyResult, 
+    property::Property, 
+    property_info::PropertyInfo, 
+    seller::Seller, 
 };
 
 /// Pops are the data storage for a population group.
@@ -1267,9 +1297,8 @@ impl Pop {
                         return BuyResult::Successful;
                     }
                 },
-                ActorMessage::RejectOffer { buyer,
-                seller,
-                product } => {
+                ActorMessage::RejectOffer {
+                product, .. } => {
                     // TODO add some method of retrying, either recursing, or entering a special rebuy function.
                     self.property.record_purchase(product, 0.0);
                     return BuyResult::NotSuccessful { reason: OfferResult::Rejected };
@@ -1293,7 +1322,7 @@ impl Pop {
     /// ActorMessage::OfferAcceptedWithChange was recieved.
     fn retrieve_exchange_return(&mut self,
     rx: &mut Receiver<ActorMessage>,
-    tx: &Sender<ActorMessage>,
+    _tx: &Sender<ActorMessage>,
     seller: ActorInfo,
     followups: usize) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
@@ -1308,7 +1337,7 @@ impl Pop {
             ]);
             if let ActorMessage::ChangeFollowup { buyer,
             seller: s,
-            product,
+            product: _,
             return_product,
             return_quantity,
             followups: follows } = response {
@@ -1326,7 +1355,7 @@ impl Pop {
     /// A shorthand method used to gather a string of messages for us. 
     /// 
     /// The values returned should be positive (ie, gained by the buyer)
-    pub fn recieve_offer_followups(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>, buyer: ActorInfo, followups: usize) -> HashMap<usize, f64> {
+    pub fn recieve_offer_followups(&mut self, rx: &mut Receiver<ActorMessage>, _tx: &Sender<ActorMessage>, buyer: ActorInfo, followups: usize) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
         for expected_remainder in (0..followups).rev() {
             let response = self.specific_wait(rx, &vec![
@@ -1339,7 +1368,7 @@ impl Pop {
             ]);
             if let ActorMessage::BuyOfferFollowup { buyer: b,
             seller,
-            product,
+            product: _,
             offer_product,
             offer_quantity,
             followup: follows } = response {
@@ -1545,10 +1574,10 @@ impl Pop {
                 ActorMessage::NotInStock { buyer, seller: self.actor_info(), product });
             return;
         }
-        let mut ret = HashMap::new();
+        let mut ret: HashMap<usize, f64>;
         // we have recieved a found product with us as the seller.
         // check how much we are willing to offer in exchange,
-        let mut available = 0.0;
+        let available:f64;
         // extract and remove all product which does to satisfying desires above this level.
         if let Some(hard_sat_lvl) = self.property.hard_satisfaction {
             // knock off the top of our satisfaction

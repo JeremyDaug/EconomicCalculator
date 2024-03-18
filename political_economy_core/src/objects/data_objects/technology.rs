@@ -1,5 +1,6 @@
 use std::collections::HashSet;
-use crate::objects::technology_family::TechnologyFamily;
+
+use super::technology_family::TechnologyFamily;
 
 #[derive(Debug)]
 pub struct Technology {

@@ -1,8 +1,8 @@
 use barrage::{Receiver, Sender};
 
-use crate::{demographics::Demographics, data_manager::DataManager};
+use crate::{data_manager::DataManager, demographics::Demographics, objects::environmental_objects::market::MarketHistory};
 
-use super::{seller::Seller, actor_message::{ActorType, ActorInfo, ActorMessage}, buyer::Buyer, actor::Actor, market::MarketHistory};
+use super::{seller::Seller, actor_message::{ActorType, ActorInfo, ActorMessage}, buyer::Buyer, actor::Actor};
 
 
 

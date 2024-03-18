@@ -11,13 +11,33 @@
 //! DesireInfo is also used to record product data when buying or selling items.
 //! It's the weights we are modifying to improve the AI going forward.
 
-use std::{collections::{hash_map, HashMap, HashSet}, ops::{AddAssign, Add, Sub, SubAssign, Div}};
+use std::{
+    collections::{
+        HashMap, 
+        HashSet
+    }, 
+    ops::{
+        AddAssign, 
+        Add, 
+        Sub, 
+        SubAssign,
+        Div
+    }
+};
 
 use itertools::Itertools;
 
-use crate::{data_manager::DataManager, constants::{TIER_RATIO, SHOPPING_TIME_PRODUCT_ID}};
+use crate::{data_manager::DataManager, 
+    constants::{TIER_RATIO, SHOPPING_TIME_PRODUCT_ID},
+    objects::data_objects::{
+        item::Item,
+        want_info::WantInfo,
+    },
+    objects::environmental_objects::market::MarketHistory
+};
 
-use super::{desire::Desire, item::Item, market::MarketHistory, property_info::PropertyInfo, want_info::WantInfo};
+use super::{desire::Desire, 
+    property_info::PropertyInfo};
 
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
@@ -402,6 +422,7 @@ impl Property {
     /// This is not currently used.
     /// 
     /// TODO Test This.
+    #[deprecated]
     pub fn remove_satisfaction(&mut self, product: usize, amount: f64, data: &DataManager) -> (f64, TieredValue) {
         let _amount_removed = 0.0;
         let mut value_removed = TieredValue { tier: 0, value: 0.0 };
@@ -420,7 +441,7 @@ impl Property {
                 specific_desire_coord = self.walk_down_tiers_for_item(&specific_desire_coord, &Item::Product(product)).unwrap();
                 while specific_reduction > 0.0 {
                     // walk down our desires, subtracting from satisfaction and our total reduction
-                    let mut desire = self.desires
+                    let desire = self.desires
                     .get_mut(specific_desire_coord.idx).unwrap();
                     let reduce = desire.satisfaction_at_tier(specific_desire_coord.tier).min(specific_reduction);
                     desire.satisfaction -= reduce;
@@ -446,7 +467,7 @@ impl Property {
                 class_desire_coord = self.walk_down_tiers_for_item(&class_desire_coord, &Item::Class(class)).unwrap();
                 while class_reduction > 0.0 {
                     // walk down our desires, subtracting from satisfaction and our total reduction
-                    let mut desire = self.desires
+                    let desire = self.desires
                     .get_mut(class_desire_coord.idx).unwrap();
                     let reduce = desire.amount.min(class_reduction);
                     desire.satisfaction -= reduce;
@@ -514,16 +535,15 @@ impl Property {
                     for (&id, &prop) in self.property.iter() {
                         result.insert(id, prop.total_property);
                     }
-                    for proc in shared_processes.iter()
-                    .map(|x| data.processes.get(x).unwrap()) {
-                        // get how many we need to undo this satisfaction
-                        let output = proc.effective_output_of(Item::Want(desire.item.unwrap()));
-                        let ratio = desire.amount / output;
-                        // cap it at how many iterations we need at how many we originally planned.
-                        // let _change = proc.do_process(&result, &self.want_store, 0.0, 0.0, Some(ratio), true, data);
-                        // remove those iterations (undo reservations, expectations, and the plan)
-                        // if not enough to empty our satisfaction, go to the next process.
-                    }
+                    // for proc in shared_processes.iter()
+                    // .map(|x| data.processes.get(x).unwrap()) {
+                    //     // get how many we need to undo this satisfaction
+                    //     //let output = proc.effective_output_of(Item::Want(desire.item.unwrap()));
+                    //     // cap it at how many iterations we need at how many we originally planned.
+                    //     // let _change = proc.do_process(&result, &self.want_store, 0.0, 0.0, Some(ratio), true, data);
+                    //     // remove those iterations (undo reservations, expectations, and the plan)
+                    //     // if not enough to empty our satisfaction, go to the next process.
+                    // }
                 }
             }
             self.update_satisfactions();
@@ -1961,7 +1981,7 @@ impl Property {
                 // if our selected end coordinate, GTFO.
                 break;
             }
-            let mut desire = self.desires.get_mut(current.idx).unwrap();
+            let desire = self.desires.get_mut(current.idx).unwrap();
             match desire.item {
                 Item::Want(want) => { // if want
                     // start by pulling out of the expected wants, to improve efficiency
@@ -2033,7 +2053,7 @@ impl Property {
                         let eff = process.effective_output_of(Item::Want(want));
                         // how many iterations we need to reach the target.
                         let target_iter = (desire.amount - desire.satisfaction_at_tier(current.tier)) / eff;
-                        let mut combined_wants = HashMap::new();;
+                        let mut combined_wants = HashMap::new();
                         for (&want_id, want_info) in self.want_store.iter() {
                             combined_wants.insert(want_id, want_info.expendable());
                         }

@@ -5,14 +5,7 @@ use crossbeam::thread;
 use itertools::Itertools;
 use rand::{Rng, thread_rng};
 
-use crate::{demographics::Demographics, data_manager::DataManager, constants::{STD_PRICE_CHANGE, SALABILITY_THRESHOLD}};
-use super::{pop::Pop, 
-    firm::Firm, 
-    actor::Actor, 
-    actor_message::{ActorMessage, ActorInfo, OfferResult, WantSource}, 
-    institution::Institution, 
-    state::State, 
-    seller::Seller};
+use crate::{constants::{SALABILITY_THRESHOLD, STD_PRICE_CHANGE}, data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{actor::Actor, actor_message::{ActorInfo, ActorMessage, OfferResult, WantSource}, firm::Firm, institution::Institution, pop::Pop, seller::Seller, state::State}, data_objects::item::Item}};
 use crate::constants;
 
 /// # The Market
@@ -261,7 +254,7 @@ impl Market {
                     ActorMessage::InStock { buyer, seller, product, 
                     price, .. } => {
                         // Seller in a deal says he's in stock, record his response.
-                        let mut deal = self.find_deal_mut(buyer, seller, product);
+                        let deal = self.find_deal_mut(buyer, seller, product);
                         deal.request_product = product;
                         deal.unit_price = price;
                     },
@@ -279,7 +272,7 @@ impl Market {
                     ActorMessage::BuyOffer { buyer, seller, product, 
                     price_opinion, quantity, followup: _ } => {
                         // initial offer info
-                        let mut deal = self.find_deal_mut(buyer, seller, product);
+                        let deal = self.find_deal_mut(buyer, seller, product);
                         deal.request_quantity = quantity;
                         deal.current_result = price_opinion;
                         *self.product_demanded.entry(product).or_insert(0.0) += quantity;
@@ -739,17 +732,17 @@ impl MarketHistory {
 /// Helper function
 /// 
 /// Calculates the value of a want given the market data and id of the want in question.
-fn calculate_want_price(market: &Market, data: &DataManager, id: usize, history: &MarketHistory) -> f64 {
+fn calculate_want_price(_market: &Market, data: &DataManager, id: usize, history: &MarketHistory) -> f64 {
     let mut total_price = 0.0;
     let mut total_quantity = 0.0;
     let proc_info = data.processes.get(&id).unwrap();
     for part in proc_info.input_and_capital_products()
     .iter() {
         let price = match part.item {
-            super::item::Item::Want(id) => 0.0, // todo consider adding in recursive calculation for other wants.
-            super::item::Item::Class(id) => history.class_info.get(&id)
+            Item::Want(_id) => 0.0, // todo consider adding in recursive calculation for other wants.
+            Item::Class(id) => history.class_info.get(&id)
                 .unwrap_or(&ClassInfo::new(0.0)).price,
-            super::item::Item::Product(id) => history.product_info.get(&id)
+            Item::Product(id) => history.product_info.get(&id)
                 .unwrap_or(&ProductInfo::new(0.0)).price,
         };
         total_price = (total_price * total_quantity + price * part.amount) / (total_quantity + part.amount);

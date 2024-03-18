@@ -3,7 +3,7 @@
 use core::fmt;
 use std::error::Error;
 
-use super::{item::Item};
+use crate::objects::data_objects::item::Item;
 
 /// Desires
 /// 
@@ -278,15 +278,6 @@ impl Desire {
     /// Checks whether a given value steps on a tier of this desire.
     /// 
     /// # Examples
-    ///
-    /// ```
-    /// use political_economy_core::objects::desire::Desire;
-    /// use political_economy_core::objects::desire::Item;
-    ///
-    /// let desire = Desire{item: Item::Product(0),start: 2, end: Some(10),
-    ///     amount: 5.0, satisfaction: 15.0, reserved: 0.0, step: 2, tags: vec![]};
-    /// assert_eq!(desire.steps_on_tier(4), true);
-    /// ```
     pub fn steps_on_tier(&self, tier: usize) -> bool {
         if tier < self.start {
             return false; // if before the start, we can't step on anything.

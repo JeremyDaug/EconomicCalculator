@@ -3,7 +3,7 @@
 
 use std::collections::HashMap;
 
-use crate::{data_manager::DataManager, objects::{process::ProcessSectionTag, item::Item}};
+use crate::{data_manager::DataManager, objects::data_objects::{process::ProcessSectionTag, item::Item}};
 
 /// Product Network storage.
 #[derive(Debug)]
@@ -190,7 +190,7 @@ impl ProductNetwork{
 #[derive(Debug, Clone)]
 pub struct Node {
     /// The item in this node.
-    item: ItemData,
+    _item: ItemData,
     /// Incoming Connections (this is an output)
     incoming: Vec<usize>,
     /// outgoing connections (this is an input)
@@ -201,7 +201,7 @@ impl Node {
     pub fn new(item: ItemData) -> 
         Self { 
             Self { 
-                item, 
+                _item: item, 
                 incoming: vec![], 
                 outgoing: vec![] 
             } 
@@ -226,7 +226,7 @@ pub struct Connection {
     /// Process (contains process ID)
     /// or 
     /// Ownership (this is the input)
-    conn_type: ConnectionType,
+    _conn_type: ConnectionType,
     /// The index of the output item.
     output_idx: Vec<usize>
 }
@@ -234,7 +234,7 @@ pub struct Connection {
 impl Connection {
     pub fn new(conn_type: ConnectionType) -> Self { 
         Self { input_idx: vec![], 
-            conn_type, 
+            _conn_type: conn_type, 
             output_idx: vec![]
         } 
     }

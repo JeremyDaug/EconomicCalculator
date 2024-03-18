@@ -2,12 +2,11 @@ use std::collections::HashSet;
 
 use barrage::{Sender, Receiver};
 
-use crate::{data_manager::DataManager, demographics::Demographics};
+use crate::{data_manager::DataManager, demographics::Demographics, objects::environmental_objects::market::MarketHistory};
 
 use super::{seller::Seller, 
     buyer::Buyer, 
     firm_job::FirmJob, 
-    market::MarketHistory, 
     actor::Actor, actor_message::{ActorMessage, ActorInfo, ActorType}};
 
 /// Firms are the productive actors of our system.

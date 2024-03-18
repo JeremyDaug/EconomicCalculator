@@ -1,6 +1,8 @@
 use std::{collections::HashMap};
 
-use super::{product::Product, market::Market};
+use crate::objects::data_objects::product::Product;
+
+use super::market::Market;
 
 #[derive(Debug)]
 pub struct Territory {

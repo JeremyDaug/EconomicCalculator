@@ -39,8 +39,10 @@ pub struct Product {
     /// If None, the product does not decay. 
     /// else If Some(0), it decays instantly.
     /// else Some(N), it has a 1/(N+1) chance of failure.
+    /// TODO improve this to allow for arbitrary failure rates/chances.
     pub mean_time_to_failure: Option<u32>,
     /// whether the item can be sold in units smaller than 1.0.
+    /// TODO, when MTTF is altered to be more flexible, use this to define if products fail in part or in whole units.
     pub fractional: bool,
     // icon
     /// The tags of the product.

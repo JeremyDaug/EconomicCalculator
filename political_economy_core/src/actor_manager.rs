@@ -3,7 +3,16 @@ use crossbeam::thread;
 
 use crate::{data_manager::DataManager, 
     demographics::Demographics, 
-    objects::{market::{Market, MarketMessage, MarketMessageEnum}, pop::Pop, firm::Firm, institution::Institution, state::State}};
+    objects::{
+        actor_objects::{
+            firm::Firm, 
+            institution::Institution, 
+            pop::Pop,
+            state::State
+        }, 
+        environmental_objects::market::{Market, MarketMessage, MarketMessageEnum},
+    }
+};
 
 /// Actors, these have AI attached to them, make active decisions, and try
 /// to satisfy desires either of their own or of others.
