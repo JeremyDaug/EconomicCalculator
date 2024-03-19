@@ -732,43 +732,58 @@ impl Process {
     pub fn do_process_with_property(&self, available_products: &HashMap<usize, PropertyInfo>, 
     available_wants: &HashMap<usize, f64>, _other_efficiency_boni: f64, 
     target: Option<f64>, _hard_cap: bool, data: &DataManager,
-    allow_reserves: bool) 
+    _allow_reserves: bool) 
     -> ProcessOutputs {
         let mut results = ProcessOutputs::new();
         // get how many cycles we can do in total
         // TODO check and take optional and fixed items into account here.
+        // the (rolling) throughput modifier from optional products
         // optional items will need to be ignored if unavailable, but add to the target of all non-fixed items
-        // fixed items ignore any efficiency gains from 
-        let mut ratio_available = f64::INFINITY;
-        for process_part in self.process_parts.iter() {
-            if let ProcessSectionTag::Capital = process_part.part {
+        // fixed items ignore any efficiency gains from optional
+        let mut ratios = HashMap::new();
+        let mut normals = HashMap::new(); // The highest we can get 
+        let mut lowest_normal = f64::INFINITY;
+        let mut max_poss_fixed = f64::INFINITY; // the highest possible fixed iterations.
+        let mut optional_iters = HashMap::new();
+        let mut optional_mods = HashMap::new();
+        let mut initial_penalty = 1.0; // the penalty which we have if no optional parts are used.
+        for (idx, process_part) in self.process_parts.iter().enumerate() {
+            if let ProcessSectionTag::Capital = process_part.part { // skip capital wants for now.
                 // todo add capital want handling here.
                 if let Item::Want(_id) = process_part.item {
+                    debug_assert!(false, "Should not use wants in capital yet.");
                     continue;
                 }
             }
             if let ProcessSectionTag::Output = process_part.part { // if output, ignore
                 continue;
             }
-            match process_part.item { // TODO add optional check here.
+            let mut optional = None;
+            let mut fixed = false;
+            for tag in process_part.part_tags.iter() { // get whether it's optional or fixed for later.
+                match tag {
+                    ProcessPartTag::Optional { missing_penalty, final_bonus } => {
+                        optional = Some((missing_penalty, final_bonus));
+                    },
+                    ProcessPartTag::Fixed => {
+                        fixed = true;
+                    },
+                    _ => ()
+                }
+            }
+            debug_assert!(!(optional.is_some() && fixed), "Cannot be both optional and fixed.");
+            let ratio: f64;
+            match process_part.item { // get the amount of times we can do the part.
                 Item::Product(id) => {
                     // take lower between current ratio available and available_product / cycle_target.
-                    if let Some(prod_info) = available_products.get(&id) {
-                        if allow_reserves {
-                            ratio_available = ratio_available
-                                .min(prod_info.available_for_want() / process_part.amount);
-                        } else {
-                            ratio_available = ratio_available
-                                .min(prod_info.unreserved / process_part.amount)
-                        }
-                    } else { // if we don't have that item in property, return to 0.0
-                        ratio_available = 0.0;
-                    }
+                    ratio = available_products.get(&id).unwrap_or(&PropertyInfo::new(0.0)).available() 
+                        / process_part.amount;
+                    ratios.insert(idx, ratio);
                 },
-                Item::Want(id) => {
+                Item::Want(id) => { // input wants are taken directly from storage.
                     // take lower between current ratio available and available_product / cycle_target.
-                    ratio_available = ratio_available
-                        .min(available_wants.get(&id).unwrap_or(&0.0) / process_part.amount);
+                    ratio = available_wants.get(&id).unwrap_or(&0.0) / process_part.amount;
+                    ratios.insert(idx, ratio);
                 },
                 Item::Class(id) => {
                     // TODO add quality check here!
@@ -782,79 +797,206 @@ impl Process {
                         } else { false }
                     });
                     // how many items within the class we have,
-                    let sum: f64 = if allow_reserves {
-                         class_mates.map(|x| x.1.available_for_want()).sum()
-                    } else {
-                        class_mates.map(|x| x.1.unreserved).sum()
-                    };
-                    ratio_available = ratio_available.min(sum / process_part.amount);
+                    let sum: f64 = class_mates.map(|x| x.1.available()).sum();
+                    ratio = sum / process_part.amount;
+                    ratios.insert(idx, ratio);
                 }
             }
-            if ratio_available == 0.0 { // if ratio is 0, gtfo, we can't do anything.
-                return ProcessOutputs::new();
+            if let Some((penalty, bonus)) = optional { // if optional, get that info and record it as optional
+                optional_iters.insert(idx, ratio);
+                optional_mods.insert(idx, (penalty, bonus));
+                initial_penalty = initial_penalty * (1.0 + penalty);
+            } else { // non optional
+                if fixed { // and fixed, modify max possible fixed to be the lower between this and it's current vaule.
+                    max_poss_fixed = max_poss_fixed.min(ratio);
+                } else { // if normal, record it for later use and check it for highest possible.
+                    normals.insert(idx, ratio);
+                    lowest_normal = lowest_normal.min(ratio);
+                }
             }
         }
-        // cap our ratio at the target
-        // TODO add check for hard_cap here.
-        if let Some(val) = target { // we assume that hard_cap == true for now
-            ratio_available = ratio_available.min(val);
+        if max_poss_fixed == 0.0 || lowest_normal == 0.0 {
+            // if no possible iterations, skip to output nothing.
+            return ProcessOutputs::new();
         }
-        // without efficiency gains, our ratio available == possible iteratons.
-        results.iterations = ratio_available;
+        // TODO #67 Add Load Check on processes, which ensures that an optional part tag is paired with a meaningful fixed or other limitation elsewhere.
+        // TODO cap is always treated as hard, need to do work to make it soft.
+        let cap = target.unwrap_or(f64::INFINITY); // get cap.
+        lowest_normal = lowest_normal.min(cap); // reduce max poss fixed to the cap.
+
+        // TODO Note area for soon to come rewrite of this calculation section
+        // Get the minimum number of Fixed iterations we can do
+        // get the minimum number of Normal(Throughput modified) iterations we can do.
+        // Get the iterations we can do with bonuses.
+        // walk up the lowest possible options with each, using as much as possible.
+        let mut fixed_iters = 0.0; // how many iterations of fixed done.
+        let mut normal_iters = 0.0; // how many normal iterations to do.
+        let mut total_bonus = 1.0;
+        // how much of each bonus we consumed (organized by key).
+        let mut bonus_iters = HashMap::new();
+        loop {
+            // get lowest between normal, fixed, and optionals
+            let mut lowest = lowest_normal.min(max_poss_fixed)
+                .min(*optional_iters.values()
+                    .min_by(|a, b| a.total_cmp(b))
+                    .unwrap_or(&f64::INFINITY));
+            // with lowest gotten, record the results and subtract from others.
+            let mut current_bonus = initial_penalty;
+            // iterate by key over the optionals
+            for (&key, (&penalty, &bonus)) in optional_mods.iter()
+                .sorted_by(|a, b| a.0.cmp(b.0)) {
+                let &cur_bon_iter = optional_iters.get(&key).unwrap();
+                if cur_bon_iter > 0.0{
+                    // remove penalty first
+                    current_bonus = current_bonus / (1.0 + penalty);
+                    current_bonus = current_bonus * (1.0 + bonus);
+                    // include in bonus iters fully
+                    bonus_iters.entry(key)
+                        .and_modify(|x| *x += lowest)
+                        .or_insert(lowest);
+                } // no else, penalty is included by default.
+                // check if we've overshot the normal target
+                if current_bonus * lowest > lowest_normal {
+                    if lowest == lowest_normal { 
+                        // if overflows because this normal lowest is lowest, maximize savings
+                        bonus_iters.entry(key).and_modify(|x| *x -= lowest); // remove iters
+                        // reduce effective lowest to maximize effect.
+                        lowest = lowest_normal / current_bonus;
+                        bonus_iters.entry(key).and_modify(|x| *x += lowest); // add this ratio of iters back in.
+                    } else { // else, reduce to cap at normal
+                        // reduce the current bonus to match normal iters, then leave loop
+                        bonus_iters.entry(key).and_modify(|x| *x -= lowest); // remove iters
+                        current_bonus = current_bonus / (1.0 + bonus);
+                        let target_bonus = lowest_normal / (lowest * current_bonus); // get the bonus needed
+                        current_bonus = current_bonus * (target_bonus); // add target back into current.
+                        let ratio = reverse_lerp(penalty, bonus, target_bonus-1.0); // get the ratio of iteration needed.
+                        bonus_iters.entry(key).and_modify(|x| *x += ratio * lowest); // add this ratio of iters back in.
+                    }
+                    break; // get out of optional loop, no benefit can come from going further.
+                }
+            }
+            // update total bonuses (add bonus via average.)
+            total_bonus = ((total_bonus * fixed_iters) + (current_bonus * lowest)) / (fixed_iters + lowest);
+            // with bonii gotten, apply fixed alteration
+            max_poss_fixed -= lowest;
+            fixed_iters += lowest;
+            // same with normals, but don't forget the bonus throughput.
+            lowest_normal -= lowest * current_bonus;
+            normal_iters += lowest * current_bonus;
+            if max_poss_fixed == 0.0 || lowest_normal == 0.0 {
+                // if we cannot get more fixed or normal iterations in, bounce.
+                break;
+            } 
+            debug_assert!(max_poss_fixed >= 0.0, "Max Possible fixed somehow got below 0.");
+            debug_assert!(lowest_normal >= 0.0, "Lowest normal somehow got below 0.");
+        }
+
+        // TODO make consider adding profitability check here for optional products vs the extra output.
+        
+        // without efficiency gains, our ratio is our fixed target
+        results.iterations = fixed_iters;
         // efficiency is equal to the total possible gain we were able to achieved.
-        results.efficiency = 1.0;
+        results.efficiency = total_bonus;
         // effective iterations is our iterations after applying efficiency gains.
-        results.effective_iterations = ratio_available;
+        results.effective_iterations = normal_iters;
 
         // with our target ratio gotten, create the return results for inputs and outputs
         // TODO fixed items will also need to be taken into account here.
-        for process_part in self.process_parts.iter() {
-            let mut _in_out_sign = 1.0;
+        for (idx, process_part) in self.process_parts.iter().enumerate() {
+            let in_out_sign;
+            let mut fixed = false;
+            let mut optional = false;
+            let mut consumed = false;
+            for tag in process_part.part_tags.iter() {
+                match tag {
+                    ProcessPartTag::Fixed => fixed = true,
+                    ProcessPartTag::Optional { .. } => optional = true,
+                    ProcessPartTag::Consumed => consumed = true,
+                    _ => ()
+                }
+            }
             match process_part.part {
                 ProcessSectionTag::Capital => {
                     if let Item::Product(_id) = process_part.item {
                         // add used capital products
-                        results.capital_products
-                        .insert(process_part.item.unwrap(), process_part.amount * ratio_available);
+                        if fixed {
+                            results.capital_products
+                                .insert(process_part.item.unwrap(), process_part.amount * fixed_iters);
+                        } else if optional {
+                            let optional_val = bonus_iters.get(&idx).unwrap();
+                            results.capital_products
+                                .insert(process_part.item.unwrap(), process_part.amount * optional_val);
+                        } else {
+                            results.capital_products
+                                .insert(process_part.item.unwrap(), process_part.amount * normal_iters);
+                        }
+                        
+
                     } else if let Item::Want(_id) = process_part.item { 
                         // TODO add capital want handling here also.
                     }
                     continue;
                 },
-                ProcessSectionTag::Input => { _in_out_sign = -1.0; }, // subtract inputs
-                ProcessSectionTag::Output => { _in_out_sign = 1.0; }, // add outputs
+                ProcessSectionTag::Input => { in_out_sign = -1.0; }, // subtract inputs
+                ProcessSectionTag::Output => { in_out_sign = 1.0; }, // add outputs
             } 
             // if not capital, add to appropriate input_output
             match process_part.item {
                 Item::Product(id) => {
-                    results.input_output_products.entry(id)
-                    .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
-                    .or_insert(_in_out_sign * process_part.amount * ratio_available);
+                    if fixed {
+                        results.input_output_products.entry(id)
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_iters)
+                            .or_insert(in_out_sign * process_part.amount * fixed_iters);
+                    } else if optional {
+                        let optional_val = bonus_iters.get(&idx).unwrap();
+                        results.input_output_products.entry(id)
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * optional_val)
+                            .or_insert(in_out_sign * process_part.amount * optional_val);
+                    } else { // consumed or others
+                        results.input_output_products.entry(id)
+                            .and_modify(|x| *x += in_out_sign * process_part.amount * normal_iters)
+                            .or_insert(in_out_sign * process_part.amount * normal_iters);
+                    }
+                    // if optional or consumed, add the failure outputs.
+                    if consumed && fixed { // consume process on these.
+                        Process::get_consumed_outputs(id, data, &mut results, fixed_iters);
+                    } else if optional {
+                        let &optional_val = bonus_iters.get(&idx).unwrap();
+                        Process::get_consumed_outputs(id, data, &mut results, optional_val);
+                    } else if consumed { // consume process on these.
+                        Process::get_consumed_outputs(id, data, &mut results, normal_iters);
+                    }
                 },
                 Item::Want(id) => {
-                    results.input_output_wants.entry(id)
-                    .and_modify(|x| *x += _in_out_sign * process_part.amount * ratio_available)
-                    .or_insert(_in_out_sign * process_part.amount * ratio_available);
+                    // Consumed are not considerde valid.
+                    if fixed {
+                        results.input_output_wants.entry(id)
+                        .and_modify(|x| *x += in_out_sign * process_part.amount * fixed_iters)
+                        .or_insert(in_out_sign * process_part.amount * fixed_iters);
+                    } else { // not fixed
+                        results.input_output_wants.entry(id)
+                        .and_modify(|x| *x += in_out_sign * process_part.amount * normal_iters)
+                        .or_insert(in_out_sign * process_part.amount * normal_iters);
+                    }
                 },
                 Item::Class(id) => { // TODO test this part of the code!
                     debug_assert!(process_part.part.is_output(), "Class cannot be an output.");
                     // TODO improve this to deal with overlap and quality management.
-                    // get the class products
-                    let class_mates = available_products.iter()
-                    .filter(|(&prod_id, _)| {
-                        let class = data.get_product_class(prod_id);
-                        if let Some(val) = class {
-                            id == val
-                        } else { false }
-                    });
-                    // get items up to our needs
-                    let mut target = process_part.amount * ratio_available;
-                    for (&product_id, &quantity) in class_mates {
-                        let remove = quantity.available_for_want().min(target);
-                        results.input_output_products.entry(product_id)
-                        .and_modify(|x| *x -= remove).or_insert(-remove);
-                        target -= remove;
-                        if target == 0.0 { break; }
+                    // remove from inputs
+                    let removed_products = if fixed {
+                        Process::class_part_processing_with_property(id, &available_products, data, 
+                            fixed_iters, process_part, &mut results)
+                    } else if optional {
+                        let &optional_val = bonus_iters.get(&idx).unwrap();
+                        Process::class_part_processing_with_property(id, &available_products, data, 
+                            optional_val, process_part, &mut results)
+                    } else { // not fixed
+                        Process::class_part_processing_with_property(id, &available_products, data, 
+                            normal_iters, process_part, &mut results)
+                    };
+                    // if marked consumed, also fail process those specific items as well.
+                    for (&id, &amount) in removed_products.iter() {
+                        Process::get_consumed_outputs(id, data, &mut results, amount);
                     }
                 },
             }
@@ -862,6 +1004,33 @@ impl Process {
 
         results
     }
+
+
+    fn class_part_processing_with_property(class_id: usize, available_products: &HashMap<usize, PropertyInfo>, data: &DataManager, 
+        iterations: f64, process_part: &ProcessPart, results: &mut ProcessOutputs) -> HashMap<usize, f64> {
+            let mut ret = HashMap::new();
+            // get the class products
+            let class_mates = available_products.iter()
+            .filter(|(&prod_id, _)| {
+                let class = data.get_product_class(prod_id);
+                if let Some(val) = class {
+                    class_id == val
+                } else { false }
+            });
+            // get items up to our needs
+            let mut target = process_part.amount * iterations;
+            for (&product_id, &quantity) in class_mates {
+                let add = quantity.available().min(target);
+                results.input_output_products.entry(product_id)
+                .and_modify(|x| *x += add).or_insert(add);
+                ret.insert(product_id, add);
+                target -= add;
+                if target == 0.0 { break; }
+            }
+            ret
+        }
+    
+    
 
     /// # Effective Output Of 
     /// 

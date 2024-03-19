@@ -492,12 +492,16 @@ pub enum DesireTag{
     /// satisfied, it instead increases their chance of sickness and death.
     Toxic,
     /// The desire is not needed every day, instead they only desire it
-    /// occasionally. How likely they are on any given ady is equal to
-    /// the value inside it.
-    Sporadic(u64),
+    /// occasionally. How likely they are on any given day has a chance equal
+    /// to the value contained.
+    Sporadic(f64),
     /// The item is not needed consistently, but instead periodically and
     /// consistently. The value given is how often they need 
-    Periodic { offset: u64, cycle: u64 },
+    Periodic { offset: usize, cycle: usize },
+    /// The desire has a minimum tier which it wants to fulfill.
+    /// Not meeting this has negative effects on the pop. 
+    /// TODO add data parts for the negative effects.
+    MinimumTier { tier: usize },
 }
 
 

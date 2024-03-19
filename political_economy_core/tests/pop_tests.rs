@@ -4979,8 +4979,9 @@ mod pop_tests {
 
     /// These tests 
     mod pop_integration_tests {
-        use std::collections::{HashMap, HashSet};
+        use std::{collections::{HashMap, HashSet}, thread};
         use itertools::Itertools;
+        use political_economy_core::objects::actor_objects::{actor::Actor, desire::DesireTag};
 
         use super::super::*;
 
@@ -4993,7 +4994,7 @@ mod pop_tests {
         /// - Resources: 1.0 
         /// - Wealth: 5.0
         /// - Capital: 3.0
-        fn setup_pop_test_data() -> (MarketHistory, DataManager) {
+        fn setup_pop_test_data() -> (MarketHistory, DataManager, Demographics) {
             let mut manager = DataManager::new();
             // get required items.
             // Loads 
@@ -5354,7 +5355,13 @@ mod pop_tests {
             manager.processes.insert(make_capital.id, make_capital);
             manager.processes.insert(consume_wealth.id, consume_wealth);
 
-            (history, manager)
+            let demos = Demographics {
+                species: HashMap::new(),
+                cultures: HashMap::new(),
+                ideology: HashMap::new(),
+            };
+
+            (history, manager, demos)
         }
     
         /// # Pop Barter Test
@@ -5363,14 +5370,22 @@ mod pop_tests {
         /// other trade successfully at least once.
         #[test]
         fn pop_barter_test() {
-            let (history, data) = setup_pop_test_data();
+            let (history, data, demos) = setup_pop_test_data();
 
             // get some data to make values more robust.
             let rest = data.wants.get(&REST_WANT_ID).unwrap();
-            let sustenance = data.wants.iter().find_or_first(|x| {
-                x.1.name.eq(&String::from("Sustenance"))
-            }).unwrap().1;
-            //let 
+            let sustenance = data.wants.values().find_or_first(|x| {
+                x.name.eq(&String::from("Sustenance"))
+            }).unwrap();
+            let resources = data.products.values().find(|x| {
+                x.name == String::from("Resources")
+            }).unwrap();
+            let wealth = data.products.values().find(|x| {
+                x.name == String::from("Wealth")
+            }).unwrap();
+            let capital = data.products.values().find(|x| {
+                x.name == String::from("Capital")
+            }).unwrap();
 
             let mut pop1 = Pop {
                 id: 0,
@@ -5378,7 +5393,9 @@ mod pop_tests {
                 firm: 0,
                 market: 0,
                 property: Property::new(vec![
-                    Desire::new(item, start, end, amount, satisfaction, step, tags)
+                    Desire::new(Item::Want(rest.id), 0, Some(10), 1.0, 0.0, 1, vec![]).unwrap(),
+                    Desire::new(Item::Want(sustenance.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
+                    Desire::new(Item::Want(resources.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
                 ]),
                 breakdown_table: PopBreakdownTable {
                     table: vec![],
@@ -5396,7 +5413,9 @@ mod pop_tests {
                 firm: 1,
                 market: 0,
                 property: Property::new(vec![
-
+                    Desire::new(Item::Want(rest.id), 0, Some(10), 1.0, 0.0, 1, vec![]).unwrap(),
+                    Desire::new(Item::Want(sustenance.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
+                    Desire::new(Item::Want(resources.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
                 ]),
                 breakdown_table: PopBreakdownTable {
                     table: vec![],
@@ -5408,6 +5427,26 @@ mod pop_tests {
                 hypo_change: TieredValue { tier: 0, value: 0.0 },
                 backlog: VecDeque::new(),
             };
+
+            // add property to exchange between them.
+            // same time to both.
+            pop1.property.add_property(rest.id, 20.0, &data);
+            pop2.property.add_property(rest.id, 20.0, &data);
+            // one has a bunch of wealth, the other has a bunch of resources.
+            pop1.property.add_property(resources.id, 10.0, &data);
+            pop2.property.add_property(wealth.id, 10.0, &data);
+
+            // spin them up into their day stuff, then while acting as the market, set them up to trade.
+            let (tx, rx) = barrage::bounded(10);
+            let mut passed_rx = rx.clone();
+            let mut passed_tx = tx.clone();
+
+            // get loop running
+            let handle = thread::spawn(move || {
+                pop1.run_market_day(&mut passed_tx, &mut passed_rx, &data, &demos, &history);
+                pop2.run_market_day(&mut passed_tx, &mut passed_rx, &data, &demos, &history);
+                (pop1, pop2)
+            });
         }
     }
 }
