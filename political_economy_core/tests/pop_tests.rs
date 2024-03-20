@@ -5447,6 +5447,16 @@ mod pop_tests {
                 pop2.run_market_day(&mut passed_tx, &mut passed_rx, &data, &demos, &history);
                 (pop1, pop2)
             });
+
+            // start the market day.
+            tx.send(ActorMessage::StartDay).expect("Brokd.");
+            // should recieve finished here
+            let start = std::time::SystemTime::now();
+            if let Ok(ActorMessage::StartDay) = rx.recv() {
+                // do nothing, all's fine
+            } else {
+                assert!(false, "wrong message recieved.");
+            }
         }
     }
 }
