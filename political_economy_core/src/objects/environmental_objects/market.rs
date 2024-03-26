@@ -131,14 +131,14 @@ pub struct Market {
 impl Market {
     /// Runs the market day for this market. This manages the various actors in the market
     pub fn run_market_day(&mut self, 
-        sender: Sender<MarketMessage>,
-        reciever: &mut Receiver<MarketMessage>,
-        data: &DataManager, 
-        demos: &Demographics, 
-        pops: &mut Vec<Pop>, 
-        firms: &mut Vec<Firm>, 
-        institutions: &mut Vec<Institution>,
-        states: &mut Vec<State>) {
+    sender: Sender<MarketMessage>,
+    reciever: &mut Receiver<MarketMessage>,
+    data: &DataManager, 
+    demos: &Demographics, 
+    pops: &mut Vec<Pop>, 
+    firms: &mut Vec<Firm>, 
+    institutions: &mut Vec<Institution>,
+    states: &mut Vec<State>) {
         // get the lengths of our actors for later use.
         let pop_count = pops.len();
         let firm_count = firms.len();

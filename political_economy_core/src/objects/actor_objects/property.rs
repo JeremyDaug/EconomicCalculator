@@ -168,6 +168,7 @@ impl Property {
     /// 
     /// This function does not need external data as it matches for specific 
     /// products and does not consume anything.
+    #[deprecated]
     pub fn sift_specific_products(&mut self) {
         // TODO Remove? this
         todo!("Come back here later.")
@@ -1364,8 +1365,8 @@ impl Property {
                     // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
                     if self.want_store.contains_key(&want) {
                         let want_info = self.want_store.get_mut(&want).unwrap();
-                        if want_info.expected > 0.0 {
-                            let target = want_info.expected
+                        if want_info.consumable() > 0.0 {
+                            let target = want_info.consumable()
                                 .min(desire.amount - desire.satisfaction_at_tier(current.tier));
                             want_info.consume(target);
                             desire.satisfaction += target;
@@ -1988,8 +1989,8 @@ impl Property {
                     // TODO this can be improved with some minor lookaheads. For example, a one process produces just X another produces both X and Y, check that we want Y, if we do, use the latter, else the former.
                     if self.want_store.contains_key(&want) {
                         let want_info = self.want_store.get_mut(&want).unwrap();
-                        if want_info.expected > 0.0 { // if positive expectation, use
-                            let shift = want_info.expected
+                        if want_info.consumable() > 0.0 { // if positive expectation, use
+                            let shift = want_info.consumable()
                             .min(desire.amount - desire.satisfaction_at_tier(current.tier));
                             want_info.expected -= shift;
                             desire.satisfaction += shift;

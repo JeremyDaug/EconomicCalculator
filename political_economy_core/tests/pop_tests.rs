@@ -4979,7 +4979,8 @@ mod pop_tests {
 
     /// These tests 
     mod pop_integration_tests {
-        use std::{collections::{HashMap, HashSet}, thread};
+        use std::{borrow::BorrowMut, collections::{HashMap, HashSet}, thread, time::{self, Duration}};
+        use crossbeam::scope;
         use itertools::Itertools;
         use political_economy_core::objects::actor_objects::{actor::Actor, desire::DesireTag};
 
@@ -5345,6 +5346,7 @@ mod pop_tests {
             history.sale_priority.push(resources.id);
 
             manager.wants.insert(sustenance.id, sustenance);
+
             manager.products.insert(resources.id, resources);
             manager.products.insert(wealth.id, wealth);
             manager.products.insert(capital.id, capital);
@@ -5387,7 +5389,7 @@ mod pop_tests {
                 x.name == String::from("Capital")
             }).unwrap();
 
-            let mut pop1 = Pop {
+            let pop0 = &mut Pop {
                 id: 0,
                 job: 0,
                 firm: 0,
@@ -5395,7 +5397,7 @@ mod pop_tests {
                 property: Property::new(vec![
                     Desire::new(Item::Want(rest.id), 0, Some(10), 1.0, 0.0, 1, vec![]).unwrap(),
                     Desire::new(Item::Want(sustenance.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
-                    Desire::new(Item::Want(resources.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
+                    Desire::new(Item::Product(resources.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
                 ]),
                 breakdown_table: PopBreakdownTable {
                     table: vec![],
@@ -5407,7 +5409,7 @@ mod pop_tests {
                 hypo_change: TieredValue { tier: 0, value: 0.0 },
                 backlog: VecDeque::new(),
             };
-            let mut pop2 = Pop {
+            let pop1 = &mut Pop {
                 id: 1,
                 job: 1,
                 firm: 1,
@@ -5415,7 +5417,7 @@ mod pop_tests {
                 property: Property::new(vec![
                     Desire::new(Item::Want(rest.id), 0, Some(10), 1.0, 0.0, 1, vec![]).unwrap(),
                     Desire::new(Item::Want(sustenance.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
-                    Desire::new(Item::Want(resources.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
+                    Desire::new(Item::Product(resources.id), 0, Some(10), 1.0, 0.0, 2, vec![]).unwrap(),
                 ]),
                 breakdown_table: PopBreakdownTable {
                     table: vec![],
@@ -5430,33 +5432,111 @@ mod pop_tests {
 
             // add property to exchange between them.
             // same time to both.
-            pop1.property.add_property(rest.id, 20.0, &data);
-            pop2.property.add_property(rest.id, 20.0, &data);
+            pop0.property.add_want(rest.id, &20.0);
+            pop1.property.add_want(rest.id, &20.0);
             // one has a bunch of wealth, the other has a bunch of resources.
-            pop1.property.add_property(resources.id, 10.0, &data);
-            pop2.property.add_property(wealth.id, 10.0, &data);
+            pop0.property.add_property(resources.id, 10.0, &data);
+            pop1.property.add_property(wealth.id, 10.0, &data);
+            let mut pops = &mut vec![pop0, pop1];
+            crossbeam_utils::thread::scope(|scope| {
+                // spin them up into their day stuff, then while acting as the market, set them up to trade.
+                let (tx, rx) = barrage::bounded(10);
 
-            // spin them up into their day stuff, then while acting as the market, set them up to trade.
-            let (tx, rx) = barrage::bounded(10);
-            let mut passed_rx = rx.clone();
-            let mut passed_tx = tx.clone();
+                // get loop running
+                let mut handles = vec![];
+                for pop in pops {
+                    let mov_data = &data;
+                    let mov_demos = &demos;
+                    let mov_hist = &history;
+                    let mut passed_rx = rx.clone();
+                    let mut passed_tx = tx.clone();
+                    handles.push(scope.spawn(move |_| {
+                        pop.run_market_day(&mut passed_tx, &mut passed_rx, 
+                            mov_data, mov_demos, mov_hist);
+                        pop
+                    }));
+                }
 
-            // get loop running
-            let handle = thread::spawn(move || {
-                pop1.run_market_day(&mut passed_tx, &mut passed_rx, &data, &demos, &history);
-                pop2.run_market_day(&mut passed_tx, &mut passed_rx, &data, &demos, &history);
-                (pop1, pop2)
-            });
+                // start the market day.
+                tx.send(ActorMessage::StartDay).expect("Brokd.");
+                // should recieve finished here
+                let start = std::time::SystemTime::now();
+                if let Ok(ActorMessage::StartDay) = rx.recv() {
+                    // do nothing, all's fine
+                } else {
+                    assert!(false, "wrong message recieved.");
+                }
 
-            // start the market day.
-            tx.send(ActorMessage::StartDay).expect("Brokd.");
-            // should recieve finished here
-            let start = std::time::SystemTime::now();
-            if let Ok(ActorMessage::StartDay) = rx.recv() {
-                // do nothing, all's fine
-            } else {
-                assert!(false, "wrong message recieved.");
-            }
+                // send workday end msgs to both pop0 and 1.
+                tx.send(ActorMessage::FirmToEmployee { 
+                    firm: ActorInfo::Firm(0), 
+                    employee: ActorInfo::Pop(0), 
+                    action: FirmEmployeeAction::WorkDayEnded }).expect("Borkd.");
+                tx.send(ActorMessage::FirmToEmployee { 
+                    firm: ActorInfo::Firm(1), 
+                    employee: ActorInfo::Pop(1), 
+                    action: FirmEmployeeAction::WorkDayEnded }).expect("Borkd.");
+                // absorb the twe messages from this real quick.
+                // use vecdeq just in case.
+                let mut backlog = VecDeque::new();
+                let mut firstmsg = false;
+                let mut secmsg = false;
+                while let Ok(msg) = rx.recv() {
+                    println!("{}", msg);
+                    if let ActorMessage::FirmToEmployee { 
+                    employee, 
+                    .. } = msg {
+                        if let ActorInfo::Pop(0) = employee {
+                            firstmsg = true;
+                        } else if let ActorInfo::Pop(1) = employee {
+                            secmsg = true;
+                        } else {
+                            assert!(false, "bad msg?");
+                        }
+                    } else {
+                        backlog.push_back(msg);
+                    }
+                    if firstmsg && secmsg {
+                        break;
+                    }
+                }
+
+                // check that both put stuff up for sale.
+                let mut times = 0; // clear out backlog first.
+                let mut other_backlog = VecDeque::new();
+                while let Some(msg) = backlog.pop_front() {
+                    println!("{}", msg);
+                    if let ActorMessage::SellOrder { .. } = msg {
+                        times += 1;
+                    } else {
+                        // shift to other backlog if it's not actor message.
+                        other_backlog.push_back(msg);
+                    }
+                }
+                let start = time::Instant::now();
+                while let Ok(opt) = rx.try_recv() {
+                    if let Some(msg) = opt {
+                        println!("{}", msg);
+                        if let ActorMessage::SellOrder { .. } = msg {
+                            times += 1;
+                        } else {
+                            other_backlog.push_back(msg);
+                        }
+                        continue; // if we got something, don't check for time.
+                    }
+                    let here = time::Instant::elapsed(&start);
+                    if here > Duration::from_millis(500) {
+                        //assert!(false, "To Long to get all expected messages.")
+                    }
+                }
+
+                let mut pops = vec![];
+                for handle in handles.into_iter() {
+                    //pops.push(*handle.join().unwrap());
+                    let pop = handle.join().unwrap();
+                    pops.push(pop);
+                }
+            }).expect("Err'd.");
         }
     }
 }

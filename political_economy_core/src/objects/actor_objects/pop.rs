@@ -1810,7 +1810,7 @@ impl Actor for Pop {
         }
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
-        self.property.sift_specific_products();
+        self.property.sift_all(&data);
         self.is_selling = if self.property.is_disorganized {
             true
         } else {
