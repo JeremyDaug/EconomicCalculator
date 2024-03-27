@@ -147,6 +147,8 @@ impl WantInfo {
     /// Adds the given value to the total_current and
     /// gained.
     pub fn add(&mut self, value: f64) {
+        debug_assert!(value > 0.0, 
+            "Value cannot be zero.");
         self.total_current += value;
         self.gained += value;
     }

@@ -280,7 +280,7 @@ impl Property {
     /// 
     /// TODO include excess AMV expenditure estimate gain. Would require adding Market History as well.
     pub fn predict_value_changed(&self, alterations: &HashMap<usize, f64>, 
-        data: &DataManager) -> TieredValue {
+    data: &DataManager) -> TieredValue {
         // create our clone first
         let mut clone = self.cheap_clone();
         for (&product, &amount) in alterations.iter() {
@@ -1337,15 +1337,7 @@ impl Property {
     /// todo https://github.com/JeremyDaug/EconomicCalculator/issues/64
     pub fn sift_all(&mut self, data: &DataManager) -> TieredValue {
         // start by resetting property and satisfactions
-        for (_, info) in self.property.iter_mut() {
-            info.reset_reserves();
-        }
-        for desire in self.desires.iter_mut() {
-            desire.satisfaction = 0.0;
-        }
-        self.process_plan.clear();
-        self.product_expectations.clear();
-        self.clear_expectations();
+        self.unsift();
         // with data cleared, walk up our tiers and reserve items for our desires as needed.
         // we are allowed to satisfy our wants from the expectations, but not products expected.
         let mut cleared = HashSet::new();
@@ -1951,17 +1943,7 @@ impl Property {
     pub fn sift_up_to(&mut self, coord: &DesireCoord, 
     data: &DataManager) -> TieredValue {
         // start by resetting property and satisfactions
-        for (_, info) in self.property.iter_mut() {
-            info.reset_reserves();
-        }
-        for desire in self.desires.iter_mut() {
-            desire.satisfaction = 0.0;
-        }
-        self.process_plan.clear();
-        self.product_expectations.clear();
-        for (_, info) in self.want_store.iter_mut() {
-            info.expected = 0.0;
-        }
+        self.unsift();
         // with data cleared, walk up our tiers and reserve items for our desires as needed.
         // we are allowed to satisfy our wants from the expectations, but not products expected.
         let mut cleared = HashSet::new();
@@ -2555,7 +2537,27 @@ impl Property {
         }
         self.process_plan.clear();
         self.product_expectations.clear();
+        self.reset_wants();
         self.clear_expectations();
+    }
+    
+    /// # Reset Wants
+    /// 
+    /// Resets the wants.
+    /// 
+    /// Recalculates how much it actually has.
+    pub fn reset_wants(&mut self) {
+        for (_, info) in self.want_store.iter_mut() {
+            let mut current = info.day_start; // start with what he know we have
+            current += info.consumed; // add consumed back in
+            info.consumed = 0.0;
+            current += info.expended; // add what is going to be expneded back in.
+            info.expended = 0.0;
+            current -= info.expected; // remove what we expect to get back out.
+            info.expected = 0.0;
+            current += info.gained; // add in what we have gained so far during today.
+            info.total_current = current;
+        }
     }
 }
 
