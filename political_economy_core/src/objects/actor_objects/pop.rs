@@ -564,7 +564,8 @@ impl Pop {
     data: &DataManager, market: &MarketHistory) {
         // with everything reserved begin trying to buy more stuff
         // prepare current desire for first possible purchase.
-        let mut next_desire = pop.property.get_first_unsatisfied_desire();
+        let mut next_desire = pop.property
+            .get_first_unsatisfied_desire();
 
         // setup our sanity check escape mechanism, primarily if we find ourselves 
         let mut completed_desires = HashSet::new();

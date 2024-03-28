@@ -2442,6 +2442,12 @@ impl Property {
                         result.tier = tier;
                     }
                 }
+            } else { // if no satisfaction extant, go to start tier.
+                let tier = desire.start;
+                if tier < result.tier {
+                    result.idx = idx;
+                    result.tier = tier;
+                }
             }
         }
         if result.tier == usize::MAX {

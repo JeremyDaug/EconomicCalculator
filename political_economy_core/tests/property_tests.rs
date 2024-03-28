@@ -1223,6 +1223,88 @@ mod property_tests {
 
     mod get_first_unsatisfied_desire_should {
         use super::*;
+
+        #[test]
+        pub fn find_lowest_when_one_has_no_sat_but_is_not_lowest() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(0), 
+                start: 4, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 1.0,
+                step: 0,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(1), 
+                start: 7, 
+                end: Some(13), 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(1), 
+                start: 2, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 1.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(1), 
+                start: 1, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 10.0,
+                step: 1,
+                tags: vec![]});
+            let mut test = Property::new(test_desires);
+            let result = test.get_first_unsatisfied_desire().unwrap();
+            assert_eq!(result.idx, 2);
+            assert_eq!(result.tier, 3);
+        }
+
+        #[test]
+        pub fn find_lowest_when_it_has_no_sat() {
+            let mut test_desires = vec![];
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(0), 
+                start: 4, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 1.0,
+                step: 0,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(1), 
+                start: 7, 
+                end: Some(13), 
+                amount: 1.0, 
+                satisfaction: 3.5,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(1), 
+                start: 2, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 10.0,
+                step: 1,
+                tags: vec![]});
+            test_desires.push(Desire{ // 0,2,...
+                item: Item::Want(1), 
+                start: 1, 
+                end: None, 
+                amount: 1.0, 
+                satisfaction: 0.0,
+                step: 1,
+                tags: vec![]});
+            let mut test = Property::new(test_desires);
+            let result = test.get_first_unsatisfied_desire().unwrap();
+            assert_eq!(result.idx, 3);
+            assert_eq!(result.tier, 1);
+        }
         
         #[test]
         pub fn find_the_lowest_and_first_unsatisfied_desire() {
