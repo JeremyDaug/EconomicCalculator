@@ -4377,6 +4377,11 @@ mod pop_tests {
             assert_eq!(time_info.total_property, (100.0 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
         }
         
+        #[test]
+        pub fn get_buy_target_when_no_preexisting_product_in_property() {
+            // TODO !!!!!!!!!!!!!!!!!!! PICK UP HERE!
+        }
+
         // additional tests to consider adding
         // TODO Shopping_Loop buy_result tests
         // TODO Shopping_loop emergency buy routing when Emergency buy is made
@@ -5373,12 +5378,15 @@ mod pop_tests {
             let sustenance = data.wants.values().find_or_first(|x| {
                 x.name.eq(&String::from("Sustenance"))
             }).unwrap();
+            // id 101
             let resources = data.products.values().find(|x| {
                 x.name == String::from("Resources")
             }).unwrap();
+            // id 102
             let wealth = data.products.values().find(|x| {
                 x.name == String::from("Wealth")
             }).unwrap();
+            // id 103
             let capital = data.products.values().find(|x| {
                 x.name == String::from("Capital")
             }).unwrap();

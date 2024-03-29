@@ -701,7 +701,11 @@ impl Pop {
                 // TODO consider testing this check specifically.
                 let property_info = pop.property.property
                     .entry(buy_target)
-                    .or_insert(PropertyInfo::new(0.0));
+                    .or_insert({
+                        let mut t = PropertyInfo::new(0.0);
+                        t.upper_target = buy_quantity;
+                        t
+                    });
                 if property_info.available() >= buy_quantity {
                     continue; // if not skip to next.
                 } else if (property_info.upper_target - property_info.available()) > buy_quantity { 
