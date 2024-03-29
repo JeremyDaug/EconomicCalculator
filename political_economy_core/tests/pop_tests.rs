@@ -5016,7 +5016,7 @@ mod pop_tests {
                 consumption_sources: HashSet::new(),
             };
 
-            sustenance.consumption_sources.insert(102);
+            sustenance.consumption_sources.insert(103);
 
             // set up simple products and processes
             // Resources, extracted via time and Skill from nothing (Land not yet in system).
@@ -5283,12 +5283,6 @@ mod pop_tests {
                         part_tags: vec![], 
                         part: ProcessSectionTag::Input 
                     },
-                    ProcessPart { // 1/4 plot (fixed)
-                        item: Item::Product(LAND_PRODUCT_ID), 
-                        amount: 0.25, 
-                        part_tags: vec![], 
-                        part: ProcessSectionTag::Input 
-                    },
                     ProcessPart { // 1 resources
                         item: Item::Product(wealth.id), 
                         amount: 1.0, 
@@ -5435,8 +5429,8 @@ mod pop_tests {
             pop0.property.add_want(rest.id, &20.0);
             pop1.property.add_want(rest.id, &20.0);
             // one has a bunch of wealth, the other has a bunch of resources.
-            pop0.property.add_property(resources.id, 10.0, &data);
-            pop1.property.add_property(wealth.id, 10.0, &data);
+            pop0.property.add_property(resources.id, 10.0, &data); // desire 0 and 2
+            pop1.property.add_property(wealth.id, 10.0, &data); // desire 0 and 1
             let mut pops = &mut vec![pop0, pop1];
             crossbeam_utils::thread::scope(|scope| {
                 // spin them up into their day stuff, then while acting as the market, set them up to trade.
@@ -5524,9 +5518,20 @@ mod pop_tests {
                         }
                         continue; // if we got something, don't check for time.
                     }
+                    if times == 2 { // get both sell orders, then gtfo.
+                        break;
+                    }
                     let here = time::Instant::elapsed(&start);
                     if here > Duration::from_millis(500) {
                         //assert!(false, "To Long to get all expected messages.")
+                    }
+                }
+
+                // with sell orders gotten, send back our confirmation from pop0 to pop1
+                backlog = VecDeque::new();
+                while let Some(msg) = other_backlog.pop_front() {
+                    if let ActorMessage::FindWant { want, sender } = msg {
+
                     }
                 }
 
