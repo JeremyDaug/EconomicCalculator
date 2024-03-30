@@ -3803,7 +3803,7 @@ mod pop_tests {
 
     // Completed
     mod shopping_loop_should {
-        use std::{collections::{HashMap, VecDeque}, thread, time::Duration};
+        use std::{collections::{HashMap, VecDeque}, thread, time::{Duration, Instant}};
         use super::super::*;
 
         /// Intentionally super simple pop generation
@@ -4203,7 +4203,7 @@ mod pop_tests {
                 assert_eq!(buyer, pop_info);
                 assert_eq!(seller, seller);
                 assert_eq!(product, 2);
-                assert_eq!(offer_product, 6);
+                assert_eq!(offer_product, 14);
                 assert_eq!(offer_quantity, 1.0);
                 assert_eq!(followup, 0);
             } else {
@@ -4227,15 +4227,15 @@ mod pop_tests {
             // check that we recorded our expenditure in time and AMV
             assert_eq!(food_info.total_property, 11.0);
             assert_eq!(food_info.time_cost, test.standard_shop_time_cost());
-            assert_eq!(food_info.amv_cost, 10.0);
+            assert_eq!(food_info.amv_cost, 100.0);
             assert_eq!(food_info.recieved, 1.0);
             // cotton was expended for food
             assert_eq!(cotton_info.total_property, 100.0);
             assert_eq!(cotton_info.spent, 0.0);
             // huts were untouched
-            assert_eq!(hut_info.total_property, 10.0);
+            assert_eq!(hut_info.total_property, 9.0);
             // time was spent for shopping
-            assert_eq!(time_info.total_property, (100.0 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
+            assert_eq!(time_info.total_property, 99.0 * test.standard_shop_time_cost());
         }
 
         #[test]
@@ -4374,12 +4374,167 @@ mod pop_tests {
             // huts were untouched
             assert_eq!(hut_info.total_property, 10.0);
             // time was spent for shopping
-            assert_eq!(time_info.total_property, (100.0 * test.standard_shop_time_cost())-test.standard_shop_time_cost());
+            assert_eq!(time_info.total_property, 98.0 * test.standard_shop_time_cost());
         }
         
         #[test]
         pub fn get_buy_target_when_no_preexisting_product_in_property() {
-            // TODO !!!!!!!!!!!!!!!!!!! PICK UP HERE!
+            let mut test = default_pop();
+            let pop_info = test.actor_info();
+            let (data, mut history) = prepare_data_for_market_actions(&mut test);
+            let seller = ActorInfo::Firm(1);
+            // alter desires to run out of desires.
+            // product 2
+            test.property.clear_desires();
+            test.property.add_desire(&Desire::new(Item::Product(2), 0, 
+                Some(10), 1.0, 0.0, 1, vec![]).unwrap());
+            
+            // reduce price of product 3 to ensure solid buy.
+            history.product_info.get_mut(&3).unwrap().price = 1.0;
+
+            // add the initial property of the pop we'll be using\
+            // 20 ambrosia fruit, cotton clothes, huts, and cotton bolls
+            //test.property.add_property(2, 10.0, &data);
+            test.property.add_property(3, 100.0, &data);
+            test.property.add_property(6, 10.0, &data);
+            test.property.add_property(14, 10.0, &data);
+            // add in way to much shopping time.
+            test.property.add_property(TIME_PRODUCT_ID, 
+                100.0 * test.standard_shop_time_cost(), &data);
+
+            // setup message queue.
+            let (tx, rx) = barrage::bounded(10);
+            let mut passed_rx = rx.clone();
+            let mut passed_tx = tx.clone();
+
+            // get loop running
+            let handle = thread::spawn(move || {
+                Pop::shopping_loop(&mut test, &mut passed_rx, &mut passed_tx, &data, 
+                    &history);
+                test
+            });
+            thread::sleep(Duration::from_millis(100));
+
+            // first want recieved. tier 1, idx 0, food want.
+            if let ActorMessage::FindProduct { product, sender } = rx
+            .recv().expect("Unexpected Disconnect.") {
+                println!("Find product Recieved.");
+                assert_eq!(product, 2, "Product incorrect.");
+                assert_eq!(sender, pop_info, "Incorrect sender?");
+            } else {
+                assert!(false, "FindProduct not recieved.")
+            }
+
+            // send want found message with ambrosia fruit consumption (13)
+            tx.send(ActorMessage::FoundProduct { seller, buyer: pop_info, product: 2 })
+                .expect("Sudden Disconnect!");
+            // clear out the message just sent.
+            rx.recv().expect("Broke.");
+
+            thread::sleep(Duration::from_millis(100));
+
+            // send in stock message, since seller has customer.
+            tx.send(ActorMessage::InStock { buyer: pop_info, seller, 
+                product: 2, price: 1.0, quantity: 1000.0 }).expect("Broke.");
+            println!("Sent In Stock msg");
+            rx.recv().expect("Broke");
+
+            if let ActorMessage::BuyOffer { buyer, seller, product, 
+            price_opinion, quantity, followup } = rx.recv().expect("Broke") {
+                println!("Buy Offer Recieved.");
+                assert_eq!(buyer, pop_info, "wrong buyer.");
+                assert_eq!(seller, seller, "wrong seller.");
+                assert_eq!(product, 2, "wrong product.");
+                assert_eq!(price_opinion, OfferResult::TooExpensive, "wrong oppinion.");
+                assert_eq!(quantity, 1.0, "wrong quantity.");
+                assert_eq!(followup, 1, "wrong followups.");
+            } else {
+                assert!(false, "buy offer not recieved.")
+            }
+
+            if let ActorMessage::BuyOfferFollowup { buyer, seller,
+            product, offer_product, offer_quantity, followup }
+            = rx.recv().expect("Broke.") {
+                println!("Buy Offer Followup Recieved.");
+                assert_eq!(buyer, pop_info);
+                assert_eq!(seller, seller);
+                assert_eq!(product, 2);
+                assert_eq!(offer_product, 3);
+                assert_eq!(offer_quantity, 1.0);
+                assert_eq!(followup, 0);
+            } else {
+                assert!(false, "Wrong Message.");
+            }
+
+            // send back accept message.
+            tx.send(ActorMessage::SellerAcceptOfferAsIs { buyer: pop_info, 
+                seller, product: 2, offer_result: OfferResult::Reasonable })
+                .expect("borkd");
+            rx.recv().expect("borkd");
+
+            let start = Instant::now();
+            while let Ok(msg_opt) = rx.try_recv() {
+                if let Some(msg) = msg_opt {
+                    if let ActorMessage::FindProduct { product, sender } = msg {
+                        println!("2nd Product Find recieved.");
+                        assert_eq!(product, 2, "Product incorrect.");
+                        assert_eq!(sender, pop_info, "Incorrect sender?");
+                        break;
+                    }
+                } else {
+                    let curr = Instant::now() - start;
+                    if curr > Duration::from_secs(1) {
+                        //assert!(false, "Timed out.");
+                    }
+                }
+            }
+
+            // push out want not found to end it's loop.
+            tx.send(ActorMessage::ProductNotFound { product: 2, buyer: pop_info })
+                .expect("Sudden Disconnect!");
+
+            let start = Instant::now();
+            while let Ok(msg_opt) = rx.try_recv() {
+                if let Some(msg) = msg_opt {
+                    if let ActorMessage::FindProduct { product, sender } = msg {
+                        println!("3rd Product Find recieved.");
+                        assert_eq!(product, 2, "Product incorrect.");
+                        assert_eq!(sender, pop_info, "Incorrect sender?");
+                        break;
+                    }
+                } else {
+                    let curr = Instant::now() - start;
+                    if curr > Duration::from_secs(1) {
+                        //assert!(false, "Timed out.");
+                    }
+                }
+            }
+
+            // push out want not found to end it's loop.
+            tx.send(ActorMessage::ProductNotFound { product: 2, buyer: pop_info })
+                .expect("Sudden Disconnect!");
+
+            // Deal completed, should also finish shopping, check for shop as predicted.
+            // it should've bought 1.0 units of 2 for 1.0 units of 3 and 0.2 units of time/shopping time.
+            let test = handle.join().unwrap();
+            let food_info = test.property.property[&2];
+            let cotton_info = test.property.property[&3];
+            let hut_info = test.property.property[&14];
+            let time_info = test.property.property[&TIME_PRODUCT_ID];
+            assert!(test.property.property.get(&SHOPPING_TIME_PRODUCT_ID).is_none(), "Shopping Time Found.");
+            // check that we recorded our expenditure in time and AMV
+            assert_eq!(food_info.total_property, 1.0);
+            assert_eq!(food_info.time_cost, 3. * test.standard_shop_time_cost());
+            assert_eq!(food_info.amv_cost, 1.0);
+            assert_eq!(food_info.recieved, 1.0);
+            // cotton was expended for food
+            assert_eq!(cotton_info.total_property, 99.0);
+            assert_eq!(cotton_info.spent, 1.0);
+            // huts were untouched
+            assert_eq!(hut_info.total_property, 10.0);
+            // time was spent for shopping
+            assert_eq!(time_info.total_property, 
+                97.0 * test.standard_shop_time_cost());
         }
 
         // additional tests to consider adding

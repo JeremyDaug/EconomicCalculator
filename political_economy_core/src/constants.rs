@@ -68,6 +68,8 @@ pub const RESTING_PROC_ID: usize = 1;
 pub const TIER_RATIO: f64 = 0.9;
 
 /// The standard cost in time for an individual to go shopping.
+/// 
+/// Used for shopping for specific products.
 pub const SHOPPING_TIME_COST: f64 = 0.2;
 /// The Salability threshold for an item to be considered a currency.
 pub const SALABILITY_THRESHOLD: f64 = 0.75;

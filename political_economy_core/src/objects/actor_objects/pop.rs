@@ -632,6 +632,8 @@ impl Pop {
                 Item::Want(id) => { // for wants, we need to get the product inputs.
                     // if it's a want, go to the most common satisfaction
                     // of that want in the market.
+                    // TODO: doing a find want in the market is a free action currently, consider changing that.
+                    // TODO: Finding a want like this may not be necessary. Using market history may be good enough.
                     pop.push_message(rx, tx,
                         ActorMessage::FindWant { want: *id, sender: pop.actor_info() });
                     // wait for the market to respond with either it's suggested process, or failure.
@@ -691,14 +693,14 @@ impl Pop {
             pop.property.sift_up_to(&curr_desire_coord, data);
 
             // prepare a check to see if we want to move on or not.
-            let mut go_to_next = true;
+            // if no buy targets, then we should at best try again once.
+            let mut go_to_next = buy_targets.len() > 0; 
             let mut emergency_buy = false;
 
             // Do one buy at a time, ignoring if we have enough time for all trips or not
             // TODO improve this to actually peak ahead to see if it can go shopping enough to get what it needs and satisfy that desire.
             for (buy_target, mut buy_quantity) in buy_targets {
                 // check if we need to get the item or not
-                // TODO consider testing this check specifically.
                 let property_info = pop.property.property
                     .entry(buy_target)
                     .or_insert({
@@ -732,6 +734,7 @@ impl Pop {
                     if remaining_shop_time > 0.0 {
                         pop.property.add_property(SHOPPING_TIME_PRODUCT_ID, remaining_shop_time, data);
                     }
+                    available_shopping_time -= shopping_time_cost;
                     // regardless of our success or failure, add it to the cost.
                     pop.property.property.entry(buy_target)
                     .and_modify(|x| x.time_cost += shopping_time_cost)
@@ -809,6 +812,7 @@ impl Pop {
     pub fn find_class_product(&mut self, rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>, class: usize, data: &DataManager,
     market: &MarketHistory) -> Option<usize> {
+        // TODO: Currently this is costless, either consider adding a cost or using marketHistory instead.
         self.push_message(rx, tx,
             ActorMessage::FindClass { class,
                 sender: self.actor_info() });
@@ -1048,6 +1052,9 @@ impl Pop {
                 let b_val = market.get_product_salability(&b.0);
                 b_val.partial_cmp(&a_val).unwrap_or(std::cmp::Ordering::Equal)
             }) {
+                // if product is non-transferable, skip.
+                let prod_info = data.products.get(product).expect("Product Not Found");
+                if prod_info.tags.contains(&ProductTag::NonTransferrable) { continue; }
                 // get amv for the current product being given up.
                 let eff_amv = market.get_product_price(product, 1.0);
                 // add units up to amv_price, then round up.
@@ -1209,7 +1216,9 @@ impl Pop {
                 purchase_quantity
             };
             // sanity check that our sat_gained is still higher than sat_lost
-            if sat_gain < sat_lost {
+            // or if there is no offer.
+            // TODO test the current_offer.len() check as well as the sat_gain < sat_lost check.
+            if sat_gain < sat_lost || current_offer.len() == 0 {
                 // if the final target results in a net loss in satisfaction, cancel the buy.
                 self.push_message(rx, tx, ActorMessage::RejectPurchase { buyer: self.actor_info(),
                     seller: seller, product: sought_product, price_opinion: OfferResult::TooExpensive });
