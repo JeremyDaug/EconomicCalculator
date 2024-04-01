@@ -13,18 +13,14 @@ use crate::{
     data_manager::DataManager, 
     demographics::Demographics, 
     objects::{
-        actor_objects::property::{
+        actor_objects::{buyer::Buyer, property::{
             DesireCoord,
             TieredValue
-        },
-        data_objects::{
+        }}, data_objects::{
             item::Item,
             product::ProductTag,
             want_info::WantInfo
-        },
-        environmental_objects::market::MarketHistory,
-        actor_objects::buyer::Buyer,
-        demographic_objects::pop_breakdown_table::PopBreakdownTable
+        }, demographic_objects::{ideology, pop_breakdown_table::PopBreakdownTable}, environmental_objects::market::MarketHistory
     }
 };
 
@@ -35,7 +31,7 @@ use super::{
         ActorMessage,
         ActorType, 
         FirmEmployeeAction, 
-        OfferResult
+        OfferResult, WantSource
     }, 
     buy_result::BuyResult, 
     property::Property, 
@@ -639,36 +635,49 @@ impl Pop {
                     // wait for the market to respond with either it's suggested process, or failure.
                     let result = pop.active_wait(rx, tx, data, market,
                         &vec![
-                            ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, process: 0 },
+                            ActorMessage::FoundWant { buyer: ActorInfo::Firm(0), want: 0, source: WantSource::Process(0) },
                             ActorMessage::WantNotFound { want: 0, buyer: ActorInfo::Firm(0) }
                         ]);
-                    if let ActorMessage::FoundWant { process, .. } = result {
-                        // get the process suggested
-                        let process_info = data.processes.get(&process).unwrap();
-                        let needs = process_info.inputs_and_capital();
-                        let mut things_to_get = 0.0;
-                        // get what needs to be gotten
-                        for part in needs.iter()
-                        {
-                            match part.item { // add the part item to our buy targets
-                                Item::Want(_) =>
-                                    panic!("Use/Consume should not have wants."),
-                                Item::Class(id) => {
-                                    // get class item which satisfies.
-                                    let result = pop.find_class_product(rx, tx, id, data, market);
-                                    if let Some(product) = result {
-                                        buy_targets.push((product,
-                                            part.amount * sat_target));
+                    if let ActorMessage::FoundWant { want, source, .. } = result {
+                        match source {
+                            WantSource::Product(product) => {
+                                // TODO test this!!!!
+                                let product_info = data.products.get(&product).expect("Product Not found.");
+                                let ratio = product_info.wants.get(&want)
+                                    .expect("Product does not have want from ownership.");
+                                let ratiod_target = sat_target / ratio;
+                                buy_targets.push((product, ratiod_target));
+                                1.0
+                            },
+                            WantSource::Process(process) => {
+                                // get the process suggested
+                                let process_info = data.processes.get(&process).unwrap();
+                                let needs = process_info.inputs_and_capital();
+                                let mut things_to_get = 0.0;
+                                // get what needs to be gotten
+                                for part in needs.iter()
+                                {
+                                    match part.item { // add the part item to our buy targets
+                                        Item::Want(_) =>
+                                            panic!("Use/Consume should not have wants."),
+                                        Item::Class(id) => {
+                                            // get class item which satisfies.
+                                            let result = pop.find_class_product(rx, tx, id, data, market);
+                                            if let Some(product) = result {
+                                                buy_targets.push((product,
+                                                    part.amount * sat_target));
+                                                    things_to_get += 1.0;
+                                            } // else don't add anything we can't use.
+                                        },
+                                        Item::Product(id) => {
+                                            buy_targets.push((id, sat_target * part.amount));
                                             things_to_get += 1.0;
-                                    } // else don't add anything we can't use.
-                                },
-                                Item::Product(id) => {
-                                    buy_targets.push((id, sat_target * part.amount));
-                                    things_to_get += 1.0;
-                                },
-                            }
+                                        },
+                                    }
+                                }
+                                things_to_get
+                            },
                         }
-                        things_to_get
                     } else if let ActorMessage::WantNotFound { .. } = result {
                         // if the want is not found in the market, then move on to the next desire
                         0.0

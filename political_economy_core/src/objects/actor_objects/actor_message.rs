@@ -95,7 +95,7 @@ pub enum ActorMessage {
     /// option. It returns the process the market views as most likely to succeed.
     /// 
     /// This allows a buyer to purchase multiple possible goods.
-    FoundWant {buyer: ActorInfo, want: usize, process: usize },
+    FoundWant {buyer: ActorInfo, want: usize, source: WantSource },
 
     /// Return from seller after ActorMessage::CheckItem if they have the item
     /// in stock. returns their price and available stock.
@@ -423,7 +423,7 @@ pub enum ActorType {
 /// Used for recording the source of wants in the market.
 /// 
 /// Includes options for both ownership (product) or a process.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum WantSource {
     /// Product(Ownership) source of the want.
     Product(usize),

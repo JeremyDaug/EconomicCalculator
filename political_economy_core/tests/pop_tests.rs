@@ -4030,7 +4030,7 @@ mod pop_tests {
             }
 
             // send want found message with ambrosia fruit consumption (13)
-            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, source: WantSource::Process(13)})
                 .expect("Sudden Disconnect!");
             // clear out the message just sent.
             rx.recv().expect("Broke.");
@@ -4157,7 +4157,7 @@ mod pop_tests {
             }
 
             // send want found message with ambrosia fruit consumption (13)
-            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, source: WantSource::Process(13) })
                 .expect("Sudden Disconnect!");
             // clear out the message just sent.
             rx.recv().expect("Broke.");
@@ -4284,7 +4284,7 @@ mod pop_tests {
             }
 
             // send want found message with ambrosia fruit consumption (13)
-            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, source: WantSource::Process(13) })
                 .expect("Sudden Disconnect!");
             // clear out the message just sent.
             rx.recv().expect("Broke.");
@@ -4323,7 +4323,7 @@ mod pop_tests {
             }
             
             // send want found message with ambrosia fruit consumption (13)
-            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, process: 13 })
+            tx.send(ActorMessage::FoundWant { buyer: pop_info, want: 2, source: WantSource::Process(13) })
                 .expect("Sudden Disconnect!");
             // clear out the message just sent.
             rx.recv().expect("Broke.");
@@ -5139,7 +5139,7 @@ mod pop_tests {
 
     /// These tests 
     mod pop_integration_tests {
-        use std::{borrow::BorrowMut, collections::{HashMap, HashSet}, thread, time::{self, Duration}};
+        use std::{borrow::BorrowMut, collections::{HashMap, HashSet}, thread, time::{self, Duration, Instant}};
         use crossbeam::scope;
         use itertools::Itertools;
         use political_economy_core::objects::actor_objects::{actor::Actor, desire::DesireTag};
@@ -5617,7 +5617,7 @@ mod pop_tests {
                 // start the market day.
                 tx.send(ActorMessage::StartDay).expect("Brokd.");
                 // should recieve finished here
-                let start = std::time::SystemTime::now();
+                let start = Instant::now();
                 if let Ok(ActorMessage::StartDay) = rx.recv() {
                     // do nothing, all's fine
                 } else {
@@ -5639,10 +5639,10 @@ mod pop_tests {
                 let mut firstmsg = false;
                 let mut secmsg = false;
                 while let Ok(msg) = rx.recv() {
-                    println!("{}", msg);
                     if let ActorMessage::FirmToEmployee { 
                     employee, 
                     .. } = msg {
+                        println!("{}", msg);
                         if let ActorInfo::Pop(0) = employee {
                             firstmsg = true;
                         } else if let ActorInfo::Pop(1) = employee {
@@ -5662,19 +5662,18 @@ mod pop_tests {
                 let mut times = 0; // clear out backlog first.
                 let mut other_backlog = VecDeque::new();
                 while let Some(msg) = backlog.pop_front() {
-                    println!("{}", msg);
                     if let ActorMessage::SellOrder { .. } = msg {
+                        println!("{}", msg);
                         times += 1;
                     } else {
                         // shift to other backlog if it's not actor message.
                         other_backlog.push_back(msg);
                     }
                 }
-                let start = time::Instant::now();
                 while let Ok(opt) = rx.try_recv() {
                     if let Some(msg) = opt {
-                        println!("{}", msg);
                         if let ActorMessage::SellOrder { .. } = msg {
+                            println!("{}", msg);
                             times += 1;
                         } else {
                             other_backlog.push_back(msg);
@@ -5685,7 +5684,7 @@ mod pop_tests {
                         break;
                     }
                     let here = time::Instant::elapsed(&start);
-                    if here > Duration::from_millis(500) {
+                    if here > Duration::from_secs(10) {
                         //assert!(false, "To Long to get all expected messages.")
                     }
                 }
@@ -5693,8 +5692,10 @@ mod pop_tests {
                 // with sell orders gotten, send back our confirmation from pop0 to pop1
                 backlog = VecDeque::new();
                 while let Some(msg) = other_backlog.pop_front() {
+                    println!("{}", msg);
                     if let ActorMessage::FindWant { want, sender } = msg {
-
+                        tx.send(ActorMessage::FoundWant { buyer: sender, want, source: WantSource::Process(103) })
+                            .expect("Borked");
                     }
                 }
 

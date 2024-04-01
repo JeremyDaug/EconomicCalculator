@@ -70,6 +70,8 @@ pub const TIER_RATIO: f64 = 0.9;
 /// The standard cost in time for an individual to go shopping.
 /// 
 /// Used for shopping for specific products.
+/// This will likely need to be alterend to a much nicer binary number, such
+/// as 0.25 (0b0.01) or 0.1875 (0b0.0011)
 pub const SHOPPING_TIME_COST: f64 = 0.2;
 /// The Salability threshold for an item to be considered a currency.
 pub const SALABILITY_THRESHOLD: f64 = 0.75;
