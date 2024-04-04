@@ -195,6 +195,7 @@ impl Pop {
                 .expect("Unexpected Disconnect"); // if disconnected, panic.
 
             if let Some(msg) = result { // if we recieved a message, check it's for us
+            if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
                 if msg.for_me(self.actor_info()) {
                     self.backlog.push_back(msg); // if it's for us, push it to the backlog.
                 }
@@ -272,12 +273,16 @@ impl Pop {
             // next deal with the first backlog
             let popped = self.backlog.pop_front();
             if let Some(msg) = popped {
+                if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
                 if find.iter()
                 .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
                     return msg;
                 }
                 else {
-                    self.process_common_msg(rx, tx, data, market, msg);
+                    let result = self.process_common_msg(rx, tx, data, market, msg);
+                    if let Some(back_result) = result {
+                        self.backlog.push_back(back_result);
+                    }
                 }
             }
         }

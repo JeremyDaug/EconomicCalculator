@@ -253,7 +253,7 @@ impl DataManager {
             None,
             None).unwrap();
         // Shopping Time
-        let shopping_time = Product::new(SHOPPING_TIME_PRODUCT_ID,
+        let mut shopping_time = Product::new(SHOPPING_TIME_PRODUCT_ID,
             String::from("Shopping Time"),
             String::from(""),
             String::from("Shopping Time, productive, but sometimes frustrating."), 
@@ -318,7 +318,11 @@ impl DataManager {
             variant_name: String::new(),
             description: String::from("Shopping takes time."),
             minimum_time: 0.0,
-            process_parts: vec![shop_input, shop_skill, shop_output, shop_output_skill],
+            process_parts: vec![
+                shop_input, 
+                shop_skill, 
+                shop_output, 
+                shop_output_skill],
             process_tags: Vec::new(),
             technology_requirement: None,
             tertiary_tech: None,
@@ -1667,7 +1671,81 @@ impl DataManager {
         Ok(())
     }
 
-        /// Creates a default process for the skill and it's labor.
+    pub fn connect_processes_to_products_and_wants(&mut self) -> Result<(), ()> {
+        // once all processes are loaded connect the products to the processes
+        for process in self.processes.values() {
+            for part in process.process_parts.iter() {
+                if part.item.is_product() {
+                    let id = part.item.unwrap();
+                    let product = self.products.get_mut(&id).unwrap();
+                    product.add_process(process)
+                    .expect(
+                        format!("An error occured connecting process '{}' to proudct '{}'",
+                        process.get_name(), 
+                        product.get_name()).as_str());
+                }
+                else if part.item.is_want() &&
+                    part.part == ProcessSectionTag::Output { 
+                        // if it is want and an output, then it must be some
+                        // use to a want
+                        // add it to the want
+                        let id = part.item.unwrap();
+                        let want = self.wants.get_mut(&id).unwrap();
+                        want.add_process_source(process)
+                            .expect("Error Occured in processing to want.");
+                }
+            }
+        }
+
+        // connect up process nodes.
+        // preemtively create all of them so we can add as we go.
+        for id in self.processes.keys() {
+            self.process_nodes.insert(*id, ProcessNode::new(*id));
+        }
+        for (id, process) in self.processes.iter() {
+            // processes share an ID with their node for simplicity.
+            let mut new_node = ProcessNode::new(*id);
+
+            new_node.can_feed_self = process.can_feed_self(&self);
+
+            for (other_id, other_process) in self.processes.iter() {
+                // for our current process, iterate through again
+                // skip if same id (we already checked it)
+                if id == other_id {
+                    continue;
+                }
+                if  new_node.inputs.contains(other_id) || 
+                    new_node.capitals.contains(other_id) ||
+                    new_node.outputs.contains(other_id) {
+                    // if current node already references other_id, skip
+                    continue;
+                }
+                let other_node = self.process_nodes.get_mut(other_id).unwrap();
+                // check connections to other process and add to both if there is one
+                if process.takes_input_from(other_process) { // inputs to output
+                    new_node.inputs.push(*other_id);
+                    other_node.outputs.push(*id);
+                }
+                if process.takes_capital_from(other_process) { // capital to output (product only)
+                    new_node.capitals.push(*other_id);
+                    other_node.outputs.push(*id);
+                }
+                if process.gives_output_to_others_input(other_process) { // output to input
+                    new_node.outputs.push(*other_id);
+                    other_node.inputs.push(*id);
+                }
+                if process.gives_output_to_others_capital(other_process) { // output to capital (product only)
+                    new_node.outputs.push(*other_id);
+                    other_node.capitals.push(*id);
+                }
+            }
+
+            self.process_nodes.insert(*id, new_node);
+        };
+        Ok(())
+    }
+
+    /// Creates a default process for the skill and it's labor.
     /// 
     /// # Defalts
     /// 

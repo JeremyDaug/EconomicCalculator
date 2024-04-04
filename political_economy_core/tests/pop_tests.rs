@@ -5176,8 +5176,6 @@ mod pop_tests {
                 consumption_sources: HashSet::new(),
             };
 
-            sustenance.consumption_sources.insert(103);
-
             // set up simple products and processes
             // Resources, extracted via time and Skill from nothing (Land not yet in system).
             let resources = Product::new(
@@ -5247,9 +5245,6 @@ mod pop_tests {
                 None,
                 None,
             ).unwrap();
-
-            // wealth is consumed into sustenance.
-            wealth.consumption_processes.insert(103);
 
             // processes
             // extract resources from land
@@ -5517,6 +5512,8 @@ mod pop_tests {
                 ideology: HashMap::new(),
             };
 
+            manager.connect_processes_to_products_and_wants().expect("Error on connecting data.");
+
             (history, manager, demos)
         }
     
@@ -5642,7 +5639,7 @@ mod pop_tests {
                     if let ActorMessage::FirmToEmployee { 
                     employee, 
                     .. } = msg {
-                        println!("{}", msg);
+                        println!("Tester: {}", msg);
                         if let ActorInfo::Pop(0) = employee {
                             firstmsg = true;
                         } else if let ActorInfo::Pop(1) = employee {
@@ -5673,7 +5670,7 @@ mod pop_tests {
                 while let Ok(opt) = rx.try_recv() {
                     if let Some(msg) = opt {
                         if let ActorMessage::SellOrder { .. } = msg {
-                            println!("{}", msg);
+                            println!("Tester: {}", msg);
                             times += 1;
                         } else {
                             other_backlog.push_back(msg);
@@ -5691,11 +5688,30 @@ mod pop_tests {
 
                 // with sell orders gotten, send back our confirmation from pop0 to pop1
                 backlog = VecDeque::new();
+                let mut want_founds = 0;
                 while let Some(msg) = other_backlog.pop_front() {
-                    println!("{}", msg);
                     if let ActorMessage::FindWant { want, sender } = msg {
+                        println!("Tester: {}", msg);
                         tx.send(ActorMessage::FoundWant { buyer: sender, want, source: WantSource::Process(103) })
                             .expect("Borked");
+                        want_founds += 1;
+                    } else {
+                        backlog.push_back(msg);
+                    }
+                }
+                while let Ok(opt) = rx.try_recv() {
+                    if let Some(msg) = opt {
+                        println!("Tester: {}", msg);
+                        if let ActorMessage::FindWant { want, sender } = msg {
+                            //tx.send
+                        }
+                    }
+                    if want_founds == 2 {
+                        break;
+                    }
+                    let here = time::Instant::elapsed(&start);
+                    if here > Duration::from_secs(10) {
+                        //assert!(false, "Timed out!");
                     }
                 }
 

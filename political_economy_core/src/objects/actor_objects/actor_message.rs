@@ -273,7 +273,7 @@ impl ActorMessage {
     pub fn for_me(&self, me: ActorInfo) -> bool {
         match self {
             ActorMessage::StartDay => true,
-            ActorMessage::Finished { sender } => me == *sender,
+            ActorMessage::Finished { .. } => false, // Sender sent this, no one should bother catching it.
             ActorMessage::AllFinished => true,
             ActorMessage::FindProduct { .. } => false, // for market, sent by me
             ActorMessage::FindClass { .. } => false, // for market, sent by me,
