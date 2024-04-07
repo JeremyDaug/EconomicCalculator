@@ -301,7 +301,7 @@ impl DataManager {
             part: ProcessSectionTag::Capital
         };
         let shop_output = ProcessPart{
-            item: Item::Product(SHOPPING_TIME_PROC_ID),
+            item: Item::Product(SHOPPING_TIME_PRODUCT_ID),
             amount: 1.0,
             part_tags: Vec::new(),
             part: ProcessSectionTag::Output,

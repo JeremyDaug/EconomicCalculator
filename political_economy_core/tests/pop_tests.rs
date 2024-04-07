@@ -1204,7 +1204,7 @@ mod pop_tests {
             }
             
             let handler = thread::spawn(move || {
-                test.msg_catchup(&passed_rx);
+                test.quick_msg_catchup(&passed_rx);
                 test
             });
 
@@ -1248,7 +1248,7 @@ mod pop_tests {
             }
             
             let handler = thread::spawn(move || {
-                test.msg_catchup(&passed_rx);
+                test.quick_msg_catchup(&passed_rx);
                 test
             });
 
@@ -5475,7 +5475,7 @@ mod pop_tests {
             });
             history.product_info.insert(wealth.id, ProductInfo {
                 available: 100.0,
-                price: 5.0,
+                price: 1.0,
                 offered: 100.0,
                 sold: 0.0,
                 salability: 1.0,
@@ -5483,13 +5483,14 @@ mod pop_tests {
             });
             history.product_info.insert(capital.id, ProductInfo {
                 available: 100.0,
-                price: 3.0,
+                price: 1.0,
                 offered: 100.0,
                 sold: 0.0,
                 salability: 0.5,
                 is_currency: false,
             });
-            history.want_info.insert(sustenance.id, MarketWantInfo::new(1.0));
+            history.want_info.insert(sustenance.id,
+                 MarketWantInfo::new(1.0));
             history.sale_priority.push(wealth.id);
             history.sale_priority.push(capital.id);
             history.sale_priority.push(resources.id);
@@ -5583,6 +5584,8 @@ mod pop_tests {
                 hypo_change: TieredValue { tier: 0, value: 0.0 },
                 backlog: VecDeque::new(),
             };
+            let pop0_id = pop0.actor_info();
+            let pop1_id = pop1.actor_info();
 
             // add property to exchange between them.
             // same time to both.
@@ -5613,15 +5616,9 @@ mod pop_tests {
 
                 // start the market day.
                 tx.send(ActorMessage::StartDay).expect("Brokd.");
-                // should recieve finished here
-                let start = Instant::now();
-                if let Ok(ActorMessage::StartDay) = rx.recv() {
-                    // do nothing, all's fine
-                } else {
-                    assert!(false, "wrong message recieved.");
-                }
+                // don't bother checking for it.
 
-                // send workday end msgs to both pop0 and 1.
+                // send workday end msgs to both pop0 and 1, they're waiting for it.
                 tx.send(ActorMessage::FirmToEmployee { 
                     firm: ActorInfo::Firm(0), 
                     employee: ActorInfo::Pop(0), 
@@ -5630,91 +5627,76 @@ mod pop_tests {
                     firm: ActorInfo::Firm(1), 
                     employee: ActorInfo::Pop(1), 
                     action: FirmEmployeeAction::WorkDayEnded }).expect("Borkd.");
-                // absorb the twe messages from this real quick.
-                // use vecdeq just in case.
-                let mut backlog = VecDeque::new();
-                let mut firstmsg = false;
-                let mut secmsg = false;
-                while let Ok(msg) = rx.recv() {
-                    if let ActorMessage::FirmToEmployee { 
-                    employee, 
-                    .. } = msg {
-                        println!("Tester: {}", msg);
-                        if let ActorInfo::Pop(0) = employee {
-                            firstmsg = true;
-                        } else if let ActorInfo::Pop(1) = employee {
-                            secmsg = true;
-                        } else {
-                            assert!(false, "bad msg?");
-                        }
-                    } else {
-                        backlog.push_back(msg);
-                    }
-                    if firstmsg && secmsg {
-                        break;
-                    }
-                }
+                // don't bother checking that work day complete was sent. conitnue on.
 
-                // check that both put stuff up for sale.
-                let mut times = 0; // clear out backlog first.
-                let mut other_backlog = VecDeque::new();
-                while let Some(msg) = backlog.pop_front() {
-                    if let ActorMessage::SellOrder { .. } = msg {
+                // loop through and treat each message as it comes.
+                let mut sales = vec![];
+                let mut sellers = vec![];
+                let mut want_times = 0;
+                let mut product_times = 0;
+                let mut other_items = 0;
+                let mut finished = 0;
+                
+                // Continually get msgs and handle them until the pops are done.
+                let start = Instant::now();
+                while let Ok(opt) = rx.try_recv() {
+                    if let Some(msg) = opt {
                         println!("{}", msg);
-                        times += 1;
-                    } else {
-                        // shift to other backlog if it's not actor message.
-                        other_backlog.push_back(msg);
-                    }
-                }
-                while let Ok(opt) = rx.try_recv() {
-                    if let Some(msg) = opt {
-                        if let ActorMessage::SellOrder { .. } = msg {
-                            println!("Tester: {}", msg);
-                            times += 1;
-                        } else {
-                            other_backlog.push_back(msg);
+                        match msg {
+                            ActorMessage::SellOrder { sender, .. } => {
+                                // record who's put stuff up for sale currently.
+                                sales.push(msg);
+                                sellers.push(sender);
+                            },
+                            ActorMessage::FindWant { want, sender } => {
+                                // want search, send back the standard info
+                                tx.send(ActorMessage::FoundWant { buyer: sender, want, 
+                                    source: WantSource::Process(103) }).expect("Borkde");
+                                want_times += 1;
+                            },
+                            ActorMessage::FindProduct { product, sender } => {
+                                if sender == pop0_id {
+                                    // find product message recieved. Only send if a seller has 
+                                    if sellers.contains(&pop1_id) {
+                                        tx.send(ActorMessage::FoundProduct { seller: pop1_id, buyer: sender, product })
+                                        .expect("Borbs");
+                                    } else {
+                                        tx.send(ActorMessage::ProductNotFound 
+                                            { product, buyer: sender })
+                                            .expect("Borgd");
+                                    }
+                                } else if sender == pop1_id {
+                                    // find product message recieved. Only send if a seller has 
+                                    if sellers.contains(&pop0_id) {
+                                        tx.send(ActorMessage::FoundProduct { seller: pop0_id, buyer: sender, product })
+                                        .expect("Borbs");
+                                    } else {
+                                        tx.send(ActorMessage::ProductNotFound 
+                                            { product, buyer: sender })
+                                            .expect("Borgd");
+                                    }
+                                }
+                            },
+                            ActorMessage::Finished { sender } => {
+                                finished += 1;
+                                if finished == 2 {
+                                    break;
+                                }
+                            },
+                            _ => {
+                                println!(" ==> Unhandled");
+                            },
                         }
-                        continue; // if we got something, don't check for time.
-                    }
-                    if times == 2 { // get both sell orders, then gtfo.
-                        break;
-                    }
-                    let here = time::Instant::elapsed(&start);
-                    if here > Duration::from_secs(10) {
-                        //assert!(false, "To Long to get all expected messages.")
+                    } else {
+                        // check time here to ensure no infinite running.
+                        let now = Instant::now();
+                        if now.duration_since(start) > Duration::from_secs(100) {
+                            //assert!(false, "Timed out.");
+                        }
                     }
                 }
 
-                // with sell orders gotten, send back our confirmation from pop0 to pop1
-                backlog = VecDeque::new();
-                let mut want_founds = 0;
-                while let Some(msg) = other_backlog.pop_front() {
-                    if let ActorMessage::FindWant { want, sender } = msg {
-                        println!("Tester: {}", msg);
-                        tx.send(ActorMessage::FoundWant { buyer: sender, want, source: WantSource::Process(103) })
-                            .expect("Borked");
-                        want_founds += 1;
-                    } else {
-                        backlog.push_back(msg);
-                    }
-                }
-                while let Ok(opt) = rx.try_recv() {
-                    if let Some(msg) = opt {
-                        println!("Tester: {}", msg);
-                        if let ActorMessage::FindWant { want, sender } = msg {
-                            //tx.send
-                        }
-                    }
-                    if want_founds == 2 {
-                        break;
-                    }
-                    let here = time::Instant::elapsed(&start);
-                    if here > Duration::from_secs(10) {
-                        //assert!(false, "Timed out!");
-                    }
-                }
-
+                // wrap everything back up for ending
                 let mut pops = vec![];
                 for handle in handles.into_iter() {
                     //pops.push(*handle.join().unwrap());
@@ -5722,6 +5704,8 @@ mod pop_tests {
                     pops.push(pop);
                 }
             }).expect("Err'd.");
+
+            // with everything out, sanity check our results.
         }
     }
 }

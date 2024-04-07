@@ -455,10 +455,13 @@ impl Process {
         let mut total_bonus = 1.0;
         // how much of each bonus we consumed (organized by key).
         let mut bonus_iters = HashMap::new();
+        // quickly initialize bonus iters incase they don't get touched
+        for id in optional_iters.keys() { bonus_iters.insert(*id, 0.0); }
         loop {
             // get lowest between normal, fixed, and optionals
             let mut lowest = lowest_normal.min(max_poss_fixed)
                 .min(*optional_iters.values()
+                    .filter(|x| **x > 0.0)
                     .min_by(|a, b| a.total_cmp(b))
                     .unwrap_or(&f64::INFINITY));
             // with lowest gotten, record the results and subtract from others.
@@ -504,6 +507,13 @@ impl Process {
             // same with normals, but don't forget the bonus throughput.
             lowest_normal -= lowest * current_bonus;
             normal_iters += lowest * current_bonus;
+            // remove from optional iters as well, and pop off any that are equal to 0.
+            for (id, val) in optional_iters.iter_mut() {
+                *val -= lowest;
+                if *val <= 0.0 {
+                    *val = 0.0;
+                }
+            }
             if max_poss_fixed == 0.0 || lowest_normal == 0.0 {
                 // if we cannot get more fixed or normal iterations in, bounce.
                 break;
@@ -834,10 +844,13 @@ impl Process {
         let mut total_bonus = 1.0;
         // how much of each bonus we consumed (organized by key).
         let mut bonus_iters = HashMap::new();
+        // quickly initialize bonus iters incase they don't get touched
+        for id in optional_iters.keys() { bonus_iters.insert(*id, 0.0); }
         loop {
             // get lowest between normal, fixed, and optionals
             let mut lowest = lowest_normal.min(max_poss_fixed)
                 .min(*optional_iters.values()
+                    .filter(|x| **x > 0.0)
                     .min_by(|a, b| a.total_cmp(b))
                     .unwrap_or(&f64::INFINITY));
             // with lowest gotten, record the results and subtract from others.
@@ -877,12 +890,19 @@ impl Process {
             }
             // update total bonuses (add bonus via average.)
             total_bonus = ((total_bonus * fixed_iters) + (current_bonus * lowest)) / (fixed_iters + lowest);
+            debug_assert!(!total_bonus.is_nan(), "Divided by 0, check how lowest was 0.");
             // with bonii gotten, apply fixed alteration
             max_poss_fixed -= lowest;
             fixed_iters += lowest;
             // same with normals, but don't forget the bonus throughput.
             lowest_normal -= lowest * current_bonus;
             normal_iters += lowest * current_bonus;
+            for (id, val) in optional_iters.iter_mut() {
+                *val -= lowest;
+                if *val <= 0.0 {
+                    *val = 0.0;
+                }
+            }
             if max_poss_fixed == 0.0 || lowest_normal == 0.0 {
                 // if we cannot get more fixed or normal iterations in, bounce.
                 break;
@@ -917,13 +937,13 @@ impl Process {
             }
             match process_part.part {
                 ProcessSectionTag::Capital => {
-                    if let Item::Product(_id) = process_part.item {
+                    if let Item::Product(id) = process_part.item {
                         // add used capital products
                         if fixed {
                             results.capital_products
                                 .insert(process_part.item.unwrap(), process_part.amount * fixed_iters);
                         } else if optional {
-                            let optional_val = bonus_iters.get(&idx).unwrap();
+                            let optional_val = bonus_iters.get(&idx).expect(format!("Product {} not found in bonus iters.", id).as_str());
                             results.capital_products
                                 .insert(process_part.item.unwrap(), process_part.amount * optional_val);
                         } else {
@@ -1005,9 +1025,8 @@ impl Process {
         results
     }
 
-
     fn class_part_processing_with_property(class_id: usize, available_products: &HashMap<usize, PropertyInfo>, data: &DataManager, 
-        iterations: f64, process_part: &ProcessPart, results: &mut ProcessOutputs) -> HashMap<usize, f64> {
+    iterations: f64, process_part: &ProcessPart, results: &mut ProcessOutputs) -> HashMap<usize, f64> {
             let mut ret = HashMap::new();
             // get the class products
             let class_mates = available_products.iter()
@@ -1029,8 +1048,6 @@ impl Process {
             }
             ret
         }
-    
-    
 
     /// # Effective Output Of 
     /// 

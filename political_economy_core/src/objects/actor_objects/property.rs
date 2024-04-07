@@ -2270,6 +2270,18 @@ impl Property {
         max_available
     }
 
+    /// # Get Product
+    /// 
+    /// Retrieves a product from our property. 
+    /// 
+    /// Will first seek it from available.
+    /// 
+    /// then, if that's not enough, it will seek it out from our 
+    pub fn get_product(&mut self, product: usize, target: f64, data: &DataManager,
+    _market: &MarketHistory, _tier_cutoff: Option<usize>) -> f64 {
+        todo!("Do later.")
+    }
+
     /// # Get Shopping Time
     /// 
     /// As available_shopping_time(), but instead of returning a total estimate it tries to get
@@ -2313,8 +2325,10 @@ impl Property {
         for (&id, &avail) in self.want_store.iter() {
             available_wants.insert(id, avail.expendable());
         }
-        for process in data.products.get(&SHOPPING_TIME_PRODUCT_ID).unwrap() // The product
-        .processes.iter() // the process IDs which time is related to
+        let processes = data.products.get(&SHOPPING_TIME_PRODUCT_ID)
+            .unwrap().processes.clone();
+
+        for process in processes.iter()
         .map(|x| data.processes.get(x).unwrap()) // the process info
         .filter(|x| x.outputs_product(SHOPPING_TIME_PRODUCT_ID)) // the processes which output it.
         .sorted_by(|a, b| a.id.cmp(&b.id)) { // ID order.

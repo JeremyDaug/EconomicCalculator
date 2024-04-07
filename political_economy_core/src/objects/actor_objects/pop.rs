@@ -163,7 +163,7 @@ impl Pop {
     msg: ActorMessage) {
         loop {
             // try to clear out prior msgs before sending.
-            self.msg_catchup(rx);
+            self.quick_msg_catchup(rx);
             let result = tx.try_send(msg);
             if let Ok(_) = result {
                 break; // if message got sent out, break.
@@ -178,7 +178,7 @@ impl Pop {
         };
     }
 
-    /// # Message Catchup
+    /// # Quick Message Catchup
     ///
     /// A shorthand function.
     ///
@@ -189,13 +189,13 @@ impl Pop {
     ///
     /// This focuses on keeping the Broadcast Queue open to ensure it doesn't get backed
     /// up too much.
-    pub fn msg_catchup(&mut self, rx: &Receiver<ActorMessage>) {
+    pub fn quick_msg_catchup(&mut self, rx: &Receiver<ActorMessage>) {
         loop {
             let result = rx.try_recv()
                 .expect("Unexpected Disconnect"); // if disconnected, panic.
 
             if let Some(msg) = result { // if we recieved a message, check it's for us
-            if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
+            //if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
                 if msg.for_me(self.actor_info()) {
                     self.backlog.push_back(msg); // if it's for us, push it to the backlog.
                 }
@@ -203,6 +203,35 @@ impl Pop {
             else { // if no messsage in queue, we've caught up so break out.
                 return;
             }
+        }
+    }
+
+    /// # Active Message Catchup
+    /// 
+    /// Similar to msg_catchup, but instead of just clearing out the queue and adding it to the backlog it
+    /// also processes any messages it recieves.
+    /// 
+    /// First it consumes the backlog, if there is anything, then it consumes the msg queue.
+    pub fn msg_catchup(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+    data: &DataManager, market: &MarketHistory) {
+        while let Some(msg) = self.backlog.pop_front() {
+            let result = self.process_common_msg(rx, tx, data, market, msg);
+            if let Some(msg) = result {
+                println!("Common msg handling for pop does not handle: {}", msg);
+            }
+        }
+
+        // with backlog cleared out, go through the actual message queue.
+        loop {
+            let result = rx.try_recv()
+                .expect("Unexpected Disconnect");
+
+            if let Some(msg) = result {
+                //if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
+                if msg.for_me(self.actor_info()) {
+                    let _unhandled = self.process_common_msg(rx, tx, data, market, msg);
+                }
+            } else { return; } // if no message, we've caught up.
         }
     }
 
@@ -269,11 +298,11 @@ impl Pop {
     find: &Vec<ActorMessage>) -> ActorMessage {
         loop {
             // catchup on messages for good measure
-            self.msg_catchup(rx);
+            self.quick_msg_catchup(rx);
             // next deal with the first backlog
             let popped = self.backlog.pop_front();
             if let Some(msg) = popped {
-                if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
+                // if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
                 if find.iter()
                 .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
                     return msg;
@@ -931,7 +960,9 @@ impl Pop {
         // with budget gotten, check if it's feasable for us to buy (market price < 2.0 budget)
         let market_price = market.get_product_price(&product, 0.0);
         if market_price > (price_estimate * constants::HARD_BUY_CAP) {
-            // if unfeaseable, at current market price, cancel.
+            // if unfeaseable, at current market price, add the current market AMV
+
+            // and cancel.
             return BuyResult::CancelBuy;
         }
 
@@ -951,6 +982,8 @@ impl Pop {
             BuyResult::NotSuccessful { reason: OfferResult::NotInMarket }
         }
         else if let ActorMessage::FoundProduct { seller, .. } = result {
+            // before we enter standard buy, catch up to ensure any possible deadlocks are avoided.
+            self.msg_catchup(rx, tx, data, market);
             self.standard_buy(rx, tx, data, market, buy_target, seller)
         }
         else { unreachable!("Somehow did not get FoundProduct or ProductNotFound."); }
@@ -1019,6 +1052,7 @@ impl Pop {
     market: &MarketHistory,
     buy_target: f64,
     _seller: ActorInfo) -> BuyResult {
+        // With 
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
         let result = self.specific_wait(rx, &vec![
