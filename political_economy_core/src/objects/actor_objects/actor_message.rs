@@ -373,6 +373,12 @@ pub enum ActorInfo {
     State(usize),
 }
 
+impl Display for ActorInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl ActorInfo {
     pub fn get_id(&self) -> usize {
         match self {

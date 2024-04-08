@@ -1066,7 +1066,7 @@ mod pop_tests {
                 let pop_info = test.actor_info();
                 let firm = ActorInfo::Firm(0);
                 // setup message queue.
-                let (tx, rx) = barrage::bounded(10);
+                let (tx, mut rx) = barrage::bounded(10);
                 // push a bunch of stuff to get it blocked.
                 let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
                     seller: ActorInfo::Firm(0), proudct: 0 };
@@ -1081,7 +1081,7 @@ mod pop_tests {
 
                 // get the thread going
                 let handler = thread::spawn(move || {
-                    let result = test.specific_wait(&rx, &vec![
+                    let result = test.specific_wait(&mut rx, &vec![
                         ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
                             seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
                             quantity: 0.0, followup: 0 },
@@ -1131,7 +1131,7 @@ mod pop_tests {
                 let pop_info = test.actor_info();
                 let firm = ActorInfo::Firm(0);
                 // setup message queue.
-                let (_tx, rx) = barrage::bounded(10);
+                let (mut _tx, mut rx) = barrage::bounded(10);
                 // push a bunch of stuff to get it blocked.
                 let undesired_msg = ActorMessage::CheckItem { buyer: firm, 
                     seller: ActorInfo::Firm(0), proudct: 0 };
@@ -1152,7 +1152,7 @@ mod pop_tests {
 
                 // get the thread going
                 let handler = thread::spawn(move || {
-                    let result = test.specific_wait(&rx, &vec![
+                    let result = test.specific_wait(&mut rx, &vec![
                         ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
                             seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
                             quantity: 0.0, followup: 0 }]);
@@ -5658,7 +5658,9 @@ mod pop_tests {
                                 if sender == pop0_id {
                                     // find product message recieved. Only send if a seller has 
                                     if sellers.contains(&pop1_id) {
-                                        tx.send(ActorMessage::FoundProduct { seller: pop1_id, buyer: sender, product })
+                                        tx.send(ActorMessage::FoundProduct { 
+                                            seller: pop1_id, buyer: sender, product 
+                                        })
                                         .expect("Borbs");
                                     } else {
                                         tx.send(ActorMessage::ProductNotFound 
@@ -5668,7 +5670,9 @@ mod pop_tests {
                                 } else if sender == pop1_id {
                                     // find product message recieved. Only send if a seller has 
                                     if sellers.contains(&pop0_id) {
-                                        tx.send(ActorMessage::FoundProduct { seller: pop0_id, buyer: sender, product })
+                                        tx.send(ActorMessage::FoundProduct { 
+                                            seller: pop0_id, buyer: sender, product 
+                                        })
                                         .expect("Borbs");
                                     } else {
                                         tx.send(ActorMessage::ProductNotFound 
@@ -5677,9 +5681,11 @@ mod pop_tests {
                                     }
                                 }
                             },
-                            ActorMessage::Finished { sender } => {
+                            ActorMessage::Finished { .. } => {
                                 finished += 1;
                                 if finished == 2 {
+                                    // if both finished, send all finished and break out of our handle loop here.
+                                    tx.send(ActorMessage::AllFinished).expect("Bod");
                                     break;
                                 }
                             },
