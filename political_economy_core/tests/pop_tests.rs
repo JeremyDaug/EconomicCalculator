@@ -5641,20 +5641,24 @@ mod pop_tests {
                 let start = Instant::now();
                 while let Ok(opt) = rx.try_recv() {
                     if let Some(msg) = opt {
-                        println!("{}", msg);
                         match msg {
                             ActorMessage::SellOrder { sender, .. } => {
+                                println!("{}->M:  {}", sender, msg);
                                 // record who's put stuff up for sale currently.
                                 sales.push(msg);
                                 sellers.push(sender);
                             },
                             ActorMessage::FindWant { want, sender } => {
                                 // want search, send back the standard info
-                                tx.send(ActorMessage::FoundWant { buyer: sender, want, 
-                                    source: WantSource::Process(103) }).expect("Borkde");
+                                println!("{}->M:  {}", sender, msg);
+                                let response = ActorMessage::FoundWant { buyer: sender, want, 
+                                    source: WantSource::Process(103) };
+                                println!("M->{}:  {}", sender, response);
+                                tx.send(response).expect("Borkde");
                                 want_times += 1;
                             },
                             ActorMessage::FindProduct { product, sender } => {
+                                println!("{}->M:  {}", sender, msg);
                                 if sender == pop0_id {
                                     // find product message recieved. Only send if a seller has 
                                     if sellers.contains(&pop1_id) {
@@ -5663,34 +5667,57 @@ mod pop_tests {
                                         })
                                         .expect("Borbs");
                                     } else {
-                                        tx.send(ActorMessage::ProductNotFound 
-                                            { product, buyer: sender })
+                                        let response = ActorMessage::ProductNotFound 
+                                        { product, buyer: sender };
+                                        println!("M->{}:  {}", sender, response);
+                                        tx.send(response)
                                             .expect("Borgd");
                                     }
                                 } else if sender == pop1_id {
                                     // find product message recieved. Only send if a seller has 
                                     if sellers.contains(&pop0_id) {
-                                        tx.send(ActorMessage::FoundProduct { 
+                                        let response = ActorMessage::FoundProduct { 
                                             seller: pop0_id, buyer: sender, product 
-                                        })
+                                        };
+                                        println!("M->{}: {}", sender, response);
+                                        tx.send(response)
                                         .expect("Borbs");
                                     } else {
-                                        tx.send(ActorMessage::ProductNotFound 
-                                            { product, buyer: sender })
+                                        let response = ActorMessage::ProductNotFound 
+                                            { product, buyer: sender };
+                                        println!("M->{}:  {}", sender, response);
+                                        tx.send(response)
                                             .expect("Borgd");
                                     }
                                 }
                             },
-                            ActorMessage::Finished { .. } => {
+                            ActorMessage::Finished { sender  } => {
+                                println!("{}->M:  Finished", sender);
                                 finished += 1;
                                 if finished == 2 {
+                                    println!("M->All: AllFinished");
                                     // if both finished, send all finished and break out of our handle loop here.
                                     tx.send(ActorMessage::AllFinished).expect("Bod");
                                     break;
                                 }
                             },
+                            ActorMessage::FoundWant { .. } |
+                            ActorMessage::ProductNotFound { .. } |
+                            ActorMessage::FoundProduct { .. } => {},
+                            ActorMessage::InStock { buyer, seller, .. } => {
+                                println!("{}->{}: {}", seller, buyer, msg);
+                            },
+                            ActorMessage::BuyOffer { buyer, seller, .. } => {
+                                println!("{}->{}: {}", buyer, seller, msg);
+                            },
+                            ActorMessage::BuyOfferFollowup { buyer, seller, .. } => {
+                                println!("{}->{}: {}", buyer, seller, msg);
+                            },
+                            ActorMessage::SellerAcceptOfferAsIs { buyer, seller, .. } => {
+                                println!("{}->{}: {}", seller, buyer, msg);
+                            },
                             _ => {
-                                println!(" ==> Unhandled");
+                                println!("{}", msg);
                             },
                         }
                     } else {

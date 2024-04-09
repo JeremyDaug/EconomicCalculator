@@ -916,7 +916,7 @@ impl Pop {
                     // TODO When change is possible, deal with it here.
                     self.standard_sell(rx, tx, data, market, product, buyer);
                 } else {
-                    if cfg!(debug_assertions) { println!("Pop {} is buyer in: {}", self.id, msg); }
+                    //if cfg!(debug_assertions) { println!("Pop {} is buyer in: {}", self.id, msg); }
                 }
                 return None;
             },
