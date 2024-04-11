@@ -24,12 +24,14 @@ pub struct Firm {
     pub id: usize,
     /// The Firm's name
     pub name: String,
-    /// The variant name for a firm, used if the Firm is a child of another 
+    /// The name for a firm, used if the Firm is a child of another 
     /// firm or other organization.
-    pub variant_name: String,
+    /// 
+    /// Sub firms share their primary name.
+    pub sub_name: String,
     /// What kind of firm it is, alters the logic of the firm 
     pub firm_kind: FirmKind,
-    /// The rank of the firm. How high it is in it's firm tree.
+    /// The rank of the firm. How high it is in it's firm tree. Also alters it's logic.
     pub firm_rank: FirmRank,
     /// How is the firm owned.
     pub ownership_type: OwnershipStructure,
@@ -71,7 +73,10 @@ pub struct Firm {
 }
 
 impl Firm {
-    pub fn get_name(&self) -> String {
+    /// # Get full name
+    /// 
+    /// Shorthand function to get the firm's full name.
+    pub fn get_full_name(&self) -> String {
         format!("{}({})", self.name, self.variant_name)
     }
 }
@@ -139,7 +144,7 @@ pub enum FirmRank {
     /// an owner job. Little else.
     /// 
     /// Can only exist in a single market, and lacks the ability to form
-    /// a proper subdivisions, and finds it difficult to research new things
+    /// proper subdivisions, and finds it difficult to research new things
     /// actively.
     Firm,
     /// The Second Rank, capable of internal specialization through subfirms
