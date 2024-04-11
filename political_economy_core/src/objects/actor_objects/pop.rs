@@ -153,8 +153,11 @@ impl Pop {
     /// A helper function to push a message to the market.
     /// Safely pushes without blocking.
     ///
-    /// Tries to send, if fails it reads one message, and if it's for us, puts it on the
-    /// backlog. Then tries again, until it succeeds or the channel breaks.
+    /// Does a quick message catchup, reading up to the newest messages and 
+    /// adding any for us to the backlog.
+    /// 
+    /// Afterwards, it tries to push the message.If it fails, it tries the 
+    /// entire thing again.
     ///
     /// ## Panics
     ///
@@ -203,58 +206,6 @@ impl Pop {
             else { // if no messsage in queue, we've caught up so break out.
                 return;
             }
-        }
-    }
-
-    pub fn catchup_and_push_msg(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
-    data: &DataManager, market: &MarketHistory, msg: ActorMessage) {
-        loop {
-            // try to clear out prior msgs before sending.
-            self.msg_catchup(rx, tx, data, market);
-            let result = tx.try_send(msg);
-            if let Ok(_) = result {
-                break; // if message got sent out, break.
-            }
-            else if let Err(msg) = result {
-                match msg { // failed to send, check why
-                    // If disconnected, panic, there's nothing more we can do.
-                    barrage::TrySendError::Disconnected(_) => panic!("Unexpected Disconnect"),
-                    barrage::TrySendError::Full(_) => (), // if just full, consume and try again.
-                }
-            }
-        };
-    }
-
-    /// # Active Message Catchup
-    /// 
-    /// Similar to msg_catchup, but instead of just clearing out the queue and adding it to the backlog it
-    /// also processes any messages it recieves.
-    /// 
-    /// First it consumes the backlog, if there is anything, then it consumes the msg queue.
-    pub fn msg_catchup(&mut self, rx: &mut Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
-    data: &DataManager, market: &MarketHistory) {
-        while let Some(msg) = self.backlog.pop_front() {
-            let result = self.process_common_msg(rx, tx, data, market, msg);
-            if let Some(msg) = result {
-                //println!("Common msg handling for pop does not handle: {}", msg);
-            }
-        }
-
-        // with backlog cleared out, go through the actual message queue.
-        loop {
-            let result = rx.try_recv()
-                .expect("Unexpected Disconnect");
-
-            if let Some(msg) = result {
-                //if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
-                if msg.for_me(self.actor_info()) {
-                    // if a message is not handled here, it is likely needed elsewhere
-                    let result = self.process_common_msg(rx, tx, data, market, msg);
-                    if let Some(unhandled) = result {
-                        self.backlog.push_back(unhandled);
-                    }
-                }
-            } else { return; } // if no message, we've caught up.
         }
     }
 
@@ -313,6 +264,12 @@ impl Pop {
     ///
     /// It ignores the data of the message, only looking at the message type
     /// and that it is for us.
+    /// 
+    /// ## Panics if message channel breaks.
+    /// 
+    /// ## Notes
+    /// 
+    /// As it stands, only some products would ever be sought by us. All of them 
     pub fn active_wait(&mut self,
     rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>,
@@ -325,22 +282,24 @@ impl Pop {
             // next deal with the first backlog
             let popped = self.backlog.pop_front();
             if let Some(msg) = popped {
-                // if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
-                if find.iter()
-                .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
-                    return msg;
-                }
-                else {
-                    let result = self.process_common_msg(rx, tx, data, market, msg);
-                    if let Some(back_result) = result {
-                        self.backlog.push_back(back_result);
+                let result = self.process_common_msg(rx, tx, data, market, msg);
+
+                if let Some(msg) = result {
+                    // if we recieved something back, then check it's what we should be getting back.
+                    if find.iter()
+                    .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                        return msg; // if yes, return the message.
+                    } else {
+                        // if somehow not, panic, this should NEVER happen.
+                        panic!("Pop {} panicked! It recieved {} instead of what it should've and couldn't handle it.", 
+                            self.id, msg);
                     }
                 }
             }
         }
     }
 
-    /// # Specific wait function.
+    /// # Exclusive Wait function.
     ///
     /// First checks the backlog for the message requested, if it finds it, 
     /// it extracts it and returns that. If it doesn't, then it 
@@ -352,7 +311,7 @@ impl Pop {
     /// 
     /// May be improved by making find work with incomplete ActorMessages or some
     /// other mechanism that removes the need to created dummies to make it work.
-    pub fn specific_wait(&mut self,
+    pub fn exclusive_wait(&mut self,
     rx: &mut Receiver<ActorMessage>,
     find: &Vec<ActorMessage>) -> ActorMessage {
         // TODO Look into improving Find Parameter so it doesn't need a fully filled out ActorMessage to function.
@@ -692,7 +651,7 @@ impl Pop {
                     // of that want in the market.
                     // TODO: doing a find want in the market is a free action currently, consider changing that.
                     // TODO: Finding a want like this may not be necessary. Using market history may be good enough.
-                    pop.catchup_and_push_msg(rx, tx, data, market,
+                    pop.push_message(rx, tx,
                         ActorMessage::FindWant { want: *id, sender: pop.actor_info() });
                     // wait for the market to respond with either it's suggested process, or failure.
                     let result = pop.active_wait(rx, tx, data, market,
@@ -902,21 +861,34 @@ impl Pop {
             } else { unreachable!("Should not reach here!"); }
     }
 
+    /// # Process Common message
+    /// 
     /// Processes common messages from the ActorMessages for current free time.
     /// Function assumes that msg is for us, so be sure to collect just those.
-    ///
-    /// Returns any messages that we don't handle here. Currently,
+    /// 
+    /// All messages this deals with are ones in which we are the reactor not
+    /// the initiator. If it recieves something that means we are the initator
+    /// it returns it. If we are the initiator we are obviously expecting it.
+    /// 
+    /// Currently, this applies when 
+    /// 
+    /// - We are searching for a product, class, or want in the market. 
+    /// We recieve either found or not fonuds respectively.
+    /// - We are the buyers in a deal.
     fn process_common_msg(&mut self, rx: &mut Receiver<ActorMessage>,
     tx: &Sender<ActorMessage>, data: &DataManager,
     market: &MarketHistory, msg: ActorMessage) -> Option<ActorMessage> {
+        // println!("Pop {}: Processing ------>>>>> {}", self.id, msg);
         match msg {
             ActorMessage::FoundProduct { seller, buyer,
             product } => {
                 if seller == self.actor_info() {
                     // TODO When change is possible, deal with it here.
+                    // println!("---------- Pop {} entering Deal State as Seller! --------------", self.id);
                     self.standard_sell(rx, tx, data, market, product, buyer);
                 } else {
-                    //if cfg!(debug_assertions) { println!("Pop {} is buyer in: {}", self.id, msg); }
+                    // if we aren't the seller, then we're the buyer, send it back up.
+                    return Some(msg);
                 }
                 return None;
             },
@@ -945,6 +917,11 @@ impl Pop {
                 self.process_firm_message(rx, tx, firm, action, data);
                 return None;
             },
+            ActorMessage::FinishDeal { .. } => {
+                // Accept here, maybe do some logging or sanity checking, but otherwise just absorb.
+                // println!("---------- Pop {} leaving Deal State! ----------", self.id);
+                return None;
+            }
             _ => ()
         }
         Some(msg)
@@ -996,7 +973,7 @@ impl Pop {
         }
 
         // since the current market price is within our budget, try to look for it.
-        self.catchup_and_push_msg(rx, tx, data, market, ActorMessage::FindProduct { 
+        self.push_message(rx, tx, ActorMessage::FindProduct { 
             product, sender: self.actor_info() 
         });
         // with the message sent, wait for the response back while in our standard holding pattern.
@@ -1014,7 +991,7 @@ impl Pop {
         }
         else if let ActorMessage::FoundProduct { seller, .. } = result {
             // before we enter standard buy, catch up to ensure any possible deadlocks are avoided.
-            self.msg_catchup(rx, tx, data, market);
+            // println!("--------- Pop {} entering Deal State as Buyer! ------------------", self.id);
             self.standard_buy(rx, tx, data, market, buy_target, seller)
         }
         else { unreachable!("Somehow did not get FoundProduct or ProductNotFound."); }
@@ -1094,7 +1071,7 @@ impl Pop {
     _seller: ActorInfo) -> BuyResult {
         // We don't send CheckItem message as FindProduct msg includes that in the logic.
         // wait for deal start or preemptive close.
-        let result = self.active_wait(rx, tx, data, market,
+        let result = self.exclusive_wait(rx, 
             &vec![
             ActorMessage::InStock { buyer: ActorInfo::Firm(0), seller:
                 ActorInfo::Firm(0), product: 0, price: 0.0, quantity: 0.0 },
@@ -1321,7 +1298,7 @@ impl Pop {
             // TODO add in possibility of rejection here. For now they will always try, if nothing else.
 
             // deal with responses
-            let response = self.specific_wait(rx, &vec![
+            let response = self.exclusive_wait(rx, &vec![
                 ActorMessage::SellerAcceptOfferAsIs { buyer: ActorInfo::Firm(0),
                     seller: ActorInfo::Firm(0),
                     product: 0,
@@ -1429,7 +1406,7 @@ impl Pop {
     followups: usize) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
         for expected_remainder in (0..followups).rev() {
-            let response = self.specific_wait(rx, &vec![
+            let response = self.exclusive_wait(rx, &vec![
                 ActorMessage::ChangeFollowup { buyer: ActorInfo::Firm(0),
                     seller: ActorInfo::Firm(0),
                     product: 0,
@@ -1464,7 +1441,7 @@ impl Pop {
     followups: usize) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
         for expected_remainder in (0..followups).rev() {
-            let response = self.specific_wait(rx, &vec![
+            let response = self.exclusive_wait(rx, &vec![
                 ActorMessage::BuyOfferFollowup { buyer: ActorInfo::Firm(0),
                     seller: ActorInfo::Firm(0),
                     product: 0,
@@ -1721,7 +1698,7 @@ impl Pop {
                     product, price, quantity: available });
         } // message was sent
         // get response
-        let response = self.specific_wait(rx, &vec![
+        let response = self.exclusive_wait(rx, &vec![
             ActorMessage::RejectPurchase { buyer, seller: self.actor_info(), product: 0, price_opinion: OfferResult::Cheap },
             ActorMessage::BuyOffer { buyer, seller: self.actor_info(), product, 
                 price_opinion: OfferResult::Cheap, quantity: 1.0, followup: 0 }

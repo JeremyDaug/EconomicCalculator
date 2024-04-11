@@ -1081,7 +1081,7 @@ mod pop_tests {
 
                 // get the thread going
                 let handler = thread::spawn(move || {
-                    let result = test.specific_wait(&mut rx, &vec![
+                    let result = test.exclusive_wait(&mut rx, &vec![
                         ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
                             seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
                             quantity: 0.0, followup: 0 },
@@ -1152,7 +1152,7 @@ mod pop_tests {
 
                 // get the thread going
                 let handler = thread::spawn(move || {
-                    let result = test.specific_wait(&mut rx, &vec![
+                    let result = test.exclusive_wait(&mut rx, &vec![
                         ActorMessage::BuyOffer { buyer: ActorInfo::Firm(0), 
                             seller: ActorInfo::Firm(0), product: 0, price_opinion: OfferResult::Cheap, 
                             quantity: 0.0, followup: 0 }]);
@@ -5524,6 +5524,7 @@ mod pop_tests {
         /// other trade successfully at least once.
         #[test]
         fn pop_barter_test() {
+            let print_lines = false;
             let (history, data, demos) = setup_pop_test_data();
 
             // get some data to make values more robust.
@@ -5643,33 +5644,35 @@ mod pop_tests {
                     if let Some(msg) = opt {
                         match msg {
                             ActorMessage::SellOrder { sender, .. } => {
-                                println!("{}->M:  {}", sender, msg);
+                                if print_lines { println!("{}->M:  {}", sender, msg); }
                                 // record who's put stuff up for sale currently.
                                 sales.push(msg);
                                 sellers.push(sender);
                             },
                             ActorMessage::FindWant { want, sender } => {
                                 // want search, send back the standard info
-                                println!("{}->M:  {}", sender, msg);
+                                if print_lines { println!("{}->M:  {}", sender, msg); }
                                 let response = ActorMessage::FoundWant { buyer: sender, want, 
                                     source: WantSource::Process(103) };
-                                println!("M->{}:  {}", sender, response);
+                                //println!("M->{}:  {}", sender, response);
                                 tx.send(response).expect("Borkde");
                                 want_times += 1;
                             },
                             ActorMessage::FindProduct { product, sender } => {
-                                println!("{}->M:  {}", sender, msg);
+                                if print_lines { println!("{}->M:  {}", sender, msg); }
                                 if sender == pop0_id {
                                     // find product message recieved. Only send if a seller has 
                                     if sellers.contains(&pop1_id) {
-                                        tx.send(ActorMessage::FoundProduct { 
+                                        let response = ActorMessage::FoundProduct { 
                                             seller: pop1_id, buyer: sender, product 
-                                        })
-                                        .expect("Borbs");
+                                        };
+                                        //println!("M->{}: {}", sender, response);
+                                        tx.send(response)
+                                            .expect("Borbs");
                                     } else {
                                         let response = ActorMessage::ProductNotFound 
                                         { product, buyer: sender };
-                                        println!("M->{}:  {}", sender, response);
+                                        //println!("M->{}:  {}", sender, response);
                                         tx.send(response)
                                             .expect("Borgd");
                                     }
@@ -5679,20 +5682,20 @@ mod pop_tests {
                                         let response = ActorMessage::FoundProduct { 
                                             seller: pop0_id, buyer: sender, product 
                                         };
-                                        println!("M->{}: {}", sender, response);
+                                        //println!("M->{}: {}", sender, response);
                                         tx.send(response)
                                         .expect("Borbs");
                                     } else {
                                         let response = ActorMessage::ProductNotFound 
                                             { product, buyer: sender };
-                                        println!("M->{}:  {}", sender, response);
+                                        //println!("M->{}:  {}", sender, response);
                                         tx.send(response)
                                             .expect("Borgd");
                                     }
                                 }
                             },
                             ActorMessage::Finished { sender  } => {
-                                println!("{}->M:  Finished", sender);
+                                if print_lines { println!("{}->M:  Finished", sender); }
                                 finished += 1;
                                 if finished == 2 {
                                     println!("M->All: AllFinished");
@@ -5701,23 +5704,27 @@ mod pop_tests {
                                     break;
                                 }
                             },
-                            ActorMessage::FoundWant { .. } |
-                            ActorMessage::ProductNotFound { .. } |
-                            ActorMessage::FoundProduct { .. } => {},
+                            ActorMessage::FoundWant { buyer, ..  } => {
+                                if print_lines { println!("M->{}: {}", buyer, msg); }
+                            },
+                            ActorMessage::FoundProduct { buyer, ..  } |
+                            ActorMessage::ProductNotFound { buyer, .. } => {
+                                if print_lines { println!("M->{}: {}", buyer, msg); }
+                            },
                             ActorMessage::InStock { buyer, seller, .. } => {
-                                println!("{}->{}: {}", seller, buyer, msg);
+                                if print_lines { println!("{}->{}: {}", seller, buyer, msg); }
                             },
                             ActorMessage::BuyOffer { buyer, seller, .. } => {
-                                println!("{}->{}: {}", buyer, seller, msg);
+                                if print_lines { println!("{}->{}: {}", buyer, seller, msg); }
                             },
                             ActorMessage::BuyOfferFollowup { buyer, seller, .. } => {
-                                println!("{}->{}: {}", buyer, seller, msg);
+                                if print_lines { println!("{}->{}: {}", buyer, seller, msg); }
                             },
                             ActorMessage::SellerAcceptOfferAsIs { buyer, seller, .. } => {
-                                println!("{}->{}: {}", seller, buyer, msg);
+                                if print_lines { println!("{}->{}: {}", seller, buyer, msg); }
                             },
                             _ => {
-                                println!("{}", msg);
+                                if print_lines { println!("???{}", msg); }
                             },
                         }
                     } else {
