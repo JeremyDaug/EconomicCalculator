@@ -6,18 +6,29 @@ use std::collections::HashMap;
 /// Used to store the data for a firm's jobs.
 #[derive(Debug)]
 pub struct FirmJob {
-    /// The Job (id) in question.
-    pub job: usize,
-    /// The type of wage they recieve.
-    pub wage_type: WageType,
-    /// the value of the wage given in AMV.
-    pub wage: f64,
-    /// The unit(s) of the wage,
-    pub wage_unit_priority: Vec<usize>,
-    /// The exact assignments of the job.
-    pub assignments: HashMap<usize, AssignmentInfo>,
     /// The pop which is in this firm job.
     pub pop: usize,
+    /// The Job (id) in question the pop is doing.
+    pub job: usize,
+    /// The logic of the wage they recieve.
+    pub wage_type: WageType,
+    /// The wage given to the pop. This is on a per person basis and multiplied
+    /// by a factor decided by WageType.
+    /// 
+    /// - Slaves, Salaried, and Profit sharing workers recieve a flat payment 
+    /// per day regardless of work done.
+    /// - LossSharing recieves no wage at all, instead recieving all property 
+    /// of the firm at the end of the work day.
+    ///   Productivity is paid by the number of iterations they do in their assignment.
+    /// - Daily and Contractor are paid by the number of hours they sell in a day.
+    pub wage: HashMap<usize, f64>,
+    /// Acceptable conversions take place between wage goods, to cover fractional
+    /// or alternative forms of payment.
+    /// 
+    /// Only needed for wages which are more flexible
+    pub accetped_conversions: Vec<(usize, usize, f64)>,
+    /// The exact assignments of the job, The process Id is the key.
+    pub assignments: HashMap<usize, AssignmentInfo>,
 }
 
 /// What kind of wage types are available for jobs.

@@ -277,7 +277,7 @@ mod data_manager_tests {
         println!("----+------------------");
         println!("| id|name");
         for id in test.firms.keys().sorted() {
-            println!("{:>3} | {:<}", id, test.firms[id].get_name());
+            println!("{:>3} | {:<}", id, test.firms[id].get_full_name());
         }
     }
 }

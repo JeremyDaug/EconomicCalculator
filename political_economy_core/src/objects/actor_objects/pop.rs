@@ -1886,6 +1886,8 @@ impl Actor for Pop {
         // before we even begin, add in the time we have for the day.
         self.property.add_property(TIME_PRODUCT_ID, (self.breakdown_table.total as f64) *
             24.0 * self.breakdown_table.average_productivity(), data);
+        // after that, sift property.
+        self.property.sift_all(&data);
 
         // started up, so wait for the first message.
         match rx.recv().expect("Channel Broke.") {
@@ -1894,7 +1896,6 @@ impl Actor for Pop {
         }
         // precalculate our plans for the day based on yesterday's results and
         // see if we want to sell and what we want to sell.
-        self.property.sift_all(&data);
         self.is_selling = if self.property.is_disorganized {
             true
         } else {

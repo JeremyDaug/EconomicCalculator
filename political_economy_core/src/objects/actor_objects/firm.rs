@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, VecDeque};
 
 use barrage::{Sender, Receiver};
 
@@ -54,13 +54,13 @@ pub struct Firm {
     /// Also contains the pops and assignments.
     /// 
     /// Unavailable for Disorganized Firms.
-    pub management: Vec<FirmJob>,
+    //pub management: Vec<FirmJob>,
     /// The ownership jobs the firm uses. The first is the primary and preferred
     /// option, the others are either required by the structure, or that is being
     /// transitioned away from.
     /// 
     /// Also contains the pops and assignments.
-    pub ownership: Vec<FirmJob>,
+    //pub ownership: Vec<FirmJob>,
     /// The prices of the products the firm sells.
     /// Stores the ID of the product and the price in AMV it seeks from
     /// the market.
@@ -69,6 +69,8 @@ pub struct Firm {
     /// If the firm is not Disorganized or otherwise a distinct entity from
     /// the pop, this is where all of it's inputs and capital is stored.
     pub property: HashSet<usize, f64>,
+    /// Message Backlog for storing messages we aren't handling right this second.
+    pub backlog: VecDeque<ActorMessage>,
     _firm_outputs: Vec<usize>,
 }
 
@@ -77,7 +79,7 @@ impl Firm {
     /// 
     /// Shorthand function to get the firm's full name.
     pub fn get_full_name(&self) -> String {
-        format!("{}({})", self.name, self.variant_name)
+        format!("{}({})", self.name, self.sub_name)
     }
 }
 
@@ -125,15 +127,39 @@ impl Actor for Firm {
     /// and close out.
     fn run_market_day(&mut self, 
         sender: &mut Sender<ActorMessage>,
-        _reciever: &mut Receiver<ActorMessage>,
+        rx: &mut Receiver<ActorMessage>,
         _data: &DataManager,
         _demos: &Demographics,
         _history: &MarketHistory) {
+        // TODO idea, Firms hire retailers who handle the details of sales and then report their results back to here. They are on separate threads. THis is a bad, crazy idea, but fuckit it may just work.
+        
+        // Prep for the day. Firms not much, if anything, should be needed.
+
+        // Started up, so wait for the start signal.
+        match rx.recv().expect("Channel Broke.") {
+            ActorMessage::StartDay => (),
+            _ => panic!("Recived something before DayStart. Panic.")
+        }
+
+        // go to work day processing, buy work from employees and do any transfers there
+        // Work day also includes doing any processes and work and putting out sell orders if the firm is selling.
+
+        // Note: Disorganized Firms skip a lot of what follows, after they do their local work, they send all 
+        // their stuff back, possibly minus time to plan things out further.
+
+        // After the core work time is done, do any shopping needed for the next day's processes,
+        // getting a bit extra to ensure decay doesn't hit too hard.
+        // during this time we also regularly ensure we handle deals.
+        // Send Finish Message after we're done here.
+
+        // during the end of day wrap-up, don't consume anything
+
+        // Decay our goods.
+
+        // Then adapt today's plan for tomorrow.
+
         sender.send(ActorMessage::Finished { sender: self.actor_info() })
             .expect("Channel Closed Unexpectedly!");
-        // TODO idea, Firms hire retailers who handle the details of sales and then report their
-        // results back to here. They are on separate threads. THis is a bad, crazy idea, but fuckit
-        // it may just work.
     }
 }
 
