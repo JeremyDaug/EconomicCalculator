@@ -4,10 +4,7 @@ use barrage::{Sender, Receiver};
 
 use crate::{data_manager::DataManager, demographics::Demographics, objects::environmental_objects::market::MarketHistory};
 
-use super::{seller::Seller, 
-    buyer::Buyer, 
-    firm_job::FirmJob, 
-    actor::Actor, actor_message::{ActorMessage, ActorInfo, ActorType}};
+use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, seller::Seller};
 
 /// Firms are the productive actors of our system.
 /// 
@@ -81,6 +78,209 @@ impl Firm {
     pub fn get_full_name(&self) -> String {
         format!("{}({})", self.name, self.sub_name)
     }
+
+    /// A helper function to push a message to the market.
+    /// Safely pushes without blocking.
+    ///
+    /// Does a quick message catchup, reading up to the newest messages and 
+    /// adding any for us to the backlog.
+    /// 
+    /// Afterwards, it tries to push the message.If it fails, it tries the 
+    /// entire thing again.
+    ///
+    /// ## Panics
+    ///
+    /// If the send fails due to a disconnect.
+    pub fn push_message(&mut self, rx: &Receiver<ActorMessage>, tx: &Sender<ActorMessage>,
+    msg: ActorMessage) {
+        loop {
+            // try to clear out prior msgs before sending.
+            self.quick_msg_catchup(rx);
+            let result = tx.try_send(msg);
+            if let Ok(_) = result {
+                break; // if message got sent out, break.
+            }
+            else if let Err(msg) = result {
+                match msg { // failed to send, check why
+                    // If disconnected, panic, there's nothing more we can do.
+                    barrage::TrySendError::Disconnected(_) => panic!("Unexpected Disconnect"),
+                    barrage::TrySendError::Full(_) => (), // if just full, consume and try again.
+                }
+            }
+        };
+    }
+    
+    /// # Quick Message Catchup
+    ///
+    /// A shorthand function.
+    ///
+    /// Quickly consumes all messages from the queue it can, catching up
+    /// with the current back of the queue.
+    ///
+    /// If it finds something for us, it puts it in the backlog for later consumption.
+    ///
+    /// This focuses on keeping the Broadcast Queue open to ensure it doesn't get backed
+    /// up too much.
+    pub fn quick_msg_catchup(&mut self, rx: &Receiver<ActorMessage>) {
+        loop {
+            let result = rx.try_recv()
+                .expect("Unexpected Disconnect"); // if disconnected, panic.
+
+            if let Some(msg) = result { // if we recieved a message, check it's for us
+            //if cfg!(debug_assertions) { println!("Pop {} recieves: {}", self.id, msg); }
+                if msg.for_me(self.actor_info()) {
+                    self.backlog.push_back(msg); // if it's for us, push it to the backlog.
+                }
+            }
+            else { // if no messsage in queue, we've caught up so break out.
+                return;
+            }
+        }
+    }
+    
+    /// A shorthand function to recieve the next message from the queue for us.
+    /// It returns it to us instead of putting it in the backlog.
+    pub fn get_next_message(&self, rx: &Receiver<ActorMessage>) -> ActorMessage {
+        loop {
+            let msg = rx.recv().expect("Unexpected Disconnect.");
+            if msg.for_me(self.actor_info()) {
+                return msg;
+            }
+        }
+    }
+    
+    /// # Active Wait
+    ///
+    /// Active Wait Function, used whenever we need to wait for a particular
+    /// result or message. Takes in all the standard stuff for free time, while
+    /// also taking in whatever it's looking to find. If it recieves one of the
+    /// message types requested, it returns it.
+    ///
+    /// If it gets a message other than what it's looking for, it deals with it
+    /// via the process_common_message.
+    ///
+    /// This only returns if it recieves the message it's looking for, it it does
+    /// not recieve it, it will be stuck in it's loop.
+    ///
+    /// It ignores the data of the message, only looking at the message type
+    /// and that it is for us.
+    /// 
+    /// ## Panics if message channel breaks.
+    /// 
+    /// ## Notes
+    /// 
+    /// As it stands, only some products would ever be sought by us. All of them 
+    pub fn active_wait(&mut self,
+    rx: &mut Receiver<ActorMessage>,
+    tx: &Sender<ActorMessage>,
+    data: &DataManager,
+    market: &MarketHistory,
+    find: &Vec<ActorMessage>) -> ActorMessage {
+        loop {
+            // catchup on messages for good measure
+            self.quick_msg_catchup(rx);
+            // next deal with the first backlog
+            let popped = self.backlog.pop_front();
+            if let Some(msg) = popped {
+                let result = self.process_common_msg(rx, tx, data, market, msg);
+
+                if let Some(msg) = result {
+                    // if we recieved something back, then check it's what we should be getting back.
+                    if find.iter()
+                    .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                        return msg; // if yes, return the message.
+                    } else {
+                        // if somehow not, panic, this should NEVER happen.
+                        panic!("Pop {} panicked! It recieved {} instead of what it should've and couldn't handle it.", 
+                            self.id, msg);
+                    }
+                }
+            }
+        }
+    }
+
+    /// # Exclusive Wait function.
+    ///
+    /// First checks the backlog for the message requested, if it finds it, 
+    /// it extracts it and returns that. If it doesn't, then it 
+    /// Waits on a specific message or messages to be recieved directed for us.
+    /// If it's any other message for us, it's put onto the backlog.
+    ///
+    /// Meant to be used primarily when we are locked into a state where we
+    /// shouldn't respond to anything else but what we're focusing on.
+    /// 
+    /// May be improved by making find work with incomplete ActorMessages or some
+    /// other mechanism that removes the need to created dummies to make it work.
+    pub fn exclusive_wait(&mut self,
+    rx: &mut Receiver<ActorMessage>,
+    find: &Vec<ActorMessage>) -> ActorMessage {
+        // TODO Look into improving Find Parameter so it doesn't need a fully filled out ActorMessage to function.
+        // first, look through the backlog to ensure we haven't already gotten what we're looking for.
+        for idx in 0..self.backlog.len() {
+            if find.iter()
+            .any(|x| {
+                std::mem::discriminant(x) == std::mem::discriminant(&self.backlog[idx])
+            }) {
+                return self.backlog.remove(idx).expect("Somehow walked off end of backlog.");
+            }
+        }
+        loop {
+            let result = rx.try_recv()
+                .expect("Unexpected Disconnect.");
+            if let Some(msg) = result {
+                // if not for me, skip, don't add to our backlog.
+                if !msg.for_me(self.actor_info()) { continue; }
+                // if for me and matches what we're looking for, return.
+                if find.iter()
+                .any(|x| std::mem::discriminant(x) == std::mem::discriminant(&msg)) {
+                    return msg;
+                } else { // if not what we're looking for right now, put onto backlog.
+                    self.backlog.push_back(msg);
+                }
+            } 
+        }
+    }
+    
+    /// # Process Common Messages
+    /// 
+    /// All messages that can be handled at any time (reactively)
+    fn process_common_msg(&self, 
+    rx: &mut Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>,
+    data: &DataManager, 
+    market: &MarketHistory, 
+    msg: ActorMessage) -> Option<ActorMessage> 
+    {
+        todo!()
+    }
+
+    /// # Work Time Processing
+    /// 
+    /// Work time processing does the standard work needed of the firm.
+    pub fn work_time_processing(&mut self, 
+    rx: &Receiver<ActorMessage>, 
+    tx: &Sender<ActorMessage>, 
+    data: &DataManager, 
+    demos: &Demographics,
+    history: &MarketHistory) {
+        if let OrganizationalStructure::Disorganized 
+        = self.organization_strucutre {
+            // if disorganized, ask for everything
+            let pop = self.jobs.first().expect("Disorganized Firm Has No jobs?")
+            .pop;
+            self.push_message(rx, tx, 
+                ActorMessage::FirmToEmployee { 
+                    firm: self.actor_info(), employee: pop, 
+                    action: FirmEmployeeAction::RequestEverything });
+            
+        } else {
+
+        }
+    }
+
+    fn recieve_goods_from_employee(&mut self,
+    rx: &Receiver<ActorMessage>,
+    tx: &Sender<ActorMessage>) {}
 }
 
 impl Seller for Firm {
@@ -143,6 +343,7 @@ impl Actor for Firm {
 
         // go to work day processing, buy work from employees and do any transfers there
         // Work day also includes doing any processes and work and putting out sell orders if the firm is selling.
+        self.
 
         // Note: Disorganized Firms skip a lot of what follows, after they do their local work, they send all 
         // their stuff back, possibly minus time to plan things out further.
