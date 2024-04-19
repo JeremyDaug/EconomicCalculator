@@ -376,8 +376,9 @@ impl Pop {
                         product,
                         amount: amount.total_property
                     });
-                    self.property.property.remove(&product)
-                    .expect("Not found?");
+                    // remove amount from storage, but don't remove product info entirely.
+                    self.property.property.get_mut(&product).expect("Not found?")
+                    .remove(amount.total_property);
                 }
                 // also send over the wants
                 let mut to_move = HashMap::new();
@@ -392,8 +393,9 @@ impl Pop {
                         want,
                         amount: amount.total_current
                     });
-                    self.property.want_store.remove(&want)
-                    .expect("Not found?");
+                    self.property.want_store.get_mut(&want)
+                    .expect("Not found?")
+                    .remove(amount.total_current);
                 }
                 // Tell the firm we've sent everything to them and they can continue on.
                 self.push_message(rx, tx, ActorMessage::EmployeeToFirm {

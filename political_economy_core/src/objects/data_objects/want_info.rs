@@ -142,6 +142,18 @@ impl WantInfo {
         self.consumed += value;
     }
 
+    /// # Remove
+    /// 
+    /// Removes wants from the total current. Does not record it as a lost or consumed.
+    pub fn remove(&mut self, value: f64) {
+        debug_assert!(self.total_current >= value,
+            "Value cannot be greater than total current available products.");
+        debug_assert!(value > 0,
+            "Value cannot be negative or zero value.");
+
+        self.total_current -= value;
+    }
+
     /// # Add
     /// 
     /// Adds the given value to the total_current and

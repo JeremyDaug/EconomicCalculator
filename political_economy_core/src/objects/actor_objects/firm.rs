@@ -270,7 +270,7 @@ impl Firm {
             .pop;
             self.push_message(rx, tx, 
                 ActorMessage::FirmToEmployee { 
-                    firm: self.actor_info(), employee: pop, 
+                    firm: self.actor_info(), employee: ActorInfo::Pop(pop), 
                     action: FirmEmployeeAction::RequestEverything });
             
         } else {
@@ -280,7 +280,9 @@ impl Firm {
 
     fn recieve_goods_from_employee(&mut self,
     rx: &Receiver<ActorMessage>,
-    tx: &Sender<ActorMessage>) {}
+    tx: &Sender<ActorMessage>) {
+        
+    }
 }
 
 impl Seller for Firm {
