@@ -258,7 +258,7 @@ impl Firm {
     /// 
     /// Work time processing does the standard work needed of the firm.
     pub fn work_time_processing(&mut self, 
-    rx: &Receiver<ActorMessage>, 
+    rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>, 
     data: &DataManager, 
     demos: &Demographics,
@@ -266,22 +266,28 @@ impl Firm {
         if let OrganizationalStructure::Disorganized 
         = self.organization_strucutre {
             // if disorganized, ask for everything
-            let pop = self.jobs.first().expect("Disorganized Firm Has No jobs?")
-            .pop;
+            let pop = ActorInfo::Pop(self.jobs.first().expect("Disorganized Firm Has No jobs?")
+            .pop);
             self.push_message(rx, tx, 
                 ActorMessage::FirmToEmployee { 
-                    firm: self.actor_info(), employee: ActorInfo::Pop(pop), 
+                    firm: self.actor_info(), employee: pop, 
                     action: FirmEmployeeAction::RequestEverything });
-            
+            // products and wants sent by this are recievd via SendWant and SendProduct msgs
+            // these sendings end when 
+            let response = self.active_wait(rx, tx, data, history, &vec![
+                ActorMessage::EmployeeToFirm { employee: ActorInfo::Firm(0), firm: self.actor_info(), 
+                    action: FirmEmployeeAction::RequestSent }
+            ]);
+            // check that the response is valid, this is just debug stuff.
+            if let ActorMessage::EmployeeToFirm { employee, firm, 
+                action } = response {
+                debug_assert!(employee == pop, "Employee doesn't match.");
+                debug_assert!(firm == self.actor_info(), "Firm doesn't match.");
+                debug_assert!(action == FirmEmployeeAction::RequestSent, "Action Returned does not match.");
+            } // don't look for others, it can't come.
         } else {
 
         }
-    }
-
-    fn recieve_goods_from_employee(&mut self,
-    rx: &Receiver<ActorMessage>,
-    tx: &Sender<ActorMessage>) {
-        
     }
 }
 
@@ -328,11 +334,11 @@ impl Actor for Firm {
     /// Once we get the AllFinished message, complete any remaining cleanup, 
     /// and close out.
     fn run_market_day(&mut self, 
-        sender: &mut Sender<ActorMessage>,
+        tx: &mut Sender<ActorMessage>,
         rx: &mut Receiver<ActorMessage>,
-        _data: &DataManager,
-        _demos: &Demographics,
-        _history: &MarketHistory) {
+        data: &DataManager,
+        demos: &Demographics,
+        history: &MarketHistory) {
         // TODO idea, Firms hire retailers who handle the details of sales and then report their results back to here. They are on separate threads. THis is a bad, crazy idea, but fuckit it may just work.
         
         // Prep for the day. Firms not much, if anything, should be needed.
@@ -345,7 +351,7 @@ impl Actor for Firm {
 
         // go to work day processing, buy work from employees and do any transfers there
         // Work day also includes doing any processes and work and putting out sell orders if the firm is selling.
-        self.
+        self.work_time_processing(rx, tx, data, demos, history);
 
         // Note: Disorganized Firms skip a lot of what follows, after they do their local work, they send all 
         // their stuff back, possibly minus time to plan things out further.
@@ -361,7 +367,7 @@ impl Actor for Firm {
 
         // Then adapt today's plan for tomorrow.
 
-        sender.send(ActorMessage::Finished { sender: self.actor_info() })
+        tx.send(ActorMessage::Finished { sender: self.actor_info() })
             .expect("Channel Closed Unexpectedly!");
     }
 }

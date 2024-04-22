@@ -1559,8 +1559,13 @@ mod pop_tests {
             assert!(finisher_recieved);
 
             // and assert that those items have been removed from the pop
-            assert!(test.property.property.is_empty());
-            assert!(test.property.want_store.is_empty());
+            assert_eq!(test.property.property.len(), 3);
+            assert_eq!(test.property.want_store.len(), 2);
+            assert_eq!(test.property.property.get(&TIME_PRODUCT_ID).unwrap().total_property, 0.0);
+            assert_eq!(test.property.property.get(&3).unwrap().total_property, 0.0);
+            assert_eq!(test.property.property.get(&5).unwrap().total_property, 0.0);
+            assert_eq!(test.property.want_store.get(&4).unwrap().total_current, 0.0);
+            assert_eq!(test.property.want_store.get(&6).unwrap().total_current, 0.0);
         }
     
         #[test]

@@ -148,7 +148,7 @@ impl WantInfo {
     pub fn remove(&mut self, value: f64) {
         debug_assert!(self.total_current >= value,
             "Value cannot be greater than total current available products.");
-        debug_assert!(value > 0,
+        debug_assert!(value > 0.0,
             "Value cannot be negative or zero value.");
 
         self.total_current -= value;

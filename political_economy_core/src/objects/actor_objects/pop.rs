@@ -360,7 +360,8 @@ impl Pop {
                     amount: self.property.work_time
                     });
                 // and remove that time from our property as well
-                self.property.remove_property(TIME_PRODUCT_ID, self.property.work_time, data);
+                self.property.property.get_mut(&TIME_PRODUCT_ID)
+                .expect("Time not found in pop.").remove(self.property.work_time);
             },
             FirmEmployeeAction::RequestEverything => {
                 // loop over everything and send it to the firm.
@@ -416,6 +417,8 @@ impl Pop {
                     product,
                     amount
                 }); // no need to send more
+                self.property.property.get_mut(&product).expect("Not found?")
+                    .remove(amount.total_property);
             },
             _ => ()
         }
