@@ -1,8 +1,8 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use barrage::{Sender, Receiver};
 
-use crate::{data_manager::DataManager, demographics::Demographics, objects::environmental_objects::market::MarketHistory};
+use crate::{data_manager::DataManager, demographics::Demographics, objects::{data_objects::process::ProcessPartTag, environmental_objects::market::MarketHistory}};
 
 use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, seller::Seller};
 
@@ -35,7 +35,7 @@ pub struct Firm {
     /// How the profit of the Firm is distributed.
     pub profit_structure: ProfitStructure,
     /// How the firm is organized, or how it attempts to organize itself.
-    pub organization_strucutre: OrganizationalStructure,
+    pub organization_structure: OrganizationalStructure,
     /// The ids for the firm's children (subfirms).
     /// May be empty.
     pub children: Vec<usize>,
@@ -72,6 +72,27 @@ pub struct Firm {
 }
 
 impl Firm {
+    /// # Get Production Requirements
+    /// 
+    /// Gets all of the products needed to meet the pre-existing plan.
+    pub fn get_production_requirements(&self, data: &DataManager) 
+    -> HashSet<usize, f64> {
+        let mut result = HashMap::new();
+
+        for job in self.jobs.iter() {
+            for (proc, Assgn) in job.assignments.iter() {
+                let process = data.processes.get(proc).expect("Process not found.");
+                for part in process.input_and_capital_products().iter()
+                .filter(|x| !x.is_optional()) {
+                    // if not optional, add to our result
+                    
+                }
+            }
+        }
+
+        result
+    }
+
     /// # Get full name
     /// 
     /// Shorthand function to get the firm's full name.
@@ -264,7 +285,7 @@ impl Firm {
     demos: &Demographics,
     history: &MarketHistory) {
         if let OrganizationalStructure::Disorganized 
-        = self.organization_strucutre {
+        = self.organization_structure {
             // if disorganized, ask for everything
             let pop = ActorInfo::Pop(self.jobs.first().expect("Disorganized Firm Has No jobs?")
             .pop);
@@ -273,21 +294,62 @@ impl Firm {
                     firm: self.actor_info(), employee: pop, 
                     action: FirmEmployeeAction::RequestEverything });
             // products and wants sent by this are recievd via SendWant and SendProduct msgs
-            // these sendings end when 
+            // these sendings end when EmployeeToFirm sends the RequestSent action. 
+            // Only 1 EtF msg should be recieved, it should be from our employee and say RequestSent
             let response = self.active_wait(rx, tx, data, history, &vec![
                 ActorMessage::EmployeeToFirm { employee: ActorInfo::Firm(0), firm: self.actor_info(), 
                     action: FirmEmployeeAction::RequestSent }
             ]);
-            // check that the response is valid, this is just debug stuff.
+            // Sanity check via debugs. These should never fire under normal circumstances
             if let ActorMessage::EmployeeToFirm { employee, firm, 
-                action } = response {
+            action } = response {
                 debug_assert!(employee == pop, "Employee doesn't match.");
                 debug_assert!(firm == self.actor_info(), "Firm doesn't match.");
                 debug_assert!(action == FirmEmployeeAction::RequestSent, "Action Returned does not match.");
             } // don't look for others, it can't come.
-        } else {
-
+            // with RequestSent recieved and all that we need here, follow our plans and do our stuff.
+            self.do_plan();
+            // with our plan carried out to the best of our ability, return everything to the pop.
+            // then exit work_time_processing
+        } else { // the firm is organized, therefore labor is properly used. Send everything.
+            // if payday, send pop agreed upon wage
+            // always requests for their time and skills (record who sent what and how much)
+            // Try to do our plan to the best of our abilities.
+            // return any skills earned and whatever splashed onto them.
+            // then we're done being productive for the day. Move on.
         }
+    }
+
+    pub fn do_plan(&mut self, data: &DataManager, 
+    demos: &Demographics,
+    history: &MarketHistory) {
+        
+    }
+    
+    /// # Buy and Sell Processing
+    /// 
+    /// This function has 2 purposes. Selling it's outputs and buying up it's 
+    /// inputs.
+    /// 
+    /// It wants to focus on getting it's inputs primarily. Once it does, it 
+    /// just holds, focusing on selling.
+    /// 
+    /// This function is unused by Firms which are disorganized as 
+    /// disorganize firms transfer all goods to the pop it employs
+    fn buy_and_sell_processing(&self, 
+    rx: &mut Receiver<ActorMessage>, tx: &mut Sender<ActorMessage>, 
+    data: &DataManager, demos: &Demographics, history: &MarketHistory) {
+        if self.organization_structure == OrganizationalStructure::Disorganized {
+            // if disorganized, we don't sell anything. Consider sending our plan needs for tomorrow to the
+            // pop for them to buy for us.
+            return;
+        }
+        // First, put our products up for sale on the market at our selected price
+        // then, when we have enough AMV, go out and try to purchase the inputs we need
+        // once all inputs are purchased to the best of our ability, send our done message to the market
+        // then hold until we either sell out
+        // or we recieve the message that the market day has ended.
+        todo!()
     }
 }
 
@@ -360,6 +422,7 @@ impl Actor for Firm {
         // getting a bit extra to ensure decay doesn't hit too hard.
         // during this time we also regularly ensure we handle deals.
         // Send Finish Message after we're done here.
+        self.buy_and_sell_processing(rx, tx, data, demos, history);
 
         // during the end of day wrap-up, don't consume anything
 
@@ -600,7 +663,7 @@ pub enum OwnershipStructure {
 
 /// An enum which defines how a firm organizes itself and it's children,
 /// as well as how tightly it and it's children are bound together.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum OrganizationalStructure {
     /// The firm is not organized at all, it is a collection of small
     /// business in a market.

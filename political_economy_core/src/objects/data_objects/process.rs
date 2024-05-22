@@ -1151,6 +1151,22 @@ pub struct ProcessPart {
 }
 
 impl ProcessPart {
+    /// # Is Optional
+    /// 
+    /// Returns true if the part is optional to the process.
+    pub fn is_optional(&self) -> bool {
+        self.part_tags.iter().any(|x| {
+            match x {
+                ProcessPartTag::Optional { missing_penalty, final_bonus } => true,
+                ProcessPartTag::Consumed |
+                ProcessPartTag::Fixed |
+                ProcessPartTag::Investment |
+                ProcessPartTag::Pollutant |
+                ProcessPartTag::Chance(_, _) |
+                ProcessPartTag::QualityBased(_) => false,
+            }
+        })
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
