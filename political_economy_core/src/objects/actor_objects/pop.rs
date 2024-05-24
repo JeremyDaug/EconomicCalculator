@@ -418,7 +418,7 @@ impl Pop {
                     amount
                 }); // no need to send more
                 self.property.property.get_mut(&product).expect("Not found?")
-                    .remove(amount.total_property);
+                    .remove(amount);
             },
             _ => ()
         }

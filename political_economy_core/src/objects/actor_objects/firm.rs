@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use barrage::{Sender, Receiver};
 
-use crate::{data_manager::DataManager, demographics::Demographics, objects::{data_objects::process::ProcessPartTag, environmental_objects::market::MarketHistory}};
+use crate::{data_manager::DataManager, demographics::Demographics, objects::{data_objects::{item::Item, process::ProcessPartTag}, environmental_objects::market::MarketHistory}};
 
 use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, seller::Seller};
 
@@ -61,11 +61,14 @@ pub struct Firm {
     /// The prices of the products the firm sells.
     /// Stores the ID of the product and the price in AMV it seeks from
     /// the market.
-    pub prices: HashSet<usize, f64>,
+    pub prices: HashMap<usize, f64>,
     /// The property owned or otherwise managed by the firm.
     /// If the firm is not Disorganized or otherwise a distinct entity from
     /// the pop, this is where all of it's inputs and capital is stored.
-    pub property: HashSet<usize, f64>,
+    pub property: HashMap<usize, f64>,
+    /// The wants currently owned by the firm. Like Property, if the firm is Disorganized, 
+    /// all wants will shift to the owner/workers instead of being stored.
+    pub wants: HashMap<usize, f64>,
     /// Message Backlog for storing messages we aren't handling right this second.
     pub backlog: VecDeque<ActorMessage>,
     _firm_outputs: Vec<usize>,
@@ -76,7 +79,7 @@ impl Firm {
     /// 
     /// Gets all of the products needed to meet the pre-existing plan.
     pub fn get_production_requirements(&self, data: &DataManager) 
-    -> HashSet<usize, f64> {
+    -> HashMap<Item, f64> {
         let mut result = HashMap::new();
 
         for job in self.jobs.iter() {
@@ -85,7 +88,54 @@ impl Firm {
                 for part in process.input_and_capital_products().iter()
                 .filter(|x| !x.is_optional()) {
                     // if not optional, add to our result
-                    
+                    result.entry(part.item)
+                    .and_modify(|x| *x += part.amount * Assgn.iterations)
+                    .or_insert(part.amount * Assgn.iterations);
+                }
+            }
+        }
+
+        result
+    }
+
+    /// # Get Optional Production Goods
+    /// 
+    /// Get the goods which are considered optional for our needs. 
+    pub fn get_optional_production_goods(&self, data: &DataManager)
+    -> HashMap<Item, f64> {
+        let mut result = HashMap::new();
+
+        for job in self.jobs.iter() {
+            for (proc, Assgn) in job.assignments.iter() {
+                let process = data.processes.get(proc).expect("Process not found.");
+                for part in process.input_and_capital_products().iter()
+                .filter(|x| x.is_optional()) {
+                    // if not optional, add to our result
+                    result.entry(part.item)
+                    .and_modify(|x| *x += part.amount * Assgn.iterations)
+                    .or_insert(part.amount * Assgn.iterations);
+                }
+            }
+        }
+
+        result
+    }
+
+    /// # Get Production Output
+    /// 
+    /// Get the products which we expect to output from our processes.
+    pub fn get_production_goods(&self, data: &DataManager)
+    -> HashMap<Item, f64> {
+        let mut result = HashMap::new();
+
+        for job in self.jobs.iter() {
+            for (proc, Assgn) in job.assignments.iter() {
+                let process = data.processes.get(proc).expect("Process not found.");
+                for part in process.outputs().iter() {
+                    // if not optional, add to our result
+                    result.entry(part.item)
+                    .and_modify(|x| *x += part.amount * Assgn.iterations)
+                    .or_insert(part.amount * Assgn.iterations);
                 }
             }
         }
@@ -265,14 +315,69 @@ impl Firm {
     /// # Process Common Messages
     /// 
     /// All messages that can be handled at any time (reactively)
-    fn process_common_msg(&self, 
+    fn process_common_msg(&mut self, 
     rx: &mut Receiver<ActorMessage>, 
     tx: &Sender<ActorMessage>,
     data: &DataManager, 
     market: &MarketHistory, 
     msg: ActorMessage) -> Option<ActorMessage> 
     {
-        todo!()
+        match msg {
+            ActorMessage::FoundProduct { seller,
+            buyer: _, product: _ } => {
+                // if we are the seller, enter sell state here.
+                if seller == self.actor_info() {
+                    // sell product
+                } else {
+                    return Some(msg);
+                }
+            },
+            ActorMessage::SendProduct { sender: _, 
+            reciever: _, product, amount } => {
+                // it's for us, so add.
+                self.property.entry(product)
+                .and_modify(|x| *x += amount)
+                .or_insert(amount);
+            },
+            ActorMessage::SendWant { sender: _, 
+            reciever: _, want, amount } => {
+                self.wants.entry(want)
+                .and_modify(|x| *x += amount)
+                .or_insert(amount);
+            },
+            _ => {
+                // Start Day, We recieve only at day start
+                // Finished, We send out
+                // All Finished, Recieved at day end.
+                // Sell Order, Sent by us
+                // Find Product, Sent by us
+                // Find Class, we send out
+                // Find Want, we send out.
+                // Product Not Found, explicitly waited on
+                // Class Not Found, explicitly waited on
+                // Want Not Found, Explicitly Waited on
+                // Found Class, always waited on.
+                // Found Want, always waited on.
+                // In Stock, Sent and waited on explicitly.
+                // Not In Stock, Sent and waited on Explicitly.
+                // Ask Barter Hint, Sent and Waited on Explicitly.
+                // Barter Hint, sent and Waited on Explicitly.
+                // Reject Purchase, Explicit both ways.
+                // Buy Offer
+                // Buy Offer Followup
+                // Seller Accept Offer As Is
+                // Offer Accepted With Change
+                // Change Followup
+                // Reject Offer
+                // Finished Deal
+                // Close Deal
+                // Check item, followup in deal space.
+                // Want Splash, firms should not absorb any splash
+                // Dump Product, sent, not recieved.
+                // Firm to Employee, only sent, never recieved
+            }
+        }
+        None
     }
 
     /// # Work Time Processing
@@ -308,7 +413,7 @@ impl Firm {
                 debug_assert!(action == FirmEmployeeAction::RequestSent, "Action Returned does not match.");
             } // don't look for others, it can't come.
             // with RequestSent recieved and all that we need here, follow our plans and do our stuff.
-            self.do_plan();
+            //self.do_plan();
             // with our plan carried out to the best of our ability, return everything to the pop.
             // then exit work_time_processing
         } else { // the firm is organized, therefore labor is properly used. Send everything.

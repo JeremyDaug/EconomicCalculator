@@ -63,9 +63,9 @@ pub enum WageType {
 #[derive(Debug)]
 pub struct AssignmentInfo {
     /// how many iterations are being attempted.
-    iterations: f64,
+    pub iterations: f64,
     /// how much progress is leftover from yesterday.
-    _progress: f64,
+    pub _progress: f64,
 }
 
 impl AssignmentInfo {
