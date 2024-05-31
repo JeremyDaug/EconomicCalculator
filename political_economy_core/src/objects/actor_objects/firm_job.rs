@@ -26,7 +26,7 @@ pub struct FirmJob {
     /// or alternative forms of payment.
     /// 
     /// Only needed for wages which are more flexible
-    pub accetped_conversions: Vec<(usize, usize, f64)>,
+    pub accepted_conversions: Vec<(usize, usize, f64)>,
     /// The exact assignments of the job, The process Id is the key.
     pub assignments: HashMap<usize, AssignmentInfo>,
 }

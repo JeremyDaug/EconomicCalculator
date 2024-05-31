@@ -66,6 +66,9 @@ pub struct Firm {
     /// If the firm is not Disorganized or otherwise a distinct entity from
     /// the pop, this is where all of it's inputs and capital is stored.
     pub property: HashMap<usize, f64>,
+    /// The property which was used as capital today and has been expended, making it
+    /// no longer useful today.
+    pub expended: HashMap<usize, f64>,
     /// The wants currently owned by the firm. Like Property, if the firm is Disorganized, 
     /// all wants will shift to the owner/workers instead of being stored.
     pub wants: HashMap<usize, f64>,
@@ -320,8 +323,7 @@ impl Firm {
     tx: &Sender<ActorMessage>,
     data: &DataManager, 
     market: &MarketHistory, 
-    msg: ActorMessage) -> Option<ActorMessage> 
-    {
+    msg: ActorMessage) -> Option<ActorMessage> {
         match msg {
             ActorMessage::FoundProduct { seller,
             buyer: _, product: _ } => {
@@ -413,8 +415,11 @@ impl Firm {
                 debug_assert!(action == FirmEmployeeAction::RequestSent, "Action Returned does not match.");
             } // don't look for others, it can't come.
             // with RequestSent recieved and all that we need here, follow our plans and do our stuff.
-            //self.do_plan();
+            let plan_results = self.do_plan(data, demos, history);
             // with our plan carried out to the best of our ability, return everything to the pop.
+            // TODO pick up here, returning all property and wants back to pop. Maybe don't send back capital expended.
+            //for (product, quant) in self.property.
+            // given our results, reduce downwards to match our abilities.
             // then exit work_time_processing
         } else { // the firm is organized, therefore labor is properly used. Send everything.
             // if payday, send pop agreed upon wage
@@ -425,10 +430,79 @@ impl Firm {
         }
     }
 
+    /// # Do Plan
+    /// 
+    /// Does the production plan laid out previously.
+    /// 
+    /// Priority is defined by the order of the job and nothing else.
+    /// Instead of priorities expecting to fail, it creates limited plans
+    /// it can succeed with.
+    /// 
     pub fn do_plan(&mut self, data: &DataManager, 
     demos: &Demographics,
-    history: &MarketHistory) {
-        
+    history: &MarketHistory) -> PlanResults {
+        // The results (success or failure) of our processes so we can build
+        // or reduce as needed.
+        let mut plan_results: HashMap<usize, HashMap<usize, f64>> = HashMap::new();
+        // expenses in the form of specific products, wants are not counted
+        let mut expenses: HashMap<usize, f64> = HashMap::new();
+        // The capital goods locked up in plan can be gotten from self.expended
+        // Total production of goods from our proceses
+        let mut production:HashMap<usize, f64> = HashMap::new();
+        // The final net results of production to allows us to do some economic calculation.
+        //let mut net = HashMap::new();
+        for job in self.jobs.iter() {
+            let pop_id = job.pop;
+            plan_results.insert(pop_id, HashMap::new());
+            for (proc_id, i) in job.assignments.iter() {
+                plan_results.get_mut(&pop_id).unwrap()
+                    .entry(*proc_id)
+                    .and_modify(|x| *x += i.iterations)
+                    .or_insert(i.iterations);
+                let proc = data.processes.get(proc_id).expect("Process not found");
+                let proc_results = proc.do_process(&self.property, 
+                    &self.wants, 0.0, Some(i.iterations), 
+                    false, data);
+                // with results gotten, deal with changes
+                for (prod, change) in proc_results.input_output_products.iter() {
+                    let temp = self.property.entry(*prod)
+                        .and_modify(|x| *x += change)
+                        .or_insert(*change);
+                    if *change < 0.0 { // record expenses
+                        expenses.entry(*prod)
+                        .and_modify(|x| *x -= change)
+                        .or_insert(-change);
+                    } else { // and production
+                        production.entry(*prod)
+                        .and_modify(|x| *x += change)
+                        .or_insert(*change);
+                    }
+                    debug_assert!(*temp > 0.0, "Got to negative value of product.");
+                }
+                // expend capital
+                for (prod, change) in proc_results.capital_products.iter() {
+                    *self.property.get_mut(prod).unwrap() -= change;
+                    let temp = self.expended.entry(*prod)
+                        .and_modify(|x| *x += change)
+                        .or_insert(*change);
+                    debug_assert!(*temp > 0.0, "Got to negative product expended.");
+                }
+                // add/remove wants
+                for (want, change) in proc_results.input_output_wants.iter() {
+                    let temp = self.wants.entry(*want)
+                        .and_modify(|x| *x += change)
+                        .or_insert(*change);
+                    debug_assert!(*temp > 0.0, "Got to negative Wants used.");
+                }
+            }
+        }
+        // Package our results and return
+        PlanResults {
+            expenses,
+            production,
+            used: self.expended.clone(),
+            plan_results,
+        }
     }
     
     /// # Buy and Sell Processing
@@ -821,4 +895,18 @@ pub enum OrganizationalStructure {
     /// 
     /// Uncommon, typically unstable also.
     Decentralized,
+}
+
+/// # Plan Results
+/// 
+/// A helper 
+pub struct PlanResults {
+    /// All expended products
+    pub expenses: HashMap<usize, f64>,
+    /// All products created by today's plans.
+    pub production: HashMap<usize, f64>,
+    /// All capital used up (not destroyed).
+    pub used: HashMap<usize, f64>,
+    /// The results of the iterations.
+    pub plan_results: HashMap<usize, HashMap<usize, f64>>
 }
