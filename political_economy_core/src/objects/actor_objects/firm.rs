@@ -132,13 +132,13 @@ impl Firm {
         let mut result = HashMap::new();
 
         for job in self.jobs.iter() {
-            for (proc, Assgn) in job.assignments.iter() {
+            for (proc, assgn) in job.assignments.iter() {
                 let process = data.processes.get(proc).expect("Process not found.");
                 for part in process.outputs().iter() {
                     // if not optional, add to our result
                     result.entry(part.item)
-                    .and_modify(|x| *x += part.amount * Assgn.iterations)
-                    .or_insert(part.amount * Assgn.iterations);
+                        .and_modify(|x| *x += part.amount * assgn.iterations)
+                        .or_insert(part.amount * assgn.iterations);
                 }
             }
         }
@@ -319,10 +319,10 @@ impl Firm {
     /// 
     /// All messages that can be handled at any time (reactively)
     fn process_common_msg(&mut self, 
-    rx: &mut Receiver<ActorMessage>, 
-    tx: &Sender<ActorMessage>,
-    data: &DataManager, 
-    market: &MarketHistory, 
+    _rx: &mut Receiver<ActorMessage>, 
+    _tx: &Sender<ActorMessage>,
+    _data: &DataManager, 
+    _market: &MarketHistory, 
     msg: ActorMessage) -> Option<ActorMessage> {
         match msg {
             ActorMessage::FoundProduct { seller,
@@ -338,14 +338,14 @@ impl Firm {
             reciever: _, product, amount } => {
                 // it's for us, so add.
                 self.property.entry(product)
-                .and_modify(|x| *x += amount)
-                .or_insert(amount);
+                    .and_modify(|x| *x += amount)
+                    .or_insert(amount);
             },
             ActorMessage::SendWant { sender: _, 
             reciever: _, want, amount } => {
                 self.wants.entry(want)
-                .and_modify(|x| *x += amount)
-                .or_insert(amount);
+                    .and_modify(|x| *x += amount)
+                    .or_insert(amount);
             },
             _ => {
                 // Start Day, We recieve only at day start
@@ -391,6 +391,7 @@ impl Firm {
     data: &DataManager, 
     demos: &Demographics,
     history: &MarketHistory) {
+        let actor_info = self.actor_info();
         if let OrganizationalStructure::Disorganized 
         = self.organization_structure {
             // if disorganized, ask for everything
@@ -413,13 +414,30 @@ impl Firm {
                 debug_assert!(employee == pop, "Employee doesn't match.");
                 debug_assert!(firm == self.actor_info(), "Firm doesn't match.");
                 debug_assert!(action == FirmEmployeeAction::RequestSent, "Action Returned does not match.");
-            } // don't look for others, it can't come.
+            }// don't look for others, it can't come.
             // with RequestSent recieved and all that we need here, follow our plans and do our stuff.
             let plan_results = self.do_plan(data, demos, history);
             // with our plan carried out to the best of our ability, return everything to the pop.
-            // TODO pick up here, returning all property and wants back to pop. Maybe don't send back capital expended.
-            //for (product, quant) in self.property.
+            let prop_copy = self.property.clone();
+            for (product, amount) in prop_copy.into_iter() {
+                // send to pop
+                self.push_message(rx, tx, 
+                ActorMessage::SendProduct { sender: actor_info, 
+                    reciever: pop, product: product, amount: amount });
+            }
+            let want_copy = self.wants.clone();
+            for (want, amount) in want_copy.into_iter() {
+                self.push_message(rx, tx, 
+                ActorMessage::SendWant { sender: actor_info, 
+                    reciever: pop, want, amount });
+            }
+            // With want and products sent back, clear out current
+            //* NOTE: Expended capital is not included and should be included in the pop buy request.
+            self.property.clear();
+            self.wants.clear();
+            // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // given our results, reduce downwards to match our abilities.
+            // send over the needs of the firm to the pops so they can buy what we need as well.
             // then exit work_time_processing
         } else { // the firm is organized, therefore labor is properly used. Send everything.
             // if payday, send pop agreed upon wage
@@ -594,7 +612,7 @@ impl Actor for Firm {
         // Work day also includes doing any processes and work and putting out sell orders if the firm is selling.
         self.work_time_processing(rx, tx, data, demos, history);
 
-        // Note: Disorganized Firms skip a lot of what follows, after they do their local work, they send all 
+        //* Note: Disorganized Firms skip a lot of what follows, after they do their local work, they send all 
         // their stuff back, possibly minus time to plan things out further.
 
         // After the core work time is done, do any shopping needed for the next day's processes,
@@ -611,6 +629,11 @@ impl Actor for Firm {
 
         tx.send(ActorMessage::Finished { sender: self.actor_info() })
             .expect("Channel Closed Unexpectedly!");
+
+        // Enter holding pattern for the end of the day.
+        self.active_wait(rx, tx, data, history, &vec![
+            ActorMessage::AllFinished
+        ]);
     }
 }
 

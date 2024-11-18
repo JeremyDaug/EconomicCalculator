@@ -33,7 +33,7 @@ pub enum ActorMessage {
     /// day.
     Finished{ sender: ActorInfo },
     /// Sent by the market when all Actors have sent their Finished message.
-    /// ONce this is nent
+    /// Once this is sent, all actors do their internal market wrap up work.
     AllFinished,
 
     // Break for Deal Items

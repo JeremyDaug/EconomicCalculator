@@ -222,7 +222,6 @@ impl Market {
 
                     ActorMessage::SellOrder { sender, product, 
                     quantity, amv } => self.add_seller_weight(&sender, product,quantity, amv),
-
                     ActorMessage::DumpProduct { sender: _, product, amount } => {
                         // product dumped into the environment
                         *self.resources.entry(product).or_insert(0.0) += amount;

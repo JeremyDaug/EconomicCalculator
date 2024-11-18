@@ -2680,7 +2680,7 @@ mod process_tests {
     }
 
     mod effective_output_of_should {
-        use std::str::FromStr;
+        use std::str::FromStr; 
         use super::super::*;
 
         #[test]

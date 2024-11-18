@@ -379,7 +379,7 @@ impl Pop {
                     });
                     // remove amount from storage, but don't remove product info entirely.
                     self.property.property.get_mut(&product).expect("Not found?")
-                    .remove(amount.total_property);
+                        .remove(amount.total_property);
                 }
                 // also send over the wants
                 let mut to_move = HashMap::new();
@@ -508,8 +508,7 @@ impl Pop {
         &mut Receiver<ActorMessage>, 
         &mut Sender<ActorMessage>, 
         &DataManager, 
-        &MarketHistory,)) 
-    {
+        &MarketHistory,)) {
         // start by organizing our property, reserve everything for our desires.
         self.prev_sat = self.property.sift_all(data);
 
