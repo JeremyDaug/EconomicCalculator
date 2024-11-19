@@ -43,8 +43,19 @@ Pop internal Market day
 Firm Internal Market Day
     Firm Prep
     Do Work
-        Disorganized Firm Work {cm}
+        Disorganized Firm Work
+            Get Everything from Pop {cm}
+            Active Wait until RequestSent Recieved. {cm}
+            Do work and recieve results of our plan {cm}
+            Send All wants and goods back {cm}
+            Update our plans based on our product results
+            Send over production needs to pop for them to purchase
         Organized Firm Work
+            If payday, pay worker wages
+            Always request workers time and skills
+            Do our plan as best we can
+            Return skills and any training recieved
+            Update Plans
     Organized Firm Work Followups
     Buy and Sell Processing
     Decay Goods

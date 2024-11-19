@@ -436,7 +436,10 @@ impl Firm {
             self.property.clear();
             self.wants.clear();
             // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
             // given our results, reduce downwards to match our abilities.
+            self.update_plans(plan_results, data, demos, history);
+
             // send over the needs of the firm to the pops so they can buy what we need as well.
             // then exit work_time_processing
         } else { // the firm is organized, therefore labor is properly used. Send everything.
@@ -447,6 +450,8 @@ impl Firm {
             // then we're done being productive for the day. Move on.
         }
     }
+
+
 
     /// # Do Plan
     /// 
@@ -516,7 +521,7 @@ impl Firm {
         }
         // Package our results and return
         PlanResults {
-            expenses,
+            expended_products: expenses,
             production,
             used: self.expended.clone(),
             plan_results,
@@ -546,6 +551,17 @@ impl Firm {
         // once all inputs are purchased to the best of our ability, send our done message to the market
         // then hold until we either sell out
         // or we recieve the message that the market day has ended.
+        todo!()
+    }
+    
+    /// # Update Plans
+    /// 
+    /// Update Plans alters the plans of the firm based on the results of the plan.
+    /// 
+    /// If it was unable to do some of it's process iterations, it reduces them to this lower target.
+    /// 
+    /// If it was able to meet the plans, it will look into improving it based on available resources
+    fn update_plans(&mut self, plan_results: PlanResults, _data: &DataManager, _demos: &Demographics, _history: &MarketHistory) {
         todo!()
     }
 }
@@ -925,11 +941,15 @@ pub enum OrganizationalStructure {
 /// A helper 
 pub struct PlanResults {
     /// All expended products
-    pub expenses: HashMap<usize, f64>,
+    pub expended_products: HashMap<usize, f64>,
     /// All products created by today's plans.
     pub production: HashMap<usize, f64>,
+    /// Wants which were used in the plan.
+    pub expended_wants: HashMap<usize, f64>,
+    /// Created Wants.
+    pub created_wants: HashMap<usize, f64>,
     /// All capital used up (not destroyed).
     pub used: HashMap<usize, f64>,
     /// The results of the iterations.
-    pub plan_results: HashMap<usize, HashMap<usize, f64>>
+    pub plan_results: HashMap<usize, HashMap<usize, f64>>,
 }
