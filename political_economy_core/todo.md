@@ -48,7 +48,7 @@ Firm Internal Market Day
             Active Wait until RequestSent Recieved. {cm}
             Do work and recieve results of our plan {cm}
             Send All wants and goods back {cm}
-            Update our plans based on our product results
+            Record plan results {cm}
             Send over production needs to pop for them to purchase
         Organized Firm Work
             If payday, pay worker wages
@@ -64,3 +64,25 @@ Firm Internal Market Day
     Enter Holding Pattern
 Institution Internal Market Day
 State Internal Market Day
+Testing
+    Firm Tests
+        get_production_requirements
+        get_optional_production_rgoods
+        get_production_goods
+        get_full_name
+        push_message (may not bother)
+        quick_msg_catchup (may not bother)
+        get_next_message (may not bother)
+        active_wait (may not bother)
+        exclusive_wait (may not bother)
+        process_common_msg
+        work_time_processing
+        do_plan
+        buy_and_sell_processing
+        update_plans
+        run_market_day
+In Consideration
+    Allow a pop to have multiple jobs Issue[#70](https://github.com/JeremyDaug/EconomicCalculator/issues/70)
+    Add Load Check on Processes for part tags Issue[#67](https://github.com/JeremyDaug/EconomicCalculator/issues/67)
+    Decouple Message using functions in Pop Issue[#66](https://github.com/JeremyDaug/EconomicCalculator/issues/66)
+    Improve Sifting Intelligence Issue[#64](https://github.com/JeremyDaug/EconomicCalculator/issues/64)

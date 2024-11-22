@@ -343,6 +343,7 @@ pub enum FirmEmployeeAction {
     /// along.
     WorkDayEnded,
     /// Requests time from the firm, simplifies the transfer as it's common.
+    /// TODO: As part of allowing pops to do multiple jobs, this will need to include how much time and/or skills needed.
     RequestTime,
     /// Used by Disorganized firms or for owners without limited liability
     /// to take everything from the pop.
@@ -353,6 +354,9 @@ pub enum FirmEmployeeAction {
     /// requested item(s). Intended primarily to end
     /// FirmEmployeeAction::RequestEverything logic.
     RequestSent,
+    /// Firm to Employee. Gives the employee things which it should add to it's 
+    /// desires that the firm needs. This is used primarily for Disorganized firms.
+    FirmDesire {},
 
     // TODO consider removing these.
     /// The firm has hired more people into this pop.

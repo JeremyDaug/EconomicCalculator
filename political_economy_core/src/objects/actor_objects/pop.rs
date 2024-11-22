@@ -52,6 +52,7 @@ pub struct Pop {
     /// Pop's unique id for navigation purposes.
     pub id: usize,
     /// The job of the pop.
+    /// TODO: Consider removing this
     pub job: usize,
     /// Where the pop works.
     pub firm: usize,

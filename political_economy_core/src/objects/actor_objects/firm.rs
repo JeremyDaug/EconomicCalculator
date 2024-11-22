@@ -1,10 +1,10 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 
 use barrage::{Sender, Receiver};
 
-use crate::{data_manager::DataManager, demographics::Demographics, objects::{data_objects::{item::Item, process::ProcessPartTag}, environmental_objects::market::MarketHistory}};
+use crate::{data_manager::DataManager, demographics::Demographics, objects::{data_objects::item::Item, environmental_objects::market::MarketHistory}};
 
-use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, seller::Seller};
+use super::{actor::{self, Actor}, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, seller::Seller};
 
 /// Firms are the productive actors of our system.
 /// 
@@ -74,6 +74,11 @@ pub struct Firm {
     pub wants: HashMap<usize, f64>,
     /// Message Backlog for storing messages we aren't handling right this second.
     pub backlog: VecDeque<ActorMessage>,
+    /// Records our results of the day, both how well our production plans worked as 
+    /// well as our success buying and selling in the market.
+    /// 
+    /// Make it an option so we can just set to None when not needed.
+    pub todays_results: Option<PlanResults>,
     _firm_outputs: Vec<usize>,
 }
 
@@ -86,14 +91,14 @@ impl Firm {
         let mut result = HashMap::new();
 
         for job in self.jobs.iter() {
-            for (proc, Assgn) in job.assignments.iter() {
+            for (proc, assgn) in job.assignments.iter() {
                 let process = data.processes.get(proc).expect("Process not found.");
                 for part in process.input_and_capital_products().iter()
                 .filter(|x| !x.is_optional()) {
                     // if not optional, add to our result
                     result.entry(part.item)
-                    .and_modify(|x| *x += part.amount * Assgn.iterations)
-                    .or_insert(part.amount * Assgn.iterations);
+                    .and_modify(|x| *x += part.amount * assgn.iterations)
+                    .or_insert(part.amount * assgn.iterations);
                 }
             }
         }
@@ -109,14 +114,14 @@ impl Firm {
         let mut result = HashMap::new();
 
         for job in self.jobs.iter() {
-            for (proc, Assgn) in job.assignments.iter() {
+            for (proc, assgn) in job.assignments.iter() {
                 let process = data.processes.get(proc).expect("Process not found.");
                 for part in process.input_and_capital_products().iter()
                 .filter(|x| x.is_optional()) {
                     // if not optional, add to our result
                     result.entry(part.item)
-                    .and_modify(|x| *x += part.amount * Assgn.iterations)
-                    .or_insert(part.amount * Assgn.iterations);
+                    .and_modify(|x| *x += part.amount * assgn.iterations)
+                    .or_insert(part.amount * assgn.iterations);
                 }
             }
         }
@@ -318,7 +323,7 @@ impl Firm {
     /// # Process Common Messages
     /// 
     /// All messages that can be handled at any time (reactively)
-    fn process_common_msg(&mut self, 
+    pub fn process_common_msg(&mut self, 
     _rx: &mut Receiver<ActorMessage>, 
     _tx: &Sender<ActorMessage>,
     _data: &DataManager, 
@@ -391,12 +396,14 @@ impl Firm {
     data: &DataManager, 
     demos: &Demographics,
     history: &MarketHistory) {
-        let actor_info = self.actor_info();
+        let firm = self.actor_info();
         if let OrganizationalStructure::Disorganized 
         = self.organization_structure {
             // if disorganized, ask for everything
-            let pop = ActorInfo::Pop(self.jobs.first().expect("Disorganized Firm Has No jobs?")
-            .pop);
+            let pop = ActorInfo::Pop(self.jobs
+                .first()
+                .expect("Disorganized Firm Has No jobs?")
+                .pop);
             self.push_message(rx, tx, 
                 ActorMessage::FirmToEmployee { 
                     firm: self.actor_info(), employee: pop, 
@@ -422,25 +429,39 @@ impl Firm {
             for (product, amount) in prop_copy.into_iter() {
                 // send to pop
                 self.push_message(rx, tx, 
-                ActorMessage::SendProduct { sender: actor_info, 
+                ActorMessage::SendProduct { sender: firm, 
                     reciever: pop, product: product, amount: amount });
             }
             let want_copy = self.wants.clone();
             for (want, amount) in want_copy.into_iter() {
                 self.push_message(rx, tx, 
-                ActorMessage::SendWant { sender: actor_info, 
+                ActorMessage::SendWant { sender: firm, 
                     reciever: pop, want, amount });
             }
             // With want and products sent back, clear out current
             //* NOTE: Expended capital is not included and should be included in the pop buy request.
             self.property.clear();
             self.wants.clear();
+
+            // Set our current results from this.
+            self.todays_results = Some(plan_results);
+
             // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-            // given our results, reduce downwards to match our abilities.
-            self.update_plans(plan_results, data, demos, history);
-
             // send over the needs of the firm to the pops so they can buy what we need as well.
+            // send over all inputs and capital desires, should have default desire setup on other side.
+            let desire_items: Vec<FirmDesireNeed> = self.get_all_production_needs(data);
+
+            for need in desire_items {
+                self.push_message(rx, tx,
+                    ActorMessage::FirmToEmployee { 
+                        firm, 
+                        employee: pop, 
+                        action: FirmEmployeeAction::FirmDesire {
+                            // TODO: Add firm desire needs here
+                        }
+                    });
+            }
+
             // then exit work_time_processing
         } else { // the firm is organized, therefore labor is properly used. Send everything.
             // if payday, send pop agreed upon wage
@@ -449,29 +470,51 @@ impl Firm {
             // return any skills earned and whatever splashed onto them.
             // then we're done being productive for the day. Move on.
         }
+        // Send work day done to pops
+        let mut pops = self.get_pops();
+        for pop in pops {
+            self.push_message(rx, tx, 
+                ActorMessage::FirmToEmployee { 
+                    firm, 
+                    employee: ActorInfo::Pop(pop), 
+                    action: FirmEmployeeAction::WorkDayEnded 
+                });
+        }
     }
-
-
+    
+    /// # Get All Production Needs
+    /// 
+    /// Gets all of the production needs for the firm.
+    /// 
+    /// It gets what products/product class/want is needed, how many, whether it's optional,
+    /// and possibly how important it is for them to get it.
+    fn get_all_production_needs(&self, data: &DataManager) -> Vec<FirmDesireNeed> {
+        // TODO: Pick up here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        todo!()
+    }
 
     /// # Do Plan
     /// 
-    /// Does the production plan laid out previously.
+    /// Does the production plan laid out previously to the best of our ability.
     /// 
     /// Priority is defined by the order of the job and nothing else.
     /// Instead of priorities expecting to fail, it creates limited plans
     /// it can succeed with.
-    /// 
     pub fn do_plan(&mut self, data: &DataManager, 
-    demos: &Demographics,
-    history: &MarketHistory) -> PlanResults {
+    _demos: &Demographics,
+    _history: &MarketHistory) -> PlanResults {
         // The results (success or failure) of our processes so we can build
         // or reduce as needed.
         let mut plan_results: HashMap<usize, HashMap<usize, f64>> = HashMap::new();
-        // expenses in the form of specific products, wants are not counted
-        let mut expenses: HashMap<usize, f64> = HashMap::new();
+        // expenses in the form of specific products,
+        let mut expended_goods: HashMap<usize, f64> = HashMap::new();
         // The capital goods locked up in plan can be gotten from self.expended
         // Total production of goods from our proceses
-        let mut production:HashMap<usize, f64> = HashMap::new();
+        let mut produced_goods:HashMap<usize, f64> = HashMap::new();
+        // Wants expended in process
+        let mut expended_wants:HashMap<usize, f64> = HashMap::new();
+        // Wants produced
+        let mut produced_wants:HashMap<usize, f64> = HashMap::new();
         // The final net results of production to allows us to do some economic calculation.
         //let mut net = HashMap::new();
         for job in self.jobs.iter() {
@@ -492,11 +535,11 @@ impl Firm {
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
                     if *change < 0.0 { // record expenses
-                        expenses.entry(*prod)
+                        expended_goods.entry(*prod)
                         .and_modify(|x| *x -= change)
                         .or_insert(-change);
                     } else { // and production
-                        production.entry(*prod)
+                        produced_goods.entry(*prod)
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
                     }
@@ -512,6 +555,15 @@ impl Firm {
                 }
                 // add/remove wants
                 for (want, change) in proc_results.input_output_wants.iter() {
+                    if *change > 0.0 {
+                        produced_wants.entry(*want)
+                            .and_modify(|x| *x += change)
+                            .or_insert(*change);
+                    } else {
+                        expended_wants.entry(*want)
+                            .and_modify(|x| *x -= change)
+                            .or_insert(-change);
+                    }
                     let temp = self.wants.entry(*want)
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
@@ -521,10 +573,12 @@ impl Firm {
         }
         // Package our results and return
         PlanResults {
-            expended_products: expenses,
-            production,
+            expended_products: expended_goods,
+            production: produced_goods,
             used: self.expended.clone(),
             plan_results,
+            expended_wants,
+            created_wants: produced_wants,
         }
     }
     
@@ -538,7 +592,7 @@ impl Firm {
     /// 
     /// This function is unused by Firms which are disorganized as 
     /// disorganize firms transfer all goods to the pop it employs
-    fn buy_and_sell_processing(&self, 
+    pub fn buy_and_sell_processing(&self, 
     rx: &mut Receiver<ActorMessage>, tx: &mut Sender<ActorMessage>, 
     data: &DataManager, demos: &Demographics, history: &MarketHistory) {
         if self.organization_structure == OrganizationalStructure::Disorganized {
@@ -558,11 +612,29 @@ impl Firm {
     /// 
     /// Update Plans alters the plans of the firm based on the results of the plan.
     /// 
-    /// If it was unable to do some of it's process iterations, it reduces them to this lower target.
-    /// 
-    /// If it was able to meet the plans, it will look into improving it based on available resources
-    fn update_plans(&mut self, plan_results: PlanResults, _data: &DataManager, _demos: &Demographics, _history: &MarketHistory) {
+    /// Runs at the end of the day.
+    pub fn update_plans(&mut self, plan_results: PlanResults, _data: &DataManager, _demos: &Demographics, _history: &MarketHistory) {
         todo!()
+    }
+    
+    /// # Get Pops
+    /// 
+    /// Gets the ids of all pops (jobs, managers, and owners) in the firm.
+    /// 
+    /// # Note
+    /// 
+    /// Current version does not include Management or Owners.
+    pub fn get_pops(&self) -> Vec<usize> {
+        let mut res = vec![];
+
+        for job in self.jobs.iter() {
+            res.push(job.pop);
+        }
+
+        // TODO Management Jobs
+        // TODO Owner Jobs
+
+        res
     }
 }
 
@@ -939,6 +1011,7 @@ pub enum OrganizationalStructure {
 /// # Plan Results
 /// 
 /// A helper 
+#[derive(Debug)]
 pub struct PlanResults {
     /// All expended products
     pub expended_products: HashMap<usize, f64>,
@@ -952,4 +1025,14 @@ pub struct PlanResults {
     pub used: HashMap<usize, f64>,
     /// The results of the iterations.
     pub plan_results: HashMap<usize, HashMap<usize, f64>>,
+}
+
+/// # Firm Desire Need
+/// 
+/// Used to get and send a firm's product needs to someone else.
+/// 
+/// Primarily used for disorganized firms.
+#[derive(Debug)]
+pub struct FirmDesireNeed {
+
 }
