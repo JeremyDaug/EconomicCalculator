@@ -45,6 +45,11 @@ use super::{desire::Desire,
 pub struct Property {
     /// All of the desires we are storing and looking over.
     pub desires: Vec<Desire>,
+    /// How many desires come from work. These are typically reset at the end of 
+    /// the day so the firm can update it's needs.
+    /// 
+    /// This is how many desires added to the end of our desires above are from.
+    pub work_desires: usize,
     /// The property currently owned bey the actor.
     pub property: HashMap<usize, PropertyInfo>,
     /// The wants stored and not used up yet.
@@ -129,6 +134,7 @@ impl Property {
     pub fn new(desires: Vec<Desire>) -> Self {
         Property {
             desires,
+            work_desires: 0,
             property: HashMap::new(),
             want_store: HashMap::new(),
             full_tier_satisfaction: None,
@@ -180,6 +186,7 @@ impl Property {
     /// 
     /// This will need to be expanded to allow for both specific product 
     /// satisfaction as well as general product satisfaction.
+    #[deprecated]
     pub fn sift_product(&mut self, product: &usize) {
         // TODO update or remove this.
         // get the first step.
@@ -2578,6 +2585,22 @@ impl Property {
             current += info.gained; // add in what we have gained so far during today.
             info.total_current = current;
         }
+    }
+    
+    /// # Add Firm Need
+    /// 
+    /// Takes and adds a firm need to the desires list.
+    pub fn add_firm_need(&mut self, desire: super::firm::FirmDesireNeed) {
+        self.work_desires += 1;
+        self.desires.push(
+            Desire::new(
+                desire.desire, 
+                5, 
+                None, 
+                desire.target,
+                0.0, 
+                0,
+                vec![]).expect("Bad desire?"));
     }
 }
 

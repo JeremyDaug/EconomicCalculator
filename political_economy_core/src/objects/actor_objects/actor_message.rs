@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use super::firm::FirmDesireNeed;
+
 /// Actor Message is a message which can be passed between
 /// two actor threads.
 ///
@@ -337,7 +339,7 @@ impl ActorMessage {
 }
 
 /// The actions which a can be sent between firms and employees
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum FirmEmployeeAction {
     /// Work day has finished and gotten what it needs from it's pops, move
     /// along.
@@ -356,7 +358,7 @@ pub enum FirmEmployeeAction {
     RequestSent,
     /// Firm to Employee. Gives the employee things which it should add to it's 
     /// desires that the firm needs. This is used primarily for Disorganized firms.
-    FirmDesire {},
+    FirmDesire {desire: FirmDesireNeed},
 
     // TODO consider removing these.
     /// The firm has hired more people into this pop.

@@ -4,7 +4,7 @@ use barrage::{Sender, Receiver};
 
 use crate::{data_manager::DataManager, demographics::Demographics, objects::{data_objects::item::Item, environmental_objects::market::MarketHistory}};
 
-use super::{actor::{self, Actor}, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, seller::Seller};
+use super::{actor::{self, Actor}, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, firm_property_info::FirmPropertyInfo, seller::Seller};
 
 /// Firms are the productive actors of our system.
 /// 
@@ -65,7 +65,7 @@ pub struct Firm {
     /// The property owned or otherwise managed by the firm.
     /// If the firm is not Disorganized or otherwise a distinct entity from
     /// the pop, this is where all of it's inputs and capital is stored.
-    pub property: HashMap<usize, f64>,
+    pub property: HashMap<usize, FirmPropertyInfo>,
     /// The property which was used as capital today and has been expended, making it
     /// no longer useful today.
     pub expended: HashMap<usize, f64>,
@@ -342,9 +342,12 @@ impl Firm {
             ActorMessage::SendProduct { sender: _, 
             reciever: _, product, amount } => {
                 // it's for us, so add.
+                // Sent products recieved here were not purchased, so just add to property.
                 self.property.entry(product)
-                    .and_modify(|x| *x += amount)
-                    .or_insert(amount);
+                    .and_modify(|x| x.total_property += amount)
+                    .or_insert(FirmPropertyInfo::new()
+                        .with_total_property(amount)
+                    );
             },
             ActorMessage::SendWant { sender: _, 
             reciever: _, want, amount } => {
@@ -426,11 +429,11 @@ impl Firm {
             let plan_results = self.do_plan(data, demos, history);
             // with our plan carried out to the best of our ability, return everything to the pop.
             let prop_copy = self.property.clone();
-            for (product, amount) in prop_copy.into_iter() {
+            for (product, info) in prop_copy.into_iter() {
                 // send to pop
                 self.push_message(rx, tx, 
                 ActorMessage::SendProduct { sender: firm, 
-                    reciever: pop, product: product, amount: amount });
+                    reciever: pop, product: product, amount: info.total_property });
             }
             let want_copy = self.wants.clone();
             for (want, amount) in want_copy.into_iter() {
@@ -446,22 +449,20 @@ impl Firm {
             // Set our current results from this.
             self.todays_results = Some(plan_results);
 
-            // TODO Pick up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // send over the needs of the firm to the pops so they can buy what we need as well.
             // send over all inputs and capital desires, should have default desire setup on other side.
             let desire_items: Vec<FirmDesireNeed> = self.get_all_production_needs(data);
-
-            for need in desire_items {
+            for desire in desire_items {
                 self.push_message(rx, tx,
                     ActorMessage::FirmToEmployee { 
                         firm, 
                         employee: pop, 
                         action: FirmEmployeeAction::FirmDesire {
-                            // TODO: Add firm desire needs here
+                            desire
                         }
-                    });
+                    }
+                );
             }
-
             // then exit work_time_processing
         } else { // the firm is organized, therefore labor is properly used. Send everything.
             // if payday, send pop agreed upon wage
@@ -471,14 +472,15 @@ impl Firm {
             // then we're done being productive for the day. Move on.
         }
         // Send work day done to pops
-        let mut pops = self.get_pops();
+        let pops = self.get_pops();
         for pop in pops {
             self.push_message(rx, tx, 
                 ActorMessage::FirmToEmployee { 
                     firm, 
                     employee: ActorInfo::Pop(pop), 
                     action: FirmEmployeeAction::WorkDayEnded 
-                });
+                }
+            );
         }
     }
     
@@ -489,8 +491,26 @@ impl Firm {
     /// It gets what products/product class/want is needed, how many, whether it's optional,
     /// and possibly how important it is for them to get it.
     fn get_all_production_needs(&self, data: &DataManager) -> Vec<FirmDesireNeed> {
-        // TODO: Pick up here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        todo!()
+        let mut result = vec![];
+
+        for job in self.jobs.iter() {
+            for (proc, assgn) in job.assignments.iter() {
+                let process = data.processes.get(proc).expect("Process not found!");
+                // inputs and capitals
+                for part in process.input_and_capital_products().iter() {
+                    let is_optional = part.is_optional();
+                    result.push(FirmDesireNeed {
+                        desire: part.item,
+                        target: part.amount * assgn.iterations,
+                        is_optional,
+                    });
+                }
+            }
+        }
+
+        // Get the other assignments maybe.
+
+        result
     }
 
     /// # Do Plan
@@ -526,14 +546,23 @@ impl Firm {
                     .and_modify(|x| *x += i.iterations)
                     .or_insert(i.iterations);
                 let proc = data.processes.get(proc_id).expect("Process not found");
-                let proc_results = proc.do_process(&self.property, 
+                let property = self.property_to_hashmap();
+                let proc_results = proc.do_process(&property, 
                     &self.wants, 0.0, Some(i.iterations), 
                     false, data);
                 // with results gotten, deal with changes
                 for (prod, change) in proc_results.input_output_products.iter() {
                     let temp = self.property.entry(*prod)
-                        .and_modify(|x| *x += change)
-                        .or_insert(*change);
+                        .and_modify(|x| {
+                            x.production_change(*change);
+                        })
+                        .or_insert(
+                            { 
+                                let mut temp = FirmPropertyInfo::new();
+                                temp.production_change(*change);
+                                temp
+                            }
+                        );
                     if *change < 0.0 { // record expenses
                         expended_goods.entry(*prod)
                         .and_modify(|x| *x -= change)
@@ -543,11 +572,11 @@ impl Firm {
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
                     }
-                    debug_assert!(*temp > 0.0, "Got to negative value of product.");
+                    debug_assert!(temp.total_property > 0.0, "Got to negative value of product.");
                 }
                 // expend capital
                 for (prod, change) in proc_results.capital_products.iter() {
-                    *self.property.get_mut(prod).unwrap() -= change;
+                    self.property.get_mut(prod).unwrap().expend_capital(*change);
                     let temp = self.expended.entry(*prod)
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
@@ -636,6 +665,23 @@ impl Firm {
 
         res
     }
+    
+    /// # Decay Goods
+    /// 
+    /// Decays goods owned by the firm and records the lost goods and changes.
+    pub fn decay_goods(&self, data: &DataManager) {
+        todo!()
+    }
+
+    pub fn property_to_hashmap(&self) -> HashMap<usize, f64> {
+        let mut result = HashMap::new();
+
+        for (&prod, info) in self.property.iter() {
+            result.insert(prod, info.total_property);
+        }
+
+        result
+    }
 }
 
 impl Seller for Firm {
@@ -712,6 +758,7 @@ impl Actor for Firm {
         // during the end of day wrap-up, don't consume anything
 
         // Decay our goods.
+        self.decay_goods(data);
 
         // Then adapt today's plan for tomorrow.
 
@@ -1032,7 +1079,12 @@ pub struct PlanResults {
 /// Used to get and send a firm's product needs to someone else.
 /// 
 /// Primarily used for disorganized firms.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FirmDesireNeed {
-
+    /// The item to get.
+    pub desire: Item,
+    /// How many of that item to get.
+    pub target: f64,
+    /// Whether the item is optional or not.
+    pub is_optional: bool,
 }

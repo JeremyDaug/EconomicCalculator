@@ -413,13 +413,18 @@ impl Pop {
                     None => 0.0,
                 };
                 self.push_message(rx, tx,
-                ActorMessage::SendProduct { sender: self.actor_info()       ,
+                ActorMessage::SendProduct { sender: self.actor_info(),
                     reciever: firm,
                     product,
                     amount
                 }); // no need to send more
                 self.property.property.get_mut(&product).expect("Not found?")
                     .remove(amount);
+            },
+            FirmEmployeeAction::FirmDesire { desire } => {
+                // Recieved when the pop is part of a disorganized firm. 
+                // take the desire recieved and add it to ours appropriately.
+                self.property.add_firm_need(desire);
             },
             _ => ()
         }

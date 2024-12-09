@@ -12,3 +12,4 @@ pub mod property_info;
 pub mod property;
 pub mod seller;
 pub mod state;
+pub mod firm_property_info;
