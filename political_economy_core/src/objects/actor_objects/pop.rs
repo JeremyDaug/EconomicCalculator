@@ -418,8 +418,6 @@ impl Pop {
                     product,
                     amount
                 }); // no need to send more
-                self.property.property.get_mut(&product).expect("Not found?")
-                    .remove(amount);
             },
             FirmEmployeeAction::FirmDesire { desire } => {
                 // Recieved when the pop is part of a disorganized firm. 
@@ -1822,6 +1820,13 @@ impl Pop {
     pub fn add_target(&mut self, product: usize, target: f64) {
         self.property.add_target(product, target);
     }
+    
+    /// # Remove Firm Need
+    /// 
+    /// Removes firm desires from desires list.
+    fn remove_firm_need(&mut self) {
+        self.property.remove_firm_need();
+    }
 }
 
 impl Buyer for Pop {
@@ -1882,6 +1887,17 @@ impl Actor for Pop {
     ///
     /// Items which have an AMV below the value of their time will be
     /// trashed instead, thrown to the market for anyone to pick up.
+    /// 
+    /// # Other Notes
+    /// 
+    /// Do not add desires to a pop during this phase unless it's from 
+    /// a pop's job. All desire alterations to the base pop should be done
+    /// elsewhere. Firm desires recieved by a pop are recieved here, and
+    /// deleted here.
+    /// 
+    /// # EXTRA IMPORTANT NOTE
+    /// 
+    /// The addition and removal of firm desires should be tested during pop/firm integration testing.
     ///
     /// # Panics
     ///
@@ -1945,5 +1961,10 @@ impl Actor for Pop {
         // With these things consumed, we've done what we can. Process our
         // results to hopefully improve our situation tomorrow.
         self.adapt_future_plan(data, history);
+
+        // With day over and all work done, remove the desires recieved from
+        // our job (if we have any).
+        // TODO Note: This may need to be tested to ensure it's actually getting what it needs, but I'll look into that during pop/firm integration testing.
+        self.remove_firm_need();
     }
 }

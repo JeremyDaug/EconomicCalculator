@@ -1435,6 +1435,8 @@ mod pop_tests {
 
     mod process_firm_message {
         use std::collections::HashMap;
+        use political_economy_core::objects::actor_objects::firm::FirmDesireNeed;
+
         use super::super::*;
 
         use super::make_test_pop;
@@ -1613,6 +1615,36 @@ mod pop_tests {
             assert_eq!(test.property.want_store.len(), 2);
             assert_eq!(test.property.want_store.get(&4).unwrap().total_current, 20.0);
             assert_eq!(test.property.want_store.get(&6).unwrap().total_current, 5.0);
+        }
+
+        #[test]
+        pub fn should_recieve_and_add_firm_desires() {
+            let mut test = make_test_pop();
+            let (data, _market) = prepare_data_for_market_actions(&mut test);
+            // Clear out desires for easier checking.
+            test.property.desires.clear();
+            // add the pop's time to work from memory
+            // setup message queue.
+            let (tx, rx) = barrage::bounded(10);
+            let passed_rx = rx.clone();
+            let passed_tx = tx.clone();
+            // setup the sender (firm who sent it)
+            let firm = ActorInfo::Firm(10);
+            let desire = FirmDesireNeed {
+                desire: Item::Product(10),
+                target: 1.0,
+                is_optional: false,
+            };
+            let firm_action = FirmEmployeeAction::FirmDesire {
+                desire
+            };
+
+            assert!(!test.process_firm_message(&passed_rx, &passed_tx, 
+                firm, firm_action, &data));
+            // Test should've added the desire to it's desires.
+            assert_eq!(test.property.desires.len(), 1);
+            let des = test.property.desires.first().unwrap();
+            assert_eq!(des.item, Item::Product(10));
         }
     }
 

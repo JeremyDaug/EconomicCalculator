@@ -2590,6 +2590,10 @@ impl Property {
     /// # Add Firm Need
     /// 
     /// Takes and adds a firm need to the desires list.
+    /// 
+    /// ## Note:
+    /// 
+    /// This is not acutalyl tested for simplicity reasons.
     pub fn add_firm_need(&mut self, desire: super::firm::FirmDesireNeed) {
         self.work_desires += 1;
         self.desires.push(
@@ -2601,6 +2605,19 @@ impl Property {
                 0.0, 
                 0,
                 vec![]).expect("Bad desire?"));
+    }
+    
+    /// # Remove Firm Need
+    /// 
+    /// Removes firm needs from the desire list.
+    /// 
+    /// ## Note:
+    /// 
+    /// This is not acutalyl tested for simplicity reasons.
+    pub fn remove_firm_need(&mut self) {
+        while self.work_desires > 0 {
+            self.desires.pop();
+        }
     }
 }
 
