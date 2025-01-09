@@ -1,12 +1,14 @@
 
 
 mod firm_tests {
+    mod do_plan_should {
+        
+    }
+
     mod decay_goods_should {
         use std::collections::{HashMap, HashSet, VecDeque};
 
         use political_economy_core::{data_manager::DataManager, objects::{actor_objects::{firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, ProfitStructure}, firm_property_info::FirmPropertyInfo}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, product::Product, want::Want}}};
-
-        use super::*;
 
         #[test]
         pub fn not_decay_fresh_failure_products() {

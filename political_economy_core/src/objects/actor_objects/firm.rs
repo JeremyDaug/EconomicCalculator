@@ -624,6 +624,8 @@ impl Firm {
     /// 
     /// This function is unused by Firms which are disorganized as 
     /// disorganize firms transfer all goods to the pop it employs
+    /// 
+    /// TODO: Test once non-disorganized firms are created.
     pub fn buy_and_sell_processing(&self, 
     rx: &mut Receiver<ActorMessage>, tx: &mut Sender<ActorMessage>, 
     data: &DataManager, demos: &Demographics, history: &MarketHistory) {
@@ -656,6 +658,8 @@ impl Firm {
     /// # Note
     /// 
     /// Current version does not include Management or Owners.
+    /// 
+    /// Not bothering to test, not complex enough to need.
     pub fn get_pops(&self) -> Vec<usize> {
         let mut res = vec![];
 
@@ -752,6 +756,15 @@ impl Firm {
             .or_insert(FirmPropertyInfo::new()
                 .with_total_property(amount));
         }
+        // Replace this with the commented out block if want tracking is added.
+        for (&want, &amount) in want_lost.iter()
+        .chain(want_gained.iter()) {
+            self.wants.entry(want)
+            .and_modify(|x| {
+                *x += amount;
+            })
+            .or_insert(amount);
+        }
         // Commented out as Want changes are not tracked by firms.
         // for (&want, &amount) in want_lost.iter() {
         //     self.want_store.entry(want)
@@ -771,6 +784,12 @@ impl Firm {
         // }
     }
 
+    /// # Property to HashMap
+    /// 
+    /// Turns our list of property info into a hashmap of just currently available
+    /// products.
+    /// 
+    /// No testing done or needed.
     pub fn property_to_hashmap(&self) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
 
@@ -824,13 +843,15 @@ impl Actor for Firm {
     /// 
     /// Once we get the AllFinished message, complete any remaining cleanup, 
     /// and close out.
+    /// 
+    /// TODO: Needs Testing
     fn run_market_day(&mut self, 
         tx: &mut Sender<ActorMessage>,
         rx: &mut Receiver<ActorMessage>,
         data: &DataManager,
         demos: &Demographics,
         history: &MarketHistory) {
-        // TODO idea, Firms hire retailers who handle the details of sales and then report their results back to here. They are on separate threads. THis is a bad, crazy idea, but fuckit it may just work.
+        // TODO idea, Firms hire retailers who handle the details of sales and then report their results back to here. They are on separate threads. This is a bad, crazy idea, but fuckit it may just work.
         
         // Prep for the day. Firms not much, if anything, should be needed.
 
