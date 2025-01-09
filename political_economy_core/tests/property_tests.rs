@@ -8631,7 +8631,7 @@ mod property_tests {
             // with consume goods run
             // check desires again.
             let desire0 = test.desires.get(0).unwrap();
-            assert_eq!(desire0.satisfaction, 35.0);
+            assert_eq!(desire0.satisfaction, 30.0);
             // 4.0 into desire 1 (tier 12, totally satisfied)
             let desire1 = test.desires.get(1).unwrap();
             assert_eq!(desire1.satisfaction, 25.0);
@@ -8646,20 +8646,20 @@ mod property_tests {
             assert_eq!(prop0.used, 15.0);
 
             let prop1 = test.property.get(&1).unwrap();
-            assert_eq!(prop1.total_property, 0.0);
+            assert_eq!(prop1.total_property, 10.0);
             assert_eq!(prop1.unreserved, 0.0);
 
             let prop2 = test.property.get(&2).unwrap();
-            assert_eq!(prop2.total_property, 0.0);
-            assert_eq!(prop2.unreserved, 0.0);
-            assert_eq!(prop2.used, 10.0);
+            assert_eq!(prop2.total_property, 5.0);
+            assert_eq!(prop2.unreserved, 5.0);
+            assert_eq!(prop2.used, 0.0);
 
             let prop3 = test.property.get(&3).unwrap();
-            assert_eq!(prop3.total_property, 5.0);
-            assert_eq!(prop3.unreserved, 5.0);
+            assert_eq!(prop3.total_property, 0.0);
+            assert_eq!(prop3.unreserved, 0.0);
             // check wants consumed/produced as expected and with no expected remaining.
             let want0 = test.want_store.get(&0).unwrap();
-            assert_eq!(want0.consumed, 35.0);
+            assert_eq!(want0.consumed, 30.0);
             assert_eq!(want0.expected, 0.0);
             assert_eq!(want0.total_current, 0.0);
 

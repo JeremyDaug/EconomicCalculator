@@ -66,9 +66,10 @@ pub struct Firm {
     /// If the firm is not Disorganized or otherwise a distinct entity from
     /// the pop, this is where all of it's inputs and capital is stored.
     pub property: HashMap<usize, FirmPropertyInfo>,
-    /// The property which was used as capital today and has been expended, making it
-    /// no longer useful today.
-    pub expended: HashMap<usize, f64>,
+    // The property which was used as capital today and has been expended, making it
+    // no longer useful today.
+    // Rolled into Property
+    //pub expended: HashMap<usize, f64>,
     /// The wants currently owned by the firm. Like Property, if the firm is Disorganized, 
     /// all wants will shift to the owner/workers instead of being stored.
     pub wants: HashMap<usize, f64>,
@@ -79,7 +80,8 @@ pub struct Firm {
     /// 
     /// Make it an option so we can just set to None when not needed.
     pub todays_results: Option<PlanResults>,
-    _firm_outputs: Vec<usize>,
+    // Not currently used.
+    //_firm_outputs: Vec<usize>,
 }
 
 impl Firm {
@@ -527,8 +529,9 @@ impl Firm {
         // or reduce as needed.
         let mut plan_results: HashMap<usize, HashMap<usize, f64>> = HashMap::new();
         // expenses in the form of specific products,
-        let mut expended_goods: HashMap<usize, f64> = HashMap::new();
-        // The capital goods locked up in plan can be gotten from self.expended
+        let mut consumed_goods: HashMap<usize, f64> = HashMap::new();
+        // The capital goods locked up in plan can be gotten from self.property[good].expended
+        let mut expended: HashMap<usize, f64> = HashMap::new();
         // Total production of goods from our proceses
         let mut produced_goods:HashMap<usize, f64> = HashMap::new();
         // Wants expended in process
@@ -564,7 +567,7 @@ impl Firm {
                             }
                         );
                     if *change < 0.0 { // record expenses
-                        expended_goods.entry(*prod)
+                        consumed_goods.entry(*prod)
                         .and_modify(|x| *x -= change)
                         .or_insert(-change);
                     } else { // and production
@@ -577,7 +580,7 @@ impl Firm {
                 // expend capital
                 for (prod, change) in proc_results.capital_products.iter() {
                     self.property.get_mut(prod).unwrap().expend_capital(*change);
-                    let temp = self.expended.entry(*prod)
+                    let temp = expended.entry(*prod)
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
                     debug_assert!(*temp > 0.0, "Got to negative product expended.");
@@ -602,9 +605,9 @@ impl Firm {
         }
         // Package our results and return
         PlanResults {
-            expended_products: expended_goods,
+            consumed_goods,
             production: produced_goods,
-            used: self.expended.clone(),
+            used: expended.clone(),
             plan_results,
             expended_wants,
             created_wants: produced_wants,
@@ -669,8 +672,103 @@ impl Firm {
     /// # Decay Goods
     /// 
     /// Decays goods owned by the firm and records the lost goods and changes.
-    pub fn decay_goods(&self, data: &DataManager) {
-        todo!()
+    pub fn decay_goods(&mut self, data: &DataManager) {
+        // Decay any stored wants, 
+        // NOTE: Lost/Decayed wants are not being tracked. Consider adding tracking, but for now ignore.
+        for (want, amt) in self.wants.iter_mut() {
+            let want_info = data.wants.get(want)
+                .expect(format!("Want '{}' not found!", *want).as_str());
+            let decay = want_info.decay * *amt;
+            *amt -= decay;
+        }
+        // Release used products for decay.
+        for (_, info) in self.property.iter_mut() {
+            info.release_expended();
+        }
+        // get a copy of our existing property for processing
+        let original_property = self.property_to_hashmap();
+        let original_wants = self.wants.clone();
+        let mut property_lost = HashMap::new();
+        let mut property_gained = HashMap::new();
+        let mut want_lost = HashMap::new();
+        let mut want_gained = HashMap::new();
+        // Decay Goods
+        for (product, info) in self.property.iter_mut() {
+            let prod_info = data.products.get(product)
+                .expect(format!("Product '{}' not found!", *product).as_str());
+            if prod_info.mean_time_to_failure.is_some() {
+                let failed = prod_info.failure_chance() * info.total_property;
+                // if it has a failure process, use that
+                if let Some(proc_id) = prod_info.failure_process {
+                    let fail_proc = data.processes.get(&proc_id).unwrap();
+                    let results = fail_proc
+                    .do_process(&original_property, 
+                        &original_wants, 0.0, 
+                        Some(failed), true, data);
+                    for (&product, &amount) in results.input_output_products.iter() {
+                        // add to current property.
+                        if amount > 0.0 {
+                            property_gained.entry(product)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        } else {
+                            property_lost.entry(product)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        }
+                    }
+                    for (&want, &amount) in results.input_output_wants.iter() {
+                        if amount > 0.0 {
+                            want_gained.entry(want)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        } else {
+                            want_lost.entry(want)
+                            .and_modify(|x| *x += amount)
+                            .or_insert(amount);
+                        }
+                    }
+                } else { // if no process, just shift failed products to lost.
+                    property_lost.entry(*product)
+                    .and_modify(|x| *x -= failed)
+                    .or_insert(-failed);
+                }
+            }
+        }
+        // wrap up by adding/removing what was changed
+        for (&product, &amount) in property_lost.iter() {
+            self.property.entry(product)
+            .and_modify(|x| {
+                x.remove(-amount);
+                x.lost -= amount;
+            });
+        }
+        for (&product, &amount) in property_gained.iter() {
+            self.property.entry(product)
+            .and_modify(|x| {
+                x.add_property(amount);
+                x.produced += amount;
+            })
+            .or_insert(FirmPropertyInfo::new()
+                .with_total_property(amount));
+        }
+        // Commented out as Want changes are not tracked by firms.
+        // for (&want, &amount) in want_lost.iter() {
+        //     self.want_store.entry(want)
+        //     .and_modify(|x| {
+        //         x.total_current += amount; 
+        //         x.lost -= amount;
+        //     })
+        //     .or_insert(WantInfo::new(amount));
+        // }
+        // for (&want, &amount) in want_gained.iter() {
+        //     self.want_store.entry(want)
+        //     .and_modify(|x| {
+        //         x.total_current += amount; 
+        //         x.gained += amount;
+        //     })
+        //     .or_insert(WantInfo::new(amount));
+        // }
     }
 
     pub fn property_to_hashmap(&self) -> HashMap<usize, f64> {
@@ -1061,7 +1159,7 @@ pub enum OrganizationalStructure {
 #[derive(Debug)]
 pub struct PlanResults {
     /// All expended products
-    pub expended_products: HashMap<usize, f64>,
+    pub consumed_goods: HashMap<usize, f64>,
     /// All products created by today's plans.
     pub production: HashMap<usize, f64>,
     /// Wants which were used in the plan.

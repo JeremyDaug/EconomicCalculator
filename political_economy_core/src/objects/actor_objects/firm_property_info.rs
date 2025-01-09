@@ -95,6 +95,31 @@ impl FirmPropertyInfo {
             self.consumed -= change;
         }
     }
+    
+    /// # Release Expended
+    /// 
+    /// Returns any expended property safely to our total_property.
+    pub fn release_expended(&mut self) {
+        self.add_property(self.expended);
+        self.expended = 0.0;
+    }
+    
+    /// # Add Property
+    /// 
+    /// Adds an amount to our property safely.
+    pub fn add_property(&mut self, amt: f64) {
+        debug_assert!(self.total_property + amt > 0.0);
+        self.total_property += amt;
+    }
+    
+    /// Remove
+    /// 
+    /// Subtracts the amount given, value expected to be negative, but
+    /// either accepted.
+    pub fn remove(&mut self, amt: f64) {
+        debug_assert!(self.total_property - amt > 0.0);
+        self.total_property -= amt;
+    }
 }
 
 impl Default for FirmPropertyInfo {
