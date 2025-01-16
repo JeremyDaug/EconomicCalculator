@@ -648,7 +648,11 @@ impl Firm {
     /// 
     /// Runs at the end of the day.
     pub fn update_plans(&mut self, plan_results: PlanResults, _data: &DataManager, _demos: &Demographics, _history: &MarketHistory) {
-        todo!()
+        if self.organization_structure == OrganizationalStructure::Disorganized {
+            // Disorganized planning is barebones, little strategy. 
+            // Produce more when you're profitable and have time
+            // Produce less when you're not profitable.
+        }
     }
     
     /// # Get Pops
