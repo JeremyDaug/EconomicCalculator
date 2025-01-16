@@ -519,7 +519,8 @@ impl Firm {
     /// 
     /// Does the production plan laid out previously to the best of our ability.
     /// 
-    /// Priority is defined by the order of the job and nothing else.
+    /// Priority is defined by the order of the job and nothing else, processes 
+    /// for each job should be thought of as a bulk process, done in any order.
     /// Instead of priorities expecting to fail, it creates limited plans
     /// it can succeed with.
     pub fn do_plan(&mut self, data: &DataManager, 
@@ -544,15 +545,15 @@ impl Firm {
             let pop_id = job.pop;
             plan_results.insert(pop_id, HashMap::new());
             for (proc_id, i) in job.assignments.iter() {
-                plan_results.get_mut(&pop_id).unwrap()
-                    .entry(*proc_id)
-                    .and_modify(|x| *x += i.iterations)
-                    .or_insert(i.iterations);
                 let proc = data.processes.get(proc_id).expect("Process not found");
                 let property = self.property_to_hashmap();
                 let proc_results = proc.do_process(&property, 
                     &self.wants, 0.0, Some(i.iterations), 
                     false, data);
+                plan_results.get_mut(&pop_id).unwrap()
+                    .entry(*proc_id)
+                    .and_modify(|x| *x += proc_results.iterations)
+                    .or_insert(proc_results.iterations);
                 // with results gotten, deal with changes
                 for (prod, change) in proc_results.input_output_products.iter() {
                     let temp = self.property.entry(*prod)
@@ -575,7 +576,7 @@ impl Firm {
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
                     }
-                    debug_assert!(temp.total_property > 0.0, "Got to negative value of product.");
+                    debug_assert!(temp.total_property >= 0.0, "Got to negative value of product.");
                 }
                 // expend capital
                 for (prod, change) in proc_results.capital_products.iter() {
@@ -583,7 +584,7 @@ impl Firm {
                     let temp = expended.entry(*prod)
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
-                    debug_assert!(*temp > 0.0, "Got to negative product expended.");
+                    debug_assert!(*temp >= 0.0, "Got to negative product expended.");
                 }
                 // add/remove wants
                 for (want, change) in proc_results.input_output_wants.iter() {
@@ -599,7 +600,7 @@ impl Firm {
                     let temp = self.wants.entry(*want)
                         .and_modify(|x| *x += change)
                         .or_insert(*change);
-                    debug_assert!(*temp > 0.0, "Got to negative Wants used.");
+                    debug_assert!(*temp >= 0.0, "Got to negative Wants used.");
                 }
             }
         }
@@ -791,14 +792,14 @@ impl Firm {
     /// # Property to HashMap
     /// 
     /// Turns our list of property info into a hashmap of just currently available
-    /// products.
+    /// products. It also excludes production.
     /// 
     /// No testing done or needed.
     pub fn property_to_hashmap(&self) -> HashMap<usize, f64> {
         let mut result = HashMap::new();
 
         for (&prod, info) in self.property.iter() {
-            result.insert(prod, info.total_property);
+            result.insert(prod, info.total_property - info.produced);
         }
 
         result

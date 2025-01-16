@@ -258,6 +258,115 @@ mod firm_tests {
         use super::default_test_data;
 
         #[test]
+        pub fn do_all_plans_with_limited_resources() {
+            let mut test = Firm {
+                id: 0,
+                name: "test".to_string(),
+                sub_name: "test".to_string(),
+                firm_kind: FirmKind::Subsistence,
+                firm_rank: FirmRank::Firm,
+                ownership_type: OwnershipStructure::SelfEmployed,
+                profit_structure: ProfitStructure::PrivatelyOwned,
+                organization_structure: OrganizationalStructure::Disorganized,
+                children: vec![],
+                parent: None,
+                jobs: vec![
+                    FirmJob { 
+                        pop: 0, 
+                        job: 0, 
+                        wage_type: WageType::Daily, 
+                        wage: HashMap::new(), 
+                        accepted_conversions: vec![], 
+                        assignments: HashMap::new()
+                    }
+                ],
+                prices: HashMap::new(),
+                property: HashMap::new(),
+                wants: HashMap::new(),
+                backlog: VecDeque::new(),
+                todays_results: None,
+            };
+            // Setup background data.
+            let data = &default_test_data();
+            let demos = Demographics {
+                species: HashMap::new(),
+                cultures: HashMap::new(),
+                ideology: HashMap::new(),
+            };
+            let history = MarketHistory {
+                product_info: HashMap::new(),
+                class_info: HashMap::new(),
+                want_info: HashMap::new(),
+                sale_priority: vec![],
+                currencies: vec![],
+            };
+
+            // Setup Jobs
+            let job = test.jobs.get_mut(0).unwrap();
+            job.assignments.insert(0, AssignmentInfo {
+                iterations: 10.0,
+                _progress: 0.0,
+            });
+            job.assignments.insert(1, AssignmentInfo {
+                iterations: 10.0,
+                _progress: 0.0,
+            });
+            job.assignments.insert(2, AssignmentInfo {
+                iterations: 10.0,
+                _progress: 0.0,
+            });
+            // Add property and wants for jobs, a bunch of resources to ensure everything can be done.
+            test.property.insert(0, FirmPropertyInfo::new().with_total_property(5.0));
+            test.property.insert(1, FirmPropertyInfo::new().with_total_property(5.0));
+            test.property.insert(2, FirmPropertyInfo::new().with_total_property(5.0));
+            test.property.insert(3, FirmPropertyInfo::new().with_total_property(5.0));
+            test.property.insert(4, FirmPropertyInfo::new().with_total_property(5.0));
+            test.wants.insert(0, 5.0);
+            test.wants.insert(1, 5.0);
+
+            let result = test.do_plan(data, &demos, &history);
+
+            // Sholud do 10 of each process in id order.
+            assert_eq!(*result.plan_results.get(&0).unwrap().get(&0).unwrap(), 5.0);
+            assert_eq!(*result.plan_results.get(&0).unwrap().get(&1).unwrap(), 5.0);
+            assert_eq!(*result.plan_results.get(&0).unwrap().get(&2).unwrap(), 5.0);
+            assert_eq!(*result.consumed_goods.get(&0).unwrap(), 5.0);
+            assert_eq!(*result.consumed_goods.get(&3).unwrap(), 5.0);
+            assert_eq!(*result.consumed_goods.get(&4).unwrap(), 5.0);
+            assert_eq!(*result.used.get(&1).unwrap(), 5.0);
+            assert_eq!(*result.production.get(&0).unwrap(), 5.0);
+            assert_eq!(*result.production.get(&2).unwrap(), 5.0);
+            assert_eq!(*result.production.get(&4).unwrap(), 5.0);
+            assert_eq!(*result.expended_wants.get(&0).unwrap(), 5.0);
+            assert_eq!(*result.created_wants.get(&1).unwrap(), 5.0);
+
+            // Also check property and wants changed correctly.
+            assert_eq!(test.property.get(&0).unwrap().total_property, 5.0);
+            assert_eq!(test.property.get(&0).unwrap().consumed, 5.0);
+            assert_eq!(test.property.get(&0).unwrap().produced, 5.0);
+            assert_eq!(test.property.get(&0).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().total_property, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().consumed, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().produced, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().expended, 5.0);
+            assert_eq!(test.property.get(&2).unwrap().total_property, 10.0);
+            assert_eq!(test.property.get(&2).unwrap().consumed, 0.0);
+            assert_eq!(test.property.get(&2).unwrap().produced, 5.0);
+            assert_eq!(test.property.get(&2).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&3).unwrap().total_property, 0.0);
+            assert_eq!(test.property.get(&3).unwrap().consumed, 5.0);
+            assert_eq!(test.property.get(&3).unwrap().produced, 0.0);
+            assert_eq!(test.property.get(&3).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&4).unwrap().total_property, 5.0);
+            assert_eq!(test.property.get(&4).unwrap().consumed, 5.0);
+            assert_eq!(test.property.get(&4).unwrap().produced, 5.0);
+            assert_eq!(test.property.get(&4).unwrap().expended, 0.0);
+            
+            assert_eq!(*test.wants.get(&0).unwrap(), 0.0);
+            assert_eq!(*test.wants.get(&1).unwrap(), 10.0);
+        }
+
+        #[test]
         pub fn do_all_plans_with_sufficient_resources() {
             let mut test = Firm {
                 id: 0,
@@ -320,6 +429,7 @@ mod firm_tests {
             test.property.insert(1, FirmPropertyInfo::new().with_total_property(100.0));
             test.property.insert(2, FirmPropertyInfo::new().with_total_property(100.0));
             test.property.insert(3, FirmPropertyInfo::new().with_total_property(100.0));
+            test.property.insert(4, FirmPropertyInfo::new().with_total_property(100.0));
             test.wants.insert(0, 100.0);
             test.wants.insert(1, 100.0);
 
@@ -345,24 +455,148 @@ mod firm_tests {
             assert_eq!(test.property.get(&0).unwrap().produced, 10.0);
             assert_eq!(test.property.get(&0).unwrap().expended, 0.0);
             assert_eq!(test.property.get(&1).unwrap().total_property, 90.0);
-            assert_eq!(test.property.get(&0).unwrap().consumed, 0.0);
-            assert_eq!(test.property.get(&0).unwrap().produced, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().consumed, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().produced, 0.0);
             assert_eq!(test.property.get(&1).unwrap().expended, 10.0);
-            assert_eq!(test.property.get(&2).unwrap().total_property, 100.0);
-            assert_eq!(test.property.get(&0).unwrap().consumed, 10.0);
-            assert_eq!(test.property.get(&0).unwrap().produced, 10.0);
-            assert_eq!(test.property.get(&1).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&2).unwrap().total_property, 110.0);
+            assert_eq!(test.property.get(&2).unwrap().consumed, 0.0);
+            assert_eq!(test.property.get(&2).unwrap().produced, 10.0);
+            assert_eq!(test.property.get(&2).unwrap().expended, 0.0);
             assert_eq!(test.property.get(&3).unwrap().total_property, 90.0);
-            assert_eq!(test.property.get(&0).unwrap().consumed, 10.0);
-            assert_eq!(test.property.get(&0).unwrap().produced, 0.0);
-            assert_eq!(test.property.get(&1).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&3).unwrap().consumed, 10.0);
+            assert_eq!(test.property.get(&3).unwrap().produced, 0.0);
+            assert_eq!(test.property.get(&3).unwrap().expended, 0.0);
             assert_eq!(test.property.get(&4).unwrap().total_property, 100.0);
             assert_eq!(test.property.get(&4).unwrap().consumed, 10.0);
             assert_eq!(test.property.get(&4).unwrap().produced, 10.0);
-            assert_eq!(test.property.get(&1).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&4).unwrap().expended, 0.0);
             
             assert_eq!(*test.wants.get(&0).unwrap(), 90.0);
             assert_eq!(*test.wants.get(&1).unwrap(), 110.0);
+        }
+
+        #[test]
+        pub fn do_all_plans_with_sufficient_resources_and_extra_jobs() {
+            let mut test = Firm {
+                id: 0,
+                name: "test".to_string(),
+                sub_name: "test".to_string(),
+                firm_kind: FirmKind::Subsistence,
+                firm_rank: FirmRank::Firm,
+                ownership_type: OwnershipStructure::SelfEmployed,
+                profit_structure: ProfitStructure::PrivatelyOwned,
+                organization_structure: OrganizationalStructure::Disorganized,
+                children: vec![],
+                parent: None,
+                jobs: vec![
+                    FirmJob { 
+                        pop: 0, 
+                        job: 0, 
+                        wage_type: WageType::Daily, 
+                        wage: HashMap::new(), 
+                        accepted_conversions: vec![], 
+                        assignments: HashMap::new()
+                    },
+                    FirmJob {
+                        pop: 1, 
+                        job: 1, 
+                        wage_type: WageType::Daily, 
+                        wage: HashMap::new(), 
+                        accepted_conversions: vec![], 
+                        assignments: HashMap::new()
+                    }
+                ],
+                prices: HashMap::new(),
+                property: HashMap::new(),
+                wants: HashMap::new(),
+                backlog: VecDeque::new(),
+                todays_results: None,
+            };
+            // Setup background data.
+            let data = &default_test_data();
+            let demos = Demographics {
+                species: HashMap::new(),
+                cultures: HashMap::new(),
+                ideology: HashMap::new(),
+            };
+            let history = MarketHistory {
+                product_info: HashMap::new(),
+                class_info: HashMap::new(),
+                want_info: HashMap::new(),
+                sale_priority: vec![],
+                currencies: vec![],
+            };
+
+            // Setup Jobs
+            // split into job 1 and 2, with different, but overlapping processes and assignments.
+            let job = test.jobs.get_mut(0).unwrap();
+            job.assignments.insert(0, AssignmentInfo {
+                iterations: 10.0,
+                _progress: 0.0,
+            });
+            job.assignments.insert(1, AssignmentInfo {
+                iterations: 10.0,
+                _progress: 0.0,
+            });
+            let job = test.jobs.get_mut(1).unwrap();
+            job.assignments.insert(1, AssignmentInfo {
+                iterations: 5.0,
+                _progress: 0.0,
+            });
+            job.assignments.insert(2, AssignmentInfo {
+                iterations: 5.0,
+                _progress: 0.0,
+            });
+            // Add property and wants for jobs, a bunch of resources to ensure everything can be done.
+            test.property.insert(0, FirmPropertyInfo::new().with_total_property(100.0));
+            test.property.insert(1, FirmPropertyInfo::new().with_total_property(100.0));
+            test.property.insert(2, FirmPropertyInfo::new().with_total_property(100.0));
+            test.property.insert(3, FirmPropertyInfo::new().with_total_property(100.0));
+            test.property.insert(4, FirmPropertyInfo::new().with_total_property(100.0));
+            test.wants.insert(0, 100.0);
+            test.wants.insert(1, 100.0);
+
+            let result = test.do_plan(data, &demos, &history);
+
+            // Sholud do 10 of each process in id order.
+            assert_eq!(*result.plan_results.get(&0).unwrap().get(&0).unwrap(), 10.0);
+            assert_eq!(*result.plan_results.get(&0).unwrap().get(&1).unwrap(), 10.0);
+            assert_eq!(*result.plan_results.get(&1).unwrap().get(&1).unwrap(), 5.0);
+            assert_eq!(*result.plan_results.get(&1).unwrap().get(&2).unwrap(), 5.0);
+            assert_eq!(*result.consumed_goods.get(&0).unwrap(), 10.0);
+            assert_eq!(*result.consumed_goods.get(&3).unwrap(), 15.0);
+            assert_eq!(*result.consumed_goods.get(&4).unwrap(), 5.0);
+            assert_eq!(*result.used.get(&1).unwrap(), 10.0);
+            assert_eq!(*result.production.get(&0).unwrap(), 5.0);
+            assert_eq!(*result.production.get(&2).unwrap(), 10.0);
+            assert_eq!(*result.production.get(&4).unwrap(), 15.0);
+            assert_eq!(*result.expended_wants.get(&0).unwrap(), 15.0);
+            assert_eq!(*result.created_wants.get(&1).unwrap(), 15.0);
+
+            // Also check property and wants changed correctly.
+            assert_eq!(test.property.get(&0).unwrap().total_property, 95.0);
+            assert_eq!(test.property.get(&0).unwrap().consumed, 10.0);
+            assert_eq!(test.property.get(&0).unwrap().produced, 5.0);
+            assert_eq!(test.property.get(&0).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().total_property, 90.0);
+            assert_eq!(test.property.get(&1).unwrap().consumed, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().produced, 0.0);
+            assert_eq!(test.property.get(&1).unwrap().expended, 10.0);
+            assert_eq!(test.property.get(&2).unwrap().total_property, 110.0);
+            assert_eq!(test.property.get(&2).unwrap().consumed, 0.0);
+            assert_eq!(test.property.get(&2).unwrap().produced, 10.0);
+            assert_eq!(test.property.get(&2).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&3).unwrap().total_property, 85.0);
+            assert_eq!(test.property.get(&3).unwrap().consumed, 15.0);
+            assert_eq!(test.property.get(&3).unwrap().produced, 0.0);
+            assert_eq!(test.property.get(&3).unwrap().expended, 0.0);
+            assert_eq!(test.property.get(&4).unwrap().total_property, 110.0);
+            assert_eq!(test.property.get(&4).unwrap().consumed, 5.0);
+            assert_eq!(test.property.get(&4).unwrap().produced, 15.0);
+            assert_eq!(test.property.get(&4).unwrap().expended, 0.0);
+            
+            assert_eq!(*test.wants.get(&0).unwrap(), 85.0);
+            assert_eq!(*test.wants.get(&1).unwrap(), 115.0);
         }
     }
 
