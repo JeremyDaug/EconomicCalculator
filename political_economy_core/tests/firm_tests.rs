@@ -250,6 +250,312 @@ mod firm_tests {
         data
     }
 
+    mod work_time_processing_should {
+        use std::{collections::{HashMap, HashSet, VecDeque}, default, thread, time::Duration};
+
+        use political_economy_core::{data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{actor_message::{ActorInfo, ActorMessage, FirmEmployeeAction}, firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, ProfitStructure}, firm_job::{AssignmentInfo, FirmJob, WageType}}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag}, product::Product, want::Want}, environmental_objects::market::MarketHistory}};
+
+        
+        /// # Do Disorganized Work As Expected
+        /// 
+        /// We expect it to 
+        /// 1. Request Everything from pop.
+        /// 2. Recieve Everything from Pop.
+        /// 3. Do it's planned work for the day.
+        /// 4. Return everything to the pop.
+        /// 5. Save Today's plan results.
+        /// 6. Send over the Firm's Needs to the pop.
+        /// 7. Send Work Day Ended.
+        #[test]
+        pub fn do_disorganized_work_as_expected() {
+            let mut test = Firm {
+                id: 0,
+                name: "test".to_string(),
+                sub_name: "test".to_string(),
+                firm_kind: FirmKind::Subsistence,
+                firm_rank: FirmRank::Firm,
+                ownership_type: OwnershipStructure::SelfEmployed,
+                profit_structure: ProfitStructure::PrivatelyOwned,
+                organization_structure: OrganizationalStructure::Disorganized,
+                children: vec![],
+                parent: None,
+                jobs: vec![
+                    FirmJob { 
+                        pop: 0, 
+                        job: 0, 
+                        wage_type: WageType::Daily, 
+                        wage: HashMap::new(), 
+                        accepted_conversions: vec![], 
+                        assignments: HashMap::new()
+                    }
+                ],
+                prices: HashMap::new(),
+                property: HashMap::new(),
+                wants: HashMap::new(),
+                backlog: VecDeque::new(),
+                todays_results: None,
+            };
+            let job = test.jobs.get_mut(0).unwrap();
+            job.assignments.insert(0, AssignmentInfo {
+                iterations: 1.0,
+                _progress: 0.0,
+            });
+
+            let mut data = DataManager::new();
+
+            // 1 wants
+            data.wants.insert(0, Want{
+                id: 0,
+                name: "".to_string(),
+                description: "".to_string(),
+                decay: 0.0,
+                ownership_sources: HashSet::new(),
+                process_sources: HashSet::new(),
+                use_sources: HashSet::new(),
+                consumption_sources: HashSet::new(),
+            });
+            data.wants.insert(1, Want{
+                id: 1,
+                name: "".to_string(),
+                description: "".to_string(),
+                decay: 0.0,
+                ownership_sources: HashSet::new(),
+                process_sources: HashSet::new(),
+                use_sources: HashSet::new(),
+                consumption_sources: HashSet::new(),
+            });
+            // 2 products
+            data.products.insert(0, Product{
+                id: 0,
+                name: "".to_string(),
+                variant_name: "".to_string(),
+                description: "".to_string(),
+                unit_name: "".to_string(),
+                quality: 0,
+                mass: 0.0,
+                bulk: 0.0,
+                mean_time_to_failure: None,
+                fractional: true,
+                tags: vec![],
+                wants: HashMap::new(),
+                processes: HashSet::new(),
+                failure_process: None,
+                use_processes: HashSet::new(),
+                consumption_processes: HashSet::new(),
+                maintenance_processes: HashSet::new(),
+                tech_required: None,
+                product_class: None,
+            });
+            data.products.insert(1, Product{
+                id: 1,
+                name: "".to_string(),
+                variant_name: "".to_string(),
+                description: "".to_string(),
+                unit_name: "".to_string(),
+                quality: 0,
+                mass: 0.0,
+                bulk: 0.0,
+                mean_time_to_failure: None,
+                fractional: true,
+                tags: vec![],
+                wants: HashMap::new(),
+                processes: HashSet::new(),
+                failure_process: None,
+                use_processes: HashSet::new(),
+                consumption_processes: HashSet::new(),
+                maintenance_processes: HashSet::new(),
+                tech_required: None,
+                product_class: None,
+            });
+            
+            data.processes.insert(0, Process {
+                id: 0,
+                name: "".to_string(),
+                variant_name: "".to_string(),
+                description: "".to_string(),
+                minimum_time: 0.0,
+                process_parts: vec![
+                    ProcessPart { 
+                        item: Item::Product(0), 
+                        amount: 1.0, 
+                        part_tags: vec![],
+                        part: ProcessSectionTag::Input
+                    },
+                    ProcessPart { 
+                        item: Item::Want(0), 
+                        amount: 1.0, 
+                        part_tags: vec![],
+                        part: ProcessSectionTag::Input
+                    },
+                    ProcessPart { 
+                        item: Item::Product(1), 
+                        amount: 1.0, 
+                        part_tags: vec![],
+                        part: ProcessSectionTag::Capital
+                    },
+                    ProcessPart { 
+                        item: Item::Product(1), 
+                        amount: 1.0, 
+                        part_tags: vec![],
+                        part: ProcessSectionTag::Output
+                    },
+                    ProcessPart { 
+                        item: Item::Want(1), 
+                        amount: 1.0, 
+                        part_tags: vec![],
+                        part: ProcessSectionTag::Output
+                    },
+                ],
+                process_tags: vec![],
+                technology_requirement: None,
+                tertiary_tech: None,
+            });
+
+            let demos = Demographics {
+                species: HashMap::new(),
+                cultures: HashMap::new(),
+                ideology: HashMap::new(),
+            };
+            let history = MarketHistory {
+                product_info: HashMap::new(),
+                class_info: HashMap::new(),
+                want_info: HashMap::new(),
+                sale_priority: vec![],
+                currencies: vec![],
+            };
+
+            let (tx, rx) = barrage::bounded(10);
+            let mut passed_rx = rx.clone();
+            let passed_tx = tx.clone();
+
+            let handler = thread::spawn(move || {
+                test.work_time_processing(&mut passed_rx, &passed_tx, &data, &demos, &history);
+                test
+            });
+            thread::sleep(Duration::from_millis(100));
+
+            // recieve request everything
+            assert!(!handler.is_finished());
+            if let ActorMessage::FirmToEmployee { 
+            firm, 
+            employee, 
+            action } = rx.recv().unwrap() {
+                assert_eq!(firm, ActorInfo::Firm(0), "Firm is incorrect.");
+                assert_eq!(employee, ActorInfo::Pop(0), "Pop is incorrect.");
+                assert_eq!(FirmEmployeeAction::RequestEverything, action, "RequestEverything not recieved.");
+            } else {
+                assert!(false, "FirmToEmployee msg not recieved.");
+            }
+            // send all back
+            tx.send(ActorMessage::SendProduct { 
+                sender: ActorInfo::Pop(0), 
+                reciever: ActorInfo::Firm(0), 
+                product: 0, 
+                amount: 10.0 
+            }).expect("Failed To send Product.");
+            if let ActorMessage::SendProduct { .. } = rx.recv().unwrap() {}
+            else {
+                assert!(false, "Send Product not Sent.");
+            }
+            tx.send(ActorMessage::SendProduct { 
+                sender: ActorInfo::Pop(0), 
+                reciever: ActorInfo::Firm(0), 
+                product: 1, 
+                amount: 10.0 
+            }).expect("Failed To send Product.");
+            if let ActorMessage::SendProduct { .. } = rx.recv().unwrap() {}
+            else {
+                assert!(false, "Send Product not Sent.");
+            }
+            tx.send(ActorMessage::SendWant { 
+                sender: ActorInfo::Pop(0), 
+                reciever: ActorInfo::Firm(0), 
+                want: 0, 
+                amount: 10.0 
+            }).expect("Failed To send Product.");
+            if let ActorMessage::SendWant { .. } = rx.recv().unwrap() {}
+            else {
+                assert!(false, "Send Want not Sent.");
+            }
+            tx.send(ActorMessage::SendWant { 
+                sender: ActorInfo::Pop(0), 
+                reciever: ActorInfo::Firm(0), 
+                want: 1, 
+                amount: 10.0 
+            }).expect("Failed To send Product.");
+            if let ActorMessage::SendWant { .. } = rx.recv().unwrap() {}
+            else {
+                assert!(false, "Send Want not Sent.");
+            }
+            // Wrap up our send.
+            tx.send(ActorMessage::EmployeeToFirm { 
+                employee: ActorInfo::Pop(0), 
+                firm: ActorInfo::Firm(0), 
+                action: FirmEmployeeAction::RequestSent 
+            }).expect("Failed To send Request Sent");
+            if let ActorMessage::EmployeeToFirm { .. } = rx.recv().unwrap() {}
+            else {
+                assert!(false, "Send Want not Sent.");
+            }
+            // wait for it to send everything back
+            let mut products = HashMap::new();
+            let mut wants = HashMap::new();
+            let mut desires = vec![];
+            loop {
+                let returned = rx.recv().unwrap();
+                match returned {
+                    ActorMessage::SendProduct { 
+                    sender,
+                    reciever, 
+                    product, 
+                    amount 
+                    } => {
+                        assert_eq!(sender, ActorInfo::Firm(0), "Incorrect Sender.");
+                        assert_eq!(reciever, ActorInfo::Pop(0), "Incorrect Reciever.");
+                        products.insert(product, amount);
+                    },
+                    ActorMessage::SendWant { 
+                    sender,
+                    reciever, 
+                    want, 
+                    amount 
+                    } => {
+                        assert_eq!(sender, ActorInfo::Firm(0), "Incorrect Sender.");
+                        assert_eq!(reciever, ActorInfo::Pop(0), "Incorrect Reciever.");
+                        wants.insert(want, amount);
+                    },
+                    ActorMessage::FirmToEmployee { 
+                    firm, 
+                    employee, 
+                    action } => {
+                        assert_eq!(firm, ActorInfo::Firm(0), "Incorrect Sender.");
+                        assert_eq!(employee, ActorInfo::Pop(0), "Incorrect Reciever.");
+                        if let FirmEmployeeAction::FirmDesire { desire } = action {
+                            desires.push(desire);
+                        } else if let FirmEmployeeAction::WorkDayEnded = action {
+                            break;
+                        } else {
+                            assert!(false, "Unexpected Firm to Employee Message.")
+                        }
+                    },
+                    _ => {
+                        assert!(false, "Unexpected Message.")
+                    }
+                }
+            }
+            // close out thread
+            let test = handler.join().unwrap();
+            // check everything was correct.
+            assert_eq!(*products.get(&0).unwrap(), 9.0, "Product 0 wrong amount returned.");
+            assert_eq!(*products.get(&1).unwrap(), 11.0, "Product 1 wrong amount returned.");
+            assert_eq!(*wants.get(&0).unwrap(), 9.0, "Want 0 wrong amount returned.");
+            assert_eq!(*wants.get(&1).unwrap(), 11.0, "Want 1 wrong amount returned.");
+            let des0 = desires.get(0).unwrap();
+            let des1 = desires.get(1).unwrap();
+            let des2 = desires.get(2).unwrap();
+        }
+    }
+
     mod do_plan_should {
         use std::collections::{HashMap, VecDeque};
 
