@@ -120,6 +120,10 @@ impl FirmPropertyInfo {
         debug_assert!(self.total_property - amt >= 0.0);
         self.total_property -= amt;
     }
+    
+    pub fn total_and_expended(&self) -> f64 {
+        self.total_property + self.expended
+    }
 }
 
 impl Default for FirmPropertyInfo {

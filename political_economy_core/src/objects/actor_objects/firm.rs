@@ -338,24 +338,28 @@ impl Firm {
                 if seller == self.actor_info() {
                     // sell product
                 } else {
+                    // if we're the buyer, send it back up.
                     return Some(msg);
                 }
+                return None;
             },
             ActorMessage::SendProduct { sender: _, 
             reciever: _, product, amount } => {
                 // it's for us, so add.
                 // Sent products recieved here were not purchased, so just add to property.
                 self.property.entry(product)
-                    .and_modify(|x| x.total_property += amount)
-                    .or_insert(FirmPropertyInfo::new()
-                        .with_total_property(amount)
-                    );
+                .and_modify(|x| x.total_property += amount)
+                .or_insert(FirmPropertyInfo::new()
+                    .with_total_property(amount)
+                );
+                return None
             },
             ActorMessage::SendWant { sender: _, 
             reciever: _, want, amount } => {
                 self.wants.entry(want)
-                    .and_modify(|x| *x += amount)
-                    .or_insert(amount);
+                .and_modify(|x| *x += amount)
+                .or_insert(amount);
+                return None;
             },
             _ => {
                 // Start Day, We recieve only at day start
@@ -389,7 +393,7 @@ impl Firm {
                 // Firm to Employee, only sent, never recieved
             }
         }
-        None
+        Some(msg)
     }
 
     /// # Work Time Processing
@@ -429,13 +433,13 @@ impl Firm {
             }// don't look for others, it can't come.
             // with RequestSent recieved and all that we need here, follow our plans and do our stuff.
             let plan_results = self.do_plan(data, demos, history);
-            // with our plan carried out to the best of our ability, return everything to the pop.
+            // with our plan carried out to the best of our ability, return everything to the pop, including expended.
             let prop_copy = self.property.clone();
             for (product, info) in prop_copy.into_iter() {
                 // send to pop
                 self.push_message(rx, tx, 
                 ActorMessage::SendProduct { sender: firm, 
-                    reciever: pop, product: product, amount: info.total_property });
+                    reciever: pop, product: product, amount: info.total_and_expended() });
             }
             let want_copy = self.wants.clone();
             for (want, amount) in want_copy.into_iter() {
