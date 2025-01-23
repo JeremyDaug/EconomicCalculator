@@ -550,9 +550,47 @@ mod firm_tests {
             assert_eq!(*products.get(&1).unwrap(), 11.0, "Product 1 wrong amount returned.");
             assert_eq!(*wants.get(&0).unwrap(), 9.0, "Want 0 wrong amount returned.");
             assert_eq!(*wants.get(&1).unwrap(), 11.0, "Want 1 wrong amount returned.");
+            assert_eq!(desires.len(), 2, "Incorrect number of desires.");
             let des0 = desires.get(0).unwrap();
             let des1 = desires.get(1).unwrap();
-            let des2 = desires.get(2).unwrap();
+
+            if des0.desire == Item::Product(0) {
+                 assert_eq!(des0.desire, Item::Product(0), "Incorrect Product.");
+                 assert!(!des0.is_optional, "Good is marked Optional.");
+                 assert!(des0.target == 1.0, "Incorrect target.");
+                 assert_eq!(des1.desire, Item::Product(1), "Incorrect Product.");
+                 assert!(!des1.is_optional, "Good is marked Optional.");
+                 assert!(des1.target == 1.0, "Incorrect target.");
+            } else {
+                assert_eq!(des0.desire, Item::Product(1), "Incorrect Product.");
+                 assert!(!des0.is_optional, "Good is marked Optional.");
+                 assert!(des0.target == 1.0, "Incorrect target.");
+                 assert_eq!(des1.desire, Item::Product(0), "Incorrect Product.");
+                 assert!(!des1.is_optional, "Good is marked Optional.");
+                 assert!(des1.target == 1.0, "Incorrect target.");
+            }
+        
+            if let Some(results) = test.todays_results {
+                // Consumed Goods
+                assert_eq!(results.consumed_goods.len(), 1, "Wrong number of Consumed Goods.");
+                assert_eq!(*results.consumed_goods.get(&0).unwrap(), 1.0);
+                // Used Products
+                assert_eq!(results.used.len(), 1);
+                assert_eq!(*results.used.get(&1).unwrap(), 1.0);
+                // Created Products
+                assert_eq!(results.production.len(), 1);
+                assert_eq!(*results.production.get(&1).unwrap(), 1.0);
+                // Created Wants
+                assert_eq!(results.created_wants.len(), 1);
+                assert_eq!(*results.created_wants.get(&1).unwrap(), 1.0);
+                // Expended Wants
+                assert_eq!(results.expended_wants.len(), 1);
+                assert_eq!(*results.expended_wants.get(&0).unwrap(), 1.0);
+                // plan results
+                assert_eq!(results.plan_results.len(), 1);
+                assert_eq!(results.plan_results.get(&0).unwrap().len(), 1);
+                assert_eq!(*results.plan_results.get(&0).unwrap().get(&0).unwrap(), 1.0);
+            } else { assert!(false, "Results not saved.")}
         }
     }
 
