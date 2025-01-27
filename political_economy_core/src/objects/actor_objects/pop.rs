@@ -9,7 +9,7 @@ use barrage::{Sender, Receiver};
 use itertools::Itertools;
 
 use crate::{
-    constants::{self, ACP_MAX_HARD_REDUCTION_FACTOR, ACP_MAX_SOFT_REDUCTION_FACTOR, ACP_MIN_REDUCTION_FACTOR, OVERSPEND_THRESHOLD, SHOPPING_TIME_PRODUCT_ID, TIME_PRODUCT_ID}, 
+    constants::{self, ACP_MAX_HARD_REDUCTION_FACTOR, ACP_MAX_SOFT_REDUCTION_FACTOR, ACP_MIN_REDUCTION_FACTOR, DAY_LENGTH, OVERSPEND_THRESHOLD, SHOPPING_TIME_PRODUCT_ID, TIME_PRODUCT_ID}, 
     data_manager::DataManager, 
     demographics::Demographics, 
     objects::{
@@ -1911,7 +1911,7 @@ impl Actor for Pop {
     history: &MarketHistory) {
         // before we even begin, add in the time we have for the day.
         self.property.add_property(TIME_PRODUCT_ID, (self.breakdown_table.total as f64) *
-            24.0 * self.breakdown_table.average_productivity(), data);
+            DAY_LENGTH * self.breakdown_table.average_productivity(), data);
         // after that, sift property.
         self.property.sift_all(&data);
 

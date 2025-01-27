@@ -2,7 +2,7 @@ use std::collections::{HashMap, VecDeque};
 
 use barrage::{Sender, Receiver};
 
-use crate::{data_manager::DataManager, demographics::Demographics, objects::{data_objects::item::Item, environmental_objects::market::MarketHistory}};
+use crate::{constants::DAY_LENGTH, data_manager::{self, DataManager}, demographics::Demographics, objects::{data_objects::item::Item, environmental_objects::market::MarketHistory}};
 
 use super::{actor::{self, Actor}, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, firm_property_info::FirmPropertyInfo, seller::Seller};
 
@@ -652,11 +652,46 @@ impl Firm {
     /// Update Plans alters the plans of the firm based on the results of the plan.
     /// 
     /// Runs at the end of the day.
-    pub fn update_plans(&mut self, plan_results: PlanResults, _data: &DataManager, _demos: &Demographics, _history: &MarketHistory) {
+    pub fn update_plans(&mut self, plan_results: PlanResults, _data: &DataManager, _demos: &Demographics, history: &MarketHistory) {
         if self.organization_structure == OrganizationalStructure::Disorganized {
             // Disorganized planning is barebones, little strategy. 
-            // Produce more when you're profitable and have time
-            // Produce less when you're not profitable.
+            // calculate profit/loss based on plan results directly.
+            let mut gains = 0.0;
+            let mut losses = 0.0;
+            for (produced_good, &amt) in plan_results.production.iter() {
+                gains += amt * history.get_product_price(produced_good, 1.0);
+            }
+            for (&created_want, &amt) in plan_results.created_wants.iter() {
+                gains += amt * history.get_want_price(created_want, 1.0);
+            }
+            for (consumed_good, &amt) in plan_results.consumed_goods.iter() {
+                losses += amt * history.get_product_price(consumed_good, 1.0);
+            }
+            for (&consumed_want, &amt) in plan_results.expended_wants.iter() {
+                losses += amt * history.get_want_price(consumed_want, 1.0);
+            }
+            // if profitable
+            if gains - losses > 0.0 {
+                for job in self.jobs.iter_mut() {
+                    let job_id = job.job;
+                    let pop_size = _data.pops.get(&job.pop).expect(format!("Pop '{}' not found.", job.pop).as_str()).count();
+                    for (proc_id, assn) in job.assignments.iter_mut() {
+                        let &achieved = plan_results.plan_results.get(&job_id).expect("Job not found.")
+                            .get(proc_id).expect("Process Not found in job.");
+                        if assn.iterations == achieved { // if successful
+                            // increase by 10% (Round up), capping at 1/2 of all hours in a day.
+                            assn.iterations = (assn.iterations * 1.1).max(pop_size as f64 * DAY_LENGTH / 2.0);
+                        } // if unable to get targets, don't increase, keep as is.
+                    }
+                }
+            } else { // if not profitable, 
+                // always reduce output if not profitable, reduce by 10%, minimum 1.0.
+                for job in self.jobs.iter_mut() {
+                    for (_proc_id, assn) in job.assignments.iter_mut() {
+                        assn.iterations = (assn.iterations * 0.9).floor().min(1.0);
+                    }
+                }
+            }
         }
     }
     

@@ -82,6 +82,10 @@ pub const STD_PRICE_CHANGE: f64 = 1.0;
 /// possible during the buyer's purchase logic.
 pub const OVERSPEND_THRESHOLD: f64 = 0.025;
 
+/// The current standard day length. This is how many hours are added for each market
+/// day.
+pub const DAY_LENGTH: f64 = 24.0;
+
 /// The amount by which a seller will consider a buyer as overspending and attempt
 /// to return change. Once change removed puts the purchase below this threshold it
 /// returns with that change.
