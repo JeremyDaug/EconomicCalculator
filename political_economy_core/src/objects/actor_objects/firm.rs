@@ -2,9 +2,9 @@ use std::collections::{HashMap, VecDeque};
 
 use barrage::{Sender, Receiver};
 
-use crate::{constants::DAY_LENGTH, data_manager::{self, DataManager}, demographics::Demographics, objects::{data_objects::item::Item, environmental_objects::market::MarketHistory}};
+use crate::{constants::DAY_LENGTH, data_manager::DataManager, demographics::Demographics, objects::{data_objects::item::Item, environmental_objects::market::MarketHistory}};
 
-use super::{actor::{self, Actor}, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, firm_property_info::FirmPropertyInfo, seller::Seller};
+use super::{actor::Actor, actor_message::{ActorInfo, ActorMessage, ActorType, FirmEmployeeAction}, buyer::Buyer, firm_job::FirmJob, firm_property_info::FirmPropertyInfo, seller::Seller};
 
 /// Firms are the productive actors of our system.
 /// 
@@ -80,6 +80,7 @@ pub struct Firm {
     /// 
     /// Make it an option so we can just set to None when not needed.
     pub todays_results: Option<PlanResults>,
+    // TODO: Add in AI data package. This shit will be Evolutionary! (Stifles internal screaming)
     // Not currently used.
     //_firm_outputs: Vec<usize>,
 }
@@ -379,9 +380,9 @@ impl Firm {
                 // Ask Barter Hint, Sent and Waited on Explicitly.
                 // Barter Hint, sent and Waited on Explicitly.
                 // Reject Purchase, Explicit both ways.
-                // Buy Offer
-                // Buy Offer Followup
-                // Seller Accept Offer As Is
+                // Buy Offer, explicit both ways
+                // Buy Offer Followup, explicit both ways.
+                // Seller Accept Offer As Is, 
                 // Offer Accepted With Change
                 // Change Followup
                 // Reject Offer
@@ -639,6 +640,7 @@ impl Firm {
             // pop for them to buy for us.
             return;
         }
+        // TODO: Come back here and make buying and selling for the firm when organized firms are created.
         // First, put our products up for sale on the market at our selected price
         // then, when we have enough AMV, go out and try to purchase the inputs we need
         // once all inputs are purchased to the best of our ability, send our done message to the market
@@ -671,16 +673,16 @@ impl Firm {
                 losses += amt * history.get_want_price(consumed_want, 1.0);
             }
             // if profitable
-            if gains - losses > 0.0 {
+            if gains > losses {
                 for job in self.jobs.iter_mut() {
                     let job_id = job.job;
                     let pop_size = _data.pops.get(&job.pop).expect(format!("Pop '{}' not found.", job.pop).as_str()).count();
                     for (proc_id, assn) in job.assignments.iter_mut() {
-                        let &achieved = plan_results.plan_results.get(&job_id).expect("Job not found.")
+                        let achieved = plan_results.plan_results.get(&job_id).expect("Job not found.")
                             .get(proc_id).expect("Process Not found in job.");
-                        if assn.iterations == achieved { // if successful
+                        if assn.iterations == *achieved { // if successful
                             // increase by 10% (Round up), capping at 1/2 of all hours in a day.
-                            assn.iterations = (assn.iterations * 1.1).max(pop_size as f64 * DAY_LENGTH / 2.0);
+                            assn.iterations = (assn.iterations * 1.1).ceil().min(pop_size as f64 * DAY_LENGTH / 2.0);
                         } // if unable to get targets, don't increase, keep as is.
                     }
                 }
@@ -692,6 +694,18 @@ impl Firm {
                     }
                 }
             }
+        } else {
+            // any more advanced goes into here and has more complex strategies.
+            // Since anything here stores and sells it's own products, it will always be
+            // more complex. Additionally, current strategies and plans into account
+            // while also being able to create more long term plans.
+
+            // the primary short term levers are production plans, and pricing.
+
+            // The middle term are wages and number of workers as well as mid-term plans
+
+            // The long term is focused on savings, re-investment, research, and expansion or contraction.
+            // TODO: Come back here to do this when more complex industry is needed.
         }
     }
     
