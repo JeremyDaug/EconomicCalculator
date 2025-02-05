@@ -3869,7 +3869,7 @@ mod pop_tests {
 
             // don't care about pop breakdown. it's not actually being used.
             result.breakdown_table.insert_pops(
-                PBRow::new(0, None, None, 
+                PBRow::full_new(0, None, None, 
                     None, None, None, 
                     None, None, None, 
                     1));
@@ -4612,7 +4612,7 @@ mod pop_tests {
 
             // don't care about pop breakdown. it's not actually being used.
             result.breakdown_table.insert_pops(
-                PBRow::new(0, None, None, 
+                PBRow::full_new(0, None, None, 
                     None, None, None, 
                     None, None, None, 
                     1));

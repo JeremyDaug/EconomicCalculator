@@ -8,6 +8,8 @@ use std::collections::HashMap;
 pub struct FirmJob {
     /// The pop which is in this firm job.
     pub pop: usize,
+    /// 
+    pub pop_size: usize,
     /// The Job (id) in question the pop is doing.
     pub job: usize,
     /// The logic of the wage they recieve.

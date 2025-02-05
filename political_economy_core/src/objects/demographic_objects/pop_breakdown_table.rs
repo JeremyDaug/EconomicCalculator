@@ -1,5 +1,7 @@
 use std::{collections::HashMap, ops::{AddAssign}};
 
+use super::species;
+
 /// Pop Breakdown Table
 /// 
 /// Stores the information and 'rows' of a population's data table. 
@@ -159,7 +161,62 @@ pub struct PBRow {
 }
 
 impl PBRow {
-    pub fn new(species: usize, species_cohort: Option<usize>,
+    pub fn new(species: usize, count: usize) -> Self {
+        Self {
+            species,
+            species_cohort: None,
+            species_subtype: None,
+            culture: None,
+            culture_generation: None,
+            culture_class: None,
+            ideology: None,
+            ideology_wave: None,
+            ideology_faction: None,
+            count,
+        }
+    }
+
+    pub fn with_cohort(mut self, cohort: usize) -> Self {
+        self.species_cohort = Some(cohort);
+        self
+    }
+
+    pub fn with_subtype(mut self, subtype: usize) -> Self {
+        self.species_subtype = Some(subtype);
+        self
+    }
+
+    pub fn with_culture(mut self, culture: usize) -> Self {
+        self.culture = Some(culture);
+        self
+    }
+
+    pub fn with_generation(mut self, generation: usize) -> Self {
+        self.culture_generation = Some(generation);
+        self
+    }
+
+    pub fn with_class(mut self, class: usize) -> Self {
+        self.culture_class = Some(class);
+        self
+    }
+
+    pub fn with_ideology(mut self, ideology: usize) -> Self {
+        self.ideology = Some(ideology);
+        self
+    }
+
+    pub fn with_wave(mut self, wave: usize) -> Self {
+        self.ideology_wave = Some(wave);
+        self
+    }
+
+    pub fn with_faction(mut self, faction: usize) -> Self {
+        self.ideology_faction = Some(faction);
+        self
+    }
+
+    pub fn full_new(species: usize, species_cohort: Option<usize>,
         species_subtype: Option<usize>, culture: Option<usize>, 
         culture_generation: Option<usize>, culture_class: Option<usize>, 
         ideology: Option<usize>, ideology_wave: Option<usize>, 

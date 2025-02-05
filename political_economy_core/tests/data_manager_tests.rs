@@ -237,47 +237,5 @@ mod data_manager_tests {
         for id in test.jobs.keys().sorted() {
             println!("{:>3} | {:<}", id, test.jobs[id].get_name());
         }
-
-        println!("----- Species -----");
-        println!("----+------------------");
-        println!("| id|name");
-        for id in test.species.keys().sorted() {
-            println!("{:>3} | {:<}", id, test.species[id].get_name());
-        }
-
-        println!("----- Cultures -----");
-        println!("----+------------------");
-        println!("| id|name");
-        for id in test.cultures.keys().sorted() {
-            println!("{:>3} | {:<}", id, test.cultures[id].get_name());
-        }
-
-        println!("----- Pops -----");
-        println!("----+------------------");
-        println!("| id|name");
-        for id in test.pops.keys().sorted() {
-            println!("{:>3} | {:<}", id, test.pops[id].id_name());
-        }
-
-        println!("----- Territories -----");
-        println!("----+------------------");
-        println!("| id|name");
-        for id in test.territories.keys().sorted() {
-            println!("{:>3} | {:<}", id, test.territories[id].name);
-        }
-
-        println!("----- Markets -----");
-        println!("----+------------------");
-        println!("| id|name");
-        for id in test.markets.keys().sorted() {
-            println!("{:>3} | {:<}", id, test.markets[id].name);
-        }
-
-        println!("----- Firms -----");
-        println!("----+------------------");
-        println!("| id|name");
-        for id in test.firms.keys().sorted() {
-            println!("{:>3} | {:<}", id, test.firms[id].get_full_name());
-        }
     }
 }

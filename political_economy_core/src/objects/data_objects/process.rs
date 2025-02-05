@@ -10,19 +10,45 @@ use super::item::Item;
 
 #[derive(Debug)]
 pub struct Process {
+    /// Unique ID of the process.
     pub id: usize,
+    /// Name of the process
+    /// 
+    /// Should be unique when comibned with the variant name.
     pub name: String,
+    /// Variant name of the process.
+    /// 
+    /// Should be unique when combined with the Name.
     pub variant_name: String,
+    /// A Description of the process.
     pub description: String,
     // icon
+
+    /// Minimum time the process always needs to function.
+    /// 
+    /// Currently not actually used. 
     pub minimum_time: f64,
+    /// Process Parts.
+    /// 
+    /// The inputs, Capital, and outputs of the process.
     pub process_parts: Vec<ProcessPart>,
+    /// Process Tags
+    /// 
+    /// The tags which add additional information and features to the process.
+    /// 
+    /// Currently not in use.
     pub process_tags: Vec<ProcessTag>,
     //pub skill: Option<usize>,
     //pub skill_minimum: f64,
     //pub skill_maximum: f64,
     // Processes are always fractional, fractional items are handled on the product end.
+    /// Technology Requirement
+    /// 
+    /// The user of this process, much have this technology to access this process.
     pub technology_requirement: Option<usize>,
+    /// Tertiary Tech
+    /// 
+    /// The efficiency tech tied to this process. Every 
     pub tertiary_tech: Option<usize>,
 }
 
@@ -1324,12 +1350,4 @@ pub enum ProcessTag {
     Sorter,
     Scrapping,
     Scrubber
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn testy_test_test() {
-        
-    }
 }

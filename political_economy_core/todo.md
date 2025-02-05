@@ -49,7 +49,7 @@ Firm Internal Market Day
             Do work and recieve results of our plan {cm}
             Send All wants and goods back {cm}
             Record plan results {cm}
-            Send over production needs to pop for them to purchase
+            Send over production needs to pop for them to purchase {cm}
         Organized Firm Work
             If payday, pay worker wages
             Always request workers time and skills
@@ -58,29 +58,31 @@ Firm Internal Market Day
             Update Plans
     Organized Firm Work Followups
     Buy and Sell Processing
-    Decay Goods
+    Decay Goods {cm}
     Plan for Tomorrow
+        Disorganized Firm Planning {cm}
+        Organized Firm Planning {cm}
     Send Finished Message and end {cm}
-    Enter Holding Pattern
+    Enter Holding Pattern {cm}
 Institution Internal Market Day
 State Internal Market Day
 Testing
     Firm Tests
-        get_production_requirements
-        get_optional_production_rgoods
-        get_production_goods
-        get_full_name
-        push_message (may not bother)
-        quick_msg_catchup (may not bother)
-        get_next_message (may not bother)
-        active_wait (may not bother)
-        exclusive_wait (may not bother)
-        process_common_msg
-        work_time_processing
-        do_plan
+        get_production_requirements {cm:2025-01-31}
+        get_optional_production_goods {cm:2025-01-31}
+        get_production_goods {cm:2025-01-31}
+        get_full_name {cm:2025-01-31}
+        push_message (may not bother) {cm}
+        quick_msg_catchup (may not bother) {cm:2025-01-31}
+        get_next_message (may not bother) {cm:2025-01-31}
+        active_wait (may not bother) {cm:2025-01-31}
+        exclusive_wait (may not bother) {cm:2025-01-31}
+        process_common_msg {cm:2025-01-31}
+        work_time_processing {cm:2025-01-31}
+        do_plan {cm:2025-01-31}
         buy_and_sell_processing
-        update_plans
-        run_market_day
+        update_plans {cm:2025-01-31}
+        run_market_day [Didn't Bother] {cm:2025-01-31}
 In Consideration
     Allow a pop to have multiple jobs Issue[#70](https://github.com/JeremyDaug/EconomicCalculator/issues/70)
     Add Load Check on Processes for part tags Issue[#67](https://github.com/JeremyDaug/EconomicCalculator/issues/67)

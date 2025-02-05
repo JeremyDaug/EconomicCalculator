@@ -654,7 +654,8 @@ impl Firm {
     /// Update Plans alters the plans of the firm based on the results of the plan.
     /// 
     /// Runs at the end of the day.
-    pub fn update_plans(&mut self, plan_results: PlanResults, _data: &DataManager, _demos: &Demographics, history: &MarketHistory) {
+    pub fn update_plans(&mut self,_data: &DataManager, _demos: &Demographics, history: &MarketHistory) {
+        let plan_results = self.todays_results.as_ref().unwrap();
         if self.organization_structure == OrganizationalStructure::Disorganized {
             // Disorganized planning is barebones, little strategy. 
             // calculate profit/loss based on plan results directly.
@@ -673,10 +674,11 @@ impl Firm {
                 losses += amt * history.get_want_price(consumed_want, 1.0);
             }
             // if profitable
-            if gains > losses {
+            // NOTE: This may need to be loosened to keep pure Disorganized economies functional, or Disorganized Firms will need to bee certain to cover basic needs for the pop.
+            if gains >= losses {
                 for job in self.jobs.iter_mut() {
                     let job_id = job.job;
-                    let pop_size = _data.pops.get(&job.pop).expect(format!("Pop '{}' not found.", job.pop).as_str()).count();
+                    let pop_size = job.pop_size;
                     for (proc_id, assn) in job.assignments.iter_mut() {
                         let achieved = plan_results.plan_results.get(&job_id).expect("Job not found.")
                             .get(proc_id).expect("Process Not found in job.");
@@ -694,19 +696,19 @@ impl Firm {
                     }
                 }
             }
-        } else {
-            // any more advanced goes into here and has more complex strategies.
-            // Since anything here stores and sells it's own products, it will always be
-            // more complex. Additionally, current strategies and plans into account
-            // while also being able to create more long term plans.
-
-            // the primary short term levers are production plans, and pricing.
-
-            // The middle term are wages and number of workers as well as mid-term plans
-
-            // The long term is focused on savings, re-investment, research, and expansion or contraction.
-            // TODO: Come back here to do this when more complex industry is needed.
+            return;
         }
+        // any more advanced goes into here and has more complex strategies.
+        // Since anything here stores and sells it's own products, it will always be
+        // more complex. Additionally, current strategies and plans into account
+        // while also being able to create more long term plans.
+
+        // the primary short term levers are production plans, and pricing.
+
+        // The middle term are wages and number of workers as well as mid-term plans
+
+        // The long term is focused on savings, re-investment, research, and expansion or contraction.
+        // TODO: Come back here to do this when more complex industry is needed.
     }
     
     /// # Get Pops
@@ -857,6 +859,21 @@ impl Firm {
 
         result
     }
+    
+    /// # Do Internal Ops
+    /// 
+    /// Do Internal Operations does any internal work that the firm needs to do that doesn't
+    /// include production, buying, selling, or reworking it's baseline plans.
+    /// 
+    /// This is where management, research, and any additional time resources can be spent to
+    /// improve the efficiency of the firm. 
+    pub fn do_internal_ops(&self, _rx: &mut Receiver<ActorMessage>, 
+    _tx: &mut Sender<ActorMessage>, _data: &DataManager, _demos: &Demographics, 
+    _history: &MarketHistory) {
+        if self.organization_structure == OrganizationalStructure::Disorganized {
+            return; // Disorganized cannot do internal operations.
+        }
+    }
 }
 
 impl Seller for Firm {
@@ -902,7 +919,7 @@ impl Actor for Firm {
     /// Once we get the AllFinished message, complete any remaining cleanup, 
     /// and close out.
     /// 
-    /// TODO: Needs Testing
+    /// NOTE: Have not bothered to unit test. All currently functional sub-functions in this have been tested.
     fn run_market_day(&mut self, 
         tx: &mut Sender<ActorMessage>,
         rx: &mut Receiver<ActorMessage>,
@@ -923,21 +940,21 @@ impl Actor for Firm {
         // Work day also includes doing any processes and work and putting out sell orders if the firm is selling.
         self.work_time_processing(rx, tx, data, demos, history);
 
-        //* Note: Disorganized Firms skip a lot of what follows, after they do their local work, they send all 
-        // their stuff back, possibly minus time to plan things out further.
-
+        // NOTE: Disorganized Firms skip a lot of what follows, after they do their local work, they send all 
         // After the core work time is done, do any shopping needed for the next day's processes,
         // getting a bit extra to ensure decay doesn't hit too hard.
         // during this time we also regularly ensure we handle deals.
         // Send Finish Message after we're done here.
         self.buy_and_sell_processing(rx, tx, data, demos, history);
 
-        // during the end of day wrap-up, don't consume anything
+        // After buying and selling, use any excess resources available on internal plans and research
+        self.do_internal_ops(rx, tx, data, demos, history);
 
         // Decay our goods.
         self.decay_goods(data);
 
         // Then adapt today's plan for tomorrow.
+        self.update_plans(data, demos, history);
 
         tx.send(ActorMessage::Finished { sender: self.actor_info() })
             .expect("Channel Closed Unexpectedly!");

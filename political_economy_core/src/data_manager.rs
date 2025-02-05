@@ -4,13 +4,9 @@ use std::collections::{HashMap, HashSet};
 use itertools::Itertools;
 
 use crate::objects::{
-    demographic_objects::culture::Culture, 
-    demographic_objects::species::Species, 
-    actor_objects::{
-        firm::Firm,
-        job::Job, 
-        pop::Pop, 
-    },
+    actor_objects::
+        job::Job 
+    ,
     data_objects::{
         item::Item, 
         process::{Process, 
@@ -23,8 +19,7 @@ use crate::objects::{
         technology::Technology, 
         technology_family::TechnologyFamily, 
         want::Want
-    },
-    environmental_objects::market::Market, 
+    }, 
 };
 use crate::constants::{
     BRAINSTORMING_TECH_ID,
@@ -100,18 +95,18 @@ pub struct DataManager {
     // These should be their own thread (or more accurately grouped together in their
     // own thread.) These are updated only when pops change, and merely record the changes
     // the don't act or send messages. These should have a RWLock on them (only their thread writes).
-    pub species: HashMap<usize, Species>,
-    pub cultures: HashMap<usize, Culture>,
+    //pub species: HashMap<usize, Species>,
+    //pub cultures: HashMap<usize, Culture>,
 
     // These structs are semi-mutable, they can be updated while the rest of the
     // system is running, race conditions are expected, but they are light on actions.
-    pub territories: HashMap<usize, Species>,
-    pub markets: HashMap<usize, Market>,
+    //pub territories: HashMap<usize, Species>,
+    //pub markets: HashMap<usize, Market>,
 
     // These structs are totally mutable, and should expect lots of messages passing 
     // between them.
-    pub pops: HashMap<usize, Pop>,
-    pub firms: HashMap<usize, Firm>,
+    //pub pops: HashMap<usize, Pop>,
+    //pub firms: HashMap<usize, Firm>,
     // institutions
     // states
 
@@ -122,12 +117,12 @@ pub struct DataManager {
     product_id: usize,
     process_id: usize,
     job_id: usize,
-    species_id: usize,
+    /*species_id: usize,
     culture_id: usize,
     pop_id: usize,
     territory_id: usize,
     market_id: usize,
-    firm_id: usize,
+    firm_id: usize,*/
     _institution_id: usize,
     _state_id: usize,
 }
@@ -143,12 +138,12 @@ impl DataManager {
             processes: HashMap::new(),
             process_nodes: HashMap::new(),
             jobs: HashMap::new(),
-            species: HashMap::new(),
-            cultures: HashMap::new(),
-            pops: HashMap::new(),
-            territories: HashMap::new(),
-            markets: HashMap::new(),
-            firms: HashMap::new(),
+            //species: HashMap::new(),
+            //cultures: HashMap::new(),
+            //pops: HashMap::new(),
+            //territories: HashMap::new(),
+            //markets: HashMap::new(),
+            //firms: HashMap::new(),
             sets: Vec::new(),
             want_id: 0,
             tech_id: 0,
@@ -156,12 +151,12 @@ impl DataManager {
             product_id: 0,
             process_id: 0,
             job_id: 0,
-            species_id: 0,
+            /*species_id: 0,
             culture_id: 0,
             pop_id: 0,
             territory_id: 0,
             market_id: 0,
-            firm_id: 0, 
+            firm_id: 0, */
             _institution_id: 0,
             _state_id: 0
         }
@@ -184,7 +179,8 @@ impl DataManager {
     ///   - ID 0: Time (hr) (Produces 1 rest for owning it, made by pops at day start, 
     ///                         refreshed every day)
     ///   - ID 1: Shopping Time (Used to shop)
-    ///     ID 2: Discernment (shopping skill)
+    ///   - ID 2: Discernment (shopping skill)
+    ///   - ID 3: Land (Basic Land Unit)
     ///   - TODO Items
     ///     - Land (abstract)
     ///     - Land (Wasteland)
@@ -2066,7 +2062,7 @@ impl DataManager {
             }
         }
     }
-
+    /*
     pub fn new_species_id(&mut self) -> usize {
         loop {
             if self.species.contains_key(&self.species_id) {
@@ -2132,6 +2128,7 @@ impl DataManager {
             }
         }
     }
+    */
 }
 
 /// Sanity check functions, ensures no duplicate names and that

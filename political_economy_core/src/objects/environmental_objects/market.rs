@@ -117,15 +117,15 @@ pub struct Market {
     /// Stores products offered for sale, and a list of weighted actors to 
     /// help with selection. Values are the total weight available, followed by
     /// the list of available sellers.
-    seller_weights: HashMap<usize, (f64, Vec<WeightedActor>)>,
+    pub seller_weights: HashMap<usize, (f64, Vec<WeightedActor>)>,
     /// All pops in the system, weighted by their current wealth.
     /// 
     /// TODO May be updated to a rolling average instead of a daily, perfectly
     /// accurate, measure.
-    pop_wealth_weight: Vec<WeightedActor>,
+    pub pop_wealth_weight: Vec<WeightedActor>,
     /// Ongoing record of deals, used to keep track more easily and allows us to update
     /// market data more easily. Why send the same messages twice afterall?.
-    ongoing_deals: Vec<DealRecord>
+    pub ongoing_deals: Vec<DealRecord>
 }
 
 impl Market {
@@ -665,9 +665,7 @@ impl MarketHistory {
         }
         ret
     }
-
     
-
     /// Helper function, gets a product from our history.
     pub fn get_product(&self, product: &usize) -> &ProductInfo {
         self.product_info.get(product).expect("Product Not Found!")

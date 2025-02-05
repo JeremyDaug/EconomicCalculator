@@ -272,6 +272,7 @@ mod firm_tests {
                     jobs: vec![
                         FirmJob { 
                             pop: 0, 
+                            pop_size: 1,
                             job: 0, 
                             wage_type: WageType::Daily, 
                             wage: HashMap::new(), 
@@ -407,14 +408,14 @@ mod firm_tests {
                     tertiary_tech: None,
                 });
 
-                data.pops.insert(0, Pop {
+                /*data.pops.insert(0, Pop {
                     id: 0,
                     job: 0,
                     firm: 0,
                     market: 0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable{
-                        table: vec![PBRow::new(0, None, None, None, None, None, None, None, None, 1)],
+                        table: vec![PBRow::full_new(0, None, None, None, None, None, None, None, None, 1)],
                         total: 1,
                     },
                     is_selling: true,
@@ -425,7 +426,7 @@ mod firm_tests {
                     prev_sat: TieredValue { tier: 0, value: 0.0 },
                     hypo_change: TieredValue { tier: 0, value: 0.0 },
                     backlog: VecDeque::new(),
-                });
+                });*/
     
                 let demos = Demographics {
                     species: HashMap::new(),
@@ -459,8 +460,9 @@ mod firm_tests {
                 plan_results.plan_results.insert(0, HashMap::new());
                 plan_results.plan_results.get_mut(&0).unwrap().insert(0, 1.0);
                 plan_results.plan_results.get_mut(&0).unwrap().insert(1, 1.0);
+                test.todays_results = Some(plan_results);
 
-                test.update_plans(plan_results, &data, &demos, &history);
+                test.update_plans(&data, &demos, &history);
 
                 let job = test.jobs.get(0).unwrap();
                 assert_eq!(job.assignments.get(&0).unwrap().iterations, 2.0);
@@ -483,6 +485,7 @@ mod firm_tests {
                     jobs: vec![
                         FirmJob { 
                             pop: 0, 
+                            pop_size: 1,
                             job: 0, 
                             wage_type: WageType::Daily, 
                             wage: HashMap::new(), 
@@ -618,14 +621,14 @@ mod firm_tests {
                     tertiary_tech: None,
                 });
 
-                data.pops.insert(0, Pop {
+                /*data.pops.insert(0, Pop {
                     id: 0,
                     job: 0,
                     firm: 0,
                     market: 0,
                     property: Property::new(vec![]),
                     breakdown_table: PopBreakdownTable{
-                        table: vec![PBRow::new(0, None, None, None, None, None, None, None, None, 1)],
+                        table: vec![PBRow::full_new(0, None, None, None, None, None, None, None, None, 1)],
                         total: 1,
                     },
                     is_selling: true,
@@ -636,7 +639,7 @@ mod firm_tests {
                     prev_sat: TieredValue { tier: 0, value: 0.0 },
                     hypo_change: TieredValue { tier: 0, value: 0.0 },
                     backlog: VecDeque::new(),
-                });
+                });*/
     
                 let demos = Demographics {
                     species: HashMap::new(),
@@ -670,8 +673,9 @@ mod firm_tests {
                 plan_results.plan_results.insert(0, HashMap::new());
                 plan_results.plan_results.get_mut(&0).unwrap().insert(0, 1.0);
                 plan_results.plan_results.get_mut(&0).unwrap().insert(1, 1.0);
+                test.todays_results = Some(plan_results);
 
-                test.update_plans(plan_results, &data, &demos, &history);
+                test.update_plans(&data, &demos, &history);
 
                 let job = test.jobs.get(0).unwrap();
                 assert_eq!(job.assignments.get(&0).unwrap().iterations, 1.0);
@@ -712,6 +716,7 @@ mod firm_tests {
                 jobs: vec![
                     FirmJob { 
                         pop: 0, 
+                        pop_size: 1,
                         job: 0, 
                         wage_type: WageType::Daily, 
                         wage: HashMap::new(), 
@@ -1047,6 +1052,7 @@ mod firm_tests {
                 jobs: vec![
                     FirmJob { 
                         pop: 0, 
+                        pop_size: 1,
                         job: 0, 
                         wage_type: WageType::Daily, 
                         wage: HashMap::new(), 
@@ -1156,6 +1162,7 @@ mod firm_tests {
                 jobs: vec![
                     FirmJob { 
                         pop: 0, 
+                        pop_size: 1,
                         job: 0, 
                         wage_type: WageType::Daily, 
                         wage: HashMap::new(), 
@@ -1265,6 +1272,7 @@ mod firm_tests {
                 jobs: vec![
                     FirmJob { 
                         pop: 0, 
+                        pop_size: 1,
                         job: 0, 
                         wage_type: WageType::Daily, 
                         wage: HashMap::new(), 
@@ -1273,6 +1281,7 @@ mod firm_tests {
                     },
                     FirmJob {
                         pop: 1, 
+                        pop_size: 1,
                         job: 1, 
                         wage_type: WageType::Daily, 
                         wage: HashMap::new(), 
@@ -1915,178 +1924,6 @@ mod firm_tests {
             assert_eq!(test.wants[&1], 5.0);
             assert_eq!(test.wants[&2], 7.5);
             assert_eq!(test.wants[&3], 0.0);
-        }
-    }
-
-    /// # Run Market Day Should
-    /// 
-    /// This is a near integration test for market day testing.
-    mod run_market_day_should {
-        mod disorganized_firm {
-            use std::collections::{HashMap, HashSet, VecDeque};
-
-            use political_economy_core::{data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, ProfitStructure}, firm_job::AssignmentInfo}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag}, product::Product, want::Want}, environmental_objects::market::MarketHistory}};
-
-            #[test]
-            pub fn run_market_day_successfully() {
-                let mut test = Firm {
-                    id: 0,
-                    name: "test".to_string(),
-                    sub_name: "test".to_string(),
-                    firm_kind: FirmKind::Subsistence,
-                    firm_rank: FirmRank::Firm,
-                    ownership_type: OwnershipStructure::SelfEmployed,
-                    profit_structure: ProfitStructure::PrivatelyOwned,
-                    organization_structure: OrganizationalStructure::Disorganized,
-                    children: vec![],
-                    parent: None,
-                    jobs: vec![
-                        FirmJob { 
-                            pop: 0, 
-                            job: 0, 
-                            wage_type: WageType::Daily, 
-                            wage: HashMap::new(), 
-                            accepted_conversions: vec![], 
-                            assignments: HashMap::new()
-                        }
-                    ],
-                    prices: HashMap::new(),
-                    property: HashMap::new(),
-                    wants: HashMap::new(),
-                    backlog: VecDeque::new(),
-                    todays_results: None,
-                };
-                let job = test.jobs.get_mut(0).unwrap();
-                job.assignments.insert(0, AssignmentInfo {
-                    iterations: 1.0,
-                    _progress: 0.0,
-                });
-    
-                let mut data = DataManager::new();
-    
-                // 1 wants
-                data.wants.insert(0, Want{
-                    id: 0,
-                    name: "".to_string(),
-                    description: "".to_string(),
-                    decay: 0.0,
-                    ownership_sources: HashSet::new(),
-                    process_sources: HashSet::new(),
-                    use_sources: HashSet::new(),
-                    consumption_sources: HashSet::new(),
-                });
-                data.wants.insert(1, Want{
-                    id: 1,
-                    name: "".to_string(),
-                    description: "".to_string(),
-                    decay: 0.0,
-                    ownership_sources: HashSet::new(),
-                    process_sources: HashSet::new(),
-                    use_sources: HashSet::new(),
-                    consumption_sources: HashSet::new(),
-                });
-                // 2 products
-                data.products.insert(0, Product{
-                    id: 0,
-                    name: "".to_string(),
-                    variant_name: "".to_string(),
-                    description: "".to_string(),
-                    unit_name: "".to_string(),
-                    quality: 0,
-                    mass: 0.0,
-                    bulk: 0.0,
-                    mean_time_to_failure: None,
-                    fractional: true,
-                    tags: vec![],
-                    wants: HashMap::new(),
-                    processes: HashSet::new(),
-                    failure_process: None,
-                    use_processes: HashSet::new(),
-                    consumption_processes: HashSet::new(),
-                    maintenance_processes: HashSet::new(),
-                    tech_required: None,
-                    product_class: None,
-                });
-                data.products.insert(1, Product{
-                    id: 1,
-                    name: "".to_string(),
-                    variant_name: "".to_string(),
-                    description: "".to_string(),
-                    unit_name: "".to_string(),
-                    quality: 0,
-                    mass: 0.0,
-                    bulk: 0.0,
-                    mean_time_to_failure: None,
-                    fractional: true,
-                    tags: vec![],
-                    wants: HashMap::new(),
-                    processes: HashSet::new(),
-                    failure_process: None,
-                    use_processes: HashSet::new(),
-                    consumption_processes: HashSet::new(),
-                    maintenance_processes: HashSet::new(),
-                    tech_required: None,
-                    product_class: None,
-                });
-                
-                data.processes.insert(0, Process {
-                    id: 0,
-                    name: "".to_string(),
-                    variant_name: "".to_string(),
-                    description: "".to_string(),
-                    minimum_time: 0.0,
-                    process_parts: vec![
-                        ProcessPart { 
-                            item: Item::Product(0), 
-                            amount: 1.0, 
-                            part_tags: vec![],
-                            part: ProcessSectionTag::Input
-                        },
-                        ProcessPart { 
-                            item: Item::Want(0), 
-                            amount: 1.0, 
-                            part_tags: vec![],
-                            part: ProcessSectionTag::Input
-                        },
-                        ProcessPart { 
-                            item: Item::Product(1), 
-                            amount: 1.0, 
-                            part_tags: vec![],
-                            part: ProcessSectionTag::Capital
-                        },
-                        ProcessPart { 
-                            item: Item::Product(1), 
-                            amount: 1.0, 
-                            part_tags: vec![],
-                            part: ProcessSectionTag::Output
-                        },
-                        ProcessPart { 
-                            item: Item::Want(1), 
-                            amount: 1.0, 
-                            part_tags: vec![],
-                            part: ProcessSectionTag::Output
-                        },
-                    ],
-                    process_tags: vec![],
-                    technology_requirement: None,
-                    tertiary_tech: None,
-                });
-    
-                let demos = Demographics {
-                    species: HashMap::new(),
-                    cultures: HashMap::new(),
-                    ideology: HashMap::new(),
-                };
-                let history = MarketHistory {
-                    product_info: HashMap::new(),
-                    class_info: HashMap::new(),
-                    want_info: HashMap::new(),
-                    sale_priority: vec![],
-                    currencies: vec![],
-                };
-
-                // TODO: Pick up here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            }
         }
     }
 }

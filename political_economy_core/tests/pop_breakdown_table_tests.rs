@@ -6,19 +6,19 @@ mod pop_breakdown_table_tests {
     pub fn should_return_species_makeup_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(1,
+        let first_row = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let second_row = PBRow::new(2,
+        let second_row = PBRow::full_new(2,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(1),Some(0),Some(0),
             10);
 
-        let third_row = PBRow::new(2,
+        let third_row = PBRow::full_new(2,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             None,Some(0),Some(0),
@@ -39,19 +39,19 @@ mod pop_breakdown_table_tests {
     pub fn should_return_culture_makeup_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(1,
+        let first_row = PBRow::full_new(1,
             Some(0),Some(0),None,
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let second_row = PBRow::new(2,
+        let second_row = PBRow::full_new(2,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let third_row = PBRow::new(2,
+        let third_row = PBRow::full_new(2,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             None,Some(0),Some(0),
@@ -72,19 +72,19 @@ mod pop_breakdown_table_tests {
     pub fn should_return_ideology_makeup_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(1,
+        let first_row = PBRow::full_new(1,
             Some(0),Some(0),None,
             Some(0),Some(0),
             None,Some(0),Some(0),
             10);
 
-        let second_row = PBRow::new(2,
+        let second_row = PBRow::full_new(2,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let third_row = PBRow::new(2,
+        let third_row = PBRow::full_new(2,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             None,Some(0),Some(0),
@@ -105,19 +105,19 @@ mod pop_breakdown_table_tests {
     pub fn should_divide_on_ideologies_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(1,
+        let first_row = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let second_row = PBRow::new(1,
+        let second_row = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(1),Some(0),Some(0),
             10);
 
-        let third_row = PBRow::new(1,
+        let third_row = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             None,Some(0),Some(0),
@@ -139,19 +139,19 @@ mod pop_breakdown_table_tests {
     pub fn should_divide_on_cultures_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(1,
+        let first_row = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let second_row = PBRow::new(1,
+        let second_row = PBRow::full_new(1,
             Some(0),Some(0),Some(1),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let third_row = PBRow::new(1,
+        let third_row = PBRow::full_new(1,
             Some(0),Some(0),None,
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
@@ -173,19 +173,19 @@ mod pop_breakdown_table_tests {
     pub fn should_divide_on_species_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(0,
+        let first_row = PBRow::full_new(0,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let second_row = PBRow::new(1,
+        let second_row = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
             10);
 
-        let third_row = PBRow::new(2,
+        let third_row = PBRow::full_new(2,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
@@ -207,7 +207,7 @@ mod pop_breakdown_table_tests {
     pub fn should_remove_pops_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(0,
+        let first_row = PBRow::full_new(0,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
@@ -215,7 +215,7 @@ mod pop_breakdown_table_tests {
 
         test.insert_pops(first_row);
 
-        let second_row = PBRow::new(0,
+        let second_row = PBRow::full_new(0,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
@@ -246,7 +246,7 @@ mod pop_breakdown_table_tests {
     pub fn should_insert_pops_correctly() {
         let mut test = PopBreakdownTable{table: vec![], total: 0};
 
-        let first_row = PBRow::new(0,
+        let first_row = PBRow::full_new(0,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
@@ -267,7 +267,7 @@ mod pop_breakdown_table_tests {
         assert_eq!(test.table[0].ideology_faction, Some(0));
         assert_eq!(test.table[0].ideology_wave, Some(0));
 
-        let second_row = PBRow::new(1,
+        let second_row = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),
@@ -288,7 +288,7 @@ mod pop_breakdown_table_tests {
         assert_eq!(test.table[1].ideology_faction, Some(0));
         assert_eq!(test.table[1].ideology_wave, Some(0));
 
-        let second_row_again = PBRow::new(1,
+        let second_row_again = PBRow::full_new(1,
             Some(0),Some(0),Some(0),
             Some(0),Some(0),
             Some(0),Some(0),Some(0),

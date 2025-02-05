@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, hash::Hash};
 use crossbeam::thread;
 
 use crate::{data_manager::DataManager, 
@@ -48,6 +48,15 @@ pub struct ActorManager {
 }
 
 impl ActorManager {
+    pub fn new() -> Self {
+        ActorManager {
+            markets: HashMap::new(),
+            pops: HashMap::new(),
+            firms: HashMap::new(),
+            institutions: HashMap::new(),
+            states: HashMap::new(),
+        }
+    }
     /// Runs the market day for our actors. 
     /// Splits up the work based on the markets, threads each to their own 
     /// portion, and then waits on them to return.
