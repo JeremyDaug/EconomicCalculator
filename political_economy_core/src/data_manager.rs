@@ -1673,7 +1673,7 @@ impl DataManager {
             for part in process.process_parts.iter() {
                 if part.item.is_product() {
                     let id = part.item.unwrap();
-                    let product = self.products.get_mut(&id).unwrap();
+                    let product = self.products.get_mut(&id).expect(format!("Product #{} not found.", id).as_str());
                     product.add_process(process)
                     .expect(
                         format!("An error occured connecting process '{}' to proudct '{}'",

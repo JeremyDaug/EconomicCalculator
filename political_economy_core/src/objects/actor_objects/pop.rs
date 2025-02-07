@@ -34,7 +34,7 @@ use super::{
         OfferResult, WantSource
     }, 
     buy_result::BuyResult, 
-    property::Property, 
+    property::{Property, TVZERO}, 
     property_info::PropertyInfo, 
     seller::Seller, 
 };
@@ -96,12 +96,34 @@ pub struct Pop {
 
 // TODO #66 issue Alter to make testing easier through Inverting functions which depend on message passing. In particular, free_time, shopping_loop, try_to_buy, and standard_buy
 impl Pop {
+    pub fn new_pop(id: usize, 
+        job: usize, 
+        firm: usize, 
+        market: usize, 
+        breakdown_table: PopBreakdownTable, 
+        demos: &Demographics) -> Self {
+        let mut pop = Pop {
+            id,
+            job,
+            firm,
+            market,
+            property: Property::new(vec![]),
+            breakdown_table,
+            is_selling: false,
+            current_sat: TVZERO,
+            prev_sat: TVZERO,
+            hypo_change: TVZERO,
+            backlog: VecDeque::new() };
+        pop.update_desires(demos);
+        pop
+    }
+
     /// Takes the current population table, and updates desires to match the population
     /// breakdown. This is a hard reset, so is advised to call only as needed.
     ///
     /// Does not take sub-groups of species, culture, ideology into account currently.
     /// This will need to be updated when those are implemented.
-    pub fn update_desires(&mut self, demos: Demographics) {
+    pub fn update_desires(&mut self, demos: &Demographics) {
         // TODO when subgroups are added to these items, this will need to be updated to take them into account.
         self.property.clear_desires();
         // add in each species desires

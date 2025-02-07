@@ -2,7 +2,7 @@
 mod integration_tests {
     use std::collections::{HashMap, HashSet, VecDeque};
 
-    use political_economy_core::{actor_manager::ActorManager, data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{actor, firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, ProfitStructure}, firm_job::{AssignmentInfo, FirmJob, WageType}, job::Job, pop::Pop, property::{Property, TieredValue}}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, product::Product, want::Want}, demographic_objects::{pop_breakdown_table::{PBRow, PopBreakdownTable}, species::Species}, environmental_objects::market::{Market, MarketHistory}}, runner::Runner};
+    use political_economy_core::{actor_manager::ActorManager, data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{actor, desire::Desire, firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, ProfitStructure}, firm_job::{AssignmentInfo, FirmJob, WageType}, job::Job, pop::Pop, property::{Property, TieredValue}}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, product::Product, want::Want}, demographic_objects::{pop_breakdown_table::{PBRow, PopBreakdownTable}, species::Species}, environmental_objects::market::{Market, MarketHistory}}, runner::Runner};
 
     #[test]
     pub fn two_disorg_firms_with_market() {
@@ -153,7 +153,7 @@ mod integration_tests {
                     part: ProcessSectionTag::Input 
                 },
                 ProcessPart { 
-                    item: Item::Product(4), // Land
+                    item: Item::Product(3), // Land
                     amount: 1.0, 
                     part_tags: vec![], 
                     part: ProcessSectionTag::Capital 
@@ -214,7 +214,11 @@ mod integration_tests {
             id: 0,
             name: String::from("Test Species"),
             variant_name: String::from(""),
-            desires: vec![],
+            desires: vec![
+                Desire::new(Item::Want(0), 0, Some(8), 2.0, 0.0, 2, vec![]).unwrap(),
+                Desire::new(Item::Want(1), 0, None, 0.2, 0.0, 1, vec![]).unwrap(),
+                Desire::new(Item::Want(100), 0, Some(8), 0.2, 0.0, 1, vec![]).unwrap(),
+            ],
             tags: vec![],
             relations: vec![],
             base_productivity: 1.0,
@@ -224,24 +228,14 @@ mod integration_tests {
         demos.species.insert(species.id, species);
 
         // Set up pops and firms
-        let mut pop1 = Pop {
-            id: 0,
-            job: 0,
-            firm: 0,
-            market: 0,
-            property: Property::new(vec![]),
-            breakdown_table: PopBreakdownTable {
-                table: vec![
-                    PBRow::new(0, 10)
-                ],
-                total: 10,
-            },
-            is_selling: true,
-            current_sat: TieredValue { tier: 0, value: 0.0 },
-            prev_sat: TieredValue { tier: 0, value: 0.0 },
-            hypo_change: TieredValue { tier: 0, value: 0.0 },
-            backlog: VecDeque::new(),
+        let breakdown_table = PopBreakdownTable { 
+            table: vec![
+                PBRow::new(0, 10)
+            ], 
+            total: 10 
         };
+        let mut pop1 = Pop::new_pop(0, 0, 0, 0, breakdown_table, &demos);
+        pop1.update_desires(&demos);
         pop1.property.add_property(3, 100.0, &data);
         let job1 = Job {
             id: 0,
@@ -286,24 +280,13 @@ mod integration_tests {
             _progress: 0.0,
         });
 
-        let mut pop2 = Pop {
-            id: 1,
-            job: 1,
-            firm: 1,
-            market: 0,
-            property: Property::new(vec![]),
-            breakdown_table: PopBreakdownTable {
-                table: vec![
-                    PBRow::new(0, 10)
-                ],
-                total: 10,
-            },
-            is_selling: true,
-            current_sat: TieredValue { tier: 0, value: 0.0 },
-            prev_sat: TieredValue { tier: 0, value: 0.0 },
-            hypo_change: TieredValue { tier: 0, value: 0.0 },
-            backlog: VecDeque::new(),
+        let breakdown_table = PopBreakdownTable { 
+            table: vec![
+                PBRow::new(0, 10)
+            ], 
+            total: 10 
         };
+        let mut pop2 = Pop::new_pop(1, 1, 1, 0, breakdown_table, &demos);
         pop2.property.add_property(3, 100.0, &data);
         let job2 = Job {
             id: 1,
@@ -350,6 +333,7 @@ mod integration_tests {
 
         data.jobs.insert(0, job1);
         data.jobs.insert(1, job2);
+
 
         // make market
         let mut market = Market {

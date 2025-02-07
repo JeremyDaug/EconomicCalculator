@@ -39,6 +39,8 @@ use crate::{data_manager::DataManager,
 use super::{desire::Desire, 
     property_info::PropertyInfo};
 
+pub const TVZERO: TieredValue = TieredValue { tier: 0, value: 0.0 };
+
 /// Desires are the collection of an actor's Desires. Includes their property
 /// excess / unused wants, and AI data for acting on buying and selling.
 #[derive(Debug, Clone)]
