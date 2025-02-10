@@ -1,6 +1,4 @@
-use std::{collections::HashMap, ops::{AddAssign}};
-
-use super::species;
+use std::{collections::HashMap, ops::AddAssign};
 
 /// Pop Breakdown Table
 /// 

@@ -3,7 +3,7 @@
 mod firm_tests {
     use std::collections::{HashMap, HashSet};
 
-    use political_economy_core::{data_manager::DataManager, objects::data_objects::{item::Item, process::{Process, ProcessPart, ProcessPartTag, ProcessSectionTag}, product::Product, want::Want}};
+    use political_economy_core::{data_manager::DataManager, objects::data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag}, product::Product, want::Want}};
 
     /// # Default Test Data for firms
     /// 
@@ -254,7 +254,7 @@ mod firm_tests {
         mod disorganized_firm {
             use std::collections::{HashMap, HashSet, VecDeque};
 
-            use political_economy_core::{data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, PlanResults, ProfitStructure}, firm_job::{AssignmentInfo, FirmJob, WageType}, pop::Pop, property::{Property, TieredValue}}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag}, product::Product, technology::Technology, want::Want}, demographic_objects::pop_breakdown_table::{PBRow, PopBreakdownTable}, environmental_objects::market::{MarketHistory, MarketWantInfo, ProductInfo}}};
+            use political_economy_core::{data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, PlanResults, ProfitStructure}, firm_job::{AssignmentInfo, FirmJob, WageType}}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag}, product::Product, want::Want}, environmental_objects::market::{MarketHistory, MarketWantInfo, ProductInfo}}};
 
             #[test]
             pub fn when_profitable_and() {

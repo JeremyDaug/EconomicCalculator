@@ -20,7 +20,7 @@ use crate::{
             item::Item,
             product::ProductTag,
             want_info::WantInfo
-        }, demographic_objects::{ideology, pop_breakdown_table::PopBreakdownTable}, environmental_objects::market::MarketHistory
+        }, demographic_objects::pop_breakdown_table::PopBreakdownTable, environmental_objects::market::MarketHistory
     }
 };
 
@@ -372,7 +372,7 @@ impl Pop {
     tx: &Sender<ActorMessage>,
     firm: ActorInfo,
     action: FirmEmployeeAction,
-    data: &DataManager) -> bool {
+    _data: &DataManager) -> bool {
         match action {
             FirmEmployeeAction::WorkDayEnded => return true, // work day over, we can move on.
             FirmEmployeeAction::RequestTime => {
@@ -1030,10 +1030,10 @@ impl Pop {
     /// # Find My Found Product
     /// 
     /// A helper which ensures that the FoundProduct and InStock
-    pub fn find_my_found_product(&mut self, rx: &mut Receiver<ActorMessage>,
-        tx: &Sender<ActorMessage>, data: &DataManager,
-        market: &MarketHistory, msg: ActorMessage) {
-
+    pub fn find_my_found_product(&mut self, _rx: &mut Receiver<ActorMessage>,
+    _tx: &Sender<ActorMessage>, _data: &DataManager,
+    _market: &MarketHistory, _msg: ActorMessage) {
+        todo!("Not currently done or used.")
     }
 
     /// Gets the standard shopping time cost for this pop.

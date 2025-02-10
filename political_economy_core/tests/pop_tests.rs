@@ -209,7 +209,7 @@ mod pop_tests {
                 count: 5 }
         );
 
-        test.update_desires(demos);
+        test.update_desires(&demos);
 
         test
     }
@@ -502,7 +502,7 @@ mod pop_tests {
                 count: 5 }
         );
 
-        test.update_desires(demos);
+        test.update_desires(&demos);
 
         assert_eq!(test.property.len(), 6);
         // species desire 1 x 20
@@ -5176,10 +5176,9 @@ mod pop_tests {
 
     /// These tests 
     mod pop_integration_tests {
-        use std::{borrow::BorrowMut, collections::{HashMap, HashSet}, thread, time::{self, Duration, Instant}};
-        use crossbeam::scope;
+        use std::{collections::{HashMap, HashSet}, time::{Duration, Instant}};
         use itertools::Itertools;
-        use political_economy_core::objects::actor_objects::{actor::Actor, desire::DesireTag};
+        use political_economy_core::objects::actor_objects::actor::Actor;
 
         use super::super::*;
 
@@ -5202,7 +5201,7 @@ mod pop_tests {
             manager.required_items();
 
             // set up 'food' want in sustenance
-            let mut sustenance = Want {
+            let sustenance = Want {
                 id: 100,
                 name: String::from("Sustenance"),
                 description: String::from("The things which keep one alive and satiated."),
@@ -5233,7 +5232,7 @@ mod pop_tests {
             // Wealth, made from resources and time, optional capital input and Skill.
             //      can be consumed into wealth want at 1:1.
             //      20% fails each day if not consumed.
-            let mut wealth = Product::new(
+            let wealth = Product::new(
                 102,
                 String::from("Wealth"),
                 String::from(""),
@@ -5577,10 +5576,6 @@ mod pop_tests {
             let wealth = data.products.values().find(|x| {
                 x.name == String::from("Wealth")
             }).unwrap();
-            // id 103
-            let capital = data.products.values().find(|x| {
-                x.name == String::from("Capital")
-            }).unwrap();
 
             let pop0 = &mut Pop {
                 id: 0,
@@ -5632,7 +5627,7 @@ mod pop_tests {
             // one has a bunch of wealth, the other has a bunch of resources.
             pop0.property.add_property(resources.id, 10.0, &data); // desire 0 and 2
             pop1.property.add_property(wealth.id, 10.0, &data); // desire 0 and 1
-            let mut pops = &mut vec![pop0, pop1];
+            let pops = &mut vec![pop0, pop1];
             crossbeam_utils::thread::scope(|scope| {
                 // spin them up into their day stuff, then while acting as the market, set them up to trade.
                 let (tx, rx) = barrage::bounded(10);
@@ -5670,9 +5665,6 @@ mod pop_tests {
                 // loop through and treat each message as it comes.
                 let mut sales = vec![];
                 let mut sellers = vec![];
-                let mut want_times = 0;
-                let mut product_times = 0;
-                let mut other_items = 0;
                 let mut finished = 0;
                 
                 // Continually get msgs and handle them until the pops are done.
@@ -5693,7 +5685,6 @@ mod pop_tests {
                                     source: WantSource::Process(103) };
                                 //println!("M->{}:  {}", sender, response);
                                 tx.send(response).expect("Borkde");
-                                want_times += 1;
                             },
                             ActorMessage::FindProduct { product, sender } => {
                                 if print_lines { println!("{}->M:  {}", sender, msg); }

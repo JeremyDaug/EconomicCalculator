@@ -205,7 +205,7 @@ mod property_tests {
                 count: 5 }
         );
 
-        test.update_desires(demos);
+        test.update_desires(&demos);
 
         test
     }
@@ -1259,7 +1259,7 @@ mod property_tests {
                 satisfaction: 10.0,
                 step: 1,
                 tags: vec![]});
-            let mut test = Property::new(test_desires);
+            let test = Property::new(test_desires);
             let result = test.get_first_unsatisfied_desire().unwrap();
             assert_eq!(result.idx, 2);
             assert_eq!(result.tier, 3);
@@ -1300,7 +1300,7 @@ mod property_tests {
                 satisfaction: 0.0,
                 step: 1,
                 tags: vec![]});
-            let mut test = Property::new(test_desires);
+            let test = Property::new(test_desires);
             let result = test.get_first_unsatisfied_desire().unwrap();
             assert_eq!(result.idx, 3);
             assert_eq!(result.tier, 1);
@@ -6282,7 +6282,7 @@ mod property_tests {
                     count: 5 }
             );
 
-            test.update_desires(demos);
+            test.update_desires(&demos);
 
             test
         }

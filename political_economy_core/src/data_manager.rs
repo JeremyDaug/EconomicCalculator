@@ -249,7 +249,7 @@ impl DataManager {
             None,
             None).unwrap();
         // Shopping Time
-        let mut shopping_time = Product::new(SHOPPING_TIME_PRODUCT_ID,
+        let shopping_time = Product::new(SHOPPING_TIME_PRODUCT_ID,
             String::from("Shopping Time"),
             String::from(""),
             String::from("Shopping Time, productive, but sometimes frustrating."), 

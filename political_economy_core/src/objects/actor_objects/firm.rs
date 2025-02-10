@@ -633,8 +633,8 @@ impl Firm {
     /// 
     /// TODO: Test once non-disorganized firms are created.
     pub fn buy_and_sell_processing(&self, 
-    rx: &mut Receiver<ActorMessage>, tx: &mut Sender<ActorMessage>, 
-    data: &DataManager, demos: &Demographics, history: &MarketHistory) {
+    _rx: &mut Receiver<ActorMessage>, _tx: &mut Sender<ActorMessage>, 
+    _data: &DataManager, _demos: &Demographics, _history: &MarketHistory) {
         if self.organization_structure == OrganizationalStructure::Disorganized {
             // if disorganized, we don't sell anything. Consider sending our plan needs for tomorrow to the
             // pop for them to buy for us.

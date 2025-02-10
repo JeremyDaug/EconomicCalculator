@@ -534,7 +534,7 @@ impl Process {
             lowest_normal -= lowest * current_bonus;
             normal_iters += lowest * current_bonus;
             // remove from optional iters as well, and pop off any that are equal to 0.
-            for (id, val) in optional_iters.iter_mut() {
+            for (_, val) in optional_iters.iter_mut() {
                 *val -= lowest;
                 if *val <= 0.0 {
                     *val = 0.0;
@@ -923,7 +923,7 @@ impl Process {
             // same with normals, but don't forget the bonus throughput.
             lowest_normal -= lowest * current_bonus;
             normal_iters += lowest * current_bonus;
-            for (id, val) in optional_iters.iter_mut() {
+            for (_, val) in optional_iters.iter_mut() {
                 *val -= lowest;
                 if *val <= 0.0 {
                     *val = 0.0;
@@ -1183,7 +1183,7 @@ impl ProcessPart {
     pub fn is_optional(&self) -> bool {
         self.part_tags.iter().any(|x| {
             match x {
-                ProcessPartTag::Optional { missing_penalty, final_bonus } => true,
+                ProcessPartTag::Optional { .. } => true,
                 ProcessPartTag::Consumed |
                 ProcessPartTag::Fixed |
                 ProcessPartTag::Investment |

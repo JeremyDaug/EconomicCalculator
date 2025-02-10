@@ -2286,7 +2286,7 @@ impl Property {
     /// Will first seek it from available.
     /// 
     /// then, if that's not enough, it will seek it out from our 
-    pub fn get_product(&mut self, product: usize, target: f64, data: &DataManager,
+    pub fn get_product(&mut self, _product: usize, _target: f64, _data: &DataManager,
     _market: &MarketHistory, _tier_cutoff: Option<usize>) -> f64 {
         todo!("Do later.")
     }

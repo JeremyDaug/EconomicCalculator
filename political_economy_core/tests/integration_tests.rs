@@ -2,7 +2,7 @@
 mod integration_tests {
     use std::collections::{HashMap, HashSet, VecDeque};
 
-    use political_economy_core::{actor_manager::ActorManager, data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{actor, desire::Desire, firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, ProfitStructure}, firm_job::{AssignmentInfo, FirmJob, WageType}, job::Job, pop::Pop, property::{Property, TieredValue}}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, product::Product, want::Want}, demographic_objects::{pop_breakdown_table::{PBRow, PopBreakdownTable}, species::Species}, environmental_objects::market::{Market, MarketHistory}}, runner::Runner};
+    use political_economy_core::{actor_manager::ActorManager, data_manager::DataManager, demographics::Demographics, objects::{actor_objects::{desire::Desire, firm::{Firm, FirmKind, FirmRank, OrganizationalStructure, OwnershipStructure, ProfitStructure}, firm_job::{AssignmentInfo, FirmJob, WageType}, job::Job, pop::Pop}, data_objects::{item::Item, process::{Process, ProcessPart, ProcessSectionTag, ProcessTag}, product::Product, want::Want}, demographic_objects::{pop_breakdown_table::{PBRow, PopBreakdownTable}, species::Species}, environmental_objects::market::{Market, MarketHistory}}, runner::Runner};
 
     #[test]
     pub fn two_disorg_firms_with_market() {
