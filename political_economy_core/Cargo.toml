@@ -11,7 +11,7 @@ itertools = "0.12.1"
 crossbeam = "0.8.2"
 crossbeam-utils = "0.8.14"
 barrage = "0.2.3"
-rand = "0.8.5"
+rand = "0.8.6"
 
 [package.metadata.scripts]
 run = "cargo run"
